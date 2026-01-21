@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import time
-from typing import Callable, cast
+from typing import Callable
 
 from daytona_api_client import BuildInfo
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
@@ -257,7 +257,7 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout()
-    def start(self, timeout: Optional[float] = 60):
+    def start(self, timeout: float | None = 60):
         """Starts the Sandbox and waits for it to be ready.
 
         Args:
@@ -280,7 +280,7 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to recover sandbox: ")
     @with_timeout()
-    def recover(self, timeout: Optional[float] = 60):
+    def recover(self, timeout: float | None = 60):
         """Recovers the Sandbox from a recoverable error and waits for it to be ready.
 
         Args:
@@ -303,7 +303,7 @@ class Sandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout()
-    def stop(self, timeout: Optional[float] = 60):
+    def stop(self, timeout: float | None = 60):
         """Stops the Sandbox and waits for it to be fully stopped.
 
         Args:
@@ -319,7 +319,7 @@ class Sandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
-        self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        _ = self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         self.__refresh_data_safe()
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_stop(timeout=0)

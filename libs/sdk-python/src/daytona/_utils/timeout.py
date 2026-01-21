@@ -4,26 +4,28 @@
 from __future__ import annotations
 
 import asyncio
+import contextvars
 import ctypes
 import functools
 import inspect
 import logging
 import signal
-import sys
 import threading
 import time
-from typing import Callable, Optional, TypeVar
+from types import FrameType, TracebackType
+from typing import Any, Callable, TypeVar, cast
 
 from ..common.errors import DaytonaError, DaytonaTimeoutError
 
-from ..common.errors import DaytonaError
-
-P = ParamSpec("P")
-R = TypeVar("R")  # return type (may be coroutine result or regular)
-
-C = TypeVar("C", bound=Callable[..., object])
+F = TypeVar("F", bound=Callable[..., Any])
 
 logger = logging.getLogger(__name__)
+
+# Context-local storage for nested async timeouts (similar to _signal_timeout_stack)
+# Using contextvars ensures proper isolation across async contexts
+_async_timeout_stack: contextvars.ContextVar[list[dict[str, Any]]] = contextvars.ContextVar(
+    "_async_timeout_stack", default=[]
+)
 
 
 class _TimeoutMarker(BaseException):
@@ -80,8 +82,19 @@ class _ThreadingTimeout:
     thread after a specified duration. It properly executes finally blocks because
     the exception is raised as if it came from within the protected code.
 
+    Nested Timeout Handling:
+        Each instance tracks whether IT caused the timeout via the `_timed_out` flag.
+        When _TimeoutMarker propagates through nested contexts:
+        - The instance that set `_timed_out=True` converts it to DaytonaTimeoutError
+        - Other instances let the marker propagate unchanged
+        This ensures correct error attribution even with nested timeouts.
+
     Limitations:
-        - Cannot interrupt blocking C extensions
+        - **Cannot interrupt blocking C extensions**: The PyThreadState_SetAsyncExc API
+          only raises exceptions at Python bytecode boundaries. Code blocked in C extensions
+          (e.g., time.sleep(), socket operations, database calls) will not be interrupted
+          until control returns to Python. The timeout will fire, but the exception will
+          only be raised when the blocking C call completes.
         - Race conditions possible if thread completes just as timeout fires
         - Uses undocumented CPython API (PyThreadState_SetAsyncExc)
     """
@@ -93,13 +106,13 @@ class _ThreadingTimeout:
             seconds: Timeout duration in seconds
             func_name: Name of the function being timed (for error messages)
         """
-        self.seconds = seconds
-        self.func_name = func_name
-        self.target_tid = threading.current_thread().ident
-        self.timer: Optional[threading.Timer] = None
-        self._lock = threading.Lock()
-        self._timed_out = False
-        self._completed = False
+        self.seconds: float = seconds
+        self.func_name: str = func_name
+        self.target_tid: int | None = threading.current_thread().ident
+        self.timer: threading.Timer | None = None
+        self._lock: threading.Lock = threading.Lock()
+        self._timed_out: bool = False
+        self._completed: bool = False
 
     def _timeout_handler(self) -> None:
         """Called by timer thread when timeout occurs."""
@@ -114,8 +127,9 @@ class _ThreadingTimeout:
             success = _async_raise(self.target_tid, _TimeoutMarker)
             if not success:
                 logger.warning(
-                    f"Timeout occurred for '{self.func_name}' but could not interrupt thread. "
-                    f"This may happen if the function completed or is blocked in a C extension."
+                    "Timeout occurred for '%s' but could not interrupt thread. "
+                    + "This may happen if the function completed or is blocked in a C extension.",
+                    self.func_name,
                 )
 
     def __enter__(self) -> "_ThreadingTimeout":
@@ -125,7 +139,12 @@ class _ThreadingTimeout:
         self.timer.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool:
         """Stop the timeout timer and handle timeout exception."""
         # Mark as completed and cancel timer
         with self._lock:
@@ -158,6 +177,18 @@ class _SignalTimeout:
 
     This properly handles nested SIGALRM timeouts by maintaining a stack of handlers
     and only setting the alarm for the shortest remaining timeout.
+
+    Note:
+        SIGALRM signals can only be received in the main thread. This class should
+        only be used when `threading.current_thread() is threading.main_thread()`.
+
+    Nested Timeout Handling:
+        When entering a nested timeout, the alarm is set for the minimum of:
+        - The new timeout's duration
+        - The remaining time of any outer timeout
+
+        When the alarm fires, the handler checks all timeouts on the stack to
+        determine which one actually expired, ensuring correct error attribution.
     """
 
     def __init__(self, seconds: float, func_name: str):
@@ -167,13 +198,27 @@ class _SignalTimeout:
             seconds: Timeout duration in seconds
             func_name: Name of the function being timed (for error messages)
         """
-        self.seconds = seconds
-        self.func_name = func_name
-        self.old_handler = None
-        self.start_time = None
+        self.seconds: float = seconds
+        self.func_name: str = func_name
+        self.old_handler: signal.Handlers | Callable[[int, FrameType | None], Any] | int | None = None
+        self.start_time: float | None = None
 
-    def _timeout_handler(self, _signum, _frame):
-        """Signal handler that raises timeout exception."""
+    def _timeout_handler(self, _signum: int, _frame: FrameType | None) -> None:
+        """Signal handler that raises timeout exception.
+
+        When nested timeouts exist, checks which timeout actually expired
+        (could be an outer timeout that should have fired first).
+        """
+        # Check all timeouts on stack to find which one actually expired
+        if hasattr(_signal_timeout_stack, "stack"):
+            current_time = time.time()
+            for item in _signal_timeout_stack.stack:
+                elapsed = current_time - item.start_time
+                if elapsed >= item.seconds:
+                    raise DaytonaTimeoutError(
+                        f"Function '{item.func_name}' exceeded timeout of {item.seconds} seconds."
+                    )
+        # Fallback - raise our own timeout
         raise DaytonaTimeoutError(f"Function '{self.func_name}' exceeded timeout of {self.seconds} seconds.")
 
     def __enter__(self) -> "_SignalTimeout":
@@ -186,41 +231,57 @@ class _SignalTimeout:
         self.old_handler = signal.signal(signal.SIGALRM, self._timeout_handler)
 
         # Add ourselves to the stack
-        _signal_timeout_stack.stack.append(self)
+        _ = _signal_timeout_stack.stack.append(self)
+
+        # Calculate the minimum remaining time across all timeouts on the stack
+        # This ensures outer timeouts with shorter remaining time still fire first
+        min_remaining = self.seconds
+        stack = cast(list["_SignalTimeout"], _signal_timeout_stack.stack)
+        for item in stack[:-1]:  # All outer timeouts
+            assert self.start_time is not None and item.start_time is not None
+            item_elapsed = self.start_time - item.start_time
+            item_remaining = item.seconds - item_elapsed
+            if item_remaining > 0:
+                min_remaining = min(min_remaining, item_remaining)
 
         # Set alarm for the shortest timeout
         # Round up to avoid sub-second precision issues
-        alarm_seconds = _round_up_to_nearest_second(self.seconds)
-        signal.alarm(alarm_seconds)
+        alarm_seconds = _round_up_to_nearest_second(min_remaining)
+        _ = signal.alarm(alarm_seconds)
 
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(
+        self, exc_type: type[BaseException] | None, exc_val: BaseException | None, exc_tb: TracebackType | None
+    ) -> bool:
         """Restore previous signal handler and alarm."""
         # Cancel current alarm
-        signal.alarm(0)
+        _ = signal.alarm(0)
 
         # Remove ourselves from the stack
         if hasattr(_signal_timeout_stack, "stack") and _signal_timeout_stack.stack:
-            _signal_timeout_stack.stack.pop()
+            _ = _signal_timeout_stack.stack.pop()
 
         # Restore the signal handler
         if self.old_handler is not None:
-            signal.signal(signal.SIGALRM, self.old_handler)
+            _ = signal.signal(signal.SIGALRM, self.old_handler)
 
         # If there are outer timeouts, restore their alarm
+        # Note: If remaining <= 0, the outer timeout would have already fired during
+        # the inner function's execution (since we set alarm for min remaining time).
+        # So we only need to restore alarm if there's still time remaining.
         if hasattr(_signal_timeout_stack, "stack") and _signal_timeout_stack.stack:
             outer = _signal_timeout_stack.stack[-1]
             elapsed = time.time() - outer.start_time
             remaining = outer.seconds - elapsed
             if remaining > 0:
                 alarm_seconds = _round_up_to_nearest_second(remaining)
-                signal.alarm(alarm_seconds)
+                _ = signal.alarm(alarm_seconds)
 
         return False  # Don't suppress exceptions
 
 
-def with_timeout() -> Callable[[Callable[P, T]], Callable[P, T]]:
+def with_timeout() -> Callable[[F], F]:
     """Decorator to add timeout mechanism that executes finally blocks properly.
 
     This decorator ensures that finally blocks and context managers execute properly
@@ -242,7 +303,17 @@ def with_timeout() -> Callable[[Callable[P, T]], Callable[P, T]]:
         - **Finally blocks**: Execute properly on timeout for both sync and async
         - **Context managers**: __exit__ methods are called with the timeout exception
         - **Resource cleanup**: Guaranteed to execute cleanup code
-        - **Nested timeouts**: Supported on all platforms
+        - **Nested timeouts**: Supported on all platforms with correct error attribution
+
+    Nested Timeout Handling (All Platforms):
+        When timeouts are nested, the decorator correctly identifies which function's timeout
+        actually expired:
+        - **Async**: Uses context-local stack to track active timeouts, checks which expired
+        - **Signal**: Uses thread-local stack, handler checks all timeouts to find expired one
+        - **Threading**: Each instance tracks its own timeout flag via _timed_out
+
+        Example: If outer(timeout=5) calls inner(timeout=10) and 5 seconds elapse, the error
+        will correctly report "outer" exceeded timeout, not "inner".
 
     Limitations:
         - **Async with blocking code**: Cannot interrupt blocking operations like time.sleep().
@@ -283,9 +354,9 @@ def with_timeout() -> Callable[[Callable[P, T]], Callable[P, T]]:
         ```
     """
 
-    def decorator(func: Callable[P, T]) -> Callable[P, T]:
+    def decorator(func: F) -> F:
         # Extract timeout from args/kwargs
-        def _extract_timeout(args: tuple, kwargs: dict) -> Optional[float]:
+        def _extract_timeout(args: tuple[Any, ...], kwargs: dict[str, Any]) -> float | None:
             names = func.__code__.co_varnames[: func.__code__.co_argcount]
             bound = dict(zip(names, args))
             return kwargs.get("timeout", bound.get("timeout", None))
@@ -293,34 +364,69 @@ def with_timeout() -> Callable[[Callable[P, T]], Callable[P, T]]:
         if inspect.iscoroutinefunction(func):
             # Async function: Use asyncio.wait_for (works on all platforms)
             @functools.wraps(func)
-            async def async_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+            async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
                 timeout = _extract_timeout(args, kwargs)
                 if timeout is None or timeout == 0:
-                    return await async_func(*args, **kwargs)
+                    return await func(*args, **kwargs)
                 if timeout < 0:
                     raise DaytonaError("Timeout must be a non-negative number or None.")
 
-                # Use asyncio.wait_for with task cancellation
-                # This executes finally blocks via CancelledError propagation
-                task = asyncio.create_task(func(*args, **kwargs))
+                # Add ourselves to the async timeout stack for nested timeout tracking
+                stack = _async_timeout_stack.get().copy()
+                timeout_info = {"func_name": func.__name__, "timeout": timeout, "start_time": time.time()}
+                _ = stack.append(timeout_info)
+                _ = _async_timeout_stack.set(stack)
 
                 try:
+                    # Use asyncio.wait_for with task cancellation
+                    # This executes finally blocks via CancelledError propagation
+                    task = asyncio.create_task(func(*args, **kwargs))
                     return await asyncio.wait_for(task, timeout=timeout)
                 except asyncio.TimeoutError:
+                    # Our own wait_for timed out - check if outer timeout also expired
+                    # (could happen if outer and inner timeouts are very close)
+                    current_time = time.time()
+                    current_stack = _async_timeout_stack.get()
+                    for item in current_stack:
+                        elapsed = current_time - item["start_time"]
+                        if elapsed >= item["timeout"]:
+                            # pylint: disable=raise-missing-from
+                            raise DaytonaTimeoutError(
+                                f"Function '{item['func_name']}' exceeded timeout of {item['timeout']} seconds."
+                            )
+                    # Our timeout fired (shouldn't reach here but fallback)
                     # pylint: disable=raise-missing-from
                     raise DaytonaTimeoutError(f"Function '{func.__name__}' exceeded timeout of {timeout} seconds.")
                 except asyncio.CancelledError:
-                    # pylint: disable=raise-missing-from
-                    raise DaytonaTimeoutError(f"Function '{func.__name__}' exceeded timeout of {timeout} seconds.")
+                    # Task was cancelled - could be from outer timeout or external cancellation
+                    # Check all timeouts on stack to determine which one expired
+                    current_time = time.time()
+                    current_stack = _async_timeout_stack.get()
+                    for item in current_stack:
+                        elapsed = current_time - item["start_time"]
+                        if elapsed >= item["timeout"]:
+                            # An outer timeout expired - report it correctly
+                            # pylint: disable=raise-missing-from
+                            raise DaytonaTimeoutError(
+                                f"Function '{item['func_name']}' exceeded timeout of {item['timeout']} seconds."
+                            )
+                    # Not from a timeout, just a regular cancellation - re-raise as-is
+                    raise
+                finally:
+                    # Remove ourselves from the stack
+                    stack = _async_timeout_stack.get().copy()
+                    if stack and stack[-1] == timeout_info:
+                        _ = stack.pop()
+                        _ = _async_timeout_stack.set(stack)
 
-            return cast(C, async_wrapper)
+            return async_wrapper  # pyright: ignore[reportReturnType]
 
         # Sync function: Use best available method
         @functools.wraps(func)
-        def sync_wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             timeout = _extract_timeout(args, kwargs)
             if timeout is None or timeout == 0:
-                return typed_func(*args, **kwargs)
+                return func(*args, **kwargs)
             if timeout < 0:
                 raise DaytonaError("Timeout must be a non-negative number or None.")
 
@@ -334,6 +440,6 @@ def with_timeout() -> Callable[[Callable[P, T]], Callable[P, T]]:
                 with _ThreadingTimeout(timeout, func.__name__):
                     return func(*args, **kwargs)
 
-        return cast(C, sync_wrapper)
+        return sync_wrapper  # pyright: ignore[reportReturnType]
 
     return decorator

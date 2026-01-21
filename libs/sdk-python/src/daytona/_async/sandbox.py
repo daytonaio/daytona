@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-import time
 from collections.abc import Awaitable, Callable
-from typing import cast
 
 from daytona_api_client_async import BuildInfo
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
@@ -262,7 +260,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout()
-    async def start(self, timeout: Optional[float] = 60):
+    async def start(self, timeout: float | None = 60):
         """Starts the Sandbox and waits for it to be ready.
 
         Args:
@@ -285,7 +283,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to recover sandbox: ")
     @with_timeout()
-    async def recover(self, timeout: Optional[float] = 60):
+    async def recover(self, timeout: float | None = 60):
         """Recovers the Sandbox from a recoverable error and waits for it to be ready.
 
         Args:
@@ -308,7 +306,7 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout()
-    async def stop(self, timeout: Optional[float] = 60):
+    async def stop(self, timeout: float | None = 60):
         """Stops the Sandbox and waits for it to be fully stopped.
 
         Args:
@@ -324,7 +322,7 @@ class AsyncSandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
-        await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        _ = await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         await self.__refresh_data_safe()
         # This method already handles a timeout, so we don't need to pass one to internal methods
         await self.wait_for_sandbox_stop(timeout=0)
