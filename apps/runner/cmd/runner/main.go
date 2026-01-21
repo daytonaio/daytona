@@ -66,6 +66,7 @@ func main() {
 		log.Error(err)
 		return
 	}
+	defer netRulesManager.Stop()
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
@@ -114,7 +115,6 @@ func main() {
 		}
 	}()
 	defer monitor.Stop()
-	defer netRulesManager.Stop()
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 
