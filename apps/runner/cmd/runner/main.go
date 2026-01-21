@@ -66,16 +66,6 @@ func main() {
 		log.Error(err)
 		return
 	}
-
-	// Start Docker events monitor
-	monitor := docker.NewDockerMonitor(cli, netRulesManager)
-	go func() {
-		err = monitor.Start()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-	defer monitor.Stop()
 	defer netRulesManager.Stop()
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
@@ -96,19 +86,35 @@ func main() {
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient:              cli,
-		StatesCache:            statesCache,
-		LogWriter:              os.Stdout,
-		AWSRegion:              cfg.AWSRegion,
-		AWSEndpointUrl:         cfg.AWSEndpointUrl,
-		AWSAccessKeyId:         cfg.AWSAccessKeyId,
-		AWSSecretAccessKey:     cfg.AWSSecretAccessKey,
-		DaemonPath:             daemonPath,
-		ComputerUsePluginPath:  pluginPath,
-		NetRulesManager:        netRulesManager,
-		ResourceLimitsDisabled: cfg.ResourceLimitsDisabled,
-		UseSnapshotEntrypoint:  cfg.UseSnapshotEntrypoint,
+		ApiClient:                cli,
+		StatesCache:              statesCache,
+		LogWriter:                os.Stdout,
+		AWSRegion:                cfg.AWSRegion,
+		AWSEndpointUrl:           cfg.AWSEndpointUrl,
+		AWSAccessKeyId:           cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:       cfg.AWSSecretAccessKey,
+		DaemonPath:               daemonPath,
+		ComputerUsePluginPath:    pluginPath,
+		NetRulesManager:          netRulesManager,
+		ResourceLimitsDisabled:   cfg.ResourceLimitsDisabled,
+		UseSnapshotEntrypoint:    cfg.UseSnapshotEntrypoint,
+		VolumeCleanupIntervalSec: cfg.VolumeCleanupIntervalSec,
 	})
+
+	// Start Docker events monitor
+	monitorOpts := docker.MonitorOptions{
+		OnDestroyEvent: func(ctx context.Context) {
+			dockerClient.CleanupOrphanedVolumeMounts(ctx)
+		},
+	}
+	monitor := docker.NewDockerMonitor(cli, netRulesManager, monitorOpts)
+	go func() {
+		err = monitor.Start()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+	defer monitor.Stop()
 
 	sandboxService := services.NewSandboxService(statesCache, dockerClient)
 

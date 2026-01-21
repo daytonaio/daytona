@@ -22,11 +22,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const volumeMountPrefix = "daytona-volume-"
+
+func getVolumeMountBasePath() string {
+	if config.GetEnvironment() == "development" {
+		return "/tmp"
+	}
+	return "/mnt"
+}
+
 func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
 	volumeMountPathBinds := make([]string, 0)
 
 	for _, vol := range volumes {
-		volumeIdPrefixed := fmt.Sprintf("daytona-volume-%s", vol.VolumeId)
+		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
 		runnerVolumeMountPath := d.getRunnerVolumeMountPath(volumeIdPrefixed, vol.Subpath)
 
 		// Create unique key for this volume+subpath combination for mutex
@@ -93,10 +102,7 @@ func (d *DockerClient) getRunnerVolumeMountPath(volumeId string, subpath *string
 		mountDirName = fmt.Sprintf("%s-%s", volumeId, hashStr)
 	}
 
-	volumePath := filepath.Join("/mnt", mountDirName)
-	if config.GetEnvironment() == "development" {
-		volumePath = filepath.Join("/tmp", mountDirName)
-	}
+	volumePath := filepath.Join(getVolumeMountBasePath(), mountDirName)
 
 	return volumePath
 }
