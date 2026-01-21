@@ -143,7 +143,7 @@ this.ptyHandle = await this.sandbox.process.createPty({
 })
 ```
 
-Letta Code is then launched in [bidirectional headless mode](https://docs.letta.com/letta-code/headless/#bidirectional-mode) through the PTY. This mode uses stream-json format for both input and output, enabling programmatic control while maintaining real-time communication:
+Letta Code is then launched in [bidirectional headless mode](https://docs.letta.com/letta-code/headless/#bidirectional-mode) through the PTY:
 
 ```typescript
 await this.ptyHandle.sendInput(
@@ -151,21 +151,29 @@ await this.ptyHandle.sendInput(
 )
 ```
 
-The command passes a custom system prompt using the `--system-custom` flag. This prompt configures the agent with Daytona-specific instructions, including a URL pattern so the agent can generate preview links.
+The `stream-json` setting is used for the input and output formats, enabling our program to send and receive JSON messages to and from the agent in real-time.
 
-User prompts are sent to the agent as JSON messages:
+The `--system-custom` prompt allows us to pass a custom system prompt to the agent. Our prompt configures the agent with Daytona-specific instructions, including a URL pattern so the agent can generate preview links.
+
+The `--yolo` flag allows the agent to run shell commands without requiring explicit user approval for each command.
+
+#### Message Handling
+
+To send prompts to the agent, the main script calls the `sendUserMessage()` method, which formats the user input as a JSON message and sends it to the PTY using `this.ptyHandle.sendInput()` as demonstrated above.
+
+Formatted user messages look like this:
 
 ```json
 {"type": "user", "message": {"role": "user", "content": "create a simple web server"}}
 ```
 
-The agent responds with streaming JSON messages. Tool calls arrive as incremental fragments:
+The agent responds with streaming JSON messages. Tool calls arrive as fragments:
 
 ```json
 {"type": "message", "message_type": "approval_request_message", "tool_call": {"tool_call_id": "call_123", "name": "Bash", "arguments": "{\"command\": \"python3 -m http.server 8080\"}"}}
 ```
 
-The program parses these streaming messages, extracts tool calls for display, and formats the final result with markdown rendering for the terminal.
+These JSON fragments are parsed by the `handleParsedMessage()` method. When multiple consecutive fragments are received for the same tool call, they are combined into a single tool call object. When a tool call or message is finished, the result is formatted and displayed to the user.
 
 #### Clean up
 
