@@ -12,7 +12,7 @@ import {
   HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, In, IsNull, Repository } from 'typeorm'
+import { DataSource, In, IsNull, Like, Repository } from 'typeorm'
 import { REGION_NAME_REGEX } from '../constants/region-name-regex.constant'
 import { CreateRegionInternalDto } from '../dto/create-region-internal.dto'
 import { Region } from '../entities/region.entity'
@@ -26,7 +26,12 @@ import { RegionEvents } from '../constants/region-events.constant'
 import { RegionCreatedEvent } from '../events/region-created.event'
 import { RegionDeletedEvent } from '../events/region-deleted.event'
 import { SnapshotManagerCredentialsDto } from '../dto/snapshot-manager-credentials.dto'
-import { RegionSnapshotManagerCredsRegeneratedEvent } from '../events/region-snapshot-manager-creds-regenerated.event'
+import {
+  RegionSnapshotManagerCredsRegeneratedEvent,
+  RegionSnapshotManagerUpdatedEvent,
+} from '../events/region-snapshot-manager-creds.event'
+import { UpdateRegionDto } from '../dto/update-region.dto'
+import { Snapshot } from '../../sandbox/entities/snapshot.entity'
 
 @Injectable()
 export class RegionService {
@@ -39,6 +44,8 @@ export class RegionService {
     private readonly runnerRepository: Repository<Runner>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
   ) {}
 
   /**
@@ -254,6 +261,67 @@ export class RegionService {
     await this.dataSource.transaction(async (em) => {
       await this.eventEmitter.emitAsync(RegionEvents.DELETED, new RegionDeletedEvent(em, region))
       await em.remove(region)
+    })
+  }
+
+  async update(regionId: string, updateRegion: UpdateRegionDto): Promise<void> {
+    const region = await this.findOne(regionId)
+
+    if (!region) {
+      throw new NotFoundException('Region not found')
+    }
+
+    await this.dataSource.transaction(async (em) => {
+      if (updateRegion.proxyUrl !== undefined) {
+        region.proxyUrl = updateRegion.proxyUrl ?? null
+      }
+
+      if (updateRegion.sshGatewayUrl !== undefined) {
+        region.sshGatewayUrl = updateRegion.sshGatewayUrl ?? null
+      }
+
+      if (updateRegion.snapshotManagerUrl !== undefined) {
+        if (region.snapshotManagerUrl) {
+          // If snapshots already exist, prevent changing the snapshot manager URL
+          const exists = await this.snapshotRepository.exists({
+            where: {
+              ref: Like(`${region.snapshotManagerUrl.replace(/^https?:\/\//, '')}%`),
+            },
+          })
+          if (exists) {
+            throw new BadRequestException(
+              'Cannot change snapshot manager URL for region with existing snapshots. Please delete existing snapshots first.',
+            )
+          }
+        }
+
+        const prevSnapshotManagerUrl = region.snapshotManagerUrl
+        region.snapshotManagerUrl = updateRegion.snapshotManagerUrl ?? null
+
+        let newUsername: string | undefined = undefined
+        let newPassword: string | undefined = undefined
+
+        // If the region did not have a snapshot manager, create new credentials
+        if (!prevSnapshotManagerUrl) {
+          newUsername = 'daytona'
+          newPassword = generateRandomString(16)
+        }
+
+        await this.eventEmitter.emitAsync(
+          RegionEvents.SNAPSHOT_MANAGER_UPDATED,
+          new RegionSnapshotManagerUpdatedEvent(
+            region,
+            region.organizationId,
+            region.snapshotManagerUrl,
+            prevSnapshotManagerUrl,
+            newUsername,
+            newPassword,
+            em,
+          ),
+        )
+      }
+
+      await em.save(region)
     })
   }
 

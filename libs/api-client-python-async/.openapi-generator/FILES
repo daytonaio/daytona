@@ -175,6 +175,7 @@ daytona_api_client_async/models/update_organization_member_access.py
 daytona_api_client_async/models/update_organization_quota.py
 daytona_api_client_async/models/update_organization_region_quota.py
 daytona_api_client_async/models/update_organization_role.py
+daytona_api_client_async/models/update_region.py
 daytona_api_client_async/models/update_sandbox_state_dto.py
 daytona_api_client_async/models/url.py
 daytona_api_client_async/models/user.py

@@ -200,6 +200,7 @@ from daytona_api_client.models.update_organization_member_access import UpdateOr
 from daytona_api_client.models.update_organization_quota import UpdateOrganizationQuota
 from daytona_api_client.models.update_organization_region_quota import UpdateOrganizationRegionQuota
 from daytona_api_client.models.update_organization_role import UpdateOrganizationRole
+from daytona_api_client.models.update_region import UpdateRegion
 from daytona_api_client.models.update_sandbox_state_dto import UpdateSandboxStateDto
 from daytona_api_client.models.url import Url
 from daytona_api_client.models.user import User
@@ -396,6 +397,7 @@ __all__ = [
     "UpdateOrganizationQuota",
     "UpdateOrganizationRegionQuota",
     "UpdateOrganizationRole",
+    "UpdateRegion",
     "UpdateSandboxStateDto",
     "Url",
     "User",

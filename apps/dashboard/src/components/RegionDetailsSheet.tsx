@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { formatTimestamp } from '@/lib/utils'
 import { Region, RegionType } from '@daytonaio/api-client'
-import { Copy, Info, Trash, X } from 'lucide-react'
+import { Copy, Info, Pencil, Trash, X } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
 
@@ -19,6 +19,7 @@ interface RegionDetailsSheetProps {
   writePermitted: boolean
   deletePermitted: boolean
   onDelete: (region: Region) => void
+  onUpdate: (region: Region) => void
   onRegenerateProxyApiKey: (region: Region) => void
   onRegenerateSshGatewayApiKey: (region: Region) => void
   onRegenerateSnapshotManagerCredentials: (region: Region) => void
@@ -32,6 +33,7 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
   writePermitted,
   deletePermitted,
   onDelete,
+  onUpdate,
   onRegenerateProxyApiKey,
   onRegenerateSshGatewayApiKey,
   onRegenerateSnapshotManagerCredentials,
@@ -57,6 +59,11 @@ const RegionDetailsSheet: React.FC<RegionDetailsSheetProps> = ({
         <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
           <SheetTitle className="text-2xl font-medium">Region Details</SheetTitle>
           <div className="flex gap-2 items-center">
+            {writePermitted && isCustomRegion && (
+              <Button variant="outline" className="w-8 h-8" onClick={() => onUpdate(region)} disabled={isLoading}>
+                <Pencil className="w-4 h-4" />
+              </Button>
+            )}
             {deletePermitted && isCustomRegion && (
               <Button variant="outline" className="w-8 h-8" onClick={() => onDelete(region)} disabled={isLoading}>
                 <Trash className="w-4 h-4" />

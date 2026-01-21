@@ -1209,6 +1209,43 @@ paths:
       summary: Get region by ID
       tags:
         - organizations
+    patch:
+      operationId: updateRegion
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Region ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRegion'
+        required: true
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update region configuration
+      tags:
+        - organizations
   /regions/{id}/regenerate-proxy-api-key:
     post:
       operationId: regenerateProxyApiKey
@@ -9571,6 +9608,28 @@ components:
           type: string
       required:
         - apiKey
+      type: object
+    UpdateRegion:
+      example:
+        snapshotManagerUrl: https://snapshot-manager.example.com
+        proxyUrl: https://proxy.example.com
+        sshGatewayUrl: ssh://ssh-gateway.example.com
+      properties:
+        proxyUrl:
+          description: Proxy URL for the region
+          example: https://proxy.example.com
+          nullable: true
+          type: string
+        sshGatewayUrl:
+          description: SSH Gateway URL for the region
+          example: ssh://ssh-gateway.example.com
+          nullable: true
+          type: string
+        snapshotManagerUrl:
+          description: Snapshot Manager URL for the region
+          example: https://snapshot-manager.example.com
+          nullable: true
+          type: string
       type: object
     SnapshotManagerCredentials:
       example:

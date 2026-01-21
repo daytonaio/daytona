@@ -23,7 +23,10 @@ import { RegionEvents } from '../../region/constants/region-events.constant'
 import { RegionCreatedEvent } from '../../region/events/region-created.event'
 import { RegionDeletedEvent } from '../../region/events/region-deleted.event'
 import { RegionService } from '../../region/services/region.service'
-import { RegionSnapshotManagerCredsRegeneratedEvent } from '../../region/events/region-snapshot-manager-creds-regenerated.event'
+import {
+  RegionSnapshotManagerCredsRegeneratedEvent,
+  RegionSnapshotManagerUpdatedEvent,
+} from '../../region/events/region-snapshot-manager-creds.event'
 
 const AXIOS_TIMEOUT_MS = 3000
 const DOCKER_HUB_REGISTRY = 'registry-1.docker.io'
@@ -821,10 +824,14 @@ export class DockerRegistryService {
   @OnAsyncEvent({
     event: RegionEvents.SNAPSHOT_MANAGER_CREDENTIALS_REGENERATED,
   })
-  async updateRegionSnapshotManagerCredentials(payload: RegionSnapshotManagerCredsRegeneratedEvent): Promise<void> {
-    const { regionId, snapshotManagerUrl, username, password } = payload
+  private async _handleRegionSnapshotManagerCredsRegenerated(
+    payload: RegionSnapshotManagerCredsRegeneratedEvent,
+  ): Promise<void> {
+    const { regionId, snapshotManagerUrl, username, password, entityManager } = payload
 
-    const registries = await this.dockerRegistryRepository.count({
+    const em = entityManager ?? this.dockerRegistryRepository.manager
+
+    const registries = await em.count(DockerRegistry, {
       where: { region: regionId, url: snapshotManagerUrl },
     })
 
@@ -832,13 +839,66 @@ export class DockerRegistryService {
       throw new NotFoundException(`No registries found for region ${regionId} with URL ${snapshotManagerUrl}`)
     }
 
-    await this.dockerRegistryRepository.update({ region: regionId, url: snapshotManagerUrl }, { username, password })
+    await em.update(DockerRegistry, { region: regionId, url: snapshotManagerUrl }, { username, password })
+  }
+
+  @OnAsyncEvent({
+    event: RegionEvents.SNAPSHOT_MANAGER_UPDATED,
+  })
+  private async _handleRegionSnapshotManagerUpdated(payload: RegionSnapshotManagerUpdatedEvent): Promise<void> {
+    const {
+      region,
+      organizationId,
+      snapshotManagerUrl,
+      prevSnapshotManagerUrl,
+      entityManager,
+      newUsername,
+      newPassword,
+    } = payload
+
+    const em = entityManager ?? this.dockerRegistryRepository.manager
+
+    if (prevSnapshotManagerUrl) {
+      // Update old registries associated with previous snapshot manager URL
+      if (snapshotManagerUrl) {
+        await em.update(
+          DockerRegistry,
+          {
+            region: region.id,
+            url: prevSnapshotManagerUrl,
+          },
+          {
+            url: snapshotManagerUrl,
+            username: newUsername,
+            password: newPassword,
+          },
+        )
+      } else {
+        // If snapshot manager URL is removed, delete associated registries
+        await em.delete(DockerRegistry, {
+          region: region.id,
+          url: prevSnapshotManagerUrl,
+        })
+      }
+
+      return
+    }
+
+    const registries = await em.count(DockerRegistry, {
+      where: { region: region.id, url: snapshotManagerUrl },
+    })
+
+    if (registries === 0) {
+      await this._handleRegionCreatedEvent(
+        new RegionCreatedEvent(entityManager, region, organizationId, newUsername, newPassword),
+      )
+    }
   }
 
   @OnAsyncEvent({
     event: RegionEvents.CREATED,
   })
-  async handleRegionCreatedEvent(payload: RegionCreatedEvent): Promise<void> {
+  private async _handleRegionCreatedEvent(payload: RegionCreatedEvent): Promise<void> {
     const { entityManager, region, organizationId, snapshotManagerUsername, snapshotManagerPassword } = payload
 
     if (!region.snapshotManagerUrl || !snapshotManagerUsername || !snapshotManagerPassword) {
