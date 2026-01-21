@@ -858,20 +858,30 @@ export class DockerRegistryService {
 
     const em = entityManager ?? this.dockerRegistryRepository.manager
 
-    if (prevSnapshotManagerUrl && prevSnapshotManagerUrl !== snapshotManagerUrl) {
-      // Delete old registries associated with previous snapshot manager URL
-      await em.update(
-        DockerRegistry,
-        {
+    if (prevSnapshotManagerUrl) {
+      // Update old registries associated with previous snapshot manager URL
+      if (snapshotManagerUrl) {
+        await em.update(
+          DockerRegistry,
+          {
+            region: region.id,
+            url: prevSnapshotManagerUrl,
+          },
+          {
+            url: snapshotManagerUrl,
+            username: newUsername,
+            password: newPassword,
+          },
+        )
+      } else {
+        // If snapshot manager URL is removed, delete associated registries
+        await em.delete(DockerRegistry, {
           region: region.id,
           url: prevSnapshotManagerUrl,
-        },
-        {
-          url: snapshotManagerUrl,
-          username: newUsername,
-          password: newPassword,
-        },
-      )
+        })
+      }
+
+      return
     }
 
     const registries = await em.count(DockerRegistry, {

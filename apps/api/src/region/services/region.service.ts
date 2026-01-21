@@ -273,11 +273,11 @@ export class RegionService {
 
     await this.dataSource.transaction(async (em) => {
       if (updateRegion.proxyUrl !== undefined) {
-        region.proxyUrl = updateRegion.proxyUrl
+        region.proxyUrl = updateRegion.proxyUrl ?? null
       }
 
       if (updateRegion.sshGatewayUrl !== undefined) {
-        region.sshGatewayUrl = updateRegion.sshGatewayUrl
+        region.sshGatewayUrl = updateRegion.sshGatewayUrl ?? null
       }
 
       if (updateRegion.snapshotManagerUrl !== undefined) {
@@ -296,38 +296,29 @@ export class RegionService {
         }
 
         const prevSnapshotManagerUrl = region.snapshotManagerUrl
-        region.snapshotManagerUrl = updateRegion.snapshotManagerUrl
+        region.snapshotManagerUrl = updateRegion.snapshotManagerUrl ?? null
+
+        let newUsername: string | undefined = undefined
+        let newPassword: string | undefined = undefined
 
         // If the region did not have a snapshot manager, create new credentials
         if (!prevSnapshotManagerUrl) {
-          const newUsername = 'daytona'
-          const newPassword = generateRandomString(16)
-          await this.eventEmitter.emitAsync(
-            RegionEvents.SNAPSHOT_MANAGER_UPDATED,
-            new RegionSnapshotManagerUpdatedEvent(
-              region,
-              region.organizationId,
-              region.snapshotManagerUrl,
-              prevSnapshotManagerUrl,
-              newUsername,
-              newPassword,
-              em,
-            ),
-          )
-        } else {
-          await this.eventEmitter.emitAsync(
-            RegionEvents.SNAPSHOT_MANAGER_UPDATED,
-            new RegionSnapshotManagerUpdatedEvent(
-              region,
-              region.organizationId,
-              region.snapshotManagerUrl,
-              prevSnapshotManagerUrl,
-              undefined,
-              undefined,
-              em,
-            ),
-          )
+          newUsername = 'daytona'
+          newPassword = generateRandomString(16)
         }
+
+        await this.eventEmitter.emitAsync(
+          RegionEvents.SNAPSHOT_MANAGER_UPDATED,
+          new RegionSnapshotManagerUpdatedEvent(
+            region,
+            region.organizationId,
+            region.snapshotManagerUrl,
+            prevSnapshotManagerUrl,
+            newUsername,
+            newPassword,
+            em,
+          ),
+        )
       }
 
       await em.save(region)

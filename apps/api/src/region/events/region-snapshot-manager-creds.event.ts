@@ -20,8 +20,8 @@ export class RegionSnapshotManagerUpdatedEvent {
   constructor(
     public readonly region: Region,
     public readonly organizationId: string,
-    public readonly snapshotManagerUrl: string,
-    public readonly prevSnapshotManagerUrl?: string,
+    public readonly snapshotManagerUrl: string | null,
+    public readonly prevSnapshotManagerUrl: string | null,
     public readonly newUsername?: string,
     public readonly newPassword?: string,
     public readonly entityManager?: EntityManager,
