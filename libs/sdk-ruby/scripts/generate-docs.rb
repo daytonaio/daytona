@@ -41,12 +41,13 @@ def add_frontmatter(content, class_name)
     ---
 
   FRONTMATTER
-  
+
   frontmatter + content
 end
 
 def format_type(types)
   return 'Object' if types.nil? || types.empty?
+
   # Join types and escape special characters that break MDX
   type_str = types.join(', ')
   # Escape special chars that break MDX parsing
@@ -58,7 +59,7 @@ end
 
 def clean_description(description)
   return '' if description.nil? || description.empty?
-  
+
   # Remove rubocop directive lines
   cleaned = description.to_s.lines.reject { |line| line.strip.start_with?('rubocop:') }.join
   cleaned.strip
@@ -66,7 +67,7 @@ end
 
 def extract_class_description(obj)
   description = clean_description(obj.docstring)
-  
+
   # If no class-level description, try to get it from the first method or constructor
   if description.empty? && obj.is_a?(YARD::CodeObjects::ClassObject)
     # Try to find a description from the constructor or first documented method
@@ -77,266 +78,266 @@ def extract_class_description(obj)
       first_paragraph = constructor_desc.split("\n\n").first
       if first_paragraph && !first_paragraph.empty?
         # Make it a class-level description
-        simple_name = extract_class_name_from_path(obj.path)
-        description = first_paragraph.gsub(/^(Initializes|Creates a new)/, "Main class for")
+        extract_class_name_from_path(obj.path)
+        description = first_paragraph.gsub(/^(Initializes|Creates a new)/, 'Main class for')
       end
     end
-    
+
     # If still empty, generate a basic description
     if description.empty?
       simple_name = extract_class_name_from_path(obj.path)
       description = "#{simple_name} class for Daytona SDK."
     end
   end
-  
+
   description
 end
 
 def extract_attributes(obj)
   attributes = []
-  
+
   return attributes unless obj.is_a?(YARD::CodeObjects::ClassObject)
-  
+
   # Collect all attributes
   read_attrs = obj.attributes[:read] || {}
   write_attrs = obj.attributes[:write] || {}
   all_attrs = (read_attrs.keys + write_attrs.keys).uniq
-  
+
   all_attrs.each do |name|
     attr_obj = read_attrs[name] || write_attrs[name]
     type = attr_obj.docstring.tag(:return)&.types
     type_str = format_type(type)
     desc = attr_obj.docstring.to_s.split("\n").first || ''
-    
+
     attributes << {
       name: name,
       type: type_str,
       description: desc
     }
   end
-  
+
   attributes
 end
 
 def generate_markdown_for_object(obj)
   content = []
-  
+
   # Add main heading
   content << "## #{obj.name}"
-  content << ""
-  
+  content << ''
+
   # Add class description
   description = extract_class_description(obj)
-  if !description.empty?
+  unless description.empty?
     content << description
-    content << ""
+    content << ''
   end
-  
+
   # Add attributes/properties section (matching Python/TypeScript format)
   if obj.is_a?(YARD::CodeObjects::ClassObject)
     attributes = extract_attributes(obj)
-    
+
     if attributes.any?
-      content << "**Attributes**:"
-      content << ""
+      content << '**Attributes**:'
+      content << ''
       attributes.each do |attr|
         content << "- `#{attr[:name]}` _#{attr[:type]}_ - #{attr[:description]}"
       end
-      content << ""
+      content << ''
     end
   end
-  
+
   # Add class-level examples (before constructors, matching Python/TypeScript)
   examples = obj.tags(:example)
   if examples.any?
-    content << "**Examples:**"
-    content << ""
+    content << '**Examples:**'
+    content << ''
     examples.each do |example|
-      content << "```ruby"
+      content << '```ruby'
       content << example.text.strip
-      content << "```"
-      content << ""
+      content << '```'
+      content << ''
     end
   end
-  
+
   # Add constructors section
   if obj.is_a?(YARD::CodeObjects::ClassObject)
     constructor = obj.meths.find { |m| m.name == :initialize }
     if constructor
-      content << "### Constructors"
-      content << ""
+      content << '### Constructors'
+      content << ''
       content << "#### new #{extract_class_name_from_path(obj.path)}()"
-      content << ""
-      
+      content << ''
+
       # Method signature
-      content << "```ruby"
+      content << '```ruby'
       params_str = constructor.parameters.map { |p| p[0] }.join(', ')
       content << "def initialize(#{params_str})"
-      content << "```"
-      content << ""
-      
+      content << '```'
+      content << ''
+
       # Constructor description
       if constructor.docstring && !constructor.docstring.empty?
         desc = clean_description(constructor.docstring)
         unless desc.empty?
           content << desc
-          content << ""
+          content << ''
         end
       end
-      
+
       # Parameters
       params = constructor.tags(:param)
       if params.any?
-        content << "**Parameters**:"
-        content << ""
+        content << '**Parameters**:'
+        content << ''
         params.each do |param|
           types = format_type(param.types)
           content << "- `#{param.name}` _#{types}_ - #{param.text}"
         end
-        content << ""
+        content << ''
       end
-      
+
       # Returns
       return_tag = constructor.tag(:return)
       if return_tag
         types = format_type(return_tag.types)
         text = return_tag.text.to_s.strip
-        content << "**Returns**:"
-        content << ""
-        if text.empty?
-          content << "- `#{types}`"
-        else
-          content << "- `#{types}` - #{text}"
-        end
-        content << ""
+        content << '**Returns**:'
+        content << ''
+        content << if text.empty?
+                     "- `#{types}`"
+                   else
+                     "- `#{types}` - #{text}"
+                   end
+        content << ''
       end
-      
+
       # Raises
       raises = constructor.tags(:raise)
       if raises.any?
-        content << "**Raises**:"
-        content << ""
+        content << '**Raises**:'
+        content << ''
         raises.each do |raise_tag|
           types = format_type(raise_tag.types)
           content << "- `#{types}` - #{raise_tag.text}"
         end
-        content << ""
+        content << ''
       end
     end
   end
-  
+
   # Add methods section
   if obj.is_a?(YARD::CodeObjects::ClassObject)
     methods = obj.meths.select { |m| m.scope == :instance && m.visibility == :public && m.name != :initialize }
-    
+
     if methods.any?
-      content << "### Methods"
-      content << ""
-      
+      content << '### Methods'
+      content << ''
+
       methods.each do |method|
         content << "#### #{method.name}()"
-        content << ""
-        
+        content << ''
+
         # Method signature
-        content << "```ruby"
+        content << '```ruby'
         params_str = method.parameters.map { |p| p[0] }.join(', ')
         content << "def #{method.name}(#{params_str})"
-        content << "```"
-        content << ""
-        
+        content << '```'
+        content << ''
+
         # Method description
         if method.docstring && !method.docstring.empty?
           desc = clean_description(method.docstring)
           unless desc.empty?
             content << desc
-            content << ""
+            content << ''
           end
         end
-        
+
         # Parameters
         params = method.tags(:param)
         if params.any?
-          content << "**Parameters**:"
-          content << ""
+          content << '**Parameters**:'
+          content << ''
           params.each do |param|
             types = format_type(param.types)
             content << "- `#{param.name}` _#{types}_ - #{param.text}"
           end
-          content << ""
+          content << ''
         end
-        
+
         # Returns
         return_tag = method.tag(:return)
         if return_tag
           types = format_type(return_tag.types)
           text = return_tag.text.to_s.strip
-          content << "**Returns**:"
-          content << ""
+          content << '**Returns**:'
+          content << ''
           # Only add description if it's meaningful and not just repeating the type
-          if text.empty? || text.start_with?('Array<') || text.start_with?('Hash<')
-            content << "- `#{types}`"
-          else
-            content << "- `#{types}` - #{text}"
-          end
-          content << ""
+          content << if text.empty? || text.start_with?('Array<') || text.start_with?('Hash<')
+                       "- `#{types}`"
+                     else
+                       "- `#{types}` - #{text}"
+                     end
+          content << ''
         end
-        
+
         # Raises
         raises = method.tags(:raise)
         if raises.any?
-          content << "**Raises**:"
-          content << ""
+          content << '**Raises**:'
+          content << ''
           raises.each do |raise_tag|
             types = format_type(raise_tag.types)
             content << "- `#{types}` - #{raise_tag.text}"
           end
-          content << ""
+          content << ''
         end
-        
+
         # Method-level examples
         examples = method.tags(:example)
-        if examples.any?
-          content << "**Examples:**"
-          content << ""
-          examples.each do |example|
-            content << "```ruby"
-            content << example.text.strip
-            content << "```"
-            content << ""
-          end
+        next unless examples.any?
+
+        content << '**Examples:**'
+        content << ''
+        examples.each do |example|
+          content << '```ruby'
+          content << example.text.strip
+          content << '```'
+          content << ''
         end
       end
     end
   end
-  
+
   content.join("\n")
 end
 
 def post_process_markdown(content)
   # Remove excessive blank lines (more than 2 consecutive)
   content = content.gsub(/\n{3,}/, "\n\n")
-  
+
   # Remove blank lines inside code blocks
-  content = content.gsub(/```ruby\n\n/, "```ruby\n")
-  content = content.gsub(/\n\n```/, "\n```")
-  
+  content = content.gsub("```ruby\n\n", "```ruby\n")
+  content = content.gsub("\n\n```", "\n```")
+
   # Ensure consistent spacing around sections
   content = content.gsub(/\n(\*\*[^*]+\*\*:)\n([^\n])/, "\n\\1\n\n\\2")
-  
+
   # Ensure code blocks have proper spacing
   content = content.gsub(/([^\n])\n```/, "\\1\n\n```")
   content = content.gsub(/```\n([^\n])/, "```\n\n\\1")
-  
+
   # Clean up trailing whitespace
   content = content.lines.map(&:rstrip).join("\n")
-  
+
   # Ensure file ends with single newline
   content.strip + "\n"
 end
 
 def generate_docs_for_class(file_path, output_filename, class_name)
   full_path = File.join(LIB_DIR, file_path)
-  
+
   unless File.exist?(full_path)
     puts "⚠️  File not found: #{full_path}"
     return
@@ -348,10 +349,10 @@ def generate_docs_for_class(file_path, output_filename, class_name)
     # Clear and parse with YARD
     YARD::Registry.clear
     YARD::Parser::SourceParser.parse(full_path)
-    
+
     # Get the class object
     obj = YARD::Registry.at(class_name)
-    
+
     unless obj
       puts "⚠️  Class #{class_name} not found in registry"
       return
@@ -359,17 +360,17 @@ def generate_docs_for_class(file_path, output_filename, class_name)
 
     # Generate markdown content
     markdown_content = generate_markdown_for_object(obj)
-    
+
     # Post-process for consistency
     markdown_content = post_process_markdown(markdown_content)
-    
+
     # Add frontmatter
     final_content = add_frontmatter(markdown_content, class_name)
-    
+
     # Write to output file
     output_path = File.join(DOCS_OUTPUT_DIR, output_filename)
     File.write(output_path, final_content)
-    
+
     puts "✅ Generated: #{output_filename}"
   rescue StandardError => e
     puts "❌ Error generating docs for #{class_name}: #{e.message}"
@@ -378,9 +379,9 @@ def generate_docs_for_class(file_path, output_filename, class_name)
 end
 
 # Main execution
-puts "🚀 Starting documentation generation..."
+puts '🚀 Starting documentation generation...'
 puts "📂 Output directory: #{DOCS_OUTPUT_DIR}"
-puts ""
+puts ''
 
 # Ensure output directory exists
 FileUtils.mkdir_p(DOCS_OUTPUT_DIR)
@@ -390,5 +391,5 @@ CLASSES_TO_DOCUMENT.each do |file_path, output_filename, class_name|
   generate_docs_for_class(file_path, output_filename, class_name)
 end
 
-puts ""
-puts "✨ Documentation generation complete!"
+puts ''
+puts '✨ Documentation generation complete!'
