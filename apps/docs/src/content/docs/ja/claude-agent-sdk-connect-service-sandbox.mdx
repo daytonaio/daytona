@@ -1,0 +1,233 @@
+---
+title: Claude と Daytona を使って 2 エージェント型コーディングシステムを構築する
+description: Claude Agent SDK と Daytona サンドボックスを使ってデュアルエージェント型コーディングシステムを構築するためのステップバイステップガイド。
+---
+
+このガイドでは、[Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) と Daytona サンドボックスを使用して、2 エージェントによる自律型コーディングシステムを実行する方法を説明します。システムは、**Project Manager Agent**（ローカル）と **Developer Agent**（サンドボックス内）で構成されており、高度なタスク委譲、計画立案、および安全なコード実行を可能にします。
+
+Project Manager Agent はローカルで動作し、高レベルな計画立案とタスクの委譲のために、`claude-sonnet-4-20250514` モデルを用いた基本的な Anthropic インターフェースを使用します。Developer Agent は Daytona のサンドボックス内で動作し、Claude Agent SDK を使って作成されます。Claude Agent SDK は、Claude Code を活用して高度なコーディングと自動化機能を提供します。このアーキテクチャにより、高レベルなプランニングと低レベルなコード実行が分離され、より堅牢な自動化が実現されます。
+
+このアプローチの重要な利点の 1 つは、その**拡張性**です。Project Manager Agent を独自のオーケストレーターのロジックや別のエージェントに容易に置き換えることができるため、システムを高度な自動化や協調処理の幅広いユースケースにわたって、非常に再利用しやすく適応可能なものにできます。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+メインモジュールが起動すると、Developer Agent 用の Daytona サンドボックスが作成され、Project Manager Agent がローカルで初期化されます。システムとの対話はコマンドラインのチャットインターフェースを介して行われます。Project Manager Agent はプロンプトを受け取り、ワークフローを計画し、コーディングタスクを Developer Agent に委譲します。Developer Agent はサンドボックス内でタスクを実行し、その結果をストリーミングで Project Manager に返します。Project Manager はそれらを確認し、次のアクションを調整します。両方のエージェントからのすべてのログと出力はリアルタイムでターミナルにストリーミングされ、Project Manager Agent によって管理されるプロセスを完全に把握できます。
+
+Developer Agent は Web アプリをホストし、[Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) を用いてプレビューリンクを提供することもできます。Project Manager Agent はこれらのリンクを提示し、その結果を要約して提示します。
+
+作業が完了するまで、システムとの対話を継続できます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+***
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytona の [リポジトリ](https://github.com/daytonaio/daytona.git) をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/anthropic/multi-agent-claude-sdk
+```
+
+#### 環境の設定 \{#configure-environment\}
+
+このサンプルを実行するには、以下の環境変数を設定する必要があります:
+
+* `DAYTONA_API_KEY`: Daytona のサンドボックスにアクセスするために必要です。[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得します
+* `ANTHROPIC_API_KEY`: **Project Manager Agent**（ローカル実行）に必要です。[Claude Developer Platform](https://console.anthropic.com/settings/keys) から取得します
+* `SANDBOX_ANTHROPIC_API_KEY`: **Developer Agent**（サンドボックス内で実行）用の**任意**の設定です。指定しない場合は `ANTHROPIC_API_KEY` がデフォルトとして使用されます。[Claude Developer Platform](https://console.anthropic.com/settings/keys) から取得します
+
+`.env.example` を `.env` にコピーし、キーを追加してください:
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+ANTHROPIC_API_KEY=your_anthropic_key
+SANDBOX_ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+:::tip[エージェント用 API キーのオプション]
+両方のエージェントで同じ `ANTHROPIC_API_KEY` を使用することも、課金やトラッキングのために別個の `SANDBOX_ANTHROPIC_API_KEY` を指定することもできます。
+:::
+
+:::caution[API キーのセキュリティ]
+`SANDBOX_ANTHROPIC_API_KEY` は Daytona のサンドボックス環境に渡され、サンドボックス内で実行されるあらゆるコードからアクセス可能になります。
+:::
+
+#### ローカル環境での利用 \{#local-usage\}
+
+:::note[Node.js のバージョン]
+このサンプルを実行するには Node.js 18 以降が必要です。先に進む前に、お使いの環境がこの要件を満たしていることを確認してください。
+:::
+
+依存パッケージをインストールします:
+
+```bash
+npm install
+```
+
+2エージェントシステムを実行する：
+
+```bash
+npm run start
+```
+
+システムが起動し、プロンプトの入力を待ちます。
+
+***
+
+### 3. 利用例 \{#3-example-usage\}
+
+チャット セッションの例：
+
+```
+$ npm run start
+Creating Developer Agent sandbox...
+Installing Developer Agent SDK...
+Initializing Developer Agent...
+Initializing Project Manager Agent...
+
+=== Two-Agent System Ready ===
+Project Manager Agent: Manages tasks and delegates to Developer (Green text)
+Developer Agent: Executes code in Daytona sandbox (White text)
+Press Ctrl+C at any time to exit.
+
+User: make a lunar lander web app
+
+[Project Manager] Processing your request...
+
+[Project Manager]: I'll help you create a lunar lander web app! Let me delegate this task to the Developer Agent.
+
+<developer_task>
+Create a lunar lander web game with the following features:
+
+- HTML/CSS/JavaScript based
+- Canvas graphics for the game
+- Physics simulation (gravity, thrust, velocity)
+- Keyboard controls (arrow keys)
+- Landing detection (safe landing vs crash)
+- Fuel management system
+- Start the game on port 80 and provide the preview URL
+  </developer_task>
+
+[Delegating to Developer Agent]...
+
+I'll help you create a lunar lander web app! Let me build a complete game with physics simulation, graphics, and controls.
+🔨 Write
+🔨 Write
+🔨 Bash
+Perfect! The web server is now running.
+
+Your Lunar Lander game is live at:
+🌐 https://80-17ac1c0f-d684-4122-93b5-8f52fd5393f8.proxy.daytona.works
+
+[Project Manager]: Excellent! The Developer Agent has successfully created your lunar lander web app. The game is now running and accessible at the preview URL above. The implementation includes:
+
+✓ Physics simulation with gravity and thrust
+✓ Canvas-based graphics
+✓ Keyboard controls for gameplay
+✓ Landing detection system
+✓ Fuel management
+✓ Web server running on port 80
+
+TASK_COMPLETE
+
+[Project Manager] All tasks completed!
+```
+
+***
+
+### 4. エージェントアーキテクチャの理解 \{#4-understanding-the-agent-architecture\}
+
+このシステムは、役割と実装がそれぞれ異なる 2 つの協調して動作するエージェントで構成されています。以下では、各エージェントがどのように動作し、ワークフロー内でどのように相互連携するかをステップごとに解説します。
+
+#### プロジェクトマネージャーエージェント（ターミナルオーケストレーション） \{#project-manager-agent-terminal-orchestration\}
+
+1. **ユーザーとの対話:**
+
+* すべてのユーザーとのやり取りは、ターミナル上でプロジェクトマネージャーエージェントを介して行われます。
+  * プロジェクトマネージャーエージェントには、その役割を定義し、会話履歴全体を保持するシステムプロンプトが設定されています。
+
+2. **Developer Agent の認識:**
+
+* プロジェクトマネージャーエージェントは、Daytona のサンドボックス内で Developer Agent が利用可能であり、必要に応じて呼び出せることを把握しています。
+
+3. **タスクの委譲:**
+
+* プロジェクトマネージャーエージェントが、コーディングタスクを委譲すべきだと判断した場合、そのタスクをレスポンス内の `<developer_task>` タグでカプセル化します。
+  * システムはこれらのタグを解析し、タグが存在する場合、指定されたタスクを用いて Developer Agent を呼び出します。
+
+4. **反復型ワークフロー:**
+
+* このプロセスは複数回繰り返すことができ、プロジェクトマネージャーエージェントは進捗を評価し、必要に応じてさらなるタスクを委譲します。
+
+5. **セッションの完了:**
+
+* プロジェクトマネージャーエージェントが全体のタスクが完了したと判断すると、`TASK_COMPLETE` を出力します。これにより、システムはセッションを終了するよう指示されます。
+
+#### Developer Agent (サンドボックスでの実行) \{#developer-agent-sandbox-execution\}
+
+1. **プロビジョニング:**
+
+* Developer Agent は Daytona のサンドボックス内にプロビジョニングされ、コーディングタスクの実行を担当します。
+
+2. **SDK のインストール:**
+
+* システムは `pip install` を実行してサンドボックス内に Claude Agent SDK をインストールします（[プロセス実行](/docs/ja/process-code-execution#process-execution)を参照）。
+
+3. **インタプリタコンテキスト:**
+
+* 隔離された実行のために、新しい[コードインタプリタコンテキスト](/docs/ja/process-code-execution#stateful-code-interpreter)が作成されます。
+
+4. **スクリプトのアップロード:**
+
+* コーディングエージェントのスクリプトは、[ファイルアップロード](/docs/file-system-operations#uploading-a-single-file)機能を使用してサンドボックスにアップロードされます。
+
+5. **SDK の初期化:**
+
+* Claude Agent SDK はインタプリタコンテキスト内で初期化されます（例: `import coding_agent`）。
+
+6. **タスク実行:**
+
+* `<developer_task>` を受け取ると、システムはインタプリタコンテキスト内で Python コマンドを実行することでタスクを Developer Agent に送信します:
+  ```typescript
+  const result = await sandbox.codeInterpreter.runCode(
+   `coding_agent.run_query_sync(os.environ.get('PROMPT', ''))`,
+   {
+    context: ctx,
+    envs: { PROMPT: task },
+    onStdout,
+    onStderr,
+   }
+  );
+  ```
+  * Developer Agent はタスクを実行し、出力をストリーミングしながら、結果を Project Manager Agent に返してレビューおよびさらなる調整を行います。
+
+***
+
+### 5. カスタマイズ \{#5-customization\}
+
+`src/index.ts` 内のシステムプロンプトを変更することで、Project Manager Agent の動作をカスタマイズできます。現在の実装は次の動作を行います:
+
+* 委任のために `<developer_task>` タグを使用する
+* Developer Agent の出力を自動的にレビューする
+* 完了時に &quot;TASK&#95;COMPLETE&quot; と出力する
+
+***
+
+### 6. クリーンアップ \{#6-cleanup\}
+
+メインプログラムを終了した時点で、Daytona のサンドボックスとすべてのファイルは自動的に削除されます。
+
+***
+
+**主な利点:**
+
+* Daytona のサンドボックス内での安全な分離実行
+* 堅牢な自動化を実現する階層型エージェントアーキテクチャ
+* 拡張性と再利用性に優れたアーキテクチャ
+* 開発サーバーの自動検出とリアルタイムなプレビューリンク
+* マルチ言語対応およびフルスタック対応
+* シンプルなセットアップと自動クリーンアップ
