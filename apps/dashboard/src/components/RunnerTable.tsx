@@ -25,6 +25,7 @@ import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from './TableEmptyState'
 import { toast } from 'sonner'
 import { DebouncedInput } from './DebouncedInput'
+import { cn } from '@/lib/utils'
 
 interface RunnerTableProps {
   data: Runner[]
@@ -36,6 +37,9 @@ interface RunnerTableProps {
   onToggleEnabled: (runner: Runner) => void
   onDelete: (runner: Runner) => void
   getRegionName: (regionId: string) => string | undefined
+  onRowClick?: (runner: Runner) => void
+  autoRefresh?: boolean
+  onAutoRefreshChange?: (enabled: boolean) => void
 }
 
 export function RunnerTable({
@@ -48,6 +52,9 @@ export function RunnerTable({
   onToggleEnabled,
   onDelete,
   getRegionName,
+  onRowClick,
+  autoRefresh,
+  onAutoRefreshChange,
 }: RunnerTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -104,13 +111,19 @@ export function RunnerTable({
 
   return (
     <div>
-      <div className="flex items-center mb-4">
+      <div className="flex items-center flex-wrap gap-4 mb-4">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
-          placeholder="Search by ID or Region"
+          placeholder="Search by ID, Name, or Region"
           className="max-w-sm"
         />
+        {onAutoRefreshChange && (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Auto-refresh</span>
+            <Switch checked={autoRefresh} onCheckedChange={onAutoRefreshChange} />
+          </div>
+        )}
       </div>
       <div className="rounded-md border">
         <Table style={{ tableLayout: 'fixed', width: '100%' }}>
@@ -145,7 +158,11 @@ export function RunnerTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${isLoadingRunner(row.original) ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={cn(
+                    isLoadingRunner(row.original) ? 'opacity-50 pointer-events-none' : '',
+                    onRowClick && 'cursor-pointer hover:bg-muted/50',
+                  )}
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
@@ -344,6 +361,7 @@ const getColumns = ({
             checked={isRunnerSchedulable(row.original)}
             onCheckedChange={() => writePermitted && !isLoading && onToggleEnabled(row.original)}
             disabled={!writePermitted || isLoading}
+            onClick={(e) => e.stopPropagation()}
           />
         )
       },
@@ -365,7 +383,7 @@ const getColumns = ({
       return (
         <div className="flex justify-end">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={isLoading}>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
