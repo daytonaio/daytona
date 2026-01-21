@@ -467,6 +467,19 @@ type OrganizationsAPI interface {
 	UpdateOrganizationRoleExecute(r OrganizationsAPIUpdateOrganizationRoleRequest) (*OrganizationRole, *http.Response, error)
 
 	/*
+		UpdateRegion Update region proxy/ssh gateway/snapshot manager
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Region ID
+		@return OrganizationsAPIUpdateRegionRequest
+	*/
+	UpdateRegion(ctx context.Context, id string) OrganizationsAPIUpdateRegionRequest
+
+	// UpdateRegionExecute executes the request
+	//  @return CreateRegionResponse
+	UpdateRegionExecute(r OrganizationsAPIUpdateRegionRequest) (*CreateRegionResponse, *http.Response, error)
+
+	/*
 		UpdateSandboxDefaultLimitedNetworkEgress Update sandbox default limited network egress
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -4063,6 +4076,129 @@ func (a *OrganizationsAPIService) UpdateOrganizationRoleExecute(r OrganizationsA
 	}
 	// body params
 	localVarPostBody = r.updateOrganizationRole
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type OrganizationsAPIUpdateRegionRequest struct {
+	ctx                    context.Context
+	ApiService             OrganizationsAPI
+	id                     string
+	updateRegion           *UpdateRegion
+	xDaytonaOrganizationID *string
+}
+
+func (r OrganizationsAPIUpdateRegionRequest) UpdateRegion(updateRegion UpdateRegion) OrganizationsAPIUpdateRegionRequest {
+	r.updateRegion = &updateRegion
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r OrganizationsAPIUpdateRegionRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) OrganizationsAPIUpdateRegionRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r OrganizationsAPIUpdateRegionRequest) Execute() (*CreateRegionResponse, *http.Response, error) {
+	return r.ApiService.UpdateRegionExecute(r)
+}
+
+/*
+UpdateRegion Update region proxy/ssh gateway/snapshot manager
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Region ID
+	@return OrganizationsAPIUpdateRegionRequest
+*/
+func (a *OrganizationsAPIService) UpdateRegion(ctx context.Context, id string) OrganizationsAPIUpdateRegionRequest {
+	return OrganizationsAPIUpdateRegionRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return CreateRegionResponse
+func (a *OrganizationsAPIService) UpdateRegionExecute(r OrganizationsAPIUpdateRegionRequest) (*CreateRegionResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CreateRegionResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.UpdateRegion")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/regions/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.updateRegion == nil {
+		return localVarReturnValue, nil, reportError("updateRegion is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.updateRegion
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

@@ -15,6 +15,7 @@ import {
   Param,
   NotFoundException,
   Delete,
+  Patch,
 } from '@nestjs/common'
 import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiParam, ApiHeader } from '@nestjs/swagger'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
@@ -38,6 +39,7 @@ import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SnapshotManagerCredentialsDto } from '../../region/dto/snapshot-manager-credentials.dto'
+import { UpdateRegionDto } from '../../region/dto/update-region.dto'
 
 @ApiTags('organizations')
 @Controller('regions')
@@ -184,6 +186,43 @@ export class OrganizationRegionController {
   async regenerateProxyApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateProxyApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
+  }
+
+  @Patch(':id')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Update region proxy/ssh gateway/snapshot manager',
+    operationId: 'updateRegion',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The region has been successfully updated.',
+    type: CreateRegionResponseDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Region ID',
+    type: String,
+  })
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.REGION,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateRegionDto>) => ({
+        ...req.body,
+      }),
+    },
+  })
+  @UseGuards(RegionAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  async updateRegion(
+    @Param('id') id: string,
+    @Body() updateRegionDto: UpdateRegionDto,
+  ): Promise<CreateRegionResponseDto> {
+    return await this.regionService.update(id, updateRegionDto)
   }
 
   @Post(':id/regenerate-ssh-gateway-api-key')

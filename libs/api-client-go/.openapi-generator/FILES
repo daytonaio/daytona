@@ -173,6 +173,7 @@ model_update_organization_member_access.go
 model_update_organization_quota.go
 model_update_organization_region_quota.go
 model_update_organization_role.go
+model_update_region.go
 model_update_sandbox_state_dto.go
 model_url.go
 model_user.go

@@ -11,9 +11,11 @@ import {
   CreateRegion,
   CreateRegionResponse,
   SnapshotManagerCredentials,
+  UpdateRegion,
 } from '@daytonaio/api-client'
 import { RegionTable } from '@/components/RegionTable'
 import { CreateRegionDialog } from '@/components/CreateRegionDialog'
+import { UpdateRegionDialog } from '@/components/UpdateRegionDialog'
 import RegionDetailsSheet from '@/components/RegionDetailsSheet'
 import {
   Dialog,
@@ -71,6 +73,10 @@ const Regions: React.FC = () => {
   // Region Details Sheet state
   const [selectedRegion, setSelectedRegion] = useState<Region | null>(null)
   const [showRegionDetails, setShowRegionDetails] = useState(false)
+
+  // Update Region Dialog state
+  const [showUpdateRegionDialog, setShowUpdateRegionDialog] = useState(false)
+  const [regionToUpdate, setRegionToUpdate] = useState<Region | null>(null)
 
   const handleCreateRegion = async (createRegionData: CreateRegion): Promise<CreateRegionResponse | null> => {
     if (!selectedOrganization) {
@@ -139,6 +145,32 @@ const Regions: React.FC = () => {
   const handleOpenRegionDetails = (region: Region) => {
     setSelectedRegion(region)
     setShowRegionDetails(true)
+  }
+
+  const handleUpdateRegion = async (
+    regionId: string,
+    updateData: UpdateRegion,
+  ): Promise<CreateRegionResponse | null> => {
+    if (!selectedOrganization) return null
+
+    setRegionIsLoading((prev) => ({ ...prev, [regionId]: true }))
+    try {
+      const response = (await organizationsApi.updateRegion(regionId, updateData, selectedOrganization.id)).data
+      toast.success('Region updated successfully')
+      await refreshRegions()
+      return response
+    } catch (error) {
+      handleApiError(error, 'Failed to update region')
+      return null
+    } finally {
+      setRegionIsLoading((prev) => ({ ...prev, [regionId]: false }))
+    }
+  }
+
+  const handleOpenUpdateDialog = (region: Region) => {
+    setRegionToUpdate(region)
+    setShowUpdateRegionDialog(true)
+    setShowRegionDetails(false)
   }
 
   const confirmRegenerateProxyApiKey = async () => {
@@ -263,10 +295,24 @@ const Regions: React.FC = () => {
           setDeleteRegionDialogIsOpen(true)
           setShowRegionDetails(false)
         }}
+        onUpdate={handleOpenUpdateDialog}
         onRegenerateProxyApiKey={handleRegenerateProxyApiKey}
         onRegenerateSshGatewayApiKey={handleRegenerateSshGatewayApiKey}
         onRegenerateSnapshotManagerCredentials={handleRegenerateSnapshotManagerCredentials}
       />
+
+      {regionToUpdate && (
+        <UpdateRegionDialog
+          region={regionToUpdate}
+          open={showUpdateRegionDialog}
+          onOpenChange={(isOpen) => {
+            setShowUpdateRegionDialog(isOpen)
+            if (!isOpen) setRegionToUpdate(null)
+          }}
+          onUpdateRegion={handleUpdateRegion}
+          loading={regionToUpdate ? regionIsLoading[regionToUpdate.id] || false : false}
+        />
+      )}
 
       {regionToDelete && (
         <Dialog
