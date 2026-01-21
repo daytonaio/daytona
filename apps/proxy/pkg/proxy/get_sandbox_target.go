@@ -239,6 +239,12 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToke
 	}
 
 	targetPort = before
+
+	// Check that port is numeric
+	if _, err := strconv.Atoi(targetPort); err != nil {
+		return "", "", errors.New("invalid port: must be numeric")
+	}
+
 	sandboxIdOrSignedToken = after
 
 	return targetPort, sandboxIdOrSignedToken, nil
