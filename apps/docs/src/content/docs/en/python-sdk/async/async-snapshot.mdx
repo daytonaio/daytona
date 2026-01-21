@@ -123,8 +123,7 @@ async with AsyncDaytona() as daytona:
 
 ```python
 @intercept_errors(message_prefix="Failed to create snapshot: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Failed to create snapshot within {timeout} seconds timeout period."))
+@with_timeout()
 async def create(params: CreateSnapshotParams,
                  *,
                  on_logs: Callable[[str], None] | None = None,
