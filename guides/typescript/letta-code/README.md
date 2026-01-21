@@ -10,7 +10,7 @@ This example runs a Letta Code agent inside a Daytona sandbox. You can interact 
 
 - **Secure sandbox execution:** The agent operates within a controlled environment, along with code or commands run by the agent.
 - **Letta Code integration:** Includes the full capabilities of Letta Code, including reading and editing code files, running shell commands, and persistent memory.
-- **Stateful Agents:** Letta Code uses stateful agents under the hood (with the Letta API), so have built-in memory and can be resumed across sandbox sessions. Agents can also be viewed in Letta's [Agent Development Environment](https://app.letta.com/).
+- **Stateful Agents:** Letta Code uses stateful agents under the hood (with the Letta API), which have built-in memory and can be resumed across sandbox sessions. Agents can also be viewed in Letta's [Agent Development Environment](https://app.letta.com/).
 - **Preview deployed apps:** Use Daytona preview links to view and interact with your deployed applications.
 
 ## Prerequisites
@@ -48,7 +48,7 @@ When this example is run, the agent follows the following workflow:
 
 1. A new Daytona sandbox is created.
 2. Letta Code is installed in the sandbox.
-3. Letta code is launched with in [bidirectional headless mode](https://docs.letta.com/letta-code/headless#bidirectional-mode) with a Daytona-specific system prompt.
+3. Letta code is launched in [bidirectional headless mode](https://docs.letta.com/letta-code/headless#bidirectional-mode) with a Daytona-specific system prompt.
 4. User queries are passed to the agent as JSON, and JSON responses are parsed and displayed to the user.
 5. When the script is terminated, the sandbox is deleted.
 
