@@ -9,6 +9,7 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/cmd/main.go",
+        "outputPath": "dist/apps/snapshot-manager",
         "env": {
           "CGO_ENABLED": "0"
         }
@@ -17,7 +18,8 @@
         "production": {
           "flags": ["-ldflags \"-X 'github.com/daytonaio/snapshot-manager/internal.Version=$VERSION'\""]
         }
-      }
+      },
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",

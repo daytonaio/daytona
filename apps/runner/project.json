@@ -10,6 +10,9 @@
       "options": {
         "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
       },
+      "cache": true,
+      "inputs": ["{workspaceRoot}/dist/apps/daemon-amd64"],
+      "outputs": ["{projectRoot}/pkg/daemon/static/daemon-amd64"],
       "dependsOn": [
         {
           "target": "build-amd64",
@@ -22,6 +25,9 @@
       "options": {
         "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
       },
+      "cache": true,
+      "inputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
+      "outputs": ["{projectRoot}/pkg/daemon/static/daytona-computer-use"],
       "dependsOn": [
         {
           "target": "build-amd64",
@@ -36,7 +42,8 @@
         "outputPath": "dist/apps/runner",
         "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
-      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"],
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
     },
     "build-amd64": {
       "executor": "@nx-go/nx-go:build",
@@ -49,7 +56,8 @@
         },
         "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
-      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"]
+      "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"],
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -84,6 +92,13 @@
     },
     "openapi": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/pkg/api/**/*.go", "!{projectRoot}/pkg/api/**/*_test.go"],
+      "outputs": [
+        "{projectRoot}/pkg/api/docs/swagger.json",
+        "{projectRoot}/pkg/api/docs/swagger.yaml",
+        "{projectRoot}/pkg/api/docs/docs.go"
+      ],
       "options": {
         "cwd": "{projectRoot}/pkg/api",
         "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"

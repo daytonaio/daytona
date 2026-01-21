@@ -15,6 +15,7 @@
         "production": {}
       },
       "dependsOn": ["build-amd64"],
+      "inputs": ["goProduction", "^goProduction"],
       "outputs": ["{workspaceRoot}/dist/libs/computer-use"],
       "cache": true
     },
@@ -28,6 +29,14 @@
           "command": "if [ -n \"$SKIP_COMPUTER_USE_BUILD\" ]; then echo 'Skipping computer-use build'; else ./hack/computer-use/build-computer-use-amd64.sh; fi"
         }
       },
+      "inputs": [
+        "{projectRoot}/**/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{workspaceRoot}/hack/computer-use/build-computer-use-amd64.sh",
+        "{workspaceRoot}/hack/computer-use/Dockerfile",
+        "sharedGlobals"
+      ],
       "outputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
       "cache": true
     },

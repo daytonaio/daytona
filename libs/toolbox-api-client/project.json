@@ -19,6 +19,9 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/toolbox-api-client/src"
@@ -43,7 +46,10 @@
       "options": {
         "cwd": "{projectRoot}",
         "command": "if [ -n \"$NPM_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${NPM_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; npm version \"$VER\" --allow-same-version && echo \"Changed version to $VER\"; else echo \"Using version from package.json\"; fi"
-      }
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/package.json", { "env": "NPM_PKG_VERSION" }, { "env": "DEFAULT_PACKAGE_VERSION" }],
+      "outputs": ["{projectRoot}/package.json"]
     },
     "publish": {
       "executor": "nx:run-commands",

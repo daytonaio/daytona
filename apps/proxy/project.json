@@ -15,7 +15,8 @@
         "production": {
           "flags": ["-ldflags \"-X 'github.com/daytonaio/proxy/internal.Version=$VERSION'\""]
         }
-      }
+      },
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",

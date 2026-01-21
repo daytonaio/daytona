@@ -11,6 +11,7 @@
         "cwd": ".",
         "main": "{projectRoot}/tools/xterm.go"
       },
+      "cache": true,
       "inputs": ["{projectRoot}/tools/xterm.go"],
       "outputs": ["{projectRoot}/pkg/terminal/static/*"],
       "configurations": {
@@ -40,9 +41,10 @@
           "GOOS": "linux",
           "CGO_ENABLED": "0"
         },
-        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=$VERSION'\""]
       },
-      "dependsOn": ["prepare"]
+      "dependsOn": ["prepare"],
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -69,6 +71,13 @@
     },
     "openapi": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/pkg/toolbox/**/*.go", "!{projectRoot}/pkg/toolbox/**/*_test.go"],
+      "outputs": [
+        "{projectRoot}/pkg/toolbox/docs/swagger.json",
+        "{projectRoot}/pkg/toolbox/docs/swagger.yaml",
+        "{projectRoot}/pkg/toolbox/docs/docs.go"
+      ],
       "options": {
         "cwd": "{projectRoot}/pkg/toolbox",
         "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g toolbox.go"

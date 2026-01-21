@@ -6,6 +6,13 @@
   "targets": {
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/apps/api/openapi.json",
+        "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
+        "{workspaceRoot}/hack/python-client/postprocess.sh"
+      ],
+      "outputs": ["{projectRoot}/daytona_api_client_async"],
       "options": {
         "commands": [
           "rm -rf {projectRoot}/daytona_api_client_async",
@@ -21,17 +28,10 @@
         }
       ]
     },
+    "deps-check": {},
+    "build-py-lib": {},
     "build": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": [
-          "rm -rf dist",
-          "if [ -n \"$PYPI_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${PYPI_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/^VERSION = \\\".*\\\"$/VERSION = \\\"$VER\\\"/\" setup.py && poetry version \"$VER\"; fi && poetry build"
-        ],
-        "parallel": false,
-        "dependsOn": ["deps-check"]
-      }
+      "dependsOn": ["build-py-lib"]
     },
     "publish": {
       "executor": "nx:run-commands",
@@ -43,13 +43,6 @@
           "for i in $(seq 1 20); do if pip download daytona_api_client_async==${PYPI_PKG_VERSION} -q -d /tmp; then echo \"daytona_api_client_async==${PYPI_PKG_VERSION} is now downloadable from PyPI\" && sleep 5 && exit 0; else printf '.\n' && sleep 5; fi; done; echo \"Timeout waiting for daytona_api_client_async==${PYPI_PKG_VERSION} on PyPI\" >&2; exit 1"
         ],
         "parallel": false
-      }
-    },
-    "deps-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["poetry run deptry .", "poetry lock --regenerate"]
       }
     }
   },

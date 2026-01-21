@@ -27,6 +27,10 @@ module.exports = composePlugins(
       const rel = path.relative(process.cwd(), info.absoluteResourcePath)
       return `webpack:///./${rel}`
     }
+    // Preserve openapi files while cleaning other build artifacts
+    config.output.clean = {
+      keep: /openapi.*\.json$/,
+    }
     // add typeorm migrations as entry points
     for (const key in migrationEntries) {
       config.entry[`migrations/${key}`] = migrationEntries[key]

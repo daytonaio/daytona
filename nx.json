@@ -2,6 +2,22 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
+    "pythonLib": [
+      "default",
+      "!{projectRoot}/dist/**",
+      "!{projectRoot}/*.egg-info/**",
+      "!{projectRoot}/build/**",
+      { "env": "PYPI_PKG_VERSION" },
+      { "env": "DEFAULT_PACKAGE_VERSION" }
+    ],
+    "pythonDepsCheck": [
+      "{projectRoot}/pyproject.toml",
+      "{projectRoot}/**/*.py",
+      "!{projectRoot}/.venv/**",
+      "!{projectRoot}/dist/**",
+      "!{projectRoot}/*.egg-info/**",
+      "!{projectRoot}/build/**"
+    ],
     "production": [
       "default",
       "!{projectRoot}/.eslintrc.json",
@@ -11,6 +27,13 @@
       "!{projectRoot}/jest.config.[jt]s",
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
+    ],
+    "goProduction": [
+      "{projectRoot}/**/*.go",
+      "{projectRoot}/go.mod",
+      "{projectRoot}/go.sum",
+      "!{projectRoot}/**/*_test.go",
+      "sharedGlobals"
     ],
     "sharedGlobals": [
       "{workspaceRoot}/.github/workflows/ci.yml",
@@ -100,6 +123,19 @@
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
     },
+    "@nx-go/nx-go:build": {
+      "cache": true,
+      "inputs": ["goProduction", "^goProduction"],
+      "outputs": ["{options.outputPath}"]
+    },
+    "@nx-go/nx-go:test": {
+      "cache": true,
+      "inputs": ["default", "^goProduction"]
+    },
+    "@nx-go/nx-go:lint": {
+      "cache": true,
+      "inputs": ["default", "^goProduction"]
+    },
     "check-version-env": {
       "executor": "nx:run-commands",
       "options": {
@@ -144,6 +180,32 @@
           "docker manifest push daytonaio/daytona-{projectName}:latest"
         ]
       }
+    },
+    "deps-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["poetry run deptry .", "poetry lock --regenerate"],
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": ["pythonDepsCheck"],
+      "outputs": ["{projectRoot}/poetry.lock"]
+    },
+    "build-py-lib": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "rm -rf dist",
+          "if [ -n \"$PYPI_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${PYPI_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/^VERSION = \\\".*\\\"$/VERSION = \\\"$VER\\\"/\" setup.py && poetry version \"$VER\"; fi && poetry build"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["deps-check"],
+      "cache": true,
+      "inputs": ["pythonLib"],
+      "outputs": ["{projectRoot}/dist/**"]
     }
   },
   "release": {
