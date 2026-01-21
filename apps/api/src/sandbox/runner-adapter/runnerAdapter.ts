@@ -100,7 +100,7 @@ export interface RunnerAdapter {
     live?: boolean,
   ): Promise<void>
 
-  forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void>
+  forkSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void>
 }
 
 @Injectable()

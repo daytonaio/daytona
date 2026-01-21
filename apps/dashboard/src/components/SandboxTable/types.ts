@@ -40,6 +40,7 @@ export interface SandboxTableProps {
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleScreenRecordings: (id: string) => void
+  handleFork: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
@@ -61,6 +62,7 @@ export interface SandboxTableActionsProps {
   writePermitted: boolean
   deletePermitted: boolean
   isLoading: boolean
+  runnerClass?: RunnerClass
   onStart: (id: string) => void
   onStop: (id: string) => void
   onDelete: (id: string) => void
@@ -71,6 +73,7 @@ export interface SandboxTableActionsProps {
   onRevokeSshAccess: (id: string) => void
   onCreateSnapshot: (id: string) => void
   onScreenRecordings: (id: string) => void
+  onFork: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

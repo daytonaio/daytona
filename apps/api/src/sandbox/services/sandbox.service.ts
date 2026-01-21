@@ -824,9 +824,11 @@ export class SandboxService {
 
     const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    // Validate source sandbox state - must be STARTED for live forking
-    if (sourceSandbox.state !== SandboxState.STARTED) {
-      throw new BadRequestException(`Sandbox must be in STARTED state to fork. Current state: ${sourceSandbox.state}`)
+    // Validate source sandbox state - must be STARTED or STOPPED for forking
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sourceSandbox.state)) {
+      throw new BadRequestException(
+        `Sandbox must be in STARTED or STOPPED state to fork. Current state: ${sourceSandbox.state}`,
+      )
     }
 
     // Validate the snapshot's runner class is LINUX_EXPERIMENTAL
@@ -847,6 +849,11 @@ export class SandboxService {
       )
     }
 
+    // Validate parent disk chain is intact (for sandboxes that are themselves forks)
+    // Forked sandboxes use qcow2 overlay disks that reference the parent's disk as a backing file.
+    // If any ancestor in the chain has been destroyed, the overlay disk becomes unusable.
+    await this.validateParentDiskChain(sourceSandbox)
+
     // Check for existing active fork jobs for this sandbox
     const existingJob = await this.jobRepository.findOne({
       where: {
@@ -859,6 +866,11 @@ export class SandboxService {
 
     if (existingJob) {
       throw new ConflictException('Fork operation is already in progress for this sandbox')
+    }
+
+    // Check if source sandbox is already in a backup/snapshot operation
+    if (sourceSandbox.backupState === BackupState.IN_PROGRESS || sourceSandbox.backupState === BackupState.PENDING) {
+      throw new ConflictException('Source sandbox has a backup or snapshot operation in progress')
     }
 
     this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -912,6 +924,15 @@ export class SandboxService {
       forkedSandbox.runnerId = sourceSandbox.runnerId
       forkedSandbox.pending = true
 
+      // Set initial state to CREATING to prevent syncInstanceState from creating a CREATE_SANDBOX job
+      // The FORK_SANDBOX job will handle the actual creation
+      forkedSandbox.state = SandboxState.CREATING
+
+      // Set backupState to IN_PROGRESS on the source sandbox BEFORE creating the fork job
+      // This ensures the dashboard shows "Snapshotting" status immediately
+      sourceSandbox.backupState = BackupState.IN_PROGRESS
+      await this.sandboxRepository.save(sourceSandbox)
+
       await this.sandboxRepository.insert(forkedSandbox)
 
       // Get runner adapter and create the fork job
@@ -921,7 +942,7 @@ export class SandboxService {
       }
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-      await runnerAdapter.forkSandbox(sourceSandbox.id, forkedSandbox.id)
+      await runnerAdapter.forkSandbox(sourceSandbox.id, forkedSandbox.id, sourceSandbox.state)
 
       // Note: We intentionally do NOT emit SandboxCreatedEvent here because:
       // 1. We've already created the FORK_SANDBOX job via runnerAdapter.forkSandbox()
@@ -934,6 +955,16 @@ export class SandboxService {
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(`Sandbox with name ${name} already exists`)
+      }
+
+      // Reset source sandbox's backupState on error
+      if (sourceSandbox.backupState === BackupState.IN_PROGRESS) {
+        try {
+          sourceSandbox.backupState = BackupState.NONE
+          await this.sandboxRepository.save(sourceSandbox)
+        } catch (resetError) {
+          this.logger.error(`Failed to reset backupState on source sandbox ${sourceSandbox.id}:`, resetError)
+        }
       }
 
       await this.rollbackPendingUsage(
@@ -1299,6 +1330,11 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
+
+    // Protect sandboxes that have active child sandboxes (forks)
+    // Child sandboxes use qcow2 overlay disks that depend on the parent's disk
+    await this.validateNoActiveChildren(sandbox)
+
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
@@ -1859,6 +1895,82 @@ export class SandboxService {
     }
 
     return { valid: true, sandboxId: sshAccess.sandbox.id }
+  }
+
+  /**
+   * Validates that the parent disk chain is intact for a sandbox.
+   * Forked sandboxes use qcow2 overlay disks that reference their parent's disk as a backing file.
+   * If any ancestor in the chain has been destroyed, the overlay disk becomes unusable.
+   *
+   * @param sandbox - The sandbox to validate
+   * @throws BadRequestException if any ancestor in the chain has been destroyed or is missing
+   */
+  private async validateParentDiskChain(sandbox: Sandbox): Promise<void> {
+    let currentSandbox = sandbox
+    const visitedIds = new Set<string>()
+
+    while (currentSandbox.parentSandboxId) {
+      // Prevent infinite loops in case of circular references
+      if (visitedIds.has(currentSandbox.parentSandboxId)) {
+        this.logger.warn(`Circular parent reference detected for sandbox ${sandbox.id}`)
+        break
+      }
+      visitedIds.add(currentSandbox.parentSandboxId)
+
+      const parentSandbox = await this.sandboxRepository.findOne({
+        where: { id: currentSandbox.parentSandboxId },
+      })
+
+      if (!parentSandbox) {
+        throw new BadRequestException(
+          `Cannot fork sandbox: parent sandbox ${currentSandbox.parentSandboxId} no longer exists. ` +
+            `The disk chain is broken and this sandbox cannot be forked.`,
+        )
+      }
+
+      if (parentSandbox.state === SandboxState.DESTROYED) {
+        throw new BadRequestException(
+          `Cannot fork sandbox: parent sandbox ${parentSandbox.id} has been destroyed. ` +
+            `The disk chain is broken and this sandbox cannot be forked.`,
+        )
+      }
+
+      currentSandbox = parentSandbox
+    }
+  }
+
+  /**
+   * Validates that a sandbox has no active child sandboxes (forks).
+   * Child sandboxes use qcow2 overlay disks that depend on the parent's disk.
+   * Destroying a parent would break all child sandboxes.
+   *
+   * @param sandbox - The sandbox to validate
+   * @throws BadRequestException if there are active child sandboxes
+   */
+  private async validateNoActiveChildren(sandbox: Sandbox): Promise<void> {
+    // Find all child sandboxes (sandboxes that have this sandbox as their parent)
+    // that are not in DESTROYED state
+    const activeChildren = await this.sandboxRepository.find({
+      where: {
+        parentSandboxId: sandbox.id,
+        state: Not(SandboxState.DESTROYED),
+      },
+      select: ['id', 'name', 'state'],
+    })
+
+    if (activeChildren.length > 0) {
+      const childInfo = activeChildren
+        .slice(0, 5) // Show at most 5 children in the error message
+        .map((c) => `${c.name || c.id} (${c.state})`)
+        .join(', ')
+
+      const moreText = activeChildren.length > 5 ? ` and ${activeChildren.length - 5} more` : ''
+
+      throw new BadRequestException(
+        `Cannot destroy sandbox: it has ${activeChildren.length} active child sandbox(es) that depend on it: ${childInfo}${moreText}. ` +
+          `Please destroy all child sandboxes first.`,
+      )
+    }
   }
 
   async updateSandboxBackupState(

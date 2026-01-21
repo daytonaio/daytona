@@ -82,6 +82,9 @@ export class JobStateHandlerService {
       case JobType.CREATE_SANDBOX_SNAPSHOT:
         await this.handleCreateSandboxSnapshotJobCompletion(job)
         break
+      case JobType.FORK_SANDBOX:
+        await this.handleForkSandboxJobCompletion(job)
+        break
       default:
         break
     }
@@ -486,6 +489,64 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling CREATE_SANDBOX_SNAPSHOT job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleForkSandboxJobCompletion(job: Job): Promise<void> {
+    const forkedSandboxId = job.resourceId
+    if (!forkedSandboxId) return
+
+    try {
+      // Parse job payload to get source sandbox ID
+      const payload = job.payload ? JSON.parse(job.payload) : {}
+      const sourceSandboxId = payload.sourceSandboxId
+
+      // Get the source sandbox to clear its backupState (do this first so we always clear it)
+      let sourceSandbox: Sandbox | null = null
+      if (sourceSandboxId) {
+        sourceSandbox = await this.sandboxRepository.findOne({ where: { id: sourceSandboxId } })
+      }
+
+      // Always clear source sandbox's backupState when fork job completes (success or failure)
+      if (sourceSandbox && sourceSandbox.backupState === BackupState.IN_PROGRESS) {
+        sourceSandbox.backupState = BackupState.NONE
+        await this.sandboxRepository.save(sourceSandbox)
+        this.logger.debug(`Cleared backupState on source sandbox ${sourceSandboxId} after fork job completed`)
+      }
+
+      // Get the forked sandbox
+      const forkedSandbox = await this.sandboxRepository.findOne({ where: { id: forkedSandboxId } })
+      if (!forkedSandbox) {
+        this.logger.warn(`Forked sandbox ${forkedSandboxId} not found for FORK_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (forkedSandbox.desiredState !== SandboxDesiredState.STARTED) {
+        this.logger.error(
+          `Forked sandbox ${forkedSandboxId} is not in desired state STARTED for FORK_SANDBOX job ${job.id}. Desired state: ${forkedSandbox.desiredState}`,
+        )
+        return
+      }
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(
+          `FORK_SANDBOX job ${job.id} completed successfully, marking forked sandbox ${forkedSandboxId} as STARTED`,
+        )
+        forkedSandbox.state = SandboxState.STARTED
+        forkedSandbox.errorReason = null
+        const metadata = job.getResultMetadata()
+        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+          forkedSandbox.daemonVersion = metadata.daemonVersion
+        }
+        await this.sandboxRepository.save(forkedSandbox)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`FORK_SANDBOX job ${job.id} failed for sandbox ${forkedSandboxId}: ${job.errorMessage}`)
+        forkedSandbox.state = SandboxState.ERROR
+        forkedSandbox.errorReason = job.errorMessage || 'Failed to fork sandbox'
+        await this.sandboxRepository.save(forkedSandbox)
+      }
+    } catch (error) {
+      this.logger.error(`Error handling FORK_SANDBOX job completion for sandbox ${forkedSandboxId}:`, error)
     }
   }
 }

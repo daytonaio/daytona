@@ -41,15 +41,17 @@ type ForkOptions struct {
 	SourceSandboxId string // Source VM to fork from
 	NewSandboxId    string // ID for the new forked VM
 	Prefault        bool   // Prefault memory pages for faster access
+	SourceStopped   bool   // If true, source VM is stopped - only fork filesystem
 }
 
-// ForkVM creates a new VM as a CoW copy of an existing running/paused VM
+// ForkVM creates a new VM as a CoW copy of an existing VM
 // This is optimized for fast forking:
 // - Disk uses qcow2 overlay (instant, no copy)
-// - Memory state is captured via vm.snapshot and restored
+// - For running/paused VMs: Memory state is captured via vm.snapshot and restored
+// - For stopped VMs: Only filesystem is forked, VM starts fresh
 // - Network namespace provides isolation with same internal IP
 //
-// The fork process:
+// The fork process for running/paused VMs:
 // 1. Pause source VM (if running)
 // 2. Create temporary snapshot via vm.snapshot API (memory + device state)
 // 3. Create qcow2 overlay disk pointing to source VM's disk as backing file
@@ -59,6 +61,11 @@ type ForkOptions struct {
 // 7. Resume source VM
 // 8. Resume child VM
 // 9. Cleanup temporary snapshot (memory state only)
+//
+// The fork process for stopped VMs (filesystem-only):
+// 1. Create qcow2 overlay disk pointing to source VM's disk as backing file
+// 2. Create new network namespace for child
+// 3. Start new cloud-hypervisor process with overlay disk (fresh boot)
 func (c *Client) ForkVM(ctx context.Context, opts ForkOptions) (*SandboxInfo, error) {
 	sourceMutex := c.getSandboxMutex(opts.SourceSandboxId)
 	sourceMutex.Lock()
@@ -68,7 +75,19 @@ func (c *Client) ForkVM(ctx context.Context, opts ForkOptions) (*SandboxInfo, er
 	newMutex.Lock()
 	defer newMutex.Unlock()
 
-	log.Infof("Forking sandbox %s to %s", opts.SourceSandboxId, opts.NewSandboxId)
+	log.Infof("Forking sandbox %s to %s (source stopped: %v)", opts.SourceSandboxId, opts.NewSandboxId, opts.SourceStopped)
+
+	// Check if target sandbox already exists
+	targetSocketPath := c.getSocketPath(opts.NewSandboxId)
+	exists, _ := c.fileExists(ctx, targetSocketPath)
+	if exists {
+		return nil, fmt.Errorf("target sandbox %s already exists", opts.NewSandboxId)
+	}
+
+	// For stopped VMs, use filesystem-only fork
+	if opts.SourceStopped {
+		return c.forkStoppedVM(ctx, opts)
+	}
 
 	// Check if source VM exists and get its state
 	sourceInfo, err := c.GetInfo(ctx, opts.SourceSandboxId)
@@ -76,16 +95,9 @@ func (c *Client) ForkVM(ctx context.Context, opts ForkOptions) (*SandboxInfo, er
 		return nil, fmt.Errorf("failed to get source VM info: %w", err)
 	}
 
-	// VM must be running or paused to fork
+	// VM must be running or paused to fork (for live fork)
 	if sourceInfo.State != VmStateRunning && sourceInfo.State != VmStatePaused {
 		return nil, fmt.Errorf("source VM must be running or paused to fork (current state: %s)", sourceInfo.State)
-	}
-
-	// Check if target sandbox already exists
-	targetSocketPath := c.getSocketPath(opts.NewSandboxId)
-	exists, _ := c.fileExists(ctx, targetSocketPath)
-	if exists {
-		return nil, fmt.Errorf("target sandbox %s already exists", opts.NewSandboxId)
 	}
 
 	// Track if we paused the source VM (so we can resume it on cleanup)
@@ -307,6 +319,137 @@ func (c *Client) cleanupFork(ctx context.Context, sandboxId, snapshotPath string
 	if snapshotPath != "" {
 		_ = c.runCommand(ctx, "rm", "-rf", snapshotPath)
 	}
+}
+
+// forkStoppedVM creates a filesystem-only fork from a stopped VM
+// This creates a qcow2 overlay disk and starts a fresh VM with it
+func (c *Client) forkStoppedVM(ctx context.Context, opts ForkOptions) (*SandboxInfo, error) {
+	log.Infof("Creating filesystem-only fork from stopped VM %s to %s", opts.SourceSandboxId, opts.NewSandboxId)
+
+	// Verify the source sandbox directory and disk exist
+	sourceDiskPath := c.getDiskPath(opts.SourceSandboxId)
+	exists, err := c.fileExists(ctx, sourceDiskPath)
+	if err != nil || !exists {
+		return nil, fmt.Errorf("source sandbox disk not found at %s", sourceDiskPath)
+	}
+
+	// Step 1: Read source sandbox's config.json to get VM configuration
+	sourceConfigPath := c.getConfigPath(opts.SourceSandboxId)
+	configBytes, err := c.runShellScript(ctx, fmt.Sprintf("cat %s 2>/dev/null", sourceConfigPath))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read source sandbox config: %w", err)
+	}
+
+	var sourceConfig VmConfig
+	if err := json.Unmarshal([]byte(configBytes), &sourceConfig); err != nil {
+		return nil, fmt.Errorf("failed to parse source sandbox config: %w", err)
+	}
+
+	// Step 2: Create qcow2 overlay disk (instant CoW, no full copy)
+	targetSandboxDir := c.getSandboxDir(opts.NewSandboxId)
+	targetDiskPath := c.getDiskPath(opts.NewSandboxId)
+
+	log.Infof("Creating CoW overlay disk for stopped VM fork")
+
+	createDiskCmd := fmt.Sprintf(
+		`mkdir -p "%s" && qemu-img create -f qcow2 -F qcow2 -b "%s" "%s"`,
+		targetSandboxDir, sourceDiskPath, targetDiskPath)
+
+	if output, err := c.runShellScript(ctx, createDiskCmd); err != nil {
+		_ = c.runCommand(ctx, "rm", "-rf", targetSandboxDir)
+		return nil, fmt.Errorf("failed to create overlay disk: %w (output: %s)", err, output)
+	}
+
+	// Step 3: Create network namespace for the forked VM
+	netns, err := c.netnsPool.Create(ctx, opts.NewSandboxId)
+	if err != nil {
+		_ = c.runCommand(ctx, "rm", "-rf", targetSandboxDir)
+		return nil, fmt.Errorf("failed to create network namespace: %w", err)
+	}
+	log.Infof("Created network namespace %s for stopped VM fork", netns.NamespaceName)
+
+	// Store guest IP for proxy routing
+	ipFilePath := filepath.Join(targetSandboxDir, "ip")
+	_ = c.runCommand(ctx, "sh", "-c", fmt.Sprintf("echo '%s' > %s", netns.GuestIP, ipFilePath))
+	GetIPCache().Set(opts.NewSandboxId, netns.GuestIP)
+
+	// Step 4: Create cloud-init ISO with new network configuration
+	hostname := opts.NewSandboxId
+	if len(hostname) > 12 {
+		hostname = hostname[:12]
+	}
+	cloudInitISO, err := c.createCloudInitISO(ctx, opts.NewSandboxId, CloudInitConfig{
+		IP:       netns.GuestIP,
+		Gateway:  netns.GatewayIP,
+		Netmask:  GuestNetmask,
+		Hostname: hostname,
+	})
+	if err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to create cloud-init ISO: %w", err)
+	}
+
+	// Step 5: Patch the config for the new sandbox
+	// Update disk paths to use the overlay disk
+	if len(sourceConfig.Disks) > 0 {
+		sourceConfig.Disks[0].Path = targetDiskPath
+	}
+	// Update cloud-init ISO (second disk)
+	if len(sourceConfig.Disks) > 1 {
+		sourceConfig.Disks[1].Path = cloudInitISO
+	} else {
+		sourceConfig.Disks = append(sourceConfig.Disks, DiskConfig{Path: cloudInitISO, Readonly: true})
+	}
+
+	// Update network config to use the new TAP in the namespace
+	newMac := c.generateMAC(opts.NewSandboxId)
+	if len(sourceConfig.Net) > 0 {
+		sourceConfig.Net[0].Tap = netns.TapName
+		sourceConfig.Net[0].Mac = newMac
+	}
+
+	// Write the config for the new sandbox
+	targetConfigPath := c.getConfigPath(opts.NewSandboxId)
+	configJSON, err := json.MarshalIndent(sourceConfig, "", "  ")
+	if err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to marshal VM config: %w", err)
+	}
+	if err := c.writeFile(ctx, targetConfigPath, configJSON); err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to write VM config: %w", err)
+	}
+
+	// Step 6: Start Cloud Hypervisor process in the network namespace
+	if err := c.startVMProcessInNamespaceAndWait(ctx, opts.NewSandboxId, netns, 30*time.Second); err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to start cloud-hypervisor: %w", err)
+	}
+
+	// Step 7: Create the VM using the API
+	if _, err := c.apiRequest(ctx, opts.NewSandboxId, http.MethodPut, "vm.create", sourceConfig); err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to create VM: %w", err)
+	}
+
+	// Step 8: Boot the VM
+	if _, err := c.apiRequest(ctx, opts.NewSandboxId, http.MethodPut, "vm.boot", nil); err != nil {
+		c.cleanupFork(ctx, opts.NewSandboxId, "")
+		return nil, fmt.Errorf("failed to boot VM: %w", err)
+	}
+
+	// Step 9: Wait for daemon to be reachable
+	if err := c.waitForDaemon(ctx, opts.NewSandboxId, netns.ExternalIP, 30*time.Second); err != nil {
+		log.Warnf("Daemon health check failed for %s: %v (continuing anyway)", opts.NewSandboxId, err)
+	}
+
+	log.Infof("Stopped VM fork completed: %s -> %s", opts.SourceSandboxId, opts.NewSandboxId)
+
+	// Store parent ID for tracking
+	parentFilePath := filepath.Join(targetSandboxDir, "parent")
+	_ = c.runCommand(ctx, "sh", "-c", fmt.Sprintf("echo '%s' > %s", opts.SourceSandboxId, parentFilePath))
+
+	return c.GetSandboxInfo(ctx, opts.NewSandboxId)
 }
 
 // GetParentSandboxId returns the parent sandbox ID for a forked VM

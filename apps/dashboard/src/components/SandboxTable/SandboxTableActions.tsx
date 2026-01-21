@@ -21,6 +21,7 @@ export function SandboxTableActions({
   writePermitted,
   deletePermitted,
   isLoading,
+  runnerClass,
   onStart,
   onStop,
   onDelete,
@@ -31,6 +32,7 @@ export function SandboxTableActions({
   onRevokeSshAccess,
   onCreateSnapshot,
   onScreenRecordings,
+  onFork,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -87,6 +89,16 @@ export function SandboxTableActions({
         })
       }
 
+      // Add Fork option (only for STARTED or STOPPED with linux-exp runner class)
+      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+        items.push({
+          key: 'fork',
+          label: 'Fork',
+          onClick: () => onFork(sandbox.id),
+          disabled: isLoading || runnerClass !== 'linux-exp',
+        })
+      }
+
       // Add SSH access options
       items.push({
         key: 'create-ssh',
@@ -123,6 +135,7 @@ export function SandboxTableActions({
     sandbox.state,
     sandbox.id,
     isLoading,
+    runnerClass,
     onStart,
     onStop,
     onDelete,
@@ -132,6 +145,7 @@ export function SandboxTableActions({
     onCreateSshAccess,
     onRevokeSshAccess,
     onCreateSnapshot,
+    onFork,
   ])
 
   if (!writePermitted && !deletePermitted) {

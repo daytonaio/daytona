@@ -1117,7 +1117,7 @@ export class SandboxController {
   @ApiOperation({
     summary: 'Fork a sandbox',
     description:
-      'Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.',
+      'Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.',
     operationId: 'forkSandbox',
   })
   @ApiParam({
@@ -1133,7 +1133,7 @@ export class SandboxController {
   @ApiResponse({
     status: 400,
     description:
-      'Sandbox is not in a valid state for forking (must be STARTED) or runner class is not LINUX_EXPERIMENTAL',
+      'Sandbox is not in a valid state for forking (must be STARTED or STOPPED) or runner class is not LINUX_EXPERIMENTAL',
   })
   @ApiResponse({
     status: 404,
@@ -1141,7 +1141,8 @@ export class SandboxController {
   })
   @ApiResponse({
     status: 409,
-    description: 'Fork operation is already in progress or sandbox name already exists',
+    description:
+      'Fork operation is already in progress, source sandbox has a backup/snapshot in progress, or sandbox name already exists',
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)

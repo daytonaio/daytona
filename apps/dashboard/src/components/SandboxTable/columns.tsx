@@ -106,6 +106,7 @@ interface GetColumnsProps {
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleScreenRecordings: (id: string) => void
+  handleFork: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
   runnerClassMap: Record<string, RunnerClass>
 }
@@ -124,6 +125,7 @@ export function getColumns({
   handleRevokeSshAccess,
   handleCreateSnapshot,
   handleScreenRecordings,
+  handleFork,
   getRegionName,
   runnerClassMap,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
@@ -215,8 +217,12 @@ export function getColumns({
         return <SortableHeader column={column} label="State" />
       },
       cell: ({ row }) => {
-        // Show "Snapshotting" when backup state is in progress (used for snapshot creation)
-        if (row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS) {
+        // Show "Snapshotting" when backup state is in progress for experimental runners (linux-exp, windows-exp)
+        // These runners support snapshot/fork operations that set backupState to IN_PROGRESS
+        const runnerClass = row.original.snapshot ? runnerClassMap[row.original.snapshot] : undefined
+        const isExperimentalRunner = runnerClass === 'linux-exp' || runnerClass === 'windows-exp'
+
+        if (isExperimentalRunner && row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS) {
           return (
             <div className="w-full truncate">
               <div className="flex items-center gap-1">
@@ -395,28 +401,33 @@ export function getColumns({
       id: 'actions',
       size: 100,
       enableHiding: false,
-      cell: ({ row }) => (
-        <div className="w-full flex justify-end">
-          <SandboxTableActions
-            sandbox={row.original}
-            writePermitted={writePermitted}
-            deletePermitted={deletePermitted}
-            isLoading={
-              sandboxIsLoading[row.original.id] || row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS
-            }
-            onStart={handleStart}
-            onStop={handleStop}
-            onDelete={handleDelete}
-            onArchive={handleArchive}
-            onVnc={handleVnc}
-            onOpenWebTerminal={handleOpenWebTerminal}
-            onCreateSshAccess={handleCreateSshAccess}
-            onRevokeSshAccess={handleRevokeSshAccess}
-            onCreateSnapshot={handleCreateSnapshot}
-            onScreenRecordings={handleScreenRecordings}
-          />
-        </div>
-      ),
+      cell: ({ row }) => {
+        const runnerClass = row.original.snapshot ? runnerClassMap[row.original.snapshot] : undefined
+        return (
+          <div className="w-full flex justify-end">
+            <SandboxTableActions
+              sandbox={row.original}
+              writePermitted={writePermitted}
+              deletePermitted={deletePermitted}
+              isLoading={
+                sandboxIsLoading[row.original.id] || row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS
+              }
+              runnerClass={runnerClass}
+              onStart={handleStart}
+              onStop={handleStop}
+              onDelete={handleDelete}
+              onArchive={handleArchive}
+              onVnc={handleVnc}
+              onOpenWebTerminal={handleOpenWebTerminal}
+              onCreateSshAccess={handleCreateSshAccess}
+              onRevokeSshAccess={handleRevokeSshAccess}
+              onCreateSnapshot={handleCreateSnapshot}
+              onScreenRecordings={handleScreenRecordings}
+              onFork={handleFork}
+            />
+          </div>
+        )
+      },
     },
   ]
 

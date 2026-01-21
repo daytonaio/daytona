@@ -445,10 +445,11 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   @Transactional()
-  async forkSandbox(sourceSandboxId: string, newSandboxId: string): Promise<void> {
+  async forkSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void> {
     const payload = {
       sourceSandboxId,
       newSandboxId,
+      sourceState: sourceState || 'started',
     }
 
     await this.jobService.createJob(
@@ -461,7 +462,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     )
 
     this.logger.debug(
-      `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} on runner ${this.runner.id}`,
+      `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} (state: ${sourceState}) on runner ${this.runner.id}`,
     )
   }
 }

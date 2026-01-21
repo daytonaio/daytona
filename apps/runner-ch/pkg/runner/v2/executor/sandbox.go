@@ -82,6 +82,7 @@ func (e *Executor) updateNetworkSettings(ctx context.Context, job *apiclient.Job
 type ForkSandboxPayload struct {
 	SourceSandboxId string `json:"sourceSandboxId"`
 	NewSandboxId    string `json:"newSandboxId"`
+	SourceState     string `json:"sourceState"` // "started" or "stopped"
 }
 
 func (e *Executor) forkSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
@@ -94,6 +95,7 @@ func (e *Executor) forkSandbox(ctx context.Context, job *apiclient.Job) (any, er
 	info, err := e.chClient.ForkVM(ctx, cloudhypervisor.ForkOptions{
 		SourceSandboxId: payload.SourceSandboxId,
 		NewSandboxId:    payload.NewSandboxId,
+		SourceStopped:   payload.SourceState == "stopped",
 	})
 	if err != nil {
 		common.ContainerOperationCount.WithLabelValues("fork", string(common.PrometheusOperationStatusFailure)).Inc()

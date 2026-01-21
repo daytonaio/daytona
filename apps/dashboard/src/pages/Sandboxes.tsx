@@ -275,6 +275,11 @@ const Sandboxes: React.FC = () => {
   const [snapshotSandboxId, setSnapshotSandboxId] = useState<string>('')
   const [snapshotLive, setSnapshotLive] = useState<boolean>(false)
 
+  // Fork Sandbox Dialog
+  const [showForkDialog, setShowForkDialog] = useState(false)
+  const [forkSandboxId, setForkSandboxId] = useState<string>('')
+  const [forkName, setForkName] = useState<string>('')
+
   // Snapshot Filter
 
   const [snapshotFilters, setSnapshotFilters] = useState<SnapshotFilters>({})
@@ -814,6 +819,35 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  // Fork Sandbox
+  const openForkDialog = (id: string) => {
+    setForkSandboxId(id)
+    setForkName('')
+    setShowForkDialog(true)
+  }
+
+  const handleFork = async () => {
+    if (!forkName.trim()) {
+      toast.error('Please enter a name for the forked sandbox')
+      return
+    }
+
+    setSandboxIsLoading((prev) => ({ ...prev, [forkSandboxId]: true }))
+    try {
+      await sandboxApi.forkSandbox(forkSandboxId, { name: forkName }, selectedOrganization?.id)
+      setShowForkDialog(false)
+      setForkName('')
+      setForkSandboxId('')
+      toast.success('Fork creation started')
+      // Refetch to get the new forked sandbox
+      await markAllSandboxQueriesAsStale(true)
+    } catch (error) {
+      handleApiError(error, 'Failed to fork sandbox')
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [forkSandboxId]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
 
@@ -881,6 +915,7 @@ const Sandboxes: React.FC = () => {
         handleRevokeSshAccess={openRevokeSshDialog}
         handleCreateSnapshot={openCreateSnapshotDialog}
         handleScreenRecordings={handleScreenRecordings}
+        handleFork={openForkDialog}
         handleRefresh={handleRefresh}
         isRefreshing={sandboxDataIsRefreshing}
         data={sandboxesData?.items || []}
@@ -1101,6 +1136,49 @@ const Sandboxes: React.FC = () => {
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >
               {sandboxIsLoading[snapshotSandboxId] ? 'Creating...' : 'Create Snapshot'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Fork Sandbox Dialog */}
+      <AlertDialog
+        open={showForkDialog}
+        onOpenChange={(isOpen) => {
+          setShowForkDialog(isOpen)
+          if (!isOpen) {
+            setForkName('')
+            setForkSandboxId('')
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Fork Sandbox</AlertDialogTitle>
+            <AlertDialogDescription>
+              Create a clone of this sandbox. The fork will include both the filesystem and memory state.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Fork Name:</Label>
+              <input
+                type="text"
+                value={forkName}
+                onChange={(e) => setForkName(e.target.value)}
+                placeholder="Enter name for the forked sandbox"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleFork}
+              disabled={!forkName.trim() || !forkSandboxId || sandboxIsLoading[forkSandboxId]}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              {sandboxIsLoading[forkSandboxId] ? 'Forking...' : 'Fork Sandbox'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

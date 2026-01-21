@@ -41,6 +41,7 @@ interface UseSandboxTableProps {
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleScreenRecordings: (id: string) => void
+  handleFork: (id: string) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -71,6 +72,7 @@ export function useSandboxTable({
   handleRevokeSshAccess,
   handleCreateSnapshot,
   handleScreenRecordings,
+  handleFork,
   pagination,
   pageCount,
   onPaginationChange,
@@ -126,6 +128,7 @@ export function useSandboxTable({
         handleRevokeSshAccess,
         handleCreateSnapshot,
         handleScreenRecordings,
+        handleFork,
         getRegionName,
         runnerClassMap,
       }),
@@ -143,6 +146,7 @@ export function useSandboxTable({
       handleRevokeSshAccess,
       handleCreateSnapshot,
       handleScreenRecordings,
+      handleFork,
       getRegionName,
       runnerClassMap,
     ],

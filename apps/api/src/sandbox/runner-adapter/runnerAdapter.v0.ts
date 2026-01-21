@@ -386,7 +386,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
   }
 
-  async forkSandbox(_sourceSandboxId: string, _newSandboxId: string): Promise<void> {
+  async forkSandbox(_sourceSandboxId: string, _newSandboxId: string, _sourceState?: string): Promise<void> {
     throw new Error('forkSandbox is not supported for V0 runners')
   }
 }
