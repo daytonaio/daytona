@@ -33,6 +33,9 @@ module DaytonaApiClient
     # When the SSH access was last updated
     attr_accessor :updated_at
 
+    # SSH command to connect to the sandbox
+    attr_accessor :ssh_command
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -41,7 +44,8 @@ module DaytonaApiClient
         :'token' => :'token',
         :'expires_at' => :'expiresAt',
         :'created_at' => :'createdAt',
-        :'updated_at' => :'updatedAt'
+        :'updated_at' => :'updatedAt',
+        :'ssh_command' => :'sshCommand'
       }
     end
 
@@ -63,7 +67,8 @@ module DaytonaApiClient
         :'token' => :'String',
         :'expires_at' => :'Time',
         :'created_at' => :'Time',
-        :'updated_at' => :'Time'
+        :'updated_at' => :'Time',
+        :'ssh_command' => :'String'
       }
     end
 
@@ -124,6 +129,12 @@ module DaytonaApiClient
       else
         self.updated_at = nil
       end
+
+      if attributes.key?(:'ssh_command')
+        self.ssh_command = attributes[:'ssh_command']
+      else
+        self.ssh_command = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -155,6 +166,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "updated_at", updated_at cannot be nil.')
       end
 
+      if @ssh_command.nil?
+        invalid_properties.push('invalid value for "ssh_command", ssh_command cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -168,6 +183,7 @@ module DaytonaApiClient
       return false if @expires_at.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
+      return false if @ssh_command.nil?
       true
     end
 
@@ -231,6 +247,16 @@ module DaytonaApiClient
       @updated_at = updated_at
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] ssh_command Value to be assigned
+    def ssh_command=(ssh_command)
+      if ssh_command.nil?
+        fail ArgumentError, 'ssh_command cannot be nil'
+      end
+
+      @ssh_command = ssh_command
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -241,7 +267,8 @@ module DaytonaApiClient
           token == o.token &&
           expires_at == o.expires_at &&
           created_at == o.created_at &&
-          updated_at == o.updated_at
+          updated_at == o.updated_at &&
+          ssh_command == o.ssh_command
     end
 
     # @see the `==` method
@@ -253,7 +280,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, sandbox_id, token, expires_at, created_at, updated_at].hash
+      [id, sandbox_id, token, expires_at, created_at, updated_at, ssh_command].hash
     end
 
     # Builds the object from hash
@@ -367,5 +394,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

@@ -83,7 +83,7 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/ruby-sdk', locale),
-          label: labels['sidebarconfig.rubySdkReference'],
+          label: t('sidebarconfig.rubySdkReference'),
           attrs: {
             icon: 'package.svg',
           },
@@ -520,7 +520,10 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/codex-sdk-interactive-terminal-sandbox', locale),
+          href: localizePath(
+            '/docs/codex-sdk-interactive-terminal-sandbox',
+            locale
+          ),
           label: t('sidebarconfig.codex'),
           disablePagination: true,
           attrs: {
@@ -630,7 +633,7 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: labels['sidebarconfig.rubySdkReference'],
+      label: t('sidebarconfig.rubySdkReference'),
       homePageHref: localizePath('/docs/ruby-sdk', locale),
       category: NavigationCategory.RUBY_SDK,
       autopopulateFromDir: localizePath('/docs/ruby-sdk', locale),
@@ -638,12 +641,12 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath('/docs/ruby-sdk/daytona', locale),
-          label: labels['sidebarconfig.daytona'],
+          label: t('sidebarconfig.daytona'),
         },
         {
           type: 'link',
           href: localizePath('/docs/ruby-sdk/sandbox', locale),
-          label: labels['sidebarconfig.sandbox'],
+          label: t('sidebarconfig.sandbox'),
         },
       ],
     },

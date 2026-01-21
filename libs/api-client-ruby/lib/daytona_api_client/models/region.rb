@@ -24,11 +24,45 @@ module DaytonaApiClient
     # Organization ID
     attr_accessor :organization_id
 
+    # The type of the region
+    attr_accessor :region_type
+
     # Creation timestamp
     attr_accessor :created_at
 
     # Last update timestamp
     attr_accessor :updated_at
+
+    # Proxy URL for the region
+    attr_accessor :proxy_url
+
+    # SSH Gateway URL for the region
+    attr_accessor :ssh_gateway_url
+
+    # Snapshot Manager URL for the region
+    attr_accessor :snapshot_manager_url
+
+    class EnumAttributeValidator
+      attr_reader :datatype
+      attr_reader :allowable_values
+
+      def initialize(datatype, allowable_values)
+        @allowable_values = allowable_values.map do |value|
+          case datatype.to_s
+          when /Integer/i
+            value.to_i
+          when /Float/i
+            value.to_f
+          else
+            value
+          end
+        end
+      end
+
+      def valid?(value)
+        !value || allowable_values.include?(value)
+      end
+    end
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -36,8 +70,12 @@ module DaytonaApiClient
         :'id' => :'id',
         :'name' => :'name',
         :'organization_id' => :'organizationId',
+        :'region_type' => :'regionType',
         :'created_at' => :'createdAt',
-        :'updated_at' => :'updatedAt'
+        :'updated_at' => :'updatedAt',
+        :'proxy_url' => :'proxyUrl',
+        :'ssh_gateway_url' => :'sshGatewayUrl',
+        :'snapshot_manager_url' => :'snapshotManagerUrl'
       }
     end
 
@@ -57,8 +95,12 @@ module DaytonaApiClient
         :'id' => :'String',
         :'name' => :'String',
         :'organization_id' => :'String',
+        :'region_type' => :'RegionType',
         :'created_at' => :'String',
-        :'updated_at' => :'String'
+        :'updated_at' => :'String',
+        :'proxy_url' => :'String',
+        :'ssh_gateway_url' => :'String',
+        :'snapshot_manager_url' => :'String'
       }
     end
 
@@ -66,6 +108,9 @@ module DaytonaApiClient
     def self.openapi_nullable
       Set.new([
         :'organization_id',
+        :'proxy_url',
+        :'ssh_gateway_url',
+        :'snapshot_manager_url'
       ])
     end
 
@@ -101,6 +146,12 @@ module DaytonaApiClient
         self.organization_id = attributes[:'organization_id']
       end
 
+      if attributes.key?(:'region_type')
+        self.region_type = attributes[:'region_type']
+      else
+        self.region_type = nil
+      end
+
       if attributes.key?(:'created_at')
         self.created_at = attributes[:'created_at']
       else
@@ -111,6 +162,18 @@ module DaytonaApiClient
         self.updated_at = attributes[:'updated_at']
       else
         self.updated_at = nil
+      end
+
+      if attributes.key?(:'proxy_url')
+        self.proxy_url = attributes[:'proxy_url']
+      end
+
+      if attributes.key?(:'ssh_gateway_url')
+        self.ssh_gateway_url = attributes[:'ssh_gateway_url']
+      end
+
+      if attributes.key?(:'snapshot_manager_url')
+        self.snapshot_manager_url = attributes[:'snapshot_manager_url']
       end
     end
 
@@ -125,6 +188,10 @@ module DaytonaApiClient
 
       if @name.nil?
         invalid_properties.push('invalid value for "name", name cannot be nil.')
+      end
+
+      if @region_type.nil?
+        invalid_properties.push('invalid value for "region_type", region_type cannot be nil.')
       end
 
       if @created_at.nil?
@@ -144,6 +211,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @id.nil?
       return false if @name.nil?
+      return false if @region_type.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
       true
@@ -167,6 +235,16 @@ module DaytonaApiClient
       end
 
       @name = name
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] region_type Value to be assigned
+    def region_type=(region_type)
+      if region_type.nil?
+        fail ArgumentError, 'region_type cannot be nil'
+      end
+
+      @region_type = region_type
     end
 
     # Custom attribute writer method with validation
@@ -197,8 +275,12 @@ module DaytonaApiClient
           id == o.id &&
           name == o.name &&
           organization_id == o.organization_id &&
+          region_type == o.region_type &&
           created_at == o.created_at &&
-          updated_at == o.updated_at
+          updated_at == o.updated_at &&
+          proxy_url == o.proxy_url &&
+          ssh_gateway_url == o.ssh_gateway_url &&
+          snapshot_manager_url == o.snapshot_manager_url
     end
 
     # @see the `==` method
@@ -210,7 +292,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, organization_id, created_at, updated_at].hash
+      [id, name, organization_id, region_type, created_at, updated_at, proxy_url, ssh_gateway_url, snapshot_manager_url].hash
     end
 
     # Builds the object from hash
@@ -324,5 +406,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

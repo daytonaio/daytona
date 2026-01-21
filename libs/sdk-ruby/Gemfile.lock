@@ -54,6 +54,7 @@ GEM
     crack (1.0.1)
       bigdecimal
       rexml
+    csv (3.3.5)
     diff-lcs (1.6.2)
     dotenv (2.8.1)
     ethon (0.15.0)
@@ -163,6 +164,9 @@ GEM
     yard (0.9.38)
     yard-activesupport-concern (0.0.1)
       yard (>= 0.8)
+    yard-markdown (0.5.0)
+      csv
+      yard
     yard-solargraph (0.1.0)
       yard (~> 0.9)
 
@@ -181,6 +185,7 @@ DEPENDENCIES
   rubocop-rake (~> 0.7)
   solargraph (~> 0.57)
   webmock (~> 3.25)
+  yard-markdown (~> 0.5.0)
 
 BUNDLED WITH
    2.6.9

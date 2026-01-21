@@ -19,37 +19,31 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
-    # List all regions
+    # List all shared regions
     # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Boolean] :include_shared Include shared regions
     # @return [Array<Region>]
-    def list_regions(opts = {})
-      data, _status_code, _headers = list_regions_with_http_info(opts)
+    def list_shared_regions(opts = {})
+      data, _status_code, _headers = list_shared_regions_with_http_info(opts)
       data
     end
 
-    # List all regions
+    # List all shared regions
     # @param [Hash] opts the optional parameters
-    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
-    # @option opts [Boolean] :include_shared Include shared regions
     # @return [Array<(Array<Region>, Integer, Hash)>] Array<Region> data, response status code and response headers
-    def list_regions_with_http_info(opts = {})
+    def list_shared_regions_with_http_info(opts = {})
       if @api_client.config.debugging
-        @api_client.config.logger.debug 'Calling API: RegionsApi.list_regions ...'
+        @api_client.config.logger.debug 'Calling API: RegionsApi.list_shared_regions ...'
       end
       # resource path
-      local_var_path = '/regions'
+      local_var_path = '/shared-regions'
 
       # query parameters
       query_params = opts[:query_params] || {}
-      query_params[:'includeShared'] = opts[:'include_shared'] if !opts[:'include_shared'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
       # HTTP header 'Accept' (if needed)
       header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
-      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -64,7 +58,7 @@ module DaytonaApiClient
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
-        :operation => :"RegionsApi.list_regions",
+        :operation => :"RegionsApi.list_shared_regions",
         :header_params => header_params,
         :query_params => query_params,
         :form_params => form_params,
@@ -75,7 +69,7 @@ module DaytonaApiClient
 
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
-        @api_client.config.logger.debug "API called: RegionsApi#list_regions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+        @api_client.config.logger.debug "API called: RegionsApi#list_shared_regions\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

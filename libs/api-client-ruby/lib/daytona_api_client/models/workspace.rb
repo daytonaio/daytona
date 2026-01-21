@@ -105,6 +105,9 @@ module DaytonaApiClient
     # The version of the daemon running in the sandbox
     attr_accessor :daemon_version
 
+    # The runner ID of the sandbox
+    attr_accessor :runner_id
+
     # The image used for the workspace
     attr_accessor :image
 
@@ -172,6 +175,7 @@ module DaytonaApiClient
         :'updated_at' => :'updatedAt',
         :'_class' => :'class',
         :'daemon_version' => :'daemonVersion',
+        :'runner_id' => :'runnerId',
         :'image' => :'image',
         :'snapshot_state' => :'snapshotState',
         :'snapshot_created_at' => :'snapshotCreatedAt',
@@ -222,6 +226,7 @@ module DaytonaApiClient
         :'updated_at' => :'String',
         :'_class' => :'String',
         :'daemon_version' => :'String',
+        :'runner_id' => :'String',
         :'image' => :'String',
         :'snapshot_state' => :'String',
         :'snapshot_created_at' => :'String',
@@ -401,6 +406,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'daemon_version')
         self.daemon_version = attributes[:'daemon_version']
+      end
+
+      if attributes.key?(:'runner_id')
+        self.runner_id = attributes[:'runner_id']
       end
 
       if attributes.key?(:'image')
@@ -701,6 +710,7 @@ module DaytonaApiClient
           updated_at == o.updated_at &&
           _class == o._class &&
           daemon_version == o.daemon_version &&
+          runner_id == o.runner_id &&
           image == o.image &&
           snapshot_state == o.snapshot_state &&
           snapshot_created_at == o.snapshot_created_at &&
@@ -716,7 +726,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, image, snapshot_state, snapshot_created_at, info].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id, image, snapshot_state, snapshot_created_at, info].hash
     end
 
     # Builds the object from hash
@@ -830,5 +840,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

@@ -22,16 +22,18 @@ module DaytonaApiClient
     # Create runner
     # @param create_runner [CreateRunner] 
     # @param [Hash] opts the optional parameters
-    # @return [nil]
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [CreateRunnerResponse]
     def create_runner(create_runner, opts = {})
-      create_runner_with_http_info(create_runner, opts)
-      nil
+      data, _status_code, _headers = create_runner_with_http_info(create_runner, opts)
+      data
     end
 
     # Create runner
     # @param create_runner [CreateRunner] 
     # @param [Hash] opts the optional parameters
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(CreateRunnerResponse, Integer, Hash)>] CreateRunnerResponse data, response status code and response headers
     def create_runner_with_http_info(create_runner, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: RunnersApi.create_runner ...'
@@ -48,11 +50,14 @@ module DaytonaApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -61,7 +66,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body] || @api_client.object_to_http_body(create_runner)
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'CreateRunnerResponse'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -83,9 +88,71 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Delete runner
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def delete_runner(id, opts = {})
+      delete_runner_with_http_info(id, opts)
+      nil
+    end
+
+    # Delete runner
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def delete_runner_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: RunnersApi.delete_runner ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling RunnersApi.delete_runner"
+      end
+      # resource path
+      local_var_path = '/runners/{id}'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"RunnersApi.delete_runner",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: RunnersApi#delete_runner\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get info for authenticated runner
     # @param [Hash] opts the optional parameters
-    # @return [Runner]
+    # @return [RunnerFull]
     def get_info_for_authenticated_runner(opts = {})
       data, _status_code, _headers = get_info_for_authenticated_runner_with_http_info(opts)
       data
@@ -93,7 +160,7 @@ module DaytonaApiClient
 
     # Get info for authenticated runner
     # @param [Hash] opts the optional parameters
-    # @return [Array<(Runner, Integer, Hash)>] Runner data, response status code and response headers
+    # @return [Array<(RunnerFull, Integer, Hash)>] RunnerFull data, response status code and response headers
     def get_info_for_authenticated_runner_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: RunnersApi.get_info_for_authenticated_runner ...'
@@ -116,7 +183,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'Runner'
+      return_type = opts[:debug_return_type] || 'RunnerFull'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -138,10 +205,74 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get runner by ID
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Runner]
+    def get_runner_by_id(id, opts = {})
+      data, _status_code, _headers = get_runner_by_id_with_http_info(id, opts)
+      data
+    end
+
+    # Get runner by ID
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Runner, Integer, Hash)>] Runner data, response status code and response headers
+    def get_runner_by_id_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: RunnersApi.get_runner_by_id ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling RunnersApi.get_runner_by_id"
+      end
+      # resource path
+      local_var_path = '/runners/{id}'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Runner'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"RunnersApi.get_runner_by_id",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: RunnersApi#get_runner_by_id\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get runner by sandbox ID
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
-    # @return [Runner]
+    # @return [RunnerFull]
     def get_runner_by_sandbox_id(sandbox_id, opts = {})
       data, _status_code, _headers = get_runner_by_sandbox_id_with_http_info(sandbox_id, opts)
       data
@@ -150,7 +281,7 @@ module DaytonaApiClient
     # Get runner by sandbox ID
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
-    # @return [Array<(Runner, Integer, Hash)>] Runner data, response status code and response headers
+    # @return [Array<(RunnerFull, Integer, Hash)>] RunnerFull data, response status code and response headers
     def get_runner_by_sandbox_id_with_http_info(sandbox_id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: RunnersApi.get_runner_by_sandbox_id ...'
@@ -177,7 +308,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type] || 'Runner'
+      return_type = opts[:debug_return_type] || 'RunnerFull'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -195,6 +326,67 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: RunnersApi#get_runner_by_sandbox_id\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get runner by ID
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @return [RunnerFull]
+    def get_runner_full_by_id(id, opts = {})
+      data, _status_code, _headers = get_runner_full_by_id_with_http_info(id, opts)
+      data
+    end
+
+    # Get runner by ID
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(RunnerFull, Integer, Hash)>] RunnerFull data, response status code and response headers
+    def get_runner_full_by_id_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: RunnersApi.get_runner_full_by_id ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling RunnersApi.get_runner_full_by_id"
+      end
+      # resource path
+      local_var_path = '/runners/{id}/full'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'RunnerFull'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"RunnersApi.get_runner_full_by_id",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: RunnersApi#get_runner_full_by_id\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -263,15 +455,17 @@ module DaytonaApiClient
 
     # List all runners
     # @param [Hash] opts the optional parameters
-    # @return [nil]
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<Runner>]
     def list_runners(opts = {})
-      list_runners_with_http_info(opts)
-      nil
+      data, _status_code, _headers = list_runners_with_http_info(opts)
+      data
     end
 
     # List all runners
     # @param [Hash] opts the optional parameters
-    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Array<Runner>, Integer, Hash)>] Array<Runner> data, response status code and response headers
     def list_runners_with_http_info(opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: RunnersApi.list_runners ...'
@@ -284,6 +478,9 @@ module DaytonaApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -292,7 +489,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Array<Runner>'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
@@ -314,19 +511,87 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
-    # Update runner scheduling status
-    # @param id [String] 
+    # Runner healthcheck
+    # Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+    # @param runner_healthcheck [RunnerHealthcheck] 
     # @param [Hash] opts the optional parameters
     # @return [nil]
-    def update_runner_scheduling(id, opts = {})
-      update_runner_scheduling_with_http_info(id, opts)
+    def runner_healthcheck(runner_healthcheck, opts = {})
+      runner_healthcheck_with_http_info(runner_healthcheck, opts)
       nil
     end
 
-    # Update runner scheduling status
-    # @param id [String] 
+    # Runner healthcheck
+    # Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+    # @param runner_healthcheck [RunnerHealthcheck] 
     # @param [Hash] opts the optional parameters
     # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def runner_healthcheck_with_http_info(runner_healthcheck, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: RunnersApi.runner_healthcheck ...'
+      end
+      # verify the required parameter 'runner_healthcheck' is set
+      if @api_client.config.client_side_validation && runner_healthcheck.nil?
+        fail ArgumentError, "Missing the required parameter 'runner_healthcheck' when calling RunnersApi.runner_healthcheck"
+      end
+      # resource path
+      local_var_path = '/runners/healthcheck'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(runner_healthcheck)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"RunnersApi.runner_healthcheck",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: RunnersApi#runner_healthcheck\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Update runner scheduling status
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Runner]
+    def update_runner_scheduling(id, opts = {})
+      data, _status_code, _headers = update_runner_scheduling_with_http_info(id, opts)
+      data
+    end
+
+    # Update runner scheduling status
+    # @param id [String] Runner ID
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Runner, Integer, Hash)>] Runner data, response status code and response headers
     def update_runner_scheduling_with_http_info(id, opts = {})
       if @api_client.config.debugging
         @api_client.config.logger.debug 'Calling API: RunnersApi.update_runner_scheduling ...'
@@ -343,6 +608,9 @@ module DaytonaApiClient
 
       # header parameters
       header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
       # form parameters
       form_params = opts[:form_params] || {}
@@ -351,7 +619,7 @@ module DaytonaApiClient
       post_body = opts[:debug_body]
 
       # return_type
-      return_type = opts[:debug_return_type]
+      return_type = opts[:debug_return_type] || 'Runner'
 
       # auth_names
       auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']

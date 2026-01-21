@@ -11,6 +11,7 @@ gem 'rubocop', '~> 1.21'
 gem 'rubocop-rake', '~> 0.7'
 gem 'solargraph', '~> 0.57'
 gem 'webmock', '~> 3.25'
+gem 'yard-markdown', '~> 0.5.0'
 
 gem 'daytona_api_client', path: '../api-client-ruby'
 gem 'daytona_toolbox_api_client', path: '../toolbox-api-client-ruby'

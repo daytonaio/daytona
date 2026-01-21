@@ -1,7 +1,7 @@
 =begin
-#Daytona Daemon API
+#Daytona Toolbox API
 
-#Daytona Daemon API
+#Daytona Toolbox API
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -67,6 +67,8 @@ module DaytonaToolboxApiClient
         if (value = attributes[:'sessions']).is_a?(Array)
           self.sessions = value
         end
+      else
+        self.sessions = nil
       end
     end
 
@@ -75,6 +77,10 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @sessions.nil?
+        invalid_properties.push('invalid value for "sessions", sessions cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -82,7 +88,18 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @sessions.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] sessions Value to be assigned
+    def sessions=(sessions)
+      if sessions.nil?
+        fail ArgumentError, 'sessions cannot be nil'
+      end
+
+      @sessions = sessions
     end
 
     # Checks equality by comparing each attribute.
@@ -216,5 +233,7 @@ module DaytonaToolboxApiClient
         value
       end
     end
+
   end
+
 end

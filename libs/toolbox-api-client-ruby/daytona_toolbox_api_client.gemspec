@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
 
 =begin
-#Daytona Daemon API
+#Daytona Toolbox API
 
-#Daytona Daemon API
+#Daytona Toolbox API
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -22,11 +22,11 @@ Gem::Specification.new do |s|
   s.authors     = ["daytonaio"]
   s.email       = ["support@daytona.io"]
   s.homepage    = "https://github.com/daytonaio/daytona"
-  s.summary     = "Daytona Daemon API Ruby Gem"
+  s.summary     = "Daytona Toolbox API Ruby Gem"
   s.description = "Daytona Toolbox API Client"
   s.license     = "Unlicense"
   s.required_ruby_version = ">= 2.7"
-  s.metadata = {}
+  s.metadata    = {}
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'
 

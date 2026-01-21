@@ -55,7 +55,7 @@ module DaytonaApiClient
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
@@ -217,6 +217,7 @@ module DaytonaApiClient
     # Get temporary registry access for pushing snapshots
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :region_id ID of the region where the snapshot will be available (defaults to organization default region)
     # @return [RegistryPushAccessDto]
     def get_transient_push_access(opts = {})
       data, _status_code, _headers = get_transient_push_access_with_http_info(opts)
@@ -226,6 +227,7 @@ module DaytonaApiClient
     # Get temporary registry access for pushing snapshots
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [String] :region_id ID of the region where the snapshot will be available (defaults to organization default region)
     # @return [Array<(RegistryPushAccessDto, Integer, Hash)>] RegistryPushAccessDto data, response status code and response headers
     def get_transient_push_access_with_http_info(opts = {})
       if @api_client.config.debugging
@@ -236,6 +238,7 @@ module DaytonaApiClient
 
       # query parameters
       query_params = opts[:query_params] || {}
+      query_params[:'regionId'] = opts[:'region_id'] if !opts[:'region_id'].nil?
 
       # header parameters
       header_params = opts[:header_params] || {}
@@ -436,7 +439,7 @@ module DaytonaApiClient
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 

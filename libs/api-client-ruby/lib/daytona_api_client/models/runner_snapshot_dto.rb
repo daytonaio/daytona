@@ -88,8 +88,6 @@ module DaytonaApiClient
 
       if attributes.key?(:'runner_domain')
         self.runner_domain = attributes[:'runner_domain']
-      else
-        self.runner_domain = nil
       end
     end
 
@@ -106,10 +104,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "runner_id", runner_id cannot be nil.')
       end
 
-      if @runner_domain.nil?
-        invalid_properties.push('invalid value for "runner_domain", runner_domain cannot be nil.')
-      end
-
       invalid_properties
     end
 
@@ -119,7 +113,6 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @runner_snapshot_id.nil?
       return false if @runner_id.nil?
-      return false if @runner_domain.nil?
       true
     end
 
@@ -141,16 +134,6 @@ module DaytonaApiClient
       end
 
       @runner_id = runner_id
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] runner_domain Value to be assigned
-    def runner_domain=(runner_domain)
-      if runner_domain.nil?
-        fail ArgumentError, 'runner_domain cannot be nil'
-      end
-
-      @runner_domain = runner_domain
     end
 
     # Checks equality by comparing each attribute.
@@ -286,5 +269,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

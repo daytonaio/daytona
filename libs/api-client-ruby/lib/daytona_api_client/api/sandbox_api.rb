@@ -183,7 +183,7 @@ module DaytonaApiClient
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
@@ -347,7 +347,82 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Expire signed preview URL for a sandbox port
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param port [Integer] Port number to expire signed preview URL for
+    # @param token [String] Token to expire signed preview URL for
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [nil]
+    def expire_signed_port_preview_url(sandbox_id_or_name, port, token, opts = {})
+      expire_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, token, opts)
+      nil
+    end
+
+    # Expire signed preview URL for a sandbox port
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param port [Integer] Port number to expire signed preview URL for
+    # @param token [String] Token to expire signed preview URL for
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def expire_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, token, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.expire_signed_port_preview_url ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.expire_signed_port_preview_url"
+      end
+      # verify the required parameter 'port' is set
+      if @api_client.config.client_side_validation && port.nil?
+        fail ArgumentError, "Missing the required parameter 'port' when calling SandboxApi.expire_signed_port_preview_url"
+      end
+      # verify the required parameter 'token' is set
+      if @api_client.config.client_side_validation && token.nil?
+        fail ArgumentError, "Missing the required parameter 'token' when calling SandboxApi.expire_signed_port_preview_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url/{token}/expire'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'port' + '}', CGI.escape(port.to_s)).sub('{' + 'token' + '}', CGI.escape(token.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.expire_signed_port_preview_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#expire_signed_port_preview_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get build logs
+    # This endpoint is deprecated. Use `getBuildLogsUrl` instead.
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
@@ -359,6 +434,7 @@ module DaytonaApiClient
     end
 
     # Get build logs
+    # This endpoint is deprecated. Use &#x60;getBuildLogsUrl&#x60; instead.
     # @param sandbox_id_or_name [String] ID or name of the sandbox
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
@@ -408,6 +484,70 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#get_build_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get build logs URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Url]
+    def get_build_logs_url(sandbox_id_or_name, opts = {})
+      data, _status_code, _headers = get_build_logs_url_with_http_info(sandbox_id_or_name, opts)
+      data
+    end
+
+    # Get build logs URL
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Url, Integer, Hash)>] Url data, response status code and response headers
+    def get_build_logs_url_with_http_info(sandbox_id_or_name, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_build_logs_url ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_build_logs_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/build-logs-url'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Url'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_build_logs_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_build_logs_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -609,6 +749,143 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#get_sandboxes_for_runner\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get signed preview URL for a sandbox port
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param port [Integer] Port number to get signed preview URL for
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 60 seconds)
+    # @return [SignedPortPreviewUrl]
+    def get_signed_port_preview_url(sandbox_id_or_name, port, opts = {})
+      data, _status_code, _headers = get_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, opts)
+      data
+    end
+
+    # Get signed preview URL for a sandbox port
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param port [Integer] Port number to get signed preview URL for
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Integer] :expires_in_seconds Expiration time in seconds (default: 60 seconds)
+    # @return [Array<(SignedPortPreviewUrl, Integer, Hash)>] SignedPortPreviewUrl data, response status code and response headers
+    def get_signed_port_preview_url_with_http_info(sandbox_id_or_name, port, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_signed_port_preview_url ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.get_signed_port_preview_url"
+      end
+      # verify the required parameter 'port' is set
+      if @api_client.config.client_side_validation && port.nil?
+        fail ArgumentError, "Missing the required parameter 'port' when calling SandboxApi.get_signed_port_preview_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s)).sub('{' + 'port' + '}', CGI.escape(port.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'expiresInSeconds'] = opts[:'expires_in_seconds'] if !opts[:'expires_in_seconds'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'SignedPortPreviewUrl'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_signed_port_preview_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_signed_port_preview_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get toolbox proxy URL for a sandbox
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [ToolboxProxyUrl]
+    def get_toolbox_proxy_url(sandbox_id, opts = {})
+      data, _status_code, _headers = get_toolbox_proxy_url_with_http_info(sandbox_id, opts)
+      data
+    end
+
+    # Get toolbox proxy URL for a sandbox
+    # @param sandbox_id [String] ID of the sandbox
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(ToolboxProxyUrl, Integer, Hash)>] ToolboxProxyUrl data, response status code and response headers
+    def get_toolbox_proxy_url_with_http_info(sandbox_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_toolbox_proxy_url ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_toolbox_proxy_url"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/toolbox-proxy-url'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'ToolboxProxyUrl'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_toolbox_proxy_url",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_toolbox_proxy_url\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -949,7 +1226,7 @@ module DaytonaApiClient
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 
@@ -1559,7 +1836,7 @@ module DaytonaApiClient
       # HTTP header 'Content-Type'
       content_type = @api_client.select_header_content_type(['application/json'])
       if !content_type.nil?
-        header_params['Content-Type'] = content_type
+          header_params['Content-Type'] = content_type
       end
       header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
 

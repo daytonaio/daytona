@@ -1,7 +1,7 @@
 =begin
-#Daytona Daemon API
+#Daytona Toolbox API
 
-#Daytona Daemon API
+#Daytona Toolbox API
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -65,6 +65,8 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'dir')
         self.dir = attributes[:'dir']
+      else
+        self.dir = nil
       end
     end
 
@@ -73,6 +75,10 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @dir.nil?
+        invalid_properties.push('invalid value for "dir", dir cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -80,7 +86,18 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @dir.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] dir Value to be assigned
+    def dir=(dir)
+      if dir.nil?
+        fail ArgumentError, 'dir cannot be nil'
+      end
+
+      @dir = dir
     end
 
     # Checks equality by comparing each attribute.
@@ -214,5 +231,7 @@ module DaytonaToolboxApiClient
         value
       end
     end
+
   end
+
 end

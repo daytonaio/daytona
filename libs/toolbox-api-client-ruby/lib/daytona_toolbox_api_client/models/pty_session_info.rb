@@ -1,7 +1,7 @@
 =begin
-#Daytona Daemon API
+#Daytona Toolbox API
 
-#Daytona Daemon API
+#Daytona Toolbox API
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -94,36 +94,52 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'active')
         self.active = attributes[:'active']
+      else
+        self.active = nil
       end
 
       if attributes.key?(:'cols')
         self.cols = attributes[:'cols']
+      else
+        self.cols = nil
       end
 
       if attributes.key?(:'created_at')
         self.created_at = attributes[:'created_at']
+      else
+        self.created_at = nil
       end
 
       if attributes.key?(:'cwd')
         self.cwd = attributes[:'cwd']
+      else
+        self.cwd = nil
       end
 
       if attributes.key?(:'envs')
         if (value = attributes[:'envs']).is_a?(Hash)
           self.envs = value
         end
+      else
+        self.envs = nil
       end
 
       if attributes.key?(:'id')
         self.id = attributes[:'id']
+      else
+        self.id = nil
       end
 
       if attributes.key?(:'lazy_start')
         self.lazy_start = attributes[:'lazy_start']
+      else
+        self.lazy_start = nil
       end
 
       if attributes.key?(:'rows')
         self.rows = attributes[:'rows']
+      else
+        self.rows = nil
       end
     end
 
@@ -132,6 +148,38 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @active.nil?
+        invalid_properties.push('invalid value for "active", active cannot be nil.')
+      end
+
+      if @cols.nil?
+        invalid_properties.push('invalid value for "cols", cols cannot be nil.')
+      end
+
+      if @created_at.nil?
+        invalid_properties.push('invalid value for "created_at", created_at cannot be nil.')
+      end
+
+      if @cwd.nil?
+        invalid_properties.push('invalid value for "cwd", cwd cannot be nil.')
+      end
+
+      if @envs.nil?
+        invalid_properties.push('invalid value for "envs", envs cannot be nil.')
+      end
+
+      if @id.nil?
+        invalid_properties.push('invalid value for "id", id cannot be nil.')
+      end
+
+      if @lazy_start.nil?
+        invalid_properties.push('invalid value for "lazy_start", lazy_start cannot be nil.')
+      end
+
+      if @rows.nil?
+        invalid_properties.push('invalid value for "rows", rows cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -139,7 +187,95 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @active.nil?
+      return false if @cols.nil?
+      return false if @created_at.nil?
+      return false if @cwd.nil?
+      return false if @envs.nil?
+      return false if @id.nil?
+      return false if @lazy_start.nil?
+      return false if @rows.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] active Value to be assigned
+    def active=(active)
+      if active.nil?
+        fail ArgumentError, 'active cannot be nil'
+      end
+
+      @active = active
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] cols Value to be assigned
+    def cols=(cols)
+      if cols.nil?
+        fail ArgumentError, 'cols cannot be nil'
+      end
+
+      @cols = cols
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] created_at Value to be assigned
+    def created_at=(created_at)
+      if created_at.nil?
+        fail ArgumentError, 'created_at cannot be nil'
+      end
+
+      @created_at = created_at
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] cwd Value to be assigned
+    def cwd=(cwd)
+      if cwd.nil?
+        fail ArgumentError, 'cwd cannot be nil'
+      end
+
+      @cwd = cwd
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] envs Value to be assigned
+    def envs=(envs)
+      if envs.nil?
+        fail ArgumentError, 'envs cannot be nil'
+      end
+
+      @envs = envs
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] id Value to be assigned
+    def id=(id)
+      if id.nil?
+        fail ArgumentError, 'id cannot be nil'
+      end
+
+      @id = id
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] lazy_start Value to be assigned
+    def lazy_start=(lazy_start)
+      if lazy_start.nil?
+        fail ArgumentError, 'lazy_start cannot be nil'
+      end
+
+      @lazy_start = lazy_start
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] rows Value to be assigned
+    def rows=(rows)
+      if rows.nil?
+        fail ArgumentError, 'rows cannot be nil'
+      end
+
+      @rows = rows
     end
 
     # Checks equality by comparing each attribute.
@@ -280,5 +416,7 @@ module DaytonaToolboxApiClient
         value
       end
     end
+
   end
+
 end

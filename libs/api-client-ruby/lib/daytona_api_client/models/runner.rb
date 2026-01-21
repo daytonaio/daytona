@@ -27,9 +27,6 @@ module DaytonaApiClient
     # The proxy URL of the runner
     attr_accessor :proxy_url
 
-    # The API key for the runner
-    attr_accessor :api_key
-
     # The CPU capacity of the runner
     attr_accessor :cpu
 
@@ -69,11 +66,17 @@ module DaytonaApiClient
     # Current snapshot count
     attr_accessor :current_snapshot_count
 
+    # Current number of started sandboxes
+    attr_accessor :current_started_sandboxes
+
     # Runner availability score
     attr_accessor :availability_score
 
     # The region of the runner
     attr_accessor :region
+
+    # The name of the runner
+    attr_accessor :name
 
     # The state of the runner
     attr_accessor :state
@@ -90,8 +93,14 @@ module DaytonaApiClient
     # The last update timestamp of the runner
     attr_accessor :updated_at
 
-    # The version of the runner
+    # The version of the runner (deprecated in favor of apiVersion)
     attr_accessor :version
+
+    # The api version of the runner
+    attr_accessor :api_version
+
+    # The app version of the runner
+    attr_accessor :app_version
 
     class EnumAttributeValidator
       attr_reader :datatype
@@ -122,7 +131,6 @@ module DaytonaApiClient
         :'domain' => :'domain',
         :'api_url' => :'apiUrl',
         :'proxy_url' => :'proxyUrl',
-        :'api_key' => :'apiKey',
         :'cpu' => :'cpu',
         :'memory' => :'memory',
         :'disk' => :'disk',
@@ -136,14 +144,18 @@ module DaytonaApiClient
         :'current_allocated_memory_gi_b' => :'currentAllocatedMemoryGiB',
         :'current_allocated_disk_gi_b' => :'currentAllocatedDiskGiB',
         :'current_snapshot_count' => :'currentSnapshotCount',
+        :'current_started_sandboxes' => :'currentStartedSandboxes',
         :'availability_score' => :'availabilityScore',
         :'region' => :'region',
+        :'name' => :'name',
         :'state' => :'state',
         :'last_checked' => :'lastChecked',
         :'unschedulable' => :'unschedulable',
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
-        :'version' => :'version'
+        :'version' => :'version',
+        :'api_version' => :'apiVersion',
+        :'app_version' => :'appVersion'
       }
     end
 
@@ -164,7 +176,6 @@ module DaytonaApiClient
         :'domain' => :'String',
         :'api_url' => :'String',
         :'proxy_url' => :'String',
-        :'api_key' => :'String',
         :'cpu' => :'Float',
         :'memory' => :'Float',
         :'disk' => :'Float',
@@ -178,14 +189,18 @@ module DaytonaApiClient
         :'current_allocated_memory_gi_b' => :'Float',
         :'current_allocated_disk_gi_b' => :'Float',
         :'current_snapshot_count' => :'Float',
+        :'current_started_sandboxes' => :'Float',
         :'availability_score' => :'Float',
         :'region' => :'String',
+        :'name' => :'String',
         :'state' => :'RunnerState',
         :'last_checked' => :'String',
         :'unschedulable' => :'Boolean',
         :'created_at' => :'String',
         :'updated_at' => :'String',
-        :'version' => :'String'
+        :'version' => :'String',
+        :'api_version' => :'String',
+        :'app_version' => :'String'
       }
     end
 
@@ -219,26 +234,14 @@ module DaytonaApiClient
 
       if attributes.key?(:'domain')
         self.domain = attributes[:'domain']
-      else
-        self.domain = nil
       end
 
       if attributes.key?(:'api_url')
         self.api_url = attributes[:'api_url']
-      else
-        self.api_url = nil
       end
 
       if attributes.key?(:'proxy_url')
         self.proxy_url = attributes[:'proxy_url']
-      else
-        self.proxy_url = nil
-      end
-
-      if attributes.key?(:'api_key')
-        self.api_key = attributes[:'api_key']
-      else
-        self.api_key = nil
       end
 
       if attributes.key?(:'cpu')
@@ -261,14 +264,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'gpu')
         self.gpu = attributes[:'gpu']
-      else
-        self.gpu = nil
       end
 
       if attributes.key?(:'gpu_type')
         self.gpu_type = attributes[:'gpu_type']
-      else
-        self.gpu_type = nil
       end
 
       if attributes.key?(:'_class')
@@ -305,6 +304,10 @@ module DaytonaApiClient
         self.current_snapshot_count = attributes[:'current_snapshot_count']
       end
 
+      if attributes.key?(:'current_started_sandboxes')
+        self.current_started_sandboxes = attributes[:'current_started_sandboxes']
+      end
+
       if attributes.key?(:'availability_score')
         self.availability_score = attributes[:'availability_score']
       end
@@ -313,6 +316,12 @@ module DaytonaApiClient
         self.region = attributes[:'region']
       else
         self.region = nil
+      end
+
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
+      else
+        self.name = nil
       end
 
       if attributes.key?(:'state')
@@ -348,6 +357,16 @@ module DaytonaApiClient
       else
         self.version = nil
       end
+
+      if attributes.key?(:'api_version')
+        self.api_version = attributes[:'api_version']
+      else
+        self.api_version = nil
+      end
+
+      if attributes.key?(:'app_version')
+        self.app_version = attributes[:'app_version']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -357,22 +376,6 @@ module DaytonaApiClient
       invalid_properties = Array.new
       if @id.nil?
         invalid_properties.push('invalid value for "id", id cannot be nil.')
-      end
-
-      if @domain.nil?
-        invalid_properties.push('invalid value for "domain", domain cannot be nil.')
-      end
-
-      if @api_url.nil?
-        invalid_properties.push('invalid value for "api_url", api_url cannot be nil.')
-      end
-
-      if @proxy_url.nil?
-        invalid_properties.push('invalid value for "proxy_url", proxy_url cannot be nil.')
-      end
-
-      if @api_key.nil?
-        invalid_properties.push('invalid value for "api_key", api_key cannot be nil.')
       end
 
       if @cpu.nil?
@@ -387,20 +390,16 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "disk", disk cannot be nil.')
       end
 
-      if @gpu.nil?
-        invalid_properties.push('invalid value for "gpu", gpu cannot be nil.')
-      end
-
-      if @gpu_type.nil?
-        invalid_properties.push('invalid value for "gpu_type", gpu_type cannot be nil.')
-      end
-
       if @_class.nil?
         invalid_properties.push('invalid value for "_class", _class cannot be nil.')
       end
 
       if @region.nil?
         invalid_properties.push('invalid value for "region", region cannot be nil.')
+      end
+
+      if @name.nil?
+        invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
 
       if @state.nil?
@@ -423,6 +422,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "version", version cannot be nil.')
       end
 
+      if @api_version.nil?
+        invalid_properties.push('invalid value for "api_version", api_version cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -431,22 +434,18 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @id.nil?
-      return false if @domain.nil?
-      return false if @api_url.nil?
-      return false if @proxy_url.nil?
-      return false if @api_key.nil?
       return false if @cpu.nil?
       return false if @memory.nil?
       return false if @disk.nil?
-      return false if @gpu.nil?
-      return false if @gpu_type.nil?
       return false if @_class.nil?
       return false if @region.nil?
+      return false if @name.nil?
       return false if @state.nil?
       return false if @unschedulable.nil?
       return false if @created_at.nil?
       return false if @updated_at.nil?
       return false if @version.nil?
+      return false if @api_version.nil?
       true
     end
 
@@ -458,46 +457,6 @@ module DaytonaApiClient
       end
 
       @id = id
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] domain Value to be assigned
-    def domain=(domain)
-      if domain.nil?
-        fail ArgumentError, 'domain cannot be nil'
-      end
-
-      @domain = domain
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] api_url Value to be assigned
-    def api_url=(api_url)
-      if api_url.nil?
-        fail ArgumentError, 'api_url cannot be nil'
-      end
-
-      @api_url = api_url
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] proxy_url Value to be assigned
-    def proxy_url=(proxy_url)
-      if proxy_url.nil?
-        fail ArgumentError, 'proxy_url cannot be nil'
-      end
-
-      @proxy_url = proxy_url
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] api_key Value to be assigned
-    def api_key=(api_key)
-      if api_key.nil?
-        fail ArgumentError, 'api_key cannot be nil'
-      end
-
-      @api_key = api_key
     end
 
     # Custom attribute writer method with validation
@@ -531,26 +490,6 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] gpu Value to be assigned
-    def gpu=(gpu)
-      if gpu.nil?
-        fail ArgumentError, 'gpu cannot be nil'
-      end
-
-      @gpu = gpu
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] gpu_type Value to be assigned
-    def gpu_type=(gpu_type)
-      if gpu_type.nil?
-        fail ArgumentError, 'gpu_type cannot be nil'
-      end
-
-      @gpu_type = gpu_type
-    end
-
-    # Custom attribute writer method with validation
     # @param [Object] _class Value to be assigned
     def _class=(_class)
       if _class.nil?
@@ -568,6 +507,16 @@ module DaytonaApiClient
       end
 
       @region = region
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] name Value to be assigned
+    def name=(name)
+      if name.nil?
+        fail ArgumentError, 'name cannot be nil'
+      end
+
+      @name = name
     end
 
     # Custom attribute writer method with validation
@@ -620,6 +569,16 @@ module DaytonaApiClient
       @version = version
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] api_version Value to be assigned
+    def api_version=(api_version)
+      if api_version.nil?
+        fail ArgumentError, 'api_version cannot be nil'
+      end
+
+      @api_version = api_version
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -629,7 +588,6 @@ module DaytonaApiClient
           domain == o.domain &&
           api_url == o.api_url &&
           proxy_url == o.proxy_url &&
-          api_key == o.api_key &&
           cpu == o.cpu &&
           memory == o.memory &&
           disk == o.disk &&
@@ -643,14 +601,18 @@ module DaytonaApiClient
           current_allocated_memory_gi_b == o.current_allocated_memory_gi_b &&
           current_allocated_disk_gi_b == o.current_allocated_disk_gi_b &&
           current_snapshot_count == o.current_snapshot_count &&
+          current_started_sandboxes == o.current_started_sandboxes &&
           availability_score == o.availability_score &&
           region == o.region &&
+          name == o.name &&
           state == o.state &&
           last_checked == o.last_checked &&
           unschedulable == o.unschedulable &&
           created_at == o.created_at &&
           updated_at == o.updated_at &&
-          version == o.version
+          version == o.version &&
+          api_version == o.api_version &&
+          app_version == o.app_version
     end
 
     # @see the `==` method
@@ -662,7 +624,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, domain, api_url, proxy_url, api_key, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, availability_score, region, state, last_checked, unschedulable, created_at, updated_at, version].hash
+      [id, domain, api_url, proxy_url, cpu, memory, disk, gpu, gpu_type, _class, current_cpu_usage_percentage, current_memory_usage_percentage, current_disk_usage_percentage, current_allocated_cpu, current_allocated_memory_gi_b, current_allocated_disk_gi_b, current_snapshot_count, current_started_sandboxes, availability_score, region, name, state, last_checked, unschedulable, created_at, updated_at, version, api_version, app_version].hash
     end
 
     # Builds the object from hash
@@ -776,5 +738,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

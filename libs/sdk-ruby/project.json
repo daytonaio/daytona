@@ -49,6 +49,13 @@
         "parallel": false
       }
     },
+    "docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bash -O extglob -c 'rm -rf ../../apps/docs/src/content/docs/en/ruby-sdk/!(index.mdx)' && bundle exec ruby scripts/generate-docs.rb"
+      }
+    },
     "publish": {
       "executor": "nx:run-commands",
       "options": {

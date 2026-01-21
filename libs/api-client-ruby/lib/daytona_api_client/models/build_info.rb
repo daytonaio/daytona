@@ -27,13 +27,17 @@ module DaytonaApiClient
     # The last update timestamp
     attr_accessor :updated_at
 
+    # The snapshot reference
+    attr_accessor :snapshot_ref
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'dockerfile_content' => :'dockerfileContent',
         :'context_hashes' => :'contextHashes',
         :'created_at' => :'createdAt',
-        :'updated_at' => :'updatedAt'
+        :'updated_at' => :'updatedAt',
+        :'snapshot_ref' => :'snapshotRef'
       }
     end
 
@@ -53,7 +57,8 @@ module DaytonaApiClient
         :'dockerfile_content' => :'String',
         :'context_hashes' => :'Array<String>',
         :'created_at' => :'Time',
-        :'updated_at' => :'Time'
+        :'updated_at' => :'Time',
+        :'snapshot_ref' => :'String'
       }
     end
 
@@ -100,6 +105,12 @@ module DaytonaApiClient
       else
         self.updated_at = nil
       end
+
+      if attributes.key?(:'snapshot_ref')
+        self.snapshot_ref = attributes[:'snapshot_ref']
+      else
+        self.snapshot_ref = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -115,6 +126,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "updated_at", updated_at cannot be nil.')
       end
 
+      if @snapshot_ref.nil?
+        invalid_properties.push('invalid value for "snapshot_ref", snapshot_ref cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -124,6 +139,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @created_at.nil?
       return false if @updated_at.nil?
+      return false if @snapshot_ref.nil?
       true
     end
 
@@ -147,6 +163,16 @@ module DaytonaApiClient
       @updated_at = updated_at
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] snapshot_ref Value to be assigned
+    def snapshot_ref=(snapshot_ref)
+      if snapshot_ref.nil?
+        fail ArgumentError, 'snapshot_ref cannot be nil'
+      end
+
+      @snapshot_ref = snapshot_ref
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -155,7 +181,8 @@ module DaytonaApiClient
           dockerfile_content == o.dockerfile_content &&
           context_hashes == o.context_hashes &&
           created_at == o.created_at &&
-          updated_at == o.updated_at
+          updated_at == o.updated_at &&
+          snapshot_ref == o.snapshot_ref
     end
 
     # @see the `==` method
@@ -167,7 +194,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [dockerfile_content, context_hashes, created_at, updated_at].hash
+      [dockerfile_content, context_hashes, created_at, updated_at, snapshot_ref].hash
     end
 
     # Builds the object from hash
@@ -281,5 +308,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

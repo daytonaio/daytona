@@ -42,6 +42,9 @@ module DaytonaApiClient
     # Build information for the snapshot
     attr_accessor :build_info
 
+    # ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
+    attr_accessor :region_id
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -53,7 +56,8 @@ module DaytonaApiClient
         :'gpu' => :'gpu',
         :'memory' => :'memory',
         :'disk' => :'disk',
-        :'build_info' => :'buildInfo'
+        :'build_info' => :'buildInfo',
+        :'region_id' => :'regionId'
       }
     end
 
@@ -78,7 +82,8 @@ module DaytonaApiClient
         :'gpu' => :'Integer',
         :'memory' => :'Integer',
         :'disk' => :'Integer',
-        :'build_info' => :'CreateBuildInfo'
+        :'build_info' => :'CreateBuildInfo',
+        :'region_id' => :'String'
       }
     end
 
@@ -143,6 +148,10 @@ module DaytonaApiClient
       if attributes.key?(:'build_info')
         self.build_info = attributes[:'build_info']
       end
+
+      if attributes.key?(:'region_id')
+        self.region_id = attributes[:'region_id']
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -188,7 +197,8 @@ module DaytonaApiClient
           gpu == o.gpu &&
           memory == o.memory &&
           disk == o.disk &&
-          build_info == o.build_info
+          build_info == o.build_info &&
+          region_id == o.region_id
     end
 
     # @see the `==` method
@@ -200,7 +210,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, image_name, entrypoint, general, cpu, gpu, memory, disk, build_info].hash
+      [name, image_name, entrypoint, general, cpu, gpu, memory, disk, build_info, region_id].hash
     end
 
     # Builds the object from hash
@@ -314,5 +324,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

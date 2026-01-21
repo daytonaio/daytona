@@ -1,7 +1,7 @@
 =begin
-#Daytona Daemon API
+#Daytona Toolbox API
 
-#Daytona Daemon API
+#Daytona Toolbox API
 
 The version of the OpenAPI document: v0.0.0-dev
 
@@ -216,5 +216,7 @@ module DaytonaToolboxApiClient
         value
       end
     end
+
   end
+
 end

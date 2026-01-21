@@ -3,171 +3,115 @@ title: "Volume"
 hideTitleOnPage: true
 ---
 
-## VolumeService
+## Volume
 
-Service for managing Daytona Volumes.
+Initialize volume from DTO
 
-This service provides methods to list, get, create, and delete Volumes.
+### Constructors
 
-Volumes can be mounted to Sandboxes with an optional subpath parameter to mount
-only a specific S3 prefix within the volume. When no subpath is specified,
-the entire volume is mounted.
+#### new Volume()
+
+```ruby
+def initialize(volume_dto)
+
+```
+
+Initialize volume from DTO
+
+**Parameters**:
+
+- `volume_dto` _DaytonaApiClient:SandboxVolume_ -
+
+**Returns**:
+
+- `Volume` - a new instance of Volume
 
 ### Methods
 
-#### create()
+#### id()
 
 ```ruby
-def create(name)
+def id()
+
 ```
-
-Creates a new Volume with the specified name.
-
-**Parameters**:
-
-- `name` _String_ - Name for the new Volume
 
 **Returns**:
 
-- `Daytona::Volume` - The newly created Volume
+- `String`
 
-**Example:**
-
-```ruby
-daytona = Daytona::Daytona.new
-volume = daytona.volume.create('my-data-volume')
-puts "Created volume #{volume.name} with ID #{volume.id}"
-```
-
-***
-
-#### get()
+#### name()
 
 ```ruby
-def get(name, create: false)
+def name()
+
 ```
-
-Gets a Volume by its name.
-
-**Parameters**:
-
-- `name` _String_ - Name of the Volume to retrieve
-- `create` _Boolean_ - Whether to create the Volume if it does not exist. Defaults to false.
 
 **Returns**:
 
-- `Daytona::Volume` - The requested Volume
+- `String`
 
-**Example:**
-
-```ruby
-daytona = Daytona::Daytona.new
-volume = daytona.volume.get('volume-name', create: true)
-puts "Volume #{volume.name} is in state #{volume.state}"
-```
-
-***
-
-#### delete()
+#### organization_id()
 
 ```ruby
-def delete(volume)
+def organization_id()
+
 ```
-
-Deletes a Volume.
-
-**Parameters**:
-
-- `volume` _Daytona::Volume_ - Volume to delete
 
 **Returns**:
 
-- `void`
+- `String`
 
-**Example:**
-
-```ruby
-daytona = Daytona::Daytona.new
-volume = daytona.volume.get('volume-name')
-daytona.volume.delete(volume)
-puts 'Volume deleted successfully'
-```
-
-***
-
-#### list()
+#### state()
 
 ```ruby
-def list
-```
+def state()
 
-Lists all available Volumes.
+```
 
 **Returns**:
 
-- `Array<Daytona::Volume>` - List of all Volumes accessible to the user
+- `String`
 
-**Example:**
-
-```ruby
-daytona = Daytona::Daytona.new
-volumes = daytona.volume.list
-puts "Found #{volumes.length} volumes"
-volumes.each { |vol| puts "#{vol.name} (#{vol.id})" }
-```
-
-## Volume
-
-Represents a Daytona Volume which is a shared storage volume for Sandboxes.
-
-**Attributes**:
-
-- `id` _String_ - Unique identifier for the Volume
-- `name` _String_ - Name of the Volume
-- `organization_id` _String_ - Organization ID of the Volume
-- `state` _String_ - Current state of the Volume
-- `created_at` _String_ - Timestamp when the Volume was created
-- `updated_at` _String_ - Timestamp when the Volume was last updated
-- `last_used_at` _String_ - Timestamp when the Volume was last used
-- `error_reason` _String, nil_ - Error reason if the Volume is in an error state
-
-## Using Volumes with Sandboxes
-
-To mount a volume to a sandbox, use the `volumes` parameter when creating a sandbox:
+#### created_at()
 
 ```ruby
-# Create or get a volume
-volume = daytona.volume.get('my-volume', create: true)
+def created_at()
 
-# Create a sandbox with the volume mounted
-params = Daytona::CreateSandboxFromSnapshotParams.new(
-  language: Daytona::CodeLanguage::PYTHON,
-  volumes: [
-    DaytonaApiClient::SandboxVolume.new(
-      volume_id: volume.id,
-      mount_path: '/data'
-    )
-  ]
-)
-sandbox = daytona.create(params)
-
-# Files in /data will persist across sandbox restarts
-sandbox.process.exec(command: "echo 'Persistent data' > /data/file.txt")
 ```
 
-You can also mount a subpath of a volume:
+**Returns**:
+
+- `String`
+
+#### updated_at()
 
 ```ruby
-# Mount only a specific prefix within the volume
-params = Daytona::CreateSandboxFromSnapshotParams.new(
-  language: Daytona::CodeLanguage::PYTHON,
-  volumes: [
-    DaytonaApiClient::SandboxVolume.new(
-      volume_id: volume.id,
-      mount_path: '/project-data',
-      subpath: 'projects/my-project'
-    )
-  ]
-)
+def updated_at()
+
 ```
 
+**Returns**:
+
+- `String`
+
+#### last_used_at()
+
+```ruby
+def last_used_at()
+
+```
+
+**Returns**:
+
+- `String`
+
+#### error_reason()
+
+```ruby
+def error_reason()
+
+```
+
+**Returns**:
+
+- `String, nil`

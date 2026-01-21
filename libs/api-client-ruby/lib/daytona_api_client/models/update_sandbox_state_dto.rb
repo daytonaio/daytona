@@ -21,6 +21,9 @@ module DaytonaApiClient
     # Optional error message when reporting an error state
     attr_accessor :error_reason
 
+    # Whether the sandbox is recoverable
+    attr_accessor :recoverable
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -47,7 +50,8 @@ module DaytonaApiClient
     def self.attribute_map
       {
         :'state' => :'state',
-        :'error_reason' => :'errorReason'
+        :'error_reason' => :'errorReason',
+        :'recoverable' => :'recoverable'
       }
     end
 
@@ -65,7 +69,8 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'state' => :'String',
-        :'error_reason' => :'String'
+        :'error_reason' => :'String',
+        :'recoverable' => :'Boolean'
       }
     end
 
@@ -99,6 +104,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'error_reason')
         self.error_reason = attributes[:'error_reason']
+      end
+
+      if attributes.key?(:'recoverable')
+        self.recoverable = attributes[:'recoverable']
       end
     end
 
@@ -140,7 +149,8 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           state == o.state &&
-          error_reason == o.error_reason
+          error_reason == o.error_reason &&
+          recoverable == o.recoverable
     end
 
     # @see the `==` method
@@ -152,7 +162,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [state, error_reason].hash
+      [state, error_reason, recoverable].hash
     end
 
     # Builds the object from hash
@@ -266,5 +276,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

@@ -15,67 +15,15 @@ require 'time'
 
 module DaytonaApiClient
   class CreateRunner
-    attr_accessor :domain
+    attr_accessor :region_id
 
-    attr_accessor :api_url
-
-    attr_accessor :proxy_url
-
-    attr_accessor :api_key
-
-    attr_accessor :cpu
-
-    attr_accessor :memory_gi_b
-
-    attr_accessor :disk_gi_b
-
-    attr_accessor :gpu
-
-    attr_accessor :gpu_type
-
-    attr_accessor :_class
-
-    attr_accessor :region
-
-    attr_accessor :version
-
-    class EnumAttributeValidator
-      attr_reader :datatype
-      attr_reader :allowable_values
-
-      def initialize(datatype, allowable_values)
-        @allowable_values = allowable_values.map do |value|
-          case datatype.to_s
-          when /Integer/i
-            value.to_i
-          when /Float/i
-            value.to_f
-          else
-            value
-          end
-        end
-      end
-
-      def valid?(value)
-        !value || allowable_values.include?(value)
-      end
-    end
+    attr_accessor :name
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'domain' => :'domain',
-        :'api_url' => :'apiUrl',
-        :'proxy_url' => :'proxyUrl',
-        :'api_key' => :'apiKey',
-        :'cpu' => :'cpu',
-        :'memory_gi_b' => :'memoryGiB',
-        :'disk_gi_b' => :'diskGiB',
-        :'gpu' => :'gpu',
-        :'gpu_type' => :'gpuType',
-        :'_class' => :'class',
-        :'region' => :'region',
-        :'version' => :'version'
+        :'region_id' => :'regionId',
+        :'name' => :'name'
       }
     end
 
@@ -92,18 +40,8 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'domain' => :'String',
-        :'api_url' => :'String',
-        :'proxy_url' => :'String',
-        :'api_key' => :'String',
-        :'cpu' => :'Float',
-        :'memory_gi_b' => :'Float',
-        :'disk_gi_b' => :'Float',
-        :'gpu' => :'Float',
-        :'gpu_type' => :'String',
-        :'_class' => :'String',
-        :'region' => :'String',
-        :'version' => :'String'
+        :'region_id' => :'String',
+        :'name' => :'String'
       }
     end
 
@@ -129,76 +67,16 @@ module DaytonaApiClient
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'domain')
-        self.domain = attributes[:'domain']
+      if attributes.key?(:'region_id')
+        self.region_id = attributes[:'region_id']
       else
-        self.domain = nil
+        self.region_id = nil
       end
 
-      if attributes.key?(:'api_url')
-        self.api_url = attributes[:'api_url']
+      if attributes.key?(:'name')
+        self.name = attributes[:'name']
       else
-        self.api_url = nil
-      end
-
-      if attributes.key?(:'proxy_url')
-        self.proxy_url = attributes[:'proxy_url']
-      else
-        self.proxy_url = nil
-      end
-
-      if attributes.key?(:'api_key')
-        self.api_key = attributes[:'api_key']
-      else
-        self.api_key = nil
-      end
-
-      if attributes.key?(:'cpu')
-        self.cpu = attributes[:'cpu']
-      else
-        self.cpu = nil
-      end
-
-      if attributes.key?(:'memory_gi_b')
-        self.memory_gi_b = attributes[:'memory_gi_b']
-      else
-        self.memory_gi_b = nil
-      end
-
-      if attributes.key?(:'disk_gi_b')
-        self.disk_gi_b = attributes[:'disk_gi_b']
-      else
-        self.disk_gi_b = nil
-      end
-
-      if attributes.key?(:'gpu')
-        self.gpu = attributes[:'gpu']
-      else
-        self.gpu = nil
-      end
-
-      if attributes.key?(:'gpu_type')
-        self.gpu_type = attributes[:'gpu_type']
-      else
-        self.gpu_type = nil
-      end
-
-      if attributes.key?(:'_class')
-        self._class = attributes[:'_class']
-      else
-        self._class = nil
-      end
-
-      if attributes.key?(:'region')
-        self.region = attributes[:'region']
-      else
-        self.region = nil
-      end
-
-      if attributes.key?(:'version')
-        self.version = attributes[:'version']
-      else
-        self.version = nil
+        self.name = nil
       end
     end
 
@@ -207,52 +85,12 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @domain.nil?
-        invalid_properties.push('invalid value for "domain", domain cannot be nil.')
+      if @region_id.nil?
+        invalid_properties.push('invalid value for "region_id", region_id cannot be nil.')
       end
 
-      if @api_url.nil?
-        invalid_properties.push('invalid value for "api_url", api_url cannot be nil.')
-      end
-
-      if @proxy_url.nil?
-        invalid_properties.push('invalid value for "proxy_url", proxy_url cannot be nil.')
-      end
-
-      if @api_key.nil?
-        invalid_properties.push('invalid value for "api_key", api_key cannot be nil.')
-      end
-
-      if @cpu.nil?
-        invalid_properties.push('invalid value for "cpu", cpu cannot be nil.')
-      end
-
-      if @memory_gi_b.nil?
-        invalid_properties.push('invalid value for "memory_gi_b", memory_gi_b cannot be nil.')
-      end
-
-      if @disk_gi_b.nil?
-        invalid_properties.push('invalid value for "disk_gi_b", disk_gi_b cannot be nil.')
-      end
-
-      if @gpu.nil?
-        invalid_properties.push('invalid value for "gpu", gpu cannot be nil.')
-      end
-
-      if @gpu_type.nil?
-        invalid_properties.push('invalid value for "gpu_type", gpu_type cannot be nil.')
-      end
-
-      if @_class.nil?
-        invalid_properties.push('invalid value for "_class", _class cannot be nil.')
-      end
-
-      if @region.nil?
-        invalid_properties.push('invalid value for "region", region cannot be nil.')
-      end
-
-      if @version.nil?
-        invalid_properties.push('invalid value for "version", version cannot be nil.')
+      if @name.nil?
+        invalid_properties.push('invalid value for "name", name cannot be nil.')
       end
 
       invalid_properties
@@ -262,141 +100,29 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @domain.nil?
-      return false if @api_url.nil?
-      return false if @proxy_url.nil?
-      return false if @api_key.nil?
-      return false if @cpu.nil?
-      return false if @memory_gi_b.nil?
-      return false if @disk_gi_b.nil?
-      return false if @gpu.nil?
-      return false if @gpu_type.nil?
-      return false if @_class.nil?
-      _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
-      return false unless _class_validator.valid?(@_class)
-      return false if @region.nil?
-      return false if @version.nil?
+      return false if @region_id.nil?
+      return false if @name.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] domain Value to be assigned
-    def domain=(domain)
-      if domain.nil?
-        fail ArgumentError, 'domain cannot be nil'
+    # @param [Object] region_id Value to be assigned
+    def region_id=(region_id)
+      if region_id.nil?
+        fail ArgumentError, 'region_id cannot be nil'
       end
 
-      @domain = domain
+      @region_id = region_id
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] api_url Value to be assigned
-    def api_url=(api_url)
-      if api_url.nil?
-        fail ArgumentError, 'api_url cannot be nil'
+    # @param [Object] name Value to be assigned
+    def name=(name)
+      if name.nil?
+        fail ArgumentError, 'name cannot be nil'
       end
 
-      @api_url = api_url
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] proxy_url Value to be assigned
-    def proxy_url=(proxy_url)
-      if proxy_url.nil?
-        fail ArgumentError, 'proxy_url cannot be nil'
-      end
-
-      @proxy_url = proxy_url
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] api_key Value to be assigned
-    def api_key=(api_key)
-      if api_key.nil?
-        fail ArgumentError, 'api_key cannot be nil'
-      end
-
-      @api_key = api_key
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] cpu Value to be assigned
-    def cpu=(cpu)
-      if cpu.nil?
-        fail ArgumentError, 'cpu cannot be nil'
-      end
-
-      @cpu = cpu
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] memory_gi_b Value to be assigned
-    def memory_gi_b=(memory_gi_b)
-      if memory_gi_b.nil?
-        fail ArgumentError, 'memory_gi_b cannot be nil'
-      end
-
-      @memory_gi_b = memory_gi_b
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] disk_gi_b Value to be assigned
-    def disk_gi_b=(disk_gi_b)
-      if disk_gi_b.nil?
-        fail ArgumentError, 'disk_gi_b cannot be nil'
-      end
-
-      @disk_gi_b = disk_gi_b
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] gpu Value to be assigned
-    def gpu=(gpu)
-      if gpu.nil?
-        fail ArgumentError, 'gpu cannot be nil'
-      end
-
-      @gpu = gpu
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] gpu_type Value to be assigned
-    def gpu_type=(gpu_type)
-      if gpu_type.nil?
-        fail ArgumentError, 'gpu_type cannot be nil'
-      end
-
-      @gpu_type = gpu_type
-    end
-
-    # Custom attribute writer method checking allowed values (enum).
-    # @param [Object] _class Object to be assigned
-    def _class=(_class)
-      validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
-      unless validator.valid?(_class)
-        fail ArgumentError, "invalid value for \"_class\", must be one of #{validator.allowable_values}."
-      end
-      @_class = _class
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] region Value to be assigned
-    def region=(region)
-      if region.nil?
-        fail ArgumentError, 'region cannot be nil'
-      end
-
-      @region = region
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] version Value to be assigned
-    def version=(version)
-      if version.nil?
-        fail ArgumentError, 'version cannot be nil'
-      end
-
-      @version = version
+      @name = name
     end
 
     # Checks equality by comparing each attribute.
@@ -404,18 +130,8 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          domain == o.domain &&
-          api_url == o.api_url &&
-          proxy_url == o.proxy_url &&
-          api_key == o.api_key &&
-          cpu == o.cpu &&
-          memory_gi_b == o.memory_gi_b &&
-          disk_gi_b == o.disk_gi_b &&
-          gpu == o.gpu &&
-          gpu_type == o.gpu_type &&
-          _class == o._class &&
-          region == o.region &&
-          version == o.version
+          region_id == o.region_id &&
+          name == o.name
     end
 
     # @see the `==` method
@@ -427,7 +143,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [domain, api_url, proxy_url, api_key, cpu, memory_gi_b, disk_gi_b, gpu, gpu_type, _class, region, version].hash
+      [region_id, name].hash
     end
 
     # Builds the object from hash
@@ -541,5 +257,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

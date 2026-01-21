@@ -50,6 +50,15 @@ module DaytonaApiClient
     # Build information for the snapshot
     attr_accessor :build_info
 
+    # IDs of regions where the snapshot is available
+    attr_accessor :region_ids
+
+    # The initial runner ID of the snapshot
+    attr_accessor :initial_runner_id
+
+    # The snapshot reference
+    attr_accessor :ref
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -91,7 +100,10 @@ module DaytonaApiClient
         :'created_at' => :'createdAt',
         :'updated_at' => :'updatedAt',
         :'last_used_at' => :'lastUsedAt',
-        :'build_info' => :'buildInfo'
+        :'build_info' => :'buildInfo',
+        :'region_ids' => :'regionIds',
+        :'initial_runner_id' => :'initialRunnerId',
+        :'ref' => :'ref'
       }
     end
 
@@ -124,7 +136,10 @@ module DaytonaApiClient
         :'created_at' => :'Time',
         :'updated_at' => :'Time',
         :'last_used_at' => :'Time',
-        :'build_info' => :'BuildInfo'
+        :'build_info' => :'BuildInfo',
+        :'region_ids' => :'Array<String>',
+        :'initial_runner_id' => :'String',
+        :'ref' => :'String'
       }
     end
 
@@ -250,6 +265,20 @@ module DaytonaApiClient
 
       if attributes.key?(:'build_info')
         self.build_info = attributes[:'build_info']
+      end
+
+      if attributes.key?(:'region_ids')
+        if (value = attributes[:'region_ids']).is_a?(Array)
+          self.region_ids = value
+        end
+      end
+
+      if attributes.key?(:'initial_runner_id')
+        self.initial_runner_id = attributes[:'initial_runner_id']
+      end
+
+      if attributes.key?(:'ref')
+        self.ref = attributes[:'ref']
       end
     end
 
@@ -439,7 +468,10 @@ module DaytonaApiClient
           created_at == o.created_at &&
           updated_at == o.updated_at &&
           last_used_at == o.last_used_at &&
-          build_info == o.build_info
+          build_info == o.build_info &&
+          region_ids == o.region_ids &&
+          initial_runner_id == o.initial_runner_id &&
+          ref == o.ref
     end
 
     # @see the `==` method
@@ -451,7 +483,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info].hash
+      [id, organization_id, general, name, image_name, state, size, entrypoint, cpu, gpu, mem, disk, error_reason, created_at, updated_at, last_used_at, build_info, region_ids, initial_runner_id, ref].hash
     end
 
     # Builds the object from hash
@@ -565,5 +597,7 @@ module DaytonaApiClient
         value
       end
     end
+
   end
+
 end

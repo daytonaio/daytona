@@ -19,6 +19,73 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
+    # Get sandbox ID from signed preview URL token
+    # @param signed_preview_token [String] Signed preview URL token
+    # @param port [Float] Port number to get sandbox ID from signed preview URL token
+    # @param [Hash] opts the optional parameters
+    # @return [String]
+    def get_sandbox_id_from_signed_preview_url_token(signed_preview_token, port, opts = {})
+      data, _status_code, _headers = get_sandbox_id_from_signed_preview_url_token_with_http_info(signed_preview_token, port, opts)
+      data
+    end
+
+    # Get sandbox ID from signed preview URL token
+    # @param signed_preview_token [String] Signed preview URL token
+    # @param port [Float] Port number to get sandbox ID from signed preview URL token
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(String, Integer, Hash)>] String data, response status code and response headers
+    def get_sandbox_id_from_signed_preview_url_token_with_http_info(signed_preview_token, port, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: PreviewApi.get_sandbox_id_from_signed_preview_url_token ...'
+      end
+      # verify the required parameter 'signed_preview_token' is set
+      if @api_client.config.client_side_validation && signed_preview_token.nil?
+        fail ArgumentError, "Missing the required parameter 'signed_preview_token' when calling PreviewApi.get_sandbox_id_from_signed_preview_url_token"
+      end
+      # verify the required parameter 'port' is set
+      if @api_client.config.client_side_validation && port.nil?
+        fail ArgumentError, "Missing the required parameter 'port' when calling PreviewApi.get_sandbox_id_from_signed_preview_url_token"
+      end
+      # resource path
+      local_var_path = '/preview/{signedPreviewToken}/{port}/sandbox-id'.sub('{' + 'signedPreviewToken' + '}', CGI.escape(signed_preview_token.to_s)).sub('{' + 'port' + '}', CGI.escape(port.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'String'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"PreviewApi.get_sandbox_id_from_signed_preview_url_token",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: PreviewApi#get_sandbox_id_from_signed_preview_url_token\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Check if user has access to the sandbox
     # @param sandbox_id [String] 
     # @param [Hash] opts the optional parameters
