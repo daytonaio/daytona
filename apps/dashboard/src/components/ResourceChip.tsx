@@ -29,7 +29,7 @@ export function ResourceChip({ resource, value, unit, icon }: Props) {
   const ResourceIcon = resourceIcons[resource]
 
   return (
-    <div className="flex items-center gap-1 bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-200 rounded-full px-2 py-[2px] text-sm whitespace-nowrap">
+    <div className="flex items-center gap-1 bg-muted/80 border border-border rounded-full px-2 py-[2px] text-sm whitespace-nowrap">
       {icon === null ? null : (icon ?? <ResourceIcon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />)} {value}{' '}
       {resourceUnit}
     </div>

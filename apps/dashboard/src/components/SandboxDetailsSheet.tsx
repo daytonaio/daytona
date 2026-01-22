@@ -6,13 +6,14 @@
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
-import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
+import { formatDuration, formatTimestamp, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
-import { Archive, Copy, Play, Tag, Trash, Wrench, X } from 'lucide-react'
+import { Archive, Play, Tag, Trash, Wrench, X } from 'lucide-react'
 import React, { useState } from 'react'
-import { toast } from 'sonner'
+import { CopyButton } from './CopyButton'
 import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
+import { TimestampTooltip } from './TimestampTooltip'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -68,20 +69,10 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
     return getRelativeTimeString(sandbox.updatedAt)
   }
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success('Copied to clipboard')
-    } catch (err) {
-      console.error('Failed to copy text:', err)
-      toast.error('Failed to copy to clipboard')
-    }
-  }
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-dvw sm:w-[800px] p-0 flex flex-col gap-0 [&>button]:hidden">
-        <SheetHeader className="space-y-0 flex flex-row justify-between items-center p-6">
+        <SheetHeader className="space-y-0 flex flex-row justify-between items-center  p-4 px-5 border-b border-border">
           <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
           <div className="flex gap-2 items-center">
             {writePermitted && (
@@ -181,26 +172,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 <h3 className="text-sm text-muted-foreground">Name</h3>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{sandbox.name}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.name)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy name"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
+                  <CopyButton value={sandbox.name} tooltipText="Copy name" size="icon-xs" />
                 </div>
               </div>
               <div>
                 <h3 className="text-sm text-muted-foreground">UUID</h3>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{sandbox.id}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.id)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy UUID"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
+                  <CopyButton value={sandbox.id} tooltipText="Copy UUID" size="icon-xs" />
                 </div>
               </div>
             </div>
@@ -221,13 +200,7 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{sandbox.snapshot || '-'}</p>
                   {sandbox.snapshot && (
-                    <button
-                      onClick={() => copyToClipboard(sandbox.snapshot || '')}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label="Copy snapshot"
-                    >
-                      <Copy className="w-3 h-3" />
-                    </button>
+                    <CopyButton value={sandbox.snapshot} tooltipText="Copy snapshot" size="icon-xs" />
                   )}
                 </div>
               </div>
@@ -235,24 +208,51 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
                 <h3 className="text-sm text-muted-foreground">Region</h3>
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-sm font-medium truncate">{getRegionName(sandbox.target) ?? sandbox.target}</p>
-                  <button
-                    onClick={() => copyToClipboard(sandbox.target)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Copy region"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </button>
+                  <CopyButton value={sandbox.target} tooltipText="Copy region" size="icon-xs" />
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <h3 className="text-sm text-muted-foreground">Last used</h3>
-                <p className="mt-1 text-sm font-medium">{getLastEvent(sandbox).relativeTimeString}</p>
+                <p className="mt-1 text-sm font-medium">
+                  <TimestampTooltip timestamp={sandbox.createdAt}>
+                    {getLastEvent(sandbox).relativeTimeString}
+                  </TimestampTooltip>
+                </p>
               </div>
               <div>
                 <h3 className="text-sm text-muted-foreground">Created at</h3>
-                <p className="mt-1 text-sm font-medium">{formatTimestamp(sandbox.createdAt)}</p>
+                <p className="mt-1 text-sm font-medium">
+                  <TimestampTooltip timestamp={sandbox.createdAt}>
+                    {formatTimestamp(sandbox.createdAt)}
+                  </TimestampTooltip>
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div>
+                <h3 className="text-sm text-muted-foreground">Auto-stop</h3>
+                <p className="mt-1 text-sm font-medium">
+                  {sandbox.autoStopInterval ? formatDuration(sandbox.autoStopInterval) : 'Disabled'}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">Auto-archive</h3>
+                <p className="mt-1 text-sm font-medium">
+                  {sandbox.autoArchiveInterval ? formatDuration(sandbox.autoArchiveInterval) : 'Disabled'}
+                </p>
+              </div>
+              <div>
+                <h3 className="text-sm text-muted-foreground">Auto-delete</h3>
+                <p className="mt-1 text-sm font-medium">
+                  {sandbox.autoDeleteInterval !== undefined && sandbox.autoDeleteInterval >= 0
+                    ? sandbox.autoDeleteInterval === 0
+                      ? 'On stop'
+                      : formatDuration(sandbox.autoDeleteInterval)
+                    : 'Disabled'}
+                </p>
               </div>
             </div>
 
