@@ -23,6 +23,7 @@ import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
+import { SnapshotFilters, SnapshotQueryParams, useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
@@ -36,7 +37,6 @@ import {
   useSandboxes,
 } from '@/hooks/useSandboxes'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
@@ -286,16 +286,11 @@ const Sandboxes: React.FC = () => {
     [snapshotFilters],
   )
 
-  const snapshotsQueryKey = useMemo<QueryKey>(
-    () => getSnapshotsQueryKey(selectedOrganization?.id, snapshotsQueryParams),
-    [selectedOrganization?.id, snapshotsQueryParams],
-  )
-
   const {
     data: snapshotsData,
     isLoading: snapshotsDataIsLoading,
     error: snapshotsDataError,
-  } = useSnapshots(snapshotsQueryKey, snapshotsQueryParams)
+  } = useSnapshotsQuery(snapshotsQueryParams)
 
   const snapshotsDataHasMore = useMemo(() => {
     return snapshotsData && snapshotsData.totalPages > 1
