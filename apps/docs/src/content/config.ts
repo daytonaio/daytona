@@ -364,11 +364,20 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/vpn-connections', locale),
+          label: t('sidebarconfig.vpnConnection'),
+          description: t('sidebarconfig.vpnConnectionDescription'),
+          attrs: {
+            icon: 'shield.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/preview-and-authentication', locale),
           label: t('sidebarconfig.previewAuthentication'),
           description: t('sidebarconfig.previewAuthenticationDescription'),
           attrs: {
-            icon: 'shield.svg',
+            icon: 'globe.svg',
           },
         },
         {
@@ -579,6 +588,7 @@ export const getSidebarConfig = (
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/common', locale),
+      entries: [],
     },
     {
       type: 'group',
