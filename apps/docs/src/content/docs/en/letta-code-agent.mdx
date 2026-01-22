@@ -159,7 +159,7 @@ The `--yolo` flag allows the agent to run shell commands without requiring expli
 
 #### Message Handling
 
-To send prompts to the agent, the main script calls the `sendUserMessage()` method, which formats the user input as a JSON message and sends it to the PTY using `this.ptyHandle.sendInput()` as demonstrated above.
+To send prompts to the agent, the main script calls the `processPrompt()` method, which formats the user input as a JSON message and sends it to the PTY using `this.ptyHandle.sendInput()` as demonstrated above.
 
 Formatted user messages look like this:
 
