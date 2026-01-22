@@ -30,6 +30,7 @@ type DockerClientConfig struct {
 	SandboxStartTimeoutSec   int
 	UseSnapshotEntrypoint    bool
 	VolumeCleanupIntervalSec int
+	VolumeCleanupDryRun      bool
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -60,6 +61,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		sandboxStartTimeoutSec:   config.SandboxStartTimeoutSec,
 		useSnapshotEntrypoint:    config.UseSnapshotEntrypoint,
 		volumeCleanupIntervalSec: config.VolumeCleanupIntervalSec,
+		volumeCleanupDryRun:      config.VolumeCleanupDryRun,
 	}
 }
 
@@ -85,6 +87,7 @@ type DockerClient struct {
 	sandboxStartTimeoutSec   int
 	useSnapshotEntrypoint    bool
 	volumeCleanupIntervalSec int
+	volumeCleanupDryRun      bool
 	volumeCleanupMutex       sync.Mutex
 	lastVolumeCleanup        time.Time
 }

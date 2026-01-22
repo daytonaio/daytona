@@ -99,6 +99,7 @@ func main() {
 		ResourceLimitsDisabled:   cfg.ResourceLimitsDisabled,
 		UseSnapshotEntrypoint:    cfg.UseSnapshotEntrypoint,
 		VolumeCleanupIntervalSec: cfg.VolumeCleanupIntervalSec,
+		VolumeCleanupDryRun:      cfg.VolumeCleanupDryRun,
 	})
 
 	// Start Docker events monitor
