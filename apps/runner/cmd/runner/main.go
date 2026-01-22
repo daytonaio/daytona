@@ -144,7 +144,11 @@ func main() {
 	slogLogger := newSLogger()
 
 	// Create metrics collector
-	metricsCollector := metrics.NewCollector(slogLogger, dockerClient, cfg.CollectorWindowSize)
+	metricsCollector := metrics.NewCollector(metrics.CollectorConfig{
+		Logger:     slogLogger,
+		Docker:     dockerClient,
+		WindowSize: cfg.CollectorWindowSize,
+	})
 	metricsCollector.Start(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{

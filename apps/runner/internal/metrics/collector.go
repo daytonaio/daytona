@@ -23,6 +23,35 @@ import (
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
+// CollectorConfig holds configuration for the metrics collector
+type CollectorConfig struct {
+	Logger                             *slog.Logger
+	Docker                             *docker.DockerClient
+	WindowSize                         int
+	CPUUsageSnapshotInterval           time.Duration
+	AllocatedResourcesSnapshotInterval time.Duration
+}
+
+// Collector collects system metrics
+type Collector struct {
+	docker *docker.DockerClient
+	log    *slog.Logger
+
+	// CPU usage - ring buffer for sliding window
+	cpuRing  *ring.Ring
+	cpuMutex sync.RWMutex
+
+	resourcesMutex      sync.RWMutex
+	allocatedCPU        float32
+	allocatedMemoryGiB  float32
+	allocatedDiskGiB    float32
+	startedSandboxCount float32
+
+	// Intervals for snapshotting metrics in seconds
+	cpuUsageSnapshotInterval           time.Duration
+	allocatedResourcesSnapshotInterval time.Duration
+}
+
 // CPUSnapshot represents a point-in-time CPU measurement
 type CPUSnapshot struct {
 	timestamp  time.Time
@@ -45,33 +74,19 @@ type Metrics struct {
 	StartedSandboxCount   float32
 }
 
-// Collector collects system metrics
-type Collector struct {
-	docker *docker.DockerClient
-	log    *slog.Logger
-
-	// CPU usage - ring buffer for sliding window
-	cpuRing  *ring.Ring
-	cpuMutex sync.RWMutex
-
-	resourcesMutex      sync.RWMutex
-	allocatedCPU        float32
-	allocatedMemoryGiB  float32
-	allocatedDiskGiB    float32
-	startedSandboxCount float32
-}
-
 // NewCollector creates a new metrics collector
-func NewCollector(logger *slog.Logger, docker *docker.DockerClient, windowSize int) *Collector {
-	if windowSize <= 0 {
+func NewCollector(cfg CollectorConfig) *Collector {
+	if cfg.WindowSize <= 0 {
 		// Default to size 60
-		windowSize = 60
+		cfg.WindowSize = 60
 	}
 
 	return &Collector{
-		log:     logger.With(slog.String("component", "metrics")),
-		docker:  docker,
-		cpuRing: ring.New(windowSize),
+		log:                                cfg.Logger.With(slog.String("component", "metrics")),
+		docker:                             cfg.Docker,
+		cpuRing:                            ring.New(cfg.WindowSize),
+		cpuUsageSnapshotInterval:           cfg.CPUUsageSnapshotInterval,
+		allocatedResourcesSnapshotInterval: cfg.AllocatedResourcesSnapshotInterval,
 	}
 }
 
@@ -169,7 +184,7 @@ func (c *Collector) collect(ctx context.Context) (*Metrics, error) {
 
 // snapshotCPUUsage runs in a background goroutine, continuously monitoring CPU usage
 func (c *Collector) snapshotCPUUsage(ctx context.Context) {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(c.cpuUsageSnapshotInterval)
 	defer ticker.Stop()
 
 	for {
@@ -224,7 +239,7 @@ func (c *Collector) collectCPUUsageAverage() (float64, error) {
 }
 
 func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(c.allocatedResourcesSnapshotInterval)
 	defer ticker.Stop()
 
 	for {
