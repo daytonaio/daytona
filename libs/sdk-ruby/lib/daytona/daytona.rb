@@ -36,8 +36,9 @@ module Daytona
       @volume = VolumeService.new(DaytonaApiClient::VolumesApi.new(api_client))
       @object_storage_api = DaytonaApiClient::ObjectStorageApi.new(api_client)
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
-      @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:)
-      @proxy_toolbox_url = nil
+      @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:, default_region_id: config.target)
+      @proxy_toolbox_url_cache = {}
+      @proxy_toolbox_url_mutex = Mutex.new
     end
 
     # Creates a sandbox with the specified parameters
@@ -180,9 +181,15 @@ module Daytona
       response = sandbox_api.create_sandbox(create_sandbox)
 
       if response.state == DaytonaApiClient::SandboxState::PENDING_BUILD && on_snapshot_create_logs
-        uri = URI.parse(sandbox_api.api_client.config.base_url)
-        uri.path = "/api/sandbox/#{response.id}/build-logs"
-        uri.query = 'follow=true'
+        # Wait for state to change from PENDING_BUILD before fetching logs
+        while response.state == DaytonaApiClient::SandboxState::PENDING_BUILD
+          sleep(1)
+          response = sandbox_api.get_sandbox(response.id)
+        end
+
+        # Get build logs URL from API
+        build_logs_response = sandbox_api.get_build_logs_url(response.id)
+        uri = URI.parse("#{build_logs_response.url}?follow=true")
 
         headers = {}
         sandbox_api.api_client.update_params_for_auth!(headers, nil, ['bearer'])
@@ -238,15 +245,27 @@ module Daytona
         config:,
         sandbox_api:,
         code_toolbox:,
-        get_proxy_toolbox_url: method(:proxy_toolbox_url)
+        get_proxy_toolbox_url: proc { |sandbox_id, region_id| proxy_toolbox_url(sandbox_id, region_id) }
       )
     end
 
-    # Gets the proxy toolbox URL from the config API (lazy loaded)
+    # Gets the proxy toolbox URL from the sandbox API (cached per region)
     #
+    # @param sandbox_id [String] The sandbox ID
+    # @param region_id [String] The region ID
     # @return [String] The proxy toolbox URL
-    def proxy_toolbox_url
-      @proxy_toolbox_url ||= @config_api.config_controller_get_config.proxy_toolbox_url
+    def proxy_toolbox_url(sandbox_id, region_id)
+      # Return cached URL if available
+      return @proxy_toolbox_url_cache[region_id] if @proxy_toolbox_url_cache.key?(region_id)
+
+      # Use mutex to ensure thread-safe caching
+      @proxy_toolbox_url_mutex.synchronize do
+        # Double-check after acquiring lock
+        return @proxy_toolbox_url_cache[region_id] if @proxy_toolbox_url_cache.key?(region_id)
+
+        # Fetch and cache the URL
+        @proxy_toolbox_url_cache[region_id] = sandbox_api.get_toolbox_proxy_url(sandbox_id).url
+      end
     end
 
     # Converts a language to a code toolbox

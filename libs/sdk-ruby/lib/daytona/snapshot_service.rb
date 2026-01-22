@@ -8,9 +8,11 @@ module Daytona
 
     # @param snapshots_api [DaytonaApiClient::SnapshotsApi] The snapshots API client
     # @param object_storage_api [DaytonaApiClient::ObjectStorageApi] The object storage API client
-    def initialize(snapshots_api:, object_storage_api:)
+    # @param default_region_id [String, nil] Default region ID for snapshot creation
+    def initialize(snapshots_api:, object_storage_api:, default_region_id: nil)
       @snapshots_api = snapshots_api
       @object_storage_api = object_storage_api
+      @default_region_id = default_region_id
     end
 
     # List all Snapshots.
@@ -97,6 +99,8 @@ module Daytona
         create_snapshot_req.disk = params.resources.disk
       end
 
+      create_snapshot_req.region_id = params.region_id || @default_region_id
+
       snapshot = snapshots_api.create_snapshot(create_snapshot_req)
 
       # Always wait for snapshot to be ready, regardless of on_logs
@@ -148,6 +152,9 @@ module Daytona
 
     # @return [DaytonaApiClient::ObjectStorageApi, nil] The object storage API client
     attr_reader :object_storage_api
+
+    # @return [String, nil] Default region ID for snapshot creation
+    attr_reader :default_region_id
 
     # Wait for snapshot to reach a terminal state (ACTIVE, ERROR, or BUILD_FAILED)
     # Optionally streams logs if on_logs callback is provided
@@ -202,9 +209,9 @@ module Daytona
     # @param on_logs [Proc]
     # @return [Thread]
     def start_log_streaming(snapshot, on_logs:)
-      uri = URI.parse(snapshots_api.api_client.config.base_url)
-      uri.path = "/api/snapshots/#{snapshot.id}/build-logs"
-      uri.query = 'follow=true'
+      # Get build logs URL from API
+      build_logs_response = snapshots_api.get_snapshot_build_logs_url(snapshot.id)
+      uri = URI.parse("#{build_logs_response.url}?follow=true")
 
       headers = {}
       snapshots_api.api_client.update_params_for_auth!(headers, nil, ['bearer'])

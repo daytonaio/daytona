@@ -16,15 +16,21 @@ module Daytona
     # @return [Array<String>, nil] Entrypoint of the snapshot
     attr_reader :entrypoint
 
+    # @return [String, nil] ID of the region where the snapshot will be available.
+    #   Defaults to organization default region if not specified.
+    attr_reader :region_id
+
     # @param name [String] Name of the snapshot
     # @param image [String, Daytona::Image] Image of the snapshot
     # @param resources [Daytona::Resources, nil] Resources of the snapshot
     # @param entrypoint [Array<String>, nil] Entrypoint of the snapshot
-    def initialize(name:, image:, resources: nil, entrypoint: nil)
+    # @param region_id [String, nil] ID of the region where the snapshot will be available
+    def initialize(name:, image:, resources: nil, entrypoint: nil, region_id: nil)
       @name = name
       @image = image
       @resources = resources
       @entrypoint = entrypoint
+      @region_id = region_id
     end
   end
 

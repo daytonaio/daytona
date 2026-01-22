@@ -109,6 +109,9 @@ module Daytona
     # @return [Daytona::ComputerUse]
     attr_reader :computer_use
 
+    # @return [Daytona::CodeInterpreter]
+    attr_reader :code_interpreter
+
     # @params code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @params config [Daytona::Config]
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
@@ -135,6 +138,8 @@ module Daytona
       git_api = DaytonaToolboxApiClient::GitApi.new(create_authenticated_client.call)
       lsp_api = DaytonaToolboxApiClient::LspApi.new(create_authenticated_client.call)
       computer_use_api = DaytonaToolboxApiClient::ComputerUseApi.new(create_authenticated_client.call)
+      interpreter_api = DaytonaToolboxApiClient::InterpreterApi.new(create_authenticated_client.call)
+      info_api = DaytonaToolboxApiClient::InfoApi.new(create_authenticated_client.call)
 
       @process = Process.new(
         sandbox_id: id,
@@ -145,7 +150,13 @@ module Daytona
       @fs = FileSystem.new(sandbox_id: id, toolbox_api: fs_api)
       @git = Git.new(sandbox_id: id, toolbox_api: git_api)
       @computer_use = ComputerUse.new(sandbox_id: id, toolbox_api: computer_use_api)
+      @code_interpreter = CodeInterpreter.new(
+        sandbox_id: id,
+        toolbox_api: interpreter_api,
+        get_preview_link: proc { |port| preview_url(port) }
+      )
       @lsp_api = lsp_api
+      @info_api = info_api
     end
 
     # Archives the sandbox, making it inactive and preserving its state. When sandboxes are
@@ -211,6 +222,33 @@ module Daytona
       refresh
     end
 
+    # Gets the user's home directory path for the logged in user inside the Sandbox.
+    #
+    # @return [String] The absolute path to the Sandbox user's home directory for the logged in user
+    #
+    # @example
+    #   user_home_dir = sandbox.get_user_home_dir
+    #   puts "Sandbox user home: #{user_home_dir}"
+    def get_user_home_dir
+      @info_api.get_user_home_dir.dir
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to get user home directory: #{e.message}"
+    end
+
+    # Gets the working directory path inside the Sandbox.
+    #
+    # @return [String] The absolute path to the Sandbox working directory. Uses the WORKDIR specified
+    #   in the Dockerfile if present, or falling back to the user's home directory if not.
+    #
+    # @example
+    #   work_dir = sandbox.get_work_dir
+    #   puts "Sandbox working directory: #{work_dir}"
+    def get_work_dir
+      @info_api.get_work_dir.dir
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to get working directory path: #{e.message}"
+    end
+
     # Sets labels for the Sandbox.
     #
     # @param labels [Hash<String, String>]
@@ -227,10 +265,53 @@ module Daytona
     # @return [DaytonaApiClient::PortPreviewUrl]
     def preview_url(port) = sandbox_api.get_port_preview_url(id, port)
 
+    # Creates a signed preview URL for the sandbox at the specified port.
+    #
+    # @param port [Integer] The port to open the preview link on
+    # @param expires_in_seconds [Integer, nil] The number of seconds the signed preview URL
+    #   will be valid for. Defaults to 60 seconds.
+    # @return [DaytonaApiClient::SignedPortPreviewUrl] The signed preview URL response object
+    #
+    # @example
+    #   signed_url = sandbox.create_signed_preview_url(3000, 120)
+    #   puts "Signed URL: #{signed_url.url}"
+    #   puts "Token: #{signed_url.token}"
+    def create_signed_preview_url(port, expires_in_seconds = nil)
+      sandbox_api.get_signed_port_preview_url(id, port, { expires_in_seconds: })
+    end
+
+    # Expires a signed preview URL for the sandbox at the specified port.
+    #
+    # @param port [Integer] The port to expire the signed preview URL on
+    # @param token [String] The token to expire
+    # @return [void]
+    #
+    # @example
+    #   sandbox.expire_signed_preview_url(3000, "token-value")
+    def expire_signed_preview_url(port, token)
+      sandbox_api.expire_signed_port_preview_url(id, port, token)
+    end
+
     # Refresh the Sandbox data from the API.
     #
     # @return [void]
     def refresh = process_response(sandbox_api.get_sandbox(id))
+
+    # Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+    #
+    # This method updates the sandbox's last activity timestamp without changing its state.
+    # It is useful for keeping long-running sessions alive while there is still user activity.
+    #
+    # @return [void]
+    #
+    # @example
+    #   sandbox.refresh_activity
+    def refresh_activity
+      sandbox_api.update_last_activity(id)
+      nil
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to refresh sandbox activity: #{e.message}"
+    end
 
     # Revokes an SSH access token for the sandbox.
     #
@@ -248,6 +329,25 @@ module Daytona
         message: "Sandbox #{id} failed to become ready within the #{timeout} seconds timeout period",
         setup: proc { process_response(sandbox_api.start_sandbox(id)) }
       ) { wait_for_states(operation: OPERATION_START, target_states: [DaytonaApiClient::SandboxState::STARTED]) }
+    end
+
+    # Recovers the Sandbox from a recoverable error and waits for it to be ready.
+    #
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s).
+    # @return [void]
+    #
+    # @example
+    #   sandbox = daytona.get('my-sandbox-id')
+    #   sandbox.recover(timeout: 40)  # Wait up to 40 seconds
+    #   puts 'Sandbox recovered successfully'
+    def recover(timeout = DEFAULT_TIMEOUT)
+      with_timeout(
+        timeout:,
+        message: "Sandbox #{id} failed to recover within the #{timeout} seconds timeout period",
+        setup: proc { process_response(sandbox_api.recover_sandbox(id)) }
+      ) { wait_for_states(operation: OPERATION_START, target_states: [DaytonaApiClient::SandboxState::STARTED]) }
+    rescue StandardError => e
+      raise Sdk::Error, "Failed to recover sandbox: #{e.message}"
     end
 
     # Stops the Sandbox and waits for it to be stopped.
@@ -297,6 +397,17 @@ module Daytona
       wait_for_states(operation: OPERATION_START, target_states: [DaytonaApiClient::SandboxState::STARTED])
     end
 
+    # Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
+    # reaches the 'stopped' state or encounters an error.
+    # Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
+    #
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s).
+    # @return [void]
+    def wait_for_sandbox_stop(_timeout = DEFAULT_TIMEOUT)
+      wait_for_states(operation: OPERATION_STOP, target_states: [DaytonaApiClient::SandboxState::STOPPED,
+                                                                  DaytonaApiClient::SandboxState::DESTROYED])
+    end
+
     private
 
     # Build toolbox API configuration with dynamic base URL from preview link
@@ -304,7 +415,7 @@ module Daytona
     def build_toolbox_api_config
       DaytonaToolboxApiClient::Configuration.new.configure do |cfg|
         # Get the proxy toolbox URL and append sandbox ID
-        proxy_toolbox_url = @get_proxy_toolbox_url.call
+        proxy_toolbox_url = @get_proxy_toolbox_url.call(id, target)
         proxy_toolbox_url += '/' unless proxy_toolbox_url.end_with?('/')
         full_url = "#{proxy_toolbox_url}#{id}"
         uri = URI(full_url)
