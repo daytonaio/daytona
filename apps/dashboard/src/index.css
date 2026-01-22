@@ -186,3 +186,7 @@ body {
     -moz-appearance: textfield;
   }
 }
+
+.scrollbar-sm {
+  @apply scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-background;
+}
