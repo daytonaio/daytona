@@ -122,6 +122,7 @@
   "sidebarconfig.opencode": "OpenCode",
   "sidebarconfig.claude": "Claude",
   "sidebarconfig.codex": "Codex",
+  "sidebarconfig.lettacode": "Letta Code",
   "sidebarconfig.trlGrpo": "TRL",
   "sidebarconfig.recursiveLms": "RLMs",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
