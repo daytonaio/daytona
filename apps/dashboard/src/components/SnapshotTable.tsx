@@ -3,19 +3,25 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { DEFAULT_SNAPSHOT_SORTING, SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn, getRelativeTimeString } from '@/lib/utils'
 import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  SortingState,
-  useReactTable,
-} from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
+  GetAllSnapshotsOrderEnum,
+  GetAllSnapshotsSortEnum,
+  OrganizationRolePermissionsEnum,
+  SnapshotDto,
+  SnapshotState,
+} from '@daytonaio/api-client'
+import { ColumnDef, flexRender, getCoreRowModel, SortingState, useReactTable } from '@tanstack/react-table'
+import { AlertTriangle, Box, CheckCircle, Loader2, MoreHorizontal, Pause, Timer } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
+import { Pagination } from './Pagination'
+import { SortOrderIcon } from './SortIcon'
+import { TableEmptyState } from './TableEmptyState'
+import { Badge, BadgeProps } from './ui/badge'
 import { Button } from './ui/button'
-import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Pause, Box } from 'lucide-react'
+import { Checkbox } from './ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,15 +29,80 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { Pagination } from './Pagination'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { Checkbox } from './ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { getRelativeTimeString } from '@/lib/utils'
-import { TableEmptyState } from './TableEmptyState'
-import { Loader2 } from 'lucide-react'
-import { Badge } from './ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+
+interface SortableHeaderProps {
+  column: any
+  label: string
+}
+
+const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
+  const sortDirection = column.getIsSorted()
+
+  return (
+    <button
+      type="button"
+      onClick={() => column.toggleSorting(sortDirection === 'asc')}
+      className="group/sort-button flex items-center gap-2 w-full"
+    >
+      {label}
+      <SortOrderIcon sort={sortDirection || null} hideDefaultState />
+    </button>
+  )
+}
+
+const convertApiSortingToTableSorting = (sorting: SnapshotSorting): SortingState => {
+  let id: string
+  switch (sorting.field) {
+    case GetAllSnapshotsSortEnum.NAME:
+      id = 'name'
+      break
+    case GetAllSnapshotsSortEnum.STATE:
+      id = 'state'
+      break
+    case GetAllSnapshotsSortEnum.CREATED_AT:
+      id = 'createdAt'
+      break
+    case GetAllSnapshotsSortEnum.LAST_USED_AT:
+    default:
+      id = 'lastUsedAt'
+      break
+  }
+
+  return [{ id, desc: sorting.direction === GetAllSnapshotsOrderEnum.DESC }]
+}
+
+const convertTableSortingToApiSorting = (sorting: SortingState): SnapshotSorting => {
+  if (!sorting.length) {
+    return DEFAULT_SNAPSHOT_SORTING
+  }
+
+  const sort = sorting[0]
+  let field: GetAllSnapshotsSortEnum
+
+  switch (sort.id) {
+    case 'name':
+      field = GetAllSnapshotsSortEnum.NAME
+      break
+    case 'state':
+      field = GetAllSnapshotsSortEnum.STATE
+      break
+    case 'createdAt':
+      field = GetAllSnapshotsSortEnum.CREATED_AT
+      break
+    case 'lastUsedAt':
+    default:
+      field = GetAllSnapshotsSortEnum.LAST_USED_AT
+      break
+  }
+
+  return {
+    field,
+    direction: sort.desc ? GetAllSnapshotsOrderEnum.DESC : GetAllSnapshotsOrderEnum.ASC,
+  }
+}
 
 interface DataTableProps {
   data: SnapshotDto[]
@@ -49,6 +120,8 @@ interface DataTableProps {
   pageCount: number
   totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  sorting: SnapshotSorting
+  onSortingChange: (sorting: SnapshotSorting) => void
 }
 
 export function SnapshotTable({
@@ -64,6 +137,8 @@ export function SnapshotTable({
   totalItems,
   onBulkDelete,
   onPaginationChange,
+  sorting,
+  onSortingChange,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -77,7 +152,7 @@ export function SnapshotTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
 
   const columns = useMemo(
     () =>
@@ -141,8 +216,12 @@ export function SnapshotTable({
     data,
     columns: columnsWithSelection,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
+    manualSorting: true,
+    onSortingChange: (updater) => {
+      const newTableSorting = typeof updater === 'function' ? updater(table.getState().sorting) : updater
+      const newApiSorting = convertTableSortingToApiSorting(newTableSorting)
+      onSortingChange(newApiSorting)
+    },
     manualPagination: true,
     pageCount: pageCount || 1,
     onPaginationChange: pagination
@@ -152,7 +231,7 @@ export function SnapshotTable({
         }
       : undefined,
     state: {
-      sorting,
+      sorting: tableSorting,
       pagination: {
         pageIndex: pagination?.pageIndex || 0,
         pageSize: pagination?.pageSize || 10,
@@ -181,7 +260,10 @@ export function SnapshotTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead className="px-2" key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={cn('px-2', header.column.getCanSort() && 'hover:bg-muted cursor-pointer')}
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -299,23 +381,21 @@ const getColumns = ({
   const columns: ColumnDef<SnapshotDto>[] = [
     {
       accessorKey: 'name',
-      header: 'Name',
+      enableSorting: true,
+      header: ({ column }) => <SortableHeader column={column} label="Name" />,
       cell: ({ row }) => {
         const snapshot = row.original
         return (
           <div className="flex items-center gap-2">
             {snapshot.name}
-            {snapshot.general && (
-              <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-blue-800 dark:bg-green-900 dark:text-green-300">
-                System
-              </span>
-            )}
+            {snapshot.general && <Badge variant="secondary">System</Badge>}
           </div>
         )
       },
     },
     {
       accessorKey: 'imageName',
+      enableSorting: false,
       header: 'Image',
       cell: ({ row }) => {
         const snapshot = row.original
@@ -331,6 +411,7 @@ const getColumns = ({
     },
     {
       accessorKey: 'regionIds',
+      enableSorting: false,
       header: 'Region',
       cell: ({ row }) => {
         const snapshot = row.original
@@ -375,18 +456,35 @@ const getColumns = ({
     },
     {
       id: 'resources',
+      enableSorting: false,
       header: 'Resources',
       cell: ({ row }) => {
         const snapshot = row.original
-        return `${snapshot.cpu}vCPU / ${snapshot.mem}GiB / ${snapshot.disk}GiB`
+
+        return (
+          <div className="flex items-center gap-2 w-full truncate">
+            <div className="whitespace-nowrap">
+              {snapshot.cpu} <span className="text-muted-foreground">vCPU</span>
+            </div>
+            <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
+            <div className="whitespace-nowrap">
+              {snapshot.mem} <span className="text-muted-foreground">GiB</span>
+            </div>
+            <div className="w-[1px] h-6 bg-muted-foreground/20 rounded-full inline-block"></div>
+            <div className="whitespace-nowrap">
+              {snapshot.disk} <span className="text-muted-foreground">GiB</span>
+            </div>
+          </div>
+        )
       },
     },
     {
       accessorKey: 'state',
-      header: 'State',
+      enableSorting: true,
+      header: ({ column }) => <SortableHeader column={column} label="State" />,
       cell: ({ row }) => {
         const snapshot = row.original
-        const color = getStateColor(snapshot.state)
+        const variant = getStateBadgeVariant(snapshot.state)
 
         if (
           (snapshot.state === SnapshotState.ERROR || snapshot.state === SnapshotState.BUILD_FAILED) &&
@@ -396,10 +494,7 @@ const getColumns = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className={`flex items-center gap-2 ${color}`}>
-                    {getStateIcon(snapshot.state)}
-                    {getStateLabel(snapshot.state)}
-                  </div>
+                  <Badge variant={variant}>{getStateLabel(snapshot.state)}</Badge>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p className="max-w-[300px]">{snapshot.errorReason}</p>
@@ -409,17 +504,13 @@ const getColumns = ({
           )
         }
 
-        return (
-          <div className={`flex items-center gap-2 ${color}`}>
-            {getStateIcon(snapshot.state)}
-            {getStateLabel(snapshot.state)}
-          </div>
-        )
+        return <Badge variant={variant}>{getStateLabel(snapshot.state)}</Badge>
       },
     },
     {
       accessorKey: 'createdAt',
-      header: 'Created',
+      enableSorting: true,
+      header: ({ column }) => <SortableHeader column={column} label="Created" />,
       cell: ({ row }) => {
         const snapshot = row.original
         return snapshot.general ? '' : getRelativeTimeString(snapshot.createdAt).relativeTimeString
@@ -427,7 +518,8 @@ const getColumns = ({
     },
     {
       accessorKey: 'lastUsedAt',
-      header: 'Last Used',
+      enableSorting: true,
+      header: ({ column }) => <SortableHeader column={column} label="Last Used" />,
       cell: ({ row }) => {
         const snapshot = row.original
         return snapshot.general ? '' : getRelativeTimeString(snapshot.lastUsedAt).relativeTimeString
@@ -507,17 +599,17 @@ const getStateIcon = (state: SnapshotState) => {
   }
 }
 
-const getStateColor = (state: SnapshotState) => {
+const getStateBadgeVariant = (state: SnapshotState): BadgeProps['variant'] => {
   switch (state) {
     case SnapshotState.ACTIVE:
-      return 'text-green-500'
+      return 'success'
     case SnapshotState.INACTIVE:
-      return 'text-gray-500 dark:text-gray-400'
+      return 'secondary'
     case SnapshotState.ERROR:
     case SnapshotState.BUILD_FAILED:
-      return 'text-red-500'
+      return 'destructive'
     default:
-      return 'text-gray-600 dark:text-gray-400'
+      return 'secondary'
   }
 }
 

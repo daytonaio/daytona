@@ -18,34 +18,36 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { queryKeys } from '@/hooks/queries/queryKeys'
+import {
+  DEFAULT_SNAPSHOT_SORTING,
+  SnapshotQueryParams,
+  SnapshotSorting,
+  useSnapshotsQuery,
+} from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { getRegionFullDisplayName } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { useRegions } from '@/hooks/useRegions'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getRegionFullDisplayName } from '@/lib/utils'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
+  const queryClient = useQueryClient()
 
   const { snapshotApi } = useApi()
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
-  const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshots>({
-    items: [],
-    total: 0,
-    page: 1,
-    totalPages: 0,
-  })
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
-  const [loadingTable, setLoadingTable] = useState(true)
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newSnapshotName, setNewSnapshotName] = useState('')
@@ -65,78 +67,71 @@ const Snapshots: React.FC = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   })
 
-  const fetchSnapshots = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoadingTable(true)
-      }
-      try {
-        const response = (
-          await snapshotApi.getAllSnapshots(
-            selectedOrganization.id,
-            paginationParams.pageIndex + 1,
-            paginationParams.pageSize,
-          )
-        ).data
-        setSnapshotsData(response)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch snapshots')
-      } finally {
-        setLoadingTable(false)
-      }
+  const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
+
+  const queryParams = useMemo<SnapshotQueryParams>(
+    () => ({
+      page: paginationParams.pageIndex + 1,
+      pageSize: paginationParams.pageSize,
+      sorting,
+    }),
+    [paginationParams, sorting],
+  )
+
+  const baseQueryKey = useMemo(() => queryKeys.snapshots.all, [])
+
+  const queryKey = useMemo(
+    () => queryKeys.snapshots.list(selectedOrganization?.id ?? '', queryParams),
+    [selectedOrganization?.id, queryParams],
+  )
+
+  const {
+    data: snapshotsData,
+    isLoading: snapshotsDataIsLoading,
+    error: snapshotsDataError,
+  } = useSnapshotsQuery(queryParams)
+
+  useEffect(() => {
+    if (snapshotsDataError) {
+      handleApiError(snapshotsDataError, 'Failed to fetch snapshots')
+    }
+  }, [snapshotsDataError])
+
+  const updateSnapshotInCache = useCallback(
+    (snapshotId: string, updates: Partial<SnapshotDto>) => {
+      queryClient.setQueryData(queryKey, (oldData: PaginatedSnapshots | undefined) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          items: oldData.items.map((snapshot) => (snapshot.id === snapshotId ? { ...snapshot, ...updates } : snapshot)),
+        }
+      })
     },
-    [snapshotApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
+    [queryClient, queryKey],
+  )
+
+  const markAllSnapshotQueriesAsStale = useCallback(
+    async (shouldRefetchActiveQueries = false) => {
+      queryClient.invalidateQueries({
+        queryKey: baseQueryKey,
+        refetchType: shouldRefetchActiveQueries ? 'active' : 'none',
+      })
+    },
+    [queryClient, baseQueryKey],
   )
 
   const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
     setPaginationParams({ pageIndex, pageSize })
   }, [])
 
-  useEffect(() => {
-    fetchSnapshots()
-  }, [fetchSnapshots])
+  const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
+    setSorting(newSorting)
+    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [])
 
   useEffect(() => {
-    const handleSnapshotCreatedEvent = (snapshot: SnapshotDto) => {
-      if (paginationParams.pageIndex === 0) {
-        setSnapshotsData((prev) => {
-          if (prev.items.some((i) => i.id === snapshot.id)) {
-            return prev
-          }
-          // Determine where the "unused" snapshots start
-          const firstUnusedIndex = prev.items.findIndex((i) => !i.lastUsedAt)
-          if (firstUnusedIndex === -1) {
-            // No unused snapshots yet; append to the end
-            const newSnapshots = [...prev.items, snapshot]
-            const newTotal = prev.total + 1
-            return {
-              ...prev,
-              items: newSnapshots.slice(0, paginationParams.pageSize),
-              total: newTotal,
-              totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-            }
-          }
-
-          // Insert within the unused section keeping newest-first (by createdAt)
-          const unusedSection = prev.items.slice(firstUnusedIndex)
-          const relativeIndex = unusedSection.findIndex((i) => i.createdAt <= snapshot.createdAt)
-          const insertIndex = firstUnusedIndex + (relativeIndex === -1 ? unusedSection.length : relativeIndex)
-
-          const newSnapshots = [...prev.items]
-          newSnapshots.splice(insertIndex, 0, snapshot)
-
-          const newTotal = prev.total + 1
-          return {
-            ...prev,
-            items: newSnapshots.slice(0, paginationParams.pageSize),
-            total: newTotal,
-            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-          }
-        })
-      }
+    const handleSnapshotCreatedEvent = () => {
+      markAllSnapshotQueriesAsStale(true)
     }
 
     const handleSnapshotStateUpdatedEvent = (data: {
@@ -144,24 +139,11 @@ const Snapshots: React.FC = () => {
       oldState: SnapshotState
       newState: SnapshotState
     }) => {
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === data.snapshot.id ? data.snapshot : i)),
-      }))
+      updateSnapshotInCache(data.snapshot.id, data.snapshot)
     }
 
-    const handleSnapshotRemovedEvent = (snapshotId: string) => {
-      setSnapshotsData((prev) => {
-        const newTotal = Math.max(0, prev.total - 1)
-        const newItems = prev.items.filter((i) => i.id !== snapshotId)
-
-        return {
-          ...prev,
-          items: newItems,
-          total: newTotal,
-          totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-        }
-      })
+    const handleSnapshotRemovedEvent = () => {
+      markAllSnapshotQueriesAsStale(true)
     }
 
     if (!notificationSocket) {
@@ -177,16 +159,16 @@ const Snapshots: React.FC = () => {
       notificationSocket.off('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
       notificationSocket.off('snapshot.removed', handleSnapshotRemovedEvent)
     }
-  }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
+  }, [notificationSocket, markAllSnapshotQueriesAsStale, updateSnapshotInCache])
 
   useEffect(() => {
-    if (snapshotsData.items.length === 0 && paginationParams.pageIndex > 0) {
+    if (snapshotsData?.items.length === 0 && paginationParams.pageIndex > 0) {
       setPaginationParams((prev) => ({
         ...prev,
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [snapshotsData.items.length, paginationParams.pageIndex])
+  }, [snapshotsData?.items.length, paginationParams.pageIndex])
 
   const validateSnapshotName = (name: string): string | null => {
     if (name.includes(' ')) {
@@ -286,12 +268,7 @@ const Snapshots: React.FC = () => {
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
 
     try {
       await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
@@ -300,11 +277,7 @@ const Snapshots: React.FC = () => {
       toast.success(`Deleting snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -312,23 +285,14 @@ const Snapshots: React.FC = () => {
 
   const handleActivate = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.PENDING } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.PENDING })
 
     try {
       await snapshotApi.activateSnapshot(snapshot.id, selectedOrganization?.id)
       toast.success(`Activating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to activate snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -336,23 +300,14 @@ const Snapshots: React.FC = () => {
 
   const handleDeactivate = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.INACTIVE } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.INACTIVE })
 
     try {
       await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
       toast.success(`Deactivating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to deactivate snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -367,21 +322,14 @@ const Snapshots: React.FC = () => {
     setLoadingSnapshots((prev) => ({ ...prev, ...snapshots.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
 
     for (const snapshot of snapshots) {
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
 
       try {
         await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
         toast.success(`Deleting snapshot ${snapshot.name}`)
       } catch (error) {
         handleApiError(error, `Failed to delete snapshot ${snapshot.name}`)
-
-        setSnapshotsData((prev) => ({
-          ...prev,
-          items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-        }))
+        updateSnapshotInCache(snapshot.id, { state: snapshot.state })
 
         if (snapshots.indexOf(snapshot) < snapshots.length - 1) {
           const shouldContinue = window.confirm(
@@ -420,7 +368,13 @@ const Snapshots: React.FC = () => {
         >
           {writePermitted && (
             <DialogTrigger asChild>
-              <Button variant="default" size="sm" disabled={loadingTable} className="ml-auto" title="Create Snapshot">
+              <Button
+                variant="default"
+                size="sm"
+                disabled={snapshotsDataIsLoading}
+                className="ml-auto"
+                title="Create Snapshot"
+              >
                 <Plus className="w-4 h-4" />
                 Create Snapshot
               </Button>
@@ -577,8 +531,8 @@ const Snapshots: React.FC = () => {
 
       <PageContent size="full">
         <SnapshotTable
-          data={snapshotsData.items}
-          loading={loadingTable}
+          data={snapshotsData?.items ?? []}
+          loading={snapshotsDataIsLoading}
           loadingSnapshots={loadingSnapshots}
           getRegionName={getRegionName}
           onDelete={(snapshot) => {
@@ -588,13 +542,15 @@ const Snapshots: React.FC = () => {
           onBulkDelete={handleBulkDelete}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
-          pageCount={snapshotsData.totalPages}
-          totalItems={snapshotsData.total}
+          pageCount={snapshotsData?.totalPages ?? 0}
+          totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,
             pageSize: paginationParams.pageSize,
           }}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
         />
 
         {snapshotToDelete && (
