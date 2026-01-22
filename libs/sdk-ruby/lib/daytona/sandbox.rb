@@ -405,7 +405,7 @@ module Daytona
     # @return [void]
     def wait_for_sandbox_stop(_timeout = DEFAULT_TIMEOUT)
       wait_for_states(operation: OPERATION_STOP, target_states: [DaytonaApiClient::SandboxState::STOPPED,
-                                                                  DaytonaApiClient::SandboxState::DESTROYED])
+                                                                 DaytonaApiClient::SandboxState::DESTROYED])
     end
 
     private

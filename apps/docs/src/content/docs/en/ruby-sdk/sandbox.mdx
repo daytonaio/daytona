@@ -398,6 +398,17 @@ def computer_use()
 
 - `Daytona:ComputerUse`
 
+#### code_interpreter()
+
+```ruby
+def code_interpreter()
+
+```
+
+**Returns**:
+
+- `Daytona:CodeInterpreter`
+
 #### archive()
 
 ```ruby
@@ -511,6 +522,49 @@ def delete()
 
 - `void`
 
+#### get_user_home_dir()
+
+```ruby
+def get_user_home_dir()
+
+```
+
+Gets the user's home directory path for the logged in user inside the Sandbox.
+
+**Returns**:
+
+- `String` - The absolute path to the Sandbox user's home directory for the logged in user
+
+**Examples:**
+
+```ruby
+user_home_dir = sandbox.get_user_home_dir
+puts "Sandbox user home: #{user_home_dir}"
+
+```
+
+#### get_work_dir()
+
+```ruby
+def get_work_dir()
+
+```
+
+Gets the working directory path inside the Sandbox.
+
+**Returns**:
+
+- `String` - The absolute path to the Sandbox working directory. Uses the WORKDIR specified
+in the Dockerfile if present, or falling back to the user's home directory if not.
+
+**Examples:**
+
+```ruby
+work_dir = sandbox.get_work_dir
+puts "Sandbox working directory: #{work_dir}"
+
+```
+
 #### labels=()
 
 ```ruby
@@ -547,6 +601,59 @@ to the URL.
 
 - `DaytonaApiClient:PortPreviewUrl`
 
+#### create_signed_preview_url()
+
+```ruby
+def create_signed_preview_url(port, expires_in_seconds)
+
+```
+
+Creates a signed preview URL for the sandbox at the specified port.
+
+**Parameters**:
+
+- `port` _Integer_ - The port to open the preview link on
+- `expires_in_seconds` _Integer, nil_ - The number of seconds the signed preview URL
+will be valid for. Defaults to 60 seconds.
+
+**Returns**:
+
+- `DaytonaApiClient:SignedPortPreviewUrl` - The signed preview URL response object
+
+**Examples:**
+
+```ruby
+signed_url = sandbox.create_signed_preview_url(3000, 120)
+puts "Signed URL: #{signed_url.url}"
+puts "Token: #{signed_url.token}"
+
+```
+
+#### expire_signed_preview_url()
+
+```ruby
+def expire_signed_preview_url(port, token)
+
+```
+
+Expires a signed preview URL for the sandbox at the specified port.
+
+**Parameters**:
+
+- `port` _Integer_ - The port to expire the signed preview URL on
+- `token` _String_ - The token to expire
+
+**Returns**:
+
+- `void`
+
+**Examples:**
+
+```ruby
+sandbox.expire_signed_preview_url(3000, "token-value")
+
+```
+
 #### refresh()
 
 ```ruby
@@ -559,6 +666,29 @@ Refresh the Sandbox data from the API.
 **Returns**:
 
 - `void`
+
+#### refresh_activity()
+
+```ruby
+def refresh_activity()
+
+```
+
+Refreshes the sandbox activity to reset the timer for automated lifecycle management actions.
+
+This method updates the sandbox's last activity timestamp without changing its state.
+It is useful for keeping long-running sessions alive while there is still user activity.
+
+**Returns**:
+
+- `void`
+
+**Examples:**
+
+```ruby
+sandbox.refresh_activity
+
+```
 
 #### revoke_ssh_access()
 
@@ -593,6 +723,32 @@ Starts the Sandbox and waits for it to be ready.
 **Returns**:
 
 - `void`
+
+#### recover()
+
+```ruby
+def recover(timeout)
+
+```
+
+Recovers the Sandbox from a recoverable error and waits for it to be ready.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s).
+
+**Returns**:
+
+- `void`
+
+**Examples:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+sandbox.recover(timeout: 40)  # Wait up to 40 seconds
+puts 'Sandbox recovered successfully'
+
+```
 
 #### stop()
 
@@ -658,6 +814,25 @@ def wait_for_sandbox_start(_timeout)
 
 Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
 reaches the 'started' state or encounters an error.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s).
+
+**Returns**:
+
+- `void`
+
+#### wait_for_sandbox_stop()
+
+```ruby
+def wait_for_sandbox_stop(_timeout)
+
+```
+
+Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
+reaches the 'stopped' state or encounters an error.
+Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
 **Parameters**:
 

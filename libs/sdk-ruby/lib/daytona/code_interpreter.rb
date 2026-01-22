@@ -70,10 +70,10 @@ module Daytona
     #     on_error: method(:handle_error),
     #     timeout: 10
     #   )
-    def run_code(code, context: nil, on_stdout: nil, on_stderr: nil, on_error: nil, envs: nil, timeout: nil) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength, Metrics/ParameterLists, Metrics/PerceivedComplexity
+    def run_code(code, context: nil, on_stdout: nil, on_stderr: nil, on_error: nil, envs: nil, timeout: nil) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength, Metrics/ParameterLists
       # Get WebSocket URL
       base_url = @toolbox_api.api_client.config.base_url
-      ws_url = base_url.sub(%r{^http}, 'ws') + '/process/interpreter/execute'
+      ws_url = base_url.sub(/^http/, 'ws') + '/process/interpreter/execute'
 
       result = ExecutionResult.new
 

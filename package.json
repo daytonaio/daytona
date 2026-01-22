@@ -291,6 +291,9 @@
     "*.go": [
       "gofmt -w"
     ],
+    "*.rb": [
+      "rubocop -a --fail-level fatal"
+    ],
     "*.{mdx,md}": [
       "markdownlint-cli2 --fix"
     ],
