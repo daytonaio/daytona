@@ -70,6 +70,8 @@ __pycache__/
 *.gem
 **/.bundle/
 **/vendor/bundle
+**/Gemfile.lock
+!/Gemfile.lock
 
 examples/**/*.png
 
