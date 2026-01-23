@@ -2133,6 +2133,48 @@ paths:
       summary: Stop sandbox
       tags:
         - sandbox
+  /sandbox/{sandboxIdOrName}/resize:
+    post:
+      operationId: resizeSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResizeSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Sandbox has been resized
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Resize sandbox resources
+      tags:
+        - sandbox
   /sandbox/{sandboxIdOrName}/labels:
     put:
       operationId: replaceLabels
@@ -10335,6 +10377,41 @@ components:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the sandbox
       type: object
+    ResizeSandbox:
+      example:
+        disk: 20
+        memory: 4
+        cpu: 2
+        hot: false
+        gpu: 0
+      properties:
+        cpu:
+          description: 'CPU cores to allocate to the sandbox (minimum: 1)'
+          example: 2
+          minimum: 1
+          type: integer
+        memory:
+          description: 'Memory in GB to allocate to the sandbox (minimum: 1)'
+          example: 4
+          minimum: 1
+          type: integer
+        disk:
+          description: Disk space in GB to allocate to the sandbox (can only be increased)
+          example: 20
+          minimum: 1
+          type: integer
+        gpu:
+          description: GPU units to allocate (not supported - will throw error if
+            provided)
+          example: 0
+          type: integer
+        hot:
+          default: false
+          description: "If true, performs hot resize on a running sandbox (only CPU/memory\
+            \ increase allowed). If false, sandbox must be stopped for full resize."
+          example: false
+          type: boolean
+      type: object
     SandboxLabels:
       example:
         labels:
@@ -13183,6 +13260,7 @@ components:
         - START_SANDBOX
         - STOP_SANDBOX
         - DESTROY_SANDBOX
+        - RESIZE_SANDBOX
         - CREATE_BACKUP
         - BUILD_SNAPSHOT
         - PULL_SNAPSHOT

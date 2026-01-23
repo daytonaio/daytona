@@ -164,6 +164,7 @@ from daytona_api_client.models.region_usage_overview import RegionUsageOverview
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
 from daytona_api_client.models.replace_request import ReplaceRequest
 from daytona_api_client.models.replace_result import ReplaceResult
+from daytona_api_client.models.resize_sandbox import ResizeSandbox
 from daytona_api_client.models.runner import Runner
 from daytona_api_client.models.runner_full import RunnerFull
 from daytona_api_client.models.runner_health_metrics import RunnerHealthMetrics

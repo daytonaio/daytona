@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere, ILike } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
+import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
@@ -262,6 +263,10 @@ export class SandboxService {
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
+    }
+
+    if (sandbox.resizing) {
+      throw new SandboxError('Resize operation in progress')
     }
 
     if (sandbox.autoDeleteInterval === 0) {
@@ -1173,6 +1178,10 @@ export class SandboxService {
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
+
+    if (sandbox.resizing) {
+      throw new SandboxError('Resize operation in progress')
+    }
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
@@ -1208,6 +1217,10 @@ export class SandboxService {
 
       if (sandbox.pending) {
         throw new SandboxError('Sandbox state change in progress')
+      }
+
+      if (sandbox.resizing) {
+        throw new SandboxError('Resize operation in progress')
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -1266,6 +1279,10 @@ export class SandboxService {
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
+    }
+
+    if (sandbox.resizing) {
+      throw new SandboxError('Resize operation in progress')
     }
 
     sandbox.pending = true
@@ -1335,6 +1352,125 @@ export class SandboxService {
     // Now that sandbox is in STOPPED state, use the normal start flow
     // This handles quota validation, pending usage, event emission, etc.
     return await this.start(sandbox.id, organization)
+  }
+
+  async resize(sandboxIdOrName: string, resizeDto: ResizeSandboxDto, organization: Organization): Promise<Sandbox> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+
+    // Validate sandbox is in a valid state for resize
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
+      throw new BadRequestError('Sandbox must be in STARTED or STOPPED state to resize')
+    }
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    if (sandbox.resizing) {
+      throw new SandboxError('Resize operation already in progress')
+    }
+
+    // GPU is not supported
+    if (resizeDto.gpu !== undefined) {
+      throw new BadRequestError('GPU resize is not supported')
+    }
+
+    // If no resize parameters provided, return sandbox as-is
+    if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
+      return sandbox
+    }
+
+    const isHotResize = resizeDto.hot === true && sandbox.state === SandboxState.STARTED
+
+    // Validate hot resize constraints
+    if (isHotResize) {
+      // Hot resize: only CPU and memory can be increased, disk cannot be changed
+      if (resizeDto.disk !== undefined) {
+        throw new BadRequestError('Disk cannot be changed during hot resize')
+      }
+
+      if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
+        throw new BadRequestError('CPU can only be increased during hot resize')
+      }
+
+      if (resizeDto.memory !== undefined && resizeDto.memory < sandbox.mem) {
+        throw new BadRequestError('Memory can only be increased during hot resize')
+      }
+    }
+
+    // Disk can only be increased (never decreased)
+    if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
+      throw new BadRequestError('Disk size can only be increased, not decreased')
+    }
+
+    // Calculate new resource values
+    const newCpu = resizeDto.cpu ?? sandbox.cpu
+    const newMem = resizeDto.memory ?? sandbox.mem
+    const newDisk = resizeDto.disk ?? sandbox.disk
+
+    // Validate organization quotas for the new resource values
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    // Calculate the delta for quota validation
+    const cpuDelta = newCpu - sandbox.cpu
+    const memDelta = newMem - sandbox.mem
+    const diskDelta = newDisk - sandbox.disk
+
+    // Only validate quotas if resources are increasing
+    if (cpuDelta > 0 || memDelta > 0 || diskDelta > 0) {
+      await this.validateOrganizationQuotas(
+        organization,
+        sandbox.region,
+        cpuDelta > 0 ? cpuDelta : 0,
+        memDelta > 0 ? memDelta : 0,
+        diskDelta > 0 ? diskDelta : 0,
+        sandbox.id,
+      )
+    }
+
+    // Set resizing flag to prevent other operations
+    sandbox.resizing = true
+    await this.sandboxRepository.saveWhere(sandbox, { resizing: false })
+
+    // Get runner and perform resize
+    if (!sandbox.runnerId) {
+      sandbox.resizing = false
+      await this.sandboxRepository.save(sandbox)
+      throw new BadRequestError('Sandbox has no runner assigned')
+    }
+
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (!runner) {
+      sandbox.resizing = false
+      await this.sandboxRepository.save(sandbox)
+      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
+    }
+
+    try {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      // Only call runner if CPU or memory is changing (disk resize not implemented on runner)
+      if (resizeDto.cpu !== undefined || resizeDto.memory !== undefined) {
+        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+      }
+
+      // For V0 runners, update resources immediately
+      // For V2 runners, job handler will update resources on completion
+      if (runner.apiVersion === '0') {
+        sandbox.cpu = newCpu
+        sandbox.mem = newMem
+        sandbox.disk = newDisk
+        sandbox.resizing = false
+        await this.sandboxRepository.save(sandbox)
+      }
+
+      return await this.findOneByIdOrName(sandbox.id, organization.id)
+    } catch (error) {
+      // Reset resizing flag on error
+      sandbox.resizing = false
+      await this.sandboxRepository.save(sandbox)
+      throw error
+    }
   }
 
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {

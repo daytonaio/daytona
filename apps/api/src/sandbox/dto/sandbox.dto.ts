@@ -169,6 +169,14 @@ export class SandboxDto {
   recoverable?: boolean
 
   @ApiPropertyOptional({
+    description: 'Whether a resize operation is in progress.',
+    example: false,
+    required: false,
+  })
+  @IsOptional()
+  resizing?: boolean
+
+  @ApiPropertyOptional({
     description: 'The state of the backup',
     enum: BackupState,
     example: Object.values(BackupState)[0],
@@ -292,6 +300,7 @@ export class SandboxDto {
       desiredState: sandbox.desiredState,
       errorReason: sandbox.errorReason,
       recoverable: sandbox.recoverable,
+      resizing: sandbox.resizing,
       backupState: sandbox.backupState,
       backupCreatedAt: sandbox.lastBackupAt ? new Date(sandbox.lastBackupAt).toISOString() : undefined,
       autoStopInterval: sandbox.autoStopInterval,

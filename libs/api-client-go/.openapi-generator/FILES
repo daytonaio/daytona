@@ -137,6 +137,7 @@ model_region_usage_overview.go
 model_registry_push_access_dto.go
 model_replace_request.go
 model_replace_result.go
+model_resize_sandbox.go
 model_runner.go
 model_runner_full.go
 model_runner_health_metrics.go

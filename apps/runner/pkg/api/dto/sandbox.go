@@ -26,6 +26,7 @@ type ResizeSandboxDTO struct {
 	Cpu    int64 `json:"cpu" validate:"min=1"`
 	Gpu    int64 `json:"gpu" validate:"min=0"`
 	Memory int64 `json:"memory" validate:"min=1"`
+	Disk   int64 `json:"disk,omitempty"`
 } //	@name	ResizeSandboxDTO
 
 type UpdateNetworkSettingsDTO struct {
