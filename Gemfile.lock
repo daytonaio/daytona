@@ -221,9 +221,9 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  daytona (= 0.0.0.pre.dev)!
-  daytona_api_client (= 0.0.0.pre.dev)!
-  daytona_toolbox_api_client (= 0.0.0.pre.dev)!
+  daytona (>= 0.0.0.pre.dev)!
+  daytona_api_client (>= 0.0.0.pre.dev)!
+  daytona_toolbox_api_client (>= 0.0.0.pre.dev)!
   pry (~> 0.15)
   pry-byebug
   rake (~> 13.0)
