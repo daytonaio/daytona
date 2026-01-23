@@ -4,49 +4,61 @@ This directory contains example scripts demonstrating how to use the Daytona Rub
 
 ## Prerequisites
 
-1. **Environment Variables** - Set the following before running examples:
+1. **Environment Variables** - Configure your API credentials using one of these methods:
+
+   **Option A: Using .env files (Recommended)**
+
+   Create a `.env.local` file in the directory where you run your code:
+
+   ```bash
+   # Required (choose one authentication method)
+   DAYTONA_API_KEY=your-api-key
+   # OR
+   DAYTONA_JWT_TOKEN=your-jwt-token
+   DAYTONA_ORGANIZATION_ID=your-org-id  # required when using JWT token
+
+   # Optional
+   DAYTONA_API_URL=https://app.daytona.io/api  # defaults to this if not specified
+   DAYTONA_TARGET=us  # defaults to your organization's default region
+   ```
+
+   The SDK automatically loads only Daytona-specific variables from `.env` and `.env.local` files in the current working directory, where `.env.local` overrides `.env`. Runtime environment variables always take precedence over `.env` files.
+
+   **Option B: Export manually**
 
    ```bash
    export DAYTONA_API_KEY="your-api-key"
    export DAYTONA_API_URL="https://app.daytona.io/api"  # optional, this is the default
+   export DAYTONA_TARGET="us"  # optional
    ```
 
 2. **Ruby** - Ensure Ruby is installed (the devcontainer includes Ruby 3.4.5)
 
+3. **Devcontainer Setup** - The devcontainer automatically sets up the Ruby environment with the SDK libraries in your `RUBYLIB` path
+
 ## Running Examples
 
-Use the `daytona-ruby` command to run any example:
+Use the `ruby` command to run any example:
 
 ```bash
-daytona-ruby examples/ruby/<example-folder>/<script>.rb
+ruby examples/ruby/<example-folder>/<script>.rb
 ```
 
 For example:
 
 ```bash
-daytona-ruby examples/ruby/exec-command/exec_session.rb
-daytona-ruby examples/ruby/lifecycle/lifecycle.rb
-daytona-ruby examples/ruby/file-operations/main.rb
+ruby examples/ruby/exec-command/exec_session.rb
+ruby examples/ruby/lifecycle/lifecycle.rb
+ruby examples/ruby/file-operations/main.rb
 ```
 
-## Manual Setup (if alias not available)
+The SDK and all client libraries are loaded from source files in the `libs/` directory, so any changes you make to the SDK will be reflected immediately when you run examples.
 
-If the `daytona-ruby` alias isn't available, you can run examples manually:
+## How It Works
 
-```bash
-cd /workspaces/daytona && \
-BUNDLE_GEMFILE=/workspaces/daytona/libs/sdk-ruby/Gemfile \
-bundle exec ruby \
-     -I/workspaces/daytona/libs/sdk-ruby/lib \
-     -I/workspaces/daytona/libs/api-client-ruby/lib \
-     -I/workspaces/daytona/libs/toolbox-api-client-ruby/lib \
-     -r daytona \
-     examples/ruby/lifecycle/lifecycle.rb
-```
+The devcontainer sets up the following environment variables:
 
-Or using bundler from the SDK directory:
+- **`RUBYLIB`** - Includes paths to the SDK and client library source files
+- **`BUNDLE_GEMFILE`** - Points to the SDK's Gemfile for dependency management
 
-```bash
-cd /workspaces/daytona/libs/sdk-ruby
-bundle exec ruby -r bundler/setup -r daytona ../../examples/ruby/lifecycle/lifecycle.rb
-```
+This allows you to use plain `ruby` commands while still loading everything from source, ensuring all changes are reflected automatically.

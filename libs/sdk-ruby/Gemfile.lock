@@ -1,22 +1,22 @@
 PATH
   remote: ../api-client-ruby
   specs:
-    daytona_api_client (1.0.0)
+    daytona_api_client (0.0.0.pre.dev)
       typhoeus (~> 1.0, >= 1.0.1)
 
 PATH
   remote: ../toolbox-api-client-ruby
   specs:
-    daytona_toolbox_api_client (1.0.0)
+    daytona_toolbox_api_client (0.0.0.pre.dev)
       typhoeus (~> 1.0, >= 1.0.1)
 
 PATH
   remote: .
   specs:
-    daytona (1.0.0)
+    daytona (0.0.0.pre.dev)
       aws-sdk-s3 (~> 1.0)
-      daytona_api_client (= 1.0.0)
-      daytona_toolbox_api_client (= 1.0.0)
+      daytona_api_client (= 0.0.0.pre.dev)
+      daytona_toolbox_api_client (= 0.0.0.pre.dev)
       dotenv (~> 2.0)
       toml (~> 0.3)
       websocket-client-simple (~> 0.6)
@@ -28,8 +28,8 @@ GEM
       public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.3)
     aws-eventstream (1.4.0)
-    aws-partitions (1.1194.0)
-    aws-sdk-core (3.239.2)
+    aws-partitions (1.1209.0)
+    aws-sdk-core (3.241.4)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -37,11 +37,11 @@ GEM
       bigdecimal
       jmespath (~> 1, >= 1.6.1)
       logger
-    aws-sdk-kms (1.118.0)
-      aws-sdk-core (~> 3, >= 3.239.1)
+    aws-sdk-kms (1.121.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
       aws-sigv4 (~> 1.5)
-    aws-sdk-s3 (1.207.0)
-      aws-sdk-core (~> 3, >= 3.234.0)
+    aws-sdk-s3 (1.212.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.12.1)
@@ -49,7 +49,7 @@ GEM
     backport (1.2.0)
     base64 (0.3.0)
     benchmark (0.5.0)
-    bigdecimal (4.0.0)
+    bigdecimal (4.0.1)
     coderay (1.1.3)
     crack (1.0.1)
       bigdecimal
@@ -60,15 +60,21 @@ GEM
     ethon (0.15.0)
       ffi (>= 1.15.0)
     event_emitter (0.2.6)
-    ffi (1.17.2-aarch64-linux-gnu)
-    ffi (1.17.2-arm64-darwin)
-    ffi (1.17.2-x86_64-linux-gnu)
+    ffi (1.17.3-aarch64-linux-gnu)
+    ffi (1.17.3-aarch64-linux-musl)
+    ffi (1.17.3-arm-linux-gnu)
+    ffi (1.17.3-arm-linux-musl)
+    ffi (1.17.3-arm64-darwin)
+    ffi (1.17.3-x86_64-darwin)
+    ffi (1.17.3-x86_64-linux-gnu)
+    ffi (1.17.3-x86_64-linux-musl)
     hashdiff (1.2.1)
+    io-console (0.8.2)
     jaro_winkler (1.6.1)
     jmespath (1.6.2)
     json (2.18.0)
-    kramdown (2.5.1)
-      rexml (>= 3.3.9)
+    kramdown (2.5.2)
+      rexml (>= 3.4.4)
     kramdown-parser-gfm (1.1.0)
       kramdown (~> 2.0)
     language_server-protocol (3.17.0.5)
@@ -76,34 +82,48 @@ GEM
     logger (1.7.0)
     method_source (1.1.0)
     mutex_m (0.3.0)
-    nokogiri (1.18.10-aarch64-linux-gnu)
+    nokogiri (1.19.0-aarch64-linux-gnu)
       racc (~> 1.4)
-    nokogiri (1.18.10-arm64-darwin)
+    nokogiri (1.19.0-aarch64-linux-musl)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-linux-gnu)
+    nokogiri (1.19.0-arm-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.0-arm-linux-musl)
+      racc (~> 1.4)
+    nokogiri (1.19.0-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.0-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.0-x86_64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.0-x86_64-linux-musl)
       racc (~> 1.4)
     observer (0.1.2)
+    open3 (0.2.1)
     ostruct (0.6.3)
     parallel (1.27.0)
-    parser (3.3.10.0)
+    parser (3.3.10.1)
       ast (~> 2.4.1)
       racc
     parslet (2.0.0)
-    prism (1.6.0)
-    pry (0.15.2)
+    prism (1.8.0)
+    pry (0.16.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    public_suffix (7.0.0)
+      reline (>= 0.6.0)
+    public_suffix (7.0.2)
     racc (1.8.1)
     rainbow (3.1.1)
     rake (13.3.1)
-    rbs (3.9.5)
+    rbs (3.10.2)
       logger
     regexp_parser (2.11.3)
-    reverse_markdown (3.0.1)
+    reline (0.6.3)
+      io-console (~> 0.5)
+    reverse_markdown (3.0.2)
       nokogiri
     rexml (3.4.4)
-    rubocop (1.81.7)
+    rubocop (1.82.1)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.1.0)
@@ -111,26 +131,28 @@ GEM
       parser (>= 3.3.0.2)
       rainbow (>= 2.2.2, < 4.0)
       regexp_parser (>= 2.9.3, < 3.0)
-      rubocop-ast (>= 1.47.1, < 2.0)
+      rubocop-ast (>= 1.48.0, < 2.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 2.4.0, < 4.0)
-    rubocop-ast (1.48.0)
+    rubocop-ast (1.49.0)
       parser (>= 3.3.7.2)
-      prism (~> 1.4)
+      prism (~> 1.7)
     rubocop-rake (0.7.1)
       lint_roller (~> 1.1)
       rubocop (>= 1.72.1)
     ruby-progressbar (1.13.0)
-    solargraph (0.57.0)
+    solargraph (0.58.2)
+      ast (~> 2.4.3)
       backport (~> 1.2)
       benchmark (~> 0.4)
-      bundler (~> 2.0)
+      bundler (>= 2.0)
       diff-lcs (~> 1.4)
       jaro_winkler (~> 1.6, >= 1.6.1)
       kramdown (~> 2.3)
       kramdown-parser-gfm (~> 1.1)
       logger (~> 1.6)
       observer (~> 0.1)
+      open3 (~> 0.2.1)
       ostruct (~> 0.6)
       parser (~> 3.0)
       prism (~> 1.4)
@@ -142,15 +164,15 @@ GEM
       yard (~> 0.9, >= 0.9.24)
       yard-activesupport-concern (~> 0.0)
       yard-solargraph (~> 0.1)
-    thor (1.4.0)
-    tilt (2.6.1)
+    thor (1.5.0)
+    tilt (2.7.0)
     toml (0.3.0)
       parslet (>= 1.8.0, < 3.0.0)
     typhoeus (1.5.0)
       ethon (>= 0.9.0, < 0.16.0)
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
-    unicode-emoji (4.1.0)
+    unicode-emoji (4.2.0)
     webmock (3.26.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -171,14 +193,19 @@ GEM
       yard (~> 0.9)
 
 PLATFORMS
-  aarch64-linux
-  arm64-darwin-24
-  x86_64-linux
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
 
 DEPENDENCIES
   daytona!
-  daytona_api_client!
-  daytona_toolbox_api_client!
+  daytona_api_client (= 0.0.0.pre.dev)!
+  daytona_toolbox_api_client (= 0.0.0.pre.dev)!
   pry (~> 0.15)
   rake (~> 13.0)
   rubocop (~> 1.21)

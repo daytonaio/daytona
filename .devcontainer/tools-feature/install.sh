@@ -61,21 +61,3 @@ cat > /etc/docker/daemon.json <<EOF
   "insecure-registries": ["registry:5000"]
 }
 EOF
-
-# Add daytona-ruby alias for running Ruby SDK examples
-USER_HOME="/home/${USERNAME}"
-DAYTONA_RUBY_ALIAS='alias daytona-ruby="cd /workspaces/daytona && BUNDLE_GEMFILE=/workspaces/daytona/libs/sdk-ruby/Gemfile bundle exec ruby -I/workspaces/daytona/libs/sdk-ruby/lib -I/workspaces/daytona/libs/api-client-ruby/lib -I/workspaces/daytona/libs/toolbox-api-client-ruby/lib -r daytona"'
-
-# Add to .bashrc
-if [ -f "${USER_HOME}/.bashrc" ]; then
-    echo "" >> "${USER_HOME}/.bashrc"
-    echo "# Daytona Ruby SDK alias" >> "${USER_HOME}/.bashrc"
-    echo "${DAYTONA_RUBY_ALIAS}" >> "${USER_HOME}/.bashrc"
-fi
-
-# Add to .zshrc
-if [ -f "${USER_HOME}/.zshrc" ]; then
-    echo "" >> "${USER_HOME}/.zshrc"
-    echo "# Daytona Ruby SDK alias" >> "${USER_HOME}/.zshrc"
-    echo "${DAYTONA_RUBY_ALIAS}" >> "${USER_HOME}/.zshrc"
-fi

@@ -4,20 +4,20 @@
 require 'daytona'
 
 def basic_exec(sandbox)
-  # Run some Ruby code directly
-  code_result = sandbox.process.code_run(code: 'puts "Hello World from code!"')
-  if code_result.exit_code != 0
-    puts "Error running code: #{code_result.exit_code}"
-  else
+  # Run some Python code directly (sandbox is configured for Python)
+  code_result = sandbox.process.code_run(code: 'print("Hello World from code!")')
+  if code_result.exit_code == 0
     puts code_result.result
+  else
+    puts "Error running code: #{code_result.exit_code}"
   end
 
   # Run OS command
   cmd_result = sandbox.process.exec(command: 'echo "Hello World from CMD!"')
-  if cmd_result.exit_code != 0
-    puts "Error running command: #{cmd_result.exit_code}"
-  else
+  if cmd_result.exit_code == 0
     puts cmd_result.result
+  else
+    puts "Error running command: #{cmd_result.exit_code}"
   end
 end
 
@@ -33,7 +33,7 @@ def session_exec(sandbox)
   # Execute a first command in the session
   command = sandbox.process.execute_session_command(
     session_id: 'exec-session-1',
-    req: { command: 'export FOO=BAR' }
+    req: Daytona::SessionExecuteRequest.new(command: 'export FOO=BAR')
   )
 
   # Get the session details again to see the command has been executed
@@ -50,7 +50,7 @@ def session_exec(sandbox)
   # Execute a second command in the session and see that the environment variable is set
   response = sandbox.process.execute_session_command(
     session_id: 'exec-session-1',
-    req: { command: 'echo $FOO' }
+    req: Daytona::SessionExecuteRequest.new(command: 'echo $FOO')
   )
   puts "FOO=#{response.stdout}"
 
@@ -59,8 +59,8 @@ def session_exec(sandbox)
     session_id: 'exec-session-1',
     command_id: response.cmd_id
   )
-  puts "[STDOUT]: #{logs[:stdout]}"
-  puts "[STDERR]: #{logs[:stderr]}"
+  puts "[STDOUT]: #{logs.stdout}"
+  puts "[STDERR]: #{logs.stderr}"
 
   # We can also delete the session
   sandbox.process.delete_session('exec-session-1')
@@ -73,22 +73,22 @@ def session_exec_logs_async(sandbox)
   sandbox.process.create_session(session_id)
 
   command = sandbox.process.execute_session_command(
-    session_id:,
-    req: {
+    session_id: session_id,
+    req: Daytona::SessionExecuteRequest.new(
       command: 'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done; non-existent-command',
       run_async: true
-    }
+    )
   )
 
   sandbox.process.get_session_command_logs_async(
-    session_id:,
+    session_id: session_id,
     command_id: command.cmd_id,
     on_stdout: ->(stdout) { puts "[STDOUT]: #{stdout}" },
     on_stderr: ->(stderr) { puts "[STDERR]: #{stderr}" }
   )
 end
 
-def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+def stateful_code_interpreter(sandbox)
   log_stdout = ->(msg) { print "[STDOUT] #{msg.output}" }
   log_stderr = ->(msg) { print "[STDERR] #{msg.output}" }
   log_error = lambda do |err|
@@ -100,7 +100,7 @@ def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metric
   puts 'Stateful Code Interpreter'
   puts '=' * 60
 
-  puts '=' * 10 + ' Statefulness in the default context ' + '=' * 10
+  puts ('=' * 10) + ' Statefulness in the default context ' + ('=' * 10)
   result = sandbox.code_interpreter.run_code(
     "counter = 1\nprint(f'Initialized counter = {counter}')"
   )
@@ -113,7 +113,7 @@ def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metric
     on_error: log_error
   )
 
-  puts '=' * 10 + ' Context isolation ' + '=' * 10
+  puts ('=' * 10) + ' Context isolation ' + ('=' * 10)
   ctx = sandbox.code_interpreter.create_context
   begin
     sandbox.code_interpreter.run_code(
@@ -124,14 +124,14 @@ def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metric
       on_error: log_error
     )
 
-    puts '-' * 3 + ' Print value from same context ' + '-' * 3
+    puts ('-' * 3) + ' Print value from same context ' + ('-' * 3)
     ctx_result = sandbox.code_interpreter.run_code(
       "print(f'Value still available: {value}')",
       context: ctx
     )
     print "[STDOUT] #{ctx_result.stdout}"
 
-    puts '-' * 3 + ' Print value from different context ' + '-' * 3
+    puts ('-' * 3) + ' Print value from different context ' + ('-' * 3)
     sandbox.code_interpreter.run_code(
       'print(value)',
       on_stdout: log_stdout,
@@ -142,7 +142,7 @@ def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metric
     sandbox.code_interpreter.delete_context(ctx)
   end
 
-  puts '=' * 10 + ' Timeout handling ' + '=' * 10
+  puts ('=' * 10) + ' Timeout handling ' + ('=' * 10)
   begin
     code = <<~PYTHON
       import time
@@ -158,24 +158,19 @@ def stateful_code_interpreter(sandbox) # rubocop:disable Metrics/AbcSize, Metric
       on_stderr: log_stderr,
       on_error: log_error
     )
-  rescue Daytona::Sdk::Error => e
-    puts "Timed out as expected: #{e.message}" if e.message.include?('timed out')
+  rescue Daytona::Sdk::TimeoutError => e
+    puts "Timed out as expected: #{e.message}"
   end
 end
 
-def main # rubocop:disable Metrics/MethodLength
+def main
   daytona = Daytona::Daytona.new
 
   # First, create a sandbox
-  image = Daytona::Image.base('ubuntu:22.04').run_commands(
-    'apt-get update',
-    'apt-get install -y --no-install-recommends python3 python3-pip python3-venv',
-    'apt-get install -y --no-install-recommends coreutils',
-    'apt-get install -y --no-install-recommends ruby'
-  )
+  image = Daytona::Image.base('python:3.9.23-slim')
 
   params = Daytona::CreateSandboxFromImageParams.new(
-    image:,
+    image: image,
     language: 'python',
     auto_stop_interval: 60,
     auto_archive_interval: 60,

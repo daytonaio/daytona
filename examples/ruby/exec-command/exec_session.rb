@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'daytona'
+
 daytona = Daytona::Daytona.new
 sandbox = daytona.create
 
@@ -12,14 +14,14 @@ puts session
 
 # Execute first command in the session
 first_command = sandbox.process.execute_session_command(
-  session_id:,
+  session_id: session_id,
   req: Daytona::SessionExecuteRequest.new(command: 'export FOO=BAR')
 )
 
-if first_command.exit_code != 0
-  puts "Error: #{first_command.exit_code} #{first_command.stderr}"
-else
+if first_command.exit_code == 0
   puts first_command.output
+else
+  puts "Error: #{first_command.exit_code} #{first_command.stderr}"
 end
 
 # Get the session details again to see the command has been executed
@@ -27,23 +29,23 @@ session = sandbox.process.get_session(session_id)
 puts session.commands
 
 # Get the command details
-command = sandbox.process.get_session_command(session_id:, command_id: first_command.cmd_id)
+command = sandbox.process.get_session_command(session_id: session_id, command_id: first_command.cmd_id)
 puts command
 
 # Execute second command in the session and observe the environment variable is set
 second_command = sandbox.process.execute_session_command(
-  session_id:,
+  session_id: session_id,
   req: Daytona::SessionExecuteRequest.new(command: 'echo $FOO')
 )
 
-if second_command.exit_code != 0
-  puts "Error: #{second_command.exit_code} #{second_command.stderr}"
-else
+if second_command.exit_code == 0
   puts second_command.output
+else
+  puts "Error: #{second_command.exit_code} #{second_command.stderr}"
 end
 
 # Get logs for the second command
-logs = sandbox.process.get_session_command_logs(session_id:, command_id: second_command.cmd_id)
+logs = sandbox.process.get_session_command_logs(session_id: session_id, command_id: second_command.cmd_id)
 puts "[STDOUT] #{logs.stdout}"
 puts "[STDERR] #{logs.stderr}"
 

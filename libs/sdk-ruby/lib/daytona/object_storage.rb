@@ -110,8 +110,8 @@ module Daytona
           .glob(File.join(abs_path_str, '**', '*'))
           .select { |path| File.directory?(path) && Dir.empty?(path) }
           .each do |empty_dir|
-          rel_dir = Pathname.new(empty_dir).relative_path_from(Pathname.new(abs_path_str)).to_s
-          md5_hasher.update(rel_dir)
+            rel_dir = Pathname.new(empty_dir).relative_path_from(Pathname.new(abs_path_str)).to_s
+            md5_hasher.update(rel_dir)
         end
       end
 

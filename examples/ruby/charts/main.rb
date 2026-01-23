@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'base64'
+require 'daytona'
 
 CODE = <<~PYTHON
   import matplotlib.pyplot as plt
@@ -61,7 +62,7 @@ CODE = <<~PYTHON
   plt.show()
 PYTHON
 
-def main # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+def main
   daytona = Daytona::Daytona.new
 
   sandbox = daytona.create(
@@ -72,9 +73,7 @@ def main # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
   )
   response = sandbox.process.code_run(code: CODE)
 
-  if response.exit_code != 0
-    puts "Error: #{response.exit_code} #{response.result}"
-  else
+  if response.exit_code == 0
     response.artifacts.charts.each do |chart|
       img_data = Base64.decode64(chart.png)
       title = chart.title || Time.now.to_i
@@ -84,12 +83,14 @@ def main # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
       puts "Image saved as #{filename}"
       print_chart(chart)
     end
+  else
+    puts "Error: #{response.exit_code} #{response.result}"
   end
 
   daytona.delete(sandbox)
 end
 
-def print_chart(chart) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/MethodLength
+def print_chart(chart)
   puts "Type: #{chart.type}"
   puts "Title: #{chart.title}"
 

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'daytona'
 
 daytona = Daytona::Daytona.new
 params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)

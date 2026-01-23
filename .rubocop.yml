@@ -1,0 +1,50 @@
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.2
+
+Layout/LineLength:
+  AllowedPatterns: ['\A\s*#']
+  AllowCopDirectives: true
+
+Style/Documentation:
+  Enabled: false
+
+Style/AccessorGrouping:
+  EnforcedStyle: separated
+
+# Relax some metrics for examples
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/AbcSize:
+  Max: 25
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'examples/**/*'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'examples/**/*'
+
+# Examples can use any style for string concatenation
+Style/StringConcatenation:
+  Exclude:
+    - 'examples/**/*'
+
+# Examples don't need execute permissions
+Lint/ScriptPermission:
+  Exclude:
+    - 'examples/**/*'

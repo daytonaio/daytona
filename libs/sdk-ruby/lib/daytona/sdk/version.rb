@@ -2,6 +2,6 @@
 
 module Daytona
   module Sdk
-    VERSION = '1.0.0'
+    VERSION = '0.0.0.pre.dev'
   end
 end

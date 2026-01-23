@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'daytona'
+
 daytona = Daytona::Daytona.new
 
 # Generate unique name for the snapshot to avoid conflicts
@@ -18,7 +20,7 @@ image =
     'mkdir -p /home/daytona/workspace'
   )
   .workdir('/home/daytona/workspace')
-  .env('MY_ENV_VAR': 'My Environment Variable')
+  .env(MY_ENV_VAR: 'My Environment Variable')
   .add_local_file('file_example.txt', '/home/daytona/workspace/file_example.txt')
 
 daytona.snapshot.create(
@@ -48,7 +50,7 @@ dynamic_image =
   .pip_install(%w[pytest pytest-cov black isort mypy ruff])
   .run_commands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
   .workdir('/home/daytona/project')
-  .env('ENV_VAR': 'My Environment Variable')
+  .env(ENV_VAR: 'My Environment Variable')
 
 other_sandbox = daytona.create(
   Daytona::CreateSandboxFromImageParams.new(image: dynamic_image),

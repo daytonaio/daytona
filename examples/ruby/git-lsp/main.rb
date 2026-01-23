@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'daytona'
+
 daytona = Daytona::Daytona.new
 sandbox = daytona.create(
   Daytona::CreateSandboxFromImageParams.new(

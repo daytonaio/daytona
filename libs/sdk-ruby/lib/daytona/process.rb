@@ -222,26 +222,40 @@ module Daytona
       url.path = "/process/session/#{session_id}/command/#{command_id}/logs"
       url.query = 'follow=true'
 
-      WebSocket::Client::Simple.connect(
+      completion_queue = Queue.new
+
+      ws = WebSocket::Client::Simple.connect(
         url.to_s,
         headers: toolbox_api.api_client.default_headers.dup.merge(
           'X-Daytona-Preview-Token' => preview_link.token,
           'Content-Type' => 'text/plain',
           'Accept' => 'text/plain'
         )
-      ) do |ws|
-        ws.on(:message) do |message|
-          if message.type == :close
-            ws.close
-            next
-          else
-            stdout, stderr = Util.demux(message.data.to_s)
+      )
 
-            on_stdout.call(stdout) unless stdout.empty?
-            on_stderr.call(stderr) unless stderr.empty?
-          end
+      ws.on(:message) do |message|
+        if message.type == :close
+          ws.close
+          completion_queue.push(:close)
+        else
+          stdout, stderr = Util.demux(message.data.to_s)
+
+          on_stdout.call(stdout) unless stdout.empty?
+          on_stderr.call(stderr) unless stderr.empty?
         end
       end
+
+      ws.on(:close) do
+        completion_queue.push(:close)
+      end
+
+      ws.on(:error) do |e|
+        completion_queue.push(:error)
+        raise Sdk::Error, "WebSocket error: #{e.message}"
+      end
+
+      # Wait for completion
+      completion_queue.pop
     end
 
     #

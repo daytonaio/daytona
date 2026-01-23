@@ -279,6 +279,8 @@ module Daytona
         SandboxPythonCodeToolbox.new
       when SandboxTsCodeToolbox, CodeLanguage::TYPESCRIPT
         SandboxTsCodeToolbox.new
+      when CodeLanguage::JAVASCRIPT
+        SandboxJsCodeToolbox.new
       else
         raise Sdk::Error, "Unsupported language: #{language}"
       end

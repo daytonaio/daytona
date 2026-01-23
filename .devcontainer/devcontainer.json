@@ -10,7 +10,9 @@
   "remoteEnv": {
     "NX_DAEMON": "true",
     "NODE_ENV": "development",
-    "POETRY_VIRTUALENVS_IN_PROJECT": "true"
+    "POETRY_VIRTUALENVS_IN_PROJECT": "true",
+    "RUBYLIB": "${containerWorkspaceFolder}/libs/sdk-ruby/lib:${containerWorkspaceFolder}/libs/api-client-ruby/lib:${containerWorkspaceFolder}/libs/toolbox-api-client-ruby/lib",
+    "BUNDLE_GEMFILE": "${containerWorkspaceFolder}/libs/sdk-ruby/Gemfile"
   },
   "customizations": {
     // Configure properties specific to VS Code.

@@ -130,6 +130,9 @@ module Daytona
       create_authenticated_client = lambda do
         client = DaytonaToolboxApiClient::ApiClient.new(toolbox_api_config)
         client.default_headers['Authorization'] = "Bearer #{config.api_key || config.jwt_token}"
+        client.default_headers['X-Daytona-Source'] = 'ruby-sdk'
+        client.default_headers['X-Daytona-SDK-Version'] = Sdk::VERSION
+        client.default_headers['X-Daytona-Organization-ID'] = config.organization_id if config.jwt_token
         client
       end
 

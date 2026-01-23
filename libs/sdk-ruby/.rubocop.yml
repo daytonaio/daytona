@@ -7,7 +7,7 @@ AllCops:
 
 Layout/LineLength:
   AllowedPatterns: ['\A\s*#']
-  IgnoreCopDirectives: true
+  AllowCopDirectives: true
 
 Style/Documentation:
   Enabled: false

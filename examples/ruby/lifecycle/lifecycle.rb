@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'daytona'
+
 daytona = Daytona::Daytona.new
 
 puts 'Creating sandbox'
@@ -23,10 +25,10 @@ sandbox = daytona.get(sandbox.id)
 puts 'Retrieved existing sandbox'
 
 response = sandbox.process.exec(command: 'echo "Hello World from exec!"', cwd: '/home/daytona', timeout: 10)
-if response.exit_code != 0
-  puts "Error: #{response.exit_code} #{response.result}"
-else
+if response.exit_code == 0
   puts response.result
+else
+  puts "Error: #{response.exit_code} #{response.result}"
 end
 
 result = daytona.list

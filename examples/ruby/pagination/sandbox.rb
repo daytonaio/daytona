@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'daytona'
+
 daytona = Daytona::Daytona.new
 
 result = daytona.list({ 'my-label' => 'my-value' }, page: 2, limit: 10)

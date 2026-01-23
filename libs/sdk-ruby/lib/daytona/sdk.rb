@@ -2,8 +2,6 @@
 
 require 'logger'
 
-require 'dotenv'
-Dotenv.load('.env.local', '.env')
 require 'daytona_api_client'
 require 'daytona_toolbox_api_client'
 require 'toml'
@@ -27,6 +25,7 @@ require_relative 'code_interpreter'
 require_relative 'computer_use'
 require_relative 'code_toolbox/sandbox_python_code_toolbox'
 require_relative 'code_toolbox/sandbox_ts_code_toolbox'
+require_relative 'code_toolbox/sandbox_js_code_toolbox'
 require_relative 'daytona'
 require_relative 'file_system'
 require_relative 'git'
@@ -42,6 +41,7 @@ require_relative 'process'
 module Daytona
   module Sdk
     class Error < StandardError; end
+    class TimeoutError < Error; end
 
     def self.logger = @logger ||= Logger.new($stdout, level: Logger::INFO)
   end
