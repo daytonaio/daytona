@@ -30,6 +30,7 @@ type DockerClientConfig struct {
 	SandboxStartTimeoutSec   int
 	UseSnapshotEntrypoint    bool
 	VolumeCleanupIntervalSec int
+	BackupTimeoutMin         int
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
@@ -41,6 +42,11 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	if config.SandboxStartTimeoutSec <= 0 {
 		log.Warnf("Invalid SandboxStartTimeoutSec value: %d. Using default value: 30 seconds", config.SandboxStartTimeoutSec)
 		config.SandboxStartTimeoutSec = 30
+	}
+
+	if config.BackupTimeoutMin <= 0 {
+		log.Warnf("Invalid BackupTimeoutMin value: %d. Using default value: 60 minutes", config.BackupTimeoutMin)
+		config.BackupTimeoutMin = 60
 	}
 
 	return &DockerClient{
@@ -60,6 +66,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		sandboxStartTimeoutSec:   config.SandboxStartTimeoutSec,
 		useSnapshotEntrypoint:    config.UseSnapshotEntrypoint,
 		volumeCleanupIntervalSec: config.VolumeCleanupIntervalSec,
+		backupTimeoutMin:         config.BackupTimeoutMin,
 	}
 }
 
@@ -85,6 +92,7 @@ type DockerClient struct {
 	sandboxStartTimeoutSec   int
 	useSnapshotEntrypoint    bool
 	volumeCleanupIntervalSec int
+	backupTimeoutMin         int
 	volumeCleanupMutex       sync.Mutex
 	lastVolumeCleanup        time.Time
 }

@@ -44,6 +44,7 @@ type Config struct {
 	CollectorWindowSize      int           `envconfig:"COLLECTOR_WINDOW_SIZE" default:"60" validate:"min=1"`
 	HealthcheckInterval      time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
 	HealthcheckTimeout       time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
+	BackupTimeoutMin         int           `envconfig:"BACKUP_TIMEOUT_MIN" default:"60" validate:"min=1"`
 	ApiVersion               int           `envconfig:"API_VERSION" default:"2"`
 }
 

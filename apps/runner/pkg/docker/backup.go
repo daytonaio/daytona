@@ -6,6 +6,7 @@ package docker
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
@@ -54,7 +55,7 @@ func (d *DockerClient) CreateBackupAsync(ctx context.Context, containerId string
 }
 
 func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBackupDTO) error {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(d.backupTimeoutMin)*time.Minute)
 
 	defer func() {
 		backupContext, ok := backup_context_map.Get(containerId)
@@ -73,6 +74,11 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 			log.Infof("Backup for container %s canceled", containerId)
 			return err
 		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			log.Errorf("Backup for container %s timed out during commit", containerId)
+			return err
+		}
 		log.Errorf("Error committing container %s: %v", containerId, err)
 		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 		return err
@@ -83,6 +89,11 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 		if errors.Is(err, context.Canceled) {
 			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
 			log.Infof("Backup for container %s canceled", containerId)
+			return err
+		}
+		if errors.Is(err, context.DeadlineExceeded) {
+			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			log.Errorf("Backup for container %s timed out during push", containerId)
 			return err
 		}
 		log.Errorf("Error pushing image %s: %v", backupDto.Snapshot, err)
