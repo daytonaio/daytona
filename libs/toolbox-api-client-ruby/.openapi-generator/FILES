@@ -3,7 +3,6 @@
 .rubocop.yml
 Gemfile
 Rakefile
-daytona_toolbox_api_client.gemspec
 lib/daytona_toolbox_api_client.rb
 lib/daytona_toolbox_api_client/api/computer_use_api.rb
 lib/daytona_toolbox_api_client/api/file_system_api.rb

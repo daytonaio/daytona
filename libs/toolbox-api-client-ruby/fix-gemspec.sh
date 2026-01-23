@@ -4,7 +4,7 @@ SCRIPT_DIR="$(dirname "$0")"
 
 # Fix gemspec: replace backtick find commands with git ls-files and Dir.glob
 # This is safer and works correctly in CI environments
-sed -i "s/\`find \*\`\.split(\"\\\\n\")\.uniq\.sort\.select { |f| !f\.empty? }/\`git ls-files -z\`\.split(\"\\\\x0\")\.reject { |f| f.match(%r{^(test|spec|features)\/}) || f.end_with?('.gem') }/g" "$SCRIPT_DIR/daytona_toolbox_api_client.gemspec"
+sed -i "s/\`find \*\`\.split(\"\\\\n\")\.uniq\.sort\.select { |f| !f\.empty? }/\`git ls-files -z\`\.split(\"\\\\x0\")\.reject { |f| f.match(%r{^(test|spec|features)\/}) || f.end_with?('.gem') || f.start_with?('Gemfile') }/g" "$SCRIPT_DIR/daytona_toolbox_api_client.gemspec"
 sed -i "s/\`find spec\/\*\`\.split(\"\\\\n\")/Dir.exist?('spec') ? Dir.glob('spec\/\*\*\/\*') : []/g" "$SCRIPT_DIR/daytona_toolbox_api_client.gemspec"
 
 # Fix Gemfile: update rubocop from ~> 0.66.0 to ~> 1.21

@@ -1,6 +1,7 @@
 .gitignore
 .rspec
 .rubocop.yml
+Gemfile
 Rakefile
 lib/daytona_api_client.rb
 lib/daytona_api_client/api/admin_api.rb
