@@ -390,7 +390,10 @@ const getColumns = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                onClick={() => onDelete(row.original)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(row.original)
+                }}
                 className="cursor-pointer text-red-600 dark:text-red-400"
                 disabled={isLoading}
               >
