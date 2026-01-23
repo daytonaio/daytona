@@ -67,6 +67,8 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 	backup_context_map.Set(containerId, backupContext{ctx, cancel})
 
+	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+
 	err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
