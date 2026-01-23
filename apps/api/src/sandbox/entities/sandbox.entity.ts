@@ -204,6 +204,9 @@ export class Sandbox {
   @Column({ default: false })
   pending?: boolean
 
+  @Column({ default: false })
+  resizing?: boolean
+
   @Column({ default: () => 'MD5(random()::text)' })
   authToken: string
 

@@ -25,6 +25,7 @@ const (
 	JOBTYPE_START_SANDBOX                   JobType = "START_SANDBOX"
 	JOBTYPE_STOP_SANDBOX                    JobType = "STOP_SANDBOX"
 	JOBTYPE_DESTROY_SANDBOX                 JobType = "DESTROY_SANDBOX"
+	JOBTYPE_RESIZE_SANDBOX                  JobType = "RESIZE_SANDBOX"
 	JOBTYPE_CREATE_BACKUP                   JobType = "CREATE_BACKUP"
 	JOBTYPE_BUILD_SNAPSHOT                  JobType = "BUILD_SNAPSHOT"
 	JOBTYPE_PULL_SNAPSHOT                   JobType = "PULL_SNAPSHOT"
@@ -40,6 +41,7 @@ var AllowedJobTypeEnumValues = []JobType{
 	"START_SANDBOX",
 	"STOP_SANDBOX",
 	"DESTROY_SANDBOX",
+	"RESIZE_SANDBOX",
 	"CREATE_BACKUP",
 	"BUILD_SNAPSHOT",
 	"PULL_SNAPSHOT",

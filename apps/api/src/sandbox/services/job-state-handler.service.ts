@@ -62,6 +62,9 @@ export class JobStateHandlerService {
       case JobType.DESTROY_SANDBOX:
         await this.handleDestroySandboxJobCompletion(job)
         break
+      case JobType.RESIZE_SANDBOX:
+        await this.handleResizeSandboxJobCompletion(job)
+        break
       case JobType.PULL_SNAPSHOT:
         await this.handlePullSnapshotJobCompletion(job)
         break
@@ -430,6 +433,43 @@ export class JobStateHandlerService {
       await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling RECOVER_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleResizeSandboxJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for RESIZE_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+        // Update sandbox resources from job payload
+        const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
+        if (payload.cpu !== undefined) {
+          sandbox.cpu = payload.cpu
+        }
+        if (payload.memory !== undefined) {
+          sandbox.mem = payload.memory
+        }
+        if (payload.disk !== undefined) {
+          sandbox.disk = payload.disk
+        }
+        sandbox.resizing = false
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+        // Reset resizing flag on failure, keep original resources
+        sandbox.resizing = false
+      }
+
+      await this.sandboxRepository.save(sandbox)
+    } catch (error) {
+      this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

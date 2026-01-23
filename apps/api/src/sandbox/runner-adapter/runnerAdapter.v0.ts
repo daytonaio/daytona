@@ -31,6 +31,7 @@ import {
   ToolboxApi,
   UpdateNetworkSettingsDTO,
   RecoverSandboxDTO,
+  ResizeSandboxDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -418,5 +419,15 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       backupErrorReason: sandbox.backupErrorReason,
     }
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
+  }
+
+  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
+    const resizeSandboxDTO: ResizeSandboxDTO = {
+      cpu: cpu,
+      memory: memory,
+      // disk is passed but runner will error if provided (not implemented yet)
+    }
+
+    await this.sandboxApiClient.resize(sandboxId, resizeSandboxDTO)
   }
 }

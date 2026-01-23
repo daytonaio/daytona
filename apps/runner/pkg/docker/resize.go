@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -14,6 +15,11 @@ import (
 )
 
 func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto dto.ResizeSandboxDTO) error {
+	// Disk resize is not supported yet
+	if sandboxDto.Disk != 0 {
+		return fmt.Errorf("disk resize is not supported yet")
+	}
+
 	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
 
 	_, err := d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{

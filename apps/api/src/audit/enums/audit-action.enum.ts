@@ -24,6 +24,7 @@ export enum AuditAction {
   UPDATE_SCHEDULING = 'update_scheduling',
   START = 'start',
   STOP = 'stop',
+  RESIZE = 'resize',
   REPLACE_LABELS = 'replace_labels',
   CREATE_BACKUP = 'create_backup',
   UPDATE_PUBLIC_STATUS = 'update_public_status',

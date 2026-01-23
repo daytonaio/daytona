@@ -1,4 +1,4 @@
-from daytona import Daytona
+from daytona import Daytona, Resources
 
 
 def main():
@@ -36,6 +36,14 @@ def main():
     print("Total sandboxes count:", result.total)
 
     print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
+
+    # Hot resize: can only increase CPU and memory on a running sandbox
+    # The resize() method automatically waits for the resize operation to complete
+    print("Resizing sandbox (hot resize)...")
+    sandbox.resize(Resources(cpu=2, memory=2), hot=True, timeout=120)
+
+    # After resize completes, the sandbox object is automatically updated with new resources
+    print(f"Resize complete! New resources: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
 
     print("Removing sandbox")
     daytona.delete(sandbox)
