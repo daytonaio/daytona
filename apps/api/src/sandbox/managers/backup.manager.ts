@@ -66,6 +66,26 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
+  /**
+   * Increments a retry counter in Redis and returns whether the operation should be retried.
+   * @param key - The Redis key for the retry counter
+   * @param maxRetries - Maximum number of retries allowed (default: 3)
+   * @param ttlSeconds - TTL for the retry counter in seconds (default: 300)
+   * @returns true if should retry, false if max retries exceeded
+   */
+  private async shouldRetry(key: string, maxRetries = 3, ttlSeconds = 300): Promise<boolean> {
+    const retryCount = await this.redis.get(key)
+    const currentCount = retryCount ? parseInt(retryCount) : 0
+
+    if (currentCount >= maxRetries) {
+      await this.redis.del(key)
+      return false
+    }
+
+    await this.redis.setex(key, ttlSeconds, String(currentCount + 1))
+    return true
+  }
+
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   @TrackJobExecution()
@@ -348,7 +368,19 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         // If backup state is none, retry the backup process by setting the backup state to pending
         // This can happen if the runner is restarted or the operation is cancelled
         case BackupState.NONE: {
-          await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
+          const noneRetryKey = `sandbox-backup-${sandbox.id}-none-retry`
+          if (await this.shouldRetry(noneRetryKey)) {
+            await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
+          } else {
+            this.logger.error(`Backup for sandbox ${sandbox.id} failed: runner repeatedly reports no backup state`)
+            await this.sandboxService.updateSandboxBackupState(
+              sandbox.id,
+              BackupState.ERROR,
+              undefined,
+              undefined,
+              'Backup failed: runner repeatedly reports no backup state',
+            )
+          }
           break
         }
         // If still in progress or any other state, do nothing and wait for next sync
