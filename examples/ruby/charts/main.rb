@@ -147,7 +147,7 @@ def print_chart(chart)
     chart.elements.each do |element|
       puts "\n  Label: #{element.label}"
       puts "  Min: #{element.min}"
-      puts '  First Quartile: {element.first_quartile}'
+      puts "  First Quartile: #{element.first_quartile}"
       puts "  Median: #{element.median}"
       puts "  Third Quartile: #{element.third_quartile}"
       puts "  Max: #{element.max}"

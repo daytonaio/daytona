@@ -53,7 +53,7 @@ puts "[STDERR] #{logs.stderr}"
 sessions = sandbox.process.list_sessions
 puts sessions
 
-# Delete the sessio
+# Delete the session
 sandbox.process.delete_session(session_id)
 
 # Cleanup resources

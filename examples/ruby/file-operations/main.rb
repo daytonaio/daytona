@@ -22,7 +22,7 @@ sandbox.fs.create_folder(project_files, '755')
 local_file_path = 'local-example.txt'
 File.write(local_file_path, 'This is a local file created for demonstration purposes')
 
-# Create a configuration file with JSON dadta
+# Create a configuration file with JSON data
 config_data = JSON.dump(name: 'project-config', version: '1.0.0', settings: { debug: true, max_connections: 10 })
 
 # Upload multiple files at once - both from local path and from bytes
