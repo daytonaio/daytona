@@ -198,7 +198,7 @@ sandbox.fs.upload_files(files)
 </TabItem>
 </Tabs>
 
-See: [upload_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_files), [uploadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfiles)
+See: [upload_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_files), [uploadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfiles), [upload_files (Ruby SDK)](/docs/ruby-sdk/file-system/#upload_files)
 
 ### Downloading Files
 
@@ -247,7 +247,7 @@ sandbox.fs.download_file('file1.txt', 'local_file.txt')
 </TabItem>
 </Tabs>
 
-See: [download_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_file), [downloadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfile)
+See: [download_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_file), [downloadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfile), [download_file (Ruby SDK)](/docs/ruby-sdk/file-system/#download_file)
 
 #### Downloading Multiple Files
 
@@ -313,7 +313,7 @@ end
 </TabItem>
 </Tabs>
 
-See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles)
+See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles), [download_files (Ruby SDK)](/docs/ruby-sdk/file-system/#download_files)
 
 ### Deleting files
 
@@ -345,7 +345,7 @@ sandbox.fs.delete_file('workspace/file.txt')
 </TabItem>
 </Tabs>
 
-See: [delete_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdelete_file), [deleteFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#deletefile)
+See: [delete_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdelete_file), [deleteFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#deletefile), [delete_file (Ruby SDK)](/docs/ruby-sdk/file-system/#delete_file)
 
 ## Advanced Operations
 
@@ -353,7 +353,7 @@ Daytona SDK provides advanced file system operations like file permissions, sear
 
 ### File Permissions
 
-Daytona SDK provides an option to set file permissions, get file permissions, and set directory permissions recursively using Python and TypeScript.
+Daytona SDK provides an option to set file permissions, get file permissions, and set directory permissions recursively using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -393,11 +393,11 @@ puts "Permissions: #{file_info.permissions}"
 </TabItem>
 </Tabs>
 
-See: [set_file_permissions (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemset_file_permissions), [setFilePermissions (TypeScript SDK)](/docs/typescript-sdk/file-system/#setfilepermissions)
+See: [set_file_permissions (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemset_file_permissions), [setFilePermissions (TypeScript SDK)](/docs/typescript-sdk/file-system/#setfilepermissions), [set_file_permissions (Ruby SDK)](/docs/ruby-sdk/file-system/#set_file_permissions)
 
 ### File Search and Replace
 
-Daytona SDK provides an option to search for text in files and replace text in files using Python and TypeScript.
+Daytona SDK provides an option to search for text in files and replace text in files using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -467,4 +467,4 @@ sandbox.fs.replace_in_files(
 </TabItem>
 </Tabs>
 
-See: [find_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemfind_files), [replace_in_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemreplace_in_files), [findFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#findfiles), [replaceInFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#replaceinfiles)
+See: [find_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemfind_files), [replace_in_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemreplace_in_files), [findFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#findfiles), [replaceInFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#replaceinfiles), [find_files (Ruby SDK)](/docs/ruby-sdk/file-system/#find_files), [replace_in_files (Ruby SDK)](/docs/ruby-sdk/file-system/#replace_in_files)

@@ -195,6 +195,32 @@ Create a Daytona Sandbox instance and run code securely inside it. The following
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # Initialize the Daytona client
+    daytona = Daytona::Daytona.new(
+      Daytona::Config.new(api_key: 'YOUR_API_KEY')
+    )
+
+    # Create the Sandbox instance
+    sandbox = daytona.create
+
+    # Run code securely inside the Sandbox
+    response = sandbox.process.code_run(code: 'puts "Sum of 3 and 4 is #{3 + 4}"')
+    if response.exit_code != 0
+      puts "Error running code: #{response.exit_code} #{response.result}"
+    else
+      puts response.result
+    end
+
+    # Clean up the Sandbox
+    sandbox.delete
+    ```
+
+  </TabItem>
 </Tabs>
 
 <Tabs syncKey="language">
@@ -208,11 +234,16 @@ Create a Daytona Sandbox instance and run code securely inside it. The following
   ```bash npx tsx ./index.ts ```
 </TabItem>
 
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```bash
+    ruby main.rb
+    ```
+  </TabItem>
+</Tabs>
+
 ```text
 Sum of 3 and 4 is 7
 ```
-
-</Tabs>
 
 ## Preview your app
 
@@ -333,6 +364,65 @@ Preview your app by uploading a file containing a simple Flask app to a Daytona 
     }
 
     main().catch(error => console.error("Error:", error));
+    ```
+
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new(
+      Daytona::Config.new(api_key: 'YOUR_API_KEY')
+    )
+
+    sandbox = daytona.create
+
+    app_code = <<~PYTHON
+      from flask import Flask
+
+      app = Flask(__name__)
+
+      @app.route('/')
+      def hello():
+          return """
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Hello World</title>
+              <link rel="icon" href="https://www.daytona.io/favicon.ico">
+          </head>
+          <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
+              <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                  <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
+                  <p>This web app is running in a Daytona sandbox!</p>
+              </div>
+          </body>
+          </html>
+          """
+
+      if __name__ == '__main__':
+          app.run(host='0.0.0.0', port=3000)
+    PYTHON
+
+    # Save the Flask app to a file
+    sandbox.fs.upload_file(app_code, 'app.py')
+
+    # Create a new session and execute a command
+    exec_session_id = 'python-app-session'
+    sandbox.process.create_session(exec_session_id)
+
+    sandbox.process.execute_session_command(
+      exec_session_id,
+      Daytona::SessionExecuteRequest.new(
+        command: 'python /app.py',
+        var_async: true
+      )
+    )
+
+    # Get the preview link for the Flask app
+    preview_info = sandbox.preview_url(3000)
+    puts "Flask app is available at: #{preview_info.url}"
     ```
 
   </TabItem>
@@ -482,6 +572,71 @@ Connect to an LLM using the Anthropic API and ask Claude to generate code for ge
     DAYTONA_API_KEY="your-daytona-api-key"
     DAYTONA_TARGET=us
     npx ts-node claude-example.ts
+    ```
+
+    ```bash
+    > The factorial of 25 is 15511210043330985984000000
+    ```
+
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+
+    ```ruby
+    require 'daytona'
+    require 'net/http'
+    require 'json'
+
+    daytona = Daytona::Daytona.new
+
+    sandbox = daytona.create
+
+    def get_claude_response(api_key, prompt)
+      uri = URI('https://api.anthropic.com/v1/messages')
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Post.new(uri)
+      request['x-api-key'] = api_key
+      request['anthropic-version'] = '2023-06-01'
+      request['Content-Type'] = 'application/json'
+      request.body = {
+        model: 'claude-3-7-sonnet-latest',
+        max_tokens: 256,
+        messages: [{ role: 'user', content: prompt }]
+      }.to_json
+
+      response = http.request(request)
+      return "Error #{response.code}: #{response.body}" unless response.is_a?(Net::HTTPSuccess)
+
+      data = JSON.parse(response.body)
+      content = data['content'] || []
+      content.select { |item| item['type'] == 'text' }.map { |item| item['text'] }.join
+    end
+
+    prompt = 'Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block.'
+
+    result = get_claude_response(ENV['ANTHROPIC_API_KEY'], prompt)
+
+    # Extract code from the response
+    code = if result.match(/```python\n(.*?)```/m)
+             result.match(/```python\n(.*?)```/m)[1]
+           else
+             result
+           end
+
+    # Run Python code inside the Sandbox and get the output
+    response = sandbox.process.code_run(code: code)
+    puts "The factorial of 25 is #{response.result}"
+    ```
+
+    Ensure the following environment variables are set and run the snippet:
+
+    ```bash
+    ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
+    DAYTONA_API_KEY="YOUR_DAYTONA_API_KEY"
+    DAYTONA_TARGET=us
+    ruby claude-example.rb
     ```
 
     ```bash
