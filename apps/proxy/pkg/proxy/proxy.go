@@ -42,6 +42,12 @@ const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
 
+// SandboxStateInfo holds cached sandbox state for wake-on-request
+type SandboxStateInfo struct {
+	State         string `json:"state"`
+	WakeOnRequest string `json:"wakeOnRequest"`
+}
+
 type Proxy struct {
 	config       *config.Config
 	secureCookie *securecookie.SecureCookie
@@ -52,6 +58,7 @@ type Proxy struct {
 	sandboxPublicCache             common_cache.ICache[bool]
 	sandboxAuthKeyValidCache       common_cache.ICache[bool]
 	sandboxLastActivityUpdateCache common_cache.ICache[bool]
+	sandboxStateCache              common_cache.ICache[SandboxStateInfo]
 }
 
 func StartProxy(ctx context.Context, config *config.Config) error {
@@ -88,11 +95,16 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 		if err != nil {
 			return err
 		}
+		proxy.sandboxStateCache, err = common_cache.NewRedisCache[SandboxStateInfo](config.Redis, "proxy:sandbox-state:")
+		if err != nil {
+			return err
+		}
 	} else {
 		proxy.runnerCache = common_cache.NewMapCache[RunnerInfo]()
 		proxy.sandboxPublicCache = common_cache.NewMapCache[bool]()
 		proxy.sandboxAuthKeyValidCache = common_cache.NewMapCache[bool]()
 		proxy.sandboxLastActivityUpdateCache = common_cache.NewMapCache[bool]()
+		proxy.sandboxStateCache = common_cache.NewMapCache[SandboxStateInfo]()
 	}
 
 	shutdownWg := &sync.WaitGroup{}
@@ -163,13 +175,21 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					return
 				}
 
+				// Proactively check if sandbox needs to be started before proxying
+				if !proxy.EnsureSandboxStarted(ctx.Request.Context(), sandboxID) {
+					ctx.Header("Retry-After", "5")
+					ctx.Header("Content-Type", "text/html; charset=utf-8")
+					ctx.String(503, sandboxStartingHTML)
+					return
+				}
+
 				prefix := fmt.Sprintf("/toolbox/%s", sandboxID)
 
 				getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
 					return proxy.GetProxyTarget(ctx, true)
 				}
 
-				modifyResponse := func(res *http.Response) error {
+				baseModifyResponse := func(res *http.Response) error {
 					if res.StatusCode >= 300 && res.StatusCode < 400 {
 						if loc := res.Header.Get("Location"); !strings.HasPrefix(loc, prefix) {
 							res.Header.Set("Location", prefix+loc)
@@ -178,7 +198,10 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					return nil
 				}
 
-				common_proxy.NewProxyRequestHandler(getProxyTarget, modifyResponse)(ctx)
+				// Keep error handlers as fallback for edge cases
+				modifyResponse := proxy.WakeOnRequestModifyResponse(sandboxID, baseModifyResponse)
+				errorHandler := proxy.WakeOnRequestErrorHandler(sandboxID, nil)
+				common_proxy.NewProxyRequestHandlerWithErrorHandler(getProxyTarget, modifyResponse, errorHandler)(ctx)
 				return
 			}
 
@@ -192,11 +215,28 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return
 		}
 
+		// Extract sandbox ID for wake-on-request
+		_, sandboxID, _ := proxy.parseHost(ctx.Request.Host)
+
+		// Proactively check if sandbox needs to be started before proxying
+		if sandboxID != "" {
+			if !proxy.EnsureSandboxStarted(ctx.Request.Context(), sandboxID) {
+				// Sandbox failed to start - return 503 with auto-refresh
+				ctx.Header("Retry-After", "5")
+				ctx.Header("Content-Type", "text/html; charset=utf-8")
+				ctx.String(503, sandboxStartingHTML)
+				return
+			}
+		}
+
 		getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
 			return proxy.GetProxyTarget(ctx, false)
 		}
 
-		common_proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		// Keep error handlers as fallback for edge cases
+		modifyResponse := proxy.WakeOnRequestModifyResponse(sandboxID, nil)
+		errorHandler := proxy.WakeOnRequestErrorHandler(sandboxID, nil)
+		common_proxy.NewProxyRequestHandlerWithErrorHandler(getProxyTarget, modifyResponse, errorHandler)(ctx)
 	})
 
 	httpServer := &http.Server{

@@ -33,6 +33,7 @@ export function SandboxTableActions({
   onCreateSnapshot,
   onScreenRecordings,
   onFork,
+  onViewForks,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -99,6 +100,16 @@ export function SandboxTableActions({
         })
       }
 
+      // Add View Forks option (only for linux-exp runner class)
+      if (runnerClass === 'linux-exp') {
+        items.push({
+          key: 'view-forks',
+          label: 'View Forks',
+          onClick: () => onViewForks(sandbox.id),
+          disabled: isLoading,
+        })
+      }
+
       // Add SSH access options
       items.push({
         key: 'create-ssh',
@@ -146,6 +157,7 @@ export function SandboxTableActions({
     onRevokeSshAccess,
     onCreateSnapshot,
     onFork,
+    onViewForks,
   ])
 
   if (!writePermitted && !deletePermitted) {

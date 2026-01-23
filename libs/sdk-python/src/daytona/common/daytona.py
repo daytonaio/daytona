@@ -36,6 +36,34 @@ class CodeLanguage(Enum):
         return super().__eq__(other)
 
 
+@dataclass
+class WakeOnRequest(Enum):
+    """Wake on request setting for automatic Sandbox start.
+
+    Controls whether the Sandbox should be automatically started when
+    receiving HTTP requests or SSH connections.
+
+    **Enum Members**:
+        - `NONE` ("none") - Sandbox will not be automatically started
+        - `HTTP` ("http") - Sandbox will be started on HTTP requests
+        - `SSH` ("ssh") - Sandbox will be started on SSH connections
+        - `HTTP_AND_SSH` ("http_and_ssh") - Sandbox will be started on both HTTP and SSH
+    """
+
+    NONE = "none"
+    HTTP = "http"
+    SSH = "ssh"
+    HTTP_AND_SSH = "http_and_ssh"
+
+    def __str__(self):
+        return self.value
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value == other
+        return super().__eq__(other)
+
+
 class DaytonaConfig(BaseModel):
     """Configuration options for initializing the Daytona client.
 
@@ -114,6 +142,9 @@ class CreateSandboxBaseParams(BaseModel):
         network_allow_list (Optional[str]): Comma-separated list of allowed CIDR network addresses for the Sandbox.
         ephemeral (Optional[bool]): Whether the Sandbox should be ephemeral.
             If True, auto_delete_interval will be set to 0.
+        wake_on_request (Optional[WakeOnRequest]): Wake on request setting for automatic Sandbox start.
+            Controls whether the Sandbox should be automatically started when receiving HTTP requests
+            or SSH connections. Defaults to 'none'.
     """
 
     name: Optional[str] = None
@@ -129,6 +160,7 @@ class CreateSandboxBaseParams(BaseModel):
     network_block_all: Optional[bool] = None
     network_allow_list: Optional[str] = None
     ephemeral: Optional[bool] = None
+    wake_on_request: Optional[WakeOnRequest] = None
 
     @model_validator(mode="before")
     @classmethod

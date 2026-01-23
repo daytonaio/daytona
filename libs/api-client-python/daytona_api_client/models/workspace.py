@@ -25,6 +25,7 @@ from daytona_api_client.models.sandbox_desired_state import SandboxDesiredState
 from daytona_api_client.models.sandbox_info import SandboxInfo
 from daytona_api_client.models.sandbox_state import SandboxState
 from daytona_api_client.models.sandbox_volume import SandboxVolume
+from daytona_api_client.models.wake_on_request import WakeOnRequest
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -55,6 +56,7 @@ class Workspace(BaseModel):
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
     auto_delete_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)", alias="autoDeleteInterval")
+    wake_on_request: Optional[WakeOnRequest] = Field(default=None, description="Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections", alias="wakeOnRequest")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes attached to the sandbox")
     build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
     created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the sandbox", alias="createdAt")
@@ -67,7 +69,7 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "parentSandboxId", "image", "snapshotState", "snapshotCreatedAt", "info"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "wakeOnRequest", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "parentSandboxId", "image", "snapshotState", "snapshotCreatedAt", "info"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -193,6 +195,7 @@ class Workspace(BaseModel):
             "autoStopInterval": obj.get("autoStopInterval"),
             "autoArchiveInterval": obj.get("autoArchiveInterval"),
             "autoDeleteInterval": obj.get("autoDeleteInterval"),
+            "wakeOnRequest": obj.get("wakeOnRequest"),
             "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
             "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
             "createdAt": obj.get("createdAt"),

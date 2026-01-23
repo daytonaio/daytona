@@ -26,8 +26,10 @@ import (
 )
 
 const (
-	defaultPort = 2222
-	runnerPort  = 2220
+	defaultPort            = 2222
+	runnerPort             = 2220
+	wakeTimeoutSeconds     = 60
+	wakePollIntervalMillis = 1000
 )
 
 type SSHGateway struct {
@@ -209,26 +211,44 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 
 	log.Printf("Token validated, SSH connection established for runner: %s", runnerID)
 
-	// Check if the sandbox is started before proceeding
+	// Check if the sandbox is started before proceeding, try to wake if enabled
 	if sandboxId != "" {
 		log.Printf("Checking sandbox state for sandbox: %s", sandboxId)
-		sandbox, _, err := g.apiClient.SandboxAPI.GetSandbox(context.Background(), sandboxId).Execute()
+		info, _, err := g.apiClient.PreviewAPI.GetSandboxInfo(context.Background(), sandboxId).Execute()
 		if err != nil {
-			log.Printf("Failed to get sandbox state for %s: %v", sandboxId, err)
-			// Send error message to client and close connection
+			log.Printf("Failed to get sandbox info for %s: %v", sandboxId, err)
 			g.sendErrorAndClose(conn, fmt.Sprintf("Failed to verify sandbox state: %v", err))
 			return
 		}
 
-		if sandbox.State == nil || *sandbox.State != apiclient.SANDBOXSTATE_STARTED {
-			state := "unknown"
-			if sandbox.State != nil {
-				state = string(*sandbox.State)
-			}
+		state := info.State
+		wakeOnRequest := info.WakeOnRequest
 
-			log.Printf("Sandbox %s is not started (state: %s), closing connection", sandboxId, state)
-			g.sendErrorAndClose(conn, fmt.Sprintf("Sandbox is not started (state: %s). Please start the sandbox before attempting to connect.", state))
-			return
+		if state != apiclient.SANDBOXSTATE_STARTED {
+			// Check if we should try to wake the sandbox
+			if state == apiclient.SANDBOXSTATE_STOPPED &&
+				(wakeOnRequest == apiclient.WAKEONREQUEST_SSH || wakeOnRequest == apiclient.WAKEONREQUEST_HTTP_AND_SSH) {
+				log.Printf("Sandbox %s is stopped, attempting to wake (wakeOnRequest: %s)", sandboxId, wakeOnRequest)
+
+				// Start the sandbox
+				_, _, err := g.apiClient.SandboxAPI.StartSandbox(context.Background(), sandboxId).Execute()
+				if err != nil {
+					log.Printf("Failed to start sandbox %s: %v", sandboxId, err)
+					g.sendErrorAndClose(conn, fmt.Sprintf("Failed to start sandbox: %v", err))
+					return
+				}
+
+				// Wait for sandbox to be started
+				if !g.waitForSandboxStarted(sandboxId) {
+					g.sendErrorAndClose(conn, "Sandbox failed to start within timeout. Please try again.")
+					return
+				}
+				log.Printf("Sandbox %s woke up successfully", sandboxId)
+			} else {
+				log.Printf("Sandbox %s is not started (state: %s) and wake-on-ssh is not enabled", sandboxId, state)
+				g.sendErrorAndClose(conn, fmt.Sprintf("Sandbox is not started (state: %s). Please start the sandbox before attempting to connect.", state))
+				return
+			}
 		}
 
 		log.Printf("Sandbox %s is started, allowing SSH connection", sandboxId)
@@ -418,6 +438,40 @@ func (g *SSHGateway) sendErrorAndClose(conn net.Conn, errorMessage string) {
 	// In a more sophisticated implementation, we could send a proper SSH disconnect message
 	// but this requires restructuring the connection handling
 	conn.Close()
+}
+
+// waitForSandboxStarted polls the sandbox state until it's started or timeout
+func (g *SSHGateway) waitForSandboxStarted(sandboxId string) bool {
+	timeout := time.After(wakeTimeoutSeconds * time.Second)
+	ticker := time.NewTicker(wakePollIntervalMillis * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			log.Warnf("Timeout waiting for sandbox %s to start", sandboxId)
+			return false
+		case <-ticker.C:
+			info, _, err := g.apiClient.PreviewAPI.GetSandboxInfo(context.Background(), sandboxId).Execute()
+			if err != nil {
+				log.Errorf("Failed to get sandbox info while polling %s: %v", sandboxId, err)
+				continue
+			}
+
+			state := info.State
+			if state == apiclient.SANDBOXSTATE_STARTED {
+				log.Infof("Sandbox %s is now started", sandboxId)
+				return true
+			}
+
+			if state == apiclient.SANDBOXSTATE_ERROR || state == apiclient.SANDBOXSTATE_BUILD_FAILED {
+				log.Errorf("Sandbox %s failed to start (state: %s)", sandboxId, state)
+				return false
+			}
+
+			log.Debugf("Sandbox %s state: %s, waiting...", sandboxId, state)
+		}
+	}
 }
 
 func parsePrivateKey(privateKeyPEM string) (ssh.Signer, error) {

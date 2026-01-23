@@ -106,7 +106,7 @@ type SandboxAPI interface {
 	/*
 		ForkSandbox Fork a sandbox
 
-		Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+		Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param sandboxIdOrName ID or name of the sandbox to fork
@@ -156,6 +156,36 @@ type SandboxAPI interface {
 	// GetSandboxExecute executes the request
 	//  @return Sandbox
 	GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error)
+
+	/*
+		GetSandboxForks Get fork children
+
+		Get all sandboxes that were directly forked from this sandbox (direct children only).
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@return SandboxAPIGetSandboxForksRequest
+	*/
+	GetSandboxForks(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxForksRequest
+
+	// GetSandboxForksExecute executes the request
+	//  @return []Sandbox
+	GetSandboxForksExecute(r SandboxAPIGetSandboxForksRequest) ([]Sandbox, *http.Response, error)
+
+	/*
+		GetSandboxParent Get fork parent
+
+		Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox
+		@return SandboxAPIGetSandboxParentRequest
+	*/
+	GetSandboxParent(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxParentRequest
+
+	// GetSandboxParentExecute executes the request
+	//  @return Sandbox
+	GetSandboxParentExecute(r SandboxAPIGetSandboxParentRequest) (*Sandbox, *http.Response, error)
 
 	/*
 		GetSandboxesForRunner Get sandboxes for the authenticated runner
@@ -1082,7 +1112,7 @@ func (r SandboxAPIForkSandboxRequest) Execute() (*ForkSandboxResponse, *http.Res
 /*
 ForkSandbox Fork a sandbox
 
-Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param sandboxIdOrName ID or name of the sandbox to fork
@@ -1471,6 +1501,260 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 
 	if r.verbose != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxForksRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	xDaytonaOrganizationID *string
+	includeDestroyed       *bool
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxForksRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxForksRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Include destroyed sandboxes in the result
+func (r SandboxAPIGetSandboxForksRequest) IncludeDestroyed(includeDestroyed bool) SandboxAPIGetSandboxForksRequest {
+	r.includeDestroyed = &includeDestroyed
+	return r
+}
+
+func (r SandboxAPIGetSandboxForksRequest) Execute() ([]Sandbox, *http.Response, error) {
+	return r.ApiService.GetSandboxForksExecute(r)
+}
+
+/*
+GetSandboxForks Get fork children
+
+Get all sandboxes that were directly forked from this sandbox (direct children only).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetSandboxForksRequest
+*/
+func (a *SandboxAPIService) GetSandboxForks(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxForksRequest {
+	return SandboxAPIGetSandboxForksRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []Sandbox
+func (a *SandboxAPIService) GetSandboxForksExecute(r SandboxAPIGetSandboxForksRequest) ([]Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxForks")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/forks"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.includeDestroyed != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "includeDestroyed", r.includeDestroyed, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.includeDestroyed = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxParentRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	xDaytonaOrganizationID *string
+	ancestors              *bool
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxParentRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxParentRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// If true, returns the full ancestor chain up to the root. If false, returns only the direct parent.
+func (r SandboxAPIGetSandboxParentRequest) Ancestors(ancestors bool) SandboxAPIGetSandboxParentRequest {
+	r.ancestors = &ancestors
+	return r
+}
+
+func (r SandboxAPIGetSandboxParentRequest) Execute() (*Sandbox, *http.Response, error) {
+	return r.ApiService.GetSandboxParentExecute(r)
+}
+
+/*
+GetSandboxParent Get fork parent
+
+Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox
+	@return SandboxAPIGetSandboxParentRequest
+*/
+func (a *SandboxAPIService) GetSandboxParent(ctx context.Context, sandboxIdOrName string) SandboxAPIGetSandboxParentRequest {
+	return SandboxAPIGetSandboxParentRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Sandbox
+func (a *SandboxAPIService) GetSandboxParentExecute(r SandboxAPIGetSandboxParentRequest) (*Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxParent")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/parent"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.ancestors != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "ancestors", r.ancestors, "form", "")
+	} else {
+		var defaultValue bool = false
+		r.ancestors = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

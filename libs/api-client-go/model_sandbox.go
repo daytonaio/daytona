@@ -67,6 +67,8 @@ type Sandbox struct {
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
 	// Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
 	AutoDeleteInterval *float32 `json:"autoDeleteInterval,omitempty"`
+	// Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections
+	WakeOnRequest *WakeOnRequest `json:"wakeOnRequest,omitempty"`
 	// Array of volumes attached to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
@@ -749,6 +751,38 @@ func (o *Sandbox) SetAutoDeleteInterval(v float32) {
 	o.AutoDeleteInterval = &v
 }
 
+// GetWakeOnRequest returns the WakeOnRequest field value if set, zero value otherwise.
+func (o *Sandbox) GetWakeOnRequest() WakeOnRequest {
+	if o == nil || IsNil(o.WakeOnRequest) {
+		var ret WakeOnRequest
+		return ret
+	}
+	return *o.WakeOnRequest
+}
+
+// GetWakeOnRequestOk returns a tuple with the WakeOnRequest field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetWakeOnRequestOk() (*WakeOnRequest, bool) {
+	if o == nil || IsNil(o.WakeOnRequest) {
+		return nil, false
+	}
+	return o.WakeOnRequest, true
+}
+
+// HasWakeOnRequest returns a boolean if a field has been set.
+func (o *Sandbox) HasWakeOnRequest() bool {
+	if o != nil && !IsNil(o.WakeOnRequest) {
+		return true
+	}
+
+	return false
+}
+
+// SetWakeOnRequest gets a reference to the given WakeOnRequest and assigns it to the WakeOnRequest field.
+func (o *Sandbox) SetWakeOnRequest(v WakeOnRequest) {
+	o.WakeOnRequest = &v
+}
+
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
 func (o *Sandbox) GetVolumes() []SandboxVolume {
 	if o == nil || IsNil(o.Volumes) {
@@ -1029,6 +1063,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.AutoDeleteInterval) {
 		toSerialize["autoDeleteInterval"] = o.AutoDeleteInterval
 	}
+	if !IsNil(o.WakeOnRequest) {
+		toSerialize["wakeOnRequest"] = o.WakeOnRequest
+	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes
 	}
@@ -1128,6 +1165,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "autoStopInterval")
 		delete(additionalProperties, "autoArchiveInterval")
 		delete(additionalProperties, "autoDeleteInterval")
+		delete(additionalProperties, "wakeOnRequest")
 		delete(additionalProperties, "volumes")
 		delete(additionalProperties, "buildInfo")
 		delete(additionalProperties, "createdAt")

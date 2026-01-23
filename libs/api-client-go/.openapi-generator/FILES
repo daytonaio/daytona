@@ -152,6 +152,7 @@ model_sandbox_desired_state.go
 model_sandbox_info.go
 model_sandbox_labels.go
 model_sandbox_state.go
+model_sandbox_state_info.go
 model_sandbox_volume.go
 model_screenshot_response.go
 model_search_files_response.go
@@ -181,6 +182,7 @@ model_user_home_dir_response.go
 model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go
+model_wake_on_request.go
 model_webhook_app_portal_access.go
 model_webhook_controller_get_status_200_response.go
 model_webhook_initialization_status.go

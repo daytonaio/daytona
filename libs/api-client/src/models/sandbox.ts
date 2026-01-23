@@ -24,6 +24,9 @@ import type { SandboxState } from './sandbox-state'
 // May contain unused imports in some cases
 // @ts-ignore
 import type { SandboxVolume } from './sandbox-volume'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { WakeOnRequest } from './wake-on-request'
 
 /**
  *
@@ -169,6 +172,12 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   autoDeleteInterval?: number
+  /**
+   * Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections
+   * @type {WakeOnRequest}
+   * @memberof Sandbox
+   */
+  wakeOnRequest?: WakeOnRequest
   /**
    * Array of volumes attached to the sandbox
    * @type {Array<SandboxVolume>}

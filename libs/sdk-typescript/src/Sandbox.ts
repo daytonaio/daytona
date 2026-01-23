@@ -17,6 +17,7 @@ import {
   SshAccessValidationDto,
   ForkSandbox,
   ForkSandboxResponse,
+  WakeOnRequest,
 } from '@daytonaio/api-client'
 import {
   FileSystemApi,
@@ -81,6 +82,7 @@ export interface SandboxCodeToolbox {
  * @property {string} [updatedAt] - When the Sandbox was last updated
  * @property {boolean} networkBlockAll - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
+ * @property {WakeOnRequest} [wakeOnRequest] - Wake on request setting for automatic Sandbox start
  *
  * @class
  */
@@ -117,6 +119,7 @@ export class Sandbox implements SandboxDto {
   public updatedAt?: string
   public networkBlockAll!: boolean
   public networkAllowList?: string
+  public wakeOnRequest?: WakeOnRequest
 
   private infoApi: InfoApi
 
@@ -613,6 +616,7 @@ export class Sandbox implements SandboxDto {
     this.updatedAt = sandboxDto.updatedAt
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
+    this.wakeOnRequest = sandboxDto.wakeOnRequest
   }
 
   /**

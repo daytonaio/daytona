@@ -18,6 +18,7 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { WakeOnRequest } from '../enums/wake-on-request.enum'
 import { v4 as uuidv4 } from 'uuid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
@@ -177,6 +178,15 @@ export class Sandbox {
   //  if set to 0, sandbox will be immediately deleted upon stopping
   @Column({ default: -1 })
   autoDeleteInterval?: number
+
+  //  wake on request setting - controls whether the sandbox should be automatically started
+  //  when receiving HTTP requests through the proxy or SSH connections through the SSH gateway
+  @Column({
+    type: 'enum',
+    enum: WakeOnRequest,
+    default: WakeOnRequest.NONE,
+  })
+  wakeOnRequest: WakeOnRequest
 
   @Column({ default: false })
   pending?: boolean

@@ -31,12 +31,48 @@ import {
 } from '../common'
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
+// @ts-ignore
+import type { SandboxStateInfo } from '../models'
 /**
  * PreviewApi - axios parameter creator
  * @export
  */
 export const PreviewApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
+    /**
+     *
+     * @summary Get sandbox info for proxy/gateway
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxInfo: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSandboxInfo', 'sandboxId', sandboxId)
+      const localVarPath = `/preview/{sandboxId}/info`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
     /**
      *
      * @summary Check if user has access to the sandbox
@@ -163,6 +199,29 @@ export const PreviewApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
+     * @summary Get sandbox info for proxy/gateway
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxInfo(
+      sandboxId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SandboxStateInfo>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxInfo(sandboxId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['PreviewApi.getSandboxInfo']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Check if user has access to the sandbox
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -244,6 +303,16 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
   return {
     /**
      *
+     * @summary Get sandbox info for proxy/gateway
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxInfo(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<SandboxStateInfo> {
+      return localVarFp.getSandboxInfo(sandboxId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Check if user has access to the sandbox
      * @param {string} sandboxId
      * @param {*} [options] Override http request option.
@@ -283,6 +352,20 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class PreviewApi extends BaseAPI {
+  /**
+   *
+   * @summary Get sandbox info for proxy/gateway
+   * @param {string} sandboxId ID of the sandbox
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof PreviewApi
+   */
+  public getSandboxInfo(sandboxId: string, options?: RawAxiosRequestConfig) {
+    return PreviewApiFp(this.configuration)
+      .getSandboxInfo(sandboxId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
   /**
    *
    * @summary Check if user has access to the sandbox

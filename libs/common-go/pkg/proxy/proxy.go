@@ -41,6 +41,15 @@ var proxyTransport = &http.Transport{
 //	@Failure		500			{object}	string	"Internal server error"
 //	@Router			/workspaces/{workspaceId}/{projectId}/toolbox/{path} [get]
 func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.URL, extraHeaders map[string]string, err error), modifyResponse func(*http.Response) error) gin.HandlerFunc {
+	return NewProxyRequestHandlerWithErrorHandler(getProxyTarget, modifyResponse, nil)
+}
+
+// NewProxyRequestHandlerWithErrorHandler is like NewProxyRequestHandler but allows specifying a custom error handler
+func NewProxyRequestHandlerWithErrorHandler(
+	getProxyTarget func(*gin.Context) (targetUrl *url.URL, extraHeaders map[string]string, err error),
+	modifyResponse func(*http.Response) error,
+	errorHandler func(http.ResponseWriter, *http.Request, error),
+) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		startTotal := time.Now()
 		target, extraHeaders, err := getProxyTarget(ctx)
@@ -68,6 +77,7 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 			},
 			Transport:      proxyTransport,
 			ModifyResponse: modifyResponse,
+			ErrorHandler:   errorHandler,
 			FlushInterval:  -1, // Flush immediately for streaming
 		}
 

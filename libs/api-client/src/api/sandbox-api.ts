@@ -363,7 +363,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+     * Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
      * @summary Fork a sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox to fork
      * @param {ForkSandbox} forkSandbox
@@ -562,6 +562,114 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
 
       if (verbose !== undefined) {
         localVarQueryParameter['verbose'] = verbose
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get all sandboxes that were directly forked from this sandbox (direct children only).
+     * @summary Get fork children
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [includeDestroyed] Include destroyed sandboxes in the result
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxForks: async (
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      includeDestroyed?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getSandboxForks', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/forks`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (includeDestroyed !== undefined) {
+        localVarQueryParameter['includeDestroyed'] = includeDestroyed
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+     * @summary Get fork parent
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [ancestors] If true, returns the full ancestor chain up to the root. If false, returns only the direct parent.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxParent: async (
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      ancestors?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('getSandboxParent', 'sandboxIdOrName', sandboxIdOrName)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/parent`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (ancestors !== undefined) {
+        localVarQueryParameter['ancestors'] = ancestors
       }
 
       if (xDaytonaOrganizationID != null) {
@@ -1645,7 +1753,7 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+     * Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
      * @summary Fork a sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox to fork
      * @param {ForkSandbox} forkSandbox
@@ -1764,6 +1872,70 @@ export const SandboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.getSandbox']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get all sandboxes that were directly forked from this sandbox (direct children only).
+     * @summary Get fork children
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [includeDestroyed] Include destroyed sandboxes in the result
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxForks(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      includeDestroyed?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxForks(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        includeDestroyed,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxForks']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+     * @summary Get fork parent
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [ancestors] If true, returns the full ancestor chain up to the root. If false, returns only the direct parent.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getSandboxParent(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      ancestors?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getSandboxParent(
+        sandboxIdOrName,
+        xDaytonaOrganizationID,
+        ancestors,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.getSandboxParent']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -2408,7 +2580,7 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
-     * Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+     * Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
      * @summary Fork a sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox to fork
      * @param {ForkSandbox} forkSandbox
@@ -2481,6 +2653,44 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<Sandbox> {
       return localVarFp
         .getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get all sandboxes that were directly forked from this sandbox (direct children only).
+     * @summary Get fork children
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [includeDestroyed] Include destroyed sandboxes in the result
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxForks(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      includeDestroyed?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Array<Sandbox>> {
+      return localVarFp
+        .getSandboxForks(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+     * @summary Get fork parent
+     * @param {string} sandboxIdOrName ID or name of the sandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [ancestors] If true, returns the full ancestor chain up to the root. If false, returns only the direct parent.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getSandboxParent(
+      sandboxIdOrName: string,
+      xDaytonaOrganizationID?: string,
+      ancestors?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<Sandbox> {
+      return localVarFp
+        .getSandboxParent(sandboxIdOrName, xDaytonaOrganizationID, ancestors, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -2929,7 +3139,7 @@ export class SandboxApi extends BaseAPI {
   }
 
   /**
-   * Create a copy-on-write clone of a running sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+   * Create a clone of a sandbox. The fork includes both the filesystem and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
    * @summary Fork a sandbox
    * @param {string} sandboxIdOrName ID or name of the sandbox to fork
    * @param {ForkSandbox} forkSandbox
@@ -3009,6 +3219,48 @@ export class SandboxApi extends BaseAPI {
   ) {
     return SandboxApiFp(this.configuration)
       .getSandbox(sandboxIdOrName, xDaytonaOrganizationID, verbose, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get all sandboxes that were directly forked from this sandbox (direct children only).
+   * @summary Get fork children
+   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [includeDestroyed] Include destroyed sandboxes in the result
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxForks(
+    sandboxIdOrName: string,
+    xDaytonaOrganizationID?: string,
+    includeDestroyed?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxForks(sandboxIdOrName, xDaytonaOrganizationID, includeDestroyed, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.
+   * @summary Get fork parent
+   * @param {string} sandboxIdOrName ID or name of the sandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [ancestors] If true, returns the full ancestor chain up to the root. If false, returns only the direct parent.
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public getSandboxParent(
+    sandboxIdOrName: string,
+    xDaytonaOrganizationID?: string,
+    ancestors?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .getSandboxParent(sandboxIdOrName, xDaytonaOrganizationID, ancestors, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

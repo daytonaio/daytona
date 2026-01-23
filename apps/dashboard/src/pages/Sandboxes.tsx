@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
+import { ForkTreeDialog } from '@/components/ForkTreeDialog'
 import { formatDuration } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -280,6 +281,10 @@ const Sandboxes: React.FC = () => {
   const [showForkDialog, setShowForkDialog] = useState(false)
   const [forkSandboxId, setForkSandboxId] = useState<string>('')
   const [forkName, setForkName] = useState<string>('')
+
+  // View Forks Dialog
+  const [showForkTreeDialog, setShowForkTreeDialog] = useState(false)
+  const [forkTreeSandboxId, setForkTreeSandboxId] = useState<string | null>(null)
 
   // Snapshot Filter
 
@@ -856,6 +861,12 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  // View Forks
+  const openForkTreeDialog = (id: string) => {
+    setForkTreeSandboxId(id)
+    setShowForkTreeDialog(true)
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
 
@@ -924,6 +935,7 @@ const Sandboxes: React.FC = () => {
         handleCreateSnapshot={openCreateSnapshotDialog}
         handleScreenRecordings={handleScreenRecordings}
         handleFork={openForkDialog}
+        handleViewForks={openForkTreeDialog}
         handleRefresh={handleRefresh}
         isRefreshing={sandboxDataIsRefreshing}
         data={sandboxesData?.items || []}
@@ -1191,6 +1203,18 @@ const Sandboxes: React.FC = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Fork Tree Dialog */}
+      <ForkTreeDialog
+        open={showForkTreeDialog}
+        onOpenChange={setShowForkTreeDialog}
+        sandboxId={forkTreeSandboxId}
+        onSelectSandbox={(sandbox) => {
+          setSelectedSandbox(sandbox)
+          setShowSandboxDetails(true)
+          setShowForkTreeDialog(false)
+        }}
+      />
 
       <SandboxDetailsSheet
         sandbox={selectedSandbox}

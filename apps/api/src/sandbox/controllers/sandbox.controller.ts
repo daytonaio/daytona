@@ -49,7 +49,11 @@ import { ContentTypeInterceptor } from '../../common/interceptors/content-type.i
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import {
+  OrganizationAuthContext,
+  BaseAuthContext,
+  isOrganizationAuthContext,
+} from '../../common/interfaces/auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -70,6 +74,7 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
 import { ForkSandboxDto, ForkSandboxResponseDto } from '../dto/fork-sandbox.dto'
+import { GetForkChildrenQueryDto, GetForkParentQueryDto } from '../dto/fork-tree.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -422,10 +427,20 @@ export class SandboxController {
     targetIdFromResult: (result: SandboxDto) => result?.id,
   })
   async startSandbox(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @AuthContext() authContext: OrganizationAuthContext | BaseAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
-    const sbx = await this.sandboxService.start(sandboxIdOrName, authContext.organization)
+    let sbx: Sandbox
+
+    // For service roles (proxy, etc.) that don't have organization context,
+    // look up the sandbox directly and start it using its organization
+    if (isOrganizationAuthContext(authContext)) {
+      sbx = await this.sandboxService.start(sandboxIdOrName, authContext.organization)
+    } else {
+      // Service role - look up sandbox and start it
+      sbx = await this.sandboxService.startById(sandboxIdOrName)
+    }
+
     let sandbox = SandboxDto.fromSandbox(sbx)
 
     if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
@@ -1174,6 +1189,88 @@ export class SandboxController {
       state: startedSandbox.state!,
       parentSandboxId: startedSandbox.parentSandboxId,
     }
+  }
+
+  @Get(':sandboxIdOrName/forks')
+  @ApiOperation({
+    summary: 'Get fork children',
+    description: 'Get all sandboxes that were directly forked from this sandbox (direct children only).',
+    operationId: 'getSandboxForks',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of sandboxes forked from this sandbox',
+    type: [SandboxDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sandbox not found',
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getSandboxForks(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query() query: GetForkChildrenQueryDto,
+  ): Promise<SandboxDto[]> {
+    // First validate the sandbox exists
+    await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
+
+    const children = await this.sandboxService.getForkChildren(
+      sandboxIdOrName,
+      authContext.organizationId,
+      query.includeDestroyed,
+    )
+
+    return children.map((sandbox) => SandboxDto.fromSandbox(sandbox))
+  }
+
+  @Get(':sandboxIdOrName/parent')
+  @ApiOperation({
+    summary: 'Get fork parent',
+    description:
+      'Get the parent sandbox that this sandbox was forked from. Optionally get the full ancestor chain up to the root.',
+    operationId: 'getSandboxParent',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Parent sandbox or ancestor chain. Returns null if sandbox has no parent.',
+    type: SandboxDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sandbox not found',
+  })
+  @UseGuards(SandboxAccessGuard)
+  async getSandboxParent(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query() query: GetForkParentQueryDto,
+  ): Promise<SandboxDto | SandboxDto[] | null> {
+    const result = await this.sandboxService.getForkAncestors(
+      sandboxIdOrName,
+      authContext.organizationId,
+      query.ancestors,
+    )
+
+    if (result === null) {
+      return null
+    }
+
+    if (Array.isArray(result)) {
+      return result.map((sandbox) => SandboxDto.fromSandbox(sandbox))
+    }
+
+    return SandboxDto.fromSandbox(result)
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn't, return current sandbox

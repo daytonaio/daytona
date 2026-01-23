@@ -75,6 +75,7 @@ class Sandbox(SandboxDto):
         updated_at (str): When the Sandbox was last updated.
         network_block_all (bool): Whether to block all network access for the Sandbox.
         network_allow_list (str): Comma-separated list of allowed CIDR network addresses for the Sandbox.
+        wake_on_request (str): Wake on request setting - controls automatic Sandbox start on HTTP/SSH.
     """
 
     _fs: FileSystem = PrivateAttr()
@@ -604,6 +605,7 @@ class Sandbox(SandboxDto):
         self.updated_at = sandbox_dto.updated_at
         self.network_block_all = sandbox_dto.network_block_all
         self.network_allow_list = sandbox_dto.network_allow_list
+        self.wake_on_request = sandbox_dto.wake_on_request
 
     def __refresh_data_safe(self) -> None:
         """Refreshes the Sandbox data from the API, but does not throw an error if the sandbox has been deleted.

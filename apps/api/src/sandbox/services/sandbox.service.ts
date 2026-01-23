@@ -487,6 +487,10 @@ export class SandboxService {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
       }
 
+      if (createSandboxDto.wakeOnRequest !== undefined) {
+        sandbox.wakeOnRequest = createSandboxDto.wakeOnRequest
+      }
+
       if (createSandboxDto.volumes !== undefined) {
         sandbox.volumes = this.resolveVolumes(createSandboxDto.volumes)
       }
@@ -540,6 +544,10 @@ export class SandboxService {
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
       warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+    }
+
+    if (createSandboxDto.wakeOnRequest !== undefined) {
+      warmPoolSandbox.wakeOnRequest = createSandboxDto.wakeOnRequest
     }
 
     if (createSandboxDto.networkBlockAll !== undefined) {
@@ -662,6 +670,10 @@ export class SandboxService {
 
       if (createSandboxDto.autoDeleteInterval !== undefined) {
         sandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      }
+
+      if (createSandboxDto.wakeOnRequest !== undefined) {
+        sandbox.wakeOnRequest = createSandboxDto.wakeOnRequest
       }
 
       if (createSandboxDto.volumes !== undefined) {
@@ -916,6 +928,7 @@ export class SandboxService {
       forkedSandbox.autoStopInterval = sourceSandbox.autoStopInterval
       forkedSandbox.autoArchiveInterval = sourceSandbox.autoArchiveInterval
       forkedSandbox.autoDeleteInterval = sourceSandbox.autoDeleteInterval
+      forkedSandbox.wakeOnRequest = sourceSandbox.wakeOnRequest
 
       // Set fork lineage
       forkedSandbox.parentSandboxId = sourceSandbox.id
@@ -1466,6 +1479,26 @@ export class SandboxService {
     }
   }
 
+  /**
+   * Start a sandbox by ID without requiring organization context.
+   * Used by internal services (proxy, etc.) that need to start a sandbox
+   * without knowing its organization.
+   */
+  @Transactional()
+  async startById(sandboxId: string): Promise<Sandbox> {
+    const sandbox = await this.findOne(sandboxId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    const organization = await this.organizationService.findOne(sandbox.organizationId)
+    if (!organization) {
+      throw new NotFoundException(`Organization ${sandbox.organizationId} not found for sandbox ${sandboxId}`)
+    }
+
+    return this.start(sandboxId, organization)
+  }
+
   @Transactional()
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
@@ -2009,5 +2042,94 @@ export class SandboxService {
     if (!updateResult.affected) {
       throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
     }
+  }
+
+  /**
+   * Gets all direct child sandboxes (forks) of a given sandbox.
+   * Limited to 100 children per call for safety.
+   *
+   * @param sandboxId - The ID of the parent sandbox
+   * @param organizationId - The organization ID for access control
+   * @param includeDestroyed - Whether to include destroyed sandboxes
+   * @returns Array of child sandboxes
+   */
+  async getForkChildren(sandboxId: string, organizationId: string, includeDestroyed = false): Promise<Sandbox[]> {
+    const whereCondition: FindOptionsWhere<Sandbox> = {
+      parentSandboxId: sandboxId,
+      organizationId,
+    }
+
+    if (!includeDestroyed) {
+      whereCondition.state = Not(SandboxState.DESTROYED)
+    }
+
+    const children = await this.sandboxRepository.find({
+      where: whereCondition,
+      take: 100, // Sanity limit: max 100 children per level
+      order: { createdAt: 'ASC' },
+    })
+
+    return children
+  }
+
+  /**
+   * Gets the parent sandbox or full ancestor chain of a forked sandbox.
+   *
+   * @param sandboxId - The ID of the sandbox to get parent(s) for
+   * @param organizationId - The organization ID for access control
+   * @param ancestors - If true, returns full ancestor chain; if false, returns only direct parent
+   * @returns Single parent sandbox or array of ancestors (ordered from direct parent to root)
+   */
+  async getForkAncestors(
+    sandboxId: string,
+    organizationId: string,
+    ancestors = false,
+  ): Promise<Sandbox | Sandbox[] | null> {
+    const sandbox = await this.findOneByIdOrName(sandboxId, organizationId)
+
+    if (!sandbox.parentSandboxId) {
+      return ancestors ? [] : null
+    }
+
+    // Get direct parent
+    const parent = await this.sandboxRepository.findOne({
+      where: { id: sandbox.parentSandboxId, organizationId },
+    })
+
+    if (!parent) {
+      return ancestors ? [] : null
+    }
+
+    if (!ancestors) {
+      return parent
+    }
+
+    // Build full ancestor chain
+    const ancestorChain: Sandbox[] = [parent]
+    let currentSandbox = parent
+    const visitedIds = new Set<string>([sandbox.id, parent.id])
+    const maxDepth = 50 // Sanity limit: max 50 levels
+
+    while (currentSandbox.parentSandboxId && ancestorChain.length < maxDepth) {
+      // Prevent infinite loops
+      if (visitedIds.has(currentSandbox.parentSandboxId)) {
+        this.logger.warn(`Circular parent reference detected in ancestor chain for sandbox ${sandboxId}`)
+        break
+      }
+      visitedIds.add(currentSandbox.parentSandboxId)
+
+      const nextParent = await this.sandboxRepository.findOne({
+        where: { id: currentSandbox.parentSandboxId, organizationId },
+      })
+
+      if (!nextParent) {
+        break
+      }
+
+      ancestorChain.push(nextParent)
+      currentSandbox = nextParent
+    }
+
+    return ancestorChain
   }
 }

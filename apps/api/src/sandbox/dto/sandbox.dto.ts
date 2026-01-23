@@ -11,6 +11,7 @@ import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BuildInfoDto } from './build-info.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { WakeOnRequest } from '../enums/wake-on-request.enum'
 
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
@@ -204,6 +205,18 @@ export class SandboxDto {
   autoDeleteInterval?: number
 
   @ApiPropertyOptional({
+    description:
+      'Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections',
+    enum: WakeOnRequest,
+    enumName: 'WakeOnRequest',
+    example: WakeOnRequest.NONE,
+    required: false,
+  })
+  @IsEnum(WakeOnRequest)
+  @IsOptional()
+  wakeOnRequest?: WakeOnRequest
+
+  @ApiPropertyOptional({
     description: 'Array of volumes attached to the sandbox',
     type: [SandboxVolume],
     required: false,
@@ -288,6 +301,7 @@ export class SandboxDto {
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
       autoDeleteInterval: sandbox.autoDeleteInterval,
+      wakeOnRequest: sandbox.wakeOnRequest,
       class: sandbox.class,
       createdAt: sandbox.createdAt?.toISOString(),
       updatedAt: sandbox.updatedAt?.toISOString(),

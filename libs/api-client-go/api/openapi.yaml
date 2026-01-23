@@ -2684,9 +2684,9 @@ paths:
         - sandbox
   /sandbox/{sandboxIdOrName}/fork:
     post:
-      description: Create a copy-on-write clone of a running sandbox. The fork includes
-        both the filesystem and memory state. Only available for sandboxes running
-        on LINUX_EXPERIMENTAL (Cloud Hypervisor) runners.
+      description: Create a clone of a sandbox. The fork includes both the filesystem
+        and memory state. Only available for sandboxes running on LINUX_EXPERIMENTAL
+        (Cloud Hypervisor) runners.
       operationId: forkSandbox
       parameters:
         - description: Use with JWT to specify the organization ID
@@ -2720,13 +2720,13 @@ paths:
           description: Fork job has been created. The forked sandbox will be available
             once the job completes.
         '400':
-          description: Sandbox is not in a valid state for forking (must be STARTED)
-            or runner class is not LINUX_EXPERIMENTAL
+          description: Sandbox is not in a valid state for forking (must be STARTED
+            or STOPPED) or runner class is not LINUX_EXPERIMENTAL
         '404':
           description: Sandbox not found
         '409':
-          description: Fork operation is already in progress or sandbox name already
-            exists
+          description: "Fork operation is already in progress, source sandbox has\
+            \ a backup/snapshot in progress, or sandbox name already exists"
       security:
         - bearer: []
         - oauth2:
@@ -2734,6 +2734,108 @@ paths:
             - profile
             - email
       summary: Fork a sandbox
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/forks:
+    get:
+      description: Get all sandboxes that were directly forked from this sandbox (direct
+        children only).
+      operationId: getSandboxForks
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Include destroyed sandboxes in the result
+          explode: true
+          in: query
+          name: includeDestroyed
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: List of sandboxes forked from this sandbox
+        '404':
+          description: Sandbox not found
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get fork children
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/parent:
+    get:
+      description: Get the parent sandbox that this sandbox was forked from. Optionally
+        get the full ancestor chain up to the root.
+      operationId: getSandboxParent
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: "If true, returns the full ancestor chain up to the root. If\
+            \ false, returns only the direct parent."
+          explode: true
+          in: query
+          name: ancestors
+          required: false
+          schema:
+            default: false
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Parent sandbox or ancestor chain. Returns null if sandbox has
+            no parent.
+        '404':
+          description: Sandbox not found
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get fork parent
       tags:
         - sandbox
   /runners:
@@ -7089,6 +7191,28 @@ paths:
       summary: Check if user has access to the sandbox
       tags:
         - preview
+  /preview/{sandboxId}/info:
+    get:
+      operationId: getSandboxInfo
+      parameters:
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxStateInfo'
+          description: Sandbox info including state and wake settings
+      summary: Get sandbox info for proxy/gateway
+      tags:
+        - preview
   /volumes:
     get:
       operationId: listVolumes
@@ -9559,6 +9683,15 @@ components:
         - resized
         - archived
       type: string
+    WakeOnRequest:
+      description: Wake on request setting - controls whether the sandbox should be
+        automatically started when receiving HTTP requests or SSH connections
+      enum:
+        - none
+        - http
+        - ssh
+        - http_and_ssh
+      type: string
     SandboxVolume:
       example:
         mountPath: /data
@@ -9617,6 +9750,7 @@ components:
     Sandbox:
       example:
         memory: 4
+        wakeOnRequest: none
         buildInfo: ''
         parentSandboxId: parent-sandbox-123
         autoStopInterval: 30
@@ -9763,6 +9897,12 @@ components:
             \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
+        wakeOnRequest:
+          allOf:
+            - $ref: '#/components/schemas/WakeOnRequest'
+          description: Wake on request setting - controls whether the sandbox should
+            be automatically started when receiving HTTP requests or SSH connections
+          example: none
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -9819,6 +9959,7 @@ components:
         page: 6.027456183070403
         items:
           - memory: 4
+            wakeOnRequest: none
             buildInfo: ''
             parentSandboxId: parent-sandbox-123
             autoStopInterval: 30
@@ -9857,6 +9998,7 @@ components:
             autoArchiveInterval: 10080
             snapshot: daytonaio/sandbox:latest
           - memory: 4
+            wakeOnRequest: none
             buildInfo: ''
             parentSandboxId: parent-sandbox-123
             autoStopInterval: 30
@@ -9936,6 +10078,7 @@ components:
     CreateSandbox:
       example:
         memory: 1
+        wakeOnRequest: none
         buildInfo: ''
         networkAllowList: '192.168.1.0/16,10.0.0.0/24'
         volumes:
@@ -10045,6 +10188,12 @@ components:
             \ 0 means delete immediately upon stopping)"
           example: 30
           type: integer
+        wakeOnRequest:
+          allOf:
+            - $ref: '#/components/schemas/WakeOnRequest'
+          description: Wake on request setting - controls whether the sandbox should
+            be automatically started when receiving HTTP requests or SSH connections
+          example: none
         volumes:
           description: Array of volumes to attach to the sandbox
           items:
@@ -12477,6 +12626,7 @@ components:
     Workspace:
       example:
         memory: 4
+        wakeOnRequest: none
         buildInfo: ''
         parentSandboxId: parent-sandbox-123
         autoStopInterval: 30
@@ -12627,6 +12777,12 @@ components:
             \ 0 means delete immediately upon stopping)"
           example: 30
           type: number
+        wakeOnRequest:
+          allOf:
+            - $ref: '#/components/schemas/WakeOnRequest'
+          description: Wake on request setting - controls whether the sandbox should
+            be automatically started when receiving HTTP requests or SSH connections
+          example: none
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -12817,6 +12973,25 @@ components:
       required:
         - token
         - url
+      type: object
+    SandboxStateInfo:
+      example:
+        wakeOnRequest: none
+        state: started
+      properties:
+        state:
+          allOf:
+            - $ref: '#/components/schemas/SandboxState'
+          description: The current state of the sandbox
+          example: started
+        wakeOnRequest:
+          allOf:
+            - $ref: '#/components/schemas/WakeOnRequest'
+          description: Wake on request setting for the sandbox
+          example: none
+      required:
+        - state
+        - wakeOnRequest
       type: object
     VolumeState:
       description: Volume state

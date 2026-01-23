@@ -13,6 +13,7 @@ import {
   SandboxVolume,
   ConfigApi,
   ForkSandboxResponse,
+  WakeOnRequest,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
@@ -133,6 +134,7 @@ export interface Resources {
  * @property {boolean} [networkBlockAll] - Whether to block all network access for the Sandbox
  * @property {string} [networkAllowList] - Comma-separated list of allowed CIDR network addresses for the Sandbox
  * @property {boolean} [ephemeral] - Whether the Sandbox should be ephemeral. If true, autoDeleteInterval will be set to 0.
+ * @property {WakeOnRequest} [wakeOnRequest] - Wake on request setting - controls whether the Sandbox should be automatically started when receiving HTTP requests or SSH connections. Defaults to 'none'.
  */
 export type CreateSandboxBaseParams = {
   name?: string
@@ -148,6 +150,7 @@ export type CreateSandboxBaseParams = {
   networkBlockAll?: boolean
   networkAllowList?: string
   ephemeral?: boolean
+  wakeOnRequest?: WakeOnRequest
 }
 
 /**
@@ -464,6 +467,7 @@ export class Daytona {
           volumes: params.volumes,
           networkBlockAll: params.networkBlockAll,
           networkAllowList: params.networkAllowList,
+          wakeOnRequest: params.wakeOnRequest,
         },
         undefined,
         {

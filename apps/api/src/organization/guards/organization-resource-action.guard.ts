@@ -35,6 +35,12 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
       return true
     }
 
+    // Service roles (proxy, runner, ssh-gateway) are allowed without organization context
+    const serviceRoles = ['ssh-gateway', 'runner', 'proxy', 'region-proxy', 'region-ssh-gateway']
+    if (serviceRoles.includes(authContext.role)) {
+      return true
+    }
+
     if (!canActivate) {
       return false
     }

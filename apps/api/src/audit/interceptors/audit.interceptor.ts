@@ -21,12 +21,12 @@ import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditService } from '../services/audit.service'
-import { AuthContext } from '../../common/interfaces/auth-context.interface'
+import { AuthContext, isAuthContext, BaseAuthContext } from '../../common/interfaces/auth-context.interface'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { TypedConfigService } from '../../config/typed-config.service'
 
 type RequestWithUser = Request & {
-  user?: AuthContext
+  user?: AuthContext | BaseAuthContext
 }
 
 @Injectable()
@@ -60,8 +60,14 @@ export class AuditInterceptor implements NestInterceptor {
       throw new UnauthorizedException()
     }
 
+    // Skip audit logging for service roles (proxy, ssh-gateway, runner, etc.) that don't have a userId
+    if (!isAuthContext(request.user)) {
+      this.logger.debug(`Skipping audit log for service role: ${request.user.role}`)
+      return next.handle()
+    }
+
     return new Observable((observer) => {
-      this.handleAuditedRequest(auditContext, request, response, next, observer)
+      this.handleAuditedRequest(auditContext, request as Request & { user: AuthContext }, response, next, observer)
     })
   }
 
@@ -69,7 +75,7 @@ export class AuditInterceptor implements NestInterceptor {
   // After the request handler returns, the audit log is optimistically updated with the outcome
   private async handleAuditedRequest(
     auditContext: AuditContext,
-    request: RequestWithUser,
+    request: Request & { user: AuthContext },
     response: Response,
     next: CallHandler,
     observer: Subscriber<any>,
@@ -112,7 +118,7 @@ export class AuditInterceptor implements NestInterceptor {
     }
   }
 
-  private resolveOrganizationId(request: RequestWithUser, result?: any): string | null {
+  private resolveOrganizationId(request: Request & { user: AuthContext }, result?: any): string | null {
     return result?.organizationId || request.user.organizationId
   }
 

@@ -11,6 +11,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { SandboxStateInfoDto } from '../dto/sandbox-info.dto'
+import { SandboxDto } from '../dto/sandbox.dto'
 
 @ApiTags('preview')
 @Controller('preview')
@@ -151,5 +153,32 @@ export class PreviewController {
     //  if user has access, keep it in cache longer
     await this.redis.setex(`preview:access:${sandboxId}:${userId}`, 30, '1')
     return true
+  }
+
+  @Get(':sandboxId/info')
+  @ApiOperation({
+    summary: 'Get sandbox info for proxy/gateway',
+    operationId: 'getSandboxInfo',
+  })
+  @ApiParam({
+    name: 'sandboxId',
+    description: 'ID of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox info including state and wake settings',
+    type: SandboxStateInfoDto,
+  })
+  async getSandboxInfo(@Param('sandboxId') sandboxId: string): Promise<SandboxStateInfoDto> {
+    const sandbox = await this.sandboxService.findOne(sandboxId)
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    return {
+      state: SandboxDto.fromSandbox(sandbox).state,
+      wakeOnRequest: sandbox.wakeOnRequest,
+    }
   }
 }

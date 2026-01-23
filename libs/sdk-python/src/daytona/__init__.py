@@ -34,6 +34,7 @@ from .common.daytona import (
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
+    WakeOnRequest,
 )
 from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
@@ -97,4 +98,5 @@ __all__ = [
     "OutputHandler",
     "DaytonaTimeoutError",
     "DaytonaNotFoundError",
+    "WakeOnRequest",
 ]

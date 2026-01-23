@@ -153,6 +153,7 @@ models/runner.ts
 models/sandbox-desired-state.ts
 models/sandbox-info.ts
 models/sandbox-labels.ts
+models/sandbox-state-info.ts
 models/sandbox-state.ts
 models/sandbox-volume.ts
 models/sandbox.ts
@@ -184,6 +185,7 @@ models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
+models/wake-on-request.ts
 models/webhook-app-portal-access.ts
 models/webhook-controller-get-status200-response.ts
 models/webhook-initialization-status.ts

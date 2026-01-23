@@ -6,6 +6,7 @@
 import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean, IsArray } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { SandboxClass } from '../enums/sandbox-class.enum'
+import { WakeOnRequest } from '../enums/wake-on-request.enum'
 import { SandboxVolume } from './sandbox.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 
@@ -159,6 +160,17 @@ export class CreateSandboxDto {
   @IsOptional()
   @IsNumber()
   autoDeleteInterval?: number
+
+  @ApiPropertyOptional({
+    description:
+      'Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections',
+    enum: WakeOnRequest,
+    enumName: 'WakeOnRequest',
+    example: WakeOnRequest.NONE,
+  })
+  @IsOptional()
+  @IsEnum(WakeOnRequest)
+  wakeOnRequest?: WakeOnRequest
 
   @ApiPropertyOptional({
     description: 'Array of volumes to attach to the sandbox',

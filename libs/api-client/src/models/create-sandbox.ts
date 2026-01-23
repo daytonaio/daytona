@@ -18,6 +18,9 @@ import type { CreateBuildInfo } from './create-build-info'
 // May contain unused imports in some cases
 // @ts-ignore
 import type { SandboxVolume } from './sandbox-volume'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { WakeOnRequest } from './wake-on-request'
 
 /**
  *
@@ -127,6 +130,12 @@ export interface CreateSandbox {
    * @memberof CreateSandbox
    */
   autoDeleteInterval?: number
+  /**
+   * Wake on request setting - controls whether the sandbox should be automatically started when receiving HTTP requests or SSH connections
+   * @type {WakeOnRequest}
+   * @memberof CreateSandbox
+   */
+  wakeOnRequest?: WakeOnRequest
   /**
    * Array of volumes to attach to the sandbox
    * @type {Array<SandboxVolume>}
