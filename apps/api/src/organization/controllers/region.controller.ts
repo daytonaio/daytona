@@ -27,7 +27,7 @@ export class RegionController {
   constructor(
     private readonly regionService: RegionService,
     private readonly organizationService: OrganizationService,
-  ) {}
+  ) { }
 
   @Get()
   @HttpCode(200)
@@ -48,7 +48,7 @@ export class RegionController {
   })
   async listRegions(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('includeShared') includeShared?: boolean,
+    @Query('includeShared') includeShared: boolean = true,
   ): Promise<RegionDto[]> {
     const regions: Region[] = []
 

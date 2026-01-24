@@ -7,6 +7,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { OrganizationController } from './controllers/organization.controller'
 import { OrganizationRoleController } from './controllers/organization-role.controller'
+import { DefaultRegionController } from './controllers/default-region.controller'
 import { OrganizationUserController } from './controllers/organization-user.controller'
 import { OrganizationInvitationController } from './controllers/organization-invitation.controller'
 import { Organization } from './entities/organization.entity'
@@ -50,6 +51,7 @@ import { RegionController } from './controllers/region.controller'
     OrganizationUserController,
     OrganizationInvitationController,
     RegionController,
+    DefaultRegionController,
   ],
   providers: [
     OrganizationService,
@@ -67,4 +69,4 @@ import { RegionController } from './controllers/region.controller'
     OrganizationUsageService,
   ],
 })
-export class OrganizationModule {}
+export class OrganizationModule { }

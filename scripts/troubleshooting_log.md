@@ -36,3 +36,14 @@
     - Conversation `20cf5d5c-b770-4eb0-b90c-6a3af5c5940d` (Last night) contains `task.md` and `implementation_plan.md`.
     - Current conversation `68143d23-8c88-4d5c-b59f-90798a08b737` also contains its own artifacts.
     - All progress is being tracked across blocks.
+
+## [2026-01-24 16:30] Python SDK Connectivity and Region Mismatch
+- **Problem**: Python SDK `create_sandbox()` failed with `Region not found`.
+- **Root Cause 1 (Import)**: Installed package `daytona-sdk` exports as `daytona_sdk`, not `daytona`.
+- **Root Cause 2 (Client Config)**: Getting "Region not found" because `DaytonaConfig(target=...)` was used. `target` parameter seems to trigger logic unsuitable for this environment. Using `api_url=...` is required.
+- **Root Cause 3 (Server Endpoint)**: The SDK calls `GET /region` (singular) which returned 404. API only provided `GET /api/regions`.
+- **Fixes**:
+    1.  **Server**: Implemented `DefaultRegionController` to handle `GET /region` and return the default 'us' region. Includes update to `OrganizationModule`.
+    2.  **Server**: Updated `RegionController` to default `includeShared=true`.
+    3.  **Client Guidance**: Users must use `api_url` parameter in `DaytonaConfig`.
+- **Status**: Verified. SDK now successfully creates sandboxes.
