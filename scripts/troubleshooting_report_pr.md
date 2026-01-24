@@ -1,0 +1,45 @@
+# Troubleshooting Report: Docker Hub Credential Passing & Runner Stability
+
+## 1. Problem Symptoms
+- **Snapshot/Sandbox Creation Pending**: When creating a snapshot or sandbox using an image without a registry prefix (e.g., `alpine`, `postgres`), the process would hang in `pending` or fail silently.
+- **Missing Credentials Trace**: Runner logs did not show the "using credentials" message for Docker Hub pulls, indicating it was falling back to anonymous pulls (subject to rate limiting or private repo failure).
+- **Runner Connectivity Errors**: Runner logs frequently showed `Is the docker daemon running?` or `events stream error`, causing the API to mark the runner as `UNRESPONSIVE` or `0` availability score.
+
+## 2. Root Cause Analysis
+
+### System Relationships & Workflow
+The issue stemmed from a breakdown in the communication chain between the **API**, **Database**, and **Runner**:
+
+1.  **Registry Mapping (API & DB)**: 
+    - The `DockerRegistryService` in the API is responsible for mapping an image name (e.g., `postgres:17.2`) to a registry configuration in the DB.
+    - If the image name lacks a prefix, the API looks for a registry entry specifically flagged as "Docker Hub" or matching `index.docker.io/v1/`.
+    - **Failure Point**: The database entry for Docker Hub often used `https://index.docker.io/v1/` or `docker.io`, while the code logic expected a strictly formatted URL. This caused the mapping to fail, resulting in anonymous pull requests.
+
+2.  **Credential Passing (API -> Runner)**:
+    - Once the registry is identified, the API fetches the credentials and passes them to the Runner via its REST API.
+    - **Failure Point**: Without the correct mapping in step 1, no credentials were sent.
+
+3.  **Runner Readiness (DinD Architecture)**:
+    - The Runner runs in a Docker-in-Docker (DinD) environment. The `daytona-runner` service depends on the internal `dockerd` daemon.
+    - **Failure Point**: There was a race condition where `daytona-runner` started before `dockerd` created `/var/run/docker.sock`. This led to initialization failures, preventing the Runner from reporting its health to the API.
+
+## 3. Resolution Steps
+
+### Technical Fixes
+1.  **Environment Stabilization**: 
+    - Modified `apps/runner/Dockerfile.local` to include a `while` loop in the `ENTRYPOINT`. This ensures `daytona-runner` exclusively starts *after* the Docker socket is ready.
+    - Added `LOG_LEVEL=info` to the Runner environment to ensure credential usage is visible in production logs.
+2.  **Credential Logic Correction**:
+    - Fixed `DockerRegistryService.ts` to correctly handle prefix-less images by defaulting to the "Docker Hub" registry entry.
+    - Added explicit logging in the Runner's `image_pull.go` to audit credential usage:
+      `Pulling image %s using credentials for registry %s (User: %s)`
+3.  **Database Alignment**:
+    - Standardized the Docker Hub registry URL to `index.docker.io/v1/` in the database to align with the API's mapping logic.
+
+### User Considerations & Precautions ⚠️
+- **Binary Rebuild Mandatory**: The `daytona-runner` binary must be compiled for Linux (`GOOS=linux GOARCH=amd64`) before building the Docker image. Changes to Go code will **not** take effect if simply running `docker compose build` without a fresh `go build`.
+- **Registry URL Precision**: When adding manual registries to the database, the URL must match exactly what the `parseDockerImage` utility expects. For Docker Hub, always use `index.docker.io/v1/`.
+- **Availability Score**: If the dashboard shows "No available runners", check the `availabilityScore` in the `runner` table. The API requires a score >= 10 (default) to schedule tasks.
+
+---
+*Created on: 2026-01-24*
