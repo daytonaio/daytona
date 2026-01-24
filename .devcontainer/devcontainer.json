@@ -27,7 +27,8 @@
         "cschlosser.doxdocgen",
         "ms-python.python",
         "ms-toolsai.jupyter",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "ms-kubernetes-tools.vscode-kubernetes-tools"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -69,9 +70,10 @@
     },
     "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
       "kubectl": "latest",
-      "helm": "none",
-      "minikube": "none"
-    }
+      "helm": "latest",
+      "minikube": "latest"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {}
     // "ghcr.io/ngrok/devcontainer-features/ngrok:1": {}
   },
   "onCreateCommand": {
