@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -45,6 +46,13 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 	}
 
 	labels := make(map[string]string)
+	if len(sandboxDto.Volumes) > 0 {
+		volumeMountPaths := make([]string, len(sandboxDto.Volumes))
+		for i, v := range sandboxDto.Volumes {
+			volumeMountPaths[i] = v.MountPath
+		}
+		labels["daytona.volume_mount_paths"] = strings.Join(volumeMountPaths, ",")
+	}
 	if sandboxDto.Metadata != nil {
 		if orgID, ok := sandboxDto.Metadata["organizationId"]; ok && orgID != "" {
 			labels["daytona.organization_id"] = orgID
