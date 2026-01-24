@@ -1,6 +1,6 @@
-name: daytona sandbox create
+name: daytona create
 synopsis: Create a new sandbox
-usage: daytona sandbox create [flags]
+usage: daytona create [flags]
 options:
   - name: auto-archive
     default_value: '10080'
@@ -69,4 +69,4 @@ inherited_options:
     default_value: 'false'
     usage: help for daytona
 see_also:
-  - daytona sandbox - Manage Daytona sandboxes
+  - daytona - Daytona CLI

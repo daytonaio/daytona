@@ -1,9 +1,9 @@
-## daytona logout
+## daytona start
 
-Logout from Daytona
+Start a sandbox
 
 ```
-daytona logout [flags]
+daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options inherited from parent commands

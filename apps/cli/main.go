@@ -48,6 +48,17 @@ func init() {
 	rootCmd.AddCommand(cmd.GenerateDocsCmd)
 	rootCmd.AddCommand(cmd.VersionCmd)
 
+	// Add sandbox subcommands as top-level shortcuts
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.CreateCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.DeleteCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.InfoCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.ListCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.StartCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.StopCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.ArchiveCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.SSHCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.ExecCmd))
+
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
 	rootCmd.Flags().BoolP("version", "v", false, "Display the version of Daytona")
@@ -62,6 +73,21 @@ func init() {
 			os.Exit(0)
 		}
 	}
+}
+
+// createSandboxShortcut creates a top-level shortcut for a sandbox subcommand
+func createSandboxShortcut(original *cobra.Command) *cobra.Command {
+	shortcut := &cobra.Command{
+		Use:     original.Use,
+		Short:   original.Short,
+		Long:    original.Long,
+		Args:    original.Args,
+		Aliases: original.Aliases,
+		GroupID: internal.SANDBOX_GROUP,
+		RunE:    original.RunE,
+	}
+	shortcut.Flags().AddFlagSet(original.Flags())
+	return shortcut
 }
 
 func main() {

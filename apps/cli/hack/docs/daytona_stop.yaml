@@ -1,0 +1,9 @@
+name: daytona stop
+synopsis: Stop a sandbox
+usage: daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

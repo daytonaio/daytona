@@ -1,6 +1,6 @@
-name: daytona sandbox info
+name: daytona info
 synopsis: Get sandbox info
-usage: daytona sandbox info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+usage: daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 options:
   - name: format
     shorthand: f
@@ -10,4 +10,4 @@ inherited_options:
     default_value: 'false'
     usage: help for daytona
 see_also:
-  - daytona sandbox - Manage Daytona sandboxes
+  - daytona - Daytona CLI

@@ -1,0 +1,9 @@
+name: daytona start
+synopsis: Start a sandbox
+usage: daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

@@ -1,9 +1,9 @@
-## daytona sandbox delete
+## daytona delete
 
 Delete a sandbox
 
 ```
-daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options
@@ -20,4 +20,4 @@ daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 
 ### SEE ALSO
 
-- [daytona sandbox](daytona_sandbox.md)  - Manage Daytona sandboxes
+* [daytona](daytona.md)  - Daytona CLI

@@ -1,6 +1,6 @@
-name: daytona sandbox list
+name: daytona list
 synopsis: List sandboxes
-usage: daytona sandbox list [flags]
+usage: daytona list [flags]
 options:
   - name: format
     shorthand: f
@@ -18,4 +18,4 @@ inherited_options:
     default_value: 'false'
     usage: help for daytona
 see_also:
-  - daytona sandbox - Manage Daytona sandboxes
+  - daytona - Daytona CLI
