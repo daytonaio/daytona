@@ -45,7 +45,7 @@ export class DockerRegistryService {
     private readonly dockerRegistryRepository: Repository<DockerRegistry>,
     @Inject(DOCKER_REGISTRY_PROVIDER)
     private readonly dockerRegistryProvider: IDockerRegistryProvider,
-  ) {}
+  ) { }
 
   async create(
     createDto: CreateDockerRegistryDto,
@@ -198,9 +198,9 @@ export class DockerRegistryService {
   async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const whereCondition = organizationId
       ? [
-          { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-          { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
-        ]
+        { organizationId, registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+        { organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) },
+      ]
       : [{ organizationId: IsNull(), registryType: In([RegistryType.INTERNAL, RegistryType.ORGANIZATION]) }]
 
     const registries = await this.dockerRegistryRepository.find({
@@ -212,6 +212,14 @@ export class DockerRegistryService {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (imageName.startsWith(strippedUrl)) {
         return registry
+      }
+    }
+
+    const parsedImage = parseDockerImage(imageName)
+    if (!parsedImage.registry) {
+      const dockerHubRegistry = await this.getDefaultDockerHubRegistry()
+      if (dockerHubRegistry) {
+        return dockerHubRegistry
       }
     }
 
@@ -342,6 +350,12 @@ export class DockerRegistryService {
       return this.createTemporaryRegistryConfig(parsedImage.registry)
     } else {
       // Image has no registry prefix (e.g., "alpine:3.21")
+      // Try to find matching registry in database first
+      const dockerHubRegistry = await this.getDefaultDockerHubRegistry()
+      if (dockerHubRegistry) {
+        return dockerHubRegistry
+      }
+
       // Create temporary Docker Hub config
       return this.createTemporaryRegistryConfig('docker.io')
     }

@@ -43,7 +43,11 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		}
 	}
 
-	log.Infof("Pulling image %s...", imageName)
+	if reg != nil && reg.Username != "" {
+		log.Infof("Pulling image %s using credentials for registry %s (User: %s)", imageName, reg.Url, reg.Username)
+	} else {
+		log.Infof("Pulling image %s without explicit registry credentials", imageName)
+	}
 
 	sandboxIdValue := ctx.Value(constants.ID_KEY)
 
