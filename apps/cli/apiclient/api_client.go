@@ -54,11 +54,48 @@ func checkVersionsMismatch(res *http.Response) {
 	cliVersion := strings.TrimPrefix(internal.Version, "v")
 	apiVersion := strings.TrimPrefix(serverVersion, "v")
 
-	if cliVersion != "0.0.0-dev" && cliVersion != apiVersion {
-		versionMismatchWarningOnce.Do(func() {
-			log.Warn(fmt.Sprintf("Version mismatch: Daytona CLI is on v%s and API is on v%s.\nMake sure the versions are aligned using 'brew upgrade daytonaio/cli/daytona' or by downloading the latest version from https://github.com/daytonaio/daytona/releases.", cliVersion, apiVersion))
-		})
+	if cliVersion == "0.0.0-dev" || cliVersion == apiVersion {
+		return
 	}
+
+	if compareVersions(cliVersion, apiVersion) >= 0 {
+		return
+	}
+
+	versionMismatchWarningOnce.Do(func() {
+		log.Warn(fmt.Sprintf("Version mismatch: Daytona CLI is on v%s and API is on v%s.\nMake sure the versions are aligned using 'brew upgrade daytonaio/cli/daytona' or by downloading the latest version from https://github.com/daytonaio/daytona/releases.", cliVersion, apiVersion))
+	})
+}
+
+// compareVersions compares two semver strings
+// Returns: -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2
+func compareVersions(v1, v2 string) int {
+	parts1 := strings.Split(v1, ".")
+	parts2 := strings.Split(v2, ".")
+
+	maxLen := len(parts1)
+	if len(parts2) > maxLen {
+		maxLen = len(parts2)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		var n1, n2 int
+		if i < len(parts1) {
+			fmt.Sscanf(parts1[i], "%d", &n1)
+		}
+		if i < len(parts2) {
+			fmt.Sscanf(parts2[i], "%d", &n2)
+		}
+
+		if n1 < n2 {
+			return -1
+		}
+		if n1 > n2 {
+			return 1
+		}
+	}
+
+	return 0
 }
 
 func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*apiclient.APIClient, error) {
