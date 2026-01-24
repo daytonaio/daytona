@@ -41,5 +41,31 @@ The issue stemmed from a breakdown in the communication chain between the **API*
 - **Registry URL Precision**: When adding manual registries to the database, the URL must match exactly what the `parseDockerImage` utility expects. For Docker Hub, always use `index.docker.io/v1/`.
 - **Availability Score**: If the dashboard shows "No available runners", check the `availabilityScore` in the `runner` table. The API requires a score >= 10 (default) to schedule tasks.
 
+## 4. Python SDK Troubleshooting
+
+### Problem Symptoms
+- **Region Not Found**: The Python SDK (`daytona-sdk==0.128.1`) failed during `daytona.create()` with a `Region not found` error.
+- **Import Failures**: The script failed to import `daytona` because the package name is `daytona_sdk`.
+
+### Root Cause Analysis
+1.  **API Route Mismatch**:
+    - The SDK attempts to fetch the default region via `GET /api/region` (singular).
+    - The API only exposed `/api/regions` (plural).
+    - This resulted in a 404 error, which the SDK interpreted as "Region not found".
+2.  **SDK Parameter handling**:
+    - The SDK's behavior changes based on whether `target` or `api_url` is used in `DaytonaConfig`. Using `target` caused issues in this environment; `api_url` is the correct parameter for direct API connection.
+
+### Resolution Steps
+1.  **Server-Side Fixes**:
+    - Implemented a new `DefaultRegionController` to handle the `GET /api/region` route.
+    - Updated `RegionController` to default to `includeShared=true` so that the default 'us' region is discoverable.
+2.  **Client-Side Correction**:
+    - Verified that using `from daytona_sdk import ...` is required.
+    - Verified that configuring `DaytonaConfig` with `api_url` instead of `target` is necessary for stable operation.
+
+### Verification of Fixes
+- **Credential Logging**: Verified via `docker logs daytona-runner-1` that credential passing is active (seen in `postgres` test). For SDK tests using public images, caching prevented new pulls, but the mechanism remains validated.
+- **SDK Success**: The test script `test_sdk.py` now successfully creates, uses, and returns a sandbox using the patched flow.
+
 ---
 *Created on: 2026-01-24*
