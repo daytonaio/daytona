@@ -73,3 +73,25 @@ examples/**/*.png
 !/poetry.lock
 .astro
 .github/instructions/nx.instructions.md
+
+# Local development files
+test_scripts/.env
+test_scripts/venv/
+
+# Temporary test outputs
+test_scripts/*.log
+test_scripts/db_creds_output.txt
+
+# Local SQL scripts (root directory)
+/*.sql
+
+# Temporary data dumps (root directory)
+/all_*.txt
+/last_*.txt
+/postgres_error.txt
+/registries.txt
+/runner_snapshots*.txt
+/sandboxes.json
+/sdk_trace.log
+/verify.log
+/daytona_*.py
