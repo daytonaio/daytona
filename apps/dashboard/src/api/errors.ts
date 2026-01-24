@@ -5,8 +5,17 @@
 
 export class DaytonaError extends Error {
   public static fromError(error: Error): DaytonaError {
-    if (String(error).includes('Organization is suspended')) {
+    const errorString = String(error)
+
+    if (errorString.includes('Organization is suspended')) {
       return new OrganizationSuspendedError(error.message)
+    }
+
+    // Check for "has active child sandbox(es)" error pattern
+    const childrenMatch = errorString.match(/it has (\d+) active child sandbox\(es\)/)
+    if (childrenMatch) {
+      const childCount = parseInt(childrenMatch[1], 10)
+      return new HasChildrenError(error.message, childCount)
     }
 
     return new DaytonaError(error.message)
@@ -18,3 +27,12 @@ export class DaytonaError extends Error {
 }
 
 export class OrganizationSuspendedError extends DaytonaError {}
+
+export class HasChildrenError extends DaytonaError {
+  public childCount: number
+
+  constructor(message: string, childCount: number) {
+    super(message)
+    this.childCount = childCount
+  }
+}

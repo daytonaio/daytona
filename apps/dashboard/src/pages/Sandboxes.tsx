@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { OrganizationSuspendedError } from '@/api/errors'
+import { OrganizationSuspendedError, HasChildrenError } from '@/api/errors'
 import {
   OrganizationUserRoleEnum,
   Sandbox,
@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { ForkTreeDialog } from '@/components/ForkTreeDialog'
+import { RecursiveDeleteDialog } from '@/components/RecursiveDeleteDialog'
 import { formatDuration } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -286,6 +287,10 @@ const Sandboxes: React.FC = () => {
   const [showForkTreeDialog, setShowForkTreeDialog] = useState(false)
   const [forkTreeSandboxId, setForkTreeSandboxId] = useState<string | null>(null)
 
+  // Recursive Delete Dialog
+  const [showRecursiveDeleteDialog, setShowRecursiveDeleteDialog] = useState(false)
+  const [recursiveDeleteSandboxId, setRecursiveDeleteSandboxId] = useState<string | null>(null)
+
   // Snapshot Filter
 
   const [snapshotFilters, setSnapshotFilters] = useState<SnapshotFilters>({})
@@ -512,7 +517,15 @@ const Sandboxes: React.FC = () => {
 
       await markAllSandboxQueriesAsStale()
     } catch (error) {
-      handleApiError(error, 'Failed to delete sandbox')
+      // Check if this is a "has children" error - if so, open recursive delete dialog
+      if (error instanceof HasChildrenError) {
+        setSandboxToDelete(null)
+        setShowDeleteDialog(false)
+        setRecursiveDeleteSandboxId(id)
+        setShowRecursiveDeleteDialog(true)
+      } else {
+        handleApiError(error, 'Failed to delete sandbox')
+      }
       revertSandboxStateOptimisticUpdate(id, previousState)
     } finally {
       setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
@@ -1213,6 +1226,25 @@ const Sandboxes: React.FC = () => {
           setSelectedSandbox(sandbox)
           setShowSandboxDetails(true)
           setShowForkTreeDialog(false)
+        }}
+      />
+
+      {/* Recursive Delete Dialog */}
+      <RecursiveDeleteDialog
+        open={showRecursiveDeleteDialog}
+        onOpenChange={(isOpen) => {
+          setShowRecursiveDeleteDialog(isOpen)
+          if (!isOpen) {
+            setRecursiveDeleteSandboxId(null)
+          }
+        }}
+        sandboxId={recursiveDeleteSandboxId}
+        onComplete={async () => {
+          await markAllSandboxQueriesAsStale(true)
+          if (selectedSandbox && recursiveDeleteSandboxId === selectedSandbox.id) {
+            setShowSandboxDetails(false)
+            setSelectedSandbox(null)
+          }
         }}
       />
 
