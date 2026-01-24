@@ -14,6 +14,7 @@ var SandboxCmd = &cobra.Command{
 	Long:    "Commands for managing Daytona sandboxes",
 	Aliases: []string{"sandboxes"},
 	GroupID: internal.SANDBOX_GROUP,
+	Hidden:  true, // Deprecated: use top-level commands instead (e.g., "daytona start" instead of "daytona sandbox start")
 }
 
 func init() {

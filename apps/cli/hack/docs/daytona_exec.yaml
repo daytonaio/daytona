@@ -1,0 +1,16 @@
+name: daytona exec
+synopsis: Execute a command in a sandbox
+description: Execute a command in a running sandbox
+usage: daytona exec [SANDBOX_ID | SANDBOX_NAME] -- [COMMAND] [ARGS...] [flags]
+options:
+  - name: cwd
+    usage: Working directory for command execution
+  - name: timeout
+    default_value: '0'
+    usage: Command timeout in seconds (0 for no timeout)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

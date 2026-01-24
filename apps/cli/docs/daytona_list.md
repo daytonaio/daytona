@@ -1,9 +1,9 @@
-## daytona sandbox list
+## daytona list
 
 List sandboxes
 
 ```
-daytona sandbox list [flags]
+daytona list [flags]
 ```
 
 ### Options
@@ -22,4 +22,4 @@ daytona sandbox list [flags]
 
 ### SEE ALSO
 
-- [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes
+* [daytona](daytona.md)  - Daytona CLI

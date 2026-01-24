@@ -1,9 +1,9 @@
-## daytona sandbox info
+## daytona info
 
 Get sandbox info
 
 ```
-daytona sandbox info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options
@@ -20,4 +20,4 @@ daytona sandbox info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 
 ### SEE ALSO
 
-- [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes
+* [daytona](daytona.md)  - Daytona CLI

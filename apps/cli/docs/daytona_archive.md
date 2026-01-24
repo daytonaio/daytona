@@ -1,9 +1,9 @@
-## daytona logout
+## daytona archive
 
-Logout from Daytona
+Archive a sandbox
 
 ```
-daytona logout [flags]
+daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 ### Options inherited from parent commands

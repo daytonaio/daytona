@@ -1,9 +1,9 @@
-## daytona sandbox create
+## daytona create
 
 Create a new sandbox
 
 ```
-daytona sandbox create [flags]
+daytona create [flags]
 ```
 
 ### Options
@@ -39,4 +39,4 @@ daytona sandbox create [flags]
 
 ### SEE ALSO
 
-- [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes
+* [daytona](daytona.md)  - Daytona CLI

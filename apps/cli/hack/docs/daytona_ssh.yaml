@@ -1,0 +1,15 @@
+name: daytona ssh
+synopsis: SSH into a sandbox
+description: Establish an SSH connection to a running sandbox
+usage: daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+options:
+  - name: expires
+    default_value: '1440'
+    usage: |
+      SSH access token expiration time in minutes (defaults to 24 hours)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI
