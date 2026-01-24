@@ -69,3 +69,15 @@ The issue stemmed from a breakdown in the communication chain between the **API*
 
 ---
 *Created on: 2026-01-24*
+
+## 5. Final Verification Results
+
+**Credential Logging Verification**:
+- **Test**: Attempted to create a sandbox using `redis:7.0-alpine` (uncached) with valid Docker Hub credentials (`hyoungjunnoh`).
+- **Result**: Runner logs confirm `docker pull` was initiated using credentials:
+  `level=info msg="Pulling image redis:7.0-alpine using credentials for registry index.docker.io/v1/ (User: hyoungjunnoh)"`
+- **Correction**: This definitively proves that the `DockerRegistryService` correctly maps the prefix-less image to the Docker Hub registry entry and that the Runner receives and uses the configured credentials.
+
+**API Path Mismatch Investigation**:
+- **Findings**: The `RegionController` was introduced in commit `af8fceb` (Jan 23, 2026) with the path `@Controller('regions')`.
+- **Conclusion**: The mismatch occurred at this inception point. The server implementation used plural `/regions`, while the client SDK (likely generated from a spec or convention) expected singular `/region`. This divergence has been resolved by adding `DefaultRegionController` to handle the singular path.
