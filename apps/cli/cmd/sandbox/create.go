@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
@@ -176,7 +177,11 @@ var CreateCmd = &cobra.Command{
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(previewUrl.Url)))
+		boldStyle := lipgloss.NewStyle().Bold(true)
+
+		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox '%s' created successfully", sandbox.Name))
+		views_common.RenderInfoMessage(fmt.Sprintf("Connect via SSH:         %s", boldStyle.Render(fmt.Sprintf("daytona ssh %s", sandbox.Name))))
+		views_common.RenderInfoMessage(fmt.Sprintf("Open the Web Terminal:   %s\n", views_common.LinkStyle.Render(previewUrl.Url)))
 		return nil
 	},
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package common
@@ -54,7 +54,7 @@ func ExecuteSSH(sshArgs []string) error {
 	go func() {
 		for sig := range sigChan {
 			if sshCmd.Process != nil {
-				sshCmd.Process.Signal(sig)
+				_ = sshCmd.Process.Signal(sig)
 			}
 		}
 	}()
