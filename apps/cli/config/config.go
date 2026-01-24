@@ -24,10 +24,11 @@ type Config struct {
 }
 
 type Profile struct {
-	Id                   string    `json:"id"`
-	Name                 string    `json:"name"`
-	Api                  ServerApi `json:"api"`
-	ActiveOrganizationId *string   `json:"activeOrganizationId"`
+	Id                   string            `json:"id"`
+	Name                 string            `json:"name"`
+	Api                  ServerApi         `json:"api"`
+	ActiveOrganizationId *string           `json:"activeOrganizationId"`
+	ToolboxProxyUrls     map[string]string `json:"toolboxProxyUrls,omitempty"` // Cache proxy URLs by region
 }
 
 type ServerApi struct {
@@ -288,4 +289,42 @@ func GetDaytonaApiUrl() string {
 	}
 
 	return daytonaApiUrl
+}
+
+func GetToolboxProxyUrl(region string) (string, error) {
+	c, err := GetConfig()
+	if err != nil {
+		return "", err
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		return "", err
+	}
+
+	if activeProfile.ToolboxProxyUrls == nil {
+		return "", nil
+	}
+
+	return activeProfile.ToolboxProxyUrls[region], nil
+}
+
+func SetToolboxProxyUrl(region, url string) error {
+	c, err := GetConfig()
+	if err != nil {
+		return err
+	}
+
+	// Find and update the active profile
+	for i, profile := range c.Profiles {
+		if profile.Id == c.ActiveProfileId {
+			if c.Profiles[i].ToolboxProxyUrls == nil {
+				c.Profiles[i].ToolboxProxyUrls = make(map[string]string)
+			}
+			c.Profiles[i].ToolboxProxyUrls[region] = url
+			return c.Save()
+		}
+	}
+
+	return ErrNoActiveProfile
 }

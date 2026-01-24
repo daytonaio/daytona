@@ -27,8 +27,18 @@ var SSHCmd = &cobra.Command{
 
 		sandboxIdOrName := args[0]
 
+		// Get sandbox to check state
+		sandbox, res, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxIdOrName).Execute()
+		if err != nil {
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		if err := common.RequireStartedState(sandbox); err != nil {
+			return err
+		}
+
 		// Create SSH access token
-		sshAccessRequest := apiClient.SandboxAPI.CreateSshAccess(ctx, sandboxIdOrName)
+		sshAccessRequest := apiClient.SandboxAPI.CreateSshAccess(ctx, sandbox.Id)
 		if sshExpiresInMinutes > 0 {
 			sshAccessRequest = sshAccessRequest.ExpiresInMinutes(float32(sshExpiresInMinutes))
 		}
