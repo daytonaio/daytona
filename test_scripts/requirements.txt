@@ -1,0 +1,2 @@
+# Python dependencies for test script
+requests>=2.31.0
