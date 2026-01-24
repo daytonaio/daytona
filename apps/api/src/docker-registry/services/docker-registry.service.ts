@@ -379,10 +379,20 @@ export class DockerRegistryService {
     return registry
   }
 
-  private async getDockerHubToken(repository: string): Promise<string | null> {
+  private async getDockerHubToken(repository: string, username?: string, password?: string): Promise<string | null> {
     try {
       const tokenUrl = `https://auth.docker.io/token?service=${DOCKER_HUB_REGISTRY}&scope=repository:${repository}:pull`
-      const response = await axios.get(tokenUrl, { timeout: 10000 })
+
+      // If credentials are provided, use Basic Auth to get an authenticated token
+      const config: any = { timeout: 10000 }
+      if (username && password) {
+        const encodedCredentials = Buffer.from(`${username}:${password}`).toString('base64')
+        config.headers = {
+          'Authorization': `Basic ${encodedCredentials}`
+        }
+      }
+
+      const response = await axios.get(tokenUrl, config)
       return response.data.token
     } catch (error) {
       this.logger.warn(`Failed to get Docker Hub token: ${error.message}`)
@@ -481,16 +491,18 @@ export class DockerRegistryService {
       let bearerToken: string | null = null
 
       // Pre-populate auth if we already know how
-      if (registry.username && registry.password) {
-        const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
-        baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
-      } else if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
-        // Get anonymous token for Docker Hub
+      // Docker Hub requires Bearer tokens, not Basic Auth
+      if (registry.url.includes(DOCKER_HUB_REGISTRY)) {
+        // Get Docker Hub token (authenticated if credentials available, anonymous otherwise)
         const dockerHubRepo = repoPath.includes('/') ? repoPath : `library/${repoPath}`
-        bearerToken = await this.getDockerHubToken(dockerHubRepo)
+        bearerToken = await this.getDockerHubToken(dockerHubRepo, registry.username, registry.password)
         if (bearerToken) {
           baseHeaders.set('Authorization', `Bearer ${bearerToken}`)
         }
+      } else if (registry.username && registry.password) {
+        // For other registries, use Basic Auth
+        const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
+        baseHeaders.set('Authorization', `Basic ${encodedCredentials}`)
       }
 
       const sendWithHeaders = async (url: string, headers: AxiosRequestHeaders | typeof baseHeaders) =>
