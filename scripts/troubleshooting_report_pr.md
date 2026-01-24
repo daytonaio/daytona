@@ -73,11 +73,60 @@ The issue stemmed from a breakdown in the communication chain between the **API*
 ## 5. Final Verification Results
 
 **Credential Logging Verification**:
-- **Test**: Attempted to create a sandbox using `redis:7.0-alpine` (uncached) with valid Docker Hub credentials (`hyoungjunnoh`).
-- **Result**: Runner logs confirm `docker pull` was initiated using credentials:
-  `level=info msg="Pulling image redis:7.0-alpine using credentials for registry index.docker.io/v1/ (User: hyoungjunnoh)"`
-- **Correction**: This definitively proves that the `DockerRegistryService` correctly maps the prefix-less image to the Docker Hub registry entry and that the Runner receives and uses the configured credentials.
+- **Test 1**: Created a sandbox using `redis:7.0-alpine` (uncached) with valid Docker Hub credentials (`hyoungjunnoh`).
+  - **Result**: `level=info msg="Pulling image redis:7.0-alpine using credentials for registry index.docker.io/v1/ (User: hyoungjunnoh)"`
+- **Test 2**: Created a sandbox using `nginx:1.25-alpine` (uncached) to confirm consistency.
+  - **Result**: `level=info msg="Pulling image nginx:1.25-alpine using credentials for registry index.docker.io/v1/ (User: hyoungjunnoh)"`
+- **Conclusion**: This definitively proves that the `DockerRegistryService` correctly maps prefix-less images to the Docker Hub registry entry and that the Runner receives and uses the configured credentials consistently across different images.
 
 **API Path Mismatch Investigation**:
 - **Findings**: The `RegionController` was introduced in commit `af8fceb` (Jan 23, 2026) with the path `@Controller('regions')`.
 - **Conclusion**: The mismatch occurred at this inception point. The server implementation used plural `/regions`, while the client SDK (likely generated from a spec or convention) expected singular `/region`. This divergence has been resolved by adding `DefaultRegionController` to handle the singular path.
+
+---
+
+## 6. Docker Hub Authentication Fix (Manifest API)
+
+**Problem**: After the initial credential passing fix, sandbox creation still failed with "manifest unknown" errors in the audit logs. API logs showed:
+```
+Could not get image details for <image>: Failed to get manifest for image <image>: Not Found
+```
+
+**Root Cause**: The API was attempting to use **Basic Authentication directly on Docker Hub's manifest API**. However, Docker Hub's Registry API v2 **only accepts Bearer token authentication** for manifest requests, not Basic Auth. This caused all manifest lookup requests to fail with 401/404 errors.
+
+**Understanding Docker Hub's Authentication**:
+- Docker Hub uses a **two-step authentication process**:
+  1. **Token Service** (`auth.docker.io`): Issues Bearer tokens (accepts Basic Auth with credentials)
+  2. **Manifest API** (`index.docker.io/v2/...`): Serves image data (only accepts Bearer tokens)
+
+**The Bug**: When Docker Hub credentials existed in the database, the original code sent Basic Auth directly to the manifest API, which Docker Hub rejected.
+
+**Solution**: Modified `apps/api/src/docker-registry/services/docker-registry.service.ts`:
+
+1. **Updated `getDockerHubToken` method** (lines 382-401):
+   - Added optional `username` and `password` parameters
+   - When credentials are provided, uses Basic Auth to **request an authenticated Bearer token** from `https://auth.docker.io/token`
+   - Falls back to anonymous token if no credentials provided
+   - **Key**: Basic Auth is used to GET a token, not for the manifest API
+
+2. **Updated `getImageDetails` method** (lines 493-506):
+   - **Separated Docker Hub from other registries**
+   - For Docker Hub: Always use Bearer token (authenticated if credentials available, anonymous otherwise)
+   - For other registries: Continue using Basic Auth (unchanged)
+
+**Authentication Flow**:
+```
+Docker Hub:
+  API → auth.docker.io (Basic Auth) → Bearer Token → index.docker.io (Bearer Token) → Manifest ✅
+
+Other Registries:
+  API → registry (Basic Auth) → Manifest ✅
+```
+
+**Verification**:
+- **Test 1 (nginx:1.25-alpine)**: ✓ Sandbox created successfully
+- **Test 2 (python:3.11-slim)**: ✓ Sandbox created successfully
+- **Test 3 (redis:7.0-alpine)**: ✓ Sandbox created successfully
+- **API Logs**: No "Failed to get manifest" errors after fix
+
+**Impact**: Sandbox creation from Docker Hub images now works correctly. The API can successfully retrieve image manifests using authenticated Docker Hub credentials. Other registry authentication (Basic Auth) remains unchanged.
