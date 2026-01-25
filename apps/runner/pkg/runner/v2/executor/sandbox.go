@@ -110,8 +110,11 @@ func (e *Executor) resizeSandbox(ctx context.Context, job *apiclient.Job) (any, 
 
 	err = e.docker.Resize(ctx, job.ResourceId, resizeSandboxDto)
 	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusFailure)).Inc()
 		return nil, common.FormatRecoverableError(err)
 	}
+
+	common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusSuccess)).Inc()
 
 	return nil, nil
 }

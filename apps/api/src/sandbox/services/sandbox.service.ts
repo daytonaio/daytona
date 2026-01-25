@@ -35,6 +35,7 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
+import { SandboxResizedEvent } from '../events/sandbox-resized.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../../organization/events/organization-suspended-sandbox-stopped.event'
@@ -1375,9 +1376,19 @@ export class SandboxService {
       throw new BadRequestError('GPU resize is not supported')
     }
 
+    // Disk resize is not supported yet
+    if (resizeDto.disk !== undefined) {
+      throw new BadRequestError('Disk resize is not supported yet')
+    }
+
     // If no resize parameters provided, return sandbox as-is
     if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
       return sandbox
+    }
+
+    // Validate hot resize is only for running sandboxes
+    if (resizeDto.hot === true && sandbox.state !== SandboxState.STARTED) {
+      throw new BadRequestError('Hot resize can only be performed on a running sandbox')
     }
 
     const isHotResize = resizeDto.hot === true && sandbox.state === SandboxState.STARTED
@@ -1390,11 +1401,11 @@ export class SandboxService {
       }
 
       if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
-        throw new BadRequestError('CPU can only be increased during hot resize')
+        throw new BadRequestError('CPU can not be decreased during hot resize')
       }
 
       if (resizeDto.memory !== undefined && resizeDto.memory < sandbox.mem) {
-        throw new BadRequestError('Memory can only be increased during hot resize')
+        throw new BadRequestError('Memory can not be decreased during hot resize')
       }
     }
 
@@ -1402,6 +1413,10 @@ export class SandboxService {
     if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
       throw new BadRequestError('Disk size can only be increased, not decreased')
     }
+
+    // Capture old values for event emission
+    const oldCpu = sandbox.cpu
+    const oldMem = sandbox.mem
 
     // Calculate new resource values
     const newCpu = resizeDto.cpu ?? sandbox.cpu
@@ -1449,10 +1464,7 @@ export class SandboxService {
     try {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      // Only call runner if CPU or memory is changing (disk resize not implemented on runner)
-      if (resizeDto.cpu !== undefined || resizeDto.memory !== undefined) {
-        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
-      }
+      await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
 
       // For V0 runners, update resources immediately
       // For V2 runners, job handler will update resources on completion
@@ -1461,14 +1473,15 @@ export class SandboxService {
         sandbox.mem = newMem
         sandbox.disk = newDisk
         sandbox.resizing = false
-        await this.sandboxRepository.save(sandbox)
+        await this.sandboxRepository.saveWhere(sandbox, { resizing: true })
+        this.eventEmitter.emit(SandboxEvents.RESIZED, new SandboxResizedEvent(sandbox, oldCpu, newCpu, oldMem, newMem))
       }
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
       // Reset resizing flag on error
       sandbox.resizing = false
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxRepository.saveWhere(sandbox, { resizing: true })
       throw error
     }
   }

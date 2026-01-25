@@ -422,12 +422,6 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
-    const resizeSandboxDTO: ResizeSandboxDTO = {
-      cpu: cpu,
-      memory: memory,
-      // disk is passed but runner will error if provided (not implemented yet)
-    }
-
-    await this.sandboxApiClient.resize(sandboxId, resizeSandboxDTO)
+    await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
   }
 }

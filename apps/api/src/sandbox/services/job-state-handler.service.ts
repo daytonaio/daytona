@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -18,6 +19,8 @@ import { Job } from '../entities/job.entity'
 import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { SandboxResizedEvent } from '../events/sandbox-resized.event'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -34,6 +37,7 @@ export class JobStateHandlerService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -449,18 +453,21 @@ export class JobStateHandlerService {
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
+        // Capture old values for event emission
+        const oldCpu = sandbox.cpu
+        const oldMem = sandbox.mem
         // Update sandbox resources from job payload
         const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
-        if (payload.cpu !== undefined) {
-          sandbox.cpu = payload.cpu
-        }
-        if (payload.memory !== undefined) {
-          sandbox.mem = payload.memory
-        }
-        if (payload.disk !== undefined) {
-          sandbox.disk = payload.disk
-        }
+        sandbox.cpu = payload.cpu ?? sandbox.cpu
+        sandbox.mem = payload.memory ?? sandbox.mem
+        sandbox.disk = payload.disk ?? sandbox.disk
         sandbox.resizing = false
+        await this.sandboxRepository.save(sandbox)
+        this.eventEmitter.emit(
+          SandboxEvents.RESIZED,
+          new SandboxResizedEvent(sandbox, oldCpu, sandbox.cpu, oldMem, sandbox.mem),
+        )
+        return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         // Reset resizing flag on failure, keep original resources

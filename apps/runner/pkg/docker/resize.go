@@ -16,20 +16,45 @@ import (
 
 func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto dto.ResizeSandboxDTO) error {
 	// Disk resize is not supported yet
-	if sandboxDto.Disk != 0 {
+	// Value of 0 means "don't change" (minimum valid value is 1)
+	if sandboxDto.Disk > 0 {
 		return fmt.Errorf("disk resize is not supported yet")
+	}
+
+	// Check if there's anything to resize
+	if sandboxDto.Cpu == 0 && sandboxDto.Memory == 0 {
+		return nil // Nothing to resize
+	}
+
+	// Get the current state to restore after resize
+	originalState, err := d.DeduceSandboxState(ctx, sandboxId)
+	if err != nil {
+		// Default to started if we can't deduce state
+		originalState = enums.SandboxStateStarted
 	}
 
 	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
 
-	_, err := d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
-		Resources: container.Resources{
-			CPUQuota:   sandboxDto.Cpu * 100000, // Convert CPU cores to quota (1 core = 100000)
-			CPUPeriod:  100000,
-			Memory:     common.GBToBytes(float64(sandboxDto.Memory)),
-			MemorySwap: common.GBToBytes(float64(sandboxDto.Memory)), // Set swap equal to memory to disable swap
-		},
-	})
+	// Build resources with only the fields that need to change (0 = don't change)
+	resources := container.Resources{}
+	if sandboxDto.Cpu > 0 {
+		resources.CPUQuota = sandboxDto.Cpu * 100000 // 1 core = 100000
+		resources.CPUPeriod = 100000
+	}
+	if sandboxDto.Memory > 0 {
+		resources.Memory = common.GBToBytes(float64(sandboxDto.Memory))
+		resources.MemorySwap = resources.Memory // Disable swap
+	}
 
-	return err
+	_, err = d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
+		Resources: resources,
+	})
+	if err != nil {
+		d.statesCache.SetSandboxState(ctx, sandboxId, originalState)
+		return err
+	}
+
+	d.statesCache.SetSandboxState(ctx, sandboxId, originalState)
+
+	return nil
 }
