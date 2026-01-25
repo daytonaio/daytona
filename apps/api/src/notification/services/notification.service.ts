@@ -21,6 +21,7 @@ import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
 import { VolumeLastUsedAtUpdatedEvent } from '../../sandbox/events/volume-last-used-at-updated.event'
 import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
+import { SandboxResizedEvent } from '../../sandbox/events/sandbox-resized.event'
 import { RunnerEvents } from '../../sandbox/constants/runner-events'
 import { RunnerDto } from '../../sandbox/dto/runner.dto'
 import { RunnerCreatedEvent } from '../../sandbox/events/runner-created.event'
@@ -56,6 +57,13 @@ export class NotificationService {
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
     const dto = SandboxDto.fromSandbox(event.sandbox)
     this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
+    this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
+  }
+
+  @OnEvent(SandboxEvents.RESIZED)
+  async handleSandboxResized(event: SandboxResizedEvent) {
+    const dto = SandboxDto.fromSandbox(event.sandbox)
+    this.notificationGateway.emitSandboxResized(dto, event.oldCpu, event.newCpu, event.oldMemory, event.newMemory)
     this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
   }
 

@@ -6,6 +6,7 @@
 export const WebhookEvents = {
   SANDBOX_CREATED: 'sandbox.created',
   SANDBOX_STATE_UPDATED: 'sandbox.state.updated',
+  SANDBOX_RESIZED: 'sandbox.resized',
   SNAPSHOT_CREATED: 'snapshot.created',
   SNAPSHOT_STATE_UPDATED: 'snapshot.state.updated',
   SNAPSHOT_REMOVED: 'snapshot.removed',

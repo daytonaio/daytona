@@ -15,6 +15,7 @@ import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-u
 import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
+import { SandboxResizedEvent } from '../../sandbox/events/sandbox-resized.event'
 
 export abstract class BaseWebhookEventDto {
   @ApiProperty({
@@ -123,6 +124,66 @@ export class SandboxStateUpdatedWebhookDto extends BaseWebhookEventDto {
       oldState: event.oldState,
       newState: event.newState,
       updatedAt: event.sandbox.updatedAt.toISOString(),
+    }
+  }
+}
+
+@ApiSchema({ name: 'SandboxResizedWebhook' })
+export class SandboxResizedWebhookDto extends BaseWebhookEventDto {
+  @ApiProperty({
+    description: 'Sandbox ID',
+    example: 'sandbox123',
+  })
+  id: string
+
+  @ApiProperty({
+    description: 'Organization ID',
+    example: 'org123',
+  })
+  organizationId: string
+
+  @ApiProperty({
+    description: 'Previous CPU cores',
+    example: 2,
+  })
+  oldCpu: number
+
+  @ApiProperty({
+    description: 'New CPU cores',
+    example: 4,
+  })
+  newCpu: number
+
+  @ApiProperty({
+    description: 'Previous memory in GB',
+    example: 4,
+  })
+  oldMemory: number
+
+  @ApiProperty({
+    description: 'New memory in GB',
+    example: 8,
+  })
+  newMemory: number
+
+  @ApiProperty({
+    description: 'When the sandbox was resized',
+    example: '2025-12-19T10:30:00.000Z',
+    format: 'date-time',
+  })
+  resizedAt: string
+
+  static fromEvent(event: SandboxResizedEvent, eventType: string): SandboxResizedWebhookDto {
+    return {
+      event: eventType,
+      timestamp: new Date().toISOString(),
+      id: event.sandbox.id,
+      organizationId: event.sandbox.organizationId,
+      oldCpu: event.oldCpu,
+      newCpu: event.newCpu,
+      oldMemory: event.oldMemory,
+      newMemory: event.newMemory,
+      resizedAt: new Date().toISOString(),
     }
   }
 }

@@ -11,6 +11,7 @@ import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { SandboxResizedEvent } from '../../sandbox/events/sandbox-resized.event'
 import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
 import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
 import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
@@ -20,6 +21,7 @@ import { WebhookEvents } from '../constants/webhook-events.constants'
 import {
   SandboxCreatedWebhookDto,
   SandboxStateUpdatedWebhookDto,
+  SandboxResizedWebhookDto,
   SnapshotCreatedWebhookDto,
   SnapshotStateUpdatedWebhookDto,
   SnapshotRemovedWebhookDto,
@@ -58,6 +60,20 @@ export class WebhookEventHandlerService {
       await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvents.SANDBOX_STATE_UPDATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for sandbox state updated: ${error.message}`)
+    }
+  }
+
+  @OnEvent(SandboxEvents.RESIZED)
+  async handleSandboxResized(event: SandboxResizedEvent) {
+    if (!this.webhookService.isEnabled()) {
+      return
+    }
+
+    try {
+      const payload = SandboxResizedWebhookDto.fromEvent(event, WebhookEvents.SANDBOX_RESIZED)
+      await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvents.SANDBOX_RESIZED, payload)
+    } catch (error) {
+      this.logger.error(`Failed to send webhook for sandbox resized: ${error.message}`)
     }
   }
 

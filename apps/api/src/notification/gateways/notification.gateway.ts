@@ -92,6 +92,12 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
       .emit(SandboxEvents.DESIRED_STATE_UPDATED, { sandbox, oldDesiredState, newDesiredState })
   }
 
+  emitSandboxResized(sandbox: SandboxDto, oldCpu: number, newCpu: number, oldMemory: number, newMemory: number) {
+    this.server
+      .to(sandbox.organizationId)
+      .emit(SandboxEvents.RESIZED, { sandbox, oldCpu, newCpu, oldMemory, newMemory })
+  }
+
   emitSnapshotCreated(snapshot: SnapshotDto) {
     this.server.to(snapshot.organizationId).emit(SnapshotEvents.CREATED, snapshot)
   }
