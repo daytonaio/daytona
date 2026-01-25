@@ -74,6 +74,8 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -106,6 +108,7 @@ export class SandboxService {
     @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -658,6 +661,8 @@ export class SandboxService {
         where: { snapshotRef: buildInfoSnapshotRef },
       })
 
+      const isNewBuildInfo = !existingBuildInfo
+
       if (existingBuildInfo) {
         sandbox.buildInfo = existingBuildInfo
         await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
@@ -673,15 +678,41 @@ export class SandboxService {
 
       try {
         const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
-        runner = await this.runnerService.getRandomAvailableRunner({
-          regions: [sandbox.region],
-          sandboxClass: sandbox.class,
-          snapshotRef: sandbox.buildInfo.snapshotRef,
-          ...(declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
-        })
-        sandbox.runnerId = runner.id
+
+        if (isNewBuildInfo) {
+          // For brand new build info, get up to 3 runners and trigger builds on all of them
+          const runners = await this.runnerService.getRandomAvailableRunners(
+            {
+              regions: [sandbox.region],
+              sandboxClass: sandbox.class,
+              // Don't filter by snapshotRef since it's a new build - no runner has it yet
+              ...(declarativeBuildScoreThreshold !== undefined && {
+                availabilityScoreThreshold: declarativeBuildScoreThreshold,
+              }),
+            },
+            3,
+          )
+
+          // Assign the sandbox to the first runner
+          runner = runners[0]
+          sandbox.runnerId = runner.id
+
+          // Trigger builds on all runners (including the first one)
+          // The sandbox start action will handle the first runner, but we proactively
+          // trigger builds on additional runners for redundancy
+          await this.triggerBuildsOnRunners(runners, sandbox.buildInfo, organization.id)
+        } else {
+          // For existing build info, use the original logic - find a runner that already has the snapshot
+          runner = await this.runnerService.getRandomAvailableRunner({
+            regions: [sandbox.region],
+            sandboxClass: sandbox.class,
+            snapshotRef: sandbox.buildInfo.snapshotRef,
+            ...(declarativeBuildScoreThreshold !== undefined && {
+              availabilityScoreThreshold: declarativeBuildScoreThreshold,
+            }),
+          })
+          sandbox.runnerId = runner.id
+        }
       } catch (error) {
         if (
           error instanceof BadRequestError == false ||
@@ -714,6 +745,50 @@ export class SandboxService {
       }
 
       throw error
+    }
+  }
+
+  /**
+   * Triggers snapshot builds on multiple runners for redundancy during ad-hoc declarative building.
+   * Creates SnapshotRunner entries and build jobs for each runner.
+   */
+  private async triggerBuildsOnRunners(runners: Runner[], buildInfo: BuildInfo, organizationId: string): Promise<void> {
+    const sourceRegistries = await this.dockerRegistryService.getSourceRegistriesForDockerfile(
+      buildInfo.dockerfileContent,
+      organizationId,
+    )
+
+    for (const runner of runners) {
+      try {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+        await runnerAdapter.buildSnapshot(
+          buildInfo,
+          organizationId,
+          sourceRegistries.length > 0 ? sourceRegistries : undefined,
+        )
+
+        // Check if snapshot already exists (e.g., from a previous build attempt)
+        const exists = await runnerAdapter.snapshotExists(buildInfo.snapshotRef)
+        const state = exists ? SnapshotRunnerState.READY : SnapshotRunnerState.BUILDING_SNAPSHOT
+
+        await this.runnerService.createSnapshotRunnerEntry(runner.id, buildInfo.snapshotRef, state)
+
+        this.logger.debug(
+          `Triggered build for snapshot ${buildInfo.snapshotRef} on runner ${runner.id} (state: ${state})`,
+        )
+      } catch (error) {
+        // Log error but continue with other runners - one failure shouldn't block others
+        this.logger.warn(
+          `Failed to trigger build on runner ${runner.id} for snapshot ${buildInfo.snapshotRef}: ${error.message}`,
+        )
+        await this.runnerService.createSnapshotRunnerEntry(
+          runner.id,
+          buildInfo.snapshotRef,
+          SnapshotRunnerState.ERROR,
+          error.message,
+        )
+      }
     }
   }
 

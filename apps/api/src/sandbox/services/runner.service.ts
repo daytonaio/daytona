@@ -632,6 +632,18 @@ export class RunnerService {
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
   }
 
+  async getRandomAvailableRunners(params: GetRunnerParams, count: number): Promise<Runner[]> {
+    const availableRunners = await this.findAvailableRunners(params)
+
+    if (availableRunners.length === 0) {
+      throw new BadRequestError('No available runners')
+    }
+
+    // Return up to 'count' runners, shuffled randomly from the best available runners
+    const shuffled = [...availableRunners].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, Math.min(count, shuffled.length))
+  }
+
   async getSnapshotRunner(runnerId: string, snapshotRef: string): Promise<SnapshotRunner> {
     return this.snapshotRunnerRepository.findOne({
       where: {
