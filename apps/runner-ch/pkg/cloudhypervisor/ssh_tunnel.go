@@ -304,6 +304,13 @@ func (c *sshTunnelConn) SetWriteDeadline(t time.Time) error {
 	return nil
 }
 
+// GetSOCKSProxyPort returns the current SOCKS proxy port
+func GetSOCKSProxyPort() int {
+	socksProxyMu.Lock()
+	defer socksProxyMu.Unlock()
+	return socksProxyPort
+}
+
 // StopSOCKSProxy stops the global SOCKS proxy if running
 func StopSOCKSProxy() {
 	socksProxyMu.Lock()

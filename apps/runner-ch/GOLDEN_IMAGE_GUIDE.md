@@ -325,6 +325,202 @@ The daemon listens on port **2280** by default. Key environment variables:
 | `TOOLBOX_API_PORT` | API port | 2280 |
 | `HOME` | Home directory | /root |
 
+## VNC Desktop Support (noVNC)
+
+To enable browser-based VNC desktop access, install the VNC stack and the `daytona-computer-use` daemon plugin.
+
+### VNC Components
+
+| Component | Port | Description |
+|-----------|------|-------------|
+| Xvfb | N/A | Virtual framebuffer (creates virtual display :0) |
+| XFCE4 | N/A | Lightweight desktop environment |
+| x11vnc | 5901 | VNC server exposing the X display |
+| websockify | 6080 | WebSocket-to-TCP bridge for browser access |
+| noVNC | 6080 | Web-based VNC client (served by websockify) |
+
+### Install VNC Packages
+
+Install via apt in the golden image or running VM:
+
+```bash
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    xvfb \
+    x11vnc \
+    novnc \
+    python3-websockify \
+    xfce4 \
+    xfce4-terminal \
+    dbus-x11
+```
+
+### Xvfb GLX Wrapper (Required)
+
+Cloud Hypervisor VMs don't have GPU support, causing Xvfb to crash when GLX is enabled. Create a wrapper script to disable GLX:
+
+```bash
+# Move original Xvfb binary
+mv /usr/bin/Xvfb /usr/bin/Xvfb.real
+
+# Create wrapper script
+cat > /usr/bin/Xvfb << 'EOF'
+#!/bin/bash
+exec /usr/bin/Xvfb.real -extension GLX "$@"
+EOF
+
+chmod +x /usr/bin/Xvfb
+```
+
+The `-extension GLX` flag disables the GLX extension, preventing crashes in environments without GPU.
+
+### Install Computer-Use Plugin
+
+The `daytona-computer-use` plugin manages the VNC stack (Xvfb, XFCE4, x11vnc, websockify). Build and install it:
+
+```bash
+# Build the plugin (from repository root)
+cd /workspaces/daytona
+npx nx build computer-use --configuration=linux-amd64
+
+# Copy to runner host
+scp dist/apps/computer-use/computer-use-amd64 root@<runner-host>:/tmp/daytona-computer-use
+
+# Install in VM (via SSH or daemon API)
+cp /tmp/daytona-computer-use /usr/local/lib/daytona-computer-use
+chmod +x /usr/local/lib/daytona-computer-use
+```
+
+The daemon automatically detects and loads the plugin from `/usr/local/lib/daytona-computer-use`.
+
+### DNS Configuration
+
+VMs need DNS configured for package installation. Configure systemd-resolved:
+
+```bash
+mkdir -p /etc/systemd/resolved.conf.d
+
+cat > /etc/systemd/resolved.conf.d/dns.conf << 'EOF'
+[Resolve]
+DNS=8.8.8.8 8.8.4.4
+FallbackDNS=1.1.1.1
+EOF
+
+systemctl restart systemd-resolved
+```
+
+### Start VNC Services
+
+The daemon exposes endpoints to control VNC:
+
+```bash
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# Start VNC desktop
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/computeruse/start
+
+# Check status
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/computeruse/status
+# Returns: {"status":"active"}
+
+# Stop VNC desktop
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/computeruse/stop
+```
+
+### Verify VNC Access
+
+Test VNC from the browser:
+
+```
+http://6080-<sandbox-id>.proxy.localhost:4000/vnc.html?autoconnect=true
+```
+
+Or test directly from the runner host:
+
+```bash
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# Test noVNC web client
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:6080/vnc.html | head -5
+
+# Test WebSocket upgrade
+nsenter --net=/var/run/netns/$NS curl -s -v \
+  -H "Upgrade: websocket" \
+  -H "Connection: Upgrade" \
+  -H "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==" \
+  -H "Sec-WebSocket-Version: 13" \
+  http://192.168.0.2:6080/websockify 2>&1 | grep "101 Switching"
+# Should return: HTTP/1.1 101 Switching Protocols
+
+# Test x11vnc directly
+nsenter --net=/var/run/netns/$NS curl -s telnet://192.168.0.2:5901 2>&1 | head -1
+# Should return: RFB 003.008
+```
+
+### VNC in Golden Image Script
+
+Add VNC installation to your golden image creation script:
+
+```bash
+# After installing daemon, add VNC support
+virt-customize -a golden-temp.qcow2 --install \
+    xvfb,x11vnc,novnc,python3-websockify,xfce4,xfce4-terminal,dbus-x11
+
+# Create Xvfb wrapper
+virt-customize -a golden-temp.qcow2 --run-command '
+    mv /usr/bin/Xvfb /usr/bin/Xvfb.real
+    cat > /usr/bin/Xvfb << "WRAPPER"
+#!/bin/bash
+exec /usr/bin/Xvfb.real -extension GLX "$@"
+WRAPPER
+    chmod +x /usr/bin/Xvfb
+'
+
+# Install computer-use plugin
+virt-copy-in -a golden-temp.qcow2 /path/to/daytona-computer-use /usr/local/lib/
+virt-customize -a golden-temp.qcow2 --run-command 'chmod +x /usr/local/lib/daytona-computer-use'
+
+# Configure DNS
+virt-customize -a golden-temp.qcow2 --run-command '
+    mkdir -p /etc/systemd/resolved.conf.d
+    cat > /etc/systemd/resolved.conf.d/dns.conf << "DNSCONF"
+[Resolve]
+DNS=8.8.8.8 8.8.4.4
+FallbackDNS=1.1.1.1
+DNSCONF
+'
+```
+
+### VNC Troubleshooting
+
+1. **Xvfb crashes with "Unrecognized option"**: Ensure the Xvfb wrapper is installed correctly
+
+   ```bash
+   file /usr/bin/Xvfb  # Should show "ASCII text executable"
+   cat /usr/bin/Xvfb   # Should show wrapper script
+   ```
+
+2. **websockify not listening on 6080**: Check if the computer-use plugin started successfully
+
+   ```bash
+   curl -s http://192.168.0.2:2280/computeruse/status
+   ss -tlnp | grep 6080
+   ```
+
+3. **noVNC shows blank page or null bytes**: Page cache corruption from warm snapshot. Re-install noVNC package or replace `/usr/share/novnc/` with fresh files.
+
+4. **"Failed to connect to server" in browser**: WebSocket connection failed. Check:
+   - websockify is running on port 6080
+   - x11vnc is running on port 5901
+   - Proxy chain is correctly forwarding WebSocket upgrades
+
+5. **Desktop not appearing**: XFCE4 may have failed to start. Check processes:
+
+   ```bash
+   ps aux | grep -E "Xvfb|xfce|x11vnc|websockify"
+   ```
+
 ## Verification
 
 To verify the daemon is running in a VM:

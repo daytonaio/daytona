@@ -6,15 +6,20 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"io"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/daytonaio/runner-ch/pkg/cloudhypervisor"
 	"github.com/daytonaio/runner-ch/pkg/runner"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/net/proxy"
 )
 
 // ProxyRequest handles proxying requests to a sandbox's container toolbox
@@ -106,9 +111,127 @@ func ProxyToPort(ctx *gin.Context) {
 	proxyWithTransport(ctx, r.CHClient, target)
 }
 
+// isWebSocketRequest checks if the request is a WebSocket upgrade request
+func isWebSocketRequest(r *http.Request) bool {
+	return strings.EqualFold(r.Header.Get("Upgrade"), "websocket") &&
+		strings.Contains(strings.ToLower(r.Header.Get("Connection")), "upgrade")
+}
+
+// proxyWebSocket handles WebSocket connections by establishing a direct TCP tunnel
+func proxyWebSocket(ctx *gin.Context, client *cloudhypervisor.Client, target *url.URL) {
+	log.Debugf("WebSocket proxy: connecting to %s", target.Host)
+
+	// Establish connection to target
+	var targetConn net.Conn
+	var err error
+
+	if client.IsRemote() {
+		// Use SOCKS5 proxy for remote mode
+		socksAddr := fmt.Sprintf("127.0.0.1:%d", cloudhypervisor.GetSOCKSProxyPort())
+		dialer, err := proxy.SOCKS5("tcp", socksAddr, nil, proxy.Direct)
+		if err != nil {
+			log.Errorf("WebSocket proxy: failed to create SOCKS dialer: %v", err)
+			ctx.AbortWithStatus(http.StatusBadGateway)
+			return
+		}
+
+		targetConn, err = dialer.Dial("tcp", target.Host)
+		if err != nil {
+			log.Errorf("WebSocket proxy: failed to dial through SOCKS: %v", err)
+			ctx.AbortWithStatus(http.StatusBadGateway)
+			return
+		}
+	} else {
+		// Direct connection for local mode
+		targetConn, err = net.DialTimeout("tcp", target.Host, 10*time.Second)
+		if err != nil {
+			log.Errorf("WebSocket proxy: failed to dial directly: %v", err)
+			ctx.AbortWithStatus(http.StatusBadGateway)
+			return
+		}
+	}
+	defer targetConn.Close()
+
+	// Hijack the client connection
+	hijacker, ok := ctx.Writer.(http.Hijacker)
+	if !ok {
+		log.Error("WebSocket proxy: response writer does not support hijacking")
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	clientConn, _, err := hijacker.Hijack()
+	if err != nil {
+		log.Errorf("WebSocket proxy: failed to hijack connection: %v", err)
+		ctx.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	defer clientConn.Close()
+
+	// Build and send the request to the target
+	req := ctx.Request
+	requestLine := fmt.Sprintf("%s %s HTTP/1.1\r\n", req.Method, target.RequestURI())
+	if _, err := targetConn.Write([]byte(requestLine)); err != nil {
+		log.Errorf("WebSocket proxy: failed to write request line: %v", err)
+		return
+	}
+
+	// Write headers
+	req.Header.Set("Host", target.Host)
+	if err := req.Header.Write(targetConn); err != nil {
+		log.Errorf("WebSocket proxy: failed to write headers: %v", err)
+		return
+	}
+	if _, err := targetConn.Write([]byte("\r\n")); err != nil {
+		log.Errorf("WebSocket proxy: failed to write header terminator: %v", err)
+		return
+	}
+
+	log.Debugf("WebSocket proxy: request sent, starting bidirectional copy")
+
+	// Bidirectional copy
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Copy from target to client
+	go func() {
+		defer wg.Done()
+		_, err := io.Copy(clientConn, targetConn)
+		if err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, io.EOF) {
+			log.Debugf("WebSocket proxy: target->client copy ended: %v", err)
+		}
+		// Close client write side to signal EOF
+		if tcpConn, ok := clientConn.(*net.TCPConn); ok {
+			tcpConn.CloseWrite()
+		}
+	}()
+
+	// Copy from client to target
+	go func() {
+		defer wg.Done()
+		_, err := io.Copy(targetConn, clientConn)
+		if err != nil && !errors.Is(err, net.ErrClosed) && !errors.Is(err, io.EOF) {
+			log.Debugf("WebSocket proxy: client->target copy ended: %v", err)
+		}
+		// Close target write side to signal EOF
+		if tcpConn, ok := targetConn.(*net.TCPConn); ok {
+			tcpConn.CloseWrite()
+		}
+	}()
+
+	wg.Wait()
+	log.Debugf("WebSocket proxy: connection closed")
+}
+
 // proxyWithTransport proxies requests to the VM using the appropriate transport
 // In remote mode, it uses SSH tunnel; in local mode, it connects directly
 func proxyWithTransport(ctx *gin.Context, client *cloudhypervisor.Client, target *url.URL) {
+	// Handle WebSocket requests specially
+	if isWebSocketRequest(ctx.Request) {
+		proxyWebSocket(ctx, client, target)
+		return
+	}
+
 	var transport *http.Transport
 	if client.IsRemote() {
 		// Remote mode: use SSH tunnel

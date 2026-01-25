@@ -78,6 +78,39 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 - [x] Delete snapshot
 - [x] Fork VM from snapshot
 
+### Memory Ballooning
+
+- [x] **Balloon device support** in VM creation (deflate_on_oom, free_page_reporting)
+- [x] **Memory stats collection** from guest via daemon `/memory-stats` endpoint
+- [x] **Memory controller** background loop (configurable interval, default 30s)
+- [x] **Automatic balloon inflation** to reclaim unused guest memory
+- [x] **Automatic balloon deflation** when guest needs more memory
+- [x] **StatsStore** for persistent memory statistics history
+- [x] **Stats API endpoints**: `/stats/memory` (JSON), `/stats/memory/view` (HTML dashboard)
+- [x] Network namespace-aware daemon queries (curl inside ns-<id>)
+
+**Configuration:**
+
+```bash
+MEMORY_BALLOONING_ENABLED=true        # Enable/disable ballooning
+MEMORY_BALLOONING_INTERVAL_SEC=30     # Collection/rebalance interval
+MEMORY_BALLOONING_MIN_VM_GB=1         # Minimum memory per VM (GB)
+MEMORY_BALLOONING_BUFFER_GB=2         # Safety buffer (GB)
+MEMORY_BALLOONING_BUFFER_RATIO=0.25   # Safety ratio (25% of used)
+```
+
+**Memory Target Formula:**
+
+```
+target = max(used_memory × (1 + buffer_ratio), min_vm_memory) + buffer_gb
+balloon_size = allocated_memory - target
+```
+
+**Example:** VM with 4GB allocated, 400MB used:
+
+- Target = max(400MB × 1.25, 1GB) + 2GB = 3GB
+- Balloon = 4GB - 3GB = 1GB reclaimed
+
 ### Live Fork (Local Mode)
 
 - [x] **Fork VM with memory state preservation** (vm.snapshot/vm.restore)
@@ -186,7 +219,7 @@ cp /var/lib/cloud-hypervisor/sandboxes/golden-source/disk.qcow2 \
 - [x] SSH command batching (single SSH call for disk creation + socket polling)
 - [ ] btrfs/XFS reflink support for raw disks
 - [ ] Pre-warmed VM pool for instant fork
-- [ ] Memory ballooning
+- [x] **Memory ballooning** (active reclamation of unused guest memory)
 - [ ] Huge pages support
 
 ### Advanced Features
@@ -231,6 +264,13 @@ SANDBOX_SSH_PORT=22220                # SSH port inside sandbox
 # Performance
 TAP_POOL_ENABLED=true                 # Pre-create TAP interfaces
 TAP_POOL_SIZE=10                      # Number of TAPs to pre-create
+
+# Memory Ballooning
+MEMORY_BALLOONING_ENABLED=true        # Enable memory ballooning
+MEMORY_BALLOONING_INTERVAL_SEC=30     # Stats collection interval
+MEMORY_BALLOONING_MIN_VM_GB=1         # Minimum memory per VM
+MEMORY_BALLOONING_BUFFER_GB=2         # Safety buffer in GB
+MEMORY_BALLOONING_BUFFER_RATIO=0.25   # Safety ratio (25% of used)
 ```
 
 ### Directory Structure (Remote Host)
@@ -307,6 +347,8 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 | `/snapshots/exists` | GET | ✅ Works |
 | `/snapshots/info` | GET | ✅ Works |
 | `/snapshots/remove` | POST | ✅ Works |
+| `/stats/memory` | GET | ✅ Memory stats JSON |
+| `/stats/memory/view` | GET | ✅ Memory stats HTML dashboard |
 
 ## Known Issues
 
@@ -333,6 +375,7 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 | Live Migration | ✅ | ❌ |
 | Live Fork | ❌ | ✅ (local mode) |
 | Memory Hotplug | ✅ | ✅ |
+| Memory Ballooning | ✅ | ✅ |
 | Boot Time | ~10-30s | ~5-10s |
 | Memory Overhead | Higher | Lower |
 | Disk Format | qcow2 | qcow2 |
@@ -408,4 +451,4 @@ Host Network
 
 ---
 
-_Last updated: 2026-01-21 (Live Fork Implementation)_
+_Last updated: 2026-01-25 (Memory Ballooning Implementation)_
