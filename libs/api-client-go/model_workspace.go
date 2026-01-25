@@ -59,6 +59,8 @@ type Workspace struct {
 	ErrorReason *string `json:"errorReason,omitempty"`
 	// Whether the sandbox error is recoverable.
 	Recoverable *bool `json:"recoverable,omitempty"`
+	// Whether a resize operation is in progress.
+	Resizing *bool `json:"resizing,omitempty"`
 	// The state of the backup
 	BackupState *string `json:"backupState,omitempty"`
 	// The creation timestamp of the last backup
@@ -631,6 +633,38 @@ func (o *Workspace) SetRecoverable(v bool) {
 	o.Recoverable = &v
 }
 
+// GetResizing returns the Resizing field value if set, zero value otherwise.
+func (o *Workspace) GetResizing() bool {
+	if o == nil || IsNil(o.Resizing) {
+		var ret bool
+		return ret
+	}
+	return *o.Resizing
+}
+
+// GetResizingOk returns a tuple with the Resizing field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetResizingOk() (*bool, bool) {
+	if o == nil || IsNil(o.Resizing) {
+		return nil, false
+	}
+	return o.Resizing, true
+}
+
+// HasResizing returns a boolean if a field has been set.
+func (o *Workspace) HasResizing() bool {
+	if o != nil && !IsNil(o.Resizing) {
+		return true
+	}
+
+	return false
+}
+
+// SetResizing gets a reference to the given bool and assigns it to the Resizing field.
+func (o *Workspace) SetResizing(v bool) {
+	o.Resizing = &v
+}
+
 // GetBackupState returns the BackupState field value if set, zero value otherwise.
 func (o *Workspace) GetBackupState() string {
 	if o == nil || IsNil(o.BackupState) {
@@ -1187,6 +1221,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Recoverable) {
 		toSerialize["recoverable"] = o.Recoverable
 	}
+	if !IsNil(o.Resizing) {
+		toSerialize["resizing"] = o.Resizing
+	}
 	if !IsNil(o.BackupState) {
 		toSerialize["backupState"] = o.BackupState
 	}
@@ -1309,6 +1346,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "desiredState")
 		delete(additionalProperties, "errorReason")
 		delete(additionalProperties, "recoverable")
+		delete(additionalProperties, "resizing")
 		delete(additionalProperties, "backupState")
 		delete(additionalProperties, "backupCreatedAt")
 		delete(additionalProperties, "autoStopInterval")

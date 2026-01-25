@@ -9947,6 +9947,7 @@ components:
         updatedAt: 2024-10-01T12:00:00Z
         desiredState: destroyed
         networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+        resizing: false
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -10056,6 +10057,10 @@ components:
           description: Whether the sandbox error is recoverable.
           example: true
           type: boolean
+        resizing:
+          description: Whether a resize operation is in progress.
+          example: false
+          type: boolean
         backupState:
           description: The state of the backup
           enum:
@@ -10154,6 +10159,7 @@ components:
             updatedAt: 2024-10-01T12:00:00Z
             desiredState: destroyed
             networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+            resizing: false
             volumes:
               - mountPath: /data
                 volumeId: volume123
@@ -10193,6 +10199,7 @@ components:
             updatedAt: 2024-10-01T12:00:00Z
             desiredState: destroyed
             networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+            resizing: false
             volumes:
               - mountPath: /data
                 volumeId: volume123
@@ -12843,6 +12850,7 @@ components:
         desiredState: destroyed
         image: daytonaio/workspace:latest
         networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+        resizing: false
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -12952,6 +12960,10 @@ components:
         recoverable:
           description: Whether the sandbox error is recoverable.
           example: true
+          type: boolean
+        resizing:
+          description: Whether a resize operation is in progress.
+          example: false
           type: boolean
         backupState:
           description: The state of the backup

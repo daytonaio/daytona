@@ -146,6 +146,12 @@ export interface Sandbox {
    */
   recoverable?: boolean
   /**
+   * Whether a resize operation is in progress.
+   * @type {boolean}
+   * @memberof Sandbox
+   */
+  resizing?: boolean
+  /**
    * The state of the backup
    * @type {string}
    * @memberof Sandbox
