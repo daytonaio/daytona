@@ -20,7 +20,7 @@ func RecoverableErrorsMiddleware() gin.HandlerFunc {
 			err := errs.Last()
 			if common.IsRecoverable(err.Err.Error()) {
 				res := map[string]any{
-					"errorReason": err.Err.Error(),
+					"errorReason": err.Err.Error() + " - you may attempt recovery action",
 					"recoverable": true,
 				}
 				b, marshalErr := json.Marshal(res)
