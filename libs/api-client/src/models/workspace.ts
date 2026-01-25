@@ -149,6 +149,12 @@ export interface Workspace {
    */
   recoverable?: boolean
   /**
+   * Whether a resize operation is in progress.
+   * @type {boolean}
+   * @memberof Workspace
+   */
+  resizing?: boolean
+  /**
    * The state of the backup
    * @type {string}
    * @memberof Workspace
