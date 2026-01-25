@@ -1376,14 +1376,14 @@ export class SandboxService {
       throw new BadRequestError('GPU resize is not supported')
     }
 
-    // Disk resize is not supported yet
-    if (resizeDto.disk !== undefined) {
-      throw new BadRequestError('Disk resize is not supported yet')
-    }
-
     // If no resize parameters provided, return sandbox as-is
     if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
       return sandbox
+    }
+
+    // Disk resize requires stopped sandbox (cold resize only)
+    if (resizeDto.disk !== undefined && sandbox.state !== SandboxState.STOPPED) {
+      throw new BadRequestError('Disk resize can only be performed on a stopped sandbox')
     }
 
     // Validate hot resize is only for running sandboxes
