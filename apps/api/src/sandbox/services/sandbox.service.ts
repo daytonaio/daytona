@@ -1417,6 +1417,7 @@ export class SandboxService {
     // Capture old values for event emission
     const oldCpu = sandbox.cpu
     const oldMem = sandbox.mem
+    const oldDisk = sandbox.disk
 
     // Calculate new resource values
     const newCpu = resizeDto.cpu ?? sandbox.cpu
@@ -1474,7 +1475,10 @@ export class SandboxService {
         sandbox.disk = newDisk
         sandbox.resizing = false
         await this.sandboxRepository.saveWhere(sandbox, { resizing: true })
-        this.eventEmitter.emit(SandboxEvents.RESIZED, new SandboxResizedEvent(sandbox, oldCpu, newCpu, oldMem, newMem))
+        this.eventEmitter.emit(
+          SandboxEvents.RESIZED,
+          new SandboxResizedEvent(sandbox, oldCpu, newCpu, oldMem, newMem, oldDisk, newDisk),
+        )
       }
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
