@@ -404,34 +404,7 @@ func RunnerInfo(ctx *gin.Context) {
 	})
 }
 
-// GetMemoryStats returns memory statistics
-//
-//	@Summary		Get memory stats
-//	@Description	Returns memory usage statistics
-//	@Tags			stats
-//	@Produce		json
-//	@Success		200	{object}	map[string]interface{}
-//	@Router			/stats/memory [get]
-func GetMemoryStats(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"total":     0,
-		"used":      0,
-		"free":      0,
-		"available": 0,
-	})
-}
-
-// GetMemoryStatsView returns memory statistics view
-//
-//	@Summary		Get memory stats view
-//	@Description	Returns memory usage statistics in HTML view
-//	@Tags			stats
-//	@Produce		html
-//	@Success		200	{string}	string
-//	@Router			/stats/memory/view [get]
-func GetMemoryStatsView(ctx *gin.Context) {
-	ctx.String(http.StatusOK, "Memory stats view not implemented for Cloud Hypervisor runner")
-}
+// NOTE: Memory stats endpoints moved to stats.go
 
 // NOTE: ProxyRequest and ProxyToPort are implemented in proxy.go
 

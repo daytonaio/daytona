@@ -113,3 +113,45 @@ func (c *Client) ResizeDisk(ctx context.Context, sandboxId, diskId string, newSi
 	log.Infof("Disk %s resized successfully", diskId)
 	return nil
 }
+
+// SetVMBalloon sets the balloon size for a VM to reclaim memory
+// sizeBytes is the amount of memory to reclaim from the VM (balloon inflation)
+// A size of 0 means no balloon (VM gets full memory)
+func (c *Client) SetVMBalloon(ctx context.Context, sandboxId string, sizeBytes uint64) error {
+	mutex := c.getSandboxMutex(sandboxId)
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	log.Debugf("Setting balloon for sandbox %s to %d bytes", sandboxId, sizeBytes)
+
+	resizeConfig := ResizeConfig{
+		DesiredBalloon: &sizeBytes,
+	}
+
+	if c.IsRemote() {
+		return c.setBalloonRemote(ctx, sandboxId, sizeBytes)
+	}
+
+	if _, err := c.apiRequest(ctx, sandboxId, http.MethodPut, "vm.resize", resizeConfig); err != nil {
+		return fmt.Errorf("failed to set balloon: %w", err)
+	}
+
+	log.Debugf("Balloon for sandbox %s set to %d bytes", sandboxId, sizeBytes)
+	return nil
+}
+
+// setBalloonRemote sets balloon via ch-remote over SSH
+func (c *Client) setBalloonRemote(ctx context.Context, sandboxId string, sizeBytes uint64) error {
+	socketPath := c.getSocketPath(sandboxId)
+
+	cmdStr := fmt.Sprintf("ch-remote --api-socket %s resize --balloon %d", socketPath, sizeBytes)
+
+	log.Debugf("Executing ch-remote balloon resize: %s", cmdStr)
+
+	output, err := c.runCommandOutput(ctx, "sh", "-c", cmdStr)
+	if err != nil {
+		return fmt.Errorf("ch-remote balloon resize failed: %w (output: %s)", err, output)
+	}
+
+	return nil
+}

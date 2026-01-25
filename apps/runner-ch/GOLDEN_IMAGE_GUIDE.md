@@ -372,13 +372,191 @@ journalctl -u daytona-daemon -f
    cat /var/lib/misc/dnsmasq.leases
    ```
 
+## Updating Existing Golden Images (Warm Snapshots)
+
+When you need to update the daemon binary in an existing warm snapshot (which includes memory state), follow this process. This is more complex than creating a new image because the warm snapshot contains the page cache with the old binary.
+
+### Prerequisites
+
+- A running VM created from the current golden snapshot
+- The new daemon binary built for linux/amd64
+- Access to the runner host
+
+### Step 1: Copy New Daemon to Runner Host
+
+```bash
+# Build the new daemon
+cd /workspaces/daytona
+npx nx build daemon --configuration=linux-amd64
+
+# Copy to runner host
+scp dist/apps/daemon/daemon-amd64 root@<runner-host>:/tmp/daemon-new
+```
+
+### Step 2: Update Daemon in Running VM
+
+The key challenge is that warm snapshots restore the kernel's page cache. Even if you update the disk, `systemctl restart` will load the cached (old) binary. Use **direct I/O** to bypass the page cache:
+
+```bash
+# Get the VM's network namespace (replace VM_ID)
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# First, copy new daemon to the host's sandbox directory
+cp /tmp/daemon-new /var/lib/cloud-hypervisor/sandboxes/$VM_ID/daemon-new
+
+# Use the daemon's API to copy with direct I/O (bypasses page cache)
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"dd if=/tmp/daemon-new of=/tmp/daemon-fresh iflag=direct bs=1M","timeout":60}'
+
+# Verify the new binary has your changes (e.g., check for new endpoint)
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"grep -ao memory-stats /tmp/daemon-fresh","timeout":30}'
+
+# Make executable and copy to final location
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"chmod +x /tmp/daemon-fresh","timeout":10}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"cp /tmp/daemon-fresh /usr/local/bin/daytona-daemon-new","timeout":10}'
+
+# Update systemd to use new binary path
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sed -i s,/usr/local/bin/daytona-daemon,/usr/local/bin/daytona-daemon-new,g /etc/systemd/system/daytona-daemon.service","timeout":10}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"systemctl daemon-reload","timeout":10}'
+
+# Restart daemon (connection will reset - this is expected)
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"systemctl restart daytona-daemon","timeout":30}' || echo "Connection reset (expected)"
+
+# Wait for daemon to start
+sleep 5
+
+# Verify new daemon is working
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/version
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/memory-stats  # or your new endpoint
+```
+
+### Step 3: Restore Original Daemon Path
+
+Before taking the snapshot, restore the service to use the original binary path:
+
+```bash
+# Copy new daemon to original location
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"cp /usr/local/bin/daytona-daemon-new /usr/local/bin/daytona-daemon","timeout":10}'
+
+# Restore systemd service path
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sed -i s,/usr/local/bin/daytona-daemon-new,/usr/local/bin/daytona-daemon,g /etc/systemd/system/daytona-daemon.service","timeout":10}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"systemctl daemon-reload","timeout":10}'
+```
+
+### Step 4: Take New Warm Snapshot
+
+```bash
+VM_ID="your-vm-id"
+NEW_SNAP_DIR="/var/lib/cloud-hypervisor/snapshots/ubuntu-base.X"  # Increment version
+
+# Create snapshot directory
+mkdir -p $NEW_SNAP_DIR
+
+# Pause the VM (required for snapshot)
+ch-remote --api-socket /var/run/cloud-hypervisor/$VM_ID.sock pause
+
+# Take the snapshot
+ch-remote --api-socket /var/run/cloud-hypervisor/$VM_ID.sock snapshot file://$NEW_SNAP_DIR
+
+# Copy the disk
+cp /var/lib/cloud-hypervisor/sandboxes/$VM_ID/disk.qcow2 $NEW_SNAP_DIR/disk.qcow2
+
+# Resume the VM
+ch-remote --api-socket /var/run/cloud-hypervisor/$VM_ID.sock resume
+
+# Verify snapshot contents
+ls -la $NEW_SNAP_DIR/
+```
+
+### Step 5: Fix Snapshot Configuration
+
+The snapshot's `config.json` contains hardcoded paths that must be made generic:
+
+```bash
+NEW_SNAP_DIR="/var/lib/cloud-hypervisor/snapshots/ubuntu-base.X"
+
+# Fix disk path (use placeholder that runner will replace)
+cat $NEW_SNAP_DIR/config.json | jq '.disks[0].path = "DISK_PATH_PLACEHOLDER"' > $NEW_SNAP_DIR/config.json.tmp
+mv $NEW_SNAP_DIR/config.json.tmp $NEW_SNAP_DIR/config.json
+
+# Fix serial console (set to Tty mode, no file)
+cat $NEW_SNAP_DIR/config.json | jq '.serial.file = null | .serial.mode = "Tty"' > $NEW_SNAP_DIR/config.json.tmp
+mv $NEW_SNAP_DIR/config.json.tmp $NEW_SNAP_DIR/config.json
+
+# Fix network config (use generic tap name)
+cat $NEW_SNAP_DIR/config.json | jq '.net[0].tap = "tap0" | .net[0].id = "_net0"' > $NEW_SNAP_DIR/config.json.tmp
+mv $NEW_SNAP_DIR/config.json.tmp $NEW_SNAP_DIR/config.json
+
+# Verify the configuration
+cat $NEW_SNAP_DIR/config.json | jq '{disks: .disks[0].path, serial: .serial.mode, net_tap: .net[0].tap}'
+```
+
+### Step 6: Update Database
+
+Update the snapshot reference in the database to use the new version:
+
+```sql
+-- Example: Update snapshot file path
+UPDATE snapshots 
+SET file = 'ubuntu-base.X' 
+WHERE name = 'your-snapshot-name';
+```
+
+### Step 7: Verify New Snapshot
+
+Create a test VM from the new snapshot and verify:
+
+```bash
+# After creating a new VM from the updated snapshot
+NEW_VM_ID="test-vm-id"
+NS="ns-${NEW_VM_ID:0:8}"
+
+# Test daemon endpoints
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/version
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/memory-stats  # New endpoint should work immediately
+```
+
+### Important Notes
+
+1. **Page Cache Behavior**: Warm snapshots include the kernel's page cache. Simply updating the disk and restarting the daemon won't work - you must use `iflag=direct` with `dd` to bypass the cache.
+
+2. **Keep Previous Versions**: Always keep at least one previous snapshot version for rollback.
+
+3. **Test Before Production**: Always test the new snapshot by creating a VM and verifying all daemon endpoints work before updating production.
+
+4. **Snapshot Timing**: The snapshot captures the exact memory state. Ensure the daemon is fully started and stable before taking the snapshot.
+
 ## Image Versioning
 
 Use semantic versioning for golden images:
 
-- `ubuntu-base.1.qcow2` - Initial release
-- `ubuntu-base.2.qcow2` - Updated daemon version
-- `ubuntu-base.3.qcow2` - Security patches
+- `ubuntu-base.1` - Initial release
+- `ubuntu-base.2` - Updated daemon version
+- `ubuntu-base.3` - Security patches
+- `ubuntu-base.X` - Always increment for new versions
 
 Always keep at least the previous version available for rollback.
 

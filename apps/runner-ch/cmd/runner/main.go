@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/runner-ch/internal/metrics"
 	"github.com/daytonaio/runner-ch/internal/util"
 	"github.com/daytonaio/runner-ch/pkg/api"
+	"github.com/daytonaio/runner-ch/pkg/api/controllers"
 	"github.com/daytonaio/runner-ch/pkg/cloudhypervisor"
 	"github.com/daytonaio/runner-ch/pkg/netrules"
 	"github.com/daytonaio/runner-ch/pkg/runner"
@@ -208,6 +209,36 @@ func main() {
 				log.Errorf("SSH Gateway error: %v", err)
 			}
 		}()
+	}
+
+	// Initialize memory ballooning controller
+	if cfg.MemoryBallooningEnabled {
+		// Initialize stats store for memory statistics history
+		statsStore, err := cloudhypervisor.NewStatsStore(cloudhypervisor.StatsStoreConfig{
+			DataPath:      filepath.Join(cfg.CHSandboxesPath, ".stats"),
+			RetentionDays: 7,
+		})
+		if err != nil {
+			log.Warnf("Failed to create stats store: %v (continuing without stats persistence)", err)
+		} else {
+			statsStore.Start(ctx)
+			// Set stats store for API controllers
+			controllers.SetStatsStore(statsStore)
+		}
+
+		memoryController := cloudhypervisor.NewMemoryController(cloudhypervisor.MemoryControllerConfig{
+			Client:            chClient,
+			StatsStore:        statsStore,
+			CheckInterval:     time.Duration(cfg.MemoryBallooningIntervalSec) * time.Second,
+			MinVMMemoryGB:     uint64(cfg.MemoryBallooningMinVMGB),
+			SafetyBufferGB:    uint64(cfg.MemoryBallooningBufferGB),
+			SafetyBufferRatio: cfg.MemoryBallooningBufferRatio,
+			Enabled:           true,
+		})
+		go memoryController.Start(ctx)
+		log.Info("Memory ballooning controller started")
+	} else {
+		log.Info("Memory ballooning disabled")
 	}
 
 	log.Info("Runner is ready!")

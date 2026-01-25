@@ -379,6 +379,15 @@ func (c *Client) buildVmConfig(opts CreateOptions, diskPath, tapName, mac, cloud
 		Rng: &RngConfig{
 			Src: "/dev/urandom",
 		},
+		// Memory ballooning for dynamic memory management
+		// Allows host to reclaim unused memory from guest VMs
+		// DeflateOnOom: auto-deflate if guest runs out of memory
+		// FreePageReporting: guest proactively reports free pages to host
+		Balloon: &BalloonConfig{
+			Size:              0,    // Start with no inflation (VM gets full memory)
+			DeflateOnOom:      true, // Auto-deflate if guest needs memory
+			FreePageReporting: true, // Guest reports free pages proactively
+		},
 	}
 
 	// Add GPU devices if specified

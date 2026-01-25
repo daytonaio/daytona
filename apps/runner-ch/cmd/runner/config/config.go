@@ -84,6 +84,13 @@ type Config struct {
 	PollLimit           int           `envconfig:"POLL_LIMIT" default:"10" validate:"min=1,max=100"`
 	HealthcheckInterval time.Duration `envconfig:"HEALTHCHECK_INTERVAL" default:"30s" validate:"min=10s"`
 	HealthcheckTimeout  time.Duration `envconfig:"HEALTHCHECK_TIMEOUT" default:"10s"`
+
+	// Memory ballooning configuration
+	MemoryBallooningEnabled     bool    `envconfig:"MEMORY_BALLOONING_ENABLED" default:"true"`
+	MemoryBallooningIntervalSec int     `envconfig:"MEMORY_BALLOONING_INTERVAL_SEC" default:"30"`
+	MemoryBallooningMinVMGB     int     `envconfig:"MEMORY_BALLOONING_MIN_VM_GB" default:"4"`
+	MemoryBallooningBufferGB    int     `envconfig:"MEMORY_BALLOONING_BUFFER_GB" default:"2"`
+	MemoryBallooningBufferRatio float64 `envconfig:"MEMORY_BALLOONING_BUFFER_RATIO" default:"0.25"`
 }
 
 var DEFAULT_API_PORT int = 8080

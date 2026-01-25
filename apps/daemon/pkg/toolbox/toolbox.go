@@ -133,6 +133,7 @@ func (s *Server) Start() error {
 	}
 
 	r.GET("/version", s.GetVersion)
+	r.GET("/memory-stats", s.GetMemoryStats)
 
 	// keep /project-dir old behavior for backward compatibility
 	r.GET("/project-dir", s.GetUserHomeDir)

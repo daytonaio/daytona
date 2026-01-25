@@ -90,8 +90,8 @@ func (a *ApiServer) Start() error {
 	// Stats endpoint (public)
 	statsController := public.Group("/stats")
 	{
-		statsController.GET("/memory", controllers.GetMemoryStats)
-		statsController.GET("/memory/view", controllers.GetMemoryStatsView)
+		statsController.GET("/memory", controllers.GetMemoryStatsJSON)
+		statsController.GET("/memory/view", controllers.GetMemoryStatsViewHTML)
 	}
 
 	// Protected routes (auth required)
