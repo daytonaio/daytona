@@ -309,8 +309,11 @@ ip link set %s up
 ip addr add %s/24 dev %s
 
 # 9. Host NAT (namespace -> internet) - add rule if not exists
-iptables -t nat -C POSTROUTING -s %s.%d.0/24 -o eth0 -j MASQUERADE 2>/dev/null || \
-iptables -t nat -A POSTROUTING -s %s.%d.0/24 -o eth0 -j MASQUERADE
+# Auto-detect default outbound interface (eth0, enp*, ens*, etc.)
+DEFAULT_IF=$(ip route | grep '^default' | awk '{print $5}' | head -1)
+if [ -z "$DEFAULT_IF" ]; then DEFAULT_IF="eth0"; fi
+iptables -t nat -C POSTROUTING -s %s.%d.0/24 -o $DEFAULT_IF -j MASQUERADE 2>/dev/null || \
+iptables -t nat -A POSTROUTING -s %s.%d.0/24 -o $DEFAULT_IF -j MASQUERADE
 
 # 10. Enable forwarding on host
 sysctl -w net.ipv4.ip_forward=1 > /dev/null
@@ -364,6 +367,9 @@ func (p *NetNSPool) deleteNetworkNamespace(ctx context.Context, ns *NetNamespace
 
 	script := fmt.Sprintf(`
 # Remove host NAT rule (ignore errors if not exists)
+# Try common interface names since we may not know the exact one used
+DEFAULT_IF=$(ip route | grep '^default' | awk '{print $5}' | head -1)
+iptables -t nat -D POSTROUTING -s %s.%d.0/24 -o $DEFAULT_IF -j MASQUERADE 2>/dev/null || true
 iptables -t nat -D POSTROUTING -s %s.%d.0/24 -o eth0 -j MASQUERADE 2>/dev/null || true
 
 # Remove host-side veth (may already be gone)
@@ -375,6 +381,7 @@ ip netns del %s 2>/dev/null || true
 echo "OK"
 `,
 		ExternalNetBase, ns.ExternalNum,
+		ExternalNetBase, ns.ExternalNum, // For eth0 fallback rule
 		ns.VethHost,
 		ns.NamespaceName,
 	)

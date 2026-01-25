@@ -295,7 +295,22 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 		return nil, fmt.Errorf("failed to get sandbox info for %s: %w", sandboxId, err)
 	}
 
-	// Get sandbox IP address
+	// For remote mode, we need to use the namespace's external IP (10.0.{num}.1)
+	// because the VM's internal IP (192.168.0.2) is only reachable from within the namespace.
+	// Traffic to the namespace's external IP is DNATed to the VM.
+	if s.chClient.IsRemote() {
+		ns := s.chClient.GetNetNSPool().Get(sandboxId)
+		if ns != nil && ns.ExternalIP != "" {
+			log.Debugf("SSH Gateway: using namespace external IP %s for sandbox %s (remote mode)", ns.ExternalIP, sandboxId)
+			return &SandboxDetails{
+				User:     GetSandboxSSHUser(),
+				Hostname: ns.ExternalIP,
+			}, nil
+		}
+		log.Warnf("SSH Gateway: namespace not found for %s, falling back to VM IP", sandboxId)
+	}
+
+	// Get sandbox IP address (used for local mode or as fallback)
 	sandboxIP := sandboxInfo.IpAddress
 	if sandboxIP == "" {
 		// Try to get from IP pool

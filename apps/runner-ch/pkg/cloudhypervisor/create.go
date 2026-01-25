@@ -774,12 +774,12 @@ cat "%s/config.json" | jq '.disks[0].path = "%s"' > "%s/config.json"
 	}
 
 	// Step 5: Restore VM from snapshot
-	restoreReq := map[string]interface{}{
-		"source_url": fmt.Sprintf("file://%s", tempSnapshotDir),
-		"prefault":   false,
+	restoreConfig := RestoreConfig{
+		SourceUrl: fmt.Sprintf("file://%s", tempSnapshotDir),
+		Prefault:  false,
 	}
 
-	if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.restore", restoreReq); err != nil {
+	if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.restore", restoreConfig); err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)
 		return nil, fmt.Errorf("failed to restore VM from snapshot: %w", err)
 	}
