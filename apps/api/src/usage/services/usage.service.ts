@@ -9,6 +9,7 @@ import { IsNull, LessThan, Not, Repository } from 'typeorm'
 import { SandboxUsagePeriod } from '../entities/sandbox-usage-period.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { SandboxResizedEvent } from '../../sandbox/events/sandbox-resized.event'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constants'
 import { Cron, CronExpression } from '@nestjs/schedule'
@@ -67,6 +68,22 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
           break
         }
       }
+    } finally {
+      this.releaseLock(event.sandbox.id).catch((error) => {
+        this.logger.error(`Error releasing lock for sandbox ${event.sandbox.id}`, error)
+      })
+    }
+  }
+
+  @OnEvent(SandboxEvents.RESIZED)
+  @TrackJobExecution()
+  async handleSandboxResized(event: SandboxResizedEvent) {
+    await this.waitForLock(event.sandbox.id)
+
+    try {
+      await this.closeUsagePeriod(event.sandbox.id)
+      const diskOnly = event.sandbox.state === SandboxState.STOPPED
+      await this.createUsagePeriod({ sandbox: event.sandbox } as SandboxStateUpdatedEvent, diskOnly)
     } finally {
       this.releaseLock(event.sandbox.id).catch((error) => {
         this.logger.error(`Error releasing lock for sandbox ${event.sandbox.id}`, error)

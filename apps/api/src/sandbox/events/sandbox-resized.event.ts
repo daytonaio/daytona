@@ -12,5 +12,7 @@ export class SandboxResizedEvent {
     public readonly newCpu: number,
     public readonly oldMemory: number,
     public readonly newMemory: number,
+    public readonly oldDisk: number,
+    public readonly newDisk: number,
   ) {}
 }

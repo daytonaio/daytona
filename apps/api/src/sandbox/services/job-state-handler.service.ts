@@ -456,6 +456,7 @@ export class JobStateHandlerService {
         // Capture old values for event emission
         const oldCpu = sandbox.cpu
         const oldMem = sandbox.mem
+        const oldDisk = sandbox.disk
         // Update sandbox resources from job payload
         const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
         sandbox.cpu = payload.cpu ?? sandbox.cpu
@@ -465,7 +466,7 @@ export class JobStateHandlerService {
         await this.sandboxRepository.save(sandbox)
         this.eventEmitter.emit(
           SandboxEvents.RESIZED,
-          new SandboxResizedEvent(sandbox, oldCpu, sandbox.cpu, oldMem, sandbox.mem),
+          new SandboxResizedEvent(sandbox, oldCpu, sandbox.cpu, oldMem, sandbox.mem, oldDisk, sandbox.disk),
         )
         return
       } else if (job.status === JobStatus.FAILED) {
