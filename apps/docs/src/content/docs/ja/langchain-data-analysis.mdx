@@ -1,0 +1,745 @@
+---
+title: LangChainのAIエージェントでデータを分析する
+description: Daytonaの隔離型サンドボックス環境を用いて、安全にデータ分析を実行するLangChainエージェントを構築します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Image } from 'astro:assets'
+
+import chartImage from '../../../assets/docs/images/langchain-data-analysis-chart.png'
+
+このパッケージは `DaytonaDataAnalysisTool` を提供します。LangChain のツール統合であり、エージェントがサンドボックス環境で安全に Python によるデータ分析を実行できるようにします。マルチステップのワークフロー、ファイルのアップロード／ダウンロード、カスタム結果処理をサポートしており、LangChain エージェントによるデータ分析タスクの自動化に最適です。
+
+このページでは、車両評価データセットを分析する基本例を用いて本ツールの使い方を示します。目的は、製造年ごとの車両価格の変動を分析し、年別の平均価格を示す折れ線グラフを作成することです。
+
+***
+
+### 1. ワークフロー概要 \{#1-workflow-overview\}
+
+データセットをアップロードし、実施したい分析内容を記述する自然言語プロンプトを入力します。エージェントはリクエストの意図を解釈し、`DaytonaDataAnalysisTool` をどのように用いてデータセットに対するタスクを実行するかを判断し、Daytona のサンドボックス内で安全に分析を実行します。
+
+必要なデータを提供し、求めるインサイトを記述するだけで、あとはエージェントが処理します。
+
+### 2. プロジェクトの設定 \{#2-project-setup\}
+
+#### 依存関係のインストール \{#install-dependencies\}
+
+:::note[Python Version Requirement]
+この例は LangChain 1.0+ の構文を使用するため、**Python 3.10 以上**が必要です。プロジェクトの依存関係を分離するには、仮想環境（例: `venv` や `poetry`）の使用を推奨します。
+:::
+
+この例で必要なパッケージをインストールします:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```bash
+    pip install -U langchain langchain-anthropic langchain-daytona-data-analysis python-dotenv
+    ```
+
+    パッケージの内訳:
+
+    * `langchain`: AI エージェントを構築するための LangChain フレームワーク
+    * `langchain-anthropic`: Claude（Anthropic）API と LangChain を接続するための統合パッケージ
+    * `langchain-daytona-data-analysis`: LangChain エージェント向けの `DaytonaDataAnalysisTool` を提供
+    * `python-dotenv`: `.env` ファイルから環境変数を読み込むためのライブラリ
+  </TabItem>
+</Tabs>
+
+#### 環境の設定 \{#configure-environment\}
+
+API キーを取得し、環境を設定します:
+
+1. **Daytona API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得
+2. **Anthropic API キー:** [Anthropic Console](https://console.anthropic.com/) から取得
+
+プロジェクト内に `.env` ファイルを作成します:
+
+```bash
+DAYTONA_API_KEY=dtn_***
+ANTHROPIC_API_KEY=sk-ant-***
+```
+
+### 3. データセットのダウンロード \{#3-download-dataset\}
+
+一般公開されている車両評価用データセットを使用します。以下のリンクから直接ダウンロードできます：
+
+[https://download.daytona.io/dataset.csv](https://download.daytona.io/dataset.csv)
+
+ファイルをダウンロードし、プロジェクトディレクトリに `dataset.csv` の名前で保存してください。
+
+### 4. 言語モデルを初期化する \{#4-initialize-the-language-model\}
+
+モデルは LangChain エージェントの推論エンジンであり、意思決定を行い、使用するツールを選択し、結果を解釈します。
+
+この例では、コード生成や分析タスクに優れた Anthropic の Claude モデルを使用します。
+
+以下のパラメータで Claude モデルを設定します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from langchain_anthropic import ChatAnthropic
+
+    model = ChatAnthropic(
+        model_name="claude-sonnet-4-5-20250929",
+        temperature=0,
+        timeout=None,
+        max_retries=2,
+        stop=None
+    )
+    ```
+
+    **パラメータの説明:**
+
+    * `model_name`: 使用する Claude モデルを指定
+    * `temperature`: 生成のランダム性の度合いを調整
+    * `max_retries`: Anthropic API リクエストの再試行回数
+  </TabItem>
+</Tabs>
+
+:::tip[モデルについてさらに学ぶ]
+LangChain のモデル、各プロバイダー、ユースケースに適したモデルの選び方についての詳細は、[LangChain Models のドキュメント](https://docs.langchain.com/oss/python/langchain/models)を参照してください。
+:::
+
+### 5. 結果ハンドラーを定義する \{#5-define-the-result-handler\}
+
+エージェントがサンドボックス内で Python コードを実行すると、チャートや出力ログといったアーティファクトが生成されます。これらの結果を処理するためのハンドラー関数を定義できます。
+
+この関数は実行アーティファクトからチャートデータを抽出し、PNG ファイルとして保存します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import base64
+    from daytona import ExecutionArtifacts
+
+    def process_data_analysis_result(result: ExecutionArtifacts):
+        # Print the standard output from code execution
+        print("Result stdout", result.stdout)
+        
+        result_idx = 0
+        for chart in result.charts:
+            if chart.png:
+                # Charts are returned in base64 format
+                # Decode and save them as PNG files
+                with open(f'chart-{result_idx}.png', 'wb') as f:
+                    f.write(base64.b64decode(chart.png))
+                print(f'Chart saved to chart-{result_idx}.png')
+                result_idx += 1
+    ```
+
+    このハンドラーは実行アーティファクトを次のように処理します:
+
+    * 実行コードの stdout をログ出力
+    * アーティファクトからチャートデータを抽出
+    * base64 エンコードされた PNG チャートをデコード
+    * ローカルファイルに保存
+  </TabItem>
+</Tabs>
+
+### 6. データ分析ツールを構成する \{#6-configure-the-data-analysis-tool\}
+
+ここでは `DaytonaDataAnalysisTool` を初期化し、データセットをアップロードします。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from langchain_daytona_data_analysis import DaytonaDataAnalysisTool
+
+    # Initialize the tool with our result handler
+    DataAnalysisTool = DaytonaDataAnalysisTool(
+        on_result=process_data_analysis_result
+    )
+
+    # Upload the dataset with metadata describing its structure
+    with open("./dataset.csv", "rb") as f:
+        DataAnalysisTool.upload_file(
+            f,
+            description=(
+                "This is a CSV file containing vehicle valuations. "
+                "Relevant columns:\n"
+                "- 'year': integer, the manufacturing year of the vehicle\n"
+                "- 'price_in_euro': float, the listed price of the vehicle in Euros\n"
+                "Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier."
+            )
+        )
+    ```
+
+    **重要なポイント:**
+
+    * `on_result` パラメータでカスタム結果ハンドラーを接続します
+    * `description` はデータセットの構造に関するコンテキストをエージェントに提供します
+    * 列の説明は、エージェントがデータの処理方法を理解するのに役立ちます
+    * データクリーニングの指示により、分析の品質を確保します
+  </TabItem>
+</Tabs>
+
+### 7. エージェントの作成と実行 \{#7-create-and-run-the-agent\}
+
+最後に、設定したモデルとツールで LangChain エージェントを作成し、分析リクエストで実行します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from langchain.agents import create_agent
+
+    # モデルとデータ分析ツールでエージェントを作成
+    agent = create_agent(model, tools=[DataAnalysisTool], debug=True)
+
+    # 分析リクエストでエージェントを呼び出し
+    agent_response = agent.invoke({
+        "messages": [{
+            "role": "user",
+            "content": "Analyze how vehicles price varies by manufacturing year. Create a line chart showing average price per year."
+        }]
+    })
+
+    # サンドボックスのリソースを解放するため、必ずツールをクローズ
+    DataAnalysisTool.close()
+    ```
+  </TabItem>
+</Tabs>
+
+**ここで行われること:**
+
+1. エージェントが自然言語のリクエストを受け取る
+   2. `DaytonaDataAnalysisTool` を使用する必要があると判断する
+   3. データ分析用の Python コードを生成する
+   4. コードが Daytona のサンドボックス内で安全に実行される
+   5. 結果がハンドラー関数で処理される
+   6. グラフがローカルディレクトリに保存される
+   7. 最後にサンドボックスのリソースがクリーンアップされる
+
+### 8. 分析の実行 \{#8-running-your-analysis\}
+
+これで、コード全体を実行して結果を確認できます。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```bash
+    python data-analysis.py
+    ```
+  </TabItem>
+</Tabs>
+
+#### エージェントの実行フローを理解する \{#understanding-the-agents-execution-flow\}
+
+コードを実行すると、エージェントはリクエストを段階的に処理します。内部では次の処理が行われます。
+
+**ステップ 1: エージェントがリクエストを受け取り解釈する**
+
+エージェントは分析リクエストを受理し、解釈します。
+
+```
+AIメッセージ：「製造年別の車両価格の変動を分析し、年別の平均価格を示す折れ線グラフを作成します。」
+```
+
+**ステップ2：エージェントが Python コードを生成する**
+
+まず、エージェントはデータセットを探索するための Python コードを生成します。
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# データセットを読み込む
+df = pd.read_csv('/home/daytona/dataset.csv')
+
+# データセットの基本情報を表示
+print("データセットの形状:", df.shape)
+print("\n先頭行:")
+print(df.head())
+print("\nカラム名:")
+print(df.columns.tolist())
+print("\nデータ型:")
+print(df.dtypes)
+```
+
+**ステップ 3: コードは Daytona のサンドボックス内で実行されます**
+
+このツールはコードを安全なサンドボックスで実行し、結果を返します。
+
+```
+標準出力結果 データセット形状: (100000, 15)
+
+先頭数行:
+   Unnamed: 0  ...                               offer_description
+0       75721  ...  ST-Line Hybrid Adapt.LED+Head-Up-Display Klima
+1       80184  ...             blue Trend,Viele Extras,Top-Zustand
+2       19864  ...    35 e-tron S line/Matrix/Pano/ACC/SONOS/LM 21
+3       76699  ...           2.0 Lifestyle Plus Automatik Navi FAP
+4       92991  ...                    1.6 T 48V 2WD Spirit LED, WR
+
+[5 rows x 15 columns]
+
+カラム名:
+['Unnamed: 0', 'brand', 'model', 'color', 'registration_date', 'year', 
+ 'price_in_euro', 'power_kw', 'power_ps', 'transmission_type', 'fuel_type', 
+ 'fuel_consumption_l_100km', 'fuel_consumption_g_km', 'mileage_in_km', 
+ 'offer_description']
+
+データ型:
+Unnamed: 0                    int64
+brand                        object
+model                        object
+color                        object
+registration_date            object
+year                         object
+price_in_euro                object
+power_kw                     object
+power_ps                     object
+transmission_type            object
+fuel_type                    object
+fuel_consumption_l_100km     object
+fuel_consumption_g_km        object
+mileage_in_km               float64
+offer_description            object
+dtype: object
+```
+
+**ステップ 4: エージェントが詳細な分析コードを生成**
+
+初期データセットの情報に基づき、エージェントは主要カラムを検証するための、より具体的なコードを生成します。
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# データセットを読み込む
+df = pd.read_csv('/home/daytona/dataset.csv')
+
+print("データセットの形状:", df.shape)
+print("\nカラム名:")
+print(df.columns.tolist())
+
+# yearカラムとprice_in_euroカラムを確認
+print("\n'year'カラムを確認:")
+print(df['year'].describe())
+print("\n'year'の欠損値:", df['year'].isna().sum())
+
+print("\n'price_in_euro'カラムを確認:")
+print(df['price_in_euro'].describe())
+print("\n'price_in_euro'の欠損値:", df['price_in_euro'].isna().sum())
+```
+
+**ステップ5：サンドボックスでの実行結果**
+
+コードを実行すると、カラムの統計情報が返されます。
+
+```
+実行結果 stdout データセット形状: (100000, 15)
+
+列名:
+['Unnamed: 0', 'brand', 'model', 'color', 'registration_date', 'year', 
+ 'price_in_euro', 'power_kw', 'power_ps', 'transmission_type', 'fuel_type', 
+ 'fuel_consumption_l_100km', 'fuel_consumption_g_km', 'mileage_in_km', 
+ 'offer_description']
+
+'year' 列の確認:
+count     100000
+unique        49
+top         2019
+freq       12056
+Name: year, dtype: object
+
+'year' の欠損値: 0
+
+'price_in_euro' 列の確認:
+count     100000
+unique     11652
+top        19990
+freq         665
+Name: price_in_euro, dtype: object
+
+'price_in_euro' の欠損値: 0
+```
+
+**ステップ6: エージェントが最終的な分析・可視化コードを生成する**
+
+エージェントがデータ構造を把握したため、データのクレンジング、処理、可視化を含む完全な分析用コードを生成します。
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+# データセットを読み込む
+df = pd.read_csv('/home/daytona/dataset.csv')
+
+print("元のデータセットの形状:", df.shape)
+
+# データをクリーニング - yearまたはprice_in_euroに欠損値がある行を削除
+df_clean = df.dropna(subset=['year', 'price_in_euro'])
+print(f"欠損値削除後: {df_clean.shape}")
+
+# 数値に変換し、非数値を削除
+df_clean['year'] = pd.to_numeric(df_clean['year'], errors='coerce')
+df_clean['price_in_euro'] = pd.to_numeric(df_clean['price_in_euro'], errors='coerce')
+
+# 変換に失敗した行を削除
+df_clean = df_clean.dropna(subset=['year', 'price_in_euro'])
+print(f"非数値削除後: {df_clean.shape}")
+
+# IQR法を使用してyearとpriceの両方の外れ値を削除
+def remove_outliers(df, column):
+    Q1 = df[column].quantile(0.25)
+    Q3 = df[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    return df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+
+df_clean = remove_outliers(df_clean, 'year')
+print(f"年の外れ値削除後: {df_clean.shape}")
+
+df_clean = remove_outliers(df_clean, 'price_in_euro')
+print(f"価格の外れ値削除後: {df_clean.shape}")
+
+print("\nクリーニング済みデータの要約:")
+print(df_clean[['year', 'price_in_euro']].describe())
+
+# 年ごとの平均価格を計算
+avg_price_by_year = df_clean.groupby('year')['price_in_euro'].mean().sort_index()
+
+print("\n年ごとの平均価格:")
+print(avg_price_by_year)
+
+# 折れ線グラフを作成
+plt.figure(figsize=(14, 7))
+plt.plot(avg_price_by_year.index, avg_price_by_year.values, marker='o', 
+         linewidth=2, markersize=6, color='#2E86AB')
+plt.xlabel('製造年', fontsize=12, fontweight='bold')
+plt.ylabel('平均価格 (€)', fontsize=12, fontweight='bold')
+plt.title('製造年別の平均車両価格', fontsize=14, 
+          fontweight='bold', pad=20)
+plt.grid(True, alpha=0.3, linestyle='--')
+plt.xticks(rotation=45)
+
+# y軸を通貨形式で表示
+ax = plt.gca()
+ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, p: f'€{x:,.0f}'))
+
+plt.tight_layout()
+plt.show()
+
+# 追加の統計情報
+print(f"\n分析した車両の総数: {len(df_clean)}")
+print(f"年の範囲: {int(df_clean['year'].min())} - {int(df_clean['year'].max())}")
+print(f"価格の範囲: €{df_clean['price_in_euro'].min():.2f} - €{df_clean['price_in_euro'].max():.2f}")
+print(f"全体の平均価格: €{df_clean['price_in_euro'].mean():.2f}")
+```
+
+この包括的なコードは、データのクレンジング、外れ値の除去、年次平均の計算を行い、プロフェッショナルな可視化を作成します。
+
+**ステップ 7: 最終実行とチャート生成**
+
+このコードはサンドボックス内で正常に実行され、データを処理して可視化を生成します。
+
+```
+結果 stdout 元のデータセット形状: (100000, 15)
+欠損値削除後: (100000, 15)
+非数値削除後: (99946, 15)
+年の外れ値削除後: (96598, 15)
+価格の外れ値削除後: (90095, 15)
+
+クリーニング済みデータの要約:
+               year  price_in_euro
+count  90095.000000   90095.000000
+mean    2016.698563   22422.266707
+std        4.457647   12964.727116
+min     2005.000000     150.000000
+25%     2014.000000   12980.000000
+50%     2018.000000   19900.000000
+75%     2020.000000   29500.000000
+max     2023.000000   62090.000000
+
+年別平均価格:
+year
+2005.0     5968.124319
+2006.0     6870.881523
+2007.0     8015.234473
+2008.0     8788.644495
+2009.0     8406.198576
+2010.0    10378.815972
+2011.0    11540.640435
+2012.0    13306.642261
+2013.0    14512.707025
+2014.0    15997.682899
+2015.0    18563.864358
+2016.0    20124.556294
+2017.0    22268.083322
+2018.0    24241.123673
+2019.0    26757.469111
+2020.0    29400.163494
+2021.0    30720.168646
+2022.0    33861.717552
+2023.0    33119.840175
+Name: price_in_euro, dtype: float64
+
+分析対象車両総数: 90095
+年の範囲: 2005 - 2023
+価格の範囲: €150.00 - €62090.00
+全体平均価格: €22422.27
+
+チャートを chart-0.png に保存しました
+```
+
+エージェントは分析を正常に完了し、車両価格が2005年（€5,968）から2022年（€33,862）にかけて概ね上昇し、2023年にはわずかに低下したことを示しました。結果ハンドラーは生成されたチャートを取得し、`chart-0.png`として保存しました。
+
+プロジェクトディレクトリに、次のようなチャートが表示されるはずです:
+
+<Image src={chartImage} alt="製造年別の車両評価チャート" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+### 9. 実装の完成版 \{#9-complete-implementation\}
+
+以下は、すぐに実行できる完全な例です:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import base64
+    from dotenv import load_dotenv
+    from langchain.agents import create_agent
+    from langchain_anthropic import ChatAnthropic
+    from daytona import ExecutionArtifacts
+    from langchain_daytona_data_analysis import DaytonaDataAnalysisTool
+
+    load_dotenv()
+
+    model = ChatAnthropic(
+      model_name="claude-sonnet-4-5-20250929",
+      temperature=0,
+      timeout=None,
+      max_retries=2,
+      stop=None
+    )
+
+    def process_data_analysis_result(result: ExecutionArtifacts):
+      # Print the standard output from code execution
+      print("Result stdout", result.stdout)
+      result_idx = 0
+      for chart in result.charts:
+          if chart.png:
+              # Save the png to a file
+              # The png is in base64 format.
+              with open(f'chart-{result_idx}.png', 'wb') as f:
+                  f.write(base64.b64decode(chart.png))
+              print(f'Chart saved to chart-{result_idx}.png')
+              result_idx += 1
+
+    def main():
+      DataAnalysisTool = DaytonaDataAnalysisTool(
+          on_result=process_data_analysis_result
+      )
+
+      try:
+          with open("./dataset.csv", "rb") as f:
+              DataAnalysisTool.upload_file(
+                  f,
+                  description=(
+                      "This is a CSV file containing vehicle valuations. "
+                      "Relevant columns:\n"
+                      "- 'year': integer, the manufacturing year of the vehicle\n"
+                      "- 'price_in_euro': float, the listed price of the vehicle in Euros\n"
+                      "Drop rows where 'year' or 'price_in_euro' is missing, non-numeric, or an outlier."
+                  )
+              )
+
+          agent = create_agent(model, tools=[DataAnalysisTool], debug=True)
+
+          agent_response = agent.invoke(
+              {"messages": [{"role": "user", "content": "Analyze how vehicles price varies by manufacturing year. Create a line chart showing average price per year."}]}
+          )
+      finally:
+          DataAnalysisTool.close()
+
+    if __name__ == "__main__":
+      main()
+    ```
+  </TabItem>
+</Tabs>
+
+**このアプローチの主な利点:**
+
+* **安全な実行:** コードは隔離された Daytona のサンドボックスで実行されます
+* **成果物の自動取得:** チャート、テーブル、出力が自動的に抽出されます
+* **自然言語インターフェース:** 解析タスクを平易な英語で指示できます
+* **フレームワーク統合:** LangChain のエージェントエコシステムとシームレスに連携します
+
+### 10. API リファレンス \{#10-api-reference\}
+
+`DaytonaDataAnalysisTool` で利用可能なパブリックメソッドは次のとおりです。
+
+#### download_file \{#download_file\}
+
+```python
+def download_file(remote_path: str) -> bytes
+```
+
+サンドボックス内のリモートパスを指定してファイルをダウンロードします。
+
+**引数**:
+
+* `remote_path` - str: サンドボックス内のファイルパス。
+
+**戻り値**:
+
+* `bytes` - ファイルの内容。
+
+**例**:
+
+```python
+# サンドボックスからファイルをダウンロードする
+file_bytes = tool.download_file("/home/daytona/results.csv")
+```
+
+#### upload_file \{#upload_file\}
+
+```python
+def upload_file(file: IO, description: str) -> SandboxUploadedFile
+```
+
+サンドボックスにファイルをアップロードします。ファイルは `/home/daytona/` に配置されます。
+
+**引数**:
+
+* `file` - IO: アップロードするファイル様オブジェクト。
+* `description` - str: ファイルの目的や内容（含まれるデータの種類）を説明する記述。
+
+**戻り値**:
+
+* [`SandboxUploadedFile`](#sandboxuploadedfile) - アップロードされたファイルに関するメタデータ。
+
+**例**:
+
+小売ビジネスの売上データを分析するケースを考えます。`transaction_id`、`date`、`product`、`quantity`、`revenue` といった列を含む `sales_q3_2025.csv` というCSVファイルがあり、分析の前提となる説明を添えてこのファイルをアップロードします。
+
+```python
+with open("sales_q3_2025.csv", "rb") as f:
+    uploaded = tool.upload_file(
+        f,
+        "2025年第3四半期の小売販売トランザクションを含むCSVファイル。カラム: transaction_id, date, product, quantity, revenue。"
+    )
+```
+
+#### remove_uploaded_file \{#remove_uploaded_file\}
+
+```python
+def remove_uploaded_file(uploaded_file: SandboxUploadedFile) -> None
+```
+
+サンドボックスから、アップロード済みのファイルを削除します。
+
+**引数**:
+
+* `uploaded_file` - [`SandboxUploadedFile`](#sandboxuploadedfile): 削除するファイル。
+
+**戻り値**:
+
+* なし
+
+**例**:
+
+```python
+# アップロードされたファイルを削除
+tool.remove_uploaded_file(uploaded)
+```
+
+#### get_sandbox \{#get_sandbox\}
+
+```python
+def get_sandbox() -> Sandbox
+```
+
+現在のサンドボックスインスタンスを取得します。
+
+このメソッドは Daytona のサンドボックスインスタンスへアクセスし、サンドボックスのプロパティやメタデータの確認およびサンドボックス関連の各種操作を実行できます。利用可能な属性やメソッドの詳細は、以下の[Sandbox](#sandbox) データ構造のセクションを参照してください。
+
+**引数**:
+
+* なし
+
+**戻り値**:
+
+* [`Sandbox`](#sandbox) - サンドボックスインスタンス。
+
+**例**:
+
+```python
+sandbox = tool.get_sandbox()
+```
+
+#### install_python_packages \{#install_python_packages\}
+
+```python
+def install_python_packages(package_names: str | list[str]) -> None
+```
+
+pip を使用してサンドボックスに 1 つ以上の Python パッケージをインストールします。
+
+**引数**:
+
+* `package_names` - str | list[str]: インストールするパッケージ名（複数可）。
+
+**戻り値**:
+
+* なし
+
+:::note
+サンドボックスにあらかじめインストールされているパッケージの一覧は、[Daytona のデフォルトスナップショットのドキュメント](https://www.daytona.io/docs/en/snapshots/#default-snapshots)で確認できます。
+:::
+
+**例**:
+
+```python
+# Install a single package
+tool.install_python_packages("pandas")
+
+# 複数のパッケージをインストールする
+tool.install_python_packages(["numpy", "matplotlib"])
+```
+
+#### 閉じる \{#close\}
+
+```python
+def close() -> None
+```
+
+サンドボックス環境を閉じて削除します。
+
+**引数**:
+
+* なし
+
+**戻り値**:
+
+* なし
+
+:::note
+すべてのデータ分析タスクが完了したら、このメソッドを呼び出してリソースを適切にクリーンアップし、不要な利用を避けてください。
+:::
+
+**例**:
+
+```python
+# サンドボックスを閉じてクリーンアップする
+tool.close()
+```
+
+### 11. データ構造 \{#11-data-structures\}
+
+#### SandboxUploadedFile \{#sandboxuploadedfile\}
+
+サンドボックスにアップロードされたファイルのメタデータを表します。
+
+* `name`: `str` - サンドボックス内でのアップロードファイル名
+* `remote_path`: `str` - サンドボックス内のファイルの絶対パス
+* `description`: `str` - アップロード時に指定された説明
+
+#### サンドボックス \{#sandbox\}
+
+Daytona のサンドボックス・インスタンスを表します。
+
+完全な構造と API については、[Daytona Python SDK のサンドボックスドキュメント](https://www.daytona.io/docs/en/python-sdk/sync/sandbox/#sandbox)をご参照ください。
