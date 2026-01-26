@@ -58,6 +58,7 @@ func init() {
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.ArchiveCmd))
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.SSHCmd))
 	rootCmd.AddCommand(createSandboxShortcut(sandbox.ExecCmd))
+	rootCmd.AddCommand(createSandboxShortcut(sandbox.PreviewUrlCmd))
 
 	rootCmd.CompletionOptions.HiddenDefaultCmd = true
 	rootCmd.PersistentFlags().BoolP("help", "", false, "help for daytona")

@@ -27,4 +27,5 @@ func init() {
 	SandboxCmd.AddCommand(ArchiveCmd)
 	SandboxCmd.AddCommand(SSHCmd)
 	SandboxCmd.AddCommand(ExecCmd)
+	SandboxCmd.AddCommand(PreviewUrlCmd)
 }
