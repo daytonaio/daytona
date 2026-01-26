@@ -80,7 +80,7 @@ func (p *Proxy) browserWarningMiddleware() gin.HandlerFunc {
 		}
 
 		// Skip warning for the acceptance endpoint itself or auth callbacks
-		targetPort, _, err := p.parseHost(ctx.Request.Host)
+		targetPort, _, _, err := p.parseHost(ctx.Request.Host)
 		if err != nil {
 			switch ctx.Request.Method {
 			case "GET":

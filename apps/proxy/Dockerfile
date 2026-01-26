@@ -30,7 +30,6 @@ RUN chmod +x daytona-proxy
 ENV DAYTONA_API_URL=http://api:3000/api
 
 ENV PROXY_PORT=4000
-ENV PROXY_DOMAIN=proxy.localhost:4000
 ENV PROXY_API_KEY=super_secret_key
 ENV PROXY_PROTOCOL=http
 

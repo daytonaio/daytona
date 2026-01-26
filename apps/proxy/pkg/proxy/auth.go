@@ -72,7 +72,9 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 		}
 	}
 
-	sandboxId, err = p.getSandboxIdFromSignedPreviewUrlToken(ctx, sandboxIdOrSignedToken, port)
+	cookieDomain := p.getCookieDomain(ctx.Request.Host)
+
+	sandboxId, err = p.getSandboxIdFromSignedPreviewUrlToken(ctx, sandboxIdOrSignedToken, port, cookieDomain)
 	if err == nil {
 		return sandboxId, false, nil
 	} else {
@@ -98,7 +100,7 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 	return sandboxIdOrSignedToken, true, errors.New(errorMsg)
 }
 
-func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32) (string, error) {
+func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32, cookieDomain string) (string, error) {
 	sandboxId, _, err := p.apiclient.PreviewAPI.GetSandboxIdFromSignedPreviewUrlToken(ctx.Request.Context(), sandboxIdOrSignedToken, port).Execute()
 	if err != nil {
 		return "", fmt.Errorf("failed to get sandbox ID: %w. Is the token expired?", err)
@@ -109,7 +111,7 @@ func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxI
 		return "", fmt.Errorf("failed to encode cookie: %w", err)
 	}
 
-	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", p.cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
 
 	return sandboxId, nil
 }

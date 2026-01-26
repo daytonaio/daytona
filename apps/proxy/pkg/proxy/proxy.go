@@ -57,7 +57,7 @@ func stopActivityPoll(ctx *gin.Context) {
 type Proxy struct {
 	config       *config.Config
 	secureCookie *securecookie.SecureCookie
-	cookieDomain string
+	cookieDomain *string
 
 	apiclient                      *apiclient.APIClient
 	runnerCache                    common_cache.ICache[RunnerInfo]
@@ -73,13 +73,10 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 	}
 
 	proxy.secureCookie = securecookie.New([]byte(config.ProxyApiKey), nil)
-	cookieDomain := config.ProxyDomain
 	if config.CookieDomain != nil {
-		cookieDomain = *config.CookieDomain
+		cookieDomain := GetCookieDomainFromHost(*config.CookieDomain)
+		proxy.cookieDomain = &cookieDomain
 	}
-	cookieDomain = strings.Split(cookieDomain, ":")[0]
-	cookieDomain = fmt.Sprintf(".%s", cookieDomain)
-	proxy.cookieDomain = cookieDomain
 
 	proxy.apiclient = config.ApiClient
 
@@ -174,7 +171,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return
 		}
 
-		targetPort, _, err := proxy.parseHost(ctx.Request.Host)
+		targetPort, _, _, err := proxy.parseHost(ctx.Request.Host)
 		// if the host is not valid, we don't proxy the request
 		if err != nil {
 			switch ctx.Request.Method {

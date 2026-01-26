@@ -34,7 +34,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 		// Extract port and sandbox ID from the host header
 		// Expected format: 1234-<sandboxId | token>.proxy.domain
 		var err error
-		targetPort, sandboxIdOrSignedToken, err = p.parseHost(ctx.Request.Host)
+		targetPort, sandboxIdOrSignedToken, _, err = p.parseHost(ctx.Request.Host)
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(err))
 			return nil, nil, err
@@ -214,28 +214,28 @@ func (p *Proxy) validateAndCache(
 	return &isValid, nil
 }
 
-func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToken string, err error) {
+func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToken string, baseHost string, err error) {
 	// Extract port and sandbox ID from the host header
 	// Expected format: 1234-some-id-uuid.proxy.domain
 	if host == "" {
-		return "", "", errors.New("host is required")
+		return "", "", "", errors.New("host is required")
 	}
 
 	// Split the host to extract the port and sandbox ID
 	parts := strings.Split(host, ".")
 	if len(parts) == 0 {
-		return "", "", errors.New("invalid host format")
+		return "", "", "", errors.New("invalid host format")
 	}
 
 	if len(parts) < 2 {
-		return "", "", errors.New("invalid host format: must has subdomain")
+		return "", "", "", errors.New("invalid host format: must have subdomain")
 	}
 
 	// Extract port from the first part (e.g., "1234-some-id-uuid")
 	hostPrefix := parts[0]
 	before, after, ok := strings.Cut(hostPrefix, "-")
 	if !ok {
-		return "", "", errors.New("invalid host format: port and sandbox ID not found")
+		return "", "", "", errors.New("invalid host format: port and sandbox ID not found")
 	}
 
 	targetPort = before
@@ -246,8 +246,10 @@ func (p *Proxy) parseHost(host string) (targetPort string, sandboxIdOrSignedToke
 	}
 
 	sandboxIdOrSignedToken = after
+	// Join remaining parts to form the base domain (e.g., "proxy.domain")
+	baseHost = strings.Join(parts[1:], ".")
 
-	return targetPort, sandboxIdOrSignedToken, nil
+	return targetPort, sandboxIdOrSignedToken, baseHost, nil
 }
 
 // updateLastActivity updates the last activity timestamp for a sandbox.
