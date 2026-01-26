@@ -19,7 +19,8 @@
           "flags": ["-ldflags \"-X 'github.com/daytonaio/snapshot-manager/internal.Version=$VERSION'\""]
         }
       },
-      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
+      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }],
+      "outputs": ["{options.outputPath}"]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
