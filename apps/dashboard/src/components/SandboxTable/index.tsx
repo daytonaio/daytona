@@ -3,86 +3,33 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useSidebar } from '@/components/ui/sidebar'
 import { RoutePath } from '@/enums/RoutePath'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { cn, pluralize } from '@/lib/utils'
-import { OrganizationRolePermissionsEnum, SandboxState } from '@daytonaio/api-client'
-import { flexRender, Table as TableType } from '@tanstack/react-table'
-import { CheckIcon, CommandIcon, Container, SquareIcon, Trash2Icon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  filterArchivable,
+  filterDeletable,
+  filterStartable,
+  filterStoppable,
+  getBulkActionCounts,
+} from '@/lib/utils/sandbox'
+import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
+import { flexRender } from '@tanstack/react-table'
+import { CommandIcon, Container, XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCommandPaletteActions, useRegisterCommands, type CommandConfig } from '../CommandPalette'
+import { useCommandPaletteActions } from '../CommandPalette'
 import { Pagination } from '../Pagination'
 import { TableEmptyState } from '../TableEmptyState'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '../ui/alert-dialog'
 import { Button } from '../ui/button'
+import { Separator } from '../ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
+import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
 import { SandboxTableHeader } from './SandboxTableHeader'
 import { SandboxTableProps } from './types'
+import { useSandboxCommands } from './useSandboxCommands'
 import { useSandboxTable } from './useSandboxTable'
-
-function useSandboxCommands({
-  table,
-  writePermitted,
-  deletePermitted,
-  onDelete,
-}: {
-  table: TableType<any>
-  writePermitted: boolean
-  deletePermitted: boolean
-  onDelete: () => void
-}) {
-  const selectedCount = table.getRowModel().rows.filter((row) => row.getIsSelected()).length
-  const totalCount = table.getRowModel().rows.length
-
-  const rootCommands: CommandConfig[] = useMemo(() => {
-    const commands: CommandConfig[] = []
-
-    if (totalCount !== selectedCount) {
-      commands.push({
-        id: 'select-all-sandboxes',
-        label: 'Select All Sandboxes',
-        icon: <CheckIcon className="w-4 h-4" />,
-        onSelect: () => table.toggleAllRowsSelected(true),
-        chainable: true,
-      })
-    }
-
-    if (selectedCount > 0) {
-      commands.push({
-        id: 'deselect-all-sandboxes',
-        label: 'Deselect All Sandboxes',
-        icon: <SquareIcon className="w-4 h-4" />,
-        onSelect: () => table.toggleAllRowsSelected(false),
-        chainable: true,
-      })
-    }
-
-    if (deletePermitted && selectedCount > 0) {
-      commands.push({
-        id: 'delete-sandboxes',
-        label: `Delete ${pluralize(selectedCount, 'Sandbox', 'Sandboxes')}`,
-        icon: <Trash2Icon className="w-4 h-4" />,
-        onSelect: onDelete,
-      })
-    }
-
-    return commands
-  }, [table, selectedCount, deletePermitted, onDelete, totalCount])
-
-  useRegisterCommands(rootCommands, { groupId: 'sandbox-actions', groupLabel: 'Sandbox actions', groupOrder: 0 })
-}
 
 export function SandboxTable({
   data,
@@ -100,6 +47,9 @@ export function SandboxTable({
   handleStop,
   handleDelete,
   handleBulkDelete,
+  handleBulkStart,
+  handleBulkStop,
+  handleBulkArchive,
   handleArchive,
   handleVnc,
   getWebTerminalUrl,
@@ -122,7 +72,6 @@ export function SandboxTable({
   const { authenticatedUserHasPermission } = useSelectedOrganization()
   const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
   const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
-  const { state: sidebarState } = useSidebar()
 
   const { table, regionOptions } = useSandboxTable({
     data,
@@ -149,24 +98,44 @@ export function SandboxTable({
     getRegionName,
   })
 
-  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
+  const [pendingBulkAction, setPendingBulkAction] = useState<BulkAction | null>(null)
 
-  const hasSelection = table.getRowModel().rows.some((row) => row.getIsSelected())
-  const selectedCount = table.getRowModel().rows.filter((row) => row.getIsSelected()).length
+  const selectedRows = table.getRowModel().rows.filter((row) => row.getIsSelected())
+  const hasSelection = selectedRows.length > 0
+  const selectedCount = selectedRows.length
+  const totalCount = table.getRowModel().rows.length
+  const selectedSandboxes: Sandbox[] = selectedRows.map((row) => row.original)
 
-  const handleBulkDeleteConfirm = () => {
-    const selectedIds = table
-      .getRowModel()
-      .rows.filter((row) => row.getIsSelected())
-      .map((row) => row.original.id)
+  const bulkActionCounts = useMemo(() => getBulkActionCounts(selectedSandboxes), [selectedSandboxes])
 
-    handleBulkDelete(selectedIds)
-    setBulkDeleteDialogOpen(false)
+  const handleBulkActionConfirm = () => {
+    if (!pendingBulkAction) return
 
+    const handlers: Record<BulkAction, () => void> = {
+      [BulkAction.Delete]: () => handleBulkDelete(filterDeletable(selectedSandboxes).map((s) => s.id)),
+      [BulkAction.Start]: () => handleBulkStart(filterStartable(selectedSandboxes).map((s) => s.id)),
+      [BulkAction.Stop]: () => handleBulkStop(filterStoppable(selectedSandboxes).map((s) => s.id)),
+      [BulkAction.Archive]: () => handleBulkArchive(filterArchivable(selectedSandboxes).map((s) => s.id)),
+    }
+
+    handlers[pendingBulkAction]()
+    setPendingBulkAction(null)
     table.toggleAllRowsSelected(false)
   }
 
-  useSandboxCommands({ table, writePermitted, deletePermitted, onDelete: () => setBulkDeleteDialogOpen(true) })
+  useSandboxCommands({
+    writePermitted,
+    deletePermitted,
+    selectedCount,
+    totalCount,
+    toggleAllRowsSelected: table.toggleAllRowsSelected,
+    bulkActionCounts,
+    onDelete: () => setPendingBulkAction(BulkAction.Delete),
+    onStart: () => setPendingBulkAction(BulkAction.Start),
+    onStop: () => setPendingBulkAction(BulkAction.Stop),
+    onArchive: () => setPendingBulkAction(BulkAction.Archive),
+  })
+
   const { setIsOpen } = useCommandPaletteActions()
   const handleOpenCommandPalette = () => {
     setIsOpen(true)
@@ -280,13 +249,7 @@ export function SandboxTable({
       </Table>
 
       <div className="flex items-center justify-end relative">
-        <Pagination
-          className="pb-2 pt-6"
-          table={table}
-          selectionEnabled={deletePermitted}
-          entityName="Sandboxes"
-          totalItems={totalItems}
-        />
+        <Pagination className="pb-2 pt-6" table={table} entityName="Sandboxes" totalItems={totalItems} />
 
         <AnimatePresence>
           {hasSelection && (
@@ -294,15 +257,21 @@ export function SandboxTable({
               initial={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
               animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
               exit={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
-              className="bg-popover absolute bottom-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-xs"
+              className="bg-popover absolute bottom-5 left-1/2 -translate-x-1/2 z-50 gap-3 max-w-[90vw]"
             >
               <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
-                <div className="text-sm">
-                  {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
+                <div className="flex items-center gap-1">
+                  <div className="text-sm tabular-nums whitespace-nowrap">
+                    {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
+                  </div>
+                  <Button variant="ghost" size="icon-sm" onClick={() => table.toggleAllRowsSelected(false)}>
+                    <XIcon className="size-3.5" />
+                  </Button>
                 </div>
+                <Separator orientation="vertical" className="h-5" />
 
                 <Button variant="ghost" size="sm" className="h-8" onClick={handleOpenCommandPalette}>
-                  <CommandIcon className="w-4 h-4" />
+                  <CommandIcon className="size-3.5" />
                   <span className="text-sm">Actions</span>
                 </Button>
               </div>
@@ -311,23 +280,21 @@ export function SandboxTable({
         </AnimatePresence>
       </div>
 
-      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Sandboxes</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete {selectedCount === 1 ? 'this item' : `these ${selectedCount} items`}? This
-              action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBulkDeleteConfirm} variant="destructive">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BulkActionAlertDialog
+        action={pendingBulkAction}
+        count={
+          pendingBulkAction
+            ? {
+                [BulkAction.Delete]: bulkActionCounts.deletable,
+                [BulkAction.Start]: bulkActionCounts.startable,
+                [BulkAction.Stop]: bulkActionCounts.stoppable,
+                [BulkAction.Archive]: bulkActionCounts.archivable,
+              }[pendingBulkAction]
+            : 0
+        }
+        onConfirm={handleBulkActionConfirm}
+        onCancel={() => setPendingBulkAction(null)}
+      />
     </>
   )
 }

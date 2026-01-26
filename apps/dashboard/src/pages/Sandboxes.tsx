@@ -37,9 +37,10 @@ import {
 } from '@/hooks/useSandboxes'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
+import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
-import { formatDuration } from '@/lib/utils'
+import { formatDuration, pluralize } from '@/lib/utils'
 import {
   OrganizationUserRoleEnum,
   Sandbox,
@@ -521,53 +522,6 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const handleBulkDelete = async (ids: string[]) => {
-    setSandboxIsLoading((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
-    setSandboxStateIsTransitioning((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
-
-    await cancelQueryRefetches(queryKey)
-
-    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
-
-    for (const id of ids) {
-      const sandboxToDelete = sandboxesData?.items.find((s) => s.id === id)
-      const previousState = sandboxToDelete?.state
-
-      performSandboxStateOptimisticUpdate(id, SandboxState.DESTROYING)
-
-      try {
-        await sandboxApi.deleteSandbox(id, selectedOrganization?.id)
-        toast.success(`Deleting sandbox with ID: ${id}`)
-        await markAllSandboxQueriesAsStale()
-      } catch (error) {
-        handleApiError(error, 'Failed to delete sandbox')
-
-        revertSandboxStateOptimisticUpdate(id, previousState)
-
-        const shouldContinue = window.confirm(
-          `Failed to delete sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
-        )
-
-        if (!shouldContinue) {
-          break
-        }
-      } finally {
-        setSandboxIsLoading((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: false }), {}) }))
-        setTimeout(() => {
-          setSandboxStateIsTransitioning((prev) => ({
-            ...prev,
-            ...ids.reduce((acc, id) => ({ ...acc, [id]: false }), {}),
-          }))
-        }, 2000)
-      }
-    }
-
-    if (selectedSandboxInBulk) {
-      setShowSandboxDetails(false)
-      setSelectedSandbox(null)
-    }
-  }
-
   const handleArchive = async (id: string) => {
     setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
     setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: true }))
@@ -590,6 +544,155 @@ const Sandboxes: React.FC = () => {
       setTimeout(() => {
         setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: false }))
       }, 2000)
+    }
+  }
+
+  // todo(rpavlini): we should refactor this and move to react-query mutations
+  const executeBulkAction = useCallback(
+    async ({
+      ids,
+      actionName,
+      optimisticState,
+      apiCall,
+      toastMessages,
+    }: {
+      ids: string[]
+      actionName: string
+      optimisticState: SandboxState
+      apiCall: (id: string) => Promise<unknown>
+      toastMessages: {
+        successTitle: string
+        errorTitle: string
+        warningTitle: string
+        canceledTitle: string
+      }
+    }) => {
+      await cancelQueryRefetches(queryKey)
+
+      const previousStatesById = new Map((sandboxesData?.items ?? []).map((sandbox) => [sandbox.id, sandbox.state]))
+
+      let isCancelled = false
+      let processedCount = 0
+      let successCount = 0
+      let failureCount = 0
+
+      const totalLabel = pluralize(ids.length, 'sandbox', 'sandboxes')
+      const onCancel = () => {
+        isCancelled = true
+      }
+
+      const bulkToast = createBulkActionToast(`${actionName} 0 of ${totalLabel}.`, {
+        action: { label: 'Cancel', onClick: onCancel },
+      })
+
+      try {
+        for (const id of ids) {
+          if (isCancelled) break
+
+          processedCount += 1
+          bulkToast.loading(`${actionName} ${processedCount} of ${totalLabel}.`, {
+            action: { label: 'Cancel', onClick: onCancel },
+          })
+
+          setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
+          setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: true }))
+          performSandboxStateOptimisticUpdate(id, optimisticState)
+
+          try {
+            await apiCall(id)
+            successCount += 1
+          } catch (error) {
+            failureCount += 1
+            revertSandboxStateOptimisticUpdate(id, previousStatesById.get(id))
+            console.error(`Failed to ${actionName.toLowerCase()} sandbox`, id, error)
+          } finally {
+            setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
+            setTimeout(() => {
+              setSandboxStateIsTransitioning((prev) => ({ ...prev, [id]: false }))
+            }, 2000)
+          }
+        }
+
+        await markAllSandboxQueriesAsStale()
+        bulkToast.result({ successCount, failureCount }, toastMessages)
+      } catch (error) {
+        console.error(`Failed to ${actionName.toLowerCase()} sandboxes`, error)
+        bulkToast.error(`Failed to ${actionName.toLowerCase()} sandboxes.`)
+      }
+
+      return { successCount, failureCount }
+    },
+    [
+      cancelQueryRefetches,
+      queryKey,
+      sandboxesData?.items,
+      performSandboxStateOptimisticUpdate,
+      revertSandboxStateOptimisticUpdate,
+      markAllSandboxQueriesAsStale,
+    ],
+  )
+
+  const handleBulkStart = (ids: string[]) =>
+    executeBulkAction({
+      ids,
+      actionName: 'Starting',
+      optimisticState: SandboxState.STARTING,
+      apiCall: (id) => sandboxApi.startSandbox(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(ids.length, 'sandbox', 'sandboxes')} started.`,
+        errorTitle: `Failed to start ${pluralize(ids.length, 'sandbox', 'sandboxes')}.`,
+        warningTitle: 'Failed to start some sandboxes.',
+        canceledTitle: 'Start canceled.',
+      },
+    })
+
+  const handleBulkStop = (ids: string[]) =>
+    executeBulkAction({
+      ids,
+      actionName: 'Stopping',
+      optimisticState: SandboxState.STOPPING,
+      apiCall: (id) => sandboxApi.stopSandbox(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(ids.length, 'sandbox', 'sandboxes')} stopped.`,
+        errorTitle: `Failed to stop ${pluralize(ids.length, 'sandbox', 'sandboxes')}.`,
+        warningTitle: 'Failed to stop some sandboxes.',
+        canceledTitle: 'Stop canceled.',
+      },
+    })
+
+  const handleBulkArchive = (ids: string[]) =>
+    executeBulkAction({
+      ids,
+      actionName: 'Archiving',
+      optimisticState: SandboxState.ARCHIVING,
+      apiCall: (id) => sandboxApi.archiveSandbox(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(ids.length, 'sandbox', 'sandboxes')} archived.`,
+        errorTitle: `Failed to archive ${pluralize(ids.length, 'sandbox', 'sandboxes')}.`,
+        warningTitle: 'Failed to archive some sandboxes.',
+        canceledTitle: 'Archive canceled.',
+      },
+    })
+
+  const handleBulkDelete = async (ids: string[]) => {
+    const selectedSandboxInBulk = selectedSandbox && ids.includes(selectedSandbox.id)
+
+    await executeBulkAction({
+      ids,
+      actionName: 'Deleting',
+      optimisticState: SandboxState.DESTROYING,
+      apiCall: (id) => sandboxApi.deleteSandbox(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(ids.length, 'sandbox', 'sandboxes')} deleted.`,
+        errorTitle: `Failed to delete ${pluralize(ids.length, 'sandbox', 'sandboxes')}.`,
+        warningTitle: 'Failed to delete some sandboxes.',
+        canceledTitle: 'Delete canceled.',
+      },
+    })
+
+    if (selectedSandboxInBulk) {
+      setShowSandboxDetails(false)
+      setSelectedSandbox(null)
     }
   }
 
@@ -826,6 +929,9 @@ const Sandboxes: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           handleBulkDelete={handleBulkDelete}
+          handleBulkStart={handleBulkStart}
+          handleBulkStop={handleBulkStop}
+          handleBulkArchive={handleBulkArchive}
           handleArchive={handleArchive}
           handleVnc={handleVnc}
           getWebTerminalUrl={getWebTerminalUrl}

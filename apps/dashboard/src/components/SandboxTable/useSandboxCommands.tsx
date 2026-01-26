@@ -5,7 +5,7 @@
 
 import { pluralize } from '@/lib/utils'
 import { BulkActionCounts } from '@/lib/utils/sandbox'
-import { ArchiveIcon, CheckIcon, PlayIcon, SquareIcon, StopCircleIcon, TrashIcon } from 'lucide-react'
+import { ArchiveIcon, CheckSquare2Icon, MinusSquareIcon, PlayIcon, SquareIcon, TrashIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { CommandConfig, useRegisterCommands } from '../CommandPalette'
 
@@ -41,7 +41,7 @@ export function useSandboxCommands({
       commands.push({
         id: 'select-all-sandboxes',
         label: 'Select All Sandboxes',
-        icon: <CheckIcon className="w-4 h-4" />,
+        icon: <CheckSquare2Icon className="w-4 h-4" />,
         onSelect: () => toggleAllRowsSelected(true),
         chainable: true,
       })
@@ -51,7 +51,7 @@ export function useSandboxCommands({
       commands.push({
         id: 'deselect-all-sandboxes',
         label: 'Deselect All Sandboxes',
-        icon: <SquareIcon className="w-4 h-4" />,
+        icon: <MinusSquareIcon className="w-4 h-4" />,
         onSelect: () => toggleAllRowsSelected(false),
         chainable: true,
       })
@@ -70,7 +70,7 @@ export function useSandboxCommands({
       commands.push({
         id: 'stop-sandboxes',
         label: `Stop ${pluralize(bulkActionCounts.stoppable, 'Sandbox', 'Sandboxes')}`,
-        icon: <StopCircleIcon className="w-4 h-4" />,
+        icon: <SquareIcon className="w-4 h-4" />,
         onSelect: onStop,
       })
     }
