@@ -5,108 +5,154 @@ title: スナップショット
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
 
-スナップショット（サンドボックス作成に使う再利用可能な事前設定イメージ／テンプレート）は、Daytona のサンドボックス（Daytona が管理する隔離された一時的な計算環境）に必要な依存関係、ツール、環境設定、リソース要件をすべて含む事前構成済みテンプレートです。Daytona は、標準的な [Docker](https://www.docker.com/) または [OCI](https://opencontainers.org/) 互換イメージからのスナップショット作成をサポートします。
+スナップショットは、[Docker](https://www.docker.com/) または [OCI](https://opencontainers.org/) 互換イメージから作成できるサンドボックスのテンプレートです。サンドボックスは、[デフォルトのスナップショット](#default-snapshots)またはカスタムスナップショットを利用して、依存関係、設定、リソースにおいて一貫性があり再現可能なサンドボックス環境を提供できます。
 
-## スナップショットの作成
+## スナップショットの作成 \{#create-snapshots\}
 
-サンドボックスを起動する際、Daytona は `python`、`node`、`pip` ならびに一般的な pip パッケージなどの有用なユーティリティがプリインストールされたシンプルなイメージに基づくスナップショットを使用します。詳細は[以下](#default-snapshot)を参照してください。
+Daytona では、[public images](#using-public-images)、[private images](#using-images-from-private-registries)、[local images](#using-local-images)、および [declarative builder](#using-the-declarative-builder) を使用してスナップショットを作成できます。
 
-この挙動は上書き可能です。ダッシュボードにアクセスし、[Snapshots](https://app.daytona.io/dashboard/snapshots) をクリックしてから `Create Snapshot` を選択すると、カスタムスナップショットを作成できます。
+1. [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+2. **Create Snapshot** ボタンをクリックします
+3. スナップショット名、イメージ（タグまたはダイジェスト）、エントリポイント、およびリソースを入力します
 
-スナップショットのイメージには、Docker Hub の `alpine:3.21.3` や `debian:12.10` のような公開イメージの名前とタグ、または別の公開コンテナレジストリ（例: `my-public-registry.com/custom-alpine:3.21`）のイメージを指定できます。
-
-entrypoint フィールドは任意です。イメージに長時間稼働する entrypoint がない場合、Daytona は自動的に `sleep infinity` を実行して、作成直後にコンテナが即時終了しないようにします。
+* **Snapshot name**: SDK または CLI からこのスナップショットを参照するために使用される識別子です
+* **Image**: スナップショットのベースイメージです。タグ（例: **`ubuntu:22.04`**）またはダイジェストのいずれかを必ず含める必要があります。**`latest`** タグは使用できません。
+* **Entrypoint**（任意）: スナップショットのエントリポイントとなるコマンドです。エントリポイントが長時間実行されるコマンドであることを確認してください。指定しない場合、またはスナップショットにエントリポイントがない場合は、デフォルトで `sleep infinity` が使用されます。
+* **Resources**（任意）: 基盤となるサンドボックスに割り当てるリソースです。デフォルトでは、Daytona のサンドボックスは **1 vCPU**、**1GiB メモリ**、**3GiB ストレージ** を使用します。
 
 :::note
-`latest` タグのイメージは頻繁に更新されるため、特定のタグ（例: `0.1.0`）のみがサポートされます。同様に、`lts` や `stable` といったタグも避けることを推奨します。
+`latest` タグが付与されたイメージは頻繁に更新されるため、特定のタグ（例: `0.1.0`）のみがサポートされます。`lts` や `stable` などのタグについても同様であり、予期しない動作を防ぐため、イメージを定義する際にはそれらの使用を避けることを推奨します。
 :::
 
-スナップショットがプルおよび検証され、`Active` 状態になれば使用可能です。使用するカスタムスナップショットを指定するために、`CreateSandboxFromSnapshotParams` オブジェクトを定義します:
+詳細については、[Python SDK](/docs/python-sdk/sync/snapshot#create) および [TypeScript SDK](/docs/typescript-sdk/snapshot#create) のリファレンスを参照してください。
 
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot-name",
-    ))
-    ```
-  </TabItem>
+> [**create (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotservicecreate)
+>
+> [**create (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const sandbox = await daytona.create({
-      snapshot: "my-snapshot-name",
-    })
-    ```
-  </TabItem>
-</Tabs>
+### パブリックイメージを使用する \{#using-public-images\}
 
-完全な例:
+Daytona では、Docker Hub などのパブリックコンテナレジストリ上にあるパブリックイメージからスナップショットを作成できます。
 
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, CreateSandboxFromSnapshotParams
+1. [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) にアクセスします
+2. **Create Snapshot** ボタンをクリックします
+3. Docker Hub または他のパブリックコンテナレジストリ上で公開アクセス可能な任意のイメージについて、スナップショット名とイメージタグまたはダイジェストを入力します。
 
-    daytona = Daytona()
+スナップショットがプルおよび検証され、状態が `Active` になると、使用できるようになります。
 
-    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-        snapshot="my-snapshot-name",
-    ))
+### ローカルイメージの使用 \{#using-local-images\}
 
-    response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-    if response.exit_code != 0:
-        print(f"Error running code: {response.exit_code} {response.result}")
-    else:
-        print(response.result)
+Daytona は、ローカルイメージやローカルの Dockerfile からスナップショットを作成できます。ローカルイメージまたはローカルの Dockerfile からスナップショットを作成するには、[Daytona CLI](/docs/ja/getting-started#cli) を使用してください。
 
-    sandbox.delete()
+Daytona は、ローカルイメージが AMD64 アーキテクチャ向けにビルドされていることを想定しています。そのため、マシンが別のアーキテクチャで動作している場合は、Docker イメージをビルドする際に `--platform=linux/amd64` フラグを付与する必要があります。詳細については、[CLI ドキュメント](/docs/ja/tools/cli#daytona-snapshot-push) を参照してください。
 
-    ```
-  </TabItem>
+1. 使用したいイメージとタグが利用可能であることを確認するために **`docker images`** を実行します
+2. スナップショットを作成して Daytona にプッシュするために **`daytona snapshot push <your_local_docker_image>`** を実行します。例:
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona } from '@daytonaio/sdk'
+```bash
+daytona snapshot push custom-alpine:3.21 --name alpine-minimal
+```
 
-    async function main() {
-      // Initialize the Daytona client
-      const daytona = new Daytona()
+:::tip
+`--cpu`、`--memory`、`--disk` フラグを使用して、作成されるサンドボックスに割り当てたいリソースを指定します。
 
-      try {
-        // Create the Sandbox instance
-        const sandbox = await daytona.create({
-          snapshot: "my-snapshot-name",
-        })
-        // Run the code securely inside the Sandbox
-        const response = await sandbox.process.codeRun(
-          'print("Sum of 3 and 4 is " + str(3 + 4))',
-        )
-        if (response.exitCode !== 0) {
-          console.error('Error running code:', response.exitCode, response.result)
-        } else {
-          console.log(response.result)
-        }
-      } catch (error) {
-        console.error('Sandbox flow error:', error)
-      } finally {
-        // Clean up the Sandbox
-        await sandbox.delete()
-      }
-    }
+例: `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` は、2 vCPU、4GiB メモリ、8GiB のディスク容量を持つ Alpine サンドボックスを作成します。
+:::
 
-    main()
-    ```
-  </TabItem>
-</Tabs>
+または、`create` コマンドで `--dockerfile` フラグを使用し、使用したい Dockerfile へのパスを指定すると、Daytona がスナップショットをビルドします。COPY/ADD コマンドは自動的に解析されてコンテキストに追加されます。ファイルを手動でコンテキストに追加するには、`--context` フラグを使用します。
 
-### スナップショットのリソース
+```bash
+daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
+```
 
-スナップショットには Daytona サンドボックスのリソース要件が含まれます。デフォルトでは、Daytona サンドボックスは **1 vCPU**、**1GB RAM**、**3GiB ディスク**を備えています。
+```text
+Building image from /Users/user/docs/Dockerfile
+Step 1/5 : FROM alpine:latest
 
-より高いパフォーマンスが必要ですか？`Resources` クラスを使用して、必要な CPU、メモリ、ディスク容量を正確に指定できます。
+...
+ ⡿  Waiting for the Snapshot to be validated ...
+...
 
-利用可能なリソースと上限は[ダッシュボード](https://app.daytona.io/dashboard/limits)で確認してください。
+ ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
+```
+
+### プライベートレジストリのイメージを使用する \{#using-images-from-private-registries\}
+
+Daytona では、[Docker Hub](#docker-hub)、[Google Artifact Registry](#google-artifact-registry)、[GitHub Container Registry](#github-container-registry) などのプライベートコンテナレジストリのイメージからスナップショットを作成できます。
+
+1. [Daytona Registries ↗](https://app.daytona.io/dashboard/registries) に移動します
+2. **Add Registry** ボタンをクリックします
+3. レジストリ名、レジストリ URL、ユーザー名、パスワード、およびプロジェクト（該当する場合）を入力します
+4. コンテナレジストリが正常に作成されたら、[Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+5. **Create Snapshot** ボタンをクリックします
+6. スナップショット名とプライベートイメージのタグまたはダイジェストを入力します。スナップショットを作成する際は、レジストリの場所とプロジェクト名を含む完全なプライベートイメージ名を入力してください（例: **`my-private-registry.com/<my-project>/custom-alpine:3.21`**）
+
+必要に応じて、カスタムスナップショットを使用するために **`CreateSandboxFromSnapshotParams`** フィールドを設定してください。
+
+#### Docker Hub \{#docker-hub\}
+
+Daytona では、Docker Hub イメージからスナップショットを作成できます。
+
+1. [Daytona Registries ↗](https://app.daytona.io/dashboard/registries) に移動します
+2. **Add Registry** ボタンをクリックします
+3. レジストリ名、レジストリ URL、ユーザー名、パスワード、プロジェクト（該当する場合）を入力します
+
+* **Registry URL**: `docker.io`
+* **Username**: Docker Hub のユーザー名（イメージへのアクセス権を持つアカウント）
+* **Password**: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/)（アカウントのパスワードではありません）
+* **Create the Snapshot**: `docker.io/<username>/<image>:<tag>`
+
+4. コンテナレジストリが正常に作成されたら、[Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+5. **Create Snapshot** ボタンをクリックします
+6. スナップショット名と、イメージのタグまたはダイジェストを入力します。スナップショットを作成する際は、レジストリの場所とプロジェクト名を含む完全なイメージ名を入力します（例: **`docker.io/<username>/<image>:<tag>`**）
+
+#### Google Artifact Registry \{#google-artifact-registry\}
+
+Daytona では、Google Artifact Registry のイメージからスナップショットを作成できます。
+
+Google Artifact Registry のイメージを使用するには、JSON 形式の [サービス アカウント キー](https://cloud.google.com/iam/docs/keys-create-delete) を使用してレジストリを設定します。
+
+1. [Daytona Registries ↗](https://app.daytona.io/dashboard/registries) にアクセスします
+2. **Add Registry** ボタンをクリックします
+3. レジストリ名、Registry URL、ユーザー名、パスワード、およびプロジェクト（該当する場合）を入力します
+
+* **Registry URL**: 使用するリージョンのベース URL（例: `https://us-central1-docker.pkg.dev` または `https://us-central1-docker.pkg.dev/your-org`）
+* **Username**: `_json_key`
+* **Password**: Service Account の JSON キーファイルの内容全体を貼り付けます
+* **Project**: Google Cloud プロジェクト ID
+* **Create the Snapshot**: `us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`
+
+4. コンテナ レジストリが正常に作成されたら、[Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+5. **Create Snapshot** ボタンをクリックします
+6. スナップショット名とイメージのタグまたはダイジェストを入力します。スナップショットを作成する際は、レジストリの場所とプロジェクト名を含むイメージ名全体を入力してください（例: **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**）
+
+#### GitHub Container Registry (GHCR) \{#github-container-registry-ghcr\}
+
+Daytona は GitHub Container Registry (GHCR) のイメージからスナップショットを作成することに対応しています。
+
+1. [Daytona Registries ↗](https://app.daytona.io/dashboard/registries) にアクセスします
+2. **Add Registry** ボタンをクリックします
+3. レジストリ名、レジストリ URL、ユーザー名、パスワード、およびプロジェクト（該当する場合）を入力します
+
+* **Registry URL**: `ghcr.io`
+* **Username**: GitHub のユーザー名（イメージへのアクセス権を持つアカウント）
+* **Password**: [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)（アカウントのパスワードではありません）。Personal access token (PAT) には **`write:packages`**、**`read:packages`**、**`delete:packages`** の各スコープが必要です。
+
+4. コンテナレジストリが正常に作成されたら、[Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) にアクセスします
+5. **Create Snapshot** ボタンをクリックします
+6. スナップショット名とイメージのタグまたはダイジェストを入力します。スナップショットを作成する際は、レジストリの場所とプロジェクト名を含む完全なイメージ名を入力してください（例: **`ghcr.io/<my-project>/custom-alpine:3.21`**）
+
+### 宣言的ビルダーの使用 \{#using-the-declarative-builder\}
+
+[Declarative Builder](/docs/declarative-builder) は、スナップショットをコードファーストで定義するための手法を提供します。
+
+### スナップショットのリソース \{#snapshot-resources\}
+
+スナップショットには、特定のリソース要件を指定してカスタマイズできます。デフォルトでは、Daytona のサンドボックスは **1 vCPU**、**1GB RAM**、**3GiB ディスク**を使用します。詳細は、[サンドボックスのリソース](/docs/ja/sandboxes#resources) を参照してください。
+
+利用可能なリソースとその上限を確認するには、[上限](/docs/limits) を参照するか、[Daytona Limits ↗](https://app.daytona.io/dashboard/limits) にアクセスしてください。
+
+スナップショットのリソースは、`Resources` クラスを使ってカスタマイズできます。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -116,32 +162,80 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
         CreateSnapshotParams,
         Image,
         Resources,
-        CreateSandboxFromSnapshotParams,
     )
 
     daytona = Daytona()
 
-    # カスタムリソースを指定してスナップショットを作成
-
+    # カスタムリソースを使用してスナップショットを作成
     daytona.snapshot.create(
-        CreateSnapshotParams(
-            name="my-snapshot",
-            image=Image.debian_slim("3.12"),
-            resources=Resources(
-              cpu=2,
-              memory=4,
-              disk=8,
-            ),
+      CreateSnapshotParams(
+        name="my-snapshot",
+        image=Image.debian_slim("3.12"),
+        resources=Resources(
+          cpu=2,
+          memory=4,
+          disk=8,
         ),
-        on_logs=print,
+      ),
+      on_logs=print,
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from '@daytonaio/sdk'
+
+    const daytona = new Daytona()
+
+    // カスタムリソースを使用してスナップショットを作成
+    await daytona.snapshot.create(
+      {
+        name: 'my-snapshot',
+        image: Image.debianSlim('3.13'),
+        resources: {
+          cpu: 2,
+          memory: 4,
+          disk: 8,
+        },
+      },
+      { onLogs: console.log }
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk) および [TypeScript SDK](/docs/typescript-sdk) のリファレンスを参照してください。
+
+> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+>
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
+
+### リージョンの指定 \{#specifying-region\}
+
+スナップショットを作成する際、そのスナップショットが利用可能となるリージョンを指定できます。指定しない場合、スナップショットは組織のデフォルトリージョンで作成されます。
+
+後でこのスナップショットからサンドボックスを作成する際、スナップショットのリージョンをサンドボックスの対象リージョンとして使用できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import (
+        Daytona,
+        CreateSnapshotParams,
+        Image,
     )
 
-    # カスタムスナップショットからサンドボックスを作成
+    daytona = Daytona()
 
-    sandbox = daytona.create(
-        CreateSandboxFromSnapshotParams(
-            snapshot="my-snapshot",
-        )
+    # 特定のリージョンでスナップショットを作成
+    daytona.snapshot.create(
+      CreateSnapshotParams(
+        name="my-snapshot",
+        image=Image.debian_slim("3.12"),
+        region_id="us",
+      ),
+      on_logs=print,
     )
 
     ```
@@ -151,177 +245,252 @@ entrypoint フィールドは任意です。イメージに長時間稼働する
     ```typescript
     import { Daytona, Image } from "@daytonaio/sdk";
 
-    async function main() {
-      const daytona = new Daytona();
+    const daytona = new Daytona();
 
-      // カスタムリソースを指定してスナップショットを作成
-      await daytona.snapshot.create(
-        {
-          name: "my-snapshot",
-          image: Image.debianSlim("3.13"),
-          resources: {
-            cpu: 2,
-            memory: 4,
-            disk: 8,
-          },
-        },
-        { onLogs: console.log }
-      );
-
-      // カスタムスナップショットからサンドボックスを作成
-      const sandbox = await daytona.create({
-        snapshot: "my-snapshot",
-      });
-    }
-
-    main();
+    // 特定のリージョンでスナップショットを作成
+    await daytona.snapshot.create(
+      {
+        name: "my-snapshot",
+        image: Image.debianSlim("3.13"),
+        regionId: "us",
+      },
+      { onLogs: console.log }
+    );
     ```
   </TabItem>
 </Tabs>
 
+## 名前でスナップショットを取得する \{#get-a-snapshot-by-name\}
+
+Daytona では、名前を指定してスナップショットを取得する機能を提供しています。
+
+次のコードスニペットは、指定した名前のスナップショットを返します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    snapshot = daytona.snapshot.get("my-awesome-snapshot")
+    print(f"{snapshot.name} ({snapshot.image_name})")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona()
+    const snapshot = await daytona.snapshot.get('my-awesome-snapshot')
+    console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/snapshot#snapshotget) および [TypeScript SDK](/docs/typescript-sdk/snapshot#get) のリファレンスを参照してください。
+
+> [**get (Python SDK)**](/docs/ja/python-sdk/sync/snapshot#snapshotserviceget)
+>
+> [**get (TypeScript SDK)**](/docs/ja/typescript-sdk/snapshot#get)
+
+## スナップショットの一覧取得 \{#list-snapshots\}
+
+Daytona では、スナップショットを一覧表示し、その詳細を確認するための機能を提供しています。
+
+次のスニペットは、1 ページ目にあるすべてのスナップショットを、1 ページあたり 10 件を上限として取得します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    result = daytona.snapshot.list(page=2, limit=10)
+    for snapshot in result.items:
+        print(f"{snapshot.name} ({snapshot.image_name})")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona()
+    const result = await daytona.snapshot.list(1, 10)
+    console.log(`Found ${result.total} snapshots`)
+    result.items.forEach(snapshot =>
+      console.log(`${snapshot.name} (${snapshot.imageName})`)
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist) および [TypeScript SDK](/docs/typescript-sdk/snapshot#list) のリファレンスを参照してください。
+
+> [**list (Python SDK)**](/docs/ja/python-sdk/sync/snapshot#snapshotservicelist)
+>
+> [**list (TypeScript SDK)**](/docs/ja/typescript-sdk/snapshot#list)
+
+## スナップショットを有効化する \{#activate-snapshots\}
+
+スナップショットは、2週間使用されないと自動的に非アクティブになります。非アクティブなスナップショットを有効化するには、次の手順に従います。
+
+1. [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+2. 有効化したいスナップショットの行末にある三点リーダーアイコンをクリックします
+3. **Activate** ボタンをクリックします
+
+詳細については、[Python SDK](/docs/python-sdk/sync/snapshot#snapshotactivate) および [TypeScript SDK](/docs/typescript-sdk/snapshot#activate) のリファレンスを参照してください。
+
+> [**activate (Python SDK)**](/docs/ja/python-sdk/sync/snapshot#snapshotserviceactivate)
+>
+> [**activate (TypeScript SDK)**](/docs/ja/typescript-sdk/snapshot#activate)
+
+## スナップショットを無効化する \{#deactivate-snapshots\}
+
+Daytona では、スナップショットを無効化することができます。無効化されたスナップショットは、新しいサンドボックスでは利用できません。
+
+1. [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+2. 無効化したいスナップショットの行の末尾にある三点リーダーアイコンをクリックします
+3. **Deactivate** ボタンをクリックします
+
+## スナップショットを削除する \{#delete-snapshots\}
+
+Daytona ではスナップショットを削除できます。削除したスナップショットは元に戻せません。
+
+1. [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots) に移動します
+2. 削除したいスナップショットの行末にある三点リーダーのアイコンをクリックします
+3. **Delete** ボタンをクリックします
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    daytona.snapshot.delete("my-awesome-snapshot")
+    print("Snapshot deleted")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona()
+    await daytona.snapshot.delete("my-awesome-snapshot")
+    console.log("Snapshot deleted")
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/) および [TypeScript SDK](/docs/typescript-sdk/) のリファレンスを参照してください。
+
+> [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
+>
+> [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
+
+## サンドボックスで Docker を実行する \{#run-docker-in-a-sandbox\}
+
+Daytona のサンドボックスでは内部で Docker コンテナを実行できます（**Docker-in-Docker**）。これにより、コンテナ化アプリケーションのビルド、テスト、デプロイが可能になります。特に、データベース、メッセージキュー、その他のマイクロサービスといった外部サービスに依存するプロジェクトで有用です。
+
+これらのサービスが同一のサンドボックス環境内で動作するため、エージェントはシームレスに連携できます。これにより、外部サービスに依存する場合と比べて、より強固な分離性とセキュリティを確保できます。次のようなユースケースがサポートされています。
+
+* データベース（PostgreSQL、Redis、MySQL）やその他のサービスの実行
+* コンテナ化アプリケーションのビルドとテスト
+* マイクロサービスとその依存関係のデプロイ
+* フル機能のコンテナオーケストレーションを備えた分離された開発環境の作成
+
 :::note
-すべてのリソースパラメータは任意です。指定しない場合、Daytonaはデフォルト値を使用します。
+Docker-in-Docker サンドボックスは、Docker デーモンのオーバーヘッドにより追加のリソースが必要になります。最適なパフォーマンスのために、少なくとも 2 vCPU と 4GiB のメモリを割り当てることを検討してください。
 :::
 
-### プライベートレジストリのイメージ
+### Docker-in-Docker スナップショットの作成 \{#create-a-docker-in-docker-snapshot\}
 
-一般公開されていないイメージからスナップショットを作成するには、まずそのイメージのプライベートコンテナレジストリを追加します。
+Daytona では、プリビルドの Docker-in-Docker イメージをベースにするか、カスタムイメージに Docker を手動でインストールすることで、Docker に対応したスナップショットを作成できるオプションを提供しています。
 
-1. ダッシュボードの[Registries](https://app.daytona.io/dashboard/registries)ページに移動
-2. `Add Registry`ボタンをクリック
-3. 適切なカスタム名、URL、ユーザー名、パスワード、プロジェクト（該当する場合）を入力
-4. コンテナレジストリを作成したら、[Snapshots](https://app.daytona.io/dashboard/snapshots)ページに戻る
-5. スナップショット作成時は、レジストリURLとプロジェクト名（該当する場合）を含むプライベートイメージ名全体を入力すること（例: `my-private-registry.com/<my-project>/custom-alpine:3.21`）
+#### 事前構築済みイメージの利用 \{#using-pre-built-images\}
 
-この先の手順は同じです。`CreateSandboxFromSnapshotParams`のフィールドにそのカスタムスナップショットを指定すれば、追加の認証は不要です。
+以下のベースイメージは、Docker-in-Docker のスナップショット作成で広く利用されているほか、カスタム Dockerfile のベースとしても利用できます。
 
-#### プライベートな Docker Hub イメージの使用
+* `docker:28.3.3-dind`: 公式 Docker-in-Docker イメージ（Alpine ベース、軽量）
+* `docker:28.3.3-dind-rootless`: セキュリティ強化のための rootless Docker-in-Docker
+* `docker:28.3.2-dind-alpine3.22`: Alpine 3.22 を用いた Docker-in-Docker イメージ
 
-プライベートな Docker Hub イメージを使用するには、Docker Hub の認証情報で[コンテナレジストリを追加](/docs/ja/snapshots#images-from-private-registries)します。
+#### 手動インストールを利用する \{#using-manual-installation\}
 
-- Registry URL: `docker.io` を指定
-- Username: Docker Hub のユーザー名（プライベートイメージにアクセスできるアカウント）
-- Password: [Docker Hub Personal Access Token](https://docs.docker.com/docker-hub/access-tokens/)を使用（アカウントのパスワードではない）
-- スナップショットの作成: レジストリを追加後、イメージ名としてフルイメージパスを指定してスナップショットを作成（例: `docker.io/<username>/<image>:<tag>`）
-
-### ローカルイメージの使用
-
-プライベートコンテナレジストリを手動で用意してイメージをプッシュする手間を避けるために、[Daytona CLI](/docs/ja/getting-started#cli)を使ってローカルイメージやローカルの Dockerfile からスナップショットを作成し、サンドボックスで使用できます。
-
-`docker images` を実行して使用したいイメージとタグが存在することを確認したら、`daytona snapshot push <your_local_docker_image>` コマンドでスナップショットを作成して Daytona にプッシュします。例:
-
-```bash
-daytona snapshot push custom-alpine:3.21 --name alpine-minimal
-```
-
-:::tip
-`--cpu`、`--memory`、`--disk` フラグを使って、基盤となるサンドボックス（Sandbox）に割り当てるリソースを指定します。
-
-たとえば `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` は、2 vCPU、4GiB メモリ、8GiB ディスク容量の Alpine サンドボックスを作成します。
-:::
-
-:::note
-Daytona はローカルイメージが AMD64 アーキテクチャ向けにビルドされていることを前提としています。したがって、お使いのマシンが別のアーキテクチャの場合は、Docker イメージをビルドする際に `--platform=linux/amd64` フラグが必要です。
-
-詳しくは [CLI ドキュメント](/docs/ja/tools/cli#daytona-snapshot-push) を参照してください。
-:::
-
-まだ目的のイメージをビルドしておらず、Dockerfile が用意できている場合は、SDK の宣言的ビルダー（Declarative Builder）を利用できます。詳しくは[こちら](/docs/ja/getting-started#declarative-builder)をご覧ください。
-
-また、CLI で実行する場合は、`create` で `--dockerfile` フラグに使用したい Dockerfile のパスを渡すと、Daytona がスナップショット（Snapshot）をビルドします:
-
-```bash
-daytona snapshot create data-analysis01 --dockerfile ./Dockerfile --context ./requirements.txt
-```
-
-```text
-Building image from /Users/idagelic/docs/Dockerfile
-Step 1/5 : FROM alpine:latest
-
-...
-
- ⡿  Waiting for the Snapshot to be validated ...
-
- ...
-
- ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
-
-```
-
-## スナップショットの削除
-
-作成したカスタムスナップショットの削除は簡単です。[Snapshots](https://app.daytona.io/dashboard/snapshots) ページに移動し、削除したいスナップショットの行末にある三点アイコンをクリックして表示される `Delete` ボタンを選択してください。
-
-:::tip
-
-削除せずに一時的に無効化したい場合は、`Disable` をクリックします。これにより、新しいサンドボックスではそのスナップショットが使用されなくなりますが、スナップショット自体は削除されません。
-
-:::
-
-## サンドボックスでDockerを実行する
-
-Daytonaのサンドボックスは内部でDockerコンテナを実行できます（Docker-in-Docker）。これにより、コンテナ化されたアプリケーションのビルド、テスト、デプロイが可能になります。特に、データベース、メッセージキュー、その他のマイクロサービスなど外部サービスに依存するプロジェクトで有用です。
-
-これらのサービスは同一のサンドボックス環境内で稼働するため、エージェントはシームレスに連携でき、外部サービス依存と比べて優れた分離性とセキュリティを提供します。
-
-### DinDスナップショットの作成
-
-事前構築されたDocker-in-Dockerイメージをベースにするか、カスタムイメージにDockerを手動でインストールすることで、Docker対応のスナップショットを作成できます。
-
-#### 事前構築イメージの利用
-
-以下のベースイメージはDocker-in-Dockerスナップショットの作成に広く使われており、カスタムDockerfileのベースとしても利用できます:
-
-- `docker:28.3.3-dind` - 公式のDocker-in-Dockerイメージ（Alpineベースで軽量）
-- `docker:28.3.3-dind-rootless` - セキュリティを強化したRootless Docker-in-Docker
-- `docker:28.3.2-dind-alpine3.22` - Alpine 3.22ベースのDocker-in-Dockerイメージ
-
-#### Dockerの手動インストール
-
-あるいは、カスタムDockerfileでDockerを手動インストールできます:
+別の方法として、カスタム Dockerfile で Docker を手動インストールします：
 
 ```dockerfile
 FROM ubuntu:22.04
-# 公式のインストールスクリプトを使用してDockerをインストールする
+# 公式インストールスクリプトで Docker をインストール
 RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 ```
 
-### ユースケース
+## サンドボックスで Kubernetes を実行する \{#run-kubernetes-in-a-sandbox\}
 
-- データベース（PostgreSQL、Redis、MySQL）やその他のサービスの実行
-- コンテナ化アプリケーションのビルドとテスト
-- マイクロサービスとその依存関係のデプロイ
-- フル機能のコンテナオーケストレーションを備えた分離型開発環境の作成
+Daytona サンドボックスでは、サンドボックス内に Kubernetes クラスターを実行できます。Kubernetes はサンドボックス内だけで動作し、サンドボックスの削除時にまとめて削除されるため、環境を安全かつ再現可能な状態に保てます。
 
-:::note
-Docker-in-Dockerのサンドボックスは、Dockerデーモンのオーバーヘッドにより追加のリソースを必要とします。最適なパフォーマンスのために、少なくとも2 vCPUと4GiBのメモリを割り当てることを検討してください。
-:::
+### サンドボックス内で k3s を実行する \{#run-k3s-in-a-sandbox\}
 
-## デフォルトのスナップショット
+次のスニペットは、サンドボックス内に k3s クラスターをインストールして起動し、実行中のすべての Pod を一覧表示します。
 
-Daytona が使用するデフォルトのスナップショットは、`python` と `node`、それぞれの LSP に加えて、以下の `pip` 事前インストール済みパッケージを含むイメージをベースにしています:
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import { setTimeout } from 'timers/promises'
 
-- `beautifulsoup4` (v4.13.3)
-- `django` (v5.1.7)
-- `flask` (v3.1.0)
-- `keras` (v3.9.0)
-- `matplotlib` (v3.10.1)
-- `numpy` (v2.2.3)
-- `openai` (v1.65.4)
-- `opencv-python` (v4.11.0.86)
-- `pandas` (v2.2.3)
-- `pillow` (v11.1.0)
-- `pydantic-ai` (v0.0.35)
-- `requests` (v2.32.3)
-- `scikit-learn` (v1.6.1)
-- `scipy` (v1.15.2)
-- `seaborn` (v0.13.2)
-- `SQLAlchemy` (v2.0.38)
-- `transformers` (v4.49.0)
-- `anthropic` (v0.49.0)
-- `daytona_sdk` (v0.11.1)
-- `huggingface` (v0.0.1)
-- `instructor` (v1.7.3)
-- `langchain` (v0.3.20)
-- `llama-index` (v0.12.22)
-- `ollama` (v0.4.7)
+// Daytonaクライアントを初期化する
+const daytona = new Daytona()
+
+// サンドボックスインスタンスを作成する
+const sandbox = await daytona.create()
+
+// k3sインストールスクリプトを実行する
+const response = await sandbox.process.executeCommand(
+  'curl -sfL https://get.k3s.io | sh -'
+)
+
+// k3sを実行する
+const sessionName = 'k3s-server'
+await sandbox.process.createSession(sessionName)
+const k3s = await sandbox.process.executeSessionCommand(sessionName, {
+  command: 'sudo /usr/local/bin/k3s server',
+  async: true,
+})
+
+// k3sが完全に起動するまで待機する
+await setTimeout(30000)
+
+// すべてのPodを取得する
+const pods = await sandbox.process.executeCommand(
+  'sudo /usr/local/bin/kubectl get pod -A'
+)
+console.log(pods.result)
+```
+
+## デフォルトのスナップショット \{#default-snapshots\}
+
+サンドボックス作成時にスナップショットを指定しない場合、Daytona はデフォルトのスナップショットを使用します。これには `python`、`node`、それぞれの言語サーバー、および一般的な pip パッケージが含まれます。Daytona では、デフォルトスナップショットとして 3 種類のサイズを提供しています:
+
+| **スナップショット** | **vCPU** | **メモリ** | **ストレージ** |
+| -------------------- | -------- | ---------- | ----------- |
+| **`daytona-small`**  | 1        | 1GiB       | 3GiB        |
+| **`daytona-medium`** | 2        | 4GiB       | 8GiB        |
+| **`daytona-large`**  | 4        | 8GiB       | 10GiB       |
+
+すべてのデフォルトスナップショットは、`daytonaio/sandbox:<version>` イメージをベースとしています。詳細については、[Dockerfile](https://github.com/daytonaio/daytona/blob/main/images/sandbox/Dockerfile) を参照してください。
+
+デフォルトスナップショットには次のパッケージが含まれています:
+
+* `anthropic` (v0.49.0)
+* `beautifulsoup4` (v4.13.3)
+* `daytona_sdk` (v0.11.1)
+* `django` (v5.1.7)
+* `flask` (v3.1.0)
+* `huggingface` (v0.0.1)
+* `instructor` (v1.7.3)
+* `keras` (v3.9.0)
+* `langchain` (v0.3.20)
+* `llama-index` (v0.12.22)
+* `matplotlib` (v3.10.1)
+* `numpy` (v2.2.3)
+* `ollama` (v0.4.7)
+* `openai` (v1.65.4)
+* `opencv-python` (v4.11.0.86)
+* `pandas` (v2.2.3)
+* `pillow` (v11.1.0)
+* `pydantic-ai` (v0.0.35)
+* `requests` (v2.32.3)
+* `scikit-learn` (v1.6.1)
+* `scipy` (v1.15.2)
+* `seaborn` (v0.13.2)
+* `SQLAlchemy` (v2.0.38)
+* `transformers` (v4.49.0)
