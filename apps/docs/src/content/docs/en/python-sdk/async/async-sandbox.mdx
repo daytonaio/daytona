@@ -35,6 +35,7 @@ Represents a Daytona Sandbox.
 - `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped").
 - `error_reason` _str_ - Error message if Sandbox is in error state.
 - `recoverable` _bool_ - Whether the Sandbox error is recoverable.
+- `resizing` _bool_ - Whether a resize operation is in progress.
 - `backup_state` _SandboxBackupStateEnum_ - Current state of Sandbox backup.
 - `backup_created_at` _str_ - When the backup was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
@@ -511,6 +512,76 @@ archived, the entire filesystem state is moved to cost-effective object storage,
 possible to keep sandboxes available for an extended period. The tradeoff between archived
 and stopped states is that starting an archived sandbox takes more time, depending on its size.
 Sandbox must be stopped before archiving.
+
+#### AsyncSandbox.resize
+
+```python
+@intercept_errors(message_prefix="Failed to resize sandbox: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {cast('AsyncSandbox', self).id} failed to resize within the {timeout} seconds timeout period"
+))
+async def resize(resources: Resources,
+                 hot: bool = False,
+                 timeout: float | None = 60) -> None
+```
+
+Resizes the Sandbox resources.
+
+Changes the CPU, memory, or disk allocation for the Sandbox.
+
+**Arguments**:
+
+- `resources` _Resources_ - New resource configuration. Only specified fields will be updated.
+  - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+  - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+  - disk: Disk space in GiB (can only be increased, never decreased).
+  - gpu: Not supported - will throw error if specified.
+- `hot` _bool_ - If True, performs hot resize on a running sandbox (only CPU/memory increase allowed).
+  If False, all resources can be changed but sandbox must be stopped. Default is False.
+- `timeout` _Optional[float]_ - Timeout (in seconds) for the resize operation. 0 means no timeout.
+  Default is 60 seconds.
+  
+
+**Raises**:
+
+- `DaytonaError` - If GPU is specified (not supported).
+- `DaytonaError` - If hot resize constraints are violated.
+- `DaytonaError` - If disk size decrease is attempted.
+- `DaytonaError` - If resize operation times out.
+  
+
+**Example**:
+
+```python
+# Increase resources with hot resize (sandbox must be running)
+await sandbox.resize(Resources(cpu=4, memory=8), hot=True)
+
+# Change resources (sandbox should be stopped for full flexibility)
+await sandbox.resize(Resources(cpu=2, memory=4, disk=30))
+```
+
+#### AsyncSandbox.wait\_for\_resize\_complete
+
+```python
+@intercept_errors(
+    message_prefix="Failure during waiting for resize to complete: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {cast('AsyncSandbox', self).id} resize did not complete within the {timeout}s timeout period"
+))
+async def wait_for_resize_complete(timeout: float | None = 60) -> None
+```
+
+Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
+the resizing flag is cleared.
+
+**Arguments**:
+
+- `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
+
+**Raises**:
+
+- `DaytonaError` - If timeout is negative. If resize operation times out.
 
 #### AsyncSandbox.create\_ssh\_access
 
