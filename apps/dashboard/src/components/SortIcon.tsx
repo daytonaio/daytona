@@ -6,7 +6,6 @@
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from 'lucide-react'
-import { memo } from 'react'
 
 interface Props {
   sort: 'asc' | 'desc' | null
@@ -23,7 +22,7 @@ const motionProps = {
 
 const PlaceholderIcon = () => <span className="size-4 inline-block" />
 
-export const SortOrderIcon = memo(function SortOrderIcon({ hideDefaultState = false, sort, className }: Props) {
+export const SortOrderIcon = ({ hideDefaultState = false, sort, className }: Props) => {
   const Icon =
     sort === 'asc'
       ? ArrowUpIcon
@@ -50,4 +49,4 @@ export const SortOrderIcon = memo(function SortOrderIcon({ hideDefaultState = fa
       </motion.span>
     </AnimatePresence>
   )
-})
+}

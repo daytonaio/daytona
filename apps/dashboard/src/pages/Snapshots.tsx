@@ -4,7 +4,7 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { SnapshotTable } from '@/components/SnapshotTable'
+import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
