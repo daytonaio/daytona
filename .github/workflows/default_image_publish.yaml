@@ -7,6 +7,10 @@ on:
         description: Version to release (e.g., "0.1.2")
         required: true
         default: '0.0.0-dev'
+      push_latest:
+        description: Push latest tags (disable for rc/pre-release)
+        type: boolean
+        default: true
 
 env:
   VERSION: ${{ inputs.version }}
@@ -42,7 +46,7 @@ jobs:
           push: true
           tags: |
             daytonaio/sandbox:${{ env.VERSION }}
-            daytonaio/sandbox:latest
+            ${{ inputs.push_latest && 'daytonaio/sandbox:latest' || '' }}
 
       - name: Build and push the default snapshot slim image
         uses: docker/build-push-action@v5
@@ -53,4 +57,4 @@ jobs:
           push: true
           tags: |
             daytonaio/sandbox:${{ env.VERSION }}-slim
-            daytonaio/sandbox:latest-slim
+            ${{ inputs.push_latest && 'daytonaio/sandbox:latest-slim' || '' }}
