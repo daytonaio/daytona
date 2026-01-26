@@ -48,7 +48,7 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
       className="group/sort-button flex items-center gap-2 w-full"
     >
       {label}
-      <SortOrderIcon sort={sortDirection || null} hideDefaultState />
+      <SortOrderIcon sort={sortDirection || null} />
     </button>
   )
 }
