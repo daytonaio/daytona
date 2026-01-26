@@ -4,14 +4,15 @@ title: Language Server Protocol
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-The Daytona SDK provides Language Server Protocol (LSP) support through Sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
+Daytona provides Language Server Protocol (LSP) support through sandbox instances. This enables advanced language features like code completion, diagnostics, and more.
 
-## Creating LSP Servers
+## Create LSP servers
 
-Daytona SDK provides an option to create LSP servers in Python, TypeScript, and Ruby. The `path_to_project` argument is relative to the current Sandbox working directory when no leading `/` is used. The working directory is specified by WORKDIR when it is present in the Dockerfile, and otherwise falls back to the user's home directory.
+Daytona provides methods to create LSP servers. The `path_to_project` argument is relative to the current sandbox working directory when no leading `/` is used. The working directory is specified by WORKDIR when it is present in the Dockerfile, and otherwise falls back to the user's home directory.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import Daytona, LspLanguageId
 
@@ -24,23 +25,46 @@ lsp_server = sandbox.create_lsp_server(
     language_id=LspLanguageId.PYTHON,
     path_to_project="workspace/project"
 )
-
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 import { Daytona, LspLanguageId } from '@daytonaio/sdk'
 
 // Create sandbox
 const daytona = new Daytona()
 const sandbox = await daytona.create({
-    language: 'typescript'
+  language: 'typescript',
 })
 
 // Create LSP server for TypeScript
 const lspServer = await sandbox.createLspServer(
-    LspLanguageId.TYPESCRIPT,
-    "workspace/project"
+  LspLanguageId.TYPESCRIPT,
+  'workspace/project'
+)
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+# Create Sandbox
+daytona = Daytona::Daytona.new
+sandbox = daytona.create
+
+# Create LSP server for Python
+lsp_server = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+
+# Create LSP server for TypeScript
+lsp_server = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::TYPESCRIPT,
+  path_to_project: 'workspace/project'
 )
 ```
 
@@ -70,29 +94,102 @@ lsp_server = sandbox.create_lsp_server(
 </TabItem>
 </Tabs>
 
-See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver), [create_lsp_server (Ruby SDK)](/docs/ruby-sdk/sandbox#create_lsp_server)
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/) and [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/) references:
 
-### Supported Languages
+> [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/lsp-server#lspservercreate_lsp_server)
+>
+> [**createLspServer (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server#createlspserver)
+>
+> [**create_lsp_server (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server#create_lsp_server)
+>
+> [**createLspServer (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server#createlspserver)
 
-The supported languages for creating LSP servers with the Daytona SDK are defined by the `LspLanguageId` enum:
+### Supported languages
 
-| Enum Value                   | Description                         |
-|------------------------------|-------------------------------------|
-| `LspLanguageId.PYTHON`       | Python language server.             |
-| `LspLanguageId.TYPESCRIPT`   | TypeScript/JavaScript language server. |
+The supported languages for creating LSP servers with Daytona are defined by the `LspLanguageId` enum:
 
-See: [LspLanguageId (Python SDK)](/docs/python-sdk/sync/lsp-server/#lsplanguageid), [LspLanguageId (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#lsplanguageid)
 
-## LSP Features
+| Enum Value                 | Description                            |
+| -------------------------- | -------------------------------------- |
+| `LspLanguageId.PYTHON`     | Python language server.                |
+| `LspLanguageId.TYPESCRIPT` | TypeScript/JavaScript language server. |
 
-Daytona SDK provides LSP features for code analysis and editing.
 
-### Code Completion
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
-Daytona SDK provides an option to get code completions for a specific position in a file using Python, TypeScript, and Ruby.
+> [**LspLanguageId (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid)
+>
+> [**LspLanguageId (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#lsplanguageid)
+>
+> [**LspLanguageId (Ruby SDK)**](/docs/en/ruby-sdk/daytona#lsplanguageid)
+
+## Start LSP servers
+
+Daytona provides methods to start LSP servers.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
+```python
+lsp = sandbox.create_lsp_server("typescript", "workspace/project")
+lsp.start()  # Initialize the server
+# Now ready for LSP operations
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+await lsp.start() // Initialize the server
+// Now ready for LSP operations
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
+>
+> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#start)
+
+## Stop LSP servers
+
+Daytona provides methods to stop LSP servers.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# When done with LSP features
+lsp.stop()  # Clean up resources
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// When done with LSP features
+await lsp.stop() // Clean up resources
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
+>
+> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#stop)
+
+## Code completions
+
+Daytona provides methods to get code completions for a specific position in a file.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
 ```python
 completions = lsp_server.completions(
     path="workspace/project/main.py",
@@ -100,13 +197,15 @@ completions = lsp_server.completions(
 )
 print(f"Completions: {completions}")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
-const completions = await lspServer.completions(
-    "workspace/project/main.ts",
-    { line: 10, character: 15 }
-)
+const completions = await lspServer.completions('workspace/project/main.ts', {
+  line: 10,
+  character: 15,
+})
 console.log('Completions:', completions)
 ```
 </TabItem>
@@ -120,6 +219,148 @@ completions = lsp_server.completions(
 puts "Completions: #{completions}"
 ```
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+completions = lsp_server.completions(
+  path: 'workspace/project/main.py',
+  position: Daytona::LspServer::Position.new(line: 10, character: 15)
+)
+puts "Completions: #{completions}"
+```
+
+</TabItem>
 </Tabs>
 
-See: [completions (Python SDK)](/docs/python-sdk/sync/lsp-server/#lspservercompletions), [completions (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#completions), [completions (Ruby SDK)](/docs/ruby-sdk/lsp-server/#completions)
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
+>
+> [**completions (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#completions)
+
+## File notifications
+
+Daytona provides methods to notify the LSP server when files are opened or closed. This enables features like diagnostics and completion tracking for the specified files.
+
+### Open file
+
+Notifies the language server that a file has been opened for editing.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Notify server that a file is open
+lsp_server.did_open("workspace/project/main.py")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Notify server that a file is open
+await lspServer.didOpen('workspace/project/main.ts')
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
+>
+> [**didOpen (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didopen)
+
+### Close file
+
+Notifies the language server that a file has been closed. This allows the server to clean up resources associated with that file.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Notify server that a file is closed
+lsp_server.did_close("workspace/project/main.py")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Notify server that a file is closed
+await lspServer.didClose('workspace/project/main.ts')
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
+>
+> [**didClose (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didclose)
+
+## Document symbols
+
+Daytona provides methods to retrieve symbols (functions, classes, variables, etc.) from a document.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+symbols = lsp_server.document_symbols("workspace/project/main.py")
+for symbol in symbols:
+    print(f"Symbol: {symbol.name}, Kind: {symbol.kind}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const symbols = await lspServer.documentSymbols('workspace/project/main.ts')
+symbols.forEach((symbol) => {
+  console.log(`Symbol: ${symbol.name}, Kind: ${symbol.kind}`)
+})
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
+>
+> [**documentSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#documentsymbols)
+
+## Sandbox symbols
+
+Daytona provides methods to search for symbols across all files in the sandbox.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+symbols = lsp_server.sandbox_symbols("MyClass")
+for symbol in symbols:
+    print(f"Found: {symbol.name} at {symbol.location}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const symbols = await lspServer.sandboxSymbols('MyClass')
+symbols.forEach((symbol) => {
+  console.log(`Found: ${symbol.name} at ${symbol.location}`)
+})
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+
+> [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
+>
+> [**sandboxSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols)
