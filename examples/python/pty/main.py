@@ -2,7 +2,7 @@ import sys
 import threading
 import time
 
-from daytona import Daytona, PtySize, Sandbox
+from daytona import CreateSandboxFromSnapshotParams, Daytona, PtySize, Sandbox
 
 
 def interactive_pty_session(sandbox: Sandbox):
@@ -84,7 +84,7 @@ def kill_pty_session(sandbox: Sandbox):
 
 def main():
     daytona = Daytona()
-    sandbox = daytona.create()
+    sandbox = daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
 
     try:
         # interactive PTY session with exit

@@ -1,11 +1,11 @@
-from daytona import Daytona
+from daytona import Daytona, CreateSandboxFromSnapshotParams
 
 
 def main():
     daytona = Daytona()
 
     print("Creating sandbox")
-    sandbox = daytona.create()
+    sandbox = daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
     print("Sandbox created")
 
     _ = sandbox.set_labels(

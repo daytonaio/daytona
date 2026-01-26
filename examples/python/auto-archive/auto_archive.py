@@ -13,11 +13,11 @@ def main():
     print(sandbox1.auto_archive_interval)
 
     # Max interval
-    sandbox2 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=0))
+    sandbox2 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=0, snapshot="daytonaio/sandbox:0.5.1"))
     print(sandbox2.auto_archive_interval)
 
     # 1 day interval
-    sandbox3 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=1440))
+    sandbox3 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=1440, snapshot="daytonaio/sandbox:0.5.1"))
     print(sandbox3.auto_archive_interval)
 
     sandbox1.delete()

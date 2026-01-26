@@ -1,10 +1,9 @@
 from daytona import (
-    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
     Daytona,
     DaytonaTimeoutError,
     ExecutionError,
     OutputMessage,
-    Resources,
     Sandbox,
 )
 
@@ -12,16 +11,10 @@ from daytona import (
 def main():
     daytona = Daytona()
 
-    params = CreateSandboxFromImageParams(
-        image="python:3.9.23-slim",
-        language="python",
-        resources=Resources(
-            cpu=1,
-            memory=1,
-            disk=3,
-        ),
+    params = CreateSandboxFromSnapshotParams(
+        snapshot="daytonaio/sandbox:0.5.1",
     )
-    sandbox = daytona.create(params, timeout=150, on_snapshot_create_logs=print)
+    sandbox = daytona.create(params=params)
 
     # Run the code securely inside the sandbox
     response = sandbox.process.code_run('print("Hello World!")')

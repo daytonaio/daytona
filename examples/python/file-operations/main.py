@@ -8,7 +8,7 @@ from daytona import CreateSandboxFromSnapshotParams, Daytona, FileDownloadReques
 def main():
     daytona = Daytona()
     params = CreateSandboxFromSnapshotParams(
-        language="python",
+        snapshot="daytonaio/sandbox:0.5.1",
     )
 
     # First, create a sandbox

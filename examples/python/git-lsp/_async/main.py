@@ -1,23 +1,14 @@
 import asyncio
 
-from daytona import AsyncDaytona, CreateSandboxFromImageParams, Image, LspCompletionPosition
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, Image, LspCompletionPosition
 
 
 async def main():
     async with AsyncDaytona() as daytona:
         sandbox = await daytona.create(
-            CreateSandboxFromImageParams(
-                image=(
-                    Image.base("ubuntu:25.10").run_commands(
-                        "apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils",
-                        "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
-                        "apt-get install -y nodejs",
-                        "npm install -g ts-node typescript typescript-language-server",
-                    )
-                ),
+            CreateSandboxFromSnapshotParams(
+                snapshot="daytonaio/sandbox:0.5.1",
             ),
-            timeout=200,
-            on_snapshot_create_logs=print,
         )
 
         try:

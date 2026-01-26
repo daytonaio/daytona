@@ -21,7 +21,7 @@ def main():
     print(sandbox1.auto_delete_interval)
 
     # Auto-delete after the Sandbox has been stopped for 1 day
-    sandbox2 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_delete_interval=1440))
+    sandbox2 = daytona.create(params=CreateSandboxFromSnapshotParams(auto_delete_interval=1440, snapshot="daytonaio/sandbox:0.5.1"))
     print(sandbox2.auto_delete_interval)
 
 

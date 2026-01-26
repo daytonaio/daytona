@@ -6,7 +6,7 @@ from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams
 async def main():
     async with AsyncDaytona() as daytona:
         # Default settings
-        sandbox1 = await daytona.create()
+        sandbox1 = await daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
         print("network_block_all:", sandbox1.network_block_all)
         print("network_allow_list:", sandbox1.network_allow_list)
 

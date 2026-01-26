@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/python
+FROM mcr.microsoft.com/devcontainers/python:3.14
 
 # Update package list and install required dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,16 +29,39 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
-RUN python3 -m pip install pipx && pipx ensurepath && pipx install uv
+RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
 
 # Install the Python Language Server
-RUN python3 -m pip install python-lsp-server
+RUN python3 -m pip install --no-cache-dir python-lsp-server==1.14.0
 
 # Install common pip packages
-RUN python3 -m pip install \
-    numpy pandas scikit-learn keras torch scipy seaborn matplotlib \
-    django flask beautifulsoup4 requests opencv-python pillow sqlalchemy \
-    daytona pydantic-ai langchain transformers openai anthropic llama-index instructor huggingface ollama
+RUN python3 -m pip install --no-cache-dir \
+    numpy==2.4.1 \
+    pandas==2.3.3 \
+    scikit-learn==1.8.0 \
+    keras==3.13.0 \
+    torch==2.10.0 \
+    scipy==1.17.0 \
+    seaborn==0.13.2 \
+    matplotlib==3.10.8 \
+    django==6.0.1 \
+    flask==3.1.2 \
+    beautifulsoup4==4.14.3 \
+    requests==2.32.5 \
+    opencv-python==4.13.0.90 \
+    pillow==12.1.0 \
+    sqlalchemy==2.0.46 \
+    daytona==0.134.0 \
+    pydantic-ai==1.47.0 \
+    langchain==1.2.7 \
+    transformers==4.57.6 \
+    openai==2.15.0 \
+    anthropic==0.76.0 \
+    llama-index==0.14.13 \
+    instructor==1.14.4 \
+    huggingface-hub==0.36.0 \
+    ollama==0.6.1 \
+    claude-agent-sdk==0.1.22
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
@@ -47,7 +70,7 @@ RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use node" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
-RUN npm install -g ts-node typescript typescript-language-server
+RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 clawdbot@2026.1.24-3 opencode-ai@1.1.35
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib

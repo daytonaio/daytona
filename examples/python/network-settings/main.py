@@ -5,7 +5,7 @@ def main():
     daytona = Daytona()
 
     # Default settings
-    sandbox1 = daytona.create()
+    sandbox1 = daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
     print("network_block_all:", sandbox1.network_block_all)
     print("network_allow_list:", sandbox1.network_allow_list)
 

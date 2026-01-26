@@ -1,9 +1,9 @@
-from daytona import Daytona, SessionExecuteRequest
+from daytona import CreateSandboxFromSnapshotParams, Daytona, SessionExecuteRequest
 
 
 def main():
     daytona = Daytona()
-    sandbox = daytona.create()
+    sandbox = daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
 
     exec_session_id = "exec-session-1"
     sandbox.process.create_session(exec_session_id)

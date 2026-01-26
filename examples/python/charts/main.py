@@ -9,6 +9,7 @@ from daytona import (
     ChartType,
     CompositeChart,
     CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
     Daytona,
     Image,
     LineChart,
@@ -79,10 +80,9 @@ plt.show()
 def main():
     daytona = Daytona()
     sandbox = daytona.create(
-        CreateSandboxFromImageParams(
-            image=Image.debian_slim("3.13").pip_install("matplotlib"),
+        params=CreateSandboxFromSnapshotParams(
+            snapshot="daytonaio/sandbox:0.5.1",
         ),
-        on_snapshot_create_logs=print,
     )
     response = sandbox.process.code_run(code)
 

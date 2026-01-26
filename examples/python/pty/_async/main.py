@@ -1,7 +1,7 @@
 import asyncio
 import sys
 
-from daytona import AsyncDaytona, AsyncSandbox, PtySize
+from daytona import AsyncDaytona, AsyncSandbox, CreateSandboxFromSnapshotParams, PtySize
 
 
 async def interactive_pty_session(sandbox: AsyncSandbox):
@@ -83,7 +83,7 @@ async def kill_pty_session(sandbox: AsyncSandbox):
 
 async def main():
     async with AsyncDaytona() as daytona:
-        sandbox = await daytona.create()
+        sandbox = await daytona.create(params=CreateSandboxFromSnapshotParams(snapshot="daytonaio/sandbox:0.5.1"))
 
         try:
             # Interactive PTY session with exit

@@ -13,6 +13,7 @@ def main():
     mount_dir_1 = "/home/daytona/volume"
 
     params = CreateSandboxFromSnapshotParams(
+        snapshot="daytonaio/sandbox:0.5.1",
         language="python",
         volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
     )
