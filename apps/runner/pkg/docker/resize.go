@@ -132,13 +132,13 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 
 	// Apply CPU/memory changes if specified (0 = don't change)
 	if cpu > 0 {
-		newHostConfig.Resources.CPUQuota = cpu * 100000
-		newHostConfig.Resources.CPUPeriod = 100000
+		newHostConfig.CPUQuota = cpu * 100000
+		newHostConfig.CPUPeriod = 100000
 		log.Debugf("Setting CPU quota to %d cores", cpu)
 	}
 	if memory > 0 {
-		newHostConfig.Resources.Memory = common.GBToBytes(float64(memory))
-		newHostConfig.Resources.MemorySwap = newHostConfig.Resources.Memory
+		newHostConfig.Memory = common.GBToBytes(float64(memory))
+		newHostConfig.MemorySwap = newHostConfig.Memory
 		log.Debugf("Setting memory to %dGB", memory)
 	}
 
