@@ -453,13 +453,6 @@ class AsyncDaytona:
                 ]
 
             while response_ref["response"].state == SandboxState.PENDING_BUILD:
-                if timeout:
-                    elapsed = time.time() - start_time
-                    if elapsed > timeout:
-                        raise DaytonaError(
-                            f"Sandbox build has been pending for more than {timeout} seconds. "
-                            + "Please check the sandbox state again later."
-                        )
                 await asyncio.sleep(1)
                 response_ref["response"] = await self._sandbox_api.get_sandbox(response_ref["response"].id)
 
