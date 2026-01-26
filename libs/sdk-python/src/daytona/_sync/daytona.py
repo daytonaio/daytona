@@ -414,8 +414,8 @@ class Daytona:
                     elapsed = time.time() - start_time
                     if elapsed > timeout:
                         raise DaytonaError(
-                            f"Sandbox build has been pending for more than {timeout} seconds."
-                            f"Please check the sandbox state again later."
+                            f"Sandbox build has been pending for more than {timeout} seconds. "
+                            + "Please check the sandbox state again later."
                         )
                 time.sleep(1)
                 response_ref["response"] = self._sandbox_api.get_sandbox(response_ref["response"].id)
