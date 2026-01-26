@@ -163,8 +163,9 @@ jobs:
       - name: Build all
         run: |
           python3 -m pip install poetry==2.1.3
+          source "$(poetry env info --path)/bin/activate"
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
-          yarn
+          yarn && poetry install
           VERSION=0.0.0-dev yarn build --nxBail=true
 
   license-check:
