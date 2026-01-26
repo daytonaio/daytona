@@ -321,8 +321,9 @@ function PermissionsTooltip({
   availablePermissions: CreateApiKeyPermissionsEnum[]
 }) {
   const isFullAccess = allPermissions.length === permissions.length
-  const isSingleResourceAccess = CREATE_API_KEY_PERMISSIONS_GROUPS.find((group) =>
-    group.permissions.every((p) => permissions.includes(p)),
+  const isSingleResourceAccess = CREATE_API_KEY_PERMISSIONS_GROUPS.find(
+    (group) =>
+      group.permissions.length === permissions.length && group.permissions.every((p) => permissions.includes(p)),
   )
 
   const availableGroups = useMemo(() => {
