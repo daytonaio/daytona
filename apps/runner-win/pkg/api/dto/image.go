@@ -32,7 +32,7 @@ type PushSnapshotRequestDTO struct {
 
 type PushSnapshotResponseDTO struct {
 	SnapshotName string `json:"snapshotName" example:"myapp-v1.0"`
-	SnapshotPath string `json:"snapshotPath" example:"snapshots/myapp-v1.0.qcow2"`
+	SnapshotPath string `json:"snapshotPath" example:"myapp-v1.0.qcow2"`
 	SizeBytes    int64  `json:"sizeBytes" example:"15032385536"`
 } //	@name	PushSnapshotResponseDTO
 
@@ -45,7 +45,7 @@ type CreateSnapshotRequestDTO struct {
 
 type CreateSnapshotResponseDTO struct {
 	Name         string `json:"name" example:"myapp-v1.0"`
-	SnapshotPath string `json:"snapshotPath" example:"snapshots/myapp-v1.0.qcow2"`
+	SnapshotPath string `json:"snapshotPath" example:"orgId/myapp-v1.0.qcow2"`
 	SizeBytes    int64  `json:"sizeBytes" example:"15032385536"`
 	LiveMode     bool   `json:"liveMode" example:"false"` // Which mode was used
 } //	@name	CreateSnapshotResponseDTO

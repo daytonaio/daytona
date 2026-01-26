@@ -81,7 +81,7 @@ CH_SANDBOXES_PATH=/var/lib/cloud-hypervisor/sandboxes
 CH_SNAPSHOTS_PATH=/var/lib/cloud-hypervisor/snapshots
 CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinuz
 CH_INITRAMFS_PATH=/var/lib/cloud-hypervisor/kernels/initrd.img
-CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2
+CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1/disk.qcow2
 
 # Network
 CH_BRIDGE_NAME=br0

@@ -96,7 +96,7 @@ func NewClient(config ClientConfig) (*Client, error) {
 		config.FirmwarePath = "/var/lib/cloud-hypervisor/firmware/hypervisor-fw"
 	}
 	if config.BaseImagePath == "" {
-		config.BaseImagePath = "/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2"
+		config.BaseImagePath = "/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1/disk.qcow2"
 	}
 	if config.DefaultCpus == 0 {
 		config.DefaultCpus = 2

@@ -78,7 +78,7 @@ ENV CH_SNAPSHOTS_PATH=/var/lib/cloud-hypervisor/snapshots
 ENV CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinuz-6.8.0-90-generic
 ENV CH_INITRAMFS_PATH=/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic
 ENV CH_FIRMWARE_PATH=/var/lib/cloud-hypervisor/firmware/hypervisor-fw
-ENV CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2
+ENV CH_BASE_IMAGE_PATH=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1/disk.qcow2
 ENV CH_BRIDGE_NAME=br0
 
 # Expose API port

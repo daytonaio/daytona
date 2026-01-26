@@ -239,15 +239,14 @@ func (pr *progressReaderWithLog) Read(p []byte) (int, error) {
 }
 
 // getSnapshotLocalPath returns the path for a snapshot on the target host
-func (l *LibVirt) getSnapshotLocalPath(snapshotName string) string {
-	// Strip "snapshots/" prefix if present (snapshot.ref contains S3 path like "snapshots/name.qcow2")
-	snapshotName = strings.TrimPrefix(snapshotName, "snapshots/")
-
+// Input: snapshot ref like "myapp.qcow2" or "orgId/myapp.qcow2" (without snapshots/ prefix)
+// Output: local path like "/var/lib/libvirt/snapshots/myapp.qcow2" or "/var/lib/libvirt/snapshots/orgId/myapp.qcow2"
+func (l *LibVirt) getSnapshotLocalPath(snapshotRef string) string {
 	// Ensure .qcow2 extension
-	if !strings.HasSuffix(snapshotName, ".qcow2") {
-		snapshotName = snapshotName + ".qcow2"
+	if !strings.HasSuffix(snapshotRef, ".qcow2") {
+		snapshotRef = snapshotRef + ".qcow2"
 	}
-	return filepath.Join(snapshotsBasePath, snapshotName)
+	return filepath.Join(snapshotsBasePath, snapshotRef)
 }
 
 // ListLocalSnapshots returns a list of snapshots available in the snapshots directory

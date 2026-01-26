@@ -254,7 +254,27 @@ CH_INITRAMFS_PATH=/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic
 
 ## Step 5: Upload to S3 (Optional)
 
-Upload the golden image to S3 for distribution:
+Upload the golden image to S3 for distribution.
+
+### Important: Flatten Before Upload
+
+Before uploading, ensure the disk image is **flattened** (has no backing file dependencies). Otherwise, the snapshot won't work on other machines.
+
+```bash
+SNAP_DIR=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1
+
+# Check for backing file
+qemu-img info $SNAP_DIR/disk.qcow2 | grep -i backing
+
+# If backing file exists, flatten it:
+cd $SNAP_DIR
+qemu-img convert -O qcow2 disk.qcow2 disk-flat.qcow2
+mv disk.qcow2 disk.qcow2.bak
+mv disk-flat.qcow2 disk.qcow2
+rm disk.qcow2.bak
+```
+
+### Upload Cold Snapshot (disk only)
 
 ```bash
 export AWS_ACCESS_KEY_ID=your-access-key
@@ -268,6 +288,29 @@ aws s3 cp "$IMAGE" "s3://$BUCKET/snapshots/ubuntu-base.1.qcow2"
 
 # Verify upload
 aws s3 ls "s3://$BUCKET/snapshots/"
+```
+
+### Upload Warm Snapshot (disk + memory state)
+
+Warm snapshots include multiple files that must all be uploaded:
+
+```bash
+export AWS_ACCESS_KEY_ID=your-access-key
+export AWS_SECRET_ACCESS_KEY=your-secret-key
+export AWS_DEFAULT_REGION=us-east-2
+
+BUCKET=your-snapshots-bucket
+SNAP_NAME=ubuntu-base.1
+SNAP_DIR=/var/lib/cloud-hypervisor/snapshots/$SNAP_NAME
+
+# Upload all snapshot files
+aws s3 cp $SNAP_DIR/disk.qcow2 s3://$BUCKET/snapshots/$SNAP_NAME/disk.qcow2
+aws s3 cp $SNAP_DIR/config.json s3://$BUCKET/snapshots/$SNAP_NAME/config.json
+aws s3 cp $SNAP_DIR/state.json s3://$BUCKET/snapshots/$SNAP_NAME/state.json
+aws s3 cp $SNAP_DIR/memory-ranges s3://$BUCKET/snapshots/$SNAP_NAME/memory-ranges
+
+# Verify upload
+aws s3 ls "s3://$BUCKET/snapshots/$SNAP_NAME/"
 ```
 
 ## Step 5: Creating VM Overlays
@@ -710,7 +753,61 @@ mv $NEW_SNAP_DIR/config.json.tmp $NEW_SNAP_DIR/config.json
 cat $NEW_SNAP_DIR/config.json | jq '{disks: .disks[0].path, serial: .serial.mode, net_tap: .net[0].tap}'
 ```
 
-### Step 6: Update Database
+### Step 6: Flatten Disk Image (Required for Distribution)
+
+When creating VMs from snapshots, the disk is created as a copy-on-write overlay. This means the `disk.qcow2` has a **backing file** reference to the parent snapshot. For the snapshot to work on a fresh runner machine (or after uploading to S3), you must **flatten** the disk to remove this dependency.
+
+#### Check for Backing File
+
+```bash
+NEW_SNAP_DIR="/var/lib/cloud-hypervisor/snapshots/ubuntu-base.X"
+
+# Check if disk has a backing file
+qemu-img info $NEW_SNAP_DIR/disk.qcow2
+```
+
+If you see a `backing file:` line in the output, the image needs to be flattened:
+
+```
+backing file: /var/lib/cloud-hypervisor/snapshots/ubuntu-base.Y/disk.qcow2
+backing file format: qcow2
+```
+
+#### Flatten the Disk
+
+```bash
+NEW_SNAP_DIR="/var/lib/cloud-hypervisor/snapshots/ubuntu-base.X"
+
+cd $NEW_SNAP_DIR
+
+# Convert to standalone image (removes backing file dependency)
+qemu-img convert -O qcow2 disk.qcow2 disk-flat.qcow2
+
+# Replace original with flattened version
+mv disk.qcow2 disk.qcow2.bak
+mv disk-flat.qcow2 disk.qcow2
+
+# Verify no backing file
+qemu-img info disk.qcow2 | grep -i backing
+# Should return nothing (no backing file)
+
+# Clean up backup (after verifying)
+rm disk.qcow2.bak
+```
+
+**Note:** Flattening increases the disk size significantly (e.g., from 2.5GB to 8GB) because it merges all data from the backing chain into a single file.
+
+#### Optional: Compress the Flattened Disk
+
+To reduce storage and transfer time:
+
+```bash
+# Convert with compression
+qemu-img convert -c -O qcow2 disk.qcow2 disk-compressed.qcow2
+mv disk-compressed.qcow2 disk.qcow2
+```
+
+### Step 7: Update Database
 
 Update the snapshot reference in the database to use the new version:
 
@@ -721,7 +818,7 @@ SET file = 'ubuntu-base.X'
 WHERE name = 'your-snapshot-name';
 ```
 
-### Step 7: Verify New Snapshot
+### Step 8: Verify New Snapshot
 
 Create a test VM from the new snapshot and verify:
 
@@ -744,6 +841,8 @@ nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/memory-stats  #
 3. **Test Before Production**: Always test the new snapshot by creating a VM and verifying all daemon endpoints work before updating production.
 
 4. **Snapshot Timing**: The snapshot captures the exact memory state. Ensure the daemon is fully started and stable before taking the snapshot.
+
+5. **Flatten Before Distribution**: Always flatten the disk image before uploading to S3 or copying to other machines. Snapshots created from running VMs have backing file dependencies that won't exist on other systems.
 
 ## Image Versioning
 

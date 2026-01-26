@@ -89,18 +89,15 @@ func (m *minioClient) GetObject(ctx context.Context, organizationId, hash string
 	return data, nil
 }
 
-// getSnapshotPath returns the full object path for a snapshot
-// The path format is: snapshots/{organizationId}/{snapshotName}.qcow2
-// If organizationId is empty, uses legacy format: snapshots/{snapshotName}.qcow2
-func (m *minioClient) getSnapshotPath(snapshotName string) string {
-	// Strip "snapshots/" prefix if already present (snapshot.ref contains S3 path)
-	snapshotName = strings.TrimPrefix(snapshotName, SNAPSHOTS_PREFIX+"/")
-
+// getSnapshotPath returns the full object path for a snapshot in S3
+// Input: snapshot ref like "myapp.qcow2" or "orgId/myapp.qcow2"
+// Output: full S3 path like "snapshots/myapp.qcow2" or "snapshots/orgId/myapp.qcow2"
+func (m *minioClient) getSnapshotPath(snapshotRef string) string {
 	// Ensure snapshot name has .qcow2 extension
-	if !strings.HasSuffix(snapshotName, ".qcow2") {
-		snapshotName = snapshotName + ".qcow2"
+	if !strings.HasSuffix(snapshotRef, ".qcow2") {
+		snapshotRef = snapshotRef + ".qcow2"
 	}
-	return path.Join(SNAPSHOTS_PREFIX, snapshotName)
+	return path.Join(SNAPSHOTS_PREFIX, snapshotRef)
 }
 
 // getSnapshotPathWithOrg returns the full object path for a snapshot with organization namespacing
@@ -111,6 +108,26 @@ func (m *minioClient) getSnapshotPathWithOrg(organizationId, snapshotName string
 		snapshotName = snapshotName + ".qcow2"
 	}
 	return path.Join(SNAPSHOTS_PREFIX, organizationId, snapshotName)
+}
+
+// getSnapshotRef returns the snapshot reference (without snapshots/ prefix)
+// Input: snapshot name like "myapp" or "myapp.qcow2"
+// Output: "myapp.qcow2"
+func (m *minioClient) getSnapshotRef(snapshotName string) string {
+	if !strings.HasSuffix(snapshotName, ".qcow2") {
+		snapshotName = snapshotName + ".qcow2"
+	}
+	return snapshotName
+}
+
+// getSnapshotRefWithOrg returns the snapshot reference with org namespace (without snapshots/ prefix)
+// Input: organizationId and snapshot name
+// Output: "{organizationId}/{snapshotName}.qcow2"
+func (m *minioClient) getSnapshotRefWithOrg(organizationId, snapshotName string) string {
+	if !strings.HasSuffix(snapshotName, ".qcow2") {
+		snapshotName = snapshotName + ".qcow2"
+	}
+	return path.Join(organizationId, snapshotName)
 }
 
 // progressReader wraps an io.Reader to log upload progress
@@ -154,6 +171,7 @@ func (pr *progressReader) Read(p []byte) (int, error) {
 }
 
 // PutSnapshot uploads a snapshot file to the snapshot store (legacy, without org namespacing)
+// Returns the snapshot name (without the snapshots/ prefix) for use as a reference
 func (m *minioClient) PutSnapshot(ctx context.Context, snapshotName string, reader io.Reader, size int64) (string, error) {
 	objectPath := m.getSnapshotPath(snapshotName)
 
@@ -171,11 +189,13 @@ func (m *minioClient) PutSnapshot(ctx context.Context, snapshotName string, read
 
 	log.Infof("Completed upload of '%s'", snapshotName)
 
-	return objectPath, nil
+	// Return just the snapshot name (without snapshots/ prefix) - the runner handles the prefix internally
+	return m.getSnapshotRef(snapshotName), nil
 }
 
 // PutSnapshotWithOrg uploads a snapshot file with organization namespacing
-// Path format: snapshots/{organizationId}/{snapshotName}.qcow2
+// Path format in S3: snapshots/{organizationId}/{snapshotName}.qcow2
+// Returns: {organizationId}/{snapshotName}.qcow2 (without snapshots/ prefix)
 func (m *minioClient) PutSnapshotWithOrg(ctx context.Context, organizationId, snapshotName string, reader io.Reader, size int64) (string, error) {
 	objectPath := m.getSnapshotPathWithOrg(organizationId, snapshotName)
 
@@ -193,7 +213,8 @@ func (m *minioClient) PutSnapshotWithOrg(ctx context.Context, organizationId, sn
 
 	log.Infof("Completed upload of '%s' to org %s", snapshotName, organizationId)
 
-	return objectPath, nil
+	// Return the snapshot ref (without snapshots/ prefix) - the runner handles the prefix internally
+	return m.getSnapshotRefWithOrg(organizationId, snapshotName), nil
 }
 
 // progressReadCloser wraps an io.ReadCloser to log download progress

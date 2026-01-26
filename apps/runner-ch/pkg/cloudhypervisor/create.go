@@ -178,11 +178,8 @@ func (c *Client) createDiskBatched(ctx context.Context, opts CreateOptions) (str
 
 	var baseImage string
 	if opts.Snapshot != "" {
-		// Use snapshot as base
-		baseImage = filepath.Join(c.config.SnapshotsPath, opts.Snapshot)
-		if !hasImageExtension(baseImage) {
-			baseImage += ".qcow2"
-		}
+		// Use snapshot as base - snapshots are directories containing disk.qcow2
+		baseImage = filepath.Join(c.config.SnapshotsPath, opts.Snapshot, "disk.qcow2")
 	} else {
 		baseImage = c.config.BaseImagePath
 	}
@@ -236,11 +233,8 @@ func (c *Client) createDisk(ctx context.Context, opts CreateOptions) (string, er
 
 	var baseImage string
 	if opts.Snapshot != "" {
-		// Use snapshot as base
-		baseImage = filepath.Join(c.config.SnapshotsPath, opts.Snapshot)
-		if !hasImageExtension(baseImage) {
-			baseImage += ".qcow2"
-		}
+		// Use snapshot as base - snapshots are directories containing disk.qcow2
+		baseImage = filepath.Join(c.config.SnapshotsPath, opts.Snapshot, "disk.qcow2")
 	} else {
 		baseImage = c.config.BaseImagePath
 	}

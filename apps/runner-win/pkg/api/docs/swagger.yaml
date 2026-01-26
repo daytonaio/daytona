@@ -78,7 +78,7 @@ definitions:
         type: string
       volumes:
         items:
-          $ref: '#/definitions/dto.VolumeDTO'
+          $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO'
         type: array
     required:
       - id
@@ -119,7 +119,7 @@ definitions:
         example: 15032385536
         type: integer
       snapshotPath:
-        example: snapshots/myapp-v1.0.qcow2
+        example: orgId/myapp-v1.0.qcow2
         type: string
     type: object
   ErrorResponse:
@@ -185,7 +185,7 @@ definitions:
         example: myapp-v1.0
         type: string
       snapshotPath:
-        example: snapshots/myapp-v1.0.qcow2
+        example: myapp-v1.0.qcow2
         type: string
     type: object
   RegistryDTO:
@@ -244,11 +244,11 @@ definitions:
       backupError:
         type: string
       backupState:
-        $ref: '#/definitions/enums.BackupState'
+        $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.BackupState'
       daemonVersion:
         type: string
       state:
-        $ref: '#/definitions/enums.SandboxState'
+        $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.SandboxState'
     type: object
   SnapshotExistsResponse:
     properties:
@@ -308,24 +308,7 @@ definitions:
       networkLimitEgress:
         type: boolean
     type: object
-  controllers.MemoryStatsResponse:
-    properties:
-      count:
-        type: integer
-      from_time:
-        type: string
-      stats:
-        items:
-          $ref: '#/definitions/libvirt.MemoryStatsRecord'
-        type: array
-      to_time:
-        type: string
-      vm_names:
-        items:
-          type: string
-        type: array
-    type: object
-  dto.VolumeDTO:
+  github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO:
     properties:
       mountPath:
         type: string
@@ -334,7 +317,30 @@ definitions:
       volumeId:
         type: string
     type: object
-  enums.BackupState:
+  github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord:
+    properties:
+      actual_kib:
+        type: integer
+      balloon_active:
+        type: boolean
+      id:
+        type: integer
+      max_memory_kib:
+        type: integer
+      rss_kib:
+        type: integer
+      timestamp:
+        type: string
+      unused_kib:
+        type: integer
+      used_kib:
+        type: integer
+      vm_name:
+        type: string
+      vm_uuid:
+        type: string
+    type: object
+  github_com_daytonaio_runner-win_pkg_models_enums.BackupState:
     enum:
       - NONE
       - PENDING
@@ -348,7 +354,7 @@ definitions:
       - BackupStateInProgress
       - BackupStateCompleted
       - BackupStateFailed
-  enums.SandboxState:
+  github_com_daytonaio_runner-win_pkg_models_enums.SandboxState:
     enum:
       - creating
       - restoring
@@ -376,28 +382,22 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
-  libvirt.MemoryStatsRecord:
+  pkg_api_controllers.MemoryStatsResponse:
     properties:
-      actual_kib:
+      count:
         type: integer
-      balloon_active:
-        type: boolean
-      id:
-        type: integer
-      max_memory_kib:
-        type: integer
-      rss_kib:
-        type: integer
-      timestamp:
+      from_time:
         type: string
-      unused_kib:
-        type: integer
-      used_kib:
-        type: integer
-      vm_name:
+      stats:
+        items:
+          $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord'
+        type: array
+      to_time:
         type: string
-      vm_uuid:
-        type: string
+      vm_names:
+        items:
+          type: string
+        type: array
     type: object
 info:
   contact: {}
@@ -1476,7 +1476,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/controllers.MemoryStatsResponse'
+            $ref: '#/definitions/pkg_api_controllers.MemoryStatsResponse'
         '500':
           description: Internal Server Error
           schema:

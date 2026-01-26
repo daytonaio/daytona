@@ -36,7 +36,7 @@ type Config struct {
 	CHKernelPath      string `envconfig:"CH_KERNEL_PATH" default:"/var/lib/cloud-hypervisor/kernels/vmlinuz-6.8.0-90-generic"`
 	CHInitramfsPath   string `envconfig:"CH_INITRAMFS_PATH" default:"/var/lib/cloud-hypervisor/kernels/initrd.img-6.8.0-90-generic"`
 	CHFirmwarePath    string `envconfig:"CH_FIRMWARE_PATH" default:"/var/lib/cloud-hypervisor/firmware/hypervisor-fw"`
-	CHBaseImagePath   string `envconfig:"CH_BASE_IMAGE_PATH" default:"/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1.qcow2"`
+	CHBaseImagePath   string `envconfig:"CH_BASE_IMAGE_PATH" default:"/var/lib/cloud-hypervisor/snapshots/ubuntu-base.1/disk.qcow2"`
 	CHBridgeName      string `envconfig:"CH_BRIDGE_NAME" default:"br0"`
 	CHTapCreateScript string `envconfig:"CH_TAP_CREATE_SCRIPT" default:"/usr/local/bin/ch-create-tap"`
 	CHTapDeleteScript string `envconfig:"CH_TAP_DELETE_SCRIPT" default:"/usr/local/bin/ch-delete-tap"`

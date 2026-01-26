@@ -89,11 +89,8 @@ type ImageInfo struct {
 func (c *Client) GetImageInfo(ctx context.Context, snapshot string) (*ImageInfo, error) {
 	log.Infof("Getting image info for %s", snapshot)
 
-	// Find the snapshot file
-	snapshotPath := filepath.Join(c.config.SnapshotsPath, snapshot)
-	if !hasImageExtension(snapshotPath) {
-		snapshotPath += ".qcow2"
-	}
+	// Snapshots are directories containing disk.qcow2
+	snapshotPath := filepath.Join(c.config.SnapshotsPath, snapshot, "disk.qcow2")
 
 	// Get file size via qemu-img (validate it exists and is valid)
 	_, err := c.runCommandOutput(ctx, "qemu-img", "info", "--output=json", snapshotPath)
@@ -130,24 +127,15 @@ func (c *Client) GetImageInfo(ctx context.Context, snapshot string) (*ImageInfo,
 	}, nil
 }
 
-// RemoveImage removes a snapshot/image
+// RemoveImage removes a snapshot/image directory
 func (c *Client) RemoveImage(ctx context.Context, ref string, force bool) error {
 	log.Infof("Removing image %s (force=%v)", ref, force)
 
-	snapshotPath := filepath.Join(c.config.SnapshotsPath, ref)
-	if !hasImageExtension(snapshotPath) {
-		// Try common extensions
-		for _, ext := range []string{".qcow2", ".raw", ".img"} {
-			testPath := snapshotPath + ext
-			exists, _ := c.fileExists(ctx, testPath)
-			if exists {
-				snapshotPath = testPath
-				break
-			}
-		}
-	}
+	// Snapshots are directories containing disk.qcow2, config.json, etc.
+	snapshotDir := filepath.Join(c.config.SnapshotsPath, ref)
 
-	return c.runCommand(ctx, "rm", "-f", snapshotPath)
+	// Remove the entire snapshot directory
+	return c.runCommand(ctx, "rm", "-rf", snapshotDir)
 }
 
 // PushSnapshot pushes a snapshot to a registry
