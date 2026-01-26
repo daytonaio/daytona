@@ -31,6 +31,7 @@ daytona [flags]
 * [daytona logout](daytona_logout.md)  - Logout from Daytona
 * [daytona mcp](daytona_mcp.md)  - Manage Daytona MCP Server
 * [daytona organization](daytona_organization.md)  - Manage Daytona organizations
+* [daytona preview-url](daytona_preview-url.md)  - Get signed preview URL for a sandbox port
 * [daytona snapshot](daytona_snapshot.md)  - Manage Daytona snapshots
 * [daytona ssh](daytona_ssh.md)  - SSH into a sandbox
 * [daytona start](daytona_start.md)  - Start a sandbox
