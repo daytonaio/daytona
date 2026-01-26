@@ -25,22 +25,22 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-tags: true
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.work
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           java-version: 21
           distribution: 'temurin'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
@@ -124,7 +124,7 @@ jobs:
           gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-arm64#daytona-cli-${{ inputs.version }}-darwin-arm64 --clobber
 
       - name: Upload computer-use artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: computer-use-amd64
           path: dist/libs/computer-use-amd64
@@ -132,7 +132,7 @@ jobs:
           overwrite: true
 
       - name: Upload runner artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: runner-amd64
           path: dist/apps/runner-amd64
@@ -153,19 +153,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-tags: true
           fetch-depth: 0
 
       - name: Download computer-use artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: computer-use-amd64
           path: dist/libs/
 
       - name: Download runner artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: runner-amd64
           path: dist/apps/
@@ -175,13 +175,13 @@ jobs:
           ls -la dist/libs/
           ls -la dist/apps/
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.work
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
 
@@ -219,8 +219,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+        uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
       - name: Project dependencies
