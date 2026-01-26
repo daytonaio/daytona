@@ -362,6 +362,7 @@ __all__ = [
     "RegistryPushAccessDto",
     "ReplaceRequest",
     "ReplaceResult",
+    "ResizeSandbox",
     "Runner",
     "RunnerFull",
     "RunnerHealthMetrics",

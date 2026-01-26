@@ -16,7 +16,9 @@ import {
   SshAccessDto,
   SshAccessValidationDto,
   SignedPortPreviewUrl,
+  ResizeSandbox,
 } from '@daytonaio/api-client'
+import { Resources } from './Daytona'
 import {
   FileSystemApi,
   GitApi,
@@ -70,6 +72,7 @@ export interface SandboxCodeToolbox {
  * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string} [errorReason] - Error message if Sandbox is in error state
  * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
+ * @property {boolean} [resizing] - Whether a resize operation is in progress.
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
  * @property {string} [backupCreatedAt] - When the backup was created
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
@@ -107,6 +110,7 @@ export class Sandbox implements SandboxDto {
   public state?: SandboxState
   public errorReason?: string
   public recoverable?: boolean
+  public resizing?: boolean
   public backupState?: SandboxBackupStateEnum
   public backupCreatedAt?: string
   public autoStopInterval?: number
@@ -579,6 +583,88 @@ export class Sandbox implements SandboxDto {
   }
 
   /**
+   * Resizes the Sandbox resources.
+   *
+   * Changes the CPU, memory, or disk allocation for the Sandbox.
+   *
+   * @param {Resources} resources - New resource configuration. Only specified fields will be updated.
+   *   - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+   *   - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+   *   - disk: Disk space in GiB (can only be increased, never decreased).
+   *   - gpu: Not supported - will throw error if specified.
+   * @param {boolean} [hot=false] - If true, performs hot resize on a running sandbox (only CPU/memory increase allowed).
+   *   If false, all resources can be changed but sandbox must be stopped.
+   * @param {number} [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - If GPU is specified, hot resize constraints are violated, disk size decrease is attempted,
+   *   or resize operation times out.
+   *
+   * @example
+   * // Increase resources with hot resize (sandbox must be running)
+   * await sandbox.resize({ cpu: 4, memory: 8 }, true);
+   *
+   * // Change resources (sandbox should be stopped for full flexibility)
+   * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
+   */
+  public async resize(resources: Resources, hot = false, timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaError('Timeout must be a non-negative number')
+    }
+
+    const startTime = Date.now()
+    const resizeRequest: ResizeSandbox = {
+      cpu: resources.cpu,
+      memory: resources.memory,
+      disk: resources.disk,
+      gpu: resources.gpu,
+      hot,
+    }
+    const response = await this.sandboxApi.resizeSandbox(this.id, resizeRequest, this.organizationId, {
+      timeout: timeout * 1000,
+    })
+    this.processSandboxDto(response.data)
+    const timeElapsed = Date.now() - startTime
+    await this.waitForResizeComplete(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
+  }
+
+  /**
+   * Waits for the Sandbox resize operation to complete.
+   *
+   * This method polls the Sandbox status until the resizing flag is cleared.
+   *
+   * @param {number} [timeout=60] - Maximum time to wait in seconds. 0 means no timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - If the sandbox ends up in an error state or resize times out.
+   */
+  public async waitForResizeComplete(timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaError('Timeout must be a non-negative number')
+    }
+
+    const checkInterval = 100 // Wait 100 ms between checks
+    const startTime = Date.now()
+
+    while (this.resizing) {
+      await this.refreshData()
+
+      if (!this.resizing) {
+        return
+      }
+
+      if (this.state === 'error' || this.state === 'build_failed') {
+        const errMsg = `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`
+        throw new DaytonaError(errMsg)
+      }
+
+      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
+        throw new DaytonaError('Sandbox resize did not complete within the timeout period')
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+    }
+  }
+
+  /**
    * Creates an SSH access token for the sandbox.
    *
    * @param {number} expiresInMinutes - The number of minutes the SSH access token will be valid for.
@@ -631,6 +717,7 @@ export class Sandbox implements SandboxDto {
     this.state = sandboxDto.state
     this.errorReason = sandboxDto.errorReason
     this.recoverable = sandboxDto.recoverable
+    this.resizing = sandboxDto.resizing
     this.backupState = sandboxDto.backupState
     this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval

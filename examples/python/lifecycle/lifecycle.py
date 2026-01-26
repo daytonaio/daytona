@@ -37,13 +37,19 @@ def main():
 
     print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
 
-    # Hot resize: can only increase CPU and memory on a running sandbox
-    # The resize() method automatically waits for the resize operation to complete
+    # Hot resize: increase CPU and memory on a running sandbox
     print("Resizing sandbox (hot resize)...")
-    sandbox.resize(Resources(cpu=2, memory=2), hot=True, timeout=120)
+    sandbox.resize(Resources(cpu=2, memory=2), hot=True)
+    print(f"Hot resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
 
-    # After resize completes, the sandbox object is automatically updated with new resources
-    print(f"Resize complete! New resources: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
+    # Cold resize: stop sandbox first, then resize (can also change disk)
+    print("Stopping sandbox for cold resize...")
+    daytona.stop(sandbox)
+    print("Resizing sandbox (cold resize)...")
+    sandbox.resize(Resources(cpu=4, memory=4, disk=20), hot=False)
+    print(f"Cold resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
+    daytona.start(sandbox)
+    print("Sandbox restarted with new resources")
 
     print("Removing sandbox")
     daytona.delete(sandbox)

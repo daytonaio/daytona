@@ -568,11 +568,11 @@ class AsyncSandbox(SandboxDto):
 
     @intercept_errors(message_prefix="Failed to resize sandbox: ")
     @with_timeout(
-        error_message=lambda self, resources, hot, timeout: (
-            f"Sandbox {self.id} failed to resize within the {timeout} seconds timeout period"
+        error_message=lambda self, timeout: (
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to resize within the {timeout} seconds timeout period"
         )
     )
-    async def resize(self, resources: Resources, hot: bool = False, timeout: Optional[float] = 60) -> None:
+    async def resize(self, resources: Resources, hot: bool = False, timeout: float | None = 60) -> None:
         """Resizes the Sandbox resources.
 
         Changes the CPU, memory, or disk allocation for the Sandbox.
@@ -619,12 +619,12 @@ class AsyncSandbox(SandboxDto):
     @intercept_errors(message_prefix="Failure during waiting for resize to complete: ")
     @with_timeout(
         error_message=lambda self, timeout: (
-            f"Sandbox {self.id} resize did not complete within the {timeout} seconds timeout period"
+            f"Sandbox {cast('AsyncSandbox', self).id} resize did not complete within the {timeout}s timeout period"
         )
     )
     async def wait_for_resize_complete(
         self,
-        timeout: Optional[float] = 60,  # pylint: disable=unused-argument
+        timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
         """Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
         the resizing flag is cleared.
@@ -635,14 +635,17 @@ class AsyncSandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If resize operation times out.
         """
-        await self.refresh_data()
-        while getattr(self, "resizing", False):
-            await asyncio.sleep(0.1)  # Wait 100ms between checks
+        while self.resizing:
             await self.refresh_data()
+
+            if not self.resizing:
+                return
 
             if self.state in ["error", "build_failed"]:
                 err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
                 raise DaytonaError(err_msg)
+
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     async def create_ssh_access(self, expires_in_minutes: int | None = None) -> SshAccessDto:
