@@ -33,7 +33,7 @@ from deprecated import deprecated
 from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
-from .._utils.timeout import with_timeout
+from .._utils.timeout import http_timeout, with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
@@ -273,7 +273,7 @@ class Sandbox(SandboxDto):
             print("Sandbox started successfully")
             ```
         """
-        sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        sandbox = self._sandbox_api.start_sandbox(self.id, _request_timeout=http_timeout(timeout))
         self.__process_sandbox_dto(sandbox)
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_start(timeout=0)
@@ -296,7 +296,7 @@ class Sandbox(SandboxDto):
             print("Sandbox recovered successfully")
             ```
         """
-        sandbox = self._sandbox_api.recover_sandbox(self.id, _request_timeout=timeout or None)
+        sandbox = self._sandbox_api.recover_sandbox(self.id, _request_timeout=http_timeout(timeout))
         self.__process_sandbox_dto(sandbox)
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_start(timeout=0)
@@ -319,7 +319,7 @@ class Sandbox(SandboxDto):
             print("Sandbox stopped successfully")
             ```
         """
-        _ = self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        _ = self._sandbox_api.stop_sandbox(self.id, _request_timeout=http_timeout(timeout))
         self.__refresh_data_safe()
         # This method already handles a timeout, so we don't need to pass one to internal methods
         self.wait_for_sandbox_stop(timeout=0)
@@ -332,7 +332,7 @@ class Sandbox(SandboxDto):
             timeout (float | None): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
                 Default is 60 seconds.
         """
-        _ = self._sandbox_api.delete_sandbox(self.id, _request_timeout=timeout or None)
+        _ = self._sandbox_api.delete_sandbox(self.id, _request_timeout=http_timeout(timeout))
         self.__refresh_data_safe()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")

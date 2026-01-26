@@ -9,6 +9,7 @@ import ctypes
 import functools
 import inspect
 import logging
+import math
 import signal
 import threading
 import time
@@ -73,6 +74,44 @@ def _async_raise(target_tid: int, exception: type) -> bool:
 
 def _round_up_to_nearest_second(seconds: float) -> int:
     return int(seconds) + (1 if seconds % 1 > 0 else 0)
+
+
+def http_timeout(timeout: float | None) -> float | None:
+    """Calculate HTTP client timeout to prevent race condition with decorator timeout.
+
+    For sub-second timeouts, uses ceil() to match signal.alarm rounding behavior.
+    For timeouts >= 1 second, returns unchanged (natural execution overhead is sufficient).
+
+    This prevents a race condition where:
+    - User specifies timeout=0.2s
+    - Decorator rounds to 1s (signal.alarm limitation)
+    - HTTP client times out at 0.2s first → raises DaytonaError (wrong!)
+
+    With this fix:
+    - timeout=0.2 → HTTP timeout: 1s (matches decorator) → DaytonaTimeoutError
+    - timeout=5.0 → HTTP timeout: 5s (unchanged) → DaytonaTimeoutError
+
+    Args:
+        timeout: User's desired timeout in seconds, or None for no timeout
+
+    Returns:
+        - None if timeout is None or 0
+        - ceil(timeout) if timeout < 1 (matches signal rounding)
+        - timeout unchanged if timeout >= 1 (natural overhead is sufficient)
+
+    Example:
+        >>> http_timeout(0.2)
+        1
+        >>> http_timeout(0.9)
+        1
+        >>> http_timeout(5.0)
+        5.0
+        >>> http_timeout(None)
+        None
+    """
+    if not timeout:
+        return None
+    return math.ceil(timeout) if timeout < 1 else timeout
 
 
 class _ThreadingTimeout:

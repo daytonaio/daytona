@@ -29,7 +29,7 @@ from environs import Env
 from .._utils.enum import to_enum
 from .._utils.errors import intercept_errors
 from .._utils.stream import process_streaming_response
-from .._utils.timeout import with_timeout
+from .._utils.timeout import http_timeout, with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
@@ -436,7 +436,7 @@ class AsyncDaytona:
                 sandbox_data.disk = params.resources.disk
                 sandbox_data.gpu = params.resources.gpu
 
-        response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
+        response = await self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=http_timeout(timeout))
 
         if response.state == SandboxState.PENDING_BUILD and on_snapshot_create_logs:
             build_logs_url = (await self._sandbox_api.get_build_logs_url(response.id)).url
