@@ -36,6 +36,7 @@ type CreateSnapshotRequestDTO struct {
 type CreateSnapshotResponseDTO struct {
 	Name         string `json:"name" example:"myapp-v1.0"`
 	SnapshotPath string `json:"snapshotPath" example:"snapshots/myapp-v1.0.qcow2"`
+	S3Path       string `json:"s3Path,omitempty" example:"s3://bucket/org123/myapp-v1.0"` // S3 path if uploaded
 	SizeBytes    int64  `json:"sizeBytes" example:"15032385536"`
 	LiveMode     bool   `json:"liveMode" example:"false"` // Which mode was used
 } //	@name	CreateSnapshotResponseDTO

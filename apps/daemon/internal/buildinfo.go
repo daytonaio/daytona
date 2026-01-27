@@ -4,5 +4,7 @@
 package internal
 
 var (
-	Version = "v0.0.0-dev"
+	Version     = "v0.0.0-dev"
+	BuildNumber = "0"
+	BuildTime   = "unknown"
 )

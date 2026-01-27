@@ -4,3 +4,4 @@
 package config
 
 const TOOLBOX_API_PORT = 2280
+const DASHBOARD_PORT = 6090

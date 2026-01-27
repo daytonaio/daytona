@@ -145,7 +145,7 @@ func (c *Client) PushSnapshot(ctx context.Context, request dto.PushSnapshotReque
 	return nil, nil
 }
 
-// CreateSnapshot creates a snapshot of a sandbox
+// CreateSnapshot creates a snapshot of a sandbox and uploads it to S3
 func (c *Client) CreateSnapshot(ctx context.Context, request dto.CreateSnapshotRequestDTO) (*dto.CreateSnapshotResponseDTO, error) {
 	log.Infof("Creating snapshot '%s' from sandbox '%s' (live=%v)", request.Name, request.SandboxId, request.Live)
 
@@ -169,10 +169,30 @@ func (c *Client) CreateSnapshot(ctx context.Context, request dto.CreateSnapshotR
 		fmt.Sscanf(sizeOutput, "%d", &sizeBytes)
 	}
 
-	return &dto.CreateSnapshotResponseDTO{
+	response := &dto.CreateSnapshotResponseDTO{
 		Name:         request.Name,
 		SnapshotPath: snapshotPath,
 		SizeBytes:    sizeBytes,
 		LiveMode:     request.Live,
-	}, nil
+	}
+
+	// Upload to S3 if configured
+	if c.s3Uploader != nil && c.s3Uploader.IsConfigured() {
+		log.Infof("Uploading snapshot '%s' to S3 (org: %s)", request.Name, request.OrganizationId)
+
+		uploadResult, err := c.s3Uploader.UploadSnapshot(ctx, snapshotPath, request.OrganizationId, request.Name)
+		if err != nil {
+			log.Errorf("Failed to upload snapshot to S3: %v", err)
+			return nil, fmt.Errorf("snapshot created locally but failed to upload to S3: %w", err)
+		}
+
+		response.S3Path = uploadResult.S3Path
+		response.SizeBytes = uploadResult.TotalSize // Update with actual uploaded size
+		log.Infof("Snapshot uploaded to S3: %s (%d bytes in %v)",
+			uploadResult.S3Path, uploadResult.TotalSize, uploadResult.Duration)
+	} else {
+		log.Warn("S3 not configured - snapshot stored locally only")
+	}
+
+	return response, nil
 }

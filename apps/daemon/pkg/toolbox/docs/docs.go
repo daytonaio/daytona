@@ -1959,6 +1959,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/memory-stats": {
+            "get": {
+                "description": "Get current memory usage statistics from /proc/meminfo",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "info"
+                ],
+                "summary": "Get memory statistics",
+                "operationId": "GetMemoryStats",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/MemoryStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/port": {
             "get": {
                 "description": "Get a list of all currently active ports",
@@ -3425,6 +3455,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "line": {
+                    "type": "integer"
+                }
+            }
+        },
+        "MemoryStatsResponse": {
+            "type": "object",
+            "properties": {
+                "buffersKiB": {
+                    "type": "integer"
+                },
+                "cachedKiB": {
+                    "type": "integer"
+                },
+                "memAvailableKiB": {
+                    "type": "integer"
+                },
+                "memFreeKiB": {
+                    "type": "integer"
+                },
+                "memTotalKiB": {
                     "type": "integer"
                 }
             }

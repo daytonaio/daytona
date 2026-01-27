@@ -55,6 +55,8 @@ type ClientConfig struct {
 	TapPoolEnabled bool
 	// TapPoolSize is the number of TAPs to keep ready in the pool
 	TapPoolSize int
+	// S3 configuration for snapshot storage
+	S3Config S3Config
 }
 
 // Client is a Cloud Hypervisor API client
@@ -67,6 +69,7 @@ type Client struct {
 	tapPool      *TapPool
 	ipPool       *IPPool
 	netnsPool    *NetNSPool
+	s3Uploader   *S3Uploader
 
 	// SSHHost is the remote host for SSH-based operations (exported for proxy)
 	SSHHost string
@@ -140,6 +143,17 @@ func NewClient(config ClientConfig) (*Client, error) {
 	// Initialize network namespace pool
 	c.netnsPool = NewNetNSPool(c)
 
+	// Initialize S3 uploader (if configured)
+	s3Uploader, err := NewS3Uploader(context.Background(), config.S3Config, c)
+	if err != nil {
+		log.Warnf("Failed to initialize S3 uploader: %v", err)
+	} else {
+		c.s3Uploader = s3Uploader
+		if s3Uploader.IsConfigured() {
+			log.Info("S3 uploader initialized successfully")
+		}
+	}
+
 	return c, nil
 }
 
@@ -161,6 +175,11 @@ func (c *Client) InitializeNetNSPool(ctx context.Context) error {
 // GetNetNSPool returns the network namespace pool
 func (c *Client) GetNetNSPool() *NetNSPool {
 	return c.netnsPool
+}
+
+// GetS3Uploader returns the S3 uploader
+func (c *Client) GetS3Uploader() *S3Uploader {
+	return c.s3Uploader
 }
 
 // StartTapPool starts the TAP pool background service

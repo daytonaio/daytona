@@ -184,7 +184,7 @@ cp /var/lib/cloud-hypervisor/sandboxes/golden-source/disk.qcow2 \
 ### Snapshots & Images
 
 - [ ] Pull snapshot from S3 (stub)
-- [ ] Push snapshot to S3 (stub)
+- [x] Push snapshot to S3 (uploads to `{bucket}/{orgId}/{snapshotName}/`)
 - [ ] Build snapshot from Dockerfile (stub)
 - [ ] Tag image (stub)
 
@@ -352,7 +352,7 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 
 ## Known Issues
 
-1. **S3 integration missing** - Snapshot push/pull not implemented
+1. **S3 pull not implemented** - Snapshot pull from S3 not yet implemented (push works)
 2. **GPU passthrough untested** - VFIO code exists but needs testing
 3. **Port conflicts** - SSH gateway (port 2220) may conflict with runner-win if both running
 4. **Fork FD passing** - TAP FD passing via SCM_RIGHTS returns 400 from CH; falls back to cold restore (which still works with memory state)
@@ -360,7 +360,7 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 
 ## Next Steps
 
-1. **S3 Snapshots** - Implement push/pull for snapshot portability
+1. **S3 Pull** - Implement snapshot pull from S3 for portability
 2. **GPU Testing** - Test VFIO passthrough with actual GPUs
 3. **Fork FD Passing** - Investigate CH API format for proper SCM_RIGHTS FD passing
 4. **Testing** - End-to-end tests with actual workloads

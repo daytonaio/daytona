@@ -65,6 +65,13 @@ func main() {
 		TapDeleteScript: cfg.CHTapDeleteScript,
 		TapPoolEnabled:  cfg.TapPoolEnabled,
 		TapPoolSize:     cfg.TapPoolSize,
+		S3Config: cloudhypervisor.S3Config{
+			Region:          cfg.AWSRegion,
+			EndpointUrl:     cfg.AWSEndpointUrl,
+			AccessKeyId:     cfg.AWSAccessKeyId,
+			SecretAccessKey: cfg.AWSSecretAccessKey,
+			Bucket:          cfg.AWSDefaultBucket,
+		},
 	})
 	if err != nil {
 		log.Fatalf("Failed to create Cloud Hypervisor client: %v", err)
@@ -99,6 +106,11 @@ func main() {
 		log.Infof("  Remote mode: SSH to %s", cfg.CHSSHHost)
 	} else {
 		log.Infof("  Local mode")
+	}
+	if cfg.AWSDefaultBucket != "" {
+		log.Infof("  S3 bucket: %s (region: %s)", cfg.AWSDefaultBucket, cfg.AWSRegion)
+	} else {
+		log.Info("  S3: not configured (snapshots stored locally only)")
 	}
 
 	// Initialize IP pool (loads existing allocations)

@@ -40,9 +40,17 @@
           "GOOS": "linux",
           "CGO_ENABLED": "0"
         },
-        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
+        "flags": [
+          "-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}' -X 'github.com/daytonaio/daemon/internal.BuildNumber=$(cat {projectRoot}/BUILD_NUMBER)' -X 'github.com/daytonaio/daemon/internal.BuildTime=$(date -u +%Y-%m-%dT%H:%M:%SZ)'\""
+        ]
       },
-      "dependsOn": ["prepare"]
+      "dependsOn": ["prepare", "increment-build"]
+    },
+    "increment-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "echo $(($(cat {projectRoot}/BUILD_NUMBER) + 1)) > {projectRoot}/BUILD_NUMBER"
+      }
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",

@@ -18,3 +18,4 @@ libs/sdk-typescript
 libs/api-client-python
 libs/api-client-python-async
 Dockerfile
+BUILD_NUMBER

@@ -107,7 +107,9 @@ func (s *Server) GetUserHomeDir(ctx *gin.Context) {
 //	@id				GetVersion
 func (s *Server) GetVersion(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
-		"version": internal.Version,
+		"version":     internal.Version,
+		"buildNumber": internal.BuildNumber,
+		"buildTime":   internal.BuildTime,
 	})
 }
 
@@ -352,6 +354,15 @@ func (s *Server) Start() error {
 	}
 
 	go portDetector.Start(context.Background())
+
+	// Start recording dashboard server
+	recordingsDir := path.Join(configDir, "recordings")
+	dashboardServer := computeruse.NewDashboardServer(recordingsDir, config.TOOLBOX_API_PORT)
+	go func() {
+		if err := dashboardServer.Start(); err != nil {
+			log.Errorf("Dashboard server error: %v", err)
+		}
+	}()
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),

@@ -3,6 +3,11 @@ module github.com/daytonaio/runner-ch
 go 1.24.0
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.32.7
+	github.com/aws/aws-sdk-go-v2/config v1.28.7
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.48
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.43
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.71.1
 	github.com/coreos/go-iptables v0.8.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/validator/v10 v10.27.0

@@ -81,6 +81,17 @@ The binary will be at:
 - Using nx: `dist/apps/daemon/daemon-amd64`
 - Using go build: `apps/daemon/daemon-amd64`
 
+### Build SSH Backdoor (Optional but Recommended)
+
+The SSH backdoor provides reliable VM access for debugging and updates:
+
+```bash
+cd apps/ssh-backdoor
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ssh-backdoor ./cmd/main.go
+```
+
+The binary will be at: `apps/ssh-backdoor/ssh-backdoor`
+
 ## Step 3: Create the Golden Image
 
 ### Option A: Flattened Single Image (Recommended)
@@ -367,6 +378,16 @@ The daemon listens on port **2280** by default. Key environment variables:
 |----------|-------------|---------|
 | `TOOLBOX_API_PORT` | API port | 2280 |
 | `HOME` | Home directory | /root |
+| `DAYTONA_SANDBOX_USER` | User context for operations | root |
+
+### Service Ports
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Daemon API | 2280 | Toolbox REST API |
+| Daemon SSH | 22220 | Daemon's built-in SSH server |
+| Recording Dashboard | 6090 | Screen recording web UI |
+| SSH Backdoor | 2222 | Minimal SSH for debugging (password: `sandbox-ssh`) |
 
 ## VNC Desktop Support (noVNC)
 
@@ -611,6 +632,165 @@ journalctl -u daytona-daemon -f
    cat /var/lib/misc/dnsmasq.leases
    ```
 
+## SSH Backdoor for VM Access
+
+The SSH backdoor provides reliable root access to VMs for debugging and updates, bypassing potential issues with the daemon's process execution API (which can fail in warm snapshots due to page cache corruption).
+
+### Overview
+
+| Component | Port | Description |
+|-----------|------|-------------|
+| ssh-backdoor | 2222 | Minimal SSH server with password auth |
+
+**Credentials:**
+
+- **Port:** 2222
+- **User:** root (or any user - not validated)
+- **Password:** `sandbox-ssh`
+
+### Building the SSH Backdoor
+
+```bash
+cd /workspaces/daytona/apps/ssh-backdoor
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ssh-backdoor ./cmd/main.go
+```
+
+### Installing in Golden Image
+
+#### Option A: Via virt-customize (Cold Image)
+
+```bash
+SNAP_DIR=/var/lib/cloud-hypervisor/snapshots/ubuntu-base.X
+
+# Copy binary
+virt-copy-in -a $SNAP_DIR/disk.qcow2 /path/to/ssh-backdoor /usr/local/bin/
+
+# Create systemd service
+cat > /tmp/ssh-backdoor.service << 'EOF'
+[Unit]
+Description=SSH Backdoor Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ssh-backdoor
+Restart=always
+RestartSec=3
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+virt-copy-in -a $SNAP_DIR/disk.qcow2 /tmp/ssh-backdoor.service /etc/systemd/system/
+
+# Enable service
+virt-customize -a $SNAP_DIR/disk.qcow2 \
+  --run-command 'chmod +x /usr/local/bin/ssh-backdoor' \
+  --run-command 'systemctl enable ssh-backdoor.service'
+```
+
+#### Option B: Via Daemon API (Running VM)
+
+```bash
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# Upload binary via files API
+curl -X POST "http://localhost:3005/sandboxes/$VM_ID/toolbox/files/upload?path=/home/daytona/ssh-backdoor" \
+  -F "file=@/path/to/ssh-backdoor"
+
+# Install and enable
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo cp /home/daytona/ssh-backdoor /usr/local/bin/ssh-backdoor"}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo chmod +x /usr/local/bin/ssh-backdoor"}'
+
+# Create and install service file (upload via files API, then copy)
+# ... similar to Option A service file ...
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo systemctl daemon-reload"}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo systemctl enable ssh-backdoor"}'
+
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo systemctl start ssh-backdoor"}'
+```
+
+### Using the SSH Backdoor
+
+#### From Runner Host
+
+```bash
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# Test connectivity
+nsenter --net=/var/run/netns/$NS nc -zv 192.168.0.2 2222
+
+# SSH into VM
+nsenter --net=/var/run/netns/$NS sshpass -p 'sandbox-ssh' \
+  ssh -o StrictHostKeyChecking=no -p 2222 root@192.168.0.2 'whoami'
+
+# Copy files to VM
+nsenter --net=/var/run/netns/$NS sshpass -p 'sandbox-ssh' \
+  scp -o StrictHostKeyChecking=no -P 2222 /path/to/file root@192.168.0.2:/tmp/
+```
+
+#### Interactive Session
+
+```bash
+nsenter --net=/var/run/netns/$NS sshpass -p 'sandbox-ssh' \
+  ssh -o StrictHostKeyChecking=no -p 2222 root@192.168.0.2
+```
+
+### Warm Snapshot Considerations
+
+For warm snapshots, the SSH backdoor service must be **running** when the snapshot is taken. If it's only enabled but not started, new VMs from the snapshot won't have the backdoor running.
+
+```bash
+# Ensure service is running before taking snapshot
+nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+  -H "Content-Type: application/json" \
+  -d '{"command":"sudo systemctl start ssh-backdoor"}'
+
+# Verify
+nsenter --net=/var/run/netns/$NS nc -zv 192.168.0.2 2222
+# Should return: Connection to 192.168.0.2 2222 port [tcp/*] succeeded!
+
+# Now take the snapshot
+```
+
+### Troubleshooting
+
+1. **Connection refused on port 2222**: Service not running
+
+   ```bash
+   # Start manually via daemon API or check service status
+   nsenter --net=/var/run/netns/$NS curl -s -X POST http://192.168.0.2:2280/process/execute \
+     -H "Content-Type: application/json" \
+     -d '{"command":"systemctl status ssh-backdoor"}'
+   ```
+
+2. **Host key verification failed**: Clear old host key
+
+   ```bash
+   ssh-keygen -f '/root/.ssh/known_hosts' -R '[192.168.0.2]:2222'
+   ```
+
+3. **Permission denied**: Ensure password is exactly `sandbox-ssh`
+
+---
+
 ## Updating Existing Golden Images (Warm Snapshots)
 
 When you need to update the daemon binary in an existing warm snapshot (which includes memory state), follow this process. This is more complex than creating a new image because the warm snapshot contains the page cache with the old binary.
@@ -620,6 +800,7 @@ When you need to update the daemon binary in an existing warm snapshot (which in
 - A running VM created from the current golden snapshot
 - The new daemon binary built for linux/amd64
 - Access to the runner host
+- **Recommended:** SSH backdoor installed in the snapshot
 
 ### Step 1: Copy New Daemon to Runner Host
 
@@ -633,6 +814,45 @@ scp dist/apps/daemon/daemon-amd64 root@<runner-host>:/tmp/daemon-new
 ```
 
 ### Step 2: Update Daemon in Running VM
+
+#### Method A: Via SSH Backdoor (Recommended)
+
+The SSH backdoor provides reliable file transfer and command execution, bypassing potential issues with the daemon's API in warm snapshots.
+
+```bash
+VM_ID="your-vm-id"
+NS="ns-${VM_ID:0:8}"
+
+# Copy daemon binary to VM via SCP
+nsenter --net=/var/run/netns/$NS sshpass -p 'sandbox-ssh' \
+  scp -o StrictHostKeyChecking=no -P 2222 /tmp/daemon-new root@192.168.0.2:/tmp/daytona-daemon
+
+# SSH in and update
+nsenter --net=/var/run/netns/$NS sshpass -p 'sandbox-ssh' \
+  ssh -o StrictHostKeyChecking=no -p 2222 root@192.168.0.2 '
+    # Stop daemon
+    systemctl stop daytona-daemon || true
+    pkill -9 daytona-daemon || true
+    
+    # Replace binary
+    cp /tmp/daytona-daemon /usr/local/bin/daytona-daemon
+    chmod +x /usr/local/bin/daytona-daemon
+    rm /tmp/daytona-daemon
+    
+    # Start daemon (run as daytona user)
+    su - daytona -c "HOME=/home/daytona DAYTONA_SANDBOX_USER=daytona nohup /usr/local/bin/daytona-daemon > /home/daytona/daemon.log 2>&1 &"
+    
+    sleep 3
+    ps aux | grep daytona-daemon | grep -v grep
+  '
+
+# Verify daemon is working
+nsenter --net=/var/run/netns/$NS curl -s http://192.168.0.2:2280/version
+```
+
+**Note:** Running the daemon manually (not via systemd) avoids issues with stuck systemd cgroups from warm snapshots.
+
+#### Method B: Via Daemon API with Direct I/O
 
 The key challenge is that warm snapshots restore the kernel's page cache. Even if you update the disk, `systemctl restart` will load the cached (old) binary. Use **direct I/O** to bypass the page cache:
 
@@ -861,3 +1081,4 @@ Always keep at least the previous version available for rollback.
 - [Ubuntu Cloud Images](https://cloud-images.ubuntu.com/)
 - [QEMU qcow2 format](https://qemu-project.gitlab.io/qemu/system/images.html)
 - [libguestfs tools](https://libguestfs.org/)
+- SSH Backdoor source: `apps/ssh-backdoor/` in this repository

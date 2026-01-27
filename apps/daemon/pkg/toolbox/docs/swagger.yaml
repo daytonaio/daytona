@@ -499,6 +499,19 @@ definitions:
       - file
       - line
     type: object
+  MemoryStatsResponse:
+    properties:
+      buffersKiB:
+        type: integer
+      cachedKiB:
+        type: integer
+      memAvailableKiB:
+        type: integer
+      memFreeKiB:
+        type: integer
+      memTotalKiB:
+        type: integer
+    type: object
   MouseClickRequest:
     properties:
       button:
@@ -2189,6 +2202,26 @@ paths:
       summary: Get workspace symbols
       tags:
         - lsp
+  /memory-stats:
+    get:
+      description: Get current memory usage statistics from /proc/meminfo
+      operationId: GetMemoryStats
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/MemoryStatsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get memory statistics
+      tags:
+        - info
   /port:
     get:
       description: Get a list of all currently active ports
