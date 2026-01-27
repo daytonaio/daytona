@@ -94,7 +94,7 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		default:
 			metrics, err := c.collect(ctx)
 			if err != nil {
-				c.log.Warn("Failed to collect metrics", slog.Any("error", err))
+				c.log.Error("Failed to collect metrics", "error", err)
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -181,7 +181,7 @@ func (c *Collector) snapshotCPUUsage(ctx context.Context) {
 			// Add a new CPU snapshot to the ring buffer
 			cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
 			if err != nil {
-				c.log.Warn("Failed to collect next CPU usage ring", slog.Any("error", err))
+				c.log.Warn("Failed to collect next CPU usage ring", "error", err)
 				continue
 			}
 
@@ -235,7 +235,7 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 		case <-ticker.C:
 			containers, err := c.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
 			if err != nil {
-				c.log.Error("Error listing containers when getting allocated resources", slog.Any("error", err))
+				c.log.Error("Error listing containers when getting allocated resources", "error", err)
 				continue
 			}
 

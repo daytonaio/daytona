@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types/container"
-	log "github.com/sirupsen/logrus"
 )
 
 // normalizePath removes all trailing slashes from a path to ensure consistent comparison.
@@ -41,8 +40,8 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 
 	for _, dir := range mountDirs {
 		if !inUse[normalizePath(dir)] {
-			log.Infof("Cleaning orphaned volume mount: %s", dir)
-			d.unmountAndRemoveDir(dir)
+			d.log.InfoContext(ctx, "Cleaning orphaned volume mount", "path", dir)
+			d.unmountAndRemoveDir(ctx, dir)
 		}
 	}
 }
@@ -69,7 +68,7 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool
 	return inUse
 }
 
-func (d *DockerClient) unmountAndRemoveDir(path string) {
+func (d *DockerClient) unmountAndRemoveDir(ctx context.Context, path string) {
 	base := filepath.Join(getVolumeMountBasePath(), volumeMountPrefix)
 	cleanPath := filepath.Clean(path)
 	if !strings.HasPrefix(cleanPath, base) {
@@ -78,12 +77,12 @@ func (d *DockerClient) unmountAndRemoveDir(path string) {
 
 	if d.isDirectoryMounted(cleanPath) {
 		if err := exec.Command("umount", cleanPath).Run(); err != nil {
-			log.Errorf("Failed to unmount %s: %v", cleanPath, err)
+			d.log.ErrorContext(ctx, "Failed to unmount directory", "path", cleanPath, "error", err)
 			return
 		}
 	}
 
 	if err := os.RemoveAll(cleanPath); err != nil {
-		log.Errorf("Failed to remove %s: %v", cleanPath, err)
+		d.log.ErrorContext(ctx, "Failed to remove directory", "path", cleanPath, "error", err)
 	}
 }

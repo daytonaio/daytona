@@ -6,18 +6,19 @@ package controllers
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"strings"
 
 	"github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/gorilla/websocket"
 )
 
 func ProxyCommandLogsStream(ctx *gin.Context) {
+	reqCtx := ctx.Request.Context()
 	targetURL, extraHeaders, err := getProxyTarget(ctx)
 	if err != nil {
 		// Error already sent to the context
@@ -61,14 +62,14 @@ func ProxyCommandLogsStream(ctx *gin.Context) {
 				if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 					return
 				}
-				log.Errorf("Error reading message: %v", err)
+				slog.ErrorContext(reqCtx, "Error reading message", "error", err)
 				ws.Close()
 				return
 			}
 
 			_, err = ctx.Writer.Write(msg)
 			if err != nil {
-				log.Errorf("Error writing message: %v", err)
+				slog.ErrorContext(reqCtx, "Error writing message", "error", err)
 				ws.Close()
 				return
 			}

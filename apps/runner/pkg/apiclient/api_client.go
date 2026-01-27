@@ -8,6 +8,7 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/cmd/runner/config"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var apiClient *apiclient.APIClient
@@ -39,7 +40,7 @@ func GetApiClient() (*apiclient.APIClient, error) {
 	newApiClient = apiclient.NewAPIClient(clientConfig)
 
 	newApiClient.GetConfig().HTTPClient = &http.Client{
-		Transport: http.DefaultTransport,
+		Transport: otelhttp.NewTransport(http.DefaultTransport),
 	}
 
 	apiClient = newApiClient

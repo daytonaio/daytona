@@ -13,8 +13,6 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // RecoverFromStorageLimit attempts to recover a sandbox from storage limit issues
@@ -41,8 +39,16 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	newExpansion := currentExpansion + increment
 	newStorageQuota := originalStorageQuota + newExpansion
 
-	log.Infof("Storage recovery for sandbox %s: original=%.2fGB, current=%.2fGB, currentExpansion=%.2fGB, increment=%.2fGB, newExpansion=%.2fGB, newTotal=%.2fGB, max=%.2fGB",
-		sandboxId, originalStorageQuota, currentStorage, currentExpansion, increment, newExpansion, newStorageQuota, maxExpansion)
+	d.log.InfoContext(ctx, "Sandbox storage recovery",
+		"sandboxId", sandboxId,
+		"originalStorageQuota", originalStorageQuota,
+		"currentStorage", currentStorage,
+		"currentExpansion", currentExpansion,
+		"increment", increment,
+		"newExpansion", newExpansion,
+		"newStorageQuota", newStorageQuota,
+		"maxExpansion", maxExpansion,
+	)
 
 	// Validate expansion limit
 	if newExpansion > maxExpansion {
@@ -53,19 +59,19 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	if originalContainer.GraphDriver.Name == "overlay2" {
 		if upperDir, ok := originalContainer.GraphDriver.Data["UpperDir"]; ok {
 			overlayDiffPath = upperDir
-			log.Debugf("Overlay2 UpperDir: %s", overlayDiffPath)
+			d.log.DebugContext(ctx, "Overlay UpperDir Path", "overlay", overlayDiffPath)
 		}
 	}
 
 	if originalContainer.State.Running {
-		log.Info("Stopping sandbox")
+		d.log.InfoContext(ctx, "Stopping sandbox", "sandboxId", sandboxId)
 		err = d.stopContainerWithRetry(ctx, sandboxId, 2)
 		if err != nil {
 			return fmt.Errorf("failed to stop sandbox: %w", err)
 		}
 	}
 
-	log.Info("Creating new container with expanded storage")
+	d.log.InfoContext(ctx, "Creating new container with expanded storage", "sandboxId", sandboxId)
 
 	// Get filesystem type to determine if we can use storage-opt
 	info, err := d.apiClient.Info(ctx)
@@ -83,7 +89,7 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	// Rename container after validation checks to reduce error handling complexity
 	timestamp := time.Now().Unix()
 	oldName := fmt.Sprintf("%s-recovery-%d", sandboxId, timestamp)
-	log.Debugf("Renaming container to %s", oldName)
+	d.log.DebugContext(ctx, "Renaming container", "oldName", oldName)
 
 	err = d.apiClient.ContainerRename(ctx, sandboxId, oldName)
 	if err != nil {
@@ -95,8 +101,12 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 		newHostConfig.StorageOpt = make(map[string]string)
 	}
 	newHostConfig.StorageOpt["size"] = fmt.Sprintf("%d", newStorageBytes)
-	log.Infof("Setting storage to %d bytes (%.2fGB) on %s filesystem",
-		newStorageBytes, float64(newStorageBytes)/(1024*1024*1024), filesystem)
+
+	d.log.InfoContext(ctx, "Setting storage size on filesystem",
+		"sizeBytes", newStorageBytes,
+		"sizeGB", float64(newStorageBytes)/(1024*1024*1024),
+		"filesystem", filesystem,
+	)
 
 	err = utils.RetryWithExponentialBackoff(
 		ctx,
@@ -129,30 +139,30 @@ func (d *DockerClient) RecoverFromStorageLimit(ctx context.Context, sandboxId st
 	// Copy data directly between overlay2 layers (no need to start container)
 	// The API will trigger the normal start flow through SandboxManager
 	if overlayDiffPath != "" {
-		log.Info("Copying data directly between overlay2 layers using rsync")
+		d.log.InfoContext(ctx, "Copying data directly between overlay2 layers using rsync")
 		err = d.copyContainerOverlayData(ctx, overlayDiffPath, sandboxId)
 		if err != nil {
-			log.Errorf("Failed to copy overlay data: %v", err)
-			log.Warnf("Old container preserved as %s for manual data recovery", oldName)
+			d.log.ErrorContext(ctx, "Failed to copy overlay data", "error", err)
+			d.log.WarnContext(ctx, "Old container preserved for manual data recovery", "oldName", oldName)
 			_ = d.apiClient.ContainerRemove(ctx, sandboxId, container.RemoveOptions{Force: true})
 			_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
 			return fmt.Errorf("failed to copy data: %w", err)
 		}
-		log.Debugf("Data copy completed")
+		d.log.DebugContext(ctx, "Data copy completed")
 	} else {
-		log.Warn("Could not determine old container overlay2 path, skipping data copy")
+		d.log.WarnContext(ctx, "Could not determine old container overlay2 path, skipping data copy")
 	}
 
 	// Remove old container after successful data copy
-	log.Debugf("Removing old container %s", oldName)
+	d.log.DebugContext(ctx, "Removing old container", "oldName", oldName)
 	err = d.apiClient.ContainerRemove(ctx, oldName, container.RemoveOptions{Force: true})
 	if err != nil {
-		log.Warnf("Failed to remove old container %s: %v", oldName, err)
+		d.log.WarnContext(ctx, "Failed to remove old container", "oldName", oldName, "error", err)
 	}
 
 	// Note: Container is now stopped. The API will emit a STARTED event
 	// which will trigger the normal start flow through SandboxManager
-	log.Info("Storage expansion completed - container ready to be started by SandboxManager")
+	d.log.InfoContext(ctx, "Storage expansion completed - container ready to be started by SandboxManager", "sandboxId", sandboxId)
 
 	return nil
 }
@@ -170,17 +180,16 @@ func (d *DockerClient) copyContainerOverlayData(ctx context.Context, oldContaine
 	if newContainer.GraphDriver.Name == "overlay2" {
 		if upperDir, ok := newContainer.GraphDriver.Data["UpperDir"]; ok {
 			newUpperDir = upperDir
-			log.Debugf("New container overlay2 UpperDir: %s", newUpperDir)
+			d.log.DebugContext(ctx, "New container overlay2 UpperDir", "upperDir", newUpperDir)
 		}
 	}
 
 	if newUpperDir == "" {
-		log.Warn("Could not determine new container overlay2 path, skipping data copy")
+		d.log.WarnContext(ctx, "Could not determine new container overlay2 path, skipping data copy")
 		return nil
 	}
 
-	log.Debugf("Copying overlay data from %s to %s", oldContainerOverlayPath, newUpperDir)
-
+	d.log.DebugContext(ctx, "Copying overlay data", "source", oldContainerOverlayPath, "destination", newUpperDir)
 	// Use rsync with timeout to copy data
 	copyCtx, cancel := context.WithTimeout(ctx, 5*time.Minute)
 	defer cancel()
