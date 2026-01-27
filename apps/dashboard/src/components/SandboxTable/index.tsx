@@ -17,7 +17,7 @@ import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytona
 import { flexRender } from '@tanstack/react-table'
 import { CommandIcon, Container, XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { Pagination } from '../Pagination'
@@ -123,12 +123,35 @@ export function SandboxTable({
     table.toggleAllRowsSelected(false)
   }
 
+  const toggleAllRowsSelected = useCallback(
+    (selected: boolean) => {
+      if (selected) {
+        for (const row of table.getRowModel().rows) {
+          const selectDisabled = sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED
+          if (!selectDisabled) {
+            row.toggleSelected(true)
+          }
+        }
+      } else {
+        table.toggleAllRowsSelected(selected)
+      }
+    },
+    [sandboxIsLoading, table],
+  )
+
+  const selectableCount = useMemo(() => {
+    return table
+      .getRowModel()
+      .rows.filter((row) => !sandboxIsLoading[row.original.id] && row.original.state !== SandboxState.DESTROYED).length
+  }, [sandboxIsLoading, table])
+
   useSandboxCommands({
     writePermitted,
     deletePermitted,
     selectedCount,
     totalCount,
-    toggleAllRowsSelected: table.toggleAllRowsSelected,
+    selectableCount,
+    toggleAllRowsSelected,
     bulkActionCounts,
     onDelete: () => setPendingBulkAction(BulkAction.Delete),
     onStart: () => setPendingBulkAction(BulkAction.Start),

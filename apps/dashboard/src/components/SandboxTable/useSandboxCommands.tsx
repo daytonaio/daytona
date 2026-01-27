@@ -14,6 +14,7 @@ interface UseSandboxCommandsProps {
   deletePermitted: boolean
   selectedCount: number
   totalCount: number
+  selectableCount: number
   toggleAllRowsSelected: (selected: boolean) => void
   bulkActionCounts: BulkActionCounts
   onDelete: () => void
@@ -26,6 +27,7 @@ export function useSandboxCommands({
   writePermitted,
   deletePermitted,
   selectedCount,
+  selectableCount,
   totalCount,
   toggleAllRowsSelected,
   bulkActionCounts,
@@ -37,7 +39,7 @@ export function useSandboxCommands({
   const rootCommands: CommandConfig[] = useMemo(() => {
     const commands: CommandConfig[] = []
 
-    if (totalCount !== selectedCount) {
+    if (selectableCount !== selectedCount) {
       commands.push({
         id: 'select-all-sandboxes',
         label: 'Select All Sandboxes',
@@ -96,7 +98,7 @@ export function useSandboxCommands({
     return commands
   }, [
     selectedCount,
-    totalCount,
+    selectableCount,
     toggleAllRowsSelected,
     writePermitted,
     deletePermitted,
