@@ -2,45 +2,181 @@
 title: プレビューと認証
 ---
 
-import { Tabs, TabItem } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-ポート範囲 `3000-9999` でHTTPトラフィックを待ち受けるプロセスは、プレビューリンクで公開して確認できます。
+Daytona SDK は、サンドボックスにアクセスするためのプレビューリンクを生成するメソッドを提供します。ポート 3000～9999 で HTTP トラフィックを待ち受けているプロセスは、プレビューできます。
 
-プレビューリンクの形式はポート番号とサンドボックス（Sandbox）IDの組み合わせです。例:
-`https://3000-sandbox-123456.proxy.daytona.work`
+Daytona では、プレビュー URL に対して 2 つの方式を提供しており、それぞれ異なる認証メカニズムを使用します。**Standard Preview URL** と **Signed Preview URL** です。
 
-サンドボックスの `public` プロパティが `true` の場合、これらのリンクは一般公開されます。そうでない場合、プレビューリンクにアクセスできるのは当該サンドボックスの組織（Organization）ユーザーのみです。
+## 認証 \{#authentication\}
 
-プログラムからアクセスする場合（例: `curl`）、プレビュートークン（x-daytona-preview-token）をヘッダーに指定してプレビューURLへアクセスします:
+サンドボックスの `public` プロパティが `true` の場合、プレビューリンクは認証なしで誰でもアクセスできます。そうでない場合は、認証が必要です。
 
-```bash
-curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
-https://3000-sandbox-123456.proxy.daytona.work
-```
+プライベートなサンドボックスでは、認証方法はプレビューURLの種類によって異なります。
 
-特定のポートに対応するプレビューリンクとトークンを取得するには、SDKのメソッドを使用します:
+## 標準プレビュー URL \{#standard-preview-url\}
+
+標準プレビュー URL は、URL 構成内にサンドボックス ID を使用し、ヘッダー経由で送信される別途発行の認証トークンを必要とします。
+
+**URL 構成:** `https://{port}-{sandboxId}.{daytonaProxyDomain}`
+
+**仕組み:**
+
+* URL にポートとサンドボックス ID が含まれる
+* 別途認証トークンが発行される
+* `x-daytona-preview-token` リクエストヘッダーでトークンを送信する必要がある
+* サンドボックスが再起動するとトークンは自動的にリセットされる
+
+**利用する場面:**
+
+* HTTP ヘッダーを制御できるプログラムからのアクセスや API 連携
+* ヘッダーによるトークン管理が容易な社内ツール
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    preview_info = sandbox.get_preview_link(3000)
 
-preview_info = sandbox.get_preview_link(3000)
+    print(f"URL: {preview_info.url}")
+    print(f"Token: {preview_info.token}")
 
-print(f"Preview link url: {preview_info.url}")
-print(f"Preview link token: {preview_info.token}")
+    # Use with requests
+    import requests
+    response = requests.get(
+        preview_info.url,
+        headers={"x-daytona-preview-token": preview_info.token}
+    )
+    ```
+  </TabItem>
 
-```
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const previewInfo = await sandbox.getPreviewLink(3000);
 
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+    console.log(`URL: ${previewInfo.url}`);
+    console.log(`Token: ${previewInfo.token}`);
 
-const previewInfo = await sandbox.getPreviewLink(3000);
+    // Use with fetch
+    const response = await fetch(previewInfo.url, {
+      headers: { 'x-daytona-preview-token': previewInfo.token }
+    });
+    ```
+  </TabItem>
 
-console.log(`Preview link url: ${previewInfo.url}`);
-console.log(`Preview link token: ${previewInfo.token}`);
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
 
-```
+    preview_info = sandbox.preview_url(3000)
 
-</TabItem>
+    puts "Preview link url: #{preview_info.url}"
+    puts "Preview link token: #{preview_info.token}"
+
+    ```
+  </TabItem>
 </Tabs>
+
+参照: [get&#95;preview&#95;link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink), [preview&#95;url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
+
+### 認証 \{#authentication\}
+
+URL にサンドボックス ID を用い、認証はヘッダーで行います。
+
+```bash
+# URL構造: port-sandboxid.domain
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+  https://3000-sandbox-123456.proxy.daytona.work
+```
+
+## 署名付きプレビューURL \{#signed-preview-url\}
+
+署名付きプレビューURLは、認証トークンをURL構造そのものに直接埋め込み、別途認証ヘッダーを用意する必要をなくします。
+
+**URL 構造:** `https://{port}-{token}.{daytonaProxyDomain}`
+
+**動作概要:**
+
+* URL にはポートと署名付き認証トークン（サンドボックスIDの代わり）が含まれる
+* 認証情報はURLに埋め込まれており、ヘッダーは不要
+* トークンの有効期限をカスタム設定可能（デフォルトは60秒）
+* トークンは有効期限に達するまで、サンドボックスの再起動をまたいで有効
+* 必要に応じて、有効期限前に手動でトークンを失効させることも可能
+
+**利用シーン:**
+
+* カスタムヘッダーを簡単に設定できないユーザーとのプレビューリンク共有
+* iframe やメールなど、ヘッダー制御がしづらいコンテキストへの埋め込み
+* 明示的な有効期限を持つ、時間制限付き共有リンクの作成
+* カスタムヘッダーをサポートしない Webhook や外部連携での利用
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 3600秒（1時間）で期限切れになる署名付きプレビューURLを作成
+    signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+
+    print(f"URL: {signed_url.url}")  # トークンはURLに埋め込まれている
+    print(f"Token: {signed_url.token}")  # アクセスを取り消す際に使用できる
+
+    # そのまま利用可能 - ヘッダーは不要
+    import requests
+    response = requests.get(signed_url.url)
+
+    # 必要に応じて、有効期限前にトークンを失効させる
+    sandbox.expire_signed_preview_url(3000, signed_url.token)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 3600秒（1時間）で期限切れになる署名付きプレビューURLを作成
+    const signedUrl = await sandbox.getSignedPreviewUrl(3000, 3600);
+
+    console.log(`URL: ${signedUrl.url}`);  // トークンはURLに埋め込まれている
+    console.log(`Token: ${signedUrl.token}`);  // アクセスを取り消す際に使用できる
+
+    // そのまま利用可能 - ヘッダーは不要
+    const response = await fetch(signedUrl.url);
+
+    // 必要に応じて、有効期限前にトークンを失効させる
+    await sandbox.expireSignedPreviewUrl(3000, signedUrl.token);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 3600秒（1時間）で期限切れになる署名付きプレビューURLを作成
+    signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+
+    puts "URL: #{signed_url.url}"
+    puts "Token: #{signed_url.token}"
+    ```
+  </TabItem>
+</Tabs>
+
+参照: [create&#95;signed&#95;preview&#95;url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl), [preview&#95;url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
+
+### 認証 \{#authentication\}
+
+この URL ではサンドボックス ID の代わりにトークンが埋め込まれているため、ヘッダーは不要です:
+
+```bash
+# URL 構造: port-token.domain (トークンは URL 自体に含まれています)
+curl https://3000-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.proxy.daytona.work
+```
+
+:::tip
+Daytona の URL ではなく独自ドメイン配下でプレビューを提供したい場合は、[Custom Domain/Authentication](/docs/ja/custom-domain-authentication) セクションを参照してください。
+:::
+
+## 警告ページ \{#warning-page\}
+
+ブラウザでプレビューリンクを初めて開くと、警告ページが表示されます。
+この警告は、プレビューURLにアクセスする際の潜在的なリスクをユーザーに知らせるためのセキュリティ対策です。
+
+警告ページは、ブラウザでプレビューリンクを読み込む場合にのみ表示されます。
+
+この警告を回避するには、次のいずれかを行ってください:
+
+* `X-Daytona-Skip-Preview-Warning: true` ヘッダーを送信する
+* [Tier 3](/docs/ja/limits) にアップグレードする
+* 独自の [カスタムプレビュープロキシ](/docs/ja/custom-domain-authentication) をデプロイする
