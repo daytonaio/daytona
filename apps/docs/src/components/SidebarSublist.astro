@@ -1,5 +1,5 @@
 ---
-import { comparePaths } from '../utils/navigation'
+import { isActiveOrParentPath } from '../utils/navigation'
 import { NavigationCategory } from '../content/config'
 import arrowUpRightIcon from '@assets/sidebar/arrow-up-right.svg?raw'
 
@@ -62,7 +62,7 @@ const { sublist = [], nested, collapse = false } = Astro.props
             class:list={[
               entry.attrs?.class,
               { context: entry.context },
-              { active: comparePaths(entry.href, Astro.url.pathname) },
+              { active: isActiveOrParentPath(entry.href, Astro.url.pathname) },
             ]}
           >
             {entry.attrs?.icon && (

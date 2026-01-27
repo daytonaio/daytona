@@ -1,20 +1,26 @@
 ---
-title: Computer Use - Linux
-description: Programmatic desktop automation and GUI interaction for Linux environments using Daytona.
+title: Computer Use
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-**Computer Use** enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+Computer Use enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
 
-We recommend using this instance type for most tasks.
+We recommend using this instance type if you need to interact with **Linux**, **Windows**, or **macOS** applications.
 
-## Common Use Cases
+:::caution[Alpha Access Required]
+Computer Use for macOS and Windows is currently in **private alpha**. To request access, please fill out the [Computer Use Windows Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog) or [Computer Use macOS Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944). Once submitted, our team will review your request and reach out with setup instructions and availability details.
+:::
 
-- **GUI Application Testing** - Automate interactions with desktop applications, click buttons, fill forms, and validate UI behavior
-- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing  
-- **Desktop Automation** - Automate repetitive desktop tasks, file management through GUI, and complex workflows
-- **Human-in-the-Loop** - Access the VNC interface directly from the [Daytona Dashboard](https://app.daytona.io/dashboard/sandboxes) to manually control and interact with the desktop environment alongside automated scripts
+## Common use cases
+
+- **GUI Application Testing** - Automate interactions with native macOS applications, click buttons, fill forms, and validate UI behavior
+- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing
+- **Desktop Automation** - Automate repetitive macOS desktop tasks, file management through GUI, and complex workflows
+
+## Getting started
+
+Once you have access to the Computer Use Alpha, you'll be able to programmatically control desktop environments within your Daytona sandboxes. The functionality will include mouse operations, keyboard automation, screenshot capture, and display management specifically optimized for the operating system of your choice.
 
 ## SDK References
 
@@ -35,10 +41,10 @@ Complete API reference for computer use operations in Python (sync & async).
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
-    from daytona import Daytona
+    from daytona import Daytona, DaytonaConfig
 
     # Initialize using environment variables (recommended)
-    daytona = Daytona()
+    daytona = DaytonaConfig()
     # Or explicitly configure:
     # daytona = Daytona(
     #     api_key=os.getenv('DAYTONA_API_KEY'),
@@ -126,8 +132,3 @@ Complete API reference for computer use operations in Python (sync & async).
 DAYTONA_API_KEY=your-api-key-here
 DAYTONA_API_URL=https://app.daytona.io/api
 ```
-
-## Related Documentation
-
-- [Computer Use - Windows](/docs/en/computer-use-windows)  
-- [Computer Use - macOS](/docs/en/computer-use-macos)

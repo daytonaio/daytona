@@ -28,6 +28,7 @@ export enum NavigationCategory {
   GENERAL,
   TYPESCRIPT_SDK,
   PYTHON_SDK,
+  GUIDES,
   RUBY_SDK,
 }
 
@@ -144,20 +145,28 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/configuration', locale),
-          label: t('sidebarconfig.configuration'),
-          description: t('sidebarconfig.configurationDescription'),
-          attrs: {
-            icon: 'git-commit.svg',
-          },
-        },
-        {
-          type: 'link',
           href: localizePath('/docs/sandboxes', locale),
           label: t('sidebarconfig.sandboxes'),
           description: t('sidebarconfig.sandboxesDescription'),
           attrs: {
             icon: 'rectangle.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.sandbox'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/configuration', locale),
+          label: t('sidebarconfig.environment'),
+          description: t('sidebarconfig.configurationDescription'),
+          attrs: {
+            icon: 'git-commit.svg',
           },
         },
         {
@@ -185,6 +194,370 @@ export const getSidebarConfig = (
           description: t('sidebarconfig.volumesDescription'),
           attrs: {
             icon: 'container-registries.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/regions', locale),
+          label: t('sidebarconfig.regions'),
+          description: t('sidebarconfig.regionsDescription'),
+          attrs: {
+            icon: 'globe.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.agentTools'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/file-system-operations', locale),
+          label: t('sidebarconfig.fileSystem'),
+          description: t('sidebarconfig.fileSystemDescription'),
+          attrs: {
+            icon: 'folder.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/git-operations', locale),
+          label: t('sidebarconfig.gitOperations'),
+          description: t('sidebarconfig.gitOperationsDescription'),
+          attrs: {
+            icon: 'git-branch.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/language-server-protocol', locale),
+          label: t('sidebarconfig.languageServerProtocol'),
+          description: t('sidebarconfig.languageServerProtocolDescription'),
+          attrs: {
+            icon: 'pulse.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/process-code-execution', locale),
+          label: t('sidebarconfig.processCodeExecution'),
+          description: t('sidebarconfig.processCodeExecutionDescription'),
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/pty', locale),
+          label: t('sidebarconfig.pty'),
+          description: t('sidebarconfig.ptyDescription'),
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/log-streaming', locale),
+          label: t('sidebarconfig.logStreaming'),
+          description: t('sidebarconfig.logStreamingDescription'),
+          attrs: {
+            icon: 'log2.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/mcp', locale),
+          label: t('sidebarconfig.mcpServer'),
+          disablePagination: true,
+          attrs: {
+            icon: 'server.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/computer-use', locale),
+          label: t('sidebarconfig.computerUse'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.humanTools'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/web-terminal', locale),
+          label: t('sidebarconfig.webTerminal'),
+          description: t('sidebarconfig.webTerminalDescription'),
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/ssh-access', locale),
+          label: t('sidebarconfig.sshAccess'),
+          description: t('sidebarconfig.sshAccessDescription'),
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/vpn-connections', locale),
+          label: t('sidebarconfig.vpnConnection'),
+          description: t('sidebarconfig.vpnConnectionDescription'),
+          attrs: {
+            icon: 'shield.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/preview', locale),
+          label: t('sidebarconfig.preview'),
+          description: t('sidebarconfig.previewDescription'),
+          attrs: {
+            icon: 'globe.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.systemTools'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/webhooks', locale),
+          label: t('sidebarconfig.webhooks'),
+          description: t('sidebarconfig.webhooksDescription'),
+          attrs: {
+            icon: 'webhook.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/network-limits', locale),
+          label: t('sidebarconfig.networkLimits'),
+          description: t('sidebarconfig.networkLimitsDescription'),
+          attrs: {
+            icon: 'network-limits.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.integrations'),
+      homePageHref: localizePath('/docs/guides', locale),
+      category: NavigationCategory.GUIDES,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/guides', locale),
+          label: t('sidebarconfig.guides'),
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/data-analysis-with-ai', locale),
+          label: t('sidebarconfig.dataAnalysis'),
+          disablePagination: true,
+          attrs: {
+            icon: 'chart.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/agentkit/inngest-agentkit-coding-agent',
+            locale
+          ),
+          label: t('sidebarconfig.inngestAgentKit'),
+          disablePagination: true,
+          attrs: {
+            icon: 'inngest-agentkit.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/opencode/opencode-web-agent',
+            locale
+          ),
+          label: t('sidebarconfig.opencode'),
+          disablePagination: true,
+          attrs: {
+            icon: 'opencode.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/langchain/langchain-data-analysis',
+            locale
+          ),
+          label: t('sidebarconfig.langchain'),
+          disablePagination: true,
+          attrs: {
+            icon: 'langchain.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/mastra/mastra-coding-agent', locale),
+          label: t('sidebarconfig.mastra'),
+          disablePagination: true,
+          attrs: {
+            icon: 'mastra.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/claude', locale),
+          label: t('sidebarconfig.claude'),
+          disablePagination: true,
+          attrs: {
+            icon: 'claude.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-agent-sdk-interactive-terminal-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.claude'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-agent-sdk-connect-service-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.claude'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/claude/claude-code-run-tasks-stream-logs-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.claude'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/codex/codex-sdk-interactive-terminal-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.codex'),
+          disablePagination: true,
+          attrs: {
+            icon: 'openai.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/google-adk-code-generator', locale),
+          label: t('sidebarconfig.googleAdk'),
+          disablePagination: true,
+          attrs: {
+            icon: 'google-adk.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/letta-code/letta-code-agent',
+            locale
+          ),
+          label: t('sidebarconfig.lettacode'),
+          disablePagination: true,
+          attrs: {
+            icon: 'letta-code.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/reinforcement-learning/trl-grpo-training',
+            locale
+          ),
+          label: t('sidebarconfig.trlGrpo'),
+          disablePagination: true,
+          attrs: {
+            icon: 'trl-logo.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/recursive-language-models', locale),
+          label: t('sidebarconfig.recursiveLms'),
+          disablePagination: true,
+          attrs: {
+            icon: 'recursive-lm.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.security'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/audit-logs', locale),
+          label: t('sidebarconfig.auditLogs'),
+          description: t('sidebarconfig.auditLogsDescription'),
+          attrs: {
+            icon: 'log.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.deployments'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/oss-deployment', locale),
+          label: t('sidebarconfig.ossDeployment'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/runners', locale),
+          label: t('sidebarconfig.customerManagedCompute'),
+          description: t('sidebarconfig.customerManagedComputeDescription'),
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
           },
         },
       ],
@@ -244,363 +617,17 @@ export const getSidebarConfig = (
     },
     {
       type: 'group',
-      label: t('sidebarconfig.agentToolbox'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/file-system-operations', locale),
-          label: t('sidebarconfig.fileSystem'),
-          description: t('sidebarconfig.fileSystemDescription'),
-          attrs: {
-            icon: 'folder.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/git-operations', locale),
-          label: t('sidebarconfig.gitOperations'),
-          description: t('sidebarconfig.gitOperationsDescription'),
-          attrs: {
-            icon: 'git-branch.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/language-server-protocol', locale),
-          label: t('sidebarconfig.languageServerProtocol'),
-          description: t('sidebarconfig.languageServerProtocolDescription'),
-          attrs: {
-            icon: 'pulse.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/process-code-execution', locale),
-          label: t('sidebarconfig.processCodeExecution'),
-          description: t('sidebarconfig.processCodeExecutionDescription'),
-          attrs: {
-            icon: 'computer.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/pty', locale),
-          label: t('sidebarconfig.pty'),
-          description: t('sidebarconfig.ptyDescription'),
-          attrs: {
-            icon: 'terminal.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/log-streaming', locale),
-          label: t('sidebarconfig.logStreaming'),
-          description: t('sidebarconfig.logStreamingDescription'),
-          attrs: {
-            icon: 'log2.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.computerUse'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/computer-use-linux', locale),
-          label: t('sidebarconfig.computerUseLinux'),
-          description: t('sidebarconfig.computerUseLinuxDescription'),
-          attrs: {
-            icon: 'linux.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/computer-use-windows', locale),
-          label: t('sidebarconfig.computerUseWindows'),
-          description: t('sidebarconfig.computerUseWindowsDescription'),
-          attrs: {
-            icon: 'windows.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/computer-use-macos', locale),
-          label: t('sidebarconfig.computerUseMacOS'),
-          description: t('sidebarconfig.computerUseMacOSDescription'),
-          attrs: {
-            icon: 'apple.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.other'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/web-terminal', locale),
-          label: t('sidebarconfig.webTerminal'),
-          description: t('sidebarconfig.webTerminalDescription'),
-          attrs: {
-            icon: 'terminal.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/network-limits', locale),
-          label: t('sidebarconfig.networkLimits'),
-          description: t('sidebarconfig.networkLimitsDescription'),
-          attrs: {
-            icon: 'network-limits.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/ssh-access', locale),
-          label: t('sidebarconfig.sshAccess'),
-          description: t('sidebarconfig.sshAccessDescription'),
-          attrs: {
-            icon: 'terminal.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/vpn-connections', locale),
-          label: t('sidebarconfig.vpnConnection'),
-          description: t('sidebarconfig.vpnConnectionDescription'),
-          attrs: {
-            icon: 'shield.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/preview-and-authentication', locale),
-          label: t('sidebarconfig.previewAuthentication'),
-          description: t('sidebarconfig.previewAuthenticationDescription'),
-          attrs: {
-            icon: 'globe.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/custom-domain-authentication', locale),
-          label: t('sidebarconfig.customDomainAuthentication'),
-          description: t('sidebarconfig.customDomainAuthenticationDescription'),
-          attrs: {
-            icon: 'proxy-link.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/audit-logs', locale),
-          label: t('sidebarconfig.auditLogs'),
-          description: t('sidebarconfig.auditLogsDescription'),
-          attrs: {
-            icon: 'log.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/webhooks', locale),
-          label: t('sidebarconfig.webhooks'),
-          description: t('sidebarconfig.webhooksDescription'),
-          attrs: {
-            icon: 'webhook.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/regions-and-runners', locale),
-          label: t('sidebarconfig.regionsAndRunners'),
-          description: t('sidebarconfig.regionsAndRunnersDescription'),
-          attrs: {
-            icon: 'globe.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/mcp', locale),
-          label: t('sidebarconfig.mcpServer'),
-          disablePagination: true,
-          attrs: {
-            icon: 'server.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/data-analysis-with-ai', locale),
-          label: t('sidebarconfig.dataAnalysis'),
-          disablePagination: true,
-          attrs: {
-            icon: 'chart.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.integrations'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/inngest-agentkit-coding-agent', locale),
-          label: t('sidebarconfig.inngestAgentKit'),
-          disablePagination: true,
-          attrs: {
-            icon: 'inngest-agentkit.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/opencode-web-agent', locale),
-          label: t('sidebarconfig.opencode'),
-          disablePagination: true,
-          attrs: {
-            icon: 'opencode.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/langchain-data-analysis', locale),
-          label: t('sidebarconfig.langchain'),
-          disablePagination: true,
-          attrs: {
-            icon: 'langchain.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/mastra-coding-agent', locale),
-          label: t('sidebarconfig.mastra'),
-          disablePagination: true,
-          attrs: {
-            icon: 'mastra.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/claude', locale),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          attrs: {
-            icon: 'claude.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-agent-sdk-interactive-terminal-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-agent-sdk-connect-service-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/claude-code-run-tasks-stream-logs-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.claude'),
-          disablePagination: true,
-          hideInSidebar: true,
-        },
-        {
-          type: 'link',
-          href: localizePath(
-            '/docs/codex-sdk-interactive-terminal-sandbox',
-            locale
-          ),
-          label: t('sidebarconfig.codex'),
-          disablePagination: true,
-          attrs: {
-            icon: 'openai.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/google-adk-code-generator', locale),
-          label: t('sidebarconfig.googleAdk'),
-          disablePagination: true,
-          attrs: {
-            icon: 'google-adk.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/letta-code-agent', locale),
-          label: t('sidebarconfig.lettacode'),
-          disablePagination: true,
-          attrs: {
-            icon: 'letta-code.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/trl-grpo-training', locale),
-          label: t('sidebarconfig.trlGrpo'),
-          disablePagination: true,
-          attrs: {
-            icon: 'trl-logo.svg',
-          },
-        },
-        {
-          type: 'link',
-          href: localizePath('/docs/recursive-language-models', locale),
-          label: t('sidebarconfig.recursiveLms'),
-          disablePagination: true,
-          attrs: {
-            icon: 'recursive-lm.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
-      label: t('sidebarconfig.deployments'),
-      homePageHref: localizePath('/docs', locale),
-      category: NavigationCategory.GENERAL,
-      entries: [
-        {
-          type: 'link',
-          href: localizePath('/docs/oss-deployment', locale),
-          label: t('sidebarconfig.ossDeployment'),
-          disablePagination: true,
-          attrs: {
-            icon: 'computer.svg',
-          },
-        },
-      ],
-    },
-    {
-      type: 'group',
       label: t('sidebarconfig.tsSdkReference'),
       homePageHref: localizePath('/docs/typescript-sdk', locale),
       category: NavigationCategory.TYPESCRIPT_SDK,
       autopopulateFromDir: localizePath('/docs/typescript-sdk', locale),
       entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/typescript-sdk', locale),
+          label: t('sidebarconfig.tsSdkReference'),
+          hideInSidebar: true,
+        },
         {
           type: 'link',
           href: localizePath('/docs/typescript-sdk/daytona', locale),
@@ -619,7 +646,14 @@ export const getSidebarConfig = (
       homePageHref: localizePath('/docs/python-sdk', locale),
       category: NavigationCategory.PYTHON_SDK,
       autopopulateFromDir: localizePath('/docs/python-sdk/common', locale),
-      entries: [],
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/python-sdk', locale),
+          label: t('sidebarconfig.pythonSdkReference'),
+          hideInSidebar: true,
+        },
+      ],
     },
     {
       type: 'group',
