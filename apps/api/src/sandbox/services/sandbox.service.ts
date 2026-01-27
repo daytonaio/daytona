@@ -1345,7 +1345,7 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
     // Validate sandbox is in a valid state for resize
-    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
+    if (sandbox.state !== SandboxState.STARTED && sandbox.state !== SandboxState.STOPPED) {
       throw new BadRequestError('Sandbox must be in STARTED or STOPPED state to resize')
     }
 
@@ -1353,9 +1353,9 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    // If no resize parameters provided, return sandbox as-is
+    // If no resize parameters provided, throw error
     if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
-      return sandbox
+      throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
     }
 
     // Disk resize requires stopped sandbox (cold resize only)
@@ -1369,17 +1369,17 @@ export class SandboxService {
     // Validate hot resize constraints
     if (isHotResize) {
       if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
-        throw new BadRequestError('CPU can not be decreased during hot resize')
+        throw new BadRequestError('Sandbox must be in stopped state to decrease the number of CPU cores')
       }
 
       if (resizeDto.memory !== undefined && resizeDto.memory < sandbox.mem) {
-        throw new BadRequestError('Memory can not be decreased during hot resize')
+        throw new BadRequestError('Sandbox must be in stopped state to decrease memory')
       }
     }
 
     // Disk can only be increased (never decreased)
     if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
-      throw new BadRequestError('Disk size can only be increased, not decreased')
+      throw new BadRequestError('Sandbox disk size cannot be decreased')
     }
 
     // Calculate new resource values
@@ -1412,25 +1412,31 @@ export class SandboxService {
       )
     }
 
-    // Store previous state before transitioning to RESIZING
-    // desiredState stays as STARTED or STOPPED (tells us what to return to)
-    const previousState = sandbox.state
-    sandbox.state = SandboxState.RESIZING
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
-
-    // Get runner and perform resize
+    // Get runner and validate before changing state
     if (!sandbox.runnerId) {
-      sandbox.state = previousState
-      await this.sandboxRepository.save(sandbox)
       throw new BadRequestError('Sandbox has no runner assigned')
     }
 
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (!runner) {
-      sandbox.state = previousState
-      await this.sandboxRepository.save(sandbox)
       throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
     }
+
+    // Capture the previous state before transitioning to RESIZING (STARTED or STOPPED)
+    const previousState =
+      sandbox.state === SandboxState.STARTED
+        ? SandboxState.STARTED
+        : sandbox.state === SandboxState.STOPPED
+          ? SandboxState.STOPPED
+          : null
+
+    if (!previousState) {
+      throw new BadRequestError('Sandbox must be in STARTED or STOPPED state to resize')
+    }
+
+    // Now transition to RESIZING state
+    sandbox.state = SandboxState.RESIZING
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
 
     try {
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
@@ -1453,7 +1459,7 @@ export class SandboxService {
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
-      // Return to previous stable state on error
+      // Return to previous state on error
       sandbox.state = previousState
       await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
       throw error
