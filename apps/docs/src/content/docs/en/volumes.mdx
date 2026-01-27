@@ -37,13 +37,21 @@ The following snippets demonstrate how to create a volume using the Daytona SDK:
     ```
 
   </TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    daytona = Daytona::Daytona.new
+    volume = daytona.volume.create("my-awesome-volume")
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**volume.get (Python SDK)**](/docs/python-sdk/sync/volume/#volumeserviceget)
 >
 > [**volume.get (TypeScript SDK)**](/docs/typescript-sdk/volume/#get)
+>
+> [**volume.get (Ruby SDK)**](/docs/ruby-sdk/volume/#get)
 
 ## Mount Volumes
 
@@ -118,13 +126,48 @@ const sandbox2 = await daytona.create({
 ```
 
 </TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a new volume or get an existing one
+volume = daytona.volume.get('my-volume', create: true)
+
+# Mount the volume to the sandbox
+mount_dir = '/home/daytona/volume'
+
+params = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(volume_id: volume.id, mount_path: mount_dir)]
+)
+sandbox = daytona.create(params)
+
+# Mount a specific subpath within the volume
+# This is useful for isolating data or implementing multi-tenancy
+params2 = Daytona::CreateSandboxFromSnapshotParams.new(
+  language: Daytona::CodeLanguage::PYTHON,
+  volumes: [DaytonaApiClient::SandboxVolume.new(
+    volume_id: volume.id,
+    mount_path: mount_dir,
+    subpath: 'users/alice'
+  )]
+)
+sandbox2 = daytona.create(params2)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/) and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
 >
 > [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+>
+> [**CreateSandboxFromSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
 
 ## Work with Volumes
 
@@ -160,9 +203,20 @@ The following snippet demonstrate how to read from and write to a volume:
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Write to a file in the mounted volume using the Sandbox file system API
+    sandbox.fs.upload_file('Hello from Daytona volume!', '/home/daytona/volume/example.txt')
+
+    # When you're done with the sandbox, you can remove it
+    # The volume will persist even after the sandbox is removed
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references.
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references.
 
 ## Get a Volume by name
 
@@ -190,11 +244,13 @@ console.log(`Volume ${volume.name} is in state ${volume.state}`)
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**volume.get (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeserviceget)
 >
 > [**volume.get (TypeScript SDK)**](/docs/en/typescript-sdk/volume#get)
+>
+> [**volume.get (Ruby SDK)**](/docs/en/ruby-sdk/volume#get)
 
 ## List Volumes
 
@@ -223,11 +279,13 @@ volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`))
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**volume.list (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeservicelist)
 >
 > [**volume.list (TypeScript SDK)**](/docs/en/typescript-sdk/volume#list)
+>
+> [**volume.list (Ruby SDK)**](/docs/en/ruby-sdk/volume#list)
 
 ## Delete Volumes
 
@@ -252,13 +310,21 @@ await daytona.volume.delete(volume)
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+volume = daytona.volume.get('my-volume', create: true)
+daytona.volume.delete(volume)
+```
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**volume.delete (Python SDK)**](/docs/python-sdk/sync/volume/#volumeservicedelete)
 >
 > [**volume.delete (TypeScript SDK)**](/docs/typescript-sdk/volume/#delete)
+>
+> [**volume.delete (Ruby SDK)**](/docs/ruby-sdk/volume/#delete)
 
 ## Limitations
 

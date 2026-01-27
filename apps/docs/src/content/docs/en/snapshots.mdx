@@ -24,7 +24,7 @@ Daytona provides options to create snapshots using [public images](#using-public
 Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 :::
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#create) and [TypeScript SDK](/docs/typescript-sdk/snapshot#create) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#create), [TypeScript SDK](/docs/typescript-sdk/snapshot#create), and [Ruby SDK](/docs/ruby-sdk/snapshot#create) references:
 
 > [**create (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotservicecreate)
 >
@@ -205,14 +205,40 @@ await daytona.snapshot.create(
 )
 ```
 
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a snapshot with custom resources
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: 'my-snapshot',
+    image: Daytona::Image.debian_slim('3.12'),
+    resources: Daytona::Resources.new(
+      cpu: 2,
+      memory: 4,
+      disk: 8
+    )
+  ),
+  on_logs: proc { |chunk| puts chunk }
+)
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk) and [TypeScript SDK](/docs/typescript-sdk) references:
+For more information, see the [Python SDK](/docs/python-sdk), [TypeScript SDK](/docs/typescript-sdk), and [Ruby SDK](/docs/ruby-sdk) references:
 
 > [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
 >
 > [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
+>
+> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#create)
 
 ### Specifying Region
 
@@ -260,7 +286,31 @@ await daytona.snapshot.create(
 );
 ```
 
-</TabItem>
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a Snapshot with custom resources
+daytona.snapshot.create(
+  Daytona::CreateSnapshotParams.new(
+    name: 'my-snapshot',
+    image: Daytona::Image.debian_slim('3.12'),
+    # All resource parameters are optional:
+    resources: Daytona::Resources.new(
+      cpu: 2,
+      memory: 4,
+      disk: 8
+    )
+  ),
+  on_logs: proc { |chunk| puts chunk }
+)
+```
+
+  </TabItem>
 </Tabs>
 
 ## Get a Snapshot by name
@@ -287,14 +337,26 @@ const snapshot = await daytona.snapshot.get('my-awesome-snapshot')
 console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
 ```
 
-</TabItem>
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get('my-awesome-snapshot')
+puts "#{snapshot.name} (#{snapshot.image_name})"
+```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotget) and [TypeScript SDK](/docs/typescript-sdk/snapshot#get) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotget), [TypeScript SDK](/docs/typescript-sdk/snapshot#get), and [Ruby SDK](/docs/ruby-sdk/snapshot#get) references:
 
 > [**get (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceget)
 >
 > [**get (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#get)
+>
+> [**get (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#get)
 
 ## List Snapshots
 
@@ -324,14 +386,28 @@ result.items.forEach(snapshot =>
 )
 ```
 
-</TabItem>
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+daytona = Daytona::Daytona.new
+result = daytona.snapshot.list(page: 2, limit: 10)
+result.items.each do |snapshot|
+  puts "#{snapshot.name} (#{snapshot.image_name})"
+end
+```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist) and [TypeScript SDK](/docs/typescript-sdk/snapshot#list) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist), [TypeScript SDK](/docs/typescript-sdk/snapshot#list), and [Ruby SDK](/docs/ruby-sdk/snapshot#list) references:
 
 > [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
 >
 > [**list (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#list)
+>
+> [**list (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#list)
 
 ## Activate Snapshots
 
@@ -341,11 +417,13 @@ Snapshots automatically become inactive after 2 weeks of not being used. To acti
 2. Click the three dots at the end of the row for the snapshot you want to activate
 3. Click the **Activate** button
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotactivate) and [TypeScript SDK](/docs/typescript-sdk/snapshot#activate) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotactivate), [TypeScript SDK](/docs/typescript-sdk/snapshot#activate), and [Ruby SDK](/docs/ruby-sdk/snapshot#activate) references:
 
 > [**activate (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate)
 >
 > [**activate (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#activate)
+>
+> [**activate (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#activate)
 
 ## Deactivate Snapshots
 
@@ -379,13 +457,23 @@ await daytona.snapshot.delete("my-awesome-snapshot")
 console.log("Snapshot deleted")
 ```
 </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+```ruby
+daytona = Daytona::Daytona.new
+daytona.snapshot.delete('my-awesome-snapshot')
+puts 'Snapshot deleted'
+```
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/) and [TypeScript SDK](/docs/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/python-sdk/), [TypeScript SDK](/docs/typescript-sdk/), and [Ruby SDK](/docs/ruby-sdk/) references:
 
-> [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
+> [**delete (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotdelete)
 >
-> [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
+> [**delete (TypeScript SDK)**](/docs/typescript-sdk/snapshot#delete)
+>
+> [**delete (Ruby SDK)**](/docs/ruby-sdk/snapshot#delete)
 
 ## Run Docker in a Sandbox
 

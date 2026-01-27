@@ -61,9 +61,20 @@ const response = await fetch(previewInfo.url, {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+
+preview_info = sandbox.preview_url(3000)
+
+puts "Preview link url: #{preview_info.url}"
+puts "Preview link token: #{preview_info.token}"
+
+```
+
+</TabItem>
 </Tabs>
 
-See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink)
+See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
 
 ### Authentication
 
@@ -128,9 +139,18 @@ await sandbox.expireSignedPreviewUrl(3000, signedUrl.token);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create a signed preview URL that expires in 3600 seconds (1 hour)
+signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+
+puts "URL: #{signed_url.url}"
+puts "Token: #{signed_url.token}"
+```
+</TabItem>
 </Tabs>
 
-See: [create_signed_preview_url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl)
+See: [create_signed_preview_url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
 
 ### Authentication
 

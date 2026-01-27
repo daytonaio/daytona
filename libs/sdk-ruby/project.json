@@ -1,0 +1,78 @@
+{
+  "name": "sdk-ruby",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-ruby",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["rm -f *.gem", "bundle install", "gem build daytona.gemspec"],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client-ruby", "toolbox-api-client-ruby"]
+        },
+        "set-version"
+      ]
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ]; then sed -i \"s/VERSION = '[^']*'/VERSION = '$RUBYGEMS_PKG_VERSION'/\" lib/daytona/sdk/version.rb && echo \"Changed version to $RUBYGEMS_PKG_VERSION\"; else echo \"Using version from version.rb\"; fi"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rubocop"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bundle exec rake spec"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["bundle exec rubocop -a --fail-level=E"],
+        "parallel": false
+      }
+    },
+    "docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bash -O extglob -c 'rm -rf ../../apps/docs/src/content/docs/en/ruby-sdk/!(index.mdx)' && bundle exec ruby scripts/generate-docs.rb"
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "mkdir -p ~/.gem && echo \":rubygems: $RUBYGEMS_API_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials",
+          "gem push daytona-*.gem --key rubygems --host https://rubygems.org"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "publish",
+          "projects": ["api-client-ruby", "toolbox-api-client-ruby"]
+        },
+        "build"
+      ]
+    }
+  }
+}

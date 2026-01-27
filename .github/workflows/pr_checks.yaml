@@ -113,6 +113,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - name: Install Ruby dependencies
+        run: |
+          bundle install
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
@@ -123,7 +129,7 @@ jobs:
         run: |
           source "$(poetry env info --path)/bin/activate"
           go install github.com/swaggo/swag/cmd/swag@v1.16.4
-          echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
+          echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           yarn install --immutable
           mkdir -p dist/apps/api
           yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
@@ -148,6 +154,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - name: Install Ruby dependencies
+        run: |
+          bundle install
       - name: Build all
         run: |
           python3 -m pip install poetry==2.1.3

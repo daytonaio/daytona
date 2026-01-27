@@ -84,15 +84,41 @@ Running sandboxes utilize CPU, memory, and disk storage. Every resource is charg
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create a sandbox
+    sandbox = daytona.create
+
+    # Create a sandbox with python
+    params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
+    sandbox = daytona.create(params)
+
+    # Create a sandbox with a custom name
+    params = Daytona::CreateSandboxFromSnapshotParams.new(name: 'my_awesome_sandbox')
+    sandbox = daytona.create(params)
+
+    # Create a sandbox with custom labels
+    params = Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'LABEL' => 'label' })
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
 </Tabs>
 
 To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**create (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonacreate)
 >
 > [**create (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#create)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
 
 ### Resources
 
@@ -149,10 +175,32 @@ To set custom sandbox resources (CPU, memory, and disk space), use the `Resource
     ```
 
   </TabItem>
-All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create a sandbox with custom resources
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromImageParams.new(
+        image: Daytona::Image.debian_slim('3.12'),
+        resources: Daytona::Resources.new(
+          cpu: 2,     # 2 CPU cores
+          memory: 4,  # 4GB RAM
+          disk: 8     # 8GB disk space
+        )
+      )
+    )
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#resources) and [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources) references:
+All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#resources), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), and [Ruby SDK](/docs/en/ruby-sdk/daytona#resources) references:
 
 > [**Resources (Python SDK)**](/docs/en/python-sdk/sync/sandbox#resources)
 >
@@ -195,6 +243,22 @@ To create an ephemeral Sandbox, set the `ephemeral` parameter to `True` when cre
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # Create an ephemeral Sandbox
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      ephemeral: true,
+      auto_stop_interval: 5 # The ephemeral sandbox will be deleted after 5 minutes of inactivity
+    )
+    sandbox = daytona.create(params)
+    ```
+
+  </TabItem>
 </Tabs>
 
 :::note
@@ -208,7 +272,7 @@ By default, network access follows standard security policies, but you can [cust
 
 ## Start Sandboxes
 
-Daytona provides options to start sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/).
+Daytona provides options to start sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the start icon (**▶**) next to the sandbox you want to start.
@@ -235,13 +299,24 @@ Starting sandbox with ID: <sandbox-id>
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
+    # Start Sandbox
+    sandbox.start
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop), [TypeScript SDK](/docs/typescript-sdk/sandbox#stop), and [Ruby SDK](/docs/ruby-sdk/sandbox#start) references:
 
 > [**start (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstart)
 >
 > [**start (TypeScript SDK)**](/docs/typescript-sdk/sandbox#start)
+>
+> [**start (Ruby SDK)**](/docs/ruby-sdk/sandbox#start)
 
 ## List Sandboxes
 
@@ -279,17 +354,35 @@ Daytona provides options to view information about sandboxes (ID, root directory
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Get sandbox ID
+    sandbox_id = sandbox.id
+
+    # Get the root directory of the sandbox user
+    root_dir = sandbox.get_user_home_dir
+
+    # Get the sandbox id, auto-stop interval and state
+    puts sandbox.id
+    puts sandbox.auto_stop_interval
+    puts sandbox.state
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop), [TypeScript SDK](/docs/typescript-sdk/sandbox#stop), and [Ruby SDK](/docs/ruby-sdk/sandbox#list) references:
 
 > [**list (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxlist)
 >
 > [**list (TypeScript SDK)**](/docs/typescript-sdk/sandbox#list)
+>
+> [**list (Ruby SDK)**](/docs/ruby-sdk/sandbox#list)
 
 ## Stop Sandboxes
 
-Daytona provides methods to stop sandboxes using Python and TypeScript.
+Daytona provides methods to stop sandboxes using Python, TypeScript, and Ruby.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the stop icon (**⏹**) next to the sandbox you want to stop.
@@ -338,17 +431,35 @@ The stopped state should be used when a sandbox is expected to be started again 
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
+
+    # Stop sandbox
+    sandbox.stop
+
+    puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    # The sandbox ID can later be used to find the sandbox and start it
+    sandbox = daytona.find_one('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
+
+    # Start sandbox
+    sandbox.start
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop) and [TypeScript SDK](/docs/typescript-sdk/sandbox#stop) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop), [TypeScript SDK](/docs/typescript-sdk/sandbox#stop), and [Ruby SDK](/docs/ruby-sdk/sandbox#stop) references:
 
-> [**stop (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstop), [**stop (TypeScript SDK)**](/docs/typescript-sdk/sandbox#stop)
+> [**stop (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstop), [**stop (TypeScript SDK)**](/docs/typescript-sdk/sandbox#stop), [**stop (Ruby SDK)**](/docs/ruby-sdk/sandbox#stop)
 >
-> [**find_one (Python SDK)**](/docs/python-sdk/sync/daytona#daytonafind_one), [**findOne (TypeScript SDK)**](/docs/typescript-sdk/daytona#findone)
+> [**find_one (Python SDK)**](/docs/python-sdk/sync/daytona#daytonafind_one), [**findOne (TypeScript SDK)**](/docs/typescript-sdk/daytona#findone), [**find_one (Ruby SDK)**](/docs/ruby-sdk/daytona#find_one)
 
 ## Archive Sandboxes
 
-Daytona provides methods to archive sandboxes using Python and TypeScript.
+Daytona provides methods to archive sandboxes using Python, TypeScript, and Ruby.
 
 When sandboxes are archived, the entire filesystem state is moved to very cost-effective object storage, making it possible to keep sandboxes available for an extended period.
 Starting an archived sandbox takes more time than starting a stopped sandbox, depending on its size.
@@ -369,17 +480,26 @@ A sandbox must be stopped before it can be archived, and can be started again in
     await sandbox.archive();
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Archive Sandbox
+    sandbox.archive
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**archive (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxarchive)
 >
 > [**archive (TypeScript SDK)**](/docs/typescript-sdk/sandbox#archive)
+>
+> [**archive (Ruby SDK)**](/docs/ruby-sdk/sandbox#archive)
 
 ## Recover Sandboxes
 
-Daytona provides methods to recover sandboxes using Python and TypeScript.
+Daytona provides methods to recover sandboxes using Python, TypeScript, and Ruby.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -398,13 +518,24 @@ Daytona provides methods to recover sandboxes using Python and TypeScript.
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+
+    ```ruby
+    # Recover sandbox
+    sandbox.recover
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover) and [TypeScript SDK](/docs/typescript-sdk/sandbox#recover) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/typescript-sdk/sandbox#recover), and [Ruby SDK](/docs/ruby-sdk/sandbox#recover) references:
 
 > [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
 >
 > [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
+>
+> [**recover (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#recover)
 
 ### Recover from error state
 
@@ -433,13 +564,25 @@ Recovery actions are not performed automatically because they address errors tha
     }
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable
+      sandbox.recover
+      puts 'Sandbox recovered successfully'
+    end
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover) and [TypeScript SDK](/docs/typescript-sdk/sandbox#recover) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/typescript-sdk/sandbox#recover), and [Ruby SDK](/docs/ruby-sdk/sandbox#recover) references:
 
 > [**recover (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxrecover)
 >
 > [**recover (TypeScript SDK)**](/docs/typescript-sdk/sandbox#recover)
+>
+> [**recover (Ruby SDK)**](/docs/ruby-sdk/sandbox#recover)
 
 ## Delete Sandboxes
 
@@ -466,13 +609,22 @@ Stopping sandbox with ID: <sandbox-id>
     await sandbox.delete();
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Delete sandbox
+    sandbox.delete
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
 > [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
 >
 > [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
+>
+> [**delete (Ruby SDK)**](/docs/ruby-sdk/sandbox#delete)
 
 ## Automated lifecycle management
 
@@ -529,13 +681,27 @@ If the parameter is not set, the default interval of `15` minutes will be used.
     });
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # Disables the auto-stop feature - default is 15 minutes
+        auto_stop_interval: 0
+      )
+    )
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval), and [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_stop_interval) references:
 
 > [**set_auto_stop_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval)
 >
 > [**setAutostopInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautostopinterval)
+>
+> [**set_auto_stop_interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_stop_interval)
 
 ### Auto-archive interval
 
@@ -568,13 +734,27 @@ If the parameter is not set, the default interval of `7 days` days will be used.
     });
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # Auto-archive after a sandbox has been stopped for 1 hour
+        auto_archive_interval: 60
+      )
+    )
+    ```
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_archive_interval) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_archive_interval), and [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_archive_interval) references:
 
 > [**set_auto_archive_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
 >
 > [**setAutoArchiveInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautoarchiveinterval)
+>
+> [**set_auto_archive_interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_archive_interval)
 
 ### Auto-delete interval
 
@@ -622,13 +802,34 @@ If the parameter is not set, the sandbox will not be deleted automatically.
     ```
 
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # Auto-delete after a sandbox has been stopped for 1 hour
+        auto_delete_interval: 60
+      )
+    )
+
+    # Delete the sandbox immediately after it has been stopped
+    sandbox.set_auto_delete_interval(0)
+
+    # Disable auto-deletion
+    sandbox.set_auto_delete_interval(-1)
+    ```
+
+  </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval) and [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_delete_interval) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_delete_interval), and [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_delete_interval) references:
 
 > [**set_auto_delete_interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
 >
 > [**setAutoDeleteInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautodeleteinterval)
+>
+> [**set_auto_delete_interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_delete_interval)
 
 ### Running indefinitely
 
@@ -652,6 +853,18 @@ By default, Daytona Sandboxes auto-stop after 15 minutes of inactivity. To keep 
         // Disables the auto-stop feature - default is 15 minutes
         autoStopInterval: 0,
     });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my_awesome_snapshot',
+        # Disables the auto-stop feature - default is 15 minutes
+        auto_stop_interval: 0
+      )
+    )
     ```
   </TabItem>
 </Tabs>
