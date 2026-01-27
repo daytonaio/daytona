@@ -63,7 +63,10 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 		defer logFile.Close()
 		// Write with STDOUT prefix to maintain log format consistency
 		dataWithPrefix := append(STDOUT_PREFIX, []byte(data)...)
-		logFile.Write(dataWithPrefix)
+		_, err = logFile.Write(dataWithPrefix)
+		if err != nil {
+			log.Errorf("failed to echo input to log file: %v", err)
+		}
 	}
 
 	return nil
