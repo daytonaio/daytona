@@ -1,9 +1,16 @@
 {
-  "2e675b4cced33496.t": "div",
-  "2e675b4cced33496.i": 1,
-  "2e675b4cced33496.c.t": "a",
-  "2e675b4cced33496.c.i": 2,
-  "2e675b4cced33496.c.c": "デモを申し込む",
+  "115c69de3202f664": "開く",
+  "27f0553e7524c8a0.c.c": "サインイン",
+  "27f0553e7524c8a0.c.i": 2,
+  "27f0553e7524c8a0.c.t": "a",
+  "27f0553e7524c8a0.i": 1,
+  "27f0553e7524c8a0.t": "div",
+  "28b93171152b0f3f": "daytona.io を検索",
+  "3bb580b09a50417e": "Perplexityで開く",
   "43b449db9b205d7e": "スター",
-  "28b93171152b0f3f": "daytona.io を検索"
+  "5dfa94e4efa2d341": "Grokで開く",
+  "5f65542db0693bfc": "Windsurfで開く",
+  "baa1c84e5bb50ada": "Claudeで開く",
+  "bec010f9ce8893d7": "Cursorで開く",
+  "c22d10be28202021": "ChatGPTで開く"
 }
