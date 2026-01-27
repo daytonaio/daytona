@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CheckCircleIcon, InfoIcon, WarningIcon, XCircleIcon } from '@phosphor-icons/react'
 import { ExternalToast, toast } from 'sonner'
 
 type ToastId = string | number
@@ -42,7 +41,6 @@ export function createBulkActionToast(initialMessage: string, options?: BulkActi
 
     success(message: string, opts?: BulkActionToastOptions) {
       toast.success(message, {
-        icon: <CheckCircleIcon weight="fill" className="size-4 text-success" />,
         action: null,
         ...opts,
         id,
@@ -51,7 +49,6 @@ export function createBulkActionToast(initialMessage: string, options?: BulkActi
 
     error(message: string, opts?: BulkActionToastOptions) {
       toast.error(message, {
-        icon: <XCircleIcon weight="fill" className="size-4 text-destructive" />,
         action: null,
         ...opts,
         id,
@@ -60,7 +57,6 @@ export function createBulkActionToast(initialMessage: string, options?: BulkActi
 
     warning(message: string, opts?: BulkActionToastOptions) {
       toast.warning(message, {
-        icon: <WarningIcon weight="fill" className="size-4 text-warning" />,
         action: null,
         ...opts,
         id,
@@ -69,7 +65,6 @@ export function createBulkActionToast(initialMessage: string, options?: BulkActi
 
     info(message: string, opts?: BulkActionToastOptions) {
       toast.message(message, {
-        icon: <InfoIcon weight="fill" className="size-4 text-foreground" />,
         action: null,
         ...opts,
         id,
