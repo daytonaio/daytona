@@ -613,14 +613,13 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
   private captureResizeSandbox(
     props: CommonCaptureProps,
     sandboxId: string,
-    body: { cpu?: number; memory?: number; disk?: number; hot?: boolean },
+    body: { cpu?: number; memory?: number; disk?: number },
   ) {
     this.capture('api_sandbox_resized', props, 'api_sandbox_resize_failed', {
       sandbox_id: sandboxId,
       cpu: body?.cpu,
       memory: body?.memory,
       disk: body?.disk,
-      hot: body?.hot,
     })
   }
 

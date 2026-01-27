@@ -458,6 +458,21 @@ export class JobStateHandlerService {
         return
       }
 
+      // Determine the previous state (STARTED or STOPPED based on desiredState)
+      const previousState =
+        sandbox.desiredState === SandboxDesiredState.STARTED
+          ? SandboxState.STARTED
+          : sandbox.desiredState === SandboxDesiredState.STOPPED
+            ? SandboxState.STOPPED
+            : null
+
+      if (!previousState) {
+        this.logger.error(
+          `Sandbox ${sandboxId} has unexpected desiredState ${sandbox.desiredState} for RESIZE_SANDBOX job ${job.id}`,
+        )
+        return
+      }
+
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
         // Update sandbox resources from job payload
@@ -465,19 +480,16 @@ export class JobStateHandlerService {
         sandbox.cpu = payload.cpu ?? sandbox.cpu
         sandbox.mem = payload.memory ?? sandbox.mem
         sandbox.disk = payload.disk ?? sandbox.disk
-        // Transition from RESIZING back to desiredState (STARTED or STOPPED)
-        const newState = sandbox.desiredState as unknown as SandboxState
-        sandbox.state = newState
+        sandbox.state = previousState
         await this.sandboxRepository.save(sandbox)
         this.eventEmitter.emit(
           SandboxEvents.STATE_UPDATED,
-          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, newState),
+          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, previousState),
         )
         return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        // Return to previous stable state (desiredState) on failure
-        sandbox.state = sandbox.desiredState as unknown as SandboxState
+        sandbox.state = previousState
       }
 
       await this.sandboxRepository.save(sandbox)
