@@ -365,6 +365,7 @@ export function comparePaths(path1: string, path2: string): boolean {
 export interface HeaderActiveState {
   isTypescriptSdkActive: boolean
   isPythonSdkActive: boolean
+  isRubySdkActive: boolean
   isApiActive: boolean
   isCliActive: boolean
   isReferencesActive: boolean
@@ -378,6 +379,7 @@ export function getHeaderActiveState(
   const referencePaths = {
     typescriptSdk: `${baseUrl}/en/typescript-sdk`,
     pythonSdk: `${baseUrl}/en/python-sdk`,
+    rubySdk: `${baseUrl}/en/ruby-sdk`,
     api: `${baseUrl}/en/tools/api`,
     cli: `${baseUrl}/en/tools/cli`,
   }
@@ -390,16 +392,25 @@ export function getHeaderActiveState(
     referencePaths.pythonSdk,
     currentPath
   )
+  const isRubySdkActive = isActiveOrParentPath(
+    referencePaths.rubySdk,
+    currentPath
+  )
   const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
   const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
 
   return {
     isTypescriptSdkActive,
     isPythonSdkActive,
+    isRubySdkActive,
     isApiActive,
     isCliActive,
     isReferencesActive:
-      isTypescriptSdkActive || isPythonSdkActive || isApiActive || isCliActive,
+      isTypescriptSdkActive ||
+      isPythonSdkActive ||
+      isRubySdkActive ||
+      isApiActive ||
+      isCliActive,
     isGuidesActive: isActiveOrParentPath(`${baseUrl}/en/guides`, currentPath),
   }
 }

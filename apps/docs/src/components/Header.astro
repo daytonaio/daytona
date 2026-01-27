@@ -27,6 +27,7 @@ const showSearch = algoliaEnabled || import.meta.env.DEV
 const {
   isTypescriptSdkActive,
   isPythonSdkActive,
+  isRubySdkActive,
   isApiActive,
   isCliActive,
   isReferencesActive,
@@ -79,6 +80,13 @@ const {
           >
             <Fragment set:html={packageIcon} />
             {Astro.locals.t('sidebarconfig.pythonSdkReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/ruby-sdk`}
+            class:list={[{ active: isRubySdkActive }]}
+          >
+            <Fragment set:html={packageIcon} />
+            {Astro.locals.t('sidebarconfig.rubySdkReference' as any)}
           </a>
           <a
             href={`${import.meta.env.BASE_URL}/en/tools/api`}
