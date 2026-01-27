@@ -660,7 +660,9 @@ export class SandboxService {
 
       if (existingBuildInfo) {
         sandbox.buildInfo = existingBuildInfo
-        await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
+        if (await this.redisLockProvider.lock(`build-info:${existingBuildInfo.snapshotRef}:update`, 60)) {
+          await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
+        }
       } else {
         const buildInfoEntity = this.buildInfoRepository.create({
           ...createSandboxDto.buildInfo,
