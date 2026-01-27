@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, MoreThanOrEqual, Not, Raw } from 'typeorm'
+import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -248,70 +248,57 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @LogExecution('sync-states')
   async syncStates(): Promise<void> {
     const globalLockKey = 'sync-states'
-    const lockTtl = 10 * 60 // seconds (10 min)
+    const lockTtl = 5 * 60 // seconds
     if (!(await this.redisLockProvider.lock(globalLockKey, lockTtl))) {
       return
     }
 
     try {
-      const queryBuilder = this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .select(['sandbox.id'])
-        .where('sandbox.state NOT IN (:...excludedStates)', {
-          excludedStates: [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED],
-        })
-        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
-        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
-        .orderBy('sandbox."lastActivityAt"', 'DESC')
+      const readyRunners = await this.runnerService.findAllReady()
 
-      const stream = await queryBuilder.stream()
-      let processedCount = 0
-      const maxProcessPerRun = 1000
-      const pendingProcesses: Promise<void>[] = []
+      // Process all runners in parallel, with a limit per runner
+      // This ensures no single runner blocks others from being processed
+      const maxSandboxesPerRunner = 50
 
-      try {
-        await new Promise<void>((resolve, reject) => {
-          stream.on('data', async (row: any) => {
-            if (processedCount >= maxProcessPerRun) {
-              resolve()
-              return
-            }
+      const runnerIds: (string | null)[] = [null, ...readyRunners.map((r) => r.id)]
 
-            const lockKey = getStateChangeLockKey(row.sandbox_id)
+      await Promise.all(
+        runnerIds.map(async (runnerId) => {
+          const sandboxes = await this.sandboxRepository.find({
+            where: {
+              runnerId: runnerId === null ? IsNull() : runnerId,
+              pending: true,
+            },
+            select: ['id'],
+            take: maxSandboxesPerRunner,
+          })
+
+          // Process sandboxes for this runner with concurrency limit
+          const pendingProcesses: Promise<void>[] = []
+          const concurrencyLimit = 10
+
+          for (const sandbox of sandboxes) {
+            const lockKey = getStateChangeLockKey(sandbox.id)
             if (await this.redisLockProvider.isLocked(lockKey)) {
               // Sandbox is already being processed, skip it
-              return
+              continue
             }
 
-            // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id)
+            const processPromise = this.syncInstanceState(sandbox.id)
             pendingProcesses.push(processPromise)
-            processedCount++
 
-            // Limit concurrent processing to avoid overwhelming the system
-            if (pendingProcesses.length >= 10) {
-              stream.pause()
-              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
-                .then(() => stream.resume())
-                .catch(reject)
+            // Limit concurrent processing per runner
+            if (pendingProcesses.length >= concurrencyLimit) {
+              await Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
             }
-          })
+          }
 
-          stream.on('end', () => {
-            Promise.all(pendingProcesses)
-              .then(() => {
-                resolve()
-              })
-              .catch(reject)
-          })
-
-          stream.on('error', reject)
-        })
-      } finally {
-        if (!stream.destroyed) {
-          stream.destroy()
-        }
-      }
+          // Wait for remaining processes for this runner
+          if (pendingProcesses.length > 0) {
+            await Promise.allSettled(pendingProcesses)
+          }
+        }),
+      )
     } finally {
       await this.redisLockProvider.unlock(globalLockKey)
     }
