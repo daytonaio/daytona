@@ -36,16 +36,4 @@ export interface ResizeSandbox {
    * @memberof ResizeSandbox
    */
   disk?: number
-  /**
-   * GPU units to allocate (not supported - will throw error if provided)
-   * @type {number}
-   * @memberof ResizeSandbox
-   */
-  gpu?: number
-  /**
-   * If true, performs hot resize on a running sandbox (only CPU/memory increase allowed). If false, sandbox must be stopped for full resize.
-   * @type {boolean}
-   * @memberof ResizeSandbox
-   */
-  hot?: boolean
 }

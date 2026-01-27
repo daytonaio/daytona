@@ -10389,8 +10389,6 @@ components:
         disk: 20
         memory: 4
         cpu: 2
-        hot: false
-        gpu: 0
       properties:
         cpu:
           description: 'CPU cores to allocate to the sandbox (minimum: 1)'
@@ -10407,17 +10405,6 @@ components:
           example: 20
           minimum: 1
           type: integer
-        gpu:
-          description: GPU units to allocate (not supported - will throw error if
-            provided)
-          example: 0
-          type: integer
-        hot:
-          default: false
-          description: "If true, performs hot resize on a running sandbox (only CPU/memory\
-            \ increase allowed). If false, sandbox must be stopped for full resize."
-          example: false
-          type: boolean
       type: object
     SandboxLabels:
       example:
