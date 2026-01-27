@@ -75,7 +75,8 @@
           "gomarkdoc --template-file file=templates/file.gotxt --template-file example=templates/example.gotxt --template-file func=templates/func.gotxt --template-file type=templates/type.gotxt -o ../../apps/docs/src/content/docs/en/go-sdk/errors.mdx ./pkg/errors",
           "gomarkdoc --template-file file=templates/file.gotxt --template-file example=templates/example.gotxt --template-file func=templates/func.gotxt --template-file type=templates/type.gotxt -o ../../apps/docs/src/content/docs/en/go-sdk/options.mdx ./pkg/options"
         ]
-      }
+      },
+      "dependsOn": ["install-gomarkdoc"]
     },
     "generate": {
       "executor": "nx:run-commands",
@@ -93,6 +94,13 @@
           "git add pkg/daytona/VERSION",
           "git commit -m \"chore(sdk-go): set version to ${VERSION:-v0.0.0-dev}\" || true"
         ]
+      }
+    },
+    "install-gomarkdoc": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "which gomarkdoc || go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest"
       }
     },
     "publish": {
