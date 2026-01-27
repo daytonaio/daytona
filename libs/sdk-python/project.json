@@ -36,13 +36,17 @@
         }
       ]
     },
+    "deps-check": {},
     "build": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
         "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
         "parallel": false
-      }
+      },
+      "cache": true,
+      "inputs": ["pythonLib"],
+      "outputs": ["{projectRoot}/dist/**"]
     },
     "build:_publish": {
       "executor": "nx:run-commands",
@@ -64,14 +68,6 @@
         "parallel": false
       },
       "dependsOn": ["build:_publish"]
-    },
-    "deps-check": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["poetry run deptry .", "poetry lock --regenerate"]
-      },
-      "dependsOn": ["add-api-clients"]
     }
   }
 }

@@ -9,10 +9,9 @@ function findWorkspaceRoot(startPath: string): string {
   const root = resolve(current, '/')
 
   while (current !== root) {
-    const packageJson = join(current, 'package.json')
-    const appsDocs = join(current, 'apps/docs')
+    const nxJson = join(current, 'nx.json')
 
-    if (fs.existsSync(packageJson) && fs.existsSync(appsDocs)) {
+    if (fs.existsSync(nxJson)) {
       return current
     }
 

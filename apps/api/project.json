@@ -9,6 +9,7 @@
       "executor": "@nx/webpack:webpack",
       "options": {
         "outputPath": "dist/apps/api",
+        "deleteOutputPath": false,
         "main": "apps/api/src/main.ts",
         "tsConfig": "apps/api/tsconfig.app.json",
         "generatePackageJson": true,
@@ -30,10 +31,13 @@
           "extractLicenses": true,
           "inspect": false
         }
-      }
+      },
+      "dependsOn": ["openapi"]
     },
     "openapi": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/src/**/*.ts", "!{projectRoot}/src/**/*.spec.ts", "{projectRoot}/tsconfig.app.json"],
       "outputs": ["{workspaceRoot}/dist/apps/api/openapi.json", "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"],
       "options": {
         "commands": [

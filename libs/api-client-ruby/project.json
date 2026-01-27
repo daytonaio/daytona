@@ -12,14 +12,20 @@
         "commands": ["rm -f *.gem", "bundle install", "gem build daytona_api_client.gemspec"],
         "parallel": false
       },
-      "dependsOn": ["set-version"]
+      "dependsOn": ["set-version"],
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/**/*.gem"]
     },
     "set-version": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
         "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ]; then sed -i \"s/VERSION = '[^']*'/VERSION = '$RUBYGEMS_PKG_VERSION'/\" lib/daytona_api_client/version.rb && echo \"Changed version to $RUBYGEMS_PKG_VERSION\"; else echo \"Using version from version.rb\"; fi"
-      }
+      },
+      "cache": true,
+      "inputs": [{ "env": "RUBYGEMS_PKG_VERSION" }, { "env": "VERSION" }],
+      "outputs": ["{projectRoot}/lib/daytona_api_client/version.rb"]
     },
     "lint": {
       "executor": "nx:run-commands",
@@ -39,7 +45,16 @@
           "cd libs/api-client-ruby && bundle exec rubocop -a --fail-level=E"
         ],
         "parallel": false
-      }
+      },
+      "cache": true,
+      "inputs": ["{workspaceRoot}/dist/apps/api/openapi.json"],
+      "outputs": ["{projectRoot}/**/*", "!{projectRoot}/**/*.gem"],
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "api"
+        }
+      ]
     },
     "format": {
       "executor": "nx:run-commands",

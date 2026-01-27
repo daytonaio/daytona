@@ -36,7 +36,10 @@
       "options": {
         "cwd": "{projectRoot}",
         "command": "if [ -n \"$NPM_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${NPM_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; npm version \"$VER\" --allow-same-version && echo \"Changed version to $VER\"; else echo \"Using version from package.json\"; fi"
-      }
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/package.json", { "env": "NPM_PKG_VERSION" }, { "env": "DEFAULT_PACKAGE_VERSION" }],
+      "outputs": ["{projectRoot}/package.json"]
     },
     "publish": {
       "executor": "nx:run-commands",
