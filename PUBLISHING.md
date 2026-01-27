@@ -112,7 +112,7 @@ Ensure these secrets are configured in GitHub repository settings:
 
 Prerelease formats depend on SDK language:
 
-1. For **Typescript** (npm) and **Ruby** (gem) follow semantic versioning ([SemVer](https://semver.org/)): `MAJOR.MINOR.PATCH`
+1. For **Typescript** (npm) follow semantic versioning ([SemVer](https://semver.org/)): `MAJOR.MINOR.PATCH`
 
    For pre-releases, use:
 
