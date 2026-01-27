@@ -163,13 +163,6 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.recoverable
     ```
-- `resizing?` _boolean_ - Whether a resize operation is in progress.
-    
-    ##### Implementation of
-    
-    ```ts
-    SandboxDto.resizing
-    ```
 - `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
     
     ##### Implementation of
@@ -835,7 +828,7 @@ waitForResizeComplete(timeout?: number): Promise<void>
 
 Waits for the Sandbox resize operation to complete.
 
-This method polls the Sandbox status until the resizing flag is cleared.
+This method polls the Sandbox status until the state is no longer 'resizing'.
 
 **Parameters**:
 
