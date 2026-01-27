@@ -578,40 +578,6 @@ export class DockerRegistryService {
     }
   }
 
-  async checkImageExistsInRegistry(imageName: string, registry: DockerRegistry): Promise<boolean> {
-    try {
-      const parsedImage = parseDockerImage(imageName)
-      if (!parsedImage.project || !parsedImage.tag) {
-        throw new Error('Invalid image name format. Expected: [registry]/project/repository:tag')
-      }
-
-      const registryUrl = this.getRegistryUrl(registry)
-      const apiUrl = `${registryUrl}/v2/${parsedImage.project}/${parsedImage.repository}/manifests/${parsedImage.tag}`
-      const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
-
-      const response = await axios({
-        method: 'get',
-        url: apiUrl,
-        headers: {
-          Authorization: `Basic ${encodedCredentials}`,
-        },
-        validateStatus: (status) => status < 500,
-        timeout: AXIOS_TIMEOUT_MS,
-      })
-
-      if (response.status === 200) {
-        this.logger.debug(`Image ${imageName} exists in registry`)
-        return true
-      }
-
-      this.logger.debug(`Image ${imageName} does not exist in registry (status: ${response.status})`)
-      return false
-    } catch (error) {
-      this.logger.error(`Error checking if image ${imageName} exists in registry: ${error.message}`)
-      return false
-    }
-  }
-
   private async deleteRepositoryWithPrefix(
     repository: string,
     prefix: string,

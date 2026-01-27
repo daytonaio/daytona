@@ -664,70 +664,6 @@ export class SandboxStartAction extends SandboxAction {
       throw new Error('No registry found for backup')
     }
 
-    const existingBackups = sandbox.existingBackupSnapshots
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .map((existingSnapshot) => existingSnapshot.snapshotName)
-
-    let validBackup: string | null = null
-    let exists = false
-
-    while (existingBackups.length > 0) {
-      try {
-        if (!validBackup) {
-          //  last snapshot is the current snapshot, so we don't need to check it
-          //  just in case, we'll use the value from the backupSnapshot property
-          validBackup = sandbox.backupSnapshot
-          existingBackups.pop()
-        } else {
-          validBackup = existingBackups.pop()
-        }
-        if (await this.dockerRegistryService.checkImageExistsInRegistry(validBackup, registry)) {
-          exists = true
-          break
-        }
-      } catch (error) {
-        this.logger.error(
-          `Failed to check if backup snapshot ${sandbox.backupSnapshot} exists in registry ${registry.id}:`,
-          error,
-        )
-      }
-    }
-
-    if (!exists) {
-      const restoreBackupSnapshotRetryKey = `restore-backup-snapshot-retry-${sandbox.id}`
-
-      if (!isRecovery) {
-        // Check retry count - allow up to 3 attempts for transient issues
-        const retryCountRaw = await this.redis.get(restoreBackupSnapshotRetryKey)
-        const retryCount = retryCountRaw ? parseInt(retryCountRaw) : 0
-
-        if (retryCount < 3) {
-          // Increment retry count with 10 minute TTL, let syncStates cron pick up the retry later
-          await this.redis.setex(restoreBackupSnapshotRetryKey, 600, String(retryCount + 1))
-          this.logger.warn(
-            `No valid backup snapshot found for sandbox ${sandbox.id}, retry attempt ${retryCount + 1}/3`,
-          )
-          return DONT_SYNC_AGAIN
-        }
-
-        // After 3 retries, error out and clear the retry counter
-        await this.redis.del(restoreBackupSnapshotRetryKey)
-        await this.updateSandboxState(
-          sandbox.id,
-          SandboxState.ERROR,
-          lockCode,
-          undefined,
-          'No valid backup snapshot found',
-        )
-      } else {
-        throw new Error('No valid backup snapshot found')
-      }
-      return SYNC_AGAIN
-    }
-
-    // Clear the retry counter on success
-    await this.redis.del(`backup-snapshot-retry-${sandbox.id}`)
-
     //  make sure we pick a runner that has the base snapshot
     let baseSnapshot: Snapshot | null = null
     if (sandbox.snapshot) {
@@ -793,6 +729,70 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    const existingBackups = sandbox.existingBackupSnapshots
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map((existingSnapshot) => existingSnapshot.snapshotName)
+
+    let validBackup: string | null = null
+    let exists = false
+
+    while (existingBackups.length > 0) {
+      try {
+        if (!validBackup) {
+          //  last snapshot is the current snapshot, so we don't need to check it
+          //  just in case, we'll use the value from the backupSnapshot property
+          validBackup = sandbox.backupSnapshot
+          existingBackups.pop()
+        } else {
+          validBackup = existingBackups.pop()
+        }
+
+        await runnerAdapter.inspectSnapshotInRegistry(validBackup, registry)
+        exists = true
+        break
+      } catch (error) {
+        this.logger.error(
+          `Failed to check if backup snapshot ${sandbox.backupSnapshot} exists in registry ${registry.id}:`,
+          error,
+        )
+      }
+    }
+
+    if (!exists) {
+      const restoreBackupSnapshotRetryKey = `restore-backup-snapshot-retry-${sandbox.id}`
+
+      if (!isRecovery) {
+        // Check retry count - allow up to 3 attempts for transient issues
+        const retryCountRaw = await this.redis.get(restoreBackupSnapshotRetryKey)
+        const retryCount = retryCountRaw ? parseInt(retryCountRaw) : 0
+
+        if (retryCount < 3) {
+          // Increment retry count with 10 minute TTL, let syncStates cron pick up the retry later
+          await this.redis.setex(restoreBackupSnapshotRetryKey, 600, String(retryCount + 1))
+          this.logger.warn(
+            `No valid backup snapshot found for sandbox ${sandbox.id}, retry attempt ${retryCount + 1}/3`,
+          )
+          return DONT_SYNC_AGAIN
+        }
+
+        // After 3 retries, error out and clear the retry counter
+        await this.redis.del(restoreBackupSnapshotRetryKey)
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          lockCode,
+          undefined,
+          'No valid backup snapshot found',
+        )
+      } else {
+        throw new Error('No valid backup snapshot found')
+      }
+      return SYNC_AGAIN
+    }
+
+    // Clear the retry counter on success
+    await this.redis.del(`backup-snapshot-retry-${sandbox.id}`)
 
     await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, lockCode, runner.id)
 
