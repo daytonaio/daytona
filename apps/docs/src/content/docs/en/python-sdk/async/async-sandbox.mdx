@@ -35,7 +35,6 @@ Represents a Daytona Sandbox.
 - `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped").
 - `error_reason` _str_ - Error message if Sandbox is in error state.
 - `recoverable` _bool_ - Whether the Sandbox error is recoverable.
-- `resizing` _bool_ - Whether a resize operation is in progress.
 - `backup_state` _SandboxBackupStateEnum_ - Current state of Sandbox backup.
 - `backup_created_at` _str_ - When the backup was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
@@ -570,7 +569,7 @@ async def wait_for_resize_complete(timeout: float | None = 60) -> None
 ```
 
 Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
-the resizing flag is cleared.
+the state is no longer 'resizing'.
 
 **Arguments**:
 
