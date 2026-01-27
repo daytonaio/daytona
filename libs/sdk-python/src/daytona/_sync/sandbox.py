@@ -73,7 +73,6 @@ class Sandbox(SandboxDto):
         state (SandboxState): Current state of the Sandbox (e.g., "started", "stopped").
         error_reason (str): Error message if Sandbox is in error state.
         recoverable (bool): Whether the Sandbox error is recoverable.
-        resizing (bool): Whether a resize operation is in progress.
         backup_state (SandboxBackupStateEnum): Current state of Sandbox backup.
         backup_created_at (str): When the backup was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
@@ -618,7 +617,7 @@ class Sandbox(SandboxDto):
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
         """Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
-        the resizing flag is cleared.
+        the state is no longer 'resizing'.
 
         Args:
             timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
@@ -626,10 +625,10 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If resize operation times out.
         """
-        while self.resizing:
+        while self.state == "resizing":
             self.refresh_data()
 
-            if not self.resizing:
+            if self.state != "resizing":
                 return
 
             if self.state in ["error", "build_failed"]:
@@ -696,7 +695,6 @@ class Sandbox(SandboxDto):
         self.state: SandboxState | None = sandbox_dto.state
         self.error_reason: str | None = sandbox_dto.error_reason
         self.recoverable: bool | None = sandbox_dto.recoverable
-        self.resizing: bool | None = sandbox_dto.resizing
         self.backup_state: str | None = sandbox_dto.backup_state
         self.backup_created_at: str | None = sandbox_dto.backup_created_at
         self.auto_stop_interval: float | int | None = sandbox_dto.auto_stop_interval

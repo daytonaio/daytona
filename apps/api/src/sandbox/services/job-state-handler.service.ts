@@ -20,7 +20,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { SandboxResizedEvent } from '../events/sandbox-resized.event'
+import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -451,28 +451,33 @@ export class JobStateHandlerService {
         return
       }
 
+      if (sandbox.state !== SandboxState.RESIZING) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} is not in RESIZING state for RESIZE_SANDBOX job ${job.id}. State: ${sandbox.state}`,
+        )
+        return
+      }
+
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
-        // Capture old values for event emission
-        const oldCpu = sandbox.cpu
-        const oldMem = sandbox.mem
-        const oldDisk = sandbox.disk
         // Update sandbox resources from job payload
         const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
         sandbox.cpu = payload.cpu ?? sandbox.cpu
         sandbox.mem = payload.memory ?? sandbox.mem
         sandbox.disk = payload.disk ?? sandbox.disk
-        sandbox.resizing = false
+        // Transition from RESIZING back to desiredState (STARTED or STOPPED)
+        const newState = sandbox.desiredState as unknown as SandboxState
+        sandbox.state = newState
         await this.sandboxRepository.save(sandbox)
         this.eventEmitter.emit(
-          SandboxEvents.RESIZED,
-          new SandboxResizedEvent(sandbox, oldCpu, sandbox.cpu, oldMem, sandbox.mem, oldDisk, sandbox.disk),
+          SandboxEvents.STATE_UPDATED,
+          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, newState),
         )
         return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        // Reset resizing flag on failure, keep original resources
-        sandbox.resizing = false
+        // Return to previous stable state (desiredState) on failure
+        sandbox.state = sandbox.desiredState as unknown as SandboxState
       }
 
       await this.sandboxRepository.save(sandbox)
