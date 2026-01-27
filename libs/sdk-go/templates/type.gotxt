@@ -1,0 +1,52 @@
+{{- rawAnchorHeader .Level (escape .Name | printf "type %s") .Anchor -}}
+{{- spacer -}}
+
+{{- template "doc" .Doc -}}
+{{- spacer -}}
+
+{{- codeBlock "go" .Decl -}}
+
+{{- if len .Consts -}}
+	{{- spacer -}}
+
+	{{- range (iter .Consts) -}}
+		{{- template "value" .Entry -}}
+		{{- if (not .Last) -}}{{- spacer -}}{{- end -}}
+	{{- end -}}
+{{- end -}}
+
+{{- if len .Vars -}}
+	{{- spacer -}}
+
+	{{- range (iter .Vars) -}}
+		{{- template "value" .Entry -}}
+		{{- if (not .Last) -}}{{- spacer -}}{{- end -}}
+	{{- end -}}
+{{- end -}}
+
+{{- if len .Examples -}}
+	{{- spacer -}}
+
+	{{- range (iter .Examples) -}}
+		{{- template "example" .Entry -}}
+		{{- if (not .Last) -}}{{- spacer -}}{{- end -}}
+	{{- end -}}
+{{- end -}}
+
+{{- if len .Funcs -}}
+	{{- spacer -}}
+
+	{{- range (iter .Funcs) -}}
+		{{- template "func" .Entry -}}
+		{{- if (not .Last) -}}{{- spacer -}}{{- end -}}
+	{{- end -}}
+{{- end -}}
+
+{{- if len .Methods -}}
+	{{- spacer -}}
+
+	{{- range (iter .Methods) -}}
+		{{- template "func" .Entry -}}
+		{{- if (not .Last) -}}{{- spacer -}}{{- end -}}
+	{{- end -}}
+{{- end -}}

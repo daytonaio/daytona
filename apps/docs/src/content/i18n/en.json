@@ -41,6 +41,7 @@
   "sidebarconfig.tsSdkReference": "TypeScript SDK",
   "sidebarconfig.pythonSdkReference": "Python SDK",
   "sidebarconfig.rubySdkReference": "Ruby SDK",
+  "sidebarconfig.goSdkReference": "Go SDK",
   "sidebarconfig.apiReference": "API",
   "sidebarconfig.cliReference": "CLI",
   "sidebarconfig.introduction": "Introduction",

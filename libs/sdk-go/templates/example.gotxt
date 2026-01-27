@@ -1,0 +1,16 @@
+<details>
+<summary>{{ .Title }}</summary>
+
+{{ template "doc" .Doc }}
+
+{{ codeBlock "go" .Code }}
+
+{{- if .HasOutput }}
+
+#### Output
+
+{{ codeBlock "" .Output }}
+
+{{- end }}
+
+</details>

@@ -10,8 +10,6 @@ use (
 	./libs/api-client-go
 	./libs/common-go
 	./libs/computer-use
+	./libs/sdk-go
+	./libs/toolbox-api-go
 )
-
-// Required for all of the local workspace apps to work until we publish and switch to
-// external module github.com/daytonaio/daytona/libs/api-client-go
-replace github.com/daytonaio/daytona/libs/api-client-go v0.1.0 => ./libs/api-client-go

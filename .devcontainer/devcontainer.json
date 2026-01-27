@@ -71,7 +71,8 @@
       ],
       "goTools": [
         "github.com/swaggo/swag/cmd/swag@v1.16.4",
-        "github.com/mitranim/gow@latest"
+        "github.com/mitranim/gow@latest",
+        "github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest"
       ]
     }
   },
