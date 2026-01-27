@@ -39,14 +39,14 @@ def main():
 
     # Hot resize: increase CPU and memory on a running sandbox
     print("Resizing sandbox (hot resize)...")
-    sandbox.resize(Resources(cpu=2, memory=2), hot=True)
+    sandbox.resize(Resources(cpu=2, memory=2))
     print(f"Hot resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
 
     # Cold resize: stop sandbox first, then resize (can also change disk)
     print("Stopping sandbox for cold resize...")
     daytona.stop(sandbox)
     print("Resizing sandbox (cold resize)...")
-    sandbox.resize(Resources(cpu=4, memory=4, disk=20), hot=False)
+    sandbox.resize(Resources(cpu=4, memory=4, disk=20))
     print(f"Cold resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
     daytona.start(sandbox)
     print("Sandbox restarted with new resources")

@@ -1373,11 +1373,6 @@ export class SandboxService {
       throw new SandboxError('Resize operation already in progress')
     }
 
-    // GPU is not supported
-    if (resizeDto.gpu !== undefined) {
-      throw new BadRequestError('GPU resize is not supported')
-    }
-
     // If no resize parameters provided, return sandbox as-is
     if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
       return sandbox
@@ -1388,20 +1383,11 @@ export class SandboxService {
       throw new BadRequestError('Disk resize can only be performed on a stopped sandbox')
     }
 
-    // Validate hot resize is only for running sandboxes
-    if (resizeDto.hot === true && sandbox.state !== SandboxState.STARTED) {
-      throw new BadRequestError('Hot resize can only be performed on a running sandbox')
-    }
-
-    const isHotResize = resizeDto.hot === true && sandbox.state === SandboxState.STARTED
+    // Hot resize (sandbox is running): only CPU and memory can be increased
+    const isHotResize = sandbox.state === SandboxState.STARTED
 
     // Validate hot resize constraints
     if (isHotResize) {
-      // Hot resize: only CPU and memory can be increased, disk cannot be changed
-      if (resizeDto.disk !== undefined) {
-        throw new BadRequestError('Disk cannot be changed during hot resize')
-      }
-
       if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
         throw new BadRequestError('CPU can not be decreased during hot resize')
       }
@@ -1425,6 +1411,11 @@ export class SandboxService {
     const newCpu = resizeDto.cpu ?? sandbox.cpu
     const newMem = resizeDto.memory ?? sandbox.mem
     const newDisk = resizeDto.disk ?? sandbox.disk
+
+    // Throw if nothing actually changes
+    if (newCpu === sandbox.cpu && newMem === sandbox.mem && newDisk === sandbox.disk) {
+      throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
+    }
 
     // Validate organization quotas for the new resource values
     this.organizationService.assertOrganizationIsNotSuspended(organization)

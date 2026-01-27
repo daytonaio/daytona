@@ -559,8 +559,6 @@ export class SandboxController {
         cpu: req.body?.cpu,
         memory: req.body?.memory,
         disk: req.body?.disk,
-        gpu: req.body?.gpu,
-        hot: req.body?.hot,
       }),
     },
   })
