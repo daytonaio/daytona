@@ -83,6 +83,7 @@ lib/daytona_toolbox_api_client/models/search_files_response.rb
 lib/daytona_toolbox_api_client/models/session.rb
 lib/daytona_toolbox_api_client/models/session_execute_request.rb
 lib/daytona_toolbox_api_client/models/session_execute_response.rb
+lib/daytona_toolbox_api_client/models/session_send_input_request.rb
 lib/daytona_toolbox_api_client/models/status.rb
 lib/daytona_toolbox_api_client/models/user_home_dir_response.rb
 lib/daytona_toolbox_api_client/models/window_info.rb
