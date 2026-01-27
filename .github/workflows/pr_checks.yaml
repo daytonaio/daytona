@@ -129,6 +129,7 @@ jobs:
         run: |
           source "$(poetry env info --path)/bin/activate"
           go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0
           echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           yarn install --immutable
           mkdir -p dist/apps/api
