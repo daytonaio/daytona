@@ -100,7 +100,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "which gomarkdoc || go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@latest"
+        "command": "which gomarkdoc || go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0"
       }
     },
     "publish": {
