@@ -22,9 +22,9 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class CommandDTO(BaseModel):
+class Command(BaseModel):
     """
-    CommandDTO
+    Command
     """ # noqa: E501
     command: StrictStr
     exit_code: Optional[StrictInt] = Field(default=None, serialization_alias="exitCode")
@@ -50,7 +50,7 @@ class CommandDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of CommandDTO from a JSON string"""
+        """Create an instance of Command from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -82,7 +82,7 @@ class CommandDTO(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of CommandDTO from a dict"""
+        """Create an instance of Command from a dict"""
         if obj is None:
             return None
 

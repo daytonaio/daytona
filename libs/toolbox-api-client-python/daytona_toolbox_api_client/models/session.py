@@ -19,15 +19,15 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List
-from daytona_toolbox_api_client_async.models.command_dto import CommandDTO
+from daytona_toolbox_api_client.models.command import Command
 from typing import Optional, Set
 from typing_extensions import Self
 
-class SessionDTO(BaseModel):
+class Session(BaseModel):
     """
-    SessionDTO
+    Session
     """ # noqa: E501
-    commands: List[CommandDTO]
+    commands: List[Command]
     session_id: StrictStr = Field(serialization_alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["commands", "sessionId"]
@@ -50,7 +50,7 @@ class SessionDTO(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of SessionDTO from a JSON string"""
+        """Create an instance of Session from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -89,7 +89,7 @@ class SessionDTO(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of SessionDTO from a dict"""
+        """Create an instance of Session from a dict"""
         if obj is None:
             return None
 
@@ -97,7 +97,7 @@ class SessionDTO(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "commands": [CommandDTO.from_dict(_item) for _item in obj["commands"]] if obj.get("commands") is not None else None,
+            "commands": [Command.from_dict(_item) for _item in obj["commands"]] if obj.get("commands") is not None else None,
             "session_id": obj.get("sessionId")
         })
         # store additional fields in additional_properties

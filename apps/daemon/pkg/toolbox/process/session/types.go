@@ -32,12 +32,12 @@ type CommandDTO struct {
 	Id       string `json:"id" validate:"required"`
 	Command  string `json:"command" validate:"required"`
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
-} // @name CommandDTO
+} // @name Command
 
 type SessionDTO struct {
 	SessionId string        `json:"sessionId" validate:"required"`
 	Commands  []*CommandDTO `json:"commands" validate:"required"`
-} // @name SessionDTO
+} // @name Session
 
 func CommandToDTO(c *session.Command) *CommandDTO {
 	return &CommandDTO{

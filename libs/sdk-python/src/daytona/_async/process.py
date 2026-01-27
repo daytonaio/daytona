@@ -10,14 +10,14 @@ from typing import Any, cast
 
 import websockets
 from daytona_toolbox_api_client_async import (
-    CommandDTO,
+    Command,
     CreateSessionRequest,
     ExecuteRequest,
     ProcessApi,
     PtyCreateRequest,
     PtyResizeRequest,
     PtySessionInfo,
-    SessionDTO,
+    Session,
 )
 from websockets.asyncio.client import connect
 
@@ -263,14 +263,14 @@ class AsyncProcess:
         await self._api_client.create_session(request=request)
 
     @intercept_errors(message_prefix="Failed to get session: ")
-    async def get_session(self, session_id: str) -> SessionDTO:
+    async def get_session(self, session_id: str) -> Session:
         """Gets a session in the Sandbox.
 
         Args:
             session_id (str): Unique identifier of the session to retrieve.
 
         Returns:
-            SessionDTO: SessionDTO information including:
+            Session: Session information including:
                 - session_id: The session's unique identifier
                 - commands: List of commands executed in the session
 
@@ -284,7 +284,7 @@ class AsyncProcess:
         return await self._api_client.get_session(session_id=session_id)
 
     @intercept_errors(message_prefix="Failed to get session command: ")
-    async def get_session_command(self, session_id: str, command_id: str) -> CommandDTO:
+    async def get_session_command(self, session_id: str, command_id: str) -> Command:
         """Gets information about a specific command executed in a session.
 
         Args:
@@ -292,7 +292,7 @@ class AsyncProcess:
             command_id (str): Unique identifier of the command.
 
         Returns:
-            CommandDTO: CommandDTO information including:
+            Command: Command information including:
                 - id: The command's unique identifier
                 - command: The executed command string
                 - exit_code: Command's exit status (if completed)
@@ -438,11 +438,11 @@ class AsyncProcess:
             await std_demux_stream(ws, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to list sessions: ")
-    async def list_sessions(self) -> list[SessionDTO]:
+    async def list_sessions(self) -> list[Session]:
         """Lists all sessions in the Sandbox.
 
         Returns:
-            list[SessionDTO]: List of all sessions in the Sandbox.
+            list[Session]: List of all sessions in the Sandbox.
 
         Example:
             ```python
