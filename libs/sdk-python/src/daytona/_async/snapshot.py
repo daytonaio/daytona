@@ -103,9 +103,7 @@ class AsyncSnapshotService:
         return Snapshot.from_dto(await self.__snapshots_api.get_snapshot(name))
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
-    @with_timeout(
-        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
-    )
+    @with_timeout()
     async def create(
         self,
         params: CreateSnapshotParams,
