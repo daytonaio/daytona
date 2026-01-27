@@ -33,6 +33,7 @@ export default defineConfig((mode) => ({
       overrides: {
         path: 'path-browserify-win32',
       },
+      protocolImports: false,
     }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
