@@ -11,7 +11,6 @@ export const SandboxEvents = {
   STARTED: 'sandbox.started',
   STOPPED: 'sandbox.stopped',
   DESTROYED: 'sandbox.destroyed',
-  RESIZED: 'sandbox.resized',
   PUBLIC_STATUS_UPDATED: 'sandbox.public-status.updated',
   ORGANIZATION_UPDATED: 'sandbox.organization.updated',
   BACKUP_CREATED: 'sandbox.backup.created',

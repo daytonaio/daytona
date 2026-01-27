@@ -35,7 +35,6 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxStartedEvent } from '../events/sandbox-started.event'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
-import { SandboxResizedEvent } from '../events/sandbox-resized.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../../organization/events/organization-suspended-sandbox-stopped.event'
@@ -264,10 +263,6 @@ export class SandboxService {
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
-    }
-
-    if (sandbox.resizing) {
-      throw new SandboxError('Resize operation in progress')
     }
 
     if (sandbox.autoDeleteInterval === 0) {
@@ -1182,9 +1177,6 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    if (sandbox.resizing) {
-      throw new SandboxError('Resize operation in progress')
-    }
     sandbox.applyDesiredDestroyedState()
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
 
@@ -1220,10 +1212,6 @@ export class SandboxService {
 
       if (sandbox.pending) {
         throw new SandboxError('Sandbox state change in progress')
-      }
-
-      if (sandbox.resizing) {
-        throw new SandboxError('Resize operation in progress')
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -1282,10 +1270,6 @@ export class SandboxService {
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
-    }
-
-    if (sandbox.resizing) {
-      throw new SandboxError('Resize operation in progress')
     }
 
     sandbox.pending = true
@@ -1369,10 +1353,6 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    if (sandbox.resizing) {
-      throw new SandboxError('Resize operation already in progress')
-    }
-
     // If no resize parameters provided, return sandbox as-is
     if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
       return sandbox
@@ -1401,11 +1381,6 @@ export class SandboxService {
     if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
       throw new BadRequestError('Disk size can only be increased, not decreased')
     }
-
-    // Capture old values for event emission
-    const oldCpu = sandbox.cpu
-    const oldMem = sandbox.mem
-    const oldDisk = sandbox.disk
 
     // Calculate new resource values
     const newCpu = resizeDto.cpu ?? sandbox.cpu
@@ -1437,20 +1412,22 @@ export class SandboxService {
       )
     }
 
-    // Set resizing flag to prevent other operations
-    sandbox.resizing = true
-    await this.sandboxRepository.saveWhere(sandbox, { resizing: false })
+    // Store previous state before transitioning to RESIZING
+    // desiredState stays as STARTED or STOPPED (tells us what to return to)
+    const previousState = sandbox.state
+    sandbox.state = SandboxState.RESIZING
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
 
     // Get runner and perform resize
     if (!sandbox.runnerId) {
-      sandbox.resizing = false
+      sandbox.state = previousState
       await this.sandboxRepository.save(sandbox)
       throw new BadRequestError('Sandbox has no runner assigned')
     }
 
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (!runner) {
-      sandbox.resizing = false
+      sandbox.state = previousState
       await this.sandboxRepository.save(sandbox)
       throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
     }
@@ -1460,25 +1437,25 @@ export class SandboxService {
 
       await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
 
-      // For V0 runners, update resources immediately
+      // For V0 runners, update resources immediately and emit STATE_UPDATED event
       // For V2 runners, job handler will update resources on completion
       if (runner.apiVersion === '0') {
         sandbox.cpu = newCpu
         sandbox.mem = newMem
         sandbox.disk = newDisk
-        sandbox.resizing = false
-        await this.sandboxRepository.saveWhere(sandbox, { resizing: true })
+        sandbox.state = previousState
+        await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
         this.eventEmitter.emit(
-          SandboxEvents.RESIZED,
-          new SandboxResizedEvent(sandbox, oldCpu, newCpu, oldMem, newMem, oldDisk, newDisk),
+          SandboxEvents.STATE_UPDATED,
+          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, previousState),
         )
       }
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
-      // Reset resizing flag on error
-      sandbox.resizing = false
-      await this.sandboxRepository.saveWhere(sandbox, { resizing: true })
+      // Return to previous stable state on error
+      sandbox.state = previousState
+      await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
       throw error
     }
   }

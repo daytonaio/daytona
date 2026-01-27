@@ -72,7 +72,6 @@ export interface SandboxCodeToolbox {
  * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string} [errorReason] - Error message if Sandbox is in error state
  * @property {boolean} [recoverable] - Whether the Sandbox error is recoverable.
- * @property {boolean} [resizing] - Whether a resize operation is in progress.
  * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
  * @property {string} [backupCreatedAt] - When the backup was created
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes
@@ -110,7 +109,6 @@ export class Sandbox implements SandboxDto {
   public state?: SandboxState
   public errorReason?: string
   public recoverable?: boolean
-  public resizing?: boolean
   public backupState?: SandboxBackupStateEnum
   public backupCreatedAt?: string
   public autoStopInterval?: number
@@ -627,7 +625,7 @@ export class Sandbox implements SandboxDto {
   /**
    * Waits for the Sandbox resize operation to complete.
    *
-   * This method polls the Sandbox status until the resizing flag is cleared.
+   * This method polls the Sandbox status until the state is no longer 'resizing'.
    *
    * @param {number} [timeout=60] - Maximum time to wait in seconds. 0 means no timeout.
    * @returns {Promise<void>}
@@ -641,13 +639,14 @@ export class Sandbox implements SandboxDto {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    while (this.resizing) {
+    while (this.state === 'resizing') {
       await this.refreshData()
 
-      if (!this.resizing) {
+      if (this.state !== 'resizing') {
         return
       }
 
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
       if (this.state === 'error' || this.state === 'build_failed') {
         const errMsg = `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`
         throw new DaytonaError(errMsg)
@@ -714,7 +713,6 @@ export class Sandbox implements SandboxDto {
     this.state = sandboxDto.state
     this.errorReason = sandboxDto.errorReason
     this.recoverable = sandboxDto.recoverable
-    this.resizing = sandboxDto.resizing
     this.backupState = sandboxDto.backupState
     this.backupCreatedAt = sandboxDto.backupCreatedAt
     this.autoStopInterval = sandboxDto.autoStopInterval
