@@ -442,7 +442,7 @@ class AsyncProcess:
         """Lists all sessions in the Sandbox.
 
         Returns:
-            List[SessionDTO]: List of all sessions in the Sandbox.
+            list[SessionDTO]: List of all sessions in the Sandbox.
 
         Example:
             ```python
