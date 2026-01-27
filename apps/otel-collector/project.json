@@ -1,0 +1,50 @@
+{
+  "name": "otel-collector",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/otel-collector",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "go run -mod=mod go.opentelemetry.io/collector/cmd/builder@v0.140.0 --config {projectRoot}/builder-config.yaml"
+        ],
+        "env": {
+          "GOWORK": "off"
+        },
+        "parallel": false
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dist/apps/otel-collector/daytona-otel-collector --config {projectRoot}/config.yaml"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": ["build"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot}/exporter && go fmt ./..."
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "otel-collector"
+      }
+    },
+    "push-manifest": {}
+  }
+}

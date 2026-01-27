@@ -51,6 +51,7 @@ import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
+import Experimental from './pages/Experimental'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 
@@ -75,6 +76,7 @@ function App() {
   const config = useConfig()
   const location = useLocation()
   const posthog = usePostHog()
+
   const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
 
   useEffect(() => {
@@ -257,6 +259,14 @@ function App() {
         />
         <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
         <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+        <Route
+          path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
+          element={
+            <OwnerAccessOrganizationPageWrapper>
+              <Experimental />
+            </OwnerAccessOrganizationPageWrapper>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

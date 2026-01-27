@@ -21,6 +21,7 @@ import { Buffer } from 'buffer'
 import { PtyHandle } from './PtyHandle'
 import { PtyCreateOptions, PtyConnectOptions } from './types/Pty'
 import { createSandboxWebSocket } from './utils/WebSocket'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 // 3-byte multiplexing markers inserted by the shell labelers
 export const STDOUT_PREFIX_BYTES = new Uint8Array([0x01, 0x01, 0x01])
@@ -91,6 +92,7 @@ export class Process {
    * // Command with timeout
    * const result = await process.executeCommand('sleep 10', undefined, 5);
    */
+  @WithInstrumentation()
   public async executeCommand(
     command: string,
     cwd?: string,
@@ -188,6 +190,7 @@ export class Process {
    *   }
    * }
    */
+  @WithInstrumentation()
   public async codeRun(code: string, params?: CodeRunParams, timeout?: number): Promise<ExecuteResponse> {
     const runCommand = this.codeToolbox.getRunCommand(code, params)
     return this.executeCommand(runCommand, undefined, params?.env, timeout)
@@ -211,6 +214,7 @@ export class Process {
    * // Do work...
    * await process.deleteSession(sessionId);
    */
+  @WithInstrumentation()
   public async createSession(sessionId: string): Promise<void> {
     await this.apiClient.createSession({
       sessionId,
@@ -252,6 +256,7 @@ export class Process {
    *   console.log(`Command ${cmd.command} completed successfully`);
    * }
    */
+  @WithInstrumentation()
   public async getSessionCommand(sessionId: string, commandId: string): Promise<Command> {
     const response = await this.apiClient.getSessionCommand(sessionId, commandId)
     return response.data
@@ -288,6 +293,7 @@ export class Process {
    * console.log('[STDOUT]:', result.stdout);
    * console.log('[STDERR]:', result.stderr);
    */
+  @WithInstrumentation()
   public async executeSessionCommand(
     sessionId: string,
     req: SessionExecuteRequest,
@@ -349,6 +355,8 @@ export class Process {
     onStdout: (chunk: string) => void,
     onStderr: (chunk: string) => void,
   ): Promise<void>
+
+  @WithInstrumentation()
   public async getSessionCommandLogs(
     sessionId: string,
     commandId: string,
@@ -398,6 +406,7 @@ export class Process {
    *   });
    * });
    */
+  @WithInstrumentation()
   public async listSessions(): Promise<Session[]> {
     const response = await this.apiClient.listSessions()
     return response.data
@@ -413,6 +422,7 @@ export class Process {
    * // Clean up a completed session
    * await process.deleteSession('my-session');
    */
+  @WithInstrumentation()
   public async deleteSession(sessionId: string): Promise<void> {
     await this.apiClient.deleteSession(sessionId)
   }
@@ -456,6 +466,7 @@ export class Process {
    * // Clean up
    * await ptyHandle.disconnect();
    */
+  @WithInstrumentation()
   public async createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle> {
     const request: PtyCreateRequest = {
       id: options.id,
@@ -506,6 +517,7 @@ export class Process {
    * // Clean up
    * await handle.disconnect();
    */
+  @WithInstrumentation()
   public async connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle> {
     // Get preview link for WebSocket connection
     await this.ensureToolboxUrl()
@@ -544,6 +556,7 @@ export class Process {
    *   console.log('---');
    * }
    */
+  @WithInstrumentation()
   public async listPtySessions(): Promise<PtySessionInfo[]> {
     return (await this.apiClient.listPtySessions()).data.sessions
   }
@@ -572,6 +585,7 @@ export class Process {
    *   console.log(`Process ID: ${session.processId}`);
    * }
    */
+  @WithInstrumentation()
   public async getPtySessionInfo(sessionId: string): Promise<PtySessionInfo> {
     return (await this.apiClient.getPtySession(sessionId)).data
   }
@@ -601,6 +615,7 @@ export class Process {
    *   console.log('Session has been completely removed');
    * }
    */
+  @WithInstrumentation()
   public async killPtySession(sessionId: string): Promise<void> {
     await this.apiClient.deletePtySession(sessionId)
   }
@@ -630,6 +645,7 @@ export class Process {
    * // You can also use the PtyHandle's resize method
    * await ptyHandle.resize(150, 40); // cols, rows
    */
+  @WithInstrumentation()
   public async resizePtySession(sessionId: string, cols: number, rows: number): Promise<PtySessionInfo> {
     return (await this.apiClient.resizePtySession(sessionId, { cols, rows })).data
   }

@@ -1,0 +1,48 @@
+# OpenTelemetry Collector configuration for Daytona
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        include_metadata: true
+
+exporters:
+  daytona_exporter:
+    # Sandbox authentication header name
+    sandbox_auth_token_header: 'sandbox-auth-token'
+
+    # Cache TTL for endpoint configurations
+    cache_ttl: 5m
+
+    # Default timeout for OTLP export requests
+    default_timeout: 30s
+
+    # Retry settings for failed exports
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 5m
+
+    # Daytona API configuration
+    api_url: 'http://localhost:3000/api'
+    api_key: 'otel_collector_api_key'
+
+    # Optional Redis configuration for caching
+    redis:
+      host: 'redis'
+      port: 6379
+      # password: 'your_redis_password'  # Uncomment and set if Redis requires authentication
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [daytona_exporter]
+    metrics:
+      receivers: [otlp]
+      exporters: [daytona_exporter]
+    logs:
+      receivers: [otlp]
+      exporters: [daytona_exporter]
