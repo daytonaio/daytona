@@ -362,6 +362,48 @@ export function comparePaths(path1: string, path2: string): boolean {
   return normalizePath(path1) === normalizePath(path2)
 }
 
+export interface HeaderActiveState {
+  isTypescriptSdkActive: boolean
+  isPythonSdkActive: boolean
+  isApiActive: boolean
+  isCliActive: boolean
+  isReferencesActive: boolean
+  isGuidesActive: boolean
+}
+
+export function getHeaderActiveState(
+  baseUrl: string,
+  currentPath: string
+): HeaderActiveState {
+  const referencePaths = {
+    typescriptSdk: `${baseUrl}/en/typescript-sdk`,
+    pythonSdk: `${baseUrl}/en/python-sdk`,
+    api: `${baseUrl}/en/tools/api`,
+    cli: `${baseUrl}/en/tools/cli`,
+  }
+
+  const isTypescriptSdkActive = isActiveOrParentPath(
+    referencePaths.typescriptSdk,
+    currentPath
+  )
+  const isPythonSdkActive = isActiveOrParentPath(
+    referencePaths.pythonSdk,
+    currentPath
+  )
+  const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
+  const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
+
+  return {
+    isTypescriptSdkActive,
+    isPythonSdkActive,
+    isApiActive,
+    isCliActive,
+    isReferencesActive:
+      isTypescriptSdkActive || isPythonSdkActive || isApiActive || isCliActive,
+    isGuidesActive: isActiveOrParentPath(`${baseUrl}/en/guides`, currentPath),
+  }
+}
+
 export function isActiveOrParentPath(
   entryPath: string,
   currentPath: string

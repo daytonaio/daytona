@@ -9,7 +9,7 @@ import Version from '@components/Version.astro'
 import gtconfig from '../../gt.config.json'
 import '../styles/components/search.scss'
 import { SideNavLinks } from './menu/SideNavLinks'
-import { isActiveOrParentPath } from '@utils/navigation'
+import { getHeaderActiveState } from '@utils/navigation'
 
 const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
@@ -24,37 +24,14 @@ const algoliaEnabled =
 // Show search in production when enabled, or always in dev mode
 const showSearch = algoliaEnabled || import.meta.env.DEV
 
-// Reference paths for active state detection
-const referencePaths = {
-  typescriptSdk: `${import.meta.env.BASE_URL}/en/typescript-sdk`,
-  pythonSdk: `${import.meta.env.BASE_URL}/en/python-sdk`,
-  api: `${import.meta.env.BASE_URL}/en/tools/api`,
-  cli: `${import.meta.env.BASE_URL}/en/tools/cli`,
-}
-
-const currentPath = Astro.url.pathname
-
-// Check if each reference page is active
-const isTypescriptSdkActive = isActiveOrParentPath(
-  referencePaths.typescriptSdk,
-  currentPath
-)
-const isPythonSdkActive = isActiveOrParentPath(
-  referencePaths.pythonSdk,
-  currentPath
-)
-const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
-const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
-
-// Check if any reference page is active
-const isReferencesActive =
-  isTypescriptSdkActive || isPythonSdkActive || isApiActive || isCliActive
-
-// Check if guides page is active
-const isGuidesActive = isActiveOrParentPath(
-  `${import.meta.env.BASE_URL}/en/guides`,
-  currentPath
-)
+const {
+  isTypescriptSdkActive,
+  isPythonSdkActive,
+  isApiActive,
+  isCliActive,
+  isReferencesActive,
+  isGuidesActive,
+} = getHeaderActiveState(import.meta.env.BASE_URL, Astro.url.pathname)
 ---
 
 <header class="navbar">

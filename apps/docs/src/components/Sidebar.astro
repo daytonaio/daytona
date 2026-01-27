@@ -1,6 +1,6 @@
 ---
 import { getSidebarConfig } from '../content/config'
-import { getSidebar } from '../utils/navigation'
+import { getSidebar, getHeaderActiveState } from '../utils/navigation'
 import SidebarSublist from './SidebarSublist.astro'
 import { SideNavLinks } from './menu/SideNavLinks'
 import packageIcon from '@assets/sidebar/package.svg?raw'
@@ -10,6 +10,15 @@ import terminalIcon from '@assets/sidebar/terminal.svg?raw'
 const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
 ).replace(/\/$/, '')
+
+const {
+  isTypescriptSdkActive,
+  isPythonSdkActive,
+  isApiActive,
+  isCliActive,
+  isReferencesActive,
+  isGuidesActive,
+} = getHeaderActiveState(import.meta.env.BASE_URL, Astro.url.pathname)
 ---
 
 <SidebarSublist
@@ -25,8 +34,8 @@ const PUBLIC_WEB_URL = (
   )}
 />
 <div class="navbar-links">
-  <details class="mobile-dropdown">
-    <summary>
+  <details class="mobile-dropdown" open={isReferencesActive}>
+    <summary class:list={[{ active: isReferencesActive }]}>
       {Astro.locals.t('header.references' as any)}
       <svg
         class="chevron"
@@ -45,25 +54,39 @@ const PUBLIC_WEB_URL = (
       </svg>
     </summary>
     <div class="mobile-dropdown-menu">
-      <a href={`${import.meta.env.BASE_URL}/en/typescript-sdk`}>
+      <a
+        href={`${import.meta.env.BASE_URL}/en/typescript-sdk`}
+        class:list={[{ active: isTypescriptSdkActive }]}
+      >
         <Fragment set:html={packageIcon} />
         {Astro.locals.t('sidebarconfig.tsSdkReference' as any)}
       </a>
-      <a href={`${import.meta.env.BASE_URL}/en/python-sdk`}>
+      <a
+        href={`${import.meta.env.BASE_URL}/en/python-sdk`}
+        class:list={[{ active: isPythonSdkActive }]}
+      >
         <Fragment set:html={packageIcon} />
         {Astro.locals.t('sidebarconfig.pythonSdkReference' as any)}
       </a>
-      <a href={`${import.meta.env.BASE_URL}/en/tools/api`}>
+      <a
+        href={`${import.meta.env.BASE_URL}/en/tools/api`}
+        class:list={[{ active: isApiActive }]}
+      >
         <Fragment set:html={serverIcon} />
         {Astro.locals.t('sidebarconfig.apiReference' as any)}
       </a>
-      <a href={`${import.meta.env.BASE_URL}/en/tools/cli`}>
+      <a
+        href={`${import.meta.env.BASE_URL}/en/tools/cli`}
+        class:list={[{ active: isCliActive }]}
+      >
         <Fragment set:html={terminalIcon} />
         {Astro.locals.t('sidebarconfig.cliReference' as any)}
       </a>
     </div>
   </details>
-  <a href={`/docs/en/guides`}>{Astro.locals.t('header.guides' as any)}</a>
+  <a href={`/docs/en/guides`} class:list={[{ active: isGuidesActive }]}
+    >{Astro.locals.t('header.guides' as any)}</a
+  >
 </div>
 <div class="mobile-nav-btn nav__items_side_menu">
   <SideNavLinks client:load locale={Astro.props.lang} />
@@ -94,6 +117,9 @@ const PUBLIC_WEB_URL = (
     letter-spacing: -0.01rem;
     cursor: pointer;
     &:hover {
+      color: var(--hover-color);
+    }
+    &.active {
       color: var(--hover-color);
     }
   }
@@ -140,6 +166,9 @@ const PUBLIC_WEB_URL = (
     text-transform: none;
     transition: all 0.15s;
     &:hover {
+      color: var(--hover-color);
+    }
+    &.active {
       color: var(--hover-color);
     }
   }
