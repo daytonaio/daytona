@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List, Optional
 from typing_extensions import Annotated
 from typing import Optional, Set
@@ -31,10 +31,8 @@ class ResizeSandbox(BaseModel):
     cpu: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="CPU cores to allocate to the sandbox (minimum: 1)")
     memory: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="Memory in GB to allocate to the sandbox (minimum: 1)")
     disk: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="Disk space in GB to allocate to the sandbox (can only be increased)")
-    gpu: Optional[StrictInt] = Field(default=None, description="GPU units to allocate (not supported - will throw error if provided)")
-    hot: Optional[StrictBool] = Field(default=False, description="If true, performs hot resize on a running sandbox (only CPU/memory increase allowed). If false, sandbox must be stopped for full resize.")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["cpu", "memory", "disk", "gpu", "hot"]
+    __properties: ClassVar[List[str]] = ["cpu", "memory", "disk"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,9 +94,7 @@ class ResizeSandbox(BaseModel):
         _obj = cls.model_validate({
             "cpu": obj.get("cpu"),
             "memory": obj.get("memory"),
-            "disk": obj.get("disk"),
-            "gpu": obj.get("gpu"),
-            "hot": obj.get("hot") if obj.get("hot") is not None else False
+            "disk": obj.get("disk")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

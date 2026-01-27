@@ -25,11 +25,7 @@ type ResizeSandbox struct {
 	// Memory in GB to allocate to the sandbox (minimum: 1)
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space in GB to allocate to the sandbox (can only be increased)
-	Disk *int32 `json:"disk,omitempty"`
-	// GPU units to allocate (not supported - will throw error if provided)
-	Gpu *int32 `json:"gpu,omitempty"`
-	// If true, performs hot resize on a running sandbox (only CPU/memory increase allowed). If false, sandbox must be stopped for full resize.
-	Hot                  *bool `json:"hot,omitempty"`
+	Disk                 *int32 `json:"disk,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -41,8 +37,6 @@ type _ResizeSandbox ResizeSandbox
 // will change when the set of required properties is changed
 func NewResizeSandbox() *ResizeSandbox {
 	this := ResizeSandbox{}
-	var hot bool = false
-	this.Hot = &hot
 	return &this
 }
 
@@ -51,8 +45,6 @@ func NewResizeSandbox() *ResizeSandbox {
 // but it doesn't guarantee that properties required by API are set
 func NewResizeSandboxWithDefaults() *ResizeSandbox {
 	this := ResizeSandbox{}
-	var hot bool = false
-	this.Hot = &hot
 	return &this
 }
 
@@ -152,70 +144,6 @@ func (o *ResizeSandbox) SetDisk(v int32) {
 	o.Disk = &v
 }
 
-// GetGpu returns the Gpu field value if set, zero value otherwise.
-func (o *ResizeSandbox) GetGpu() int32 {
-	if o == nil || IsNil(o.Gpu) {
-		var ret int32
-		return ret
-	}
-	return *o.Gpu
-}
-
-// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ResizeSandbox) GetGpuOk() (*int32, bool) {
-	if o == nil || IsNil(o.Gpu) {
-		return nil, false
-	}
-	return o.Gpu, true
-}
-
-// HasGpu returns a boolean if a field has been set.
-func (o *ResizeSandbox) HasGpu() bool {
-	if o != nil && !IsNil(o.Gpu) {
-		return true
-	}
-
-	return false
-}
-
-// SetGpu gets a reference to the given int32 and assigns it to the Gpu field.
-func (o *ResizeSandbox) SetGpu(v int32) {
-	o.Gpu = &v
-}
-
-// GetHot returns the Hot field value if set, zero value otherwise.
-func (o *ResizeSandbox) GetHot() bool {
-	if o == nil || IsNil(o.Hot) {
-		var ret bool
-		return ret
-	}
-	return *o.Hot
-}
-
-// GetHotOk returns a tuple with the Hot field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *ResizeSandbox) GetHotOk() (*bool, bool) {
-	if o == nil || IsNil(o.Hot) {
-		return nil, false
-	}
-	return o.Hot, true
-}
-
-// HasHot returns a boolean if a field has been set.
-func (o *ResizeSandbox) HasHot() bool {
-	if o != nil && !IsNil(o.Hot) {
-		return true
-	}
-
-	return false
-}
-
-// SetHot gets a reference to the given bool and assigns it to the Hot field.
-func (o *ResizeSandbox) SetHot(v bool) {
-	o.Hot = &v
-}
-
 func (o ResizeSandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -234,12 +162,6 @@ func (o ResizeSandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Disk) {
 		toSerialize["disk"] = o.Disk
-	}
-	if !IsNil(o.Gpu) {
-		toSerialize["gpu"] = o.Gpu
-	}
-	if !IsNil(o.Hot) {
-		toSerialize["hot"] = o.Hot
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -266,8 +188,6 @@ func (o *ResizeSandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "memory")
 		delete(additionalProperties, "disk")
-		delete(additionalProperties, "gpu")
-		delete(additionalProperties, "hot")
 		o.AdditionalProperties = additionalProperties
 	}
 
