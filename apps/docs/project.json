@@ -17,7 +17,7 @@
         "cwd": "{projectRoot}",
         "commands": [
           "astro build",
-          "node ./tools/update-search.js",
+          "node ./tools/update-search-local.js",
           "node ./tools/update-llms.js"
         ],
         "parallel": false
@@ -27,7 +27,7 @@
         "production": {
           "commands": [
             "astro build --prod",
-            "node ./tools/update-search.js",
+            "node ./tools/update-search-prod.js",
             "node ./tools/update-llms.js"
           ]
         }
