@@ -116,7 +116,7 @@ export function formatAmount(amount: number): string {
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount / 100)
+  }).format((amount ?? 0) / 100)
 }
 
 export function findLast<T>(arr: T[], predicate: (item: T, index: number, array: T[]) => boolean): T | undefined {
