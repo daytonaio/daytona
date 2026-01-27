@@ -585,28 +585,27 @@ export class Sandbox implements SandboxDto {
   /**
    * Resizes the Sandbox resources.
    *
-   * Changes the CPU, memory, or disk allocation for the Sandbox.
+   * Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
+   * sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
    *
    * @param {Resources} resources - New resource configuration. Only specified fields will be updated.
    *   - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
    *   - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
-   *   - disk: Disk space in GiB (can only be increased, never decreased).
-   *   - gpu: Not supported - will throw error if specified.
-   * @param {boolean} [hot=false] - If true, performs hot resize on a running sandbox (only CPU/memory increase allowed).
-   *   If false, all resources can be changed but sandbox must be stopped.
+   *   - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
    * @param {number} [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
    * @returns {Promise<void>}
-   * @throws {DaytonaError} - If GPU is specified, hot resize constraints are violated, disk size decrease is attempted,
-   *   or resize operation times out.
+   * @throws {DaytonaError} - If hot resize constraints are violated, disk resize attempted on running sandbox,
+   *   disk size decrease is attempted, no resource changes are specified, or resize operation times out.
    *
    * @example
-   * // Increase resources with hot resize (sandbox must be running)
-   * await sandbox.resize({ cpu: 4, memory: 8 }, true);
+   * // Increase CPU/memory on running sandbox (hot resize)
+   * await sandbox.resize({ cpu: 4, memory: 8 });
    *
-   * // Change resources (sandbox should be stopped for full flexibility)
+   * // Change disk (sandbox must be stopped)
+   * await sandbox.stop();
    * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
    */
-  public async resize(resources: Resources, hot = false, timeout = 60): Promise<void> {
+  public async resize(resources: Resources, timeout = 60): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
@@ -616,8 +615,6 @@ export class Sandbox implements SandboxDto {
       cpu: resources.cpu,
       memory: resources.memory,
       disk: resources.disk,
-      gpu: resources.gpu,
-      hot,
     }
     const response = await this.sandboxApi.resizeSandbox(this.id, resizeRequest, this.organizationId, {
       timeout: timeout * 1000,
