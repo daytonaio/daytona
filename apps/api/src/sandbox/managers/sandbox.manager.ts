@@ -11,6 +11,7 @@ import { randomUUID } from 'crypto'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
+import { ActionLoadService } from '../services/action-load.service'
 
 import { RedisLockProvider, LockCode } from '../common/redis-lock.provider'
 
@@ -50,6 +51,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   constructor(
     private readonly sandboxRepository: SandboxRepository,
     private readonly runnerService: RunnerService,
+    private readonly actionLoadService: ActionLoadService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxStartAction: SandboxStartAction,
     private readonly sandboxStopAction: SandboxStopAction,
@@ -269,9 +271,18 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               runnerId: runnerId === null ? IsNull() : runnerId,
               pending: true,
             },
-            select: ['id'],
+            select: ['id', 'state', 'desiredState'],
             take: maxSandboxesPerRunner,
           })
+
+          // Recalculate action load for this runner based on pending sandboxes
+          if (runnerId !== null) {
+            await this.actionLoadService.recalculateActionLoad(
+              runnerId,
+              sandboxes.map((s) => ({ state: s.state, desiredState: s.desiredState })),
+              maxSandboxesPerRunner,
+            )
+          }
 
           // Process sandboxes for this runner with concurrency limit
           const pendingProcesses: Promise<void>[] = []

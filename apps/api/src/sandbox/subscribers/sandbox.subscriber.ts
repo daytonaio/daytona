@@ -64,7 +64,12 @@ export class SandboxSubscriber implements EntitySubscriberInterface<Sandbox> {
         case 'state':
           this.eventEmitter.emit(
             SandboxEvents.STATE_UPDATED,
-            new SandboxStateUpdatedEvent(event.entity as Sandbox, event.databaseEntity[column], event.entity[column]),
+            new SandboxStateUpdatedEvent(
+              event.entity as Sandbox,
+              event.databaseEntity[column],
+              event.entity[column],
+              event.databaseEntity['runnerId'],
+            ),
           )
           break
         default:
