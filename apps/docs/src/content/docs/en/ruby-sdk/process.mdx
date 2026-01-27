@@ -329,6 +329,28 @@ sandbox.process.get_session_command_logs_async(
 
 ```
 
+#### send_session_command_input()
+
+```ruby
+def send_session_command_input(session_id:, command_id:, data:)
+
+```
+
+Sends input data to a command executed in a session
+
+This method allows you to send input to an interactive command running in a session,
+such as responding to prompts or providing data to stdin.
+
+**Parameters**:
+
+- `session_id` _String_ - Unique identifier of the session
+- `command_id` _String_ - Unique identifier of the command
+- `data` _String_ - Input data to send to the command
+
+**Returns**:
+
+- `void`
+
 #### list_sessions()
 
 ```ruby

@@ -165,3 +165,39 @@ func NewRequestTimeoutError(err error) error {
 func IsRequestTimeoutError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "request timeout")
 }
+
+type GoneError struct {
+	Message string
+}
+
+func (e *GoneError) Error() string {
+	return e.Message
+}
+
+func NewGoneError(err error) error {
+	return &GoneError{
+		Message: fmt.Sprintf("gone: %s", err.Error()),
+	}
+}
+
+func IsGoneError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "gone")
+}
+
+type InternalServerError struct {
+	Message string
+}
+
+func (e *InternalServerError) Error() string {
+	return e.Message
+}
+
+func NewInternalServerError(err error) error {
+	return &InternalServerError{
+		Message: fmt.Sprintf("internal server error: %s", err.Error()),
+	}
+}
+
+func IsInternalServerError(err error) bool {
+	return err != nil && strings.Contains(err.Error(), "internal server error")
+}

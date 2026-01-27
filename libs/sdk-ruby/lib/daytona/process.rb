@@ -258,6 +258,23 @@ module Daytona
       completion_queue.pop
     end
 
+    # Sends input data to a command executed in a session
+    #
+    # This method allows you to send input to an interactive command running in a session,
+    # such as responding to prompts or providing data to stdin.
+    #
+    # @param session_id [String] Unique identifier of the session
+    # @param command_id [String] Unique identifier of the command
+    # @param data [String] Input data to send to the command
+    # @return [void]
+    def send_session_command_input(session_id:, command_id:, data:)
+      toolbox_api.send_input(
+        session_id,
+        command_id,
+        DaytonaToolboxApiClient::SessionSendInputRequest.new(data:)
+      )
+    end
+
     #
     # @return [Array<DaytonaApiClient::Session>] List of all sessions in the Sandbox
     #

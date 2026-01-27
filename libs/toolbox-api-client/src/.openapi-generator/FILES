@@ -82,6 +82,7 @@ models/scroll-response.ts
 models/search-files-response.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
+models/session-send-input-request.ts
 models/session.ts
 models/status.ts
 models/user-home-dir-response.ts
