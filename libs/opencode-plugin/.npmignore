@@ -1,0 +1,15 @@
+# Source files
+*.ts
+!*.d.ts
+
+# Build artifacts
+tsconfig.json
+project.json
+
+# Development files
+.gitignore
+.eslintrc*
+.prettierrc*
+
+# Exclude source, only include compiled output
+.opencode/**/*.ts
