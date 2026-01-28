@@ -46,11 +46,16 @@ import { SnapshotRegion } from '../entities/snapshot-region.entity'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { SnapshotEvents } from '../constants/snapshot-events'
 import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
+import { TypedConfigService } from '../../config/typed-config.service'
+import { S3Client, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3'
+import { RunnerClass } from '../enums/runner-class'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
+  private readonly s3Client: S3Client | null = null
+  private readonly s3DefaultBucket: string | null = null
 
   constructor(
     @InjectRepository(Sandbox)
@@ -70,7 +75,36 @@ export class SnapshotService {
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+    private readonly configService: TypedConfigService,
+  ) {
+    // Initialize S3 client for snapshot cleanup (linux-exp and windows-exp snapshots)
+    const s3Endpoint = this.configService.get('s3.endpoint')
+    if (s3Endpoint) {
+      const region = this.configService.getOrThrow('s3.region')
+      const accessKeyId = this.configService.getOrThrow('s3.accessKey')
+      const secretAccessKey = this.configService.getOrThrow('s3.secretKey')
+      this.s3DefaultBucket = this.configService.get('s3.defaultBucket') || null
+
+      // Check if this is AWS S3 (don't use custom endpoint or forcePathStyle for AWS)
+      const isAwsS3 = s3Endpoint.includes('.amazonaws.com')
+
+      const s3Config: any = {
+        region,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+      }
+
+      if (!isAwsS3) {
+        s3Config.endpoint = s3Endpoint.startsWith('http') ? s3Endpoint : `http://${s3Endpoint}`
+        s3Config.forcePathStyle = true
+      }
+
+      this.s3Client = new S3Client(s3Config)
+      this.logger.log(`S3 client initialized for snapshot deletion (bucket=${this.s3DefaultBucket})`)
+    }
+  }
 
   private validateImageName(name: string): string | null {
     // Check for digest format (@sha256:hash)
@@ -353,8 +387,81 @@ export class SnapshotService {
     if (snapshot.general) {
       throw new ForbiddenException('You cannot delete a general snapshot')
     }
+
+    // Delete S3 artifacts immediately for linux-exp and windows-exp snapshots
+    if (
+      snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+      snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
+    ) {
+      this.logger.log(
+        `Deleting S3 artifacts for snapshot ${snapshotId} (runnerClass=${snapshot.runnerClass}, ref=${snapshot.ref})`,
+      )
+      await this.deleteS3SnapshotArtifacts(snapshot)
+    }
+
     snapshot.state = SnapshotState.REMOVING
     await this.snapshotRepository.save(snapshot)
+  }
+
+  /**
+   * Delete S3 artifacts for linux-exp and windows-exp snapshots.
+   */
+  private async deleteS3SnapshotArtifacts(snapshot: Snapshot): Promise<void> {
+    if (!this.s3Client || !this.s3DefaultBucket) {
+      this.logger.warn(`S3 not configured, skipping S3 artifact deletion for snapshot ${snapshot.id}`)
+      return
+    }
+
+    if (!snapshot.ref) {
+      this.logger.warn(`Snapshot ${snapshot.id} has no ref, skipping S3 deletion`)
+      return
+    }
+
+    try {
+      // Build S3 prefix from snapshot ref
+      // ref format is: {orgId}/{snapshotName}
+      const s3Prefix = snapshot.ref.startsWith('snapshots/') ? snapshot.ref : `snapshots/${snapshot.ref}`
+
+      this.logger.log(`Deleting S3 objects with prefix: ${s3Prefix} from bucket ${this.s3DefaultBucket}`)
+
+      let continuationToken: string | undefined
+      let deletedCount = 0
+
+      do {
+        const listResponse = await this.s3Client.send(
+          new ListObjectsV2Command({
+            Bucket: this.s3DefaultBucket,
+            Prefix: s3Prefix,
+            ContinuationToken: continuationToken,
+          }),
+        )
+
+        if (listResponse.Contents && listResponse.Contents.length > 0) {
+          this.logger.log(`Found ${listResponse.Contents.length} objects to delete`)
+          await this.s3Client.send(
+            new DeleteObjectsCommand({
+              Bucket: this.s3DefaultBucket,
+              Delete: {
+                Objects: listResponse.Contents.map((obj) => ({ Key: obj.Key })),
+                Quiet: true,
+              },
+            }),
+          )
+          deletedCount += listResponse.Contents.length
+        }
+
+        continuationToken = listResponse.NextContinuationToken
+      } while (continuationToken)
+
+      if (deletedCount > 0) {
+        this.logger.log(`Deleted ${deletedCount} S3 objects for snapshot ${snapshot.id}`)
+      } else {
+        this.logger.log(`No S3 objects found for snapshot ${snapshot.id} with prefix ${s3Prefix}`)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to delete S3 artifacts for snapshot ${snapshot.id}: ${error.message}`)
+      // Don't throw - we still want to mark the snapshot as removing
+    }
   }
 
   async getAllSnapshots(

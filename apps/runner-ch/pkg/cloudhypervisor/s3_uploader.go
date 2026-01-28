@@ -122,9 +122,10 @@ func (u *S3Uploader) UploadSnapshot(ctx context.Context, snapshotPath, organizat
 	log.Infof("Uploading snapshot to s3://%s/%s", u.bucket, s3Prefix)
 
 	// First, flatten the disk image to remove backing file dependencies
+	// This is REQUIRED - the backing file won't exist when downloading to another host
 	diskPath := filepath.Join(snapshotPath, "disk.qcow2")
 	if err := u.flattenDiskImage(ctx, diskPath); err != nil {
-		log.Warnf("Failed to flatten disk image (continuing anyway): %v", err)
+		return nil, fmt.Errorf("failed to flatten disk image (required for S3 upload): %w", err)
 	}
 
 	// List files in snapshot directory
@@ -192,37 +193,72 @@ func (u *S3Uploader) UploadSnapshot(ctx context.Context, snapshotPath, organizat
 }
 
 // flattenDiskImage converts a qcow2 with backing file to a standalone image
+// This is essential for S3 upload - the backing file won't exist when downloading to another host
 func (u *S3Uploader) flattenDiskImage(ctx context.Context, diskPath string) error {
-	log.Infof("Flattening disk image: %s", diskPath)
+	log.Infof("Checking disk image for backing file: %s", diskPath)
 
-	// Check if the disk has a backing file
-	var checkCmd string
-	if u.chClient.IsRemote() {
-		checkCmd = fmt.Sprintf("qemu-img info --output=json %s | grep -q backing_file", diskPath)
-	} else {
-		checkCmd = fmt.Sprintf("qemu-img info --output=json %s | grep -q backing_file", diskPath)
-	}
+	// Check if the disk has a backing file using qemu-img info
+	// The output contains "backing file:" line if there's a backing file
+	checkCmd := fmt.Sprintf("qemu-img info %s | grep -q 'backing file:'", diskPath)
 
-	output, err := u.chClient.runShellScript(ctx, checkCmd)
+	_, err := u.chClient.runShellScript(ctx, checkCmd)
 	if err != nil {
-		// No backing file found - disk is already standalone
+		// grep returned non-zero = no "backing file:" found = already standalone
 		log.Info("Disk image has no backing file - skipping flatten")
 		return nil
 	}
-	_ = output
 
-	// Create a flattened copy
+	// Disk has a backing file - need to flatten it
+	log.Info("Disk has backing file - flattening (this may take several minutes for large disks)...")
+
+	// Get the current disk size for progress indication
+	sizeCmd := fmt.Sprintf("qemu-img info %s | grep 'virtual size' | awk '{print $3}'", diskPath)
+	sizeOutput, _ := u.chClient.runShellScript(ctx, sizeCmd)
+	log.Infof("Virtual disk size: %s", strings.TrimSpace(sizeOutput))
+
+	// Create a flattened copy using qemu-img convert
+	// -O qcow2: output format
+	// -c: compress the output (optional, reduces size but takes longer)
+	// Using a temp file then moving to avoid partial files on failure
 	flattenedPath := diskPath + ".flattened"
-	flattenCmd := fmt.Sprintf("qemu-img convert -O qcow2 %s %s && mv %s %s",
-		diskPath, flattenedPath, flattenedPath, diskPath)
 
-	log.Info("Flattening disk image (this may take a while for large disks)...")
-	_, err = u.chClient.runShellScript(ctx, flattenCmd)
+	// Remove any existing temp file first
+	u.chClient.runShellScript(ctx, fmt.Sprintf("rm -f %s", flattenedPath))
+
+	// Convert to standalone image (this reads the full backing chain)
+	// -U (--force-share) bypasses lock check - safe because VM should be paused during snapshot
+	// -p shows progress (useful for large disks)
+	flattenCmd := fmt.Sprintf("qemu-img convert -U -O qcow2 -p %s %s", diskPath, flattenedPath)
+	log.Infof("Running: %s", flattenCmd)
+
+	output, err := u.chClient.runShellScript(ctx, flattenCmd)
 	if err != nil {
-		return fmt.Errorf("failed to flatten disk: %w", err)
+		// Clean up temp file on failure
+		u.chClient.runShellScript(ctx, fmt.Sprintf("rm -f %s", flattenedPath))
+		return fmt.Errorf("failed to flatten disk: %w (output: %s)", err, output)
 	}
 
-	log.Info("Disk image flattened successfully")
+	// Verify the flattened image has no backing file
+	verifyCmd := fmt.Sprintf("qemu-img info %s | grep -q 'backing file:'", flattenedPath)
+	_, err = u.chClient.runShellScript(ctx, verifyCmd)
+	if err == nil {
+		// Still has backing file - something went wrong
+		u.chClient.runShellScript(ctx, fmt.Sprintf("rm -f %s", flattenedPath))
+		return fmt.Errorf("flattened image still has backing file reference")
+	}
+
+	// Replace original with flattened version
+	replaceCmd := fmt.Sprintf("mv %s %s", flattenedPath, diskPath)
+	_, err = u.chClient.runShellScript(ctx, replaceCmd)
+	if err != nil {
+		return fmt.Errorf("failed to replace disk with flattened version: %w", err)
+	}
+
+	// Log the new size
+	newSizeCmd := fmt.Sprintf("ls -lh %s | awk '{print $5}'", diskPath)
+	newSize, _ := u.chClient.runShellScript(ctx, newSizeCmd)
+	log.Infof("Disk image flattened successfully (new size: %s)", strings.TrimSpace(newSize))
+
 	return nil
 }
 
@@ -448,4 +484,147 @@ func (u *S3Uploader) SnapshotExists(ctx context.Context, organizationId, snapsho
 	}
 
 	return true, nil
+}
+
+// DownloadSnapshotResult contains information about a downloaded snapshot
+type DownloadSnapshotResult struct {
+	LocalPath string        // Local path where snapshot was downloaded
+	TotalSize int64         // Total bytes downloaded
+	FileCount int           // Number of files downloaded
+	Duration  time.Duration // Time taken to download
+}
+
+// DownloadSnapshot downloads a snapshot from S3 to the local filesystem
+// The snapshot will be downloaded to: {snapshotsPath}/{organizationId}/{snapshotName}/
+func (u *S3Uploader) DownloadSnapshot(ctx context.Context, snapshotsPath, organizationId, snapshotName string) (*DownloadSnapshotResult, error) {
+	if !u.configured {
+		return nil, fmt.Errorf("S3 is not configured")
+	}
+
+	startTime := time.Now()
+	s3Prefix := fmt.Sprintf("%s/%s/%s/", SNAPSHOTS_PREFIX, organizationId, snapshotName)
+	localDir := filepath.Join(snapshotsPath, organizationId, snapshotName)
+
+	log.Infof("Downloading snapshot from s3://%s/%s to %s", u.bucket, s3Prefix, localDir)
+
+	// Create local directory structure
+	if err := os.MkdirAll(localDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create local directory: %w", err)
+	}
+
+	// List all objects with the prefix
+	paginator := s3.NewListObjectsV2Paginator(u.client, &s3.ListObjectsV2Input{
+		Bucket: aws.String(u.bucket),
+		Prefix: aws.String(s3Prefix),
+	})
+
+	var filesToDownload []string
+	for paginator.HasMorePages() {
+		page, err := paginator.NextPage(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to list objects: %w", err)
+		}
+		for _, obj := range page.Contents {
+			filesToDownload = append(filesToDownload, *obj.Key)
+		}
+	}
+
+	if len(filesToDownload) == 0 {
+		return nil, fmt.Errorf("snapshot not found in S3: %s/%s", organizationId, snapshotName)
+	}
+
+	log.Infof("Found %d files to download", len(filesToDownload))
+
+	// Download files with concurrency
+	var totalSize int64
+	var downloadErrors []error
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+
+	// Use a semaphore to limit concurrent downloads
+	sem := make(chan struct{}, 3) // Max 3 concurrent downloads
+
+	for _, s3Key := range filesToDownload {
+		wg.Add(1)
+		go func(key string) {
+			defer wg.Done()
+			sem <- struct{}{}        // Acquire
+			defer func() { <-sem }() // Release
+
+			// Calculate local file path
+			relativePath := strings.TrimPrefix(key, s3Prefix)
+			localPath := filepath.Join(localDir, relativePath)
+
+			// Create parent directory if needed
+			if dir := filepath.Dir(localPath); dir != localDir {
+				if err := os.MkdirAll(dir, 0755); err != nil {
+					mu.Lock()
+					downloadErrors = append(downloadErrors, fmt.Errorf("failed to create directory %s: %w", dir, err))
+					mu.Unlock()
+					return
+				}
+			}
+
+			// Download the file
+			size, err := u.downloadFile(ctx, key, localPath)
+			if err != nil {
+				mu.Lock()
+				downloadErrors = append(downloadErrors, fmt.Errorf("failed to download %s: %w", key, err))
+				mu.Unlock()
+				return
+			}
+
+			atomic.AddInt64(&totalSize, size)
+			log.Debugf("Downloaded %s (%d bytes)", relativePath, size)
+		}(s3Key)
+	}
+
+	wg.Wait()
+
+	if len(downloadErrors) > 0 {
+		// Clean up on failure
+		os.RemoveAll(localDir)
+		return nil, fmt.Errorf("failed to download snapshot: %v", downloadErrors[0])
+	}
+
+	duration := time.Since(startTime)
+	log.Infof("Downloaded snapshot %s/%s: %d files, %d bytes in %v",
+		organizationId, snapshotName, len(filesToDownload), totalSize, duration)
+
+	return &DownloadSnapshotResult{
+		LocalPath: localDir,
+		TotalSize: totalSize,
+		FileCount: len(filesToDownload),
+		Duration:  duration,
+	}, nil
+}
+
+// downloadFile downloads a single file from S3
+func (u *S3Uploader) downloadFile(ctx context.Context, s3Key, localPath string) (int64, error) {
+	// Create the local file
+	file, err := os.Create(localPath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to create file: %w", err)
+	}
+	defer file.Close()
+
+	// Download using the S3 client
+	result, err := u.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(u.bucket),
+		Key:    aws.String(s3Key),
+	})
+	if err != nil {
+		os.Remove(localPath)
+		return 0, fmt.Errorf("failed to get object: %w", err)
+	}
+	defer result.Body.Close()
+
+	// Copy the content to the file
+	written, err := io.Copy(file, result.Body)
+	if err != nil {
+		os.Remove(localPath)
+		return 0, fmt.Errorf("failed to write file: %w", err)
+	}
+
+	return written, nil
 }

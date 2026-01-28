@@ -70,10 +70,40 @@ func (c *Client) BuildSnapshot(ctx context.Context, request dto.BuildSnapshotReq
 }
 
 // PullSnapshot pulls a snapshot from a registry
+// PullSnapshot downloads a snapshot from S3 to the local runner storage
+// The ref format is: {orgId}/{snapshotName}
 func (c *Client) PullSnapshot(ctx context.Context, request dto.PullSnapshotRequestDTO) error {
 	log.Infof("Pulling snapshot %s", request.Ref)
-	// TODO: Implement snapshot pulling
-	// This would download the snapshot image to the snapshots directory
+
+	// Check if S3 is configured
+	if c.s3Uploader == nil || !c.s3Uploader.IsConfigured() {
+		return fmt.Errorf("S3 is not configured - cannot pull snapshot")
+	}
+
+	// Parse the ref to get orgId and snapshotName
+	// Expected format: {orgId}/{snapshotName}
+	orgId, snapshotName := parseSnapshotRef(request.Ref)
+	if orgId == "" || snapshotName == "" {
+		return fmt.Errorf("invalid snapshot ref format '%s', expected {orgId}/{snapshotName}", request.Ref)
+	}
+
+	// Check if snapshot already exists locally
+	localPath := filepath.Join(c.config.SnapshotsPath, request.Ref)
+	diskPath := filepath.Join(localPath, "disk.qcow2")
+	if exists, _ := c.fileExists(ctx, diskPath); exists {
+		log.Infof("Snapshot %s already exists locally at %s", request.Ref, localPath)
+		return nil
+	}
+
+	// Download from S3
+	result, err := c.s3Uploader.DownloadSnapshot(ctx, c.config.SnapshotsPath, orgId, snapshotName)
+	if err != nil {
+		return fmt.Errorf("failed to download snapshot from S3: %w", err)
+	}
+
+	log.Infof("Successfully pulled snapshot %s: %d files, %d bytes in %v",
+		request.Ref, result.FileCount, result.TotalSize, result.Duration)
+
 	return nil
 }
 
@@ -127,15 +157,65 @@ func (c *Client) GetImageInfo(ctx context.Context, snapshot string) (*ImageInfo,
 	}, nil
 }
 
-// RemoveImage removes a snapshot/image directory
+// RemoveImage removes a snapshot/image directory and its S3 artifacts
+// The ref format is: {orgId}/{snapshotName}
 func (c *Client) RemoveImage(ctx context.Context, ref string, force bool) error {
 	log.Infof("Removing image %s (force=%v)", ref, force)
 
-	// Snapshots are directories containing disk.qcow2, config.json, etc.
+	// Parse the ref to get orgId and snapshotName
+	// Expected format: {orgId}/{snapshotName}
+	orgId, snapshotName := parseSnapshotRef(ref)
+
+	// Delete from S3 if configured
+	if c.s3Uploader != nil && c.s3Uploader.IsConfigured() {
+		if orgId != "" && snapshotName != "" {
+			log.Infof("Deleting snapshot from S3: orgId=%s, snapshotName=%s", orgId, snapshotName)
+			if err := c.s3Uploader.DeleteSnapshot(ctx, orgId, snapshotName); err != nil {
+				log.Warnf("Failed to delete snapshot from S3 (will continue with local cleanup): %v", err)
+				// Continue with local cleanup even if S3 deletion fails
+			} else {
+				log.Infof("Successfully deleted snapshot from S3")
+			}
+		} else {
+			log.Warnf("Could not parse orgId/snapshotName from ref '%s', skipping S3 deletion", ref)
+		}
+	}
+
+	// Local snapshot directory is at: {snapshotsPath}/{orgId}/{snapshotName}
 	snapshotDir := filepath.Join(c.config.SnapshotsPath, ref)
 
-	// Remove the entire snapshot directory
+	// Remove the entire snapshot directory (local cache)
 	return c.runCommand(ctx, "rm", "-rf", snapshotDir)
+}
+
+// parseSnapshotRef extracts organizationId and snapshotName from a snapshot ref
+// Expected format: {orgId}/{snapshotName}
+// Returns empty strings if the ref doesn't match the expected format
+func parseSnapshotRef(ref string) (orgId, snapshotName string) {
+	// Split by "/"
+	parts := splitPath(ref)
+
+	// We need exactly orgId and snapshotName (2 parts)
+	if len(parts) >= 2 {
+		return parts[0], parts[1]
+	}
+
+	return "", ""
+}
+
+// splitPath splits a path by "/" separator
+func splitPath(path string) []string {
+	var parts []string
+	start := 0
+	for i := 0; i <= len(path); i++ {
+		if i == len(path) || path[i] == '/' {
+			if i > start {
+				parts = append(parts, path[start:i])
+			}
+			start = i + 1
+		}
+	}
+	return parts
 }
 
 // PushSnapshot pushes a snapshot to a registry
@@ -147,16 +227,22 @@ func (c *Client) PushSnapshot(ctx context.Context, request dto.PushSnapshotReque
 
 // CreateSnapshot creates a snapshot of a sandbox and uploads it to S3
 func (c *Client) CreateSnapshot(ctx context.Context, request dto.CreateSnapshotRequestDTO) (*dto.CreateSnapshotResponseDTO, error) {
-	log.Infof("Creating snapshot '%s' from sandbox '%s' (live=%v)", request.Name, request.SandboxId, request.Live)
+	log.Infof("Creating snapshot '%s' from sandbox '%s' (live=%v, org=%s)", request.Name, request.SandboxId, request.Live, request.OrganizationId)
 
 	// Use the internal CreateSnapshotFromVM with proper options
+	// The local path will be: /var/lib/cloud-hypervisor/snapshots/{orgId}/{name}
 	snapshotPath, err := c.CreateSnapshotFromVM(ctx, SnapshotOptions{
-		SandboxId: request.SandboxId,
-		Name:      request.Name,
+		SandboxId:      request.SandboxId,
+		Name:           request.Name,
+		OrganizationId: request.OrganizationId,
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	// The snapshot ref is in format: {orgId}/{name}
+	// This is used for both local storage and S3
+	snapshotRef := filepath.Join(request.OrganizationId, request.Name)
 
 	// Get size of the snapshot (check qcow2 first, then legacy raw)
 	var sizeBytes int64
@@ -171,7 +257,7 @@ func (c *Client) CreateSnapshot(ctx context.Context, request dto.CreateSnapshotR
 
 	response := &dto.CreateSnapshotResponseDTO{
 		Name:         request.Name,
-		SnapshotPath: snapshotPath,
+		SnapshotPath: snapshotRef, // Return the ref format, not the full local path
 		SizeBytes:    sizeBytes,
 		LiveMode:     request.Live,
 	}

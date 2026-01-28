@@ -16,8 +16,9 @@ import (
 
 // SnapshotOptions specifies options for creating a snapshot
 type SnapshotOptions struct {
-	SandboxId string // Source sandbox to snapshot
-	Name      string // Snapshot name (defaults to sandboxId-timestamp)
+	SandboxId      string // Source sandbox to snapshot
+	Name           string // Snapshot name (defaults to sandboxId-timestamp)
+	OrganizationId string // Organization ID for namespacing (required to avoid conflicts)
 }
 
 // CreateSnapshotFromVM creates a snapshot of a running or paused VM
@@ -32,7 +33,15 @@ func (c *Client) CreateSnapshotFromVM(ctx context.Context, opts SnapshotOptions)
 		opts.Name = fmt.Sprintf("%s-%d", opts.SandboxId, time.Now().Unix())
 	}
 
-	snapshotPath := filepath.Join(c.config.SnapshotsPath, opts.Name)
+	// Use orgId/name format for the snapshot path to avoid naming conflicts between organizations
+	// The snapshotRef will be: {orgId}/{name}
+	var snapshotRef string
+	if opts.OrganizationId != "" {
+		snapshotRef = filepath.Join(opts.OrganizationId, opts.Name)
+	} else {
+		snapshotRef = opts.Name
+	}
+	snapshotPath := filepath.Join(c.config.SnapshotsPath, snapshotRef)
 
 	log.Infof("Creating snapshot %s from sandbox %s", opts.Name, opts.SandboxId)
 
