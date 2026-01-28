@@ -445,6 +445,16 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/claude/claude-code-run-cli-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.claude'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/claude/claude-agent-sdk-interactive-terminal-sandbox',
             locale
           ),
