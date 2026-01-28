@@ -643,13 +643,10 @@ export class Sandbox implements SandboxDto {
       await this.refreshData()
 
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (
-        this.state === SandboxState.ERROR ||
-        this.state === SandboxState.BUILD_FAILED ||
-        this.state === SandboxState.BUILD_FAILED
-      ) {
-        const errMsg = `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`
-        throw new DaytonaError(errMsg)
+      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
+        throw new DaytonaError(
+          `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`,
+        )
       }
 
       if (this.state !== SandboxState.RESIZING) {

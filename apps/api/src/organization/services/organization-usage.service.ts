@@ -1085,7 +1085,7 @@ export class OrganizationUsageService {
       local volumeCountKey = KEYS[1]
 
       local volumeCountDecrement = tonumber(ARGV[1])
-      
+
       if volumeCountDecrement then
         redis.call("DECRBY", volumeCountKey, volumeCountDecrement)
       end
@@ -1097,6 +1097,35 @@ export class OrganizationUsageService {
       this.getPendingQuotaUsageCacheKey(organizationId, 'volume_count'),
       volumeCount?.toString() ?? '0',
     )
+  }
+
+  /**
+   * Apply usage change after resize completes successfully.
+   * Increments current usage and decrements pending usage by the deltas.
+   *
+   * @param organizationId
+   * @param regionId
+   * @param cpuDelta - The CPU delta (positive value to increment).
+   * @param memDelta - The memory delta (positive value to increment).
+   * @param diskDelta - The disk delta (positive value to increment).
+   */
+  async applyResizeUsageChange(
+    organizationId: string,
+    regionId: string,
+    cpuDelta: number,
+    memDelta: number,
+    diskDelta: number,
+  ): Promise<void> {
+    if (cpuDelta > 0) {
+      await this.updateCurrentQuotaUsage(organizationId, 'cpu', cpuDelta, regionId)
+    }
+    if (memDelta > 0) {
+      await this.updateCurrentQuotaUsage(organizationId, 'memory', memDelta, regionId)
+    }
+    if (diskDelta > 0) {
+      await this.updateCurrentQuotaUsage(organizationId, 'disk', diskDelta, regionId)
+    }
+    // Note: updateCurrentQuotaUsage auto-decrements pending when delta > 0
   }
 
   /**
@@ -1179,6 +1208,19 @@ export class OrganizationUsageService {
     }
   }
 
+  /**
+   * For resize transitions, RESIZING consumes compute only if the other state does (hot resize).
+   */
+  private getStatesConsumingComputeForTransition(oldState: SandboxState, newState: SandboxState): SandboxState[] {
+    if (oldState === SandboxState.RESIZING || newState === SandboxState.RESIZING) {
+      const otherState = oldState === SandboxState.RESIZING ? newState : oldState
+      if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(otherState)) {
+        return [...SANDBOX_STATES_CONSUMING_COMPUTE, SandboxState.RESIZING]
+      }
+    }
+    return SANDBOX_STATES_CONSUMING_COMPUTE
+  }
+
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
@@ -1213,18 +1255,20 @@ export class OrganizationUsageService {
     }
 
     try {
+      const statesConsumingCompute = this.getStatesConsumingComputeForTransition(event.oldState, event.newState)
+
       const cpuDelta = this.calculateQuotaUsageDelta(
         event.sandbox.cpu,
         event.oldState,
         event.newState,
-        SANDBOX_STATES_CONSUMING_COMPUTE,
+        statesConsumingCompute,
       )
 
       const memDelta = this.calculateQuotaUsageDelta(
         event.sandbox.mem,
         event.oldState,
         event.newState,
-        SANDBOX_STATES_CONSUMING_COMPUTE,
+        statesConsumingCompute,
       )
 
       const diskDelta = this.calculateQuotaUsageDelta(
