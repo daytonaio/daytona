@@ -8,7 +8,8 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": ["go mod download", "go build -v ./..."]
+        "commands": ["go mod download", "go build -v ./..."],
+        "parallel": false
       }
     },
     "lint": {
@@ -21,14 +22,16 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": ["go fmt ./...", "prettier --write '**/*.yaml'"]
+        "commands": ["go fmt ./...", "prettier --write '**/*.yaml'"],
+        "parallel": false
       }
     },
     "clean": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": ["go clean", "rm -rf dist"]
+        "commands": ["go clean", "rm -rf dist"],
+        "parallel": false
       }
     },
     "generate:api-client": {

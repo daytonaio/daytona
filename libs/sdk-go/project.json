@@ -8,7 +8,8 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": ["go mod download", "go build -v ./..."]
+        "commands": ["go mod download", "go build -v ./..."],
+        "parallel": false
       }
     },
     "test": {
@@ -26,7 +27,8 @@
         "commands": [
           "go test -v -race -coverprofile=coverage.out ./...",
           "go tool cover -html=coverage.out -o coverage.html"
-        ]
+        ],
+        "parallel": false
       },
       "dependsOn": ["build"]
     },
@@ -62,7 +64,8 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": ["go clean", "rm -rf coverage.out coverage.html", "rm -rf dist"]
+        "commands": ["go clean", "rm -rf coverage.out coverage.html", "rm -rf dist"],
+        "parallel": false
       }
     },
     "docs": {
@@ -74,7 +77,8 @@
           "gomarkdoc --template-file file=templates/file.gotxt --template-file example=templates/example.gotxt --template-file func=templates/func.gotxt --template-file type=templates/type.gotxt -o ../../apps/docs/src/content/docs/en/go-sdk/types.mdx ./pkg/types",
           "gomarkdoc --template-file file=templates/file.gotxt --template-file example=templates/example.gotxt --template-file func=templates/func.gotxt --template-file type=templates/type.gotxt -o ../../apps/docs/src/content/docs/en/go-sdk/errors.mdx ./pkg/errors",
           "gomarkdoc --template-file file=templates/file.gotxt --template-file example=templates/example.gotxt --template-file func=templates/func.gotxt --template-file type=templates/type.gotxt -o ../../apps/docs/src/content/docs/en/go-sdk/options.mdx ./pkg/options"
-        ]
+        ],
+        "parallel": false
       }
     },
     "generate": {
@@ -91,8 +95,9 @@
         "commands": [
           "echo \"${VERSION:-v0.0.0-dev}\" > pkg/daytona/VERSION",
           "git add pkg/daytona/VERSION",
-          "git commit -m \"chore(sdk-go): set version to ${VERSION:-v0.0.0-dev}\" || true"
-        ]
+          "git commit -s -m \"chore(sdk-go): set version to ${VERSION:-v0.0.0-dev}\" || true"
+        ],
+        "parallel": false
       }
     },
     "publish": {
