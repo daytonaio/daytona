@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
 import {
+  ListSandboxesPaginatedOrderEnum,
+  ListSandboxesPaginatedSortEnum,
+  ListSandboxesPaginatedStatesEnum,
+  Region,
   Sandbox,
   SandboxState,
   SnapshotDto,
-  ListSandboxesPaginatedSortEnum,
-  ListSandboxesPaginatedOrderEnum,
-  ListSandboxesPaginatedStatesEnum,
-  Region,
 } from '@daytonaio/api-client'
-import { Table, SortingState, ColumnFiltersState } from '@tanstack/react-table'
-import { DEFAULT_SANDBOX_SORTING, SandboxFilters, SandboxSorting } from '@/hooks/useSandboxes'
+import { ColumnFiltersState, SortingState, Table } from '@tanstack/react-table'
 
 export interface SandboxTableProps {
   data: Sandbox[]
@@ -31,6 +31,9 @@ export interface SandboxTableProps {
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
+  handleBulkStart: (ids: string[]) => void
+  handleBulkStop: (ids: string[]) => void
+  handleBulkArchive: (ids: string[]) => void
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>

@@ -4,7 +4,7 @@
  */
 
 import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
-import { Sandbox, SandboxDesiredState } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState, SandboxState } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import React from 'react'
@@ -87,7 +87,7 @@ export function getColumns({
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
           onCheckedChange={(value) => {
             for (const row of table.getRowModel().rows) {
-              if (sandboxIsLoading[row.original.id]) {
+              if (sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED) {
                 row.toggleSelected(false)
               } else {
                 row.toggleSelected(!!value)
