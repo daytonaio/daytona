@@ -9,6 +9,9 @@ export class Migration1769516172576 implements MigrationInterface {
   name = 'Migration1769516172576'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // Drop index with explicit enum type cast in WHERE clause (required for enum swap)
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."sandbox_active_only_idx"`)
+
     // For sandbox_state_enum - add 'resizing' value using hotswap approach
     await queryRunner.query(`ALTER TYPE "public"."sandbox_state_enum" RENAME TO "sandbox_state_enum_old"`)
     await queryRunner.query(
@@ -21,41 +24,39 @@ export class Migration1769516172576 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "state" SET DEFAULT 'unknown'`)
     await queryRunner.query(`DROP TYPE "public"."sandbox_state_enum_old"`)
 
-    // For sandbox_desired_state_enum - remove 'resized' value using hotswap approach
+    // For sandbox_desiredstate_enum - remove 'resized' value using hotswap approach
+    await queryRunner.query(`ALTER TYPE "public"."sandbox_desiredstate_enum" RENAME TO "sandbox_desiredstate_enum_old"`)
     await queryRunner.query(
-      `ALTER TYPE "public"."sandbox_desired_state_enum" RENAME TO "sandbox_desired_state_enum_old"`,
-    )
-    await queryRunner.query(
-      `CREATE TYPE "public"."sandbox_desired_state_enum" AS ENUM('destroyed', 'started', 'stopped', 'archived')`,
+      `CREATE TYPE "public"."sandbox_desiredstate_enum" AS ENUM('destroyed', 'started', 'stopped', 'archived')`,
     )
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "desiredState" DROP DEFAULT`)
     await queryRunner.query(
-      `ALTER TABLE "sandbox" ALTER COLUMN "desiredState" TYPE "public"."sandbox_desired_state_enum" USING "desiredState"::"text"::"public"."sandbox_desired_state_enum"`,
+      `ALTER TABLE "sandbox" ALTER COLUMN "desiredState" TYPE "public"."sandbox_desiredstate_enum" USING "desiredState"::"text"::"public"."sandbox_desiredstate_enum"`,
     )
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "desiredState" SET DEFAULT 'started'`)
-    await queryRunner.query(`DROP TYPE "public"."sandbox_desired_state_enum_old"`)
+    await queryRunner.query(`DROP TYPE "public"."sandbox_desiredstate_enum_old"`)
 
-    // Drop the resizing boolean column (no longer needed since we use state)
-    await queryRunner.query(`ALTER TABLE "sandbox" DROP COLUMN IF EXISTS "resizing"`)
+    // Recreate the index that was dropped
+    await queryRunner.query(
+      `CREATE INDEX "sandbox_active_only_idx" ON "sandbox" ("id") WHERE "state" <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum])`,
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Re-add the resizing column
-    await queryRunner.query(`ALTER TABLE "sandbox" ADD "resizing" boolean NOT NULL DEFAULT false`)
+    // Drop index with explicit enum type cast in WHERE clause (required for enum swap)
+    await queryRunner.query(`DROP INDEX IF EXISTS "public"."sandbox_active_only_idx"`)
 
-    // For sandbox_desired_state_enum - re-add 'resized' value
+    // For sandbox_desiredstate_enum - re-add 'resized' value
+    await queryRunner.query(`ALTER TYPE "public"."sandbox_desiredstate_enum" RENAME TO "sandbox_desiredstate_enum_old"`)
     await queryRunner.query(
-      `ALTER TYPE "public"."sandbox_desired_state_enum" RENAME TO "sandbox_desired_state_enum_old"`,
-    )
-    await queryRunner.query(
-      `CREATE TYPE "public"."sandbox_desired_state_enum" AS ENUM('destroyed', 'started', 'stopped', 'resized', 'archived')`,
+      `CREATE TYPE "public"."sandbox_desiredstate_enum" AS ENUM('destroyed', 'started', 'stopped', 'resized', 'archived')`,
     )
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "desiredState" DROP DEFAULT`)
     await queryRunner.query(
-      `ALTER TABLE "sandbox" ALTER COLUMN "desiredState" TYPE "public"."sandbox_desired_state_enum" USING "desiredState"::"text"::"public"."sandbox_desired_state_enum"`,
+      `ALTER TABLE "sandbox" ALTER COLUMN "desiredState" TYPE "public"."sandbox_desiredstate_enum" USING "desiredState"::"text"::"public"."sandbox_desiredstate_enum"`,
     )
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "desiredState" SET DEFAULT 'started'`)
-    await queryRunner.query(`DROP TYPE "public"."sandbox_desired_state_enum_old"`)
+    await queryRunner.query(`DROP TYPE "public"."sandbox_desiredstate_enum_old"`)
 
     // For sandbox_state_enum - remove 'resizing' value
     await queryRunner.query(`UPDATE "sandbox" SET "state" = 'stopped' WHERE "state" = 'resizing'`)
@@ -69,5 +70,10 @@ export class Migration1769516172576 implements MigrationInterface {
     )
     await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "state" SET DEFAULT 'unknown'`)
     await queryRunner.query(`DROP TYPE "public"."sandbox_state_enum_old"`)
+
+    // Recreate the index that was dropped
+    await queryRunner.query(
+      `CREATE INDEX "sandbox_active_only_idx" ON "sandbox" ("id") WHERE "state" <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum])`,
+    )
   }
 }

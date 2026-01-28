@@ -482,10 +482,6 @@ export class JobStateHandlerService {
         sandbox.disk = payload.disk ?? sandbox.disk
         sandbox.state = previousState
         await this.sandboxRepository.save(sandbox)
-        this.eventEmitter.emit(
-          SandboxEvents.STATE_UPDATED,
-          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, previousState),
-        )
         return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)

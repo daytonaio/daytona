@@ -604,7 +604,11 @@ class Sandbox(SandboxDto):
         sandbox = self._sandbox_api.resize_sandbox(self.id, resize_request, _request_timeout=timeout or None)
         self.__process_sandbox_dto(sandbox)
         time_elapsed = time.time() - start_time
-        self.wait_for_resize_complete(timeout=max(0.001, timeout - time_elapsed) if timeout else timeout)
+        if timeout is None or timeout == 0:
+            remaining_timeout = timeout
+        else:
+            remaining_timeout = max(0.001, timeout - time_elapsed)
+        self.wait_for_resize_complete(timeout=remaining_timeout)
 
     @intercept_errors(message_prefix="Failure during waiting for resize to complete: ")
     @with_timeout(

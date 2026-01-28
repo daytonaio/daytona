@@ -1395,21 +1395,54 @@ export class SandboxService {
     // Validate organization quotas for the new resource values
     this.organizationService.assertOrganizationIsNotSuspended(organization)
 
+    // Validate per-sandbox quotas with total new values
+    if (newCpu > organization.maxCpuPerSandbox) {
+      throw new ForbiddenException(
+        `CPU request ${newCpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+      )
+    }
+    if (newMem > organization.maxMemoryPerSandbox) {
+      throw new ForbiddenException(
+        `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+      )
+    }
+    if (newDisk > organization.maxDiskPerSandbox) {
+      throw new ForbiddenException(
+        `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+      )
+    }
+
     // Calculate the delta for quota validation
     const cpuDelta = newCpu - sandbox.cpu
     const memDelta = newMem - sandbox.mem
     const diskDelta = newDisk - sandbox.disk
 
-    // Only validate quotas if resources are increasing
+    // Track pending increments for rollback on error
+    let pendingCpuIncrement = 0
+    let pendingMemoryIncrement = 0
+    let pendingDiskIncrement = 0
+
+    // Only validate org-wide quotas if resources are increasing
+    // Don't pass excludeSandboxId - sandbox is already in currentUsage, we just add the delta to pending
     if (cpuDelta > 0 || memDelta > 0 || diskDelta > 0) {
-      await this.validateOrganizationQuotas(
-        organization,
-        sandbox.region,
-        cpuDelta > 0 ? cpuDelta : 0,
-        memDelta > 0 ? memDelta : 0,
-        diskDelta > 0 ? diskDelta : 0,
-        sandbox.id,
-      )
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sandbox.region,
+          cpuDelta > 0 ? cpuDelta : 0,
+          memDelta > 0 ? memDelta : 0,
+          diskDelta > 0 ? diskDelta : 0,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = cpuDelta
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = memDelta
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = diskDelta
+      }
     }
 
     // Get runner and validate before changing state
@@ -1443,7 +1476,7 @@ export class SandboxService {
 
       await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
 
-      // For V0 runners, update resources immediately and emit STATE_UPDATED event
+      // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
       // For V2 runners, job handler will update resources on completion
       if (runner.apiVersion === '0') {
         sandbox.cpu = newCpu
@@ -1451,14 +1484,19 @@ export class SandboxService {
         sandbox.disk = newDisk
         sandbox.state = previousState
         await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
-        this.eventEmitter.emit(
-          SandboxEvents.STATE_UPDATED,
-          new SandboxStateUpdatedEvent(sandbox, SandboxState.RESIZING, previousState),
-        )
       }
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
+      // Rollback pending usage on error
+      await this.rollbackPendingUsage(
+        organization.id,
+        sandbox.region,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+
       // Return to previous state on error
       sandbox.state = previousState
       await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
