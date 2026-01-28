@@ -260,11 +260,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     //  todo: remove try catch block and implement error handling
     try {
       //  get all runners in the regions to propagate to
+      //  only propagate to runners of the same class as the snapshot
+      //  (e.g., LINUX_EXPERIMENTAL snapshots can only be used by LINUX_EXPERIMENTAL runners)
       const runners = await this.runnerRepository.find({
         where: {
           state: RunnerState.READY,
           unschedulable: Not(true),
           region: In([...sharedRegionIds, ...organizationRegionIds]),
+          class: snapshot.runnerClass || RunnerClass.LINUX,
         },
       })
 
@@ -323,10 +326,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         return
       }
 
-      // Separate Windows runners from Docker-based runners
+      // Separate runners by class type
       const windowsRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.WINDOWS_EXPERIMENTAL)
-      const linuxRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX_EXPERIMENTAL)
-      const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class !== RunnerClass.LINUX)
+      const linuxExpRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX_EXPERIMENTAL)
+      const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX)
 
       // For Docker-based runners, get the registry
       let dockerRegistry: DockerRegistry | undefined
@@ -430,7 +433,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const retryTimeoutMinutes = 10
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > retryTimeoutMs) {
-      const dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRunner.snapshotRef)
+      // Windows and Linux experimental runners pull from object storage, not Docker registries
+      const isWindowsOrLinuxRunner =
+        runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
+      const dockerRegistry = isWindowsOrLinuxRunner
+        ? undefined
+        : await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRunner.snapshotRef)
       await this.pullSnapshotRunnerWithRetries(runner, snapshotRunner.snapshotRef, dockerRegistry)
       return
     }

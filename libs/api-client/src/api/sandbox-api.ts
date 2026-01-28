@@ -3627,6 +3627,8 @@ export const ListSandboxesPaginatedStatesEnum = {
   PULLING_SNAPSHOT: 'pulling_snapshot',
   ARCHIVED: 'archived',
   ARCHIVING: 'archiving',
+  SNAPSHOTTING: 'snapshotting',
+  FORKING: 'forking',
 } as const
 export type ListSandboxesPaginatedStatesEnum =
   (typeof ListSandboxesPaginatedStatesEnum)[keyof typeof ListSandboxesPaginatedStatesEnum]

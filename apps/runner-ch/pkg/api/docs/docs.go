@@ -1012,20 +1012,40 @@ const docTemplate = `{
         },
         "/stats/memory": {
             "get": {
-                "description": "Returns memory usage statistics",
+                "description": "Returns memory statistics for sandboxes over a time range",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "stats"
                 ],
-                "summary": "Get memory stats",
+                "summary": "Get memory statistics",
+                "operationId": "GetMemoryStatsJSON",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter by sandbox ID",
+                        "name": "sandbox",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Lookback hours (default: 24)",
+                        "name": "hours",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/controllers.MemoryStatsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -1033,17 +1053,26 @@ const docTemplate = `{
         },
         "/stats/memory/view": {
             "get": {
-                "description": "Returns memory usage statistics in HTML view",
+                "description": "Returns an interactive HTML page with memory usage charts",
                 "produces": [
                     "text/html"
                 ],
                 "tags": [
                     "stats"
                 ],
-                "summary": "Get memory stats view",
+                "summary": "Memory stats visualization",
+                "operationId": "GetMemoryStatsViewHTML",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Lookback hours (default: 24)",
+                        "name": "hours",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "HTML page",
                         "schema": {
                             "type": "string"
                         }
@@ -1383,6 +1412,35 @@ const docTemplate = `{
                 }
             }
         },
+        "cloudhypervisor.MemoryStatsRecord": {
+            "type": "object",
+            "properties": {
+                "available_kib": {
+                    "type": "integer"
+                },
+                "balloon_active": {
+                    "type": "boolean"
+                },
+                "balloon_size_kib": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "max_memory_kib": {
+                    "type": "integer"
+                },
+                "sandbox_id": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "used_kib": {
+                    "type": "integer"
+                }
+            }
+        },
         "controllers.BackupState": {
             "type": "string",
             "enum": [
@@ -1397,6 +1455,32 @@ const docTemplate = `{
                 "BackupStateCompleted",
                 "BackupStateFailed"
             ]
+        },
+        "controllers.MemoryStatsResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "from_time": {
+                    "type": "string"
+                },
+                "sandbox_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "stats": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/cloudhypervisor.MemoryStatsRecord"
+                    }
+                },
+                "to_time": {
+                    "type": "string"
+                }
+            }
         },
         "controllers.SandboxState": {
             "type": "string",

@@ -78,7 +78,7 @@ definitions:
         type: string
       volumes:
         items:
-          $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO'
+          $ref: '#/definitions/dto.VolumeDTO'
         type: array
     required:
       - id
@@ -244,11 +244,11 @@ definitions:
       backupError:
         type: string
       backupState:
-        $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.BackupState'
+        $ref: '#/definitions/enums.BackupState'
       daemonVersion:
         type: string
       state:
-        $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.SandboxState'
+        $ref: '#/definitions/enums.SandboxState'
     type: object
   SnapshotExistsResponse:
     properties:
@@ -308,7 +308,24 @@ definitions:
       networkLimitEgress:
         type: boolean
     type: object
-  github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO:
+  controllers.MemoryStatsResponse:
+    properties:
+      count:
+        type: integer
+      from_time:
+        type: string
+      stats:
+        items:
+          $ref: '#/definitions/libvirt.MemoryStatsRecord'
+        type: array
+      to_time:
+        type: string
+      vm_names:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.VolumeDTO:
     properties:
       mountPath:
         type: string
@@ -317,30 +334,7 @@ definitions:
       volumeId:
         type: string
     type: object
-  github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord:
-    properties:
-      actual_kib:
-        type: integer
-      balloon_active:
-        type: boolean
-      id:
-        type: integer
-      max_memory_kib:
-        type: integer
-      rss_kib:
-        type: integer
-      timestamp:
-        type: string
-      unused_kib:
-        type: integer
-      used_kib:
-        type: integer
-      vm_name:
-        type: string
-      vm_uuid:
-        type: string
-    type: object
-  github_com_daytonaio_runner-win_pkg_models_enums.BackupState:
+  enums.BackupState:
     enum:
       - NONE
       - PENDING
@@ -354,7 +348,7 @@ definitions:
       - BackupStateInProgress
       - BackupStateCompleted
       - BackupStateFailed
-  github_com_daytonaio_runner-win_pkg_models_enums.SandboxState:
+  enums.SandboxState:
     enum:
       - creating
       - restoring
@@ -382,22 +376,28 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
-  pkg_api_controllers.MemoryStatsResponse:
+  libvirt.MemoryStatsRecord:
     properties:
-      count:
+      actual_kib:
         type: integer
-      from_time:
+      balloon_active:
+        type: boolean
+      id:
+        type: integer
+      max_memory_kib:
+        type: integer
+      rss_kib:
+        type: integer
+      timestamp:
         type: string
-      stats:
-        items:
-          $ref: '#/definitions/github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord'
-        type: array
-      to_time:
+      unused_kib:
+        type: integer
+      used_kib:
+        type: integer
+      vm_name:
         type: string
-      vm_names:
-        items:
-          type: string
-        type: array
+      vm_uuid:
+        type: string
     type: object
 info:
   contact: {}
@@ -1476,7 +1476,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/pkg_api_controllers.MemoryStatsResponse'
+            $ref: '#/definitions/controllers.MemoryStatsResponse'
         '500':
           description: Internal Server Error
           schema:

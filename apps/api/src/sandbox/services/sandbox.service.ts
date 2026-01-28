@@ -811,7 +811,8 @@ export class SandboxService {
     await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, organizationId, live)
 
     // Set backupState to IN_PROGRESS to track snapshot creation
-    sandbox.backupState = BackupState.IN_PROGRESS
+    sandbox.state = SandboxState.SNAPSHOTTING
+    sandbox.pending = true
     await this.sandboxRepository.save(sandbox)
 
     this.logger.log(`Created snapshot job for sandbox ${sandbox.id} with name ${snapshotName}`)
@@ -880,11 +881,6 @@ export class SandboxService {
       throw new ConflictException('Fork operation is already in progress for this sandbox')
     }
 
-    // Check if source sandbox is already in a backup/snapshot operation
-    if (sourceSandbox.backupState === BackupState.IN_PROGRESS || sourceSandbox.backupState === BackupState.PENDING) {
-      throw new ConflictException('Source sandbox has a backup or snapshot operation in progress')
-    }
-
     this.organizationService.assertOrganizationIsNotSuspended(organization)
 
     try {
@@ -941,9 +937,8 @@ export class SandboxService {
       // The FORK_SANDBOX job will handle the actual creation
       forkedSandbox.state = SandboxState.CREATING
 
-      // Set backupState to IN_PROGRESS on the source sandbox BEFORE creating the fork job
-      // This ensures the dashboard shows "Snapshotting" status immediately
-      sourceSandbox.backupState = BackupState.IN_PROGRESS
+      sourceSandbox.state = SandboxState.FORKING
+      sourceSandbox.pending = true
       await this.sandboxRepository.save(sourceSandbox)
 
       await this.sandboxRepository.insert(forkedSandbox)

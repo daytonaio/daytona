@@ -81,6 +81,7 @@ from daytona_toolbox_api_client.models.lsp_range import LspRange
 from daytona_toolbox_api_client.models.lsp_server_request import LspServerRequest
 from daytona_toolbox_api_client.models.lsp_symbol import LspSymbol
 from daytona_toolbox_api_client.models.match import Match
+from daytona_toolbox_api_client.models.memory_stats_response import MemoryStatsResponse
 from daytona_toolbox_api_client.models.mouse_click_request import MouseClickRequest
 from daytona_toolbox_api_client.models.mouse_click_response import MouseClickResponse
 from daytona_toolbox_api_client.models.mouse_drag_request import MouseDragRequest

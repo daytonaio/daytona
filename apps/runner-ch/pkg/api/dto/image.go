@@ -4,8 +4,10 @@
 package dto
 
 type PullSnapshotRequestDTO struct {
-	Ref      string `json:"ref" validate:"required"`
-	Snapshot string `json:"snapshot,omitempty"` // Snapshot name for the pulled image
+	Snapshot            string       `json:"snapshot" validate:"required"` // Snapshot ref in format {orgId}/{snapshotName}
+	Registry            *RegistryDTO `json:"registry,omitempty"`
+	DestinationRegistry *RegistryDTO `json:"destinationRegistry,omitempty"`
+	DestinationRef      *string      `json:"destinationRef,omitempty"`
 } //	@name	PullSnapshotRequestDTO
 
 type BuildSnapshotRequestDTO struct {

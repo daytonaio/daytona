@@ -71,27 +71,27 @@ func (c *Client) BuildSnapshot(ctx context.Context, request dto.BuildSnapshotReq
 
 // PullSnapshot pulls a snapshot from a registry
 // PullSnapshot downloads a snapshot from S3 to the local runner storage
-// The ref format is: {orgId}/{snapshotName}
+// The snapshot field format is: {orgId}/{snapshotName}
 func (c *Client) PullSnapshot(ctx context.Context, request dto.PullSnapshotRequestDTO) error {
-	log.Infof("Pulling snapshot %s", request.Ref)
+	log.Infof("Pulling snapshot %s", request.Snapshot)
 
 	// Check if S3 is configured
 	if c.s3Uploader == nil || !c.s3Uploader.IsConfigured() {
 		return fmt.Errorf("S3 is not configured - cannot pull snapshot")
 	}
 
-	// Parse the ref to get orgId and snapshotName
+	// Parse the snapshot ref to get orgId and snapshotName
 	// Expected format: {orgId}/{snapshotName}
-	orgId, snapshotName := parseSnapshotRef(request.Ref)
+	orgId, snapshotName := parseSnapshotRef(request.Snapshot)
 	if orgId == "" || snapshotName == "" {
-		return fmt.Errorf("invalid snapshot ref format '%s', expected {orgId}/{snapshotName}", request.Ref)
+		return fmt.Errorf("invalid snapshot ref format '%s', expected {orgId}/{snapshotName}", request.Snapshot)
 	}
 
 	// Check if snapshot already exists locally
-	localPath := filepath.Join(c.config.SnapshotsPath, request.Ref)
+	localPath := filepath.Join(c.config.SnapshotsPath, request.Snapshot)
 	diskPath := filepath.Join(localPath, "disk.qcow2")
 	if exists, _ := c.fileExists(ctx, diskPath); exists {
-		log.Infof("Snapshot %s already exists locally at %s", request.Ref, localPath)
+		log.Infof("Snapshot %s already exists locally at %s", request.Snapshot, localPath)
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func (c *Client) PullSnapshot(ctx context.Context, request dto.PullSnapshotReque
 	}
 
 	log.Infof("Successfully pulled snapshot %s: %d files, %d bytes in %v",
-		request.Ref, result.FileCount, result.TotalSize, result.Duration)
+		request.Snapshot, result.FileCount, result.TotalSize, result.Duration)
 
 	return nil
 }

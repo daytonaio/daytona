@@ -24,6 +24,8 @@ const STATE_LABEL_MAPPING: Record<SandboxState, string> = {
   [SandboxState.PULLING_SNAPSHOT]: 'Pulling Snapshot',
   [SandboxState.UNKNOWN]: 'Unknown',
   [SandboxState.ARCHIVING]: 'Archiving',
+  [SandboxState.SNAPSHOTTING]: 'Snapshotting',
+  [SandboxState.FORKING]: 'Forking',
 }
 
 export const STATUSES: FacetedFilterOption[] = [
@@ -40,6 +42,8 @@ export const STATUSES: FacetedFilterOption[] = [
   { label: getStateLabel(SandboxState.DESTROYING), value: SandboxState.DESTROYING, icon: Timer },
   { label: getStateLabel(SandboxState.ARCHIVED), value: SandboxState.ARCHIVED, icon: Archive },
   { label: getStateLabel(SandboxState.ARCHIVING), value: SandboxState.ARCHIVING, icon: Timer },
+  { label: getStateLabel(SandboxState.SNAPSHOTTING), value: SandboxState.SNAPSHOTTING, icon: Timer },
+  { label: getStateLabel(SandboxState.FORKING), value: SandboxState.FORKING, icon: Timer },
 ]
 
 export function getStateLabel(state?: SandboxState): string {

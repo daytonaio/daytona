@@ -403,7 +403,7 @@ const getColumns = ({
       cell: ({ row }) => {
         const snapshot = row.original
         // Don't show image for Windows-based snapshots (they use qcow2 disk images, not Docker images)
-        if (snapshot.runnerClass === 'windows-exp') {
+        if (snapshot.runnerClass === 'windows-exp' || snapshot.runnerClass === 'linux-exp') {
           return '-'
         }
         if (!snapshot.imageName && snapshot.buildInfo) {

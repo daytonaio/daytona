@@ -393,7 +393,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -461,7 +463,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -529,7 +533,9 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '204': None,
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2689,7 +2695,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetRecordingResponse",
-            '501': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2757,7 +2764,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetRecordingResponse",
-            '501': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2825,7 +2833,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "GetRecordingResponse",
-            '501': "Dict[str, str]",
+            '404': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3193,7 +3202,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '501': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3257,7 +3266,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '501': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3321,7 +3330,7 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "ListRecordingsResponse",
-            '501': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5042,7 +5051,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "StartRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5110,7 +5120,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "StartRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5178,7 +5189,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '201': "StartRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '500': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5563,7 +5575,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "StopRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5631,7 +5644,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "StopRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5699,7 +5713,8 @@ class ComputerUseApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "StopRecordingResponse",
-            '501': "Dict[str, str]",
+            '400': "Dict[str, str]",
+            '404': "Dict[str, str]",
         }
         response_data = await self.api_client.call_api(
             *_param,

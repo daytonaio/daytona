@@ -1217,8 +1217,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ListRecordingsResponse'
-        '501':
-          description: Not Implemented
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1239,8 +1239,20 @@ paths:
       responses:
         '204':
           description: No Content
-        '501':
-          description: Not Implemented
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1264,8 +1276,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/GetRecordingResponse'
-        '501':
-          description: Not Implemented
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1292,8 +1310,14 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/StartRecordingResponse'
-        '501':
-          description: Not Implemented
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
           schema:
             additionalProperties:
               type: string
@@ -1321,8 +1345,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/StopRecordingResponse'
-        '501':
-          description: Not Implemented
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
           schema:
             additionalProperties:
               type: string

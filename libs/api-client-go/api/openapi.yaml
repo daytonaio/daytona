@@ -1684,6 +1684,8 @@ paths:
                 - pulling_snapshot
                 - archived
                 - archiving
+                - snapshotting
+                - forking
               type: string
             type: array
           style: form
@@ -9673,6 +9675,8 @@ components:
         - pulling_snapshot
         - archived
         - archiving
+        - snapshotting
+        - forking
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox
@@ -10245,6 +10249,8 @@ components:
             - pulling_snapshot
             - archived
             - archiving
+            - snapshotting
+            - forking
           example: started
           type: string
         errorReason:
@@ -10416,6 +10422,8 @@ components:
             - pulling_snapshot
             - archived
             - archiving
+            - snapshotting
+            - forking
           example: creating
           type: string
         parentSandboxId:

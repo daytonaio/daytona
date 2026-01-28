@@ -19,6 +19,7 @@ import { JobType } from '../enums/job-type.enum'
 import { Job } from '../entities/job.entity'
 import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { RunnerClass } from '../enums/runner-class'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -443,20 +444,9 @@ export class JobStateHandlerService {
         const snapshot = new Snapshot()
         snapshot.organizationId = sandbox.organizationId
         snapshot.name = snapshotName
-        snapshot.imageName = snapshotPath || snapshotName // S3 path or name
+        snapshot.imageName = snapshotPath || snapshotName
         snapshot.ref = snapshotPath || snapshotName
-        snapshot.state = SnapshotState.ACTIVE
-        snapshot.cpu = sandbox.cpu
-        snapshot.gpu = sandbox.gpu
-        snapshot.mem = sandbox.mem
-        snapshot.disk = sandbox.disk
-        snapshot.initialRunnerId = runnerId
-        snapshot.runnerClass = runner.class // Use runner's class (linux, windows-exp, etc.)
-
-        if (sizeBytes) {
-          // Convert bytes to GB
-          snapshot.size = Number(sizeBytes) / (1024 * 1024 * 1024)
-        }
+        snapshot.runnerClass = runner.class
 
         await this.snapshotRepository.save(snapshot)
         this.logger.log(`Created snapshot entity ${snapshot.id} with name ${snapshotName}`)
@@ -477,14 +467,28 @@ export class JobStateHandlerService {
         snapshotRunner.state = SnapshotRunnerState.READY // 'ready' in DB enum
         await this.snapshotRunnerRepository.save(snapshotRunner)
         this.logger.log(`Created SnapshotRunner for snapshot ${snapshotName} on runner ${runnerId}`)
-
-        // Update sandbox backupState to COMPLETED
-        sandbox.backupState = BackupState.COMPLETED
-        await this.sandboxRepository.save(sandbox)
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX_SNAPSHOT job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        // Update sandbox backupState to ERROR
-        sandbox.backupState = BackupState.ERROR
+        // TODO: Notify user that snapshot creation failed
+      }
+
+      // in all cases, set the sandbox state to the desired state
+      if (job.status === JobStatus.COMPLETED || job.status === JobStatus.FAILED) {
+        switch (sandbox.desiredState) {
+          case SandboxDesiredState.STARTED:
+            sandbox.state = SandboxState.STARTED
+            break
+          case SandboxDesiredState.STOPPED:
+            sandbox.state = SandboxState.STOPPED
+            break
+          default:
+            console.error(
+              `Unknown desired state ${sandbox.desiredState} for sandbox ${sandboxId} after CREATE_SANDBOX_SNAPSHOT job completed`,
+            )
+            sandbox.state = SandboxState.ERROR
+            break
+        }
+        sandbox.pending = false
         await this.sandboxRepository.save(sandbox)
       }
     } catch (error) {
@@ -505,13 +509,29 @@ export class JobStateHandlerService {
       let sourceSandbox: Sandbox | null = null
       if (sourceSandboxId) {
         sourceSandbox = await this.sandboxRepository.findOne({ where: { id: sourceSandboxId } })
-      }
 
-      // Always clear source sandbox's backupState when fork job completes (success or failure)
-      if (sourceSandbox && sourceSandbox.backupState === BackupState.IN_PROGRESS) {
-        sourceSandbox.backupState = BackupState.NONE
+        switch (sourceSandbox?.desiredState) {
+          case SandboxDesiredState.STARTED:
+            sourceSandbox.state = SandboxState.STARTED
+            sourceSandbox.pending = false
+            break
+          case SandboxDesiredState.STOPPED:
+            sourceSandbox.state = SandboxState.STOPPED
+            sourceSandbox.pending = false
+            break
+          default:
+            console.error(
+              `Unknown desired state ${sourceSandbox?.desiredState} for source sandbox ${sourceSandboxId} after FORK_SANDBOX job completed`,
+            )
+            sourceSandbox.state = SandboxState.ERROR
+            sourceSandbox.pending = false
+            break
+        }
+
         await this.sandboxRepository.save(sourceSandbox)
-        this.logger.debug(`Cleared backupState on source sandbox ${sourceSandboxId} after fork job completed`)
+      } else {
+        this.logger.warn(`Source sandbox ${sourceSandboxId} not found for FORK_SANDBOX job ${job.id}`)
+        return
       }
 
       // Get the forked sandbox

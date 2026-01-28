@@ -57,6 +57,7 @@ daytona_toolbox_api_client/models/lsp_range.py
 daytona_toolbox_api_client/models/lsp_server_request.py
 daytona_toolbox_api_client/models/lsp_symbol.py
 daytona_toolbox_api_client/models/match.py
+daytona_toolbox_api_client/models/memory_stats_response.py
 daytona_toolbox_api_client/models/mouse_click_request.py
 daytona_toolbox_api_client/models/mouse_click_response.py
 daytona_toolbox_api_client/models/mouse_drag_request.py

@@ -58,6 +58,7 @@ models/lsp-range.ts
 models/lsp-server-request.ts
 models/lsp-symbol.ts
 models/match.ts
+models/memory-stats-response.ts
 models/mouse-click-request.ts
 models/mouse-click-response.ts
 models/mouse-drag-request.ts

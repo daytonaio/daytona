@@ -2,6 +2,7 @@
 .npmignore
 api.ts
 api/default-api.ts
+api/proxy-api.ts
 api/sandbox-api.ts
 api/snapshots-api.ts
 api/toolbox-api.ts

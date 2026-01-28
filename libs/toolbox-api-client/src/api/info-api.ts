@@ -32,6 +32,8 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
+import type { MemoryStatsResponse } from '../models'
+// @ts-ignore
 import type { UserHomeDirResponse } from '../models'
 // @ts-ignore
 import type { WorkDirResponse } from '../models'
@@ -41,6 +43,34 @@ import type { WorkDirResponse } from '../models'
  */
 export const InfoApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
+    /**
+     * Get current memory usage statistics from /proc/meminfo
+     * @summary Get memory statistics
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMemoryStats: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/memory-stats`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
     /**
      * Get the current user home directory path.
      * @summary Get user home directory
@@ -136,6 +166,27 @@ export const InfoApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = InfoApiAxiosParamCreator(configuration)
   return {
     /**
+     * Get current memory usage statistics from /proc/meminfo
+     * @summary Get memory statistics
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getMemoryStats(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MemoryStatsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getMemoryStats(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['InfoApi.getMemoryStats']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get the current user home directory path.
      * @summary Get user home directory
      * @param {*} [options] Override http request option.
@@ -209,6 +260,15 @@ export const InfoApiFactory = function (configuration?: Configuration, basePath?
   const localVarFp = InfoApiFp(configuration)
   return {
     /**
+     * Get current memory usage statistics from /proc/meminfo
+     * @summary Get memory statistics
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getMemoryStats(options?: RawAxiosRequestConfig): AxiosPromise<MemoryStatsResponse> {
+      return localVarFp.getMemoryStats(options).then((request) => request(axios, basePath))
+    },
+    /**
      * Get the current user home directory path.
      * @summary Get user home directory
      * @param {*} [options] Override http request option.
@@ -245,6 +305,19 @@ export const InfoApiFactory = function (configuration?: Configuration, basePath?
  * @extends {BaseAPI}
  */
 export class InfoApi extends BaseAPI {
+  /**
+   * Get current memory usage statistics from /proc/meminfo
+   * @summary Get memory statistics
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof InfoApi
+   */
+  public getMemoryStats(options?: RawAxiosRequestConfig) {
+    return InfoApiFp(this.configuration)
+      .getMemoryStats(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
   /**
    * Get the current user home directory path.
    * @summary Get user home directory

@@ -7,12 +7,10 @@ from daytona import CreateSandboxFromSnapshotParams, Daytona, FileDownloadReques
 
 def main():
     daytona = Daytona()
-    params = CreateSandboxFromSnapshotParams(
-        language="python",
+    sandbox_params = CreateSandboxFromSnapshotParams(
+        snapshot="windows-core",
     )
-
-    # First, create a sandbox
-    sandbox = daytona.create(params)
+    sandbox = daytona.create(sandbox_params, timeout=120)
     print(f"Created sandbox with ID: {sandbox.id}")
 
     # List files in the sandbox

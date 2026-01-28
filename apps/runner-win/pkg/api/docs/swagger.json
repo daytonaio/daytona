@@ -1511,7 +1511,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/pkg_api_controllers.MemoryStatsResponse"
+              "$ref": "#/definitions/controllers.MemoryStatsResponse"
             }
           },
           "500": {
@@ -1661,7 +1661,7 @@
         "volumes": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO"
+            "$ref": "#/definitions/dto.VolumeDTO"
           }
         }
       }
@@ -1869,13 +1869,13 @@
           "type": "string"
         },
         "backupState": {
-          "$ref": "#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.BackupState"
+          "$ref": "#/definitions/enums.BackupState"
         },
         "daemonVersion": {
           "type": "string"
         },
         "state": {
-          "$ref": "#/definitions/github_com_daytonaio_runner-win_pkg_models_enums.SandboxState"
+          "$ref": "#/definitions/enums.SandboxState"
         }
       }
     },
@@ -1953,7 +1953,33 @@
         }
       }
     },
-    "github_com_daytonaio_runner-win_pkg_api_dto.VolumeDTO": {
+    "controllers.MemoryStatsResponse": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "integer"
+        },
+        "from_time": {
+          "type": "string"
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/libvirt.MemoryStatsRecord"
+          }
+        },
+        "to_time": {
+          "type": "string"
+        },
+        "vm_names": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dto.VolumeDTO": {
       "type": "object",
       "properties": {
         "mountPath": {
@@ -1967,7 +1993,49 @@
         }
       }
     },
-    "github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord": {
+    "enums.BackupState": {
+      "type": "string",
+      "enum": ["NONE", "PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"],
+      "x-enum-varnames": [
+        "BackupStateNone",
+        "BackupStatePending",
+        "BackupStateInProgress",
+        "BackupStateCompleted",
+        "BackupStateFailed"
+      ]
+    },
+    "enums.SandboxState": {
+      "type": "string",
+      "enum": [
+        "creating",
+        "restoring",
+        "destroyed",
+        "destroying",
+        "started",
+        "stopped",
+        "starting",
+        "stopping",
+        "resizing",
+        "error",
+        "unknown",
+        "pulling_snapshot"
+      ],
+      "x-enum-varnames": [
+        "SandboxStateCreating",
+        "SandboxStateRestoring",
+        "SandboxStateDestroyed",
+        "SandboxStateDestroying",
+        "SandboxStateStarted",
+        "SandboxStateStopped",
+        "SandboxStateStarting",
+        "SandboxStateStopping",
+        "SandboxStateResizing",
+        "SandboxStateError",
+        "SandboxStateUnknown",
+        "SandboxStatePullingSnapshot"
+      ]
+    },
+    "libvirt.MemoryStatsRecord": {
       "type": "object",
       "properties": {
         "actual_kib": {
@@ -1999,74 +2067,6 @@
         },
         "vm_uuid": {
           "type": "string"
-        }
-      }
-    },
-    "github_com_daytonaio_runner-win_pkg_models_enums.BackupState": {
-      "type": "string",
-      "enum": ["NONE", "PENDING", "IN_PROGRESS", "COMPLETED", "FAILED"],
-      "x-enum-varnames": [
-        "BackupStateNone",
-        "BackupStatePending",
-        "BackupStateInProgress",
-        "BackupStateCompleted",
-        "BackupStateFailed"
-      ]
-    },
-    "github_com_daytonaio_runner-win_pkg_models_enums.SandboxState": {
-      "type": "string",
-      "enum": [
-        "creating",
-        "restoring",
-        "destroyed",
-        "destroying",
-        "started",
-        "stopped",
-        "starting",
-        "stopping",
-        "resizing",
-        "error",
-        "unknown",
-        "pulling_snapshot"
-      ],
-      "x-enum-varnames": [
-        "SandboxStateCreating",
-        "SandboxStateRestoring",
-        "SandboxStateDestroyed",
-        "SandboxStateDestroying",
-        "SandboxStateStarted",
-        "SandboxStateStopped",
-        "SandboxStateStarting",
-        "SandboxStateStopping",
-        "SandboxStateResizing",
-        "SandboxStateError",
-        "SandboxStateUnknown",
-        "SandboxStatePullingSnapshot"
-      ]
-    },
-    "pkg_api_controllers.MemoryStatsResponse": {
-      "type": "object",
-      "properties": {
-        "count": {
-          "type": "integer"
-        },
-        "from_time": {
-          "type": "string"
-        },
-        "stats": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/github_com_daytonaio_runner-win_pkg_libvirt.MemoryStatsRecord"
-          }
-        },
-        "to_time": {
-          "type": "string"
-        },
-        "vm_names": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     }

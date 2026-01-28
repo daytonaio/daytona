@@ -222,6 +222,25 @@ definitions:
       target:
         type: string
     type: object
+  cloudhypervisor.MemoryStatsRecord:
+    properties:
+      available_kib:
+        type: integer
+      balloon_active:
+        type: boolean
+      balloon_size_kib:
+        type: integer
+      id:
+        type: integer
+      max_memory_kib:
+        type: integer
+      sandbox_id:
+        type: string
+      timestamp:
+        type: string
+      used_kib:
+        type: integer
+    type: object
   controllers.BackupState:
     enum:
       - none
@@ -234,6 +253,23 @@ definitions:
       - BackupStateInProgress
       - BackupStateCompleted
       - BackupStateFailed
+  controllers.MemoryStatsResponse:
+    properties:
+      count:
+        type: integer
+      from_time:
+        type: string
+      sandbox_ids:
+        items:
+          type: string
+        type: array
+      stats:
+        items:
+          $ref: '#/definitions/cloudhypervisor.MemoryStatsRecord'
+        type: array
+      to_time:
+        type: string
+    type: object
   controllers.SandboxState:
     enum:
       - started
@@ -923,29 +959,48 @@ paths:
         - snapshots
   /stats/memory:
     get:
-      description: Returns memory usage statistics
+      description: Returns memory statistics for sandboxes over a time range
+      operationId: GetMemoryStatsJSON
+      parameters:
+        - description: Filter by sandbox ID
+          in: query
+          name: sandbox
+          type: string
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
       produces:
         - application/json
       responses:
         '200':
           description: OK
           schema:
-            additionalProperties: true
-            type: object
-      summary: Get memory stats
+            $ref: '#/definitions/controllers.MemoryStatsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get memory statistics
       tags:
         - stats
   /stats/memory/view:
     get:
-      description: Returns memory usage statistics in HTML view
+      description: Returns an interactive HTML page with memory usage charts
+      operationId: GetMemoryStatsViewHTML
+      parameters:
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
       produces:
         - text/html
       responses:
         '200':
-          description: OK
+          description: HTML page
           schema:
             type: string
-      summary: Get memory stats view
+      summary: Memory stats visualization
       tags:
         - stats
 security:

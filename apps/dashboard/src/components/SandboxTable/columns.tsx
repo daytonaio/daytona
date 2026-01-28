@@ -4,9 +4,9 @@
  */
 
 import { formatTimestamp, getRelativeTimeString } from '@/lib/utils'
-import { Sandbox, SandboxDesiredState, RunnerClass, SandboxBackupStateEnum } from '@daytonaio/api-client'
+import { Sandbox, SandboxDesiredState, RunnerClass } from '@daytonaio/api-client'
 import { ColumnDef } from '@tanstack/react-table'
-import { ArrowDown, ArrowUp, Loader2 } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import React from 'react'
 import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
 import { Checkbox } from '../ui/checkbox'
@@ -242,21 +242,6 @@ export function getColumns({
         return <SortableHeader column={column} label="State" />
       },
       cell: ({ row }) => {
-        // Show "Snapshotting" when backup state is in progress for experimental runners (linux-exp, windows-exp)
-        // These runners support snapshot/fork operations that set backupState to IN_PROGRESS
-        const runnerClass = row.original.snapshot ? runnerClassMap[row.original.snapshot] : undefined
-        const isExperimentalRunner = runnerClass === 'linux-exp' || runnerClass === 'windows-exp'
-
-        if (isExperimentalRunner && row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS) {
-          return (
-            <div className="w-full truncate">
-              <div className="flex items-center gap-1">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="truncate">Snapshotting</span>
-              </div>
-            </div>
-          )
-        }
         return (
           <div className="w-full truncate">
             <SandboxStateComponent state={row.original.state} errorReason={row.original.errorReason} />
@@ -434,9 +419,7 @@ export function getColumns({
               sandbox={row.original}
               writePermitted={writePermitted}
               deletePermitted={deletePermitted}
-              isLoading={
-                sandboxIsLoading[row.original.id] || row.original.backupState === SandboxBackupStateEnum.IN_PROGRESS
-              }
+              isLoading={sandboxIsLoading[row.original.id]}
               runnerClass={runnerClass}
               onStart={handleStart}
               onStop={handleStop}
