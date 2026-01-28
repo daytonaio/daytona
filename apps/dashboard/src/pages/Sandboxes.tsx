@@ -6,13 +6,6 @@
 import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
-import {
-  OrganizationUserRoleEnum,
-  Sandbox,
-  SandboxDesiredState,
-  SandboxState,
-  SshAccessDto,
-} from '@daytonaio/api-client'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
   AlertDialog,
@@ -47,6 +40,13 @@ import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshot
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { formatDuration } from '@/lib/utils'
+import {
+  OrganizationUserRoleEnum,
+  Sandbox,
+  SandboxDesiredState,
+  SandboxState,
+  SshAccessDto,
+} from '@daytonaio/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
 import { Check, Copy } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
@@ -815,7 +815,7 @@ const Sandboxes: React.FC = () => {
           </div>
         )}
       </PageHeader>
-      <PageContent size="full" className="flex-1">
+      <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
         <SandboxTable
           sandboxIsLoading={sandboxIsLoading}
           sandboxStateIsTransitioning={sandboxStateIsTransitioning}
