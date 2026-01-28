@@ -27,8 +27,8 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/daytonaio/daytona/libs/api-client-go v0.0.0-20260120123750-b98371563343 h1:1Kf2urqPt1rUoC8Vu4wGO/56th6TRHYiCB2041RsceM=
 github.com/daytonaio/daytona/libs/api-client-go v0.0.0-20260120123750-b98371563343/go.mod h1:1wKpdKRwUzXN7KqR+8MMpq2iEGrprBCgFgFbli89DMo=
-github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
-github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.0.0-20260128154817-2e2bf16516bc h1:vEKJvcufC2AbdBEk7Bdq3AAyC1ZjjVawjNclu4ISwXs=
+github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.0.0-20260128154817-2e2bf16516bc/go.mod h1:YJD2yevQHDl0jIrlrzTerZJxJZS6wBOVMfl1A2efkVY=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
