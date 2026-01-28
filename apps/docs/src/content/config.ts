@@ -30,6 +30,7 @@ export enum NavigationCategory {
   PYTHON_SDK,
   GUIDES,
   RUBY_SDK,
+  GO_SDK,
 }
 
 /**
@@ -89,6 +90,15 @@ export const getSidebarConfig = (
             icon: 'package.svg',
           },
           relatedGroupCategory: NavigationCategory.RUBY_SDK,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/go-sdk', locale),
+          label: t('sidebarconfig.goSdkReference'),
+          attrs: {
+            icon: 'package.svg',
+          },
+          relatedGroupCategory: NavigationCategory.GO_SDK,
         },
         {
           type: 'link',
@@ -709,6 +719,20 @@ export const getSidebarConfig = (
           type: 'link',
           href: localizePath('/docs/ruby-sdk/sandbox', locale),
           label: t('sidebarconfig.sandbox'),
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.goSdkReference'),
+      homePageHref: localizePath('/docs/go-sdk', locale),
+      category: NavigationCategory.GO_SDK,
+      autopopulateFromDir: localizePath('/docs/go-sdk', locale),
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/go-sdk/daytona', locale),
+          label: t('sidebarconfig.daytona'),
         },
       ],
     },

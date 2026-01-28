@@ -131,6 +131,62 @@ async function main() {
 main().catch(console.error)
 ```
 
+### Go SDK
+
+```go
+package main
+
+import (
+ "context"
+ "fmt"
+ "log"
+ "time"
+
+ "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+ "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+ // Initialize the Daytona client with DAYTONA_API_KEY in env
+  // Alternative is to use daytona.NewClientWithConfig(...) for more specific config
+ client, err := daytona.NewClient()
+ if err != nil {
+  log.Fatalf("Failed to create client: %v", err)
+ }
+
+ ctx := context.Background()
+
+ // Create the Sandbox instance
+ params := types.SnapshotParams{
+  SandboxBaseParams: types.SandboxBaseParams{
+   Language: types.CodeLanguagePython,
+  },
+ }
+
+ sandbox, err := client.Create(ctx, params, daytona.WithTimeout(90*time.Second))
+ if err != nil {
+  log.Fatalf("Failed to create sandbox: %v", err)
+ }
+
+ // Run code securely inside the Sandbox
+ response, err := sandbox.Process.ExecuteCommand(ctx, `python3 -c "print('Sum of 3 and 4 is', 3 + 4)"`)
+ if err != nil {
+  log.Fatalf("Failed to execute command: %v", err)
+ }
+
+ if response.ExitCode != 0 {
+  fmt.Printf("Error running code: %d %s\n", response.ExitCode, response.Result)
+ } else {
+  fmt.Println(response.Result)
+ }
+
+ // Clean up the Sandbox
+ if err := sandbox.Delete(ctx); err != nil {
+  log.Fatalf("Failed to delete sandbox: %v", err)
+ }
+}
+```
+
 ---
 
 ## Contributing

@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy]
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, libs/sdk-go]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -129,6 +129,7 @@ jobs:
         run: |
           source "$(poetry env info --path)/bin/activate"
           go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0
           echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           yarn install --immutable
           mkdir -p dist/apps/api
@@ -137,6 +138,7 @@ jobs:
           yarn format
           poetry lock
           yarn docs
+          go work sync
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
   build:

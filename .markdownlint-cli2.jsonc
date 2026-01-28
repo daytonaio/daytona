@@ -18,5 +18,10 @@
     "table-pipe-style": false,
     "no-empty-links": false,
   },
-  "ignores": ["**/node_modules/**", "**/apps/docs/**", "**/.venv/**"],
+  "ignores": [
+    "**/node_modules/**",
+    "**/apps/docs/**",
+    "**/.venv/**",
+    "**/libs/toolbox-api-client-go/**"
+  ],
 }

@@ -1,0 +1,54 @@
+{
+  "name": "toolbox-api-client-go",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/toolbox-api-client-go",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["go mod download", "go build -v ./..."],
+        "parallel": false
+      }
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "tidy": {
+      "executor": "@nx-go/nx-go:tidy"
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["go fmt ./...", "prettier --write '**/*.yaml'"],
+        "parallel": false
+      }
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["go clean", "rm -rf dist"],
+        "parallel": false
+      }
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/toolbox-api-client-go --git-user-id=daytonaio -i ../../apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=packageName=toolbox,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o ."
+        ]
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "daemon"
+        }
+      ]
+    }
+  },
+  "tags": []
+}

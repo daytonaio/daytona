@@ -19,20 +19,13 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy go workspace files first for better dependency caching
-COPY go.work /app/go.work
+RUN echo "go 1.25.4\n\nuse (\n  ./libs/computer-use\n   ./apps/daemon\n     ./libs/common-go\n)" > /app/go.work
+
 COPY go.work.sum /app/go.work.sum
 
-# Copy source code in order of change frequency (least to most likely to change)
-COPY ./libs/api-client-go /app/libs/api-client-go
-COPY ./libs/common-go /app/libs/common-go
-COPY ./apps/runner /app/apps/runner
-COPY ./apps/cli /app/apps/cli
-COPY ./apps/proxy /app/apps/proxy
 COPY ./apps/daemon /app/apps/daemon
+COPY ./libs/common-go /app/libs/common-go
 COPY ./libs/computer-use /app/libs/computer-use
-COPY ./apps/ssh-gateway /app/apps/ssh-gateway
-COPY ./apps/snapshot-manager /app/apps/snapshot-manager
 
 # Build the application with optimizations
 RUN cd /app/libs/computer-use && \

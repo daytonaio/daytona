@@ -366,6 +366,7 @@ export interface HeaderActiveState {
   isTypescriptSdkActive: boolean
   isPythonSdkActive: boolean
   isRubySdkActive: boolean
+  isGoSdkActive: boolean
   isApiActive: boolean
   isCliActive: boolean
   isReferencesActive: boolean
@@ -380,6 +381,7 @@ export function getHeaderActiveState(
     typescriptSdk: `${baseUrl}/en/typescript-sdk`,
     pythonSdk: `${baseUrl}/en/python-sdk`,
     rubySdk: `${baseUrl}/en/ruby-sdk`,
+    goSdk: `${baseUrl}/en/go-sdk`,
     api: `${baseUrl}/en/tools/api`,
     cli: `${baseUrl}/en/tools/cli`,
   }
@@ -396,6 +398,7 @@ export function getHeaderActiveState(
     referencePaths.rubySdk,
     currentPath
   )
+  const isGoSdkActive = isActiveOrParentPath(referencePaths.goSdk, currentPath)
   const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
   const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
 
@@ -403,12 +406,14 @@ export function getHeaderActiveState(
     isTypescriptSdkActive,
     isPythonSdkActive,
     isRubySdkActive,
+    isGoSdkActive,
     isApiActive,
     isCliActive,
     isReferencesActive:
       isTypescriptSdkActive ||
       isPythonSdkActive ||
       isRubySdkActive ||
+      isGoSdkActive ||
       isApiActive ||
       isCliActive,
     isGuidesActive: isActiveOrParentPath(`${baseUrl}/en/guides`, currentPath),

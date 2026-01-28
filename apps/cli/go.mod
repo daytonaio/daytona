@@ -4,12 +4,12 @@ go 1.25.4
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.0.0-20260120123750-b98371563343
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/oauth2 v0.33.0
-	github.com/daytonaio/daytona/libs/api-client-go v0.1.0
 )
 
 require (
@@ -49,6 +49,7 @@ require (
 	github.com/minio/md5-simd v1.1.2 // indirect
 	github.com/mitchellh/hashstructure/v2 v2.0.2 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
+	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
