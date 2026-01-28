@@ -763,9 +763,9 @@ export class OrganizationUsageService {
         redis.call("INCRBY", cacheKey, delta)
         redis.call("EXPIRE", cacheKey, ttl)
       end
-      
+
       local pending = tonumber(redis.call("GET", pendingCacheKey))
-      if pending and pending > 0 and delta > 0 then
+      if pending and delta ~= 0 then
         redis.call("DECRBY", pendingCacheKey, delta)
       end
     `
@@ -1101,13 +1101,13 @@ export class OrganizationUsageService {
 
   /**
    * Apply usage change after resize completes successfully.
-   * Increments current usage and decrements pending usage by the deltas.
-   *
+   * Updates current usage and clears pending by the deltas.
+   * Supports both positive (increase) and negative (decrease) deltas.
    * @param organizationId
    * @param regionId
-   * @param cpuDelta - The CPU delta (positive value to increment).
-   * @param memDelta - The memory delta (positive value to increment).
-   * @param diskDelta - The disk delta (positive value to increment).
+   * @param cpuDelta
+   * @param memDelta
+   * @param diskDelta
    */
   async applyResizeUsageChange(
     organizationId: string,
@@ -1116,16 +1116,15 @@ export class OrganizationUsageService {
     memDelta: number,
     diskDelta: number,
   ): Promise<void> {
-    if (cpuDelta > 0) {
+    if (cpuDelta !== 0) {
       await this.updateCurrentQuotaUsage(organizationId, 'cpu', cpuDelta, regionId)
     }
-    if (memDelta > 0) {
+    if (memDelta !== 0) {
       await this.updateCurrentQuotaUsage(organizationId, 'memory', memDelta, regionId)
     }
-    if (diskDelta > 0) {
+    if (diskDelta !== 0) {
       await this.updateCurrentQuotaUsage(organizationId, 'disk', diskDelta, regionId)
     }
-    // Note: updateCurrentQuotaUsage auto-decrements pending when delta > 0
   }
 
   /**
@@ -1208,23 +1207,16 @@ export class OrganizationUsageService {
     }
   }
 
-  /**
-   * For resize transitions, RESIZING consumes compute only if the other state does (hot resize).
-   */
-  private getStatesConsumingComputeForTransition(oldState: SandboxState, newState: SandboxState): SandboxState[] {
-    if (oldState === SandboxState.RESIZING || newState === SandboxState.RESIZING) {
-      const otherState = oldState === SandboxState.RESIZING ? newState : oldState
-      if (SANDBOX_STATES_CONSUMING_COMPUTE.includes(otherState)) {
-        return [...SANDBOX_STATES_CONSUMING_COMPUTE, SandboxState.RESIZING]
-      }
-    }
-    return SANDBOX_STATES_CONSUMING_COMPUTE
-  }
-
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
     await this.redisLockProvider.waitForLock(lockKey, 60)
+
+    // RESIZING transitions: usage handled by applyResizeUsageChange, not state events
+    if (event.oldState === SandboxState.RESIZING || event.newState === SandboxState.RESIZING) {
+      await this.redisLockProvider.unlock(lockKey)
+      return
+    }
 
     // Special case for warm pool sandboxes (otherwise the quota usage deltas would be 0 due to the "unchanged" state)
     if (event.oldState === event.newState && event.newState === SandboxState.STARTED) {
@@ -1255,20 +1247,18 @@ export class OrganizationUsageService {
     }
 
     try {
-      const statesConsumingCompute = this.getStatesConsumingComputeForTransition(event.oldState, event.newState)
-
       const cpuDelta = this.calculateQuotaUsageDelta(
         event.sandbox.cpu,
         event.oldState,
         event.newState,
-        statesConsumingCompute,
+        SANDBOX_STATES_CONSUMING_COMPUTE,
       )
 
       const memDelta = this.calculateQuotaUsageDelta(
         event.sandbox.mem,
         event.oldState,
         event.newState,
-        statesConsumingCompute,
+        SANDBOX_STATES_CONSUMING_COMPUTE,
       )
 
       const diskDelta = this.calculateQuotaUsageDelta(

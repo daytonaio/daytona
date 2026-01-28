@@ -1346,7 +1346,7 @@ export class SandboxService {
 
     // Validate sandbox is in a valid state for resize
     if (sandbox.state !== SandboxState.STARTED && sandbox.state !== SandboxState.STOPPED) {
-      throw new BadRequestError('Sandbox must be in STARTED or STOPPED state to resize')
+      throw new BadRequestError('Sandbox must be in started or stopped state to resize')
     }
 
     if (sandbox.pending) {
@@ -1412,24 +1412,19 @@ export class SandboxService {
       )
     }
 
-    // Calculate the delta for quota validation
-    const cpuDelta = newCpu - sandbox.cpu
-    const memDelta = newMem - sandbox.mem
-    const diskDelta = newDisk - sandbox.disk
+    // For cold resize, cpu/memory don't affect quota until sandbox is STARTED.
+    // For hot resize, track all deltas (positive reserves quota, negative frees quota for others).
+    const cpuDeltaForQuota = isHotResize ? newCpu - sandbox.cpu : 0
+    const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
+    const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
 
-    // For cold resize, cpu/memory changes don't affect org quota until sandbox is STARTED.
-    // Only validate/reserve quota for resources the sandbox is currently consuming.
-    const cpuDeltaForQuota = isHotResize && cpuDelta > 0 ? cpuDelta : 0
-    const memDeltaForQuota = isHotResize && memDelta > 0 ? memDelta : 0
-    const diskDeltaForQuota = diskDelta > 0 ? diskDelta : 0
-
-    // Track pending increments for rollback on error
+    // Track pending for rollback on error
     let pendingCpuIncrement = 0
     let pendingMemoryIncrement = 0
     let pendingDiskIncrement = 0
 
-    // Only validate org-wide quotas if resources are increasing for consuming quotas
-    if (cpuDeltaForQuota > 0 || memDeltaForQuota > 0 || diskDeltaForQuota > 0) {
+    // Validate and track pending for any non-zero quota changes
+    if (cpuDeltaForQuota !== 0 || memDeltaForQuota !== 0 || diskDeltaForQuota !== 0) {
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
         await this.validateOrganizationQuotas(
           organization,
@@ -1469,7 +1464,7 @@ export class SandboxService {
           : null
 
     if (!previousState) {
-      throw new BadRequestError('Sandbox must be in STARTED or STOPPED state to resize')
+      throw new BadRequestError('Sandbox must be in started or stopped state to resize')
     }
 
     // Now transition to RESIZING state
