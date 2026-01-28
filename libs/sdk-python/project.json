@@ -36,7 +36,9 @@
         }
       ]
     },
-    "deps-check": {},
+    "deps-check": {
+      "dependsOn": ["add-api-clients"]
+    },
     "build": {
       "executor": "nx:run-commands",
       "options": {
