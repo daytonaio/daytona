@@ -214,9 +214,9 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
-                <h3 className="text-sm text-muted-foreground">Last used</h3>
+                <h3 className="text-sm text-muted-foreground">Last event</h3>
                 <p className="mt-1 text-sm font-medium">
-                  <TimestampTooltip timestamp={sandbox.createdAt}>
+                  <TimestampTooltip timestamp={sandbox.updatedAt}>
                     {getLastEvent(sandbox).relativeTimeString}
                   </TimestampTooltip>
                 </p>
