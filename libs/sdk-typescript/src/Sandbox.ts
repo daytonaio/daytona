@@ -639,17 +639,21 @@ export class Sandbox implements SandboxDto {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    while (this.state === 'resizing') {
+    while (this.state === SandboxState.RESIZING) {
       await this.refreshData()
 
-      if (this.state !== 'resizing') {
-        return
-      }
-
       // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === 'error' || this.state === 'build_failed') {
+      if (
+        this.state === SandboxState.ERROR ||
+        this.state === SandboxState.BUILD_FAILED ||
+        this.state === SandboxState.BUILD_FAILED
+      ) {
         const errMsg = `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`
         throw new DaytonaError(errMsg)
+      }
+
+      if (this.state !== SandboxState.RESIZING) {
+        return
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
