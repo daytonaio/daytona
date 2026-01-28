@@ -1,0 +1,38 @@
+{
+  "name": "opencode-plugin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/opencode-plugin/src",
+  "projectType": "library",
+  "targets": {
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project libs/opencode-plugin/tsconfig.json"
+      }
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "rm -rf dist",
+          "tsc --project tsconfig.build.json",
+          "cp package.json dist/",
+          "cp README.md dist/",
+          "cp .npmignore dist/ 2>/dev/null || true"
+        ],
+        "parallel": false
+      },
+      "outputs": ["{projectRoot}/dist"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "libs/opencode-plugin/dist",
+        "command": "npm publish --access public --registry https://registry.npmjs.org/"
+      },
+      "dependsOn": ["build"]
+    }
+  },
+  "tags": []
+}
