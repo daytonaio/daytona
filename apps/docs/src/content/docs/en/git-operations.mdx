@@ -18,6 +18,7 @@ Daytona provides methods to clone Git repositories into sandboxes. You can clone
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Basic clone
 sandbox.git.clone(
@@ -40,8 +41,10 @@ sandbox.git.clone(
     branch="develop"
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Basic clone
 await sandbox.git.clone(
@@ -68,33 +71,8 @@ await sandbox.git.clone(
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Basic clone
-sandbox.git.clone(
-  url: 'https://github.com/user/repo.git',
-  path: 'workspace/repo'
-)
 
-# Clone with authentication
-sandbox.git.clone(
-  url: 'https://github.com/user/repo.git',
-  path: 'workspace/repo',
-  username: 'git',
-  password: 'personal_access_token'
-)
-
-# Clone specific branch
-sandbox.git.clone(
-  url: 'https://github.com/user/repo.git',
-  path: 'workspace/repo',
-  branch: 'develop'
-)
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 # Basic clone
 sandbox.git.clone(
@@ -120,6 +98,7 @@ sandbox.git.clone(
 
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
   --request POST \
@@ -133,14 +112,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
   "username": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**clone repository (Python SDK)**](/docs/en/python-sdk/sync/git/#gitclone)
 >
 > [**clone repository (TypeScript SDK)**](/docs/en/typescript-sdk/git/#clone)
+>
+> [**clone repository (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitclone)
 >
 > [**clone repository (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/clone)
 
@@ -150,6 +132,7 @@ Daytona provides methods to check the status of Git repositories in sandboxes. Y
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Get repository status
 status = sandbox.git.status("workspace/repo")
@@ -164,8 +147,10 @@ response = sandbox.git.branches("workspace/repo")
 for branch in response.branches:
     print(f"Branch: {branch}")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Get repository status
 const status = await sandbox.git.status("workspace/repo");
@@ -184,27 +169,8 @@ response.branches.forEach(branch => {
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Get repository status
-status = sandbox.git.status('workspace/repo')
-puts "Current branch: #{status.current_branch}"
-puts "Commits ahead: #{status.ahead}"
-puts "Commits behind: #{status.behind}"
-status.file_status.each do |file|
-  puts "File: #{file.name}"
-end
 
-# List branches
-response = sandbox.git.branches('workspace/repo')
-response.branches.each do |branch|
-  puts "Branch: #{branch}"
-end
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 # Get repository status
 status = sandbox.git.status('workspace/repo')
@@ -224,17 +190,21 @@ end
 
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/status?path='
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**get repository status (Python SDK)**](/docs/en/python-sdk/sync/git/#gitstatus)
 >
 > [**get repository status (TypeScript SDK)**](/docs/en/typescript-sdk/git/#status)
+>
+> [**get repository status (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitstatus)
 >
 > [**get Git repository status (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/GET/git/status)
 
@@ -248,18 +218,23 @@ Daytona provides methods to create branches in Git repositories. The following s
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Create a new branch
 sandbox.git.create_branch("workspace/repo", "new-feature")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Create new branch
 await git.createBranch('workspace/repo', 'new-feature');
 ```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
   --request POST \
@@ -269,14 +244,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
   "path": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**create branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcreate_branch)
 >
 > [**create branch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#createbranch)
+>
+> [**create branch (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitcreate_branch)
 >
 > [**create branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/branches)
 
@@ -286,18 +264,31 @@ Daytona provides methods to checkout branches in Git repositories. The following
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Checkout a branch
 sandbox.git.checkout_branch("workspace/repo", "feature-branch")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Checkout a branch
 await git.checkoutBranch('workspace/repo', 'feature-branch');
 ```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Checkout a branch
+sandbox.git.checkout_branch('workspace/repo', 'feature-branch')
+```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/checkout' \
   --request POST \
@@ -307,14 +298,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/checkout' \
   "path": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**checkout branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcheckout_branch)
 >
 > [**checkout branch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#checkoutbranch)
+>
+> [**checkout branch (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitcheckout_branch)
 >
 > [**checkout branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/checkout)
 
@@ -324,18 +318,31 @@ Daytona provides methods to delete branches in Git repositories. The following s
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Delete a branch
 sandbox.git.delete_branch("workspace/repo", "old-feature")
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Delete a branch
 await git.deleteBranch('workspace/repo', 'old-feature');
 ```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Delete a branch
+sandbox.git.delete_branch('workspace/repo', 'old-feature')
+```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
   --request DELETE \
@@ -345,14 +352,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
   "path": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**delete branch (Python SDK)**](/docs/en/python-sdk/sync/git/#gitdelete_branch)
 >
 > [**delete branch (TypeScript SDK)**](/docs/en/typescript-sdk/git/#deletebranch)
+>
+> [**delete branch (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitdelete_branch)
 >
 > [**delete branch (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/DELETE/git/branches)
 
@@ -362,6 +372,7 @@ Daytona provides methods to stage changes in Git repositories. You can stage spe
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Stage a single file
 sandbox.git.add("workspace/repo", ["file.txt"])
@@ -373,16 +384,29 @@ sandbox.git.add("workspace/repo", [
     "README.md"
 ])
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Stage a single file
 await git.add('workspace/repo', ['file.txt']);
 // Stage whole repository
 await git.add('workspace/repo', ['.']);
 ```
+
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Stage a single file
+sandbox.git.add('workspace/repo', ['file.txt'])
+```
+
+</TabItem>
+
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/add' \
   --request POST \
@@ -394,14 +418,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/add' \
   "path": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**add (Python SDK)**](/docs/en/python-sdk/sync/git/#gitadd)
 >
 > [**add (TypeScript SDK)**](/docs/en/typescript-sdk/git/#add)
+>
+> [**add (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitadd)
 >
 > [**add (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/add)
 
@@ -411,6 +438,7 @@ Daytona provides methods to commit changes in Git repositories. You can commit w
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Stage and commit changes
 sandbox.git.add("workspace/repo", ["README.md"])
@@ -422,8 +450,10 @@ sandbox.git.commit(
     allow_empty=True
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Stage and commit changes
 await git.add('workspace/repo', ['README.md']);
@@ -435,8 +465,19 @@ await git.commit(
   true
 );
 ```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Stage and commit changes
+sandbox.git.add('workspace/repo', ['README.md'])
+sandbox.git.commit('workspace/repo', 'Update documentation', 'John Doe', 'john@example.com', true)
+```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/commit' \
   --request POST \
@@ -449,14 +490,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/commit' \
   "path": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**commit (Python SDK)**](/docs/en/python-sdk/sync/git/#gitcommit)
 >
 > [**commit (TypeScript SDK)**](/docs/en/typescript-sdk/git/#commit)
+>
+> [**commit (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitcommit)
 >
 > [**commit (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/commit)
 
@@ -470,6 +514,7 @@ Daytona provides methods to push changes to remote repositories. The following s
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Push without authentication (for public repos or SSH)
 sandbox.git.push("workspace/repo")
@@ -481,8 +526,10 @@ sandbox.git.push(
     password="github_token"
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Push to a public repository
 await git.push('workspace/repo');
@@ -494,8 +541,16 @@ await git.push(
   'token'
 );
 ```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Push changes
+sandbox.git.push('workspace/repo')
+```
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/push' \
   --request POST \
@@ -506,14 +561,17 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/push' \
   "username": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**push (Python SDK)**](/docs/en/python-sdk/sync/git/#gitpush)
 >
 > [**push (TypeScript SDK)**](/docs/en/typescript-sdk/git/#push)
+>
+> [**push (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitpush)
 >
 > [**push (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/push)
 
@@ -523,6 +581,7 @@ Daytona provides methods to pull changes from remote repositories. The following
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 # Pull without authentication
 sandbox.git.pull("workspace/repo")
@@ -534,8 +593,10 @@ sandbox.git.pull(
     password="github_token"
 )
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 // Pull from a public repository
 await git.pull('workspace/repo');
@@ -547,8 +608,18 @@ await git.pull(
   'token'
 );
 ```
+
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Pull changes
+sandbox.git.pull('workspace/repo')
+```
+</TabItem>
+
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/pull' \
   --request POST \
@@ -559,13 +630,16 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/pull' \
   "username": ""
 }'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/git), [TypeScript SDK](/docs/en/typescript-sdk/git), [Ruby SDK](/docs/en/ruby-sdk/sync/git) and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**pull (Python SDK)**](/docs/en/python-sdk/sync/git/#gitpull)
 >
 > [**pull (TypeScript SDK)**](/docs/en/typescript-sdk/git/#pull)
+>
+> [**pull (Ruby SDK)**](/docs/en/ruby-sdk/sync/git/#gitpull)
 >
 > [**pull (API)**](/docs/en/tools/api/#daytona-toolbox/tag/git/POST/git/pull)
