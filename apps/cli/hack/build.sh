@@ -86,6 +86,12 @@ fi
 # Create build directory if it doesn't exist
 mkdir -p "${DIST_DIR}/dist/apps/cli"
 
+# Set output filename with .exe extension for Windows
+OUTPUT_FILE="daytona-${GOOS}-${GOARCH}"
+if [ "$GOOS" == "windows" ]; then
+    OUTPUT_FILE="${OUTPUT_FILE}.exe"
+fi
+
 # Build the binary
 echo "Building Daytona CLI with version: $DAYTONA_VERSION"
 go build \
@@ -96,6 +102,6 @@ go build \
     -X 'github.com/daytonaio/daytona/cli/internal.Auth0ClientSecret=${DAYTONA_AUTH0_CLIENT_SECRET}' \
     -X 'github.com/daytonaio/daytona/cli/internal.Auth0CallbackPort=${DAYTONA_AUTH0_CALLBACK_PORT}' \
     -X 'github.com/daytonaio/daytona/cli/internal.Auth0Audience=${DAYTONA_AUTH0_AUDIENCE}'" \
-    -o "${DIST_DIR}/dist/apps/cli/daytona-${GOOS}-${GOARCH}" main.go
+    -o "${DIST_DIR}/dist/apps/cli/${OUTPUT_FILE}" main.go
 
-echo "Build complete: ${DIST_DIR}/dist/apps/cli/daytona-${GOOS}-${GOARCH}"
+echo "Build complete: ${DIST_DIR}/dist/apps/cli/${OUTPUT_FILE}"
