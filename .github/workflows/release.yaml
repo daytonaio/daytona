@@ -68,6 +68,7 @@ jobs:
           yarn install --immutable
           poetry lock
           poetry install
+          source "$(poetry env info --path)/bin/activate"
           go work sync
           go env -w GOFLAGS="-buildvcs=false"
 
@@ -219,6 +220,7 @@ jobs:
           yarn install --immutable
           poetry lock
           poetry install
+          source "$(poetry env info --path)/bin/activate"
           go work sync
           go env -w GOFLAGS="-buildvcs=false"
 
