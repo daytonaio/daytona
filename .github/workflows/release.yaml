@@ -18,6 +18,7 @@ env:
   DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
   DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
   DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
+  POETRY_VIRTUALENVS_IN_PROJECT: true
 
 jobs:
   publish:
@@ -74,6 +75,7 @@ jobs:
 
       - name: Build projects
         run: |
+          source "$(poetry env info --path)/bin/activate"
           yarn build:production
           yarn nx build-amd64 runner --configuration=production --nxBail=true
 
@@ -225,7 +227,9 @@ jobs:
           go env -w GOFLAGS="-buildvcs=false"
 
       - name: Publish docker images
-        run: VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
 
   # Push combined manifest
   docker_push_manifest:
