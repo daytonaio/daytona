@@ -27,7 +27,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-go"
+	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
 func main() {
@@ -88,7 +88,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-go"
+	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
 func main() {
@@ -149,7 +149,7 @@ import (
 	"context"
 	"fmt"
 	"os"
-	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-go"
+	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
 func main() {

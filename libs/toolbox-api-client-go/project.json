@@ -1,7 +1,7 @@
 {
-  "name": "toolbox-api-go",
+  "name": "toolbox-api-client-go",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/toolbox-api-go",
+  "sourceRoot": "libs/toolbox-api-client-go",
   "projectType": "library",
   "targets": {
     "build": {
@@ -39,7 +39,7 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/toolbox-api-go --git-user-id=daytonaio -i ../../apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=packageName=toolbox,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o ."
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/toolbox-api-client-go --git-user-id=daytonaio -i ../../apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=packageName=toolbox,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o ."
         ]
       },
       "dependsOn": [

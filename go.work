@@ -11,5 +11,5 @@ use (
 	./libs/common-go
 	./libs/computer-use
 	./libs/sdk-go
-	./libs/toolbox-api-go
+	./libs/toolbox-api-client-go
 )

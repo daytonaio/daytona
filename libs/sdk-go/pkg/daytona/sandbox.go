@@ -10,7 +10,7 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
-	"github.com/daytonaio/daytona/libs/toolbox-api-go"
+	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
 // Sandbox represents a Daytona sandbox environment.

@@ -9,7 +9,7 @@ import (
 	"net/http"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
-	"github.com/daytonaio/daytona/libs/toolbox-api-go"
+	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
 // DaytonaError is the base error type for all Daytona SDK errors
@@ -143,7 +143,7 @@ func ConvertAPIError(err error, httpResp *http.Response) error {
 	}
 }
 
-// ConvertToolboxError converts toolbox-api-go errors to SDK error types
+// ConvertToolboxError converts toolbox-api-client-go errors to SDK error types
 func ConvertToolboxError(err error, httpResp *http.Response) error {
 	if err == nil {
 		return nil

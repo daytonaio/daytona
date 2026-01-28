@@ -35,6 +35,5 @@ header:
     - 'libs/toolbox-api-client-python-async/**'
     - 'libs/toolbox-api-client-ruby/**'
     - 'libs/toolbox-api-client-go/**'
-    - 'libs/toolbox-api-go/**'
 
   comment: on-failure

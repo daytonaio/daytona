@@ -71,7 +71,7 @@ import (
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-go"
+	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 

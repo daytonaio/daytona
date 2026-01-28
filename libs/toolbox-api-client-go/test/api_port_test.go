@@ -11,10 +11,11 @@ package toolbox
 
 import (
 	"context"
-	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-go"
+	"testing"
+
+	openapiclient "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func Test_toolbox_PortAPIService(t *testing.T) {

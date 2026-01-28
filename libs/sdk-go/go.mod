@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.2
 	github.com/daytonaio/daytona/libs/api-client-go v0.0.0-20260120123750-b98371563343
-	github.com/daytonaio/daytona/libs/toolbox-api-go v0.0.0
+	github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.0.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
@@ -34,4 +34,4 @@ require (
 )
 
 // Remove this once the toolbox lib is commited
-replace github.com/daytonaio/daytona/libs/toolbox-api-go => ../toolbox-api-go
+replace github.com/daytonaio/daytona/libs/toolbox-api-client-go => ../toolbox-api-client-go

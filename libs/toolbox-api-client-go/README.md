@@ -22,7 +22,7 @@ go get golang.org/x/net/context
 Put the package under your project folder and add the following in import:
 
 ```go
-import toolbox "github.com/daytonaio/daytona/libs/toolbox-api-go"
+import toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 ```
 
 To use a proxy, set the environment variable `HTTP_PROXY`:

@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-	"github.com/daytonaio/daytona/libs/toolbox-api-go"
+	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 	"github.com/gorilla/websocket"
 )
 
@@ -121,7 +121,7 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 
 // CodeRun executes code in a language-specific way.
 //
-// NOTE: This method is currently unavailable as the toolbox-api-go does not expose
+// NOTE: This method is currently unavailable as the toolbox-api-client-go does not expose
 // a CodeRun endpoint. For code execution, use [ProcessService.ExecuteCommand] or
 // [CodeInterpreterService].
 //
