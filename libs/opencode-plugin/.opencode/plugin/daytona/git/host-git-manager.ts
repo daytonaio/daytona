@@ -141,11 +141,14 @@ export class HostGitManager {
     try {
       logger.info(`Pushing to ${remoteName} (${sshUrl}) on branch ${branch}`)
       const operation = this.operationQueue.then(async () => {
-        execCommand('git add .', { cwd })
-        execCommand('git commit -m "Sync local changes before agent start" || echo "No changes to commit"', {
-          shell: '/bin/bash',
-          cwd,
-        })
+        const statusRes = execCommand('git status --porcelain', { cwd })
+        if (!statusRes.ok) {
+          throw new Error(statusRes.stderr)
+        }
+        if (statusRes.stdout.trim().length > 0) {
+          logger.warn('Local repository has uncommitted changes; pushing HEAD only (no auto-commit).')
+        }
+
         this.setRemote(remoteName, sshUrl, cwd)
         let attempts = 0
         while (attempts < 3) {
