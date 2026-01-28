@@ -1,0 +1,79 @@
+---
+title: "ObjectStorage"
+hideTitleOnPage: true
+---
+
+## ObjectStorage \{#objectstorage\}
+
+S3 互換のクレデンシャルを使用して ObjectStorage を初期化します
+
+### コンストラクタ \{#constructors\}
+
+#### new ObjectStorage() \{#new-objectstorage\}
+
+```ruby
+def initialize(endpoint_url:, aws_access_key_id:, aws_secret_access_key:, aws_session_token:, bucket_name:, region:)
+
+```
+
+S3 互換の認証情報を使用して ObjectStorage を初期化します
+
+**パラメーター**:
+
+* `endpoint_url` *String* - オブジェクトストレージサービスのエンドポイント URL
+* `aws_access_key_id` *String* - オブジェクトストレージサービスのアクセスキー ID
+* `aws_secret_access_key` *String* - オブジェクトストレージサービスのシークレットアクセスキー
+* `aws_session_token` *String* - オブジェクトストレージサービスのセッショントークン
+* `bucket_name` *String* - 使用するバケット名（デフォルトは &quot;daytona-volume-builds&quot;）
+* `region` *String* - AWS リージョン（デフォルトは us-east-1）
+
+**戻り値**:
+
+* `ObjectStorage` - 新しい ObjectStorage インスタンス
+
+### メソッド \{#methods\}
+
+#### bucket_name() \{#bucket_name\}
+
+```ruby
+def bucket_name()
+
+```
+
+**戻り値**:
+
+* `String` - オブジェクトストレージに使用される S3 バケット名
+
+#### s3_client() \{#s3_client\}
+
+```ruby
+def s3_client()
+
+```
+
+**戻り値**:
+
+* `Aws:S3:Client` - S3 クライアント オブジェクト
+
+#### upload() \{#upload\}
+
+```ruby
+def upload(path, organization_id, archive_base_path)
+
+```
+
+オブジェクトストレージサービスにファイルをアップロードします
+
+**パラメータ**:
+
+* `path` *String* - アップロードするファイルへのパス
+* `organization_id` *String* - 使用する組織 ID
+* `archive_base_path` *String, nil* - アーカイブに使用するベースパス
+
+**返り値**:
+
+* `String` - アップロードされたファイルのハッシュ値
+
+**例外**:
+
+* `Errno:ENOENT` - パスが存在しない場合に発生します
