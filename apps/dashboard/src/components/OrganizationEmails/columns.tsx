@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React from 'react'
 import { OrganizationEmail } from '@/billing-api/types/OrganizationEmail'
-import { ColumnDef } from '@tanstack/react-table'
-import { ArrowUp, ArrowDown, CheckCircle, Clock } from 'lucide-react'
 import { getRelativeTimeString } from '@/lib/utils'
+import { ColumnDef } from '@tanstack/react-table'
+import { ArrowDown, ArrowUp, CheckCircle, Clock } from 'lucide-react'
+import React from 'react'
 import { Badge } from '../ui/badge'
 import { OrganizationEmailsTableActions } from './OrganizationEmailsTableActions'
 
@@ -84,14 +84,7 @@ export function getColumns({
       },
       cell: ({ row }) => (
         <div className="max-w-[120px] flex">
-          <Badge
-            variant={row.original.verified ? 'default' : 'secondary'}
-            className={`flex items-center gap-1 ${
-              row.original.verified
-                ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200'
-                : 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-200'
-            }`}
-          >
+          <Badge variant={row.original.verified ? 'success' : 'secondary'} className="flex items-center gap-1">
             {row.original.verified ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
             {row.original.verified ? 'Verified' : 'Unverified'}
           </Badge>

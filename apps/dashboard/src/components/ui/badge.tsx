@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
@@ -13,10 +13,13 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
+        success: 'bg-success-background text-success-foreground border-success-separator',
+        info: 'bg-info-background text-info-foreground border-info-separator',
+        warning: 'bg-warning-background text-warning-foreground border-warning-separator',
         default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
         secondary: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive: 'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
-        outline: 'text-foreground',
+        outline: 'text-foreground bg-muted/50',
       },
     },
     defaultVariants: {

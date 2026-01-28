@@ -7,6 +7,10 @@ export const queryKeys = {
   config: {
     all: ['config'] as const,
   },
+  apiKeys: {
+    all: ['api-keys'] as const,
+    list: (organizationId: string) => [...queryKeys.apiKeys.all, organizationId, 'list'] as const,
+  },
   organization: {
     all: ['organization'] as const,
 
