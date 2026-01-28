@@ -124,6 +124,17 @@ export class DaytonaSessionManager {
       return sandbox
     }
 
+    // If not in cache/storage for this project, try to recover from other projects and migrate.
+    if (!existing) {
+      const migrated = this.dataStorage.getSession(projectId, worktree, sessionId)
+      if (migrated?.sandboxId) {
+        logger.info(`Recovered session ${sessionId} for project ${projectId} (migrated from another project)`)
+        this.sessionSandboxes.set(sessionId, { id: migrated.sandboxId })
+        // Re-run getSandbox to go through the normal reconnect path.
+        return this.getSandbox(sessionId, projectId, worktree, pluginCtx)
+      }
+    }
+
     // Otherwise, create a new sandbox
     logger.info(`Creating new sandbox for session: ${sessionId} in project: ${projectId}`)
     const daytona = new Daytona({ apiKey: this.apiKey })
@@ -165,8 +176,8 @@ export class DaytonaSessionManager {
 
     // If not in cache, try to load from storage and reconnect
     if (!sandbox || this.isPartiallyInitialized(sandbox)) {
-      const projectData = this.dataStorage.load(projectId)
-      const sessionInfo = projectData?.sessions?.[sessionId]
+      const storedWorktree = this.dataStorage.load(projectId)?.worktree ?? ''
+      const sessionInfo = this.dataStorage.getSession(projectId, storedWorktree, sessionId)
       if (sessionInfo?.sandboxId) {
         const daytona = new Daytona({ apiKey: this.apiKey })
         try {
