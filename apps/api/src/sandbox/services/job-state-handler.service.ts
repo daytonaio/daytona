@@ -475,16 +475,12 @@ export class JobStateHandlerService {
 
       // Calculate deltas before updating sandbox
       const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
-      const cpuDelta = (payload.cpu ?? sandbox.cpu) - sandbox.cpu
-      const memDelta = (payload.memory ?? sandbox.mem) - sandbox.mem
-      const diskDelta = (payload.disk ?? sandbox.disk) - sandbox.disk
 
       // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
-      // Only apply deltas for resources the sandbox was consuming.
       const isHotResize = previousState === SandboxState.STARTED
-      const cpuDeltaForQuota = isHotResize && cpuDelta > 0 ? cpuDelta : 0
-      const memDeltaForQuota = isHotResize && memDelta > 0 ? memDelta : 0
-      const diskDeltaForQuota = diskDelta > 0 ? diskDelta : 0
+      const cpuDeltaForQuota = isHotResize ? (payload.cpu ?? sandbox.cpu) - sandbox.cpu : 0
+      const memDeltaForQuota = isHotResize ? (payload.memory ?? sandbox.mem) - sandbox.mem : 0
+      const diskDeltaForQuota = (payload.disk ?? sandbox.disk) - sandbox.disk // Disk only increases
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
@@ -496,8 +492,7 @@ export class JobStateHandlerService {
         sandbox.state = previousState
         await this.sandboxRepository.save(sandbox)
 
-        // Apply usage change (increments current, decrements pending)
-        // Only apply deltas for quotas that were validated/pending-incremented
+        // Apply usage change (handles both positive and negative deltas)
         await this.organizationUsageService.applyResizeUsageChange(
           sandbox.organizationId,
           sandbox.region,
@@ -509,13 +504,13 @@ export class JobStateHandlerService {
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
 
-        // Rollback pending usage (only for quotas that had pending incremented)
+        // Rollback pending usage (all deltas were tracked, including negative)
         await this.organizationUsageService.decrementPendingSandboxUsage(
           sandbox.organizationId,
           sandbox.region,
-          cpuDeltaForQuota > 0 ? cpuDeltaForQuota : undefined,
-          memDeltaForQuota > 0 ? memDeltaForQuota : undefined,
-          diskDeltaForQuota > 0 ? diskDeltaForQuota : undefined,
+          cpuDeltaForQuota !== 0 ? cpuDeltaForQuota : undefined,
+          memDeltaForQuota !== 0 ? memDeltaForQuota : undefined,
+          diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
         )
 
         sandbox.state = previousState
