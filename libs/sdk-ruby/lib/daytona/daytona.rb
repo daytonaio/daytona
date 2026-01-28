@@ -228,7 +228,7 @@ module Daytona
       DaytonaApiClient::Configuration.new.configure do |api_config|
         uri = URI(config.api_url)
         api_config.scheme = uri.scheme
-        api_config.host = uri.host
+        api_config.host = uri.authority # Includes hostname:port
         api_config.base_path = uri.path
 
         api_config.access_token_getter = proc { config.api_key || config.jwt_token }

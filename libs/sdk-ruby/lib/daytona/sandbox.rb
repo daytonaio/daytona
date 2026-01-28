@@ -424,7 +424,7 @@ module Daytona
         uri = URI(full_url)
 
         cfg.scheme = uri.scheme
-        cfg.host = uri.host
+        cfg.host = uri.authority # Includes hostname:port
         cfg.base_path = uri.path.empty? ? '/' : uri.path
 
         cfg
