@@ -759,9 +759,8 @@ export class SandboxStartAction extends SandboxAction {
       }
     }
 
+    const restoreBackupSnapshotRetryKey = `restore-backup-snapshot-retry-${sandbox.id}`
     if (!exists) {
-      const restoreBackupSnapshotRetryKey = `restore-backup-snapshot-retry-${sandbox.id}`
-
       if (!isRecovery) {
         // Check retry count - allow up to 3 attempts for transient issues
         const retryCountRaw = await this.redis.get(restoreBackupSnapshotRetryKey)
@@ -792,7 +791,7 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     // Clear the retry counter on success
-    await this.redis.del(`backup-snapshot-retry-${sandbox.id}`)
+    await this.redis.del(restoreBackupSnapshotRetryKey)
 
     await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, lockCode, runner.id)
 
