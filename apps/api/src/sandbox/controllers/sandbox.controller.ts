@@ -37,6 +37,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
+import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
@@ -76,6 +77,8 @@ import { UrlDto } from '../../common/dto/url.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
+import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { FeatureFlags } from '../../common/constants/feature-flags'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -521,6 +524,50 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.stop(sandboxIdOrName, authContext.organizationId)
+    return SandboxDto.fromSandbox(sandbox)
+  }
+
+  @Post(':sandboxIdOrName/resize')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-lifecycle')
+  @ApiOperation({
+    summary: 'Resize sandbox resources',
+    operationId: 'resizeSandbox',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox has been resized',
+    type: SandboxDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RESIZE, defaultValue: false }] })
+  @Audit({
+    action: AuditAction.RESIZE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<ResizeSandboxDto>) => ({
+        cpu: req.body?.cpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+      }),
+    },
+  })
+  async resizeSandbox(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() resizeSandboxDto: ResizeSandboxDto,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.sandboxService.resize(sandboxIdOrName, resizeSandboxDto, authContext.organization)
     return SandboxDto.fromSandbox(sandbox)
   }
 

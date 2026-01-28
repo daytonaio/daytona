@@ -1757,6 +1757,7 @@ paths:
                 - pulling_snapshot
                 - archived
                 - archiving
+                - resizing
               type: string
             type: array
           style: form
@@ -2131,6 +2132,48 @@ paths:
             - profile
             - email
       summary: Stop sandbox
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/resize:
+    post:
+      operationId: resizeSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResizeSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Sandbox has been resized
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Resize sandbox resources
       tags:
         - sandbox
   /sandbox/{sandboxIdOrName}/labels:
@@ -9817,6 +9860,7 @@ components:
         - pulling_snapshot
         - archived
         - archiving
+        - resizing
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox
@@ -9824,7 +9868,6 @@ components:
         - destroyed
         - started
         - stopped
-        - resized
         - archived
       type: string
     SandboxVolume:
@@ -10335,6 +10378,28 @@ components:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the sandbox
       type: object
+    ResizeSandbox:
+      example:
+        disk: 20
+        memory: 4
+        cpu: 2
+      properties:
+        cpu:
+          description: 'CPU cores to allocate to the sandbox (minimum: 1)'
+          example: 2
+          minimum: 1
+          type: integer
+        memory:
+          description: 'Memory in GB to allocate to the sandbox (minimum: 1)'
+          example: 4
+          minimum: 1
+          type: integer
+        disk:
+          description: Disk space in GB to allocate to the sandbox (can only be increased)
+          example: 20
+          minimum: 1
+          type: integer
+      type: object
     SandboxLabels:
       example:
         labels:
@@ -10377,6 +10442,7 @@ components:
             - pulling_snapshot
             - archived
             - archiving
+            - resizing
           example: started
           type: string
         errorReason:
@@ -13183,6 +13249,7 @@ components:
         - START_SANDBOX
         - STOP_SANDBOX
         - DESTROY_SANDBOX
+        - RESIZE_SANDBOX
         - CREATE_BACKUP
         - BUILD_SNAPSHOT
         - PULL_SNAPSHOT

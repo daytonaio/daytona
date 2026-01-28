@@ -161,9 +161,12 @@ func Resize(ctx *gin.Context) {
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
+		common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
 		return
 	}
+
+	common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusSuccess)).Inc()
 
 	ctx.JSON(http.StatusOK, "Sandbox resized")
 }

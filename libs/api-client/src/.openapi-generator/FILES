@@ -140,6 +140,7 @@ models/region.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
+models/resize-sandbox.ts
 models/runner-full.ts
 models/runner-health-metrics.ts
 models/runner-healthcheck.ts

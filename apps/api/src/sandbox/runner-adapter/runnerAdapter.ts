@@ -101,6 +101,8 @@ export interface RunnerAdapter {
   ): Promise<void>
 
   recoverSandbox(sandbox: Sandbox): Promise<void>
+
+  resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
 }
 
 @Injectable()

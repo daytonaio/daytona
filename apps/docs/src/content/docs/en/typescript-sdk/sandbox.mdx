@@ -538,6 +538,48 @@ console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
 
 ***
 
+#### resize()
+
+```ts
+resize(resources: Resources, timeout?: number): Promise<void>
+```
+
+Resizes the Sandbox resources.
+
+Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
+sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+
+**Parameters**:
+
+- `resources` _Resources_ - New resource configuration. Only specified fields will be updated.
+    - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+    - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+    - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
+- `timeout?` _number = 60_ - Timeout in seconds for the resize operation. 0 means no timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- If hot resize constraints are violated, disk resize attempted on running sandbox,
+  disk size decrease is attempted, no resource changes are specified, or resize operation times out.
+
+**Example:**
+
+```ts
+// Increase CPU/memory on running sandbox (hot resize)
+await sandbox.resize({ cpu: 4, memory: 8 });
+
+// Change disk (sandbox must be stopped)
+await sandbox.stop();
+await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
+```
+
+***
+
 #### revokeSshAccess()
 
 ```ts
@@ -775,6 +817,31 @@ Validates an SSH access token for the sandbox.
 **Returns**:
 
 - `Promise<SshAccessValidationDto>` - The SSH access validation result.
+
+***
+
+#### waitForResizeComplete()
+
+```ts
+waitForResizeComplete(timeout?: number): Promise<void>
+```
+
+Waits for the Sandbox resize operation to complete.
+
+This method polls the Sandbox status until the state is no longer 'resizing'.
+
+**Parameters**:
+
+- `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- If the sandbox ends up in an error state or resize times out.
 
 ***
 
