@@ -1,0 +1,76 @@
+---
+title: Run Claude Code in a Daytona Sandbox via CLI
+description: Learn how to run Claude Code inside a Daytona sandbox using the Daytona CLI for secure and isolated task execution.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+This guide walks you through running Claude Code inside a Daytona sandbox using the Daytona CLI.
+
+### Prerequisites
+
+- Daytona account and API key (Get it from [Daytona Dashboard](https://app.daytona.io/dashboard/keys))
+- Local terminal (macOS, Linux, or Windows)
+
+### Install the Daytona CLI
+
+<Tabs syncKey="os">
+  <TabItem label="Mac/Linux">
+    ```bash 
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex" 
+    ```
+  </TabItem>
+</Tabs>
+
+### Authenticate with Daytona
+
+Log in to your Daytona account using your API key:
+
+```bash
+daytona login --api-key=YOUR_API_KEY
+```
+
+Replace `YOUR_API_KEY` with your actual Daytona API key.
+
+### Create a Sandbox
+
+Create a new sandbox for running Claude Code:
+
+```bash
+daytona sandbox create claude-sandbox
+```
+
+This creates a sandbox named `claude-sandbox`, visible in your [Dashboard](https://app.daytona.io/dashboard/sandboxes). The default Daytona snapshot includes Claude Code, so the command above is all you need.
+
+### Connect to the Sandbox
+
+SSH into your sandbox:
+
+```bash
+daytona ssh claude-sandbox
+```
+
+You now have an interactive terminal session inside the sandbox.
+
+### Run Claude Code
+
+Inside the SSH session, start Claude Code:
+
+```bash
+claude
+```
+
+On first run, Claude Code will prompt you to authenticate:
+
+1. Copy the authentication URL displayed in the terminal
+2. Open the URL in your local browser
+3. Complete the authentication flow
+4. Copy the code provided by the browser
+5. Paste the code back into the terminal
+
+Once authenticated, you're all set. Claude Code runs inside the sandbox while you control it from your terminal.
