@@ -4,6 +4,7 @@
  */
 
 import { OrganizationEmail, OrganizationTier, OrganizationWallet } from '@/billing-api'
+import { Invoice, PaginatedInvoices, PaymentUrl } from '@/billing-api/types/Invoice'
 import { Tier } from '@/billing-api/types/tier'
 import { DaytonaConfiguration } from '@daytonaio/api-client/src'
 import { bypass, http, HttpResponse } from 'msw'
@@ -74,6 +75,7 @@ export const handlers = [
       name: 'Wallet',
       creditCardConnected: false,
       automaticTopUp: undefined,
+      hasFailedOrPendingInvoice: true,
     })
   }),
   http.get(`${BILLING_API_URL}/organization/:organizationId/tier`, async () => {
@@ -95,5 +97,98 @@ export const handlers = [
         verifiedAt: new Date(),
       },
     ])
+  }),
+  http.get(`${BILLING_API_URL}/organization/:organizationId/invoices`, async ({ request, params }) => {
+    const url = new URL(request.url)
+    const page = parseInt(url.searchParams.get('page') || '1', 10)
+    const perPage = parseInt(url.searchParams.get('perPage') || '50', 10)
+
+    const mockInvoices: Invoice[] = [
+      {
+        id: 'inv-001',
+        number: 'INV-2026-001',
+        currency: 'USD',
+        issuingDate: new Date('2026-01-01').toISOString(),
+        paymentDueDate: new Date('2026-01-15').toISOString(),
+        paymentOverdue: false,
+        paymentStatus: 'succeeded',
+        sequentialId: 1,
+        status: 'finalized',
+        totalAmountCents: 9847,
+        totalDueAmountCents: 0,
+        type: 'subscription',
+        fileUrl: 'https://example.com/invoices/inv-001.pdf',
+      },
+      {
+        id: 'inv-004',
+        number: 'INV-2025-010',
+        currency: 'USD',
+        issuingDate: new Date('2025-10-01').toISOString(),
+        paymentDueDate: new Date('2025-10-15').toISOString(),
+        paymentOverdue: true,
+        paymentStatus: 'pending',
+        sequentialId: 10,
+        status: 'finalized',
+        totalAmountCents: 12150,
+        totalDueAmountCents: 12150,
+        type: 'subscription',
+        fileUrl: 'https://example.com/invoices/inv-004.pdf',
+      },
+      {
+        id: 'inv-009',
+        number: 'INV-2030-010',
+        currency: 'USD',
+        issuingDate: new Date('2025-10-01').toISOString(),
+        paymentDueDate: new Date('2030-10-15').toISOString(),
+        paymentOverdue: false,
+        paymentStatus: 'pending',
+        sequentialId: 10,
+        status: 'pending',
+        totalAmountCents: 12150,
+        totalDueAmountCents: 12150,
+        type: 'subscription',
+        fileUrl: 'https://example.com/invoices/inv-004.pdf',
+      },
+      {
+        id: 'inv-005',
+        number: 'INV-2025-009',
+        currency: 'USD',
+        issuingDate: new Date('2025-09-01').toISOString(),
+        paymentDueDate: new Date('2025-09-15').toISOString(),
+        paymentOverdue: false,
+        paymentStatus: 'failed',
+        sequentialId: 9,
+        status: 'failed',
+        totalAmountCents: 8900,
+        totalDueAmountCents: 0,
+        type: 'add_on',
+        fileUrl: 'https://example.com/invoices/inv-005.pdf',
+      },
+    ]
+
+    const startIndex = (page - 1) * perPage
+    const endIndex = startIndex + perPage
+    const paginatedItems = mockInvoices.slice(startIndex, endIndex)
+    const totalItems = mockInvoices.length
+    const totalPages = Math.ceil(totalItems / perPage)
+
+    return HttpResponse.json<PaginatedInvoices>({
+      items: paginatedItems,
+      totalItems,
+      totalPages,
+    })
+  }),
+  http.post(`${BILLING_API_URL}/organization/:organizationId/invoices/:invoiceId/payment-url`, async () => {
+    return HttpResponse.json<PaymentUrl>({
+      url: 'https://checkout.stripe.com/pay/cs_test_1234567890',
+    })
+  }),
+  http.post(`${BILLING_API_URL}/organization/:organizationId/invoices/:invoiceId/void`, async () => {
+    return HttpResponse.json({})
+  }),
+  http.post(`${BILLING_API_URL}/organization/:organizationId/wallet/top-up`, async () => {
+    return HttpResponse.json<PaymentUrl>({
+      url: `https://checkout.stripe.com/pay/cs_test_${Date.now()}`,
+    })
   }),
 ]

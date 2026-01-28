@@ -4,7 +4,7 @@
  */
 
 import type { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, UseQueryOptions } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { useConfig } from '../useConfig'
 import { queryKeys } from './queryKeys'
@@ -12,10 +12,11 @@ import { queryKeys } from './queryKeys'
 export const useOrganizationWalletQuery = ({
   organizationId,
   enabled = true,
+  ...queryOptions
 }: {
   organizationId: string
   enabled?: boolean
-}) => {
+} & Omit<UseQueryOptions<OrganizationWallet>, 'queryKey' | 'queryFn'>) => {
   const { billingApi } = useApi()
   const config = useConfig()
 
@@ -23,5 +24,7 @@ export const useOrganizationWalletQuery = ({
     queryKey: queryKeys.organization.wallet(organizationId),
     queryFn: () => billingApi.getOrganizationWallet(organizationId),
     enabled: Boolean(enabled && config.billingApiUrl && organizationId),
+    refetchOnWindowFocus: true,
+    ...queryOptions,
   })
 }

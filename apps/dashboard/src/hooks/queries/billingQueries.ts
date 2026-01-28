@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import type { OrganizationWallet } from '@/billing-api/types/OrganizationWallet'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { UseQueryOptions } from '@tanstack/react-query'
 import { useOrganizationBillingPortalUrlQuery } from './useOrganizationBillingPortalUrlQuery'
 import { useOrganizationEmailsQuery } from './useOrganizationEmailsQuery'
+import { useOrganizationInvoicesQuery } from './useOrganizationInvoicesQuery'
 import { useOrganizationTierQuery } from './useOrganizationTierQuery'
 import { useOrganizationWalletQuery } from './useOrganizationWalletQuery'
 
@@ -20,9 +23,14 @@ function useSelectedOrgBillingScope() {
   }
 }
 
-export function useOwnerWalletQuery() {
+export function useOwnerWalletQuery(
+  queryOptions?: Omit<UseQueryOptions<OrganizationWallet>, 'queryKey' | 'queryFn' | 'enabled'>,
+) {
   const scope = useSelectedOrgBillingScope()
-  return useOrganizationWalletQuery(scope)
+  return useOrganizationWalletQuery({
+    ...scope,
+    ...queryOptions,
+  })
 }
 
 export function useOwnerTierQuery() {
@@ -38,4 +46,13 @@ export function useOwnerOrganizationEmailsQuery() {
 export function useOwnerBillingPortalUrlQuery() {
   const scope = useSelectedOrgBillingScope()
   return useOrganizationBillingPortalUrlQuery(scope)
+}
+
+export function useOwnerInvoicesQuery(page?: number, perPage?: number) {
+  const scope = useSelectedOrgBillingScope()
+  return useOrganizationInvoicesQuery({
+    ...scope,
+    page,
+    perPage,
+  })
 }
