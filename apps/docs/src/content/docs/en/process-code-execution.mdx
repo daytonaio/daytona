@@ -393,6 +393,39 @@ await sandbox.process.sendSessionCommandInput(sessionId, command.cmdId!, 'y')
 await logPromise
 ```
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+session_id = "interactive-session"
+sandbox.process.create_session(session_id)
+
+# Execute command that requires confirmation
+interactive_command = sandbox.process.execute_session_command(
+  session_id: session_id,
+  req: Daytona::SessionExecuteRequest.new(
+    command: 'pip uninstall requests',
+    run_async: true
+  )
+)
+
+# Wait a moment for the command to start
+sleep 1
+
+# Send input to the command
+sandbox.process.send_session_command_input(
+  session_id: session_id,
+  command_id: interactive_command.cmd_id,
+  data: "y"
+)
+
+# Get logs for the interactive command asynchronously
+sandbox.process.get_session_command_logs_async(
+  session_id: session_id,
+  command_id: interactive_command.cmd_id,
+  on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+  on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+)
+```
+</TabItem>
 </Tabs>
 
 See: [send_session_command_input (Python SDK)](/docs/python-sdk/sync/process/#processsend_session_command_input), [sendSessionCommandInput (TypeScript SDK)](/docs/typescript-sdk/process/#sendsessioncommandinput)
