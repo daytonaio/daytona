@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { useAddOrganizationEmailMutation } from '@/hooks/mutations/useAddOrganizationEmailMutation'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
 import { useDeleteOrganizationEmailMutation } from '@/hooks/mutations/useDeleteOrganizationEmailMutation'
@@ -32,7 +33,7 @@ import {
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { CheckCircleIcon, CreditCardIcon, InfoIcon, Loader2, TriangleAlertIcon } from 'lucide-react'
+import { CheckCircleIcon, CreditCardIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -444,7 +445,7 @@ const Wallet = () => {
                         onClick={handleRedeemCoupon}
                         disabled={redeemCouponMutation.isPending}
                       >
-                        {redeemCouponMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Redeem'}
+                        {redeemCouponMutation.isPending && <Spinner />} Redeem
                       </Button>
                     </div>
                   </div>
@@ -549,7 +550,7 @@ const Wallet = () => {
                       disabled={saveAutomaticTopUpDisabled || walletQuery.isLoading || !wallet}
                       className="min-w-[4.5rem]"
                     >
-                      {setAutomaticTopUpMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Save'}
+                      {setAutomaticTopUpMutation.isPending && <Spinner />} Save
                     </Button>
                   </div>
                 </CardFooter>
@@ -636,7 +637,8 @@ const Wallet = () => {
                   }
                   size="sm"
                 >
-                  {topUpWalletMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Top up'}
+                  {topUpWalletMutation.isPending && <Spinner />}
+                  Top up
                 </Button>
               </CardFooter>
             </Card>
