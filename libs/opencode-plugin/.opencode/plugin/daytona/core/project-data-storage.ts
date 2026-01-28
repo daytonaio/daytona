@@ -79,26 +79,22 @@ export class ProjectDataStorage {
         current ?? {
           projectId,
           worktree,
-          lastBranchNumber: 0,
           sessions: {},
         }
 
       // Remove from source first (best effort).
       try {
         delete otherData!.sessions[sessionId]
-        this.save(otherProjectId, otherData!.worktree, otherData!.sessions, otherData!.lastBranchNumber)
+        this.save(otherProjectId, otherData!.worktree, otherData!.sessions)
       } catch (err) {
         logger.warn(`Failed to remove session ${sessionId} from project ${otherProjectId}: ${err}`)
       }
 
       // Add to destination and persist.
       destination.sessions[sessionId] = found
-      if (found.branchNumber !== undefined) {
-        destination.lastBranchNumber = Math.max(destination.lastBranchNumber ?? 0, found.branchNumber)
-      }
       // Prefer the worktree for the project we're actually operating on.
       destination.worktree = worktree
-      this.save(projectId, destination.worktree, destination.sessions, destination.lastBranchNumber)
+      this.save(projectId, destination.worktree, destination.sessions)
 
       logger.info(`Migrated session ${sessionId} from project ${otherProjectId} to project ${projectId}`)
       return found
@@ -114,13 +110,11 @@ export class ProjectDataStorage {
     projectId: string,
     worktree: string,
     sessions: Record<string, SessionInfo>,
-    lastBranchNumber?: number,
   ): void {
     const filePath = this.getProjectFilePath(projectId)
     const projectData: ProjectSessionData = {
       projectId,
       worktree,
-      lastBranchNumber,
       sessions,
     }
 
@@ -130,25 +124,6 @@ export class ProjectDataStorage {
     } catch (err) {
       logger.error(`Failed to save project data for ${projectId}: ${err}`)
     }
-  }
-
-  /**
-   * Get the next available branch number for a project
-   */
-  getNextBranchNumber(projectId: string): number {
-    const projectData = this.load(projectId)
-    if (!projectData) {
-      return 1
-    }
-
-    const branchNumbers = Object.values(projectData.sessions)
-      .map(s => s.branchNumber)
-      .filter((n): n is number => n !== undefined)
-
-    // Use a persisted monotonic pointer so we never reuse deleted numbers.
-    const pointer = projectData.lastBranchNumber ?? 0
-    const maxInSessions = branchNumbers.length > 0 ? Math.max(...branchNumbers) : 0
-    return Math.max(pointer, maxInSessions) + 1
   }
 
   /**
@@ -170,33 +145,29 @@ export class ProjectDataStorage {
     const projectData = this.load(projectId) || {
       projectId,
       worktree,
-      lastBranchNumber: 0,
       sessions: {},
     }
 
     const now = Date.now()
     if (!projectData.sessions[sessionId]) {
-      // Assign branch number if not provided
-      const assignedBranchNumber = branchNumber ?? this.getNextBranchNumber(projectId)
       projectData.sessions[sessionId] = {
         sandboxId,
-        branchNumber: assignedBranchNumber,
+        ...(branchNumber !== undefined ? { branchNumber } : {}),
         created: now,
         lastAccessed: now,
       }
-      projectData.lastBranchNumber = Math.max(projectData.lastBranchNumber ?? 0, assignedBranchNumber)
     } else {
       projectData.sessions[sessionId].sandboxId = sandboxId
       projectData.sessions[sessionId].lastAccessed = now
       // Only update branch number if it wasn't set before
       if (projectData.sessions[sessionId].branchNumber === undefined) {
-        const assignedBranchNumber = branchNumber ?? this.getNextBranchNumber(projectId)
-        projectData.sessions[sessionId].branchNumber = assignedBranchNumber
-        projectData.lastBranchNumber = Math.max(projectData.lastBranchNumber ?? 0, assignedBranchNumber)
+        if (branchNumber !== undefined) {
+          projectData.sessions[sessionId].branchNumber = branchNumber
+        }
       }
     }
 
-    this.save(projectId, worktree, projectData.sessions, projectData.lastBranchNumber)
+    this.save(projectId, worktree, projectData.sessions)
   }
 
   /**
@@ -206,8 +177,7 @@ export class ProjectDataStorage {
     const projectData = this.load(projectId)
     if (projectData && projectData.sessions[sessionId]) {
       delete projectData.sessions[sessionId]
-      // Intentionally keep lastBranchNumber so branch numbering remains monotonic
-      this.save(projectId, worktree, projectData.sessions, projectData.lastBranchNumber)
+      this.save(projectId, worktree, projectData.sessions)
     }
   }
 }

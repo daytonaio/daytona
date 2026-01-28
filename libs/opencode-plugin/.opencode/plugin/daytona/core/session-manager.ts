@@ -7,6 +7,7 @@ import { Daytona, type Sandbox } from '@daytonaio/sdk'
 import { logger } from './logger'
 import type { SessionSandboxMap, SandboxInfo } from './types'
 import { SessionGitManager } from '../git/session-git-manager'
+import { DaytonaSandboxGitManager } from '../git/sandbox-git-manager'
 import { ProjectDataStorage } from './project-data-storage'
 import type { PluginInput } from '@opencode-ai/plugin'
 import { toast } from './toast'
@@ -107,13 +108,23 @@ export class DaytonaSessionManager {
     if (this.isPartiallyInitialized(existing)) {
       logger.info(`Reconnecting to existing sandbox: ${existing.id}`)
       const daytona = new Daytona({ apiKey: this.apiKey })
+      const reconnectStart = Date.now()
+      logger.info(`Daytona get begin sandboxId=${existing.id}`)
       const sandbox = await daytona.get(existing.id)
+      logger.info(`Daytona get done sandboxId=${existing.id} in ${Date.now() - reconnectStart}ms`)
+      logger.info(`Starting sandbox begin sandboxId=${sandbox.id}`)
       await sandbox.start()
+      logger.info(`Starting sandbox done sandboxId=${sandbox.id} in ${Date.now() - reconnectStart}ms`)
       this.sessionSandboxes.set(sessionId, sandbox)
       // Preserve branch number if it exists for this sandbox
       let branchNumber = this.dataStorage.getBranchNumberForSandbox(projectId, sandbox.id)
       if (!branchNumber) {
-        branchNumber = this.dataStorage.getNextBranchNumber(projectId)
+        try {
+          branchNumber = SessionGitManager.allocateAndReserveBranchNumber(worktree)
+        } catch {
+          // No local git repo (or git unavailable) shouldn't block sandbox usage.
+          branchNumber = undefined
+        }
       }
       this.dataStorage.updateSession(projectId, worktree, sessionId, sandbox.id, branchNumber)
       toast.show({
@@ -121,6 +132,16 @@ export class DaytonaSessionManager {
         message: `Connected to existing sandbox.`,
         variant: 'info',
       })
+
+      // Even if git syncing is disabled, ensure the project directory exists in the sandbox.
+      if (!branchNumber) {
+        try {
+          await new DaytonaSandboxGitManager(sandbox, this.repoPath).ensureDirectory()
+        } catch (err) {
+          logger.warn(`Failed to ensure sandbox project directory exists: ${err}`)
+        }
+      }
+
       return sandbox
     }
 
@@ -138,20 +159,40 @@ export class DaytonaSessionManager {
     // Otherwise, create a new sandbox
     logger.info(`Creating new sandbox for session: ${sessionId} in project: ${projectId}`)
     const daytona = new Daytona({ apiKey: this.apiKey })
-    const sandbox = await daytona.create()
+    const createStart = Date.now()
+    logger.info(`Daytona create begin sessionId=${sessionId}`)
+    const waitingLog = setTimeout(() => {
+      logger.warn(`Daytona create still waiting after ${Date.now() - createStart}ms (sessionId=${sessionId})`)
+    }, 15_000)
+    const sandbox = await daytona.create().finally(() => clearTimeout(waitingLog))
+    logger.info(`Daytona create done sessionId=${sessionId} sandboxId=${sandbox.id} in ${Date.now() - createStart}ms`)
     this.sessionSandboxes.set(sessionId, sandbox)
+    
     // Get or assign branch number for this sandbox
     let branchNumber = this.dataStorage.getBranchNumberForSandbox(projectId, sandbox.id)
+    
     if (!branchNumber) {
-      branchNumber = this.dataStorage.getNextBranchNumber(projectId)
+      try {
+        branchNumber = SessionGitManager.allocateAndReserveBranchNumber(worktree)
+      } catch (err: any) {
+        logger.warn(`allocateAndReserveBranchNumber failed sessionId=${sessionId}: ${err}`)
+        // No local git repo (or git unavailable) shouldn't block sandbox usage.
+        branchNumber = undefined
+      }
     }
+    
     this.dataStorage.updateSession(projectId, worktree, sessionId, sandbox.id, branchNumber)
-    logger.info(`Sandbox created successfully: ${sandbox.id} with branch number ${branchNumber}`)
+    logger.info(`Sandbox created successfully: ${sandbox.id}${branchNumber ? ` with branch number ${branchNumber}` : ''}`)
 
     // Initialize git repo in the sandbox and sync with host
     try {
-      const sessionGit = new SessionGitManager(sandbox, this.repoPath, branchNumber)
-      await sessionGit.initializeAndSync(pluginCtx)
+      if (branchNumber) {
+        const sessionGit = new SessionGitManager(sandbox, this.repoPath, worktree, branchNumber)
+        await sessionGit.initializeAndSync(pluginCtx)
+      } else {
+        // Git disabled; still ensure the directory exists so tools can operate.
+        await new DaytonaSandboxGitManager(sandbox, this.repoPath).ensureDirectory()
+      }
     } catch (err: any) {
       logger.error(`Failed to initialize git repo or push local changes in sandbox: ${err}`)
       toast.show({

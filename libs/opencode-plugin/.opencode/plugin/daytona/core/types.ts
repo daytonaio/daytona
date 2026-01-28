@@ -43,7 +43,10 @@ export type SandboxInfo = {
 
 export type SessionInfo = {
   sandboxId: string
-  branchNumber: number
+  /**
+   * Only set when the local worktree is a git repo (used to create opencode/N branches/remotes).
+   */
+  branchNumber?: number
   created: number
   lastAccessed: number
 }
@@ -51,11 +54,6 @@ export type SessionInfo = {
 export type ProjectSessionData = {
   projectId: string
   worktree: string
-  /**
-   * Monotonically increasing pointer for branch numbering.
-   * We persist this so we don't reuse branch numbers after sessions are deleted.
-   */
-  lastBranchNumber?: number
   sessions: Record<string, SessionInfo>
 }
 
