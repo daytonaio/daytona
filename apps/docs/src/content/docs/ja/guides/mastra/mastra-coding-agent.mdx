@@ -1,0 +1,289 @@
+---
+title: Daytona で Mastra Coding Agent を利用する
+description: セキュアで分離された AI 駆動の開発環境のために、Daytona サンドボックスを Mastra Coding Agent と統合する方法を学びます。
+---
+
+このガイドでは、Daytona サンドボックスを使用するように [Mastra Coding Agent](https://github.com/mastra-ai/template-coding-agent) を構成する方法を説明します。これにより、あらゆるコーディング関連タスクに対して、セキュアかつ分離された環境で AI 機能を活用できるようになります。
+
+***
+
+## ワークフローの概要 \{#workflow-overview\}
+
+設定が完了すると、Mastra Studio を使用して、ChatGPT のようなインターフェイスからコーディングエージェントと対話できます。これにより、人間を介在させたワークフローが可能になり、エージェントをガイドし、その判断をレビューし、解決策をリアルタイムで改善・反復できます。その間も、エージェントは Daytona のサンドボックス内でタスクを安全に実行し続けます。
+
+## プロジェクトのセットアップ \{#project-setup\}
+
+:::caution[Node.js のバージョン]
+コーディングエージェントを実行するには、Node.js 20 以降が必要です。作業を続行する前に、ご利用の環境がこの要件を満たしていることを確認してください。
+:::
+
+### リポジトリをクローンする \{#clone-the-repository\}
+
+Daytona と統合された Mastra コーディングエージェント用のテンプレートリポジトリをクローンします。
+
+```bash
+git clone https://github.com/mastra-ai/template-coding-agent.git
+cd template-coding-agent
+```
+
+### 環境を設定する \{#configure-environment\}
+
+プロジェクトのルートディレクトリに `.env` ファイルを作成します。
+
+```bash
+touch .env
+```
+
+`.env` ファイルには、次の設定が必要です。
+
+* **LLM Provider**: コーディングエージェント用の AI モデルプロバイダー
+* **Model**: 選択したプロバイダーで使用するモデル
+* **Sandbox Provider**: 分離実行のための Daytona の設定
+
+このガイドでは、LLM プロバイダーとして OpenAI を使用し、`gpt-4o-mini` モデルを利用します。
+
+```env
+OPENAI_API_KEY=your_openai_key
+MODEL=openai/gpt-4o-mini
+```
+
+次に、Daytona をサンドボックスプロバイダーとして設定し、[Daytona Dashboard](https://app.daytona.io/dashboard/keys) で取得できる API キーを追加します。
+
+```env
+DAYTONA_API_KEY=your-daytona-api-key-here
+```
+
+### 依存関係のインストール \{#install-dependencies\}
+
+pnpm を使用して必要なパッケージをインストールします：
+
+```bash
+pnpm install
+```
+
+## エージェントの実行 \{#running-the-agent\}
+
+Mastra Studio は、コーディングエージェントと対話するための ChatGPT のようなインターフェースを提供します。このモードでは次のことが行えます：
+
+* **会話履歴**: 過去の会話がスレッドとして保存・整理されます
+* **ビジュアルデバッグ**: エージェントの実行ステップ、ワークフロー、ツール呼び出しを確認できます
+* **モデル切り替え**: 異なる AI モデルに簡単に切り替えられます
+* **ツールの確認**: エージェントがリアルタイムで使用しているツールを確認できます
+
+すべての機能と特長の概要については、[Mastra Studio ドキュメント](https://mastra.ai/docs/getting-started/studio) を参照してください。
+
+開発サーバーを起動するには、次を実行します：
+
+```bash
+pnpm run dev
+```
+
+開発サーバーが正常に起動すると、Mastra Studio にアクセスするための URL がターミナルに出力されます。
+
+```bash
+│ Studio: http://localhost:4111
+│ API:    http://localhost:4111/api
+```
+
+起動後、ブラウザで指定されたURLを開き、インタラクティブなインターフェースにアクセスします。ターミナルでワークフローを監視しながらエージェントと対話でき、詳細なログには実行ステップや低レベルのパラメータが表示されます。
+
+以下は、エージェントが `writeFile` ツールを呼び出して、基本的な &quot;Hello, world!&quot; を出力する JavaScript ファイルを作成したときに生成されるターミナルログの例です。
+
+```json
+{
+  "text": "",
+  "toolCalls": [
+    {
+      "type": "tool-call",
+      "runId": "ab2a1d08-91c6-4028-9046-3446a721527f",
+      "from": "AGENT",
+      "payload": {
+        "toolCallId": "call_NiLLgBmgrYLSL0MsrG54E4A5",
+        "toolName": "writeFile",
+        "args": {
+          "sandboxId": "2152d23b-5742-47c2-9992-4414d4144869",
+          "path": "hello.js",
+          "content": "console.log('Hello, world!');"
+        },
+        "providerMetadata": {
+          "openai": {
+            "itemId": "fc_00bba3412cd22a2b0069399fbaeef881909b0583f359cbc33c"
+          }
+        }
+      }
+    }
+  ],
+  "toolResults": [
+    {
+      "type": "tool-result",
+      "runId": "ab2a1d08-91c6-4028-9046-3446a721527f",
+      "from": "AGENT",
+      "payload": {
+        "args": {
+          "sandboxId": "2152d23b-5742-47c2-9992-4414d4144869",
+          "path": "hello.js",
+          "content": "console.log('Hello, world!');"
+        },
+        "toolCallId": "call_NiLLgBmgrYLSL0MsrG54E4A5",
+        "toolName": "writeFile",
+        "result": {
+          "success": true,
+          "path": "/home/daytona/hello.js"
+        },
+        "providerMetadata": {
+          "openai": {
+            "itemId": "fc_00bba3412cd22a2b0069399fbaeef881909b0583f359cbc33c"
+          }
+        }
+      }
+    }
+  ],
+  "finishReason": "tool-calls",
+  "usage": {
+    "inputTokens": 4243,
+    "outputTokens": 53,
+    "totalTokens": 4296,
+    "reasoningTokens": 0,
+    "cachedInputTokens": 4096
+  },
+  "runId": "ab2a1d08-91c6-4028-9046-3446a721527f"
+}
+```
+
+これらのログにより、ツール実行の引数や結果、キャッシュ指標を含むトークン使用量、デバッグ用の一意の識別子まで、あらゆる情報を完全に可視化できます。
+
+## 使用例 \{#example-usage\}
+
+Mastra コーディングエージェントと Daytona サンドボックスの連携が実際にどのように動作するかを、実例を通して確認していきます。エージェントには次のタスクを実行するよう依頼します。
+
+> *&quot;文字列を反転する関数を定義した Python ファイルを作成し、それ用のテストファイルを書いて、テストを実行してください。&quot;*
+
+### エージェントのワークフロー \{#agent-workflow\}
+
+エージェントは、Daytona のサンドボックスとやり取りするためにさまざまなツールを活用し、連携した一連のステップを通じてこのタスクを実行します。
+
+#### 1. サンドボックスの作成 \{#1-create-sandbox\}
+
+エージェントはまず、Python 開発用の新しい Daytona のサンドボックスを作成します。
+
+**ツール:** `createSandbox`
+
+**引数:**
+
+```json
+{
+  "name": "reverse_string_project",
+  "labels": null,
+  "language": "python",
+  "envVars": null
+}
+```
+
+**結果:**
+
+```json
+{
+  "sandboxId": "bdfa9456-4945-43a7-97df-b9bfbcbdc62e"
+}
+```
+
+#### 2. プロジェクトファイルの作成 \{#2-write-project-files\}
+
+次に、エージェントは実装ファイルとテストファイルの両方を、1回の操作でまとめて作成します。
+
+**ツール:** `writeFiles`
+
+**引数:**
+
+```json
+{
+  "sandboxId": "bdfa9456-4945-43a7-97df-b9bfbcbdc62e",
+  "files": [
+    {
+      "path": "reverse_string.py",
+      "data": "def reverse_string(s):\n    \"\"\"入力文字列 s の反転バージョンを返す。\"\"\"\n    return s[::-1]\n"
+    },
+    {
+      "path": "test_reverse_string.py",
+      "data": "import unittest\nfrom reverse_string import reverse_string\n\nclass TestReverseString(unittest.TestCase):\n    def test_regular(self):\n        self.assertEqual(reverse_string(\"hello\"), \"olleh\")\n    def test_empty(self):\n        self.assertEqual(reverse_string(\"\"), \"\")\n    def test_single_char(self):\n        self.assertEqual(reverse_string(\"a\"), \"a\")\n    def test_numbers(self):\n        self.assertEqual(reverse_string(\"12345\"), \"54321\")\n\nif __name__ == \"__main__\":\n    unittest.main()\n"
+    }
+  ]
+}
+```
+
+**結果:**
+
+```json
+{
+  "success": true,
+  "filesWritten": [
+    "/home/daytona/reverse_string.py",
+    "/home/daytona/test_reverse_string.py"
+  ]
+}
+```
+
+#### 3. テストの実行 \{#3-execute-tests\}
+
+最後に、エージェントはテストスイートを実行して、実装を検証します。
+
+**ツール:** `runCommand`
+
+**引数:**
+
+```json
+{
+  "sandboxId": "bdfa9456-4945-43a7-97df-b9bfbcbdc62e",
+  "command": "python3 test_reverse_string.py",
+  "envs": null,
+  "workingDirectory": null,
+  "timeoutSeconds": 20,
+  "captureOutput": true
+}
+```
+
+**結果:**
+
+```json
+{
+  "success": true,
+  "exitCode": 0,
+  "stdout": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.000s\n\nOK\n",
+  "command": "python3 test_reverse_string.py",
+  "executionTime": 218
+}
+```
+
+### エージェントのレスポンス \{#agent-response\}
+
+すべての手順が正常に完了すると、エージェントは次のような詳細な要約を出力します。
+
+```
+The project is complete! Here's what was done:
+
+✓ Created reverse_string.py with a function to reverse a string.
+✓ Created test_reverse_string.py using Python's unittest to test the function with several cases.
+✓ Ran the tests—all tests passed successfully.
+
+Test Output:
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.000s
+
+OK
+
+Would you like to see the code for either file or make any changes?
+```
+
+この例では、エージェントが環境セットアップからテスト実行まで、開発ワークフロー全体を安全な Daytona のサンドボックス環境内で自律的に処理する方法を示します。
+
+:::tip[Sandbox Management]
+エージェントがタスクを完了すると、アクティブなサンドボックスが [Daytona Dashboard](https://app.daytona.io/dashboard) に表示されます。ユースケースによってはサンドボックスをアクティブなまま維持する必要がある場合（例: プレビュー URL や継続的な開発のため）もありますが、特に必要がない限り、作業終了時にはリソースをクリーンアップすることを推奨します。
+:::
+
+**主な利点**
+
+* **安全な分離**: すべてのエージェント操作は分離された Daytona サンドボックス上で実行されるため、ローカル環境が保護されます
+* **マルチ言語対応**: ローカルでのセットアップなしに、複数のプログラミング言語のコードを実行できます
+* **高度なデバッグ**: Mastra Studio を使用して、エージェントワークフローをリアルタイムに可視化およびデバッグできます
+* **スケーラブルな実行**: リソース負荷の高いタスクに対して Daytona のクラウドインフラストラクチャを活用できます
