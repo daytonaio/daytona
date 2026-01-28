@@ -345,7 +345,8 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
           const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
-          const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
+          const isWindowsOrLinuxRunner =
+            runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
 
           try {
             if (!snapshotRunner) {
@@ -358,7 +359,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
               await this.pullSnapshotRunnerWithRetries(
                 runner,
                 snapshot.ref,
-                isWindowsRunner ? undefined : dockerRegistry,
+                isWindowsOrLinuxRunner ? undefined : dockerRegistry,
               )
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)

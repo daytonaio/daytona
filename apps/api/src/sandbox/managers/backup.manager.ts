@@ -303,8 +303,14 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       const snapshot = await this.snapshotRepository.findOne({
         where: snapshotFilter,
       })
-      if (snapshot && snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL) {
-        this.logger.log(`Skipping backup for sandbox ${sandbox.id} with windows-exp snapshot ${sandbox.snapshot}`)
+      if (
+        snapshot &&
+        (snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL)
+      ) {
+        this.logger.log(
+          `Skipping backup for sandbox ${sandbox.id} with windows-exp or linux-exp snapshot ${sandbox.snapshot}`,
+        )
         return
       }
     }
