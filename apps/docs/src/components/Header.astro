@@ -28,6 +28,7 @@ const {
   isTypescriptSdkActive,
   isPythonSdkActive,
   isRubySdkActive,
+  isGoSdkActive,
   isApiActive,
   isCliActive,
   isReferencesActive,
@@ -87,6 +88,13 @@ const {
           >
             <Fragment set:html={packageIcon} />
             {Astro.locals.t('sidebarconfig.rubySdkReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/go-sdk`}
+            class:list={[{ active: isGoSdkActive }]}
+          >
+            <Fragment set:html={packageIcon} />
+            {Astro.locals.t('sidebarconfig.goSdkReference' as any)}
           </a>
           <a
             href={`${import.meta.env.BASE_URL}/en/tools/api`}
