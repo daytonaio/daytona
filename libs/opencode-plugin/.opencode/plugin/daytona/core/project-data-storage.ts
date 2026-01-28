@@ -3,7 +3,7 @@
  * Stores data per-project in ~/.local/share/opencode/storage/daytona/{projectId}.json
  */
 
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs'
 import { join } from 'path'
 import { logger } from './logger'
 import type { ProjectSessionData, SessionInfo } from './types'
@@ -28,6 +28,20 @@ export class ProjectDataStorage {
   }
 
   /**
+   * List known project IDs from storage.
+   */
+  private listProjectIds(): string[] {
+    try {
+      return readdirSync(this.storageDir)
+        .filter(name => name.endsWith('.json'))
+        .map(name => name.slice(0, -'.json'.length))
+    } catch (err) {
+      logger.error(`Failed to list project data files: ${err}`)
+      return []
+    }
+  }
+
+  /**
    * Load project session data from disk
    */
   load(projectId: string): ProjectSessionData | null {
@@ -40,6 +54,57 @@ export class ProjectDataStorage {
       logger.error(`Failed to load project data for ${projectId}: ${err}`)
     }
     return null
+  }
+
+  /**
+   * Get a session for a project. If not found in the requested project, search all other
+   * projects on disk and, if found, migrate it into the requested project.
+   */
+  getSession(projectId: string, worktree: string, sessionId: string): SessionInfo | undefined {
+    const current = this.load(projectId)
+    const currentSession = current?.sessions?.[sessionId]
+    if (currentSession) {
+      return currentSession
+    }
+
+    // Look in other projects and migrate if found.
+    for (const otherProjectId of this.listProjectIds()) {
+      if (otherProjectId === projectId) continue
+
+      const otherData = this.load(otherProjectId)
+      const found = otherData?.sessions?.[sessionId]
+      if (!found) continue
+
+      const destination: ProjectSessionData =
+        current ?? {
+          projectId,
+          worktree,
+          lastBranchNumber: 0,
+          sessions: {},
+        }
+
+      // Remove from source first (best effort).
+      try {
+        delete otherData!.sessions[sessionId]
+        this.save(otherProjectId, otherData!.worktree, otherData!.sessions, otherData!.lastBranchNumber)
+      } catch (err) {
+        logger.warn(`Failed to remove session ${sessionId} from project ${otherProjectId}: ${err}`)
+      }
+
+      // Add to destination and persist.
+      destination.sessions[sessionId] = found
+      if (found.branchNumber !== undefined) {
+        destination.lastBranchNumber = Math.max(destination.lastBranchNumber ?? 0, found.branchNumber)
+      }
+      // Prefer the worktree for the project we're actually operating on.
+      destination.worktree = worktree
+      this.save(projectId, destination.worktree, destination.sessions, destination.lastBranchNumber)
+
+      logger.info(`Migrated session ${sessionId} from project ${otherProjectId} to project ${projectId}`)
+      return found
+    }
+
+    return undefined
   }
 
   /**
