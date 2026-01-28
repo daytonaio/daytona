@@ -104,7 +104,12 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "echo 'Go SDK version set to:' && cat pkg/daytona/VERSION"
+        "commands": [
+          "echo 'Go SDK version set to:'",
+          "cat pkg/daytona/VERSION",
+          "git push origin HEAD"
+        ],
+        "parallel": false
       },
       "dependsOn": ["set-version"]
     }
