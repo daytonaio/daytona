@@ -1,30 +1,110 @@
 ---
-title: リージョンの選択
+title: リージョン
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona は現在、以下のリージョンで利用可能です。
+サンドボックスは、Daytona のコンピュートプレーンを構成するマシンである **ランナー** 上で動作する、分離されたランタイム環境です。
 
-- 米国（US）
-- 欧州（EU）
+ランナーは **リージョン** に編成されており、これはコンピュートインフラストラクチャの地理的または論理的なグループです。サンドボックスを作成する際には、特定のリージョンを指定でき、Daytona はそのリージョン内で利用可能なランナー上にワークロードをスケジューリングします。
 
-Daytona の[設定](/docs/ja/configuration)手順でリージョンを選択できます。
+これにより、次のことが可能になります。
 
-```python
-from daytona import Daytona, DaytonaConfig
+* レイテンシを低減するために特定の地理的な場所を選択する
+* データ所在地要件に準拠する
+* 独自のランナーマシンを使用してカスタムリージョンを構成する
+* 各カスタムリージョン内でコンピュートリソースを個別にスケールする
 
-config = DaytonaConfig(
-    target="us"
-)
+## リージョン \{#regions\}
 
-daytona = Daytona(config)
-```
+リージョンは、サンドボックスのワークロードを実行するランナーを地理的または論理的にグループ化したものです。サンドボックスのリージョンは初期化時に`target`パラメータを設定して指定します:
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-const daytona: Daytona = new Daytona({
-    target: "eu"
-});
-```
+    # DaytonaをUSリージョンで使用するように設定
+    config = DaytonaConfig(
+        target="us"
+    )
+
+    # 指定した設定でDaytonaクライアントを初期化
+    daytona = Daytona(config)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    // DaytonaをEUリージョンで使用するように設定
+    const daytona: Daytona = new Daytona({
+        target: "eu"
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+### 共有リージョン \{#shared-regions\}
+
+共有リージョンは Daytona によって管理されており、すべての組織で利用できます。これらのリージョンにより、セットアップ不要で Daytona のインフラストラクチャへ即座にアクセスできます。
+
+制限は、組織のデフォルトリージョンに適用されます。別の共有リージョンへのアクセスが必要な場合は、[sales@daytona.io](mailto:sales@daytona.io) までお問い合わせください。
+
+| Region        | Target |
+| ------------- | ------ |
+| United States | `us`   |
+| Europe        | `eu`   |
+
+### 専用リージョン \{#dedicated-regions\}
+
+専用リージョンはDaytonaによって管理され、各組織専用としてプロビジョニングされます。これらのリージョンは、マネージドサービスとしての運用のシンプルさを維持しつつ、専用インフラストラクチャを提供します。
+
+組織向けの専用リージョンのセットアップについては、[sales@daytona.io](mailto:sales@daytona.io) までお問い合わせください。
+
+### カスタムリージョン \{#custom-regions\}
+
+カスタムリージョンは、組織によって作成および管理され、独自のランナーマシンを利用し、リージョンごとにコンピュートリソースを個別にスケールできるようにします。これにより、データローカリティ、コンプライアンス、およびインフラストラクチャ構成を最大限に制御できます。
+
+さらに、カスタムリージョンには同時リソース使用量に対する制限が適用されないため、キャパシティとパフォーマンスを完全に制御できます。
+
+:::caution
+カスタムリージョンは現在、実験的な機能であり、将来のリリースで変更される可能性があります。
+アクセスをリクエストする場合は、[support@daytona.io](mailto:support@daytona.io) までお問い合わせください。
+:::
+
+#### カスタムリージョン構成 \{#custom-region-configuration\}
+
+**name** (必須)
+
+* リージョンの一意の識別子
+* 使用できるのは半角英数字、アンダースコア、ピリオド、ハイフンのみです
+* サンドボックスを作成する際に、このリージョンを指定するために使用されます
+
+**proxyUrl** (任意)
+
+* このリージョン内のサンドボックスへのトラフィックをルーティングするプロキシサービスの URL
+* このリージョンのランナーマシンがプライベートネットワークにデプロイされている場合は必須です
+
+**sshGatewayUrl** (任意)
+
+* このリージョン内のサンドボックスへの SSH 接続を処理する SSH ゲートウェイの URL
+* このリージョンのランナーマシンがプライベートネットワークにデプロイされている場合は必須です
+
+**snapshotManagerUrl** (任意)
+
+* このリージョン内のスナップショットの保存および取得を処理するスナップショットマネージャーの URL
+* このリージョンのランナーマシンがプライベートネットワークにデプロイされている場合は必須です
+
+#### カスタムリージョンの認証情報 \{#custom-region-credentials\}
+
+カスタムリージョンを作成すると、Daytona は構成したオプションサービス向けに、以下の認証情報を提供します。
+
+* プロキシサービスが Daytona への認証に使用する API キー
+* SSH ゲートウェイサービスが Daytona への認証に使用する API キー
+* Daytona がスナップショットマネージャーサービスにアクセスするために使用する Basic 認証情報
+
+:::note
+必要に応じて、これらの認証情報はいつでも再生成できますが、更新後の認証情報を使用して対応するサービスを再デプロイする必要があります。
+:::
