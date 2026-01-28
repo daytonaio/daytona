@@ -5,7 +5,6 @@
 
 import { BadRequestException, Logger, OnModuleInit } from '@nestjs/common'
 import { OpensearchClient } from 'nestjs-opensearch'
-import { errors } from '@opensearch-project/opensearch'
 import { Search_RequestBody } from '@opensearch-project/opensearch/api/index.js'
 import { QueryContainer } from '@opensearch-project/opensearch/api/_types/_common.query_dsl.js'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -30,25 +29,21 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
     configService: TypedConfigService,
     private readonly client: OpensearchClient,
   ) {
-    this.indexName = configService.getOrThrow('opensearch.sandboxSearch.indexName')
+    this.indexName = configService.getOrThrow('sandboxSearch.publish.opensearchIndexName')
   }
 
   async onModuleInit(): Promise<void> {
-    await this.createIndex()
+    await this.putIndexTemplate()
     this.logger.log('OpenSearch sandbox search adapter initialized')
   }
 
-  private async createIndex(): Promise<void> {
-    try {
-      const exists = await this.client.indices.exists({ index: this.indexName })
-      if (exists.body) {
-        this.logger.debug(`Index already exists: ${this.indexName}. Skipping creation.`)
-        return
-      }
-
-      await this.client.indices.create({
-        index: this.indexName,
-        body: {
+  private async putIndexTemplate(): Promise<void> {
+    const templateName = `${this.indexName}-template`
+    await this.client.indices.putIndexTemplate({
+      name: templateName,
+      body: {
+        index_patterns: [`${this.indexName}*`],
+        template: {
           settings: {
             index: {
               number_of_shards: 1,
@@ -64,12 +59,12 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
             },
           },
           mappings: {
-            dynamic: 'strict',
+            dynamic: 'false',
             properties: {
               id: { type: 'keyword', normalizer: 'lowercase_normalizer' },
               organizationId: { type: 'keyword' },
               name: { type: 'keyword', normalizer: 'lowercase_normalizer' },
-              regionId: { type: 'keyword' },
+              region: { type: 'keyword' },
               runnerId: { type: 'keyword' },
               class: { type: 'keyword' },
               state: { type: 'keyword' },
@@ -88,21 +83,15 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
               autoStopInterval: { type: 'integer' },
               autoArchiveInterval: { type: 'integer' },
               autoDeleteInterval: { type: 'integer' },
-              labels: { type: 'object', dynamic: 'true' },
+              labels: { type: 'keyword' },
               backupState: { type: 'keyword' },
               daemonVersion: { type: 'keyword' },
             },
           },
         },
-      })
-      this.logger.debug(`Created index: ${this.indexName}`)
-    } catch (error) {
-      if (error instanceof errors.ResponseError && error.body?.error?.type === 'resource_already_exists_exception') {
-        this.logger.debug(`Index already exists: ${this.indexName}. Skipping creation.`)
-        return
-      }
-      throw error
-    }
+      },
+    })
+    this.logger.debug(`Created index template: ${templateName}`)
   }
 
   async search(params: {
@@ -162,7 +151,7 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
 
     // Regions filter
     if (filters.regionIds?.length) {
-      must.push({ terms: { regionId: filters.regionIds } })
+      must.push({ terms: { region: filters.regionIds } })
     }
 
     // CPU range filter
@@ -235,10 +224,14 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
       })
     }
 
-    // Labels filter (using object field with dynamic mapping)
+    // Labels filter (wildcard on JSON string)
     if (filters.labels) {
       for (const [key, value] of Object.entries(filters.labels)) {
-        must.push({ term: { [`labels.${key}`]: value } })
+        must.push({
+          wildcard: {
+            labels: `*"${key}": "${value}"*`,
+          },
+        })
       }
     }
 
@@ -314,7 +307,7 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
   }
 
   private mapSourceToSandbox(source: any): SandboxDto {
-    const sandbox = new Sandbox(source.regionId, source.name)
+    const sandbox = new Sandbox(source.region, source.name)
     sandbox.id = source.id
     sandbox.organizationId = source.organizationId
     sandbox.runnerId = source.runnerId
@@ -330,7 +323,10 @@ export class SandboxOpenSearchAdapter implements SandboxSearchAdapter, OnModuleI
     sandbox.gpu = source.gpu
     sandbox.mem = source.mem
     sandbox.disk = source.disk
-    sandbox.labels = source.labels
+    sandbox.labels =
+      typeof source.labels === 'string'
+        ? JSON.parse(source.labels || '{}')
+        : ((source.labels || {}) as { [key: string]: string })
     sandbox.backupState = source.backupState
     sandbox.autoStopInterval = source.autoStopInterval
     sandbox.autoArchiveInterval = source.autoArchiveInterval

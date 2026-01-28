@@ -21,13 +21,19 @@ export const SandboxSearchAdapterProvider: Provider = {
     opensearchClient: OpensearchClient,
     sandboxRepository: Repository<Sandbox>,
   ): SandboxSearchAdapter => {
-    const opensearchConfig = configService.get('opensearch.sandboxSearch')
+    const sandboxSearchConfig = configService.get('sandboxSearch')
 
-    if (opensearchConfig?.enabled) {
-      return new SandboxOpenSearchAdapter(configService, opensearchClient)
+    if (sandboxSearchConfig.publish.enabled) {
+      switch (sandboxSearchConfig.publish.storageAdapter) {
+        case 'opensearch': {
+          return new SandboxOpenSearchAdapter(configService, opensearchClient)
+        }
+        default:
+          throw new Error(`Invalid storage adapter: ${sandboxSearchConfig.publish.storageAdapter}`)
+      }
+    } else {
+      return new SandboxTypeormSearchAdapter(sandboxRepository)
     }
-
-    return new SandboxTypeormSearchAdapter(sandboxRepository)
   },
   inject: [TypedConfigService, OpensearchClient, getRepositoryToken(Sandbox)],
 }

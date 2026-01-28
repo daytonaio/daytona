@@ -139,9 +139,12 @@ const configuration = {
     tls: {
       rejectUnauthorized: process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED !== 'false',
     },
-    sandboxSearch: {
-      enabled: process.env.OPENSEARCH_SANDBOX_SEARCH_ENABLED === 'true',
-      indexName: process.env.OPENSEARCH_SANDBOX_SEARCH_INDEX_NAME || 'sandboxes',
+  },
+  sandboxSearch: {
+    publish: {
+      enabled: process.env.SANDBOX_SEARCH_PUBLISH_ENABLED === 'true',
+      storageAdapter: process.env.SANDBOX_SEARCH_PUBLISH_STORAGE_ADAPTER || 'opensearch',
+      opensearchIndexName: process.env.SANDBOX_SEARCH_PUBLISH_OPENSEARCH_INDEX_NAME || 'sandboxes',
     },
   },
   cronTimeZone: process.env.CRON_TIMEZONE,
