@@ -19,8 +19,7 @@ import { Job } from '../entities/job.entity'
 import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -38,6 +37,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly organizationUsageService: OrganizationUsageService,
   ) {}
 
   /**
@@ -473,22 +473,54 @@ export class JobStateHandlerService {
         return
       }
 
+      // Calculate deltas before updating sandbox
+      const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
+      const cpuDelta = (payload.cpu ?? sandbox.cpu) - sandbox.cpu
+      const memDelta = (payload.memory ?? sandbox.mem) - sandbox.mem
+      const diskDelta = (payload.disk ?? sandbox.disk) - sandbox.disk
+
+      // For cold resize (previousState === STOPPED), cpu/memory don't affect org quota.
+      // Only apply deltas for resources the sandbox was consuming.
+      const isHotResize = previousState === SandboxState.STARTED
+      const cpuDeltaForQuota = isHotResize && cpuDelta > 0 ? cpuDelta : 0
+      const memDeltaForQuota = isHotResize && memDelta > 0 ? memDelta : 0
+      const diskDeltaForQuota = diskDelta > 0 ? diskDelta : 0
+
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
-        // Update sandbox resources from job payload
-        const payload = job.payload as { cpu?: number; memory?: number; disk?: number }
+
+        // Update sandbox resources
         sandbox.cpu = payload.cpu ?? sandbox.cpu
         sandbox.mem = payload.memory ?? sandbox.mem
         sandbox.disk = payload.disk ?? sandbox.disk
         sandbox.state = previousState
         await this.sandboxRepository.save(sandbox)
+
+        // Apply usage change (increments current, decrements pending)
+        // Only apply deltas for quotas that were validated/pending-incremented
+        await this.organizationUsageService.applyResizeUsageChange(
+          sandbox.organizationId,
+          sandbox.region,
+          cpuDeltaForQuota,
+          memDeltaForQuota,
+          diskDeltaForQuota,
+        )
         return
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RESIZE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = previousState
-      }
 
-      await this.sandboxRepository.save(sandbox)
+        // Rollback pending usage (only for quotas that had pending incremented)
+        await this.organizationUsageService.decrementPendingSandboxUsage(
+          sandbox.organizationId,
+          sandbox.region,
+          cpuDeltaForQuota > 0 ? cpuDeltaForQuota : undefined,
+          memDeltaForQuota > 0 ? memDeltaForQuota : undefined,
+          diskDeltaForQuota > 0 ? diskDeltaForQuota : undefined,
+        )
+
+        sandbox.state = previousState
+        await this.sandboxRepository.save(sandbox)
+      }
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }

@@ -1417,31 +1417,36 @@ export class SandboxService {
     const memDelta = newMem - sandbox.mem
     const diskDelta = newDisk - sandbox.disk
 
+    // For cold resize, cpu/memory changes don't affect org quota until sandbox is STARTED.
+    // Only validate/reserve quota for resources the sandbox is currently consuming.
+    const cpuDeltaForQuota = isHotResize && cpuDelta > 0 ? cpuDelta : 0
+    const memDeltaForQuota = isHotResize && memDelta > 0 ? memDelta : 0
+    const diskDeltaForQuota = diskDelta > 0 ? diskDelta : 0
+
     // Track pending increments for rollback on error
     let pendingCpuIncrement = 0
     let pendingMemoryIncrement = 0
     let pendingDiskIncrement = 0
 
-    // Only validate org-wide quotas if resources are increasing
-    // Don't pass excludeSandboxId - sandbox is already in currentUsage, we just add the delta to pending
-    if (cpuDelta > 0 || memDelta > 0 || diskDelta > 0) {
+    // Only validate org-wide quotas if resources are increasing for consuming quotas
+    if (cpuDeltaForQuota > 0 || memDeltaForQuota > 0 || diskDeltaForQuota > 0) {
       const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
         await this.validateOrganizationQuotas(
           organization,
           sandbox.region,
-          cpuDelta > 0 ? cpuDelta : 0,
-          memDelta > 0 ? memDelta : 0,
-          diskDelta > 0 ? diskDelta : 0,
+          cpuDeltaForQuota,
+          memDeltaForQuota,
+          diskDeltaForQuota,
         )
 
       if (pendingCpuIncremented) {
-        pendingCpuIncrement = cpuDelta
+        pendingCpuIncrement = cpuDeltaForQuota
       }
       if (pendingMemoryIncremented) {
-        pendingMemoryIncrement = memDelta
+        pendingMemoryIncrement = memDeltaForQuota
       }
       if (pendingDiskIncremented) {
-        pendingDiskIncrement = diskDelta
+        pendingDiskIncrement = diskDeltaForQuota
       }
     }
 
@@ -1484,6 +1489,16 @@ export class SandboxService {
         sandbox.disk = newDisk
         sandbox.state = previousState
         await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
+
+        // Apply the usage change (increments current, decrements pending)
+        // Only apply deltas for quotas that were validated/pending-incremented
+        await this.organizationUsageService.applyResizeUsageChange(
+          organization.id,
+          sandbox.region,
+          cpuDeltaForQuota,
+          memDeltaForQuota,
+          diskDeltaForQuota,
+        )
       }
 
       return await this.findOneByIdOrName(sandbox.id, organization.id)
