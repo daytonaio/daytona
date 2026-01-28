@@ -140,10 +140,8 @@ export function SandboxTable({
   )
 
   const selectableCount = useMemo(() => {
-    return table
-      .getRowModel()
-      .rows.filter((row) => !sandboxIsLoading[row.original.id] && row.original.state !== SandboxState.DESTROYED).length
-  }, [sandboxIsLoading, table])
+    return data.filter((sandbox) => !sandboxIsLoading[sandbox.id] && sandbox.state !== SandboxState.DESTROYED).length
+  }, [sandboxIsLoading, data])
 
   useSandboxCommands({
     writePermitted,
