@@ -24,7 +24,7 @@
     "migration:revert": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:revert -d ./src/data-source.ts",
     "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add",
     "docs": "nx run-many --target=docs --all",
-    "publish": "nx run-many --target=publish --all",
+    "publish": "nx run-many --target=publish --exclude=sdk-go --all",
     "translate:docs": "npx gtx-cli translate --config apps/docs/gt.config.json",
     "push-manifest": "nx run-many --target=push-manifest --all --parallel=$(getconf _NPROCESSORS_ONLN)"
   },

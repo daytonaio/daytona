@@ -92,26 +92,31 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "commands": [
-          "echo \"${VERSION:-v0.0.0-dev}\" > pkg/daytona/VERSION",
-          "git add pkg/daytona/VERSION",
-          "git commit -s -m \"chore(sdk-go): set version to ${VERSION:-v0.0.0-dev}\" || true"
-        ],
+        "commands": ["echo \"${VERSION:-v0.0.0-dev}\" > pkg/daytona/VERSION"],
         "parallel": false
       }
     },
+    "check-version-env": {},
     "publish": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "echo 'Go SDK version set to:'",
-          "cat pkg/daytona/VERSION",
+          "git add pkg/daytona/VERSION",
+          "git add go.mod ../../apps/cli/go.mod",
+          "git commit -s -m \"chore(sdk-go): bump to ${VERSION:-v0.0.0-dev}\" || true",
           "git push origin HEAD"
         ],
         "parallel": false
       },
-      "dependsOn": ["set-version"]
+      "dependsOn": [
+        "check-version-env",
+        "set-version",
+        {
+          "target": "set-version",
+          "projects": ["api-client-go", "toolbox-api-client-go"]
+        }
+      ]
     }
   }
 }

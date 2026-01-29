@@ -48,6 +48,15 @@
           "projects": "daemon"
         }
       ]
+    },
+    "check-version-env": {},
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/toolbox-api-client-go@$VERSION"
+      },
+      "dependsOn": ["check-version-env"]
     }
   },
   "tags": []
