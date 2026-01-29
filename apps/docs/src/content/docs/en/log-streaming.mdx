@@ -219,8 +219,14 @@ func main() {
 	sandbox.Delete(ctx)
 }
 ```
-
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/logs'
+```
+</TabItem>
+
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/sync/process/), [TypeScript SDK](/docs/typescript-sdk/process/), [Ruby SDK](/docs/ruby-sdk/process/), [Go SDK](/docs/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/process) references.
@@ -411,6 +417,13 @@ func main() {
 
 	sandbox.Delete(ctx)
 }
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/logs'
 ```
 
 </TabItem>
