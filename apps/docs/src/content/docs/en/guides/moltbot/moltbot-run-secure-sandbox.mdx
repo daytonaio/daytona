@@ -1,0 +1,249 @@
+---
+title: Run Moltbot in a Secure Daytona Sandbox
+description: Learn how to set up and run Moltbot inside a Daytona sandbox for secure, isolated, and always-on AI assistant with Telegram and WhatsApp integrations.
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+This guide walks you through setting up [Moltbot](https://www.molt.bot/) inside a Daytona sandbox and configuring messaging channels like Telegram and WhatsApp.
+
+Running Moltbot in a Daytona sandbox keeps your AI assistant isolated from your local machine, provides a secure environment for code execution, and ensures your bot stays online 24/7 without tying up your personal computer.
+
+### Prerequisites
+
+- Daytona account and API key (Get it from [Daytona Dashboard](https://app.daytona.io/dashboard/keys))
+- Local terminal (macOS, Linux, or Windows)
+
+### Install the Daytona CLI
+
+<Tabs syncKey="os">
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+Already have the CLI? Check your version with `daytona --version`. If it's below **0.135.0**, [upgrade to the latest version](https://www.daytona.io/docs/en/getting-started/#cli).
+:::
+
+### Authenticate with Daytona
+
+Log in to your Daytona account using your API key:
+
+```bash
+daytona login --api-key=YOUR_API_KEY
+```
+
+Replace `YOUR_API_KEY` with your actual Daytona API key.
+
+### Create a Sandbox
+
+Create a sandbox for running Moltbot:
+
+```bash
+daytona sandbox create --name moltbot --snapshot daytona-medium --auto-stop 0
+```
+
+Moltbot comes preinstalled in the default Daytona snapshot, so the command above is all you need.
+
+:::note
+The `--auto-stop 0` flag disables automatic shutdown, keeping Moltbot accessible until you manually stop or delete the sandbox. The `daytona-medium` snapshot is required because the Moltbot gateway needs a minimum of 2GB memory.
+:::
+
+### Connect to the Sandbox
+
+SSH into your sandbox:
+
+```bash
+daytona ssh moltbot
+```
+
+### Run Moltbot Onboarding
+
+Start the onboarding process:
+
+```bash
+clawdbot onboard
+```
+
+:::note
+The model provider steps below are for Anthropic. If using a different provider, follow the prompts for your chosen option.
+:::
+
+Follow the prompts:
+
+1. **Security acknowledgment:** Accept to continue
+2. **Onboarding mode:** Select **Quickstart**
+3. **Model/auth provider:** Select **Anthropic**
+4. **Anthropic auth method:** Choose between:
+   - **API Key:** Enter your Anthropic API key directly
+   - **Anthropic token (paste setup-token):** If you have a Claude Pro/Team subscription, run `claude setup-token` locally, then paste the generated token
+5. **Token name:** Press Enter to use default, or enter a custom name
+6. **Default model:** Keep current (default: `anthropic/claude-opus-4-5`)
+7. **Select channel:** Choose **Skip for now** (we'll configure channels later)
+8. **Configure skills:** Select **No** (configure later based on your needs)
+9. **Enable hooks:** Select **Skip for now** (configure later based on your needs)
+10. **Gateway service:** Select **Skip** (already installed)
+
+When onboarding finishes, the output will display a **Dashboard ready** section with a dashboard link. Your gateway token is the value after `?token=` in the URL. Save this token - you'll need it to connect to the dashboard.
+
+### Start the Gateway
+
+Run the gateway in the background:
+
+```bash
+nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
+```
+
+The `&` runs the gateway as a background process, keeping your terminal free for other commands. The `nohup` ensures the gateway keeps running even after you close the SSH connection.
+
+### Access the Dashboard
+
+The Moltbot dashboard is a web interface for managing your assistant, monitoring connections, and configuring channels. To access it, you need a [preview URL](https://www.daytona.io/docs/en/preview/) that exposes the gateway port running inside your sandbox.
+
+Generate the preview URL:
+
+```bash
+daytona preview-url moltbot --port 18789
+```
+
+This command generates a [signed preview URL](https://www.daytona.io/docs/en/preview/#signed-preview-url) that securely exposes the port.
+
+Open the URL in your browser, paste your gateway token, and click **Connect**.
+
+:::tip
+The preview URL expires after 1 hour by default (customizable with `--expires` flag). When it expires, simply run the same CLI command to generate a new one.
+:::
+
+### Pair Your Browser
+
+Moltbot uses device pairing as a security measure - only approved devices can connect to and control your assistant. When you first attempt to connect from the dashboard, your browser registers as a new device that needs approval.
+
+List pending device requests:
+```bash
+clawdbot devices list
+```
+
+Approve your device:
+```bash
+clawdbot devices approve REQUEST_ID
+```
+Replace `REQUEST_ID` with the value from the **Request** column.
+
+Click **Connect** again in the dashboard.
+
+Once connected, you should see a green status indicator - your Moltbot is now ready to use.
+
+### Security
+
+Running Moltbot this way provides three layers of security:
+
+1. **Preview URL:** Time-limited access to the dashboard port
+2. **Gateway token:** Required to authenticate with the dashboard
+3. **Device approval:** Only approved devices can connect and control your assistant
+
+Even if someone obtains your dashboard URL, they cannot connect without the gateway token and an approved device.
+
+:::caution
+Keep your gateway token and preview URL secret. Do not share them publicly.
+:::
+
+---
+
+### Configure Telegram
+
+Set up a Telegram bot to chat with Moltbot.
+
+#### Create a Telegram Bot
+
+1. Open Telegram and search for **@BotFather**
+2. Send `/start`, then `/newbot`
+3. Enter a name for your bot
+4. Enter a username for your bot
+5. Copy the bot token provided
+
+#### Configure Moltbot
+
+Enable Telegram and set your bot token:
+
+```bash
+clawdbot config set channels.telegram.enabled true
+clawdbot config set channels.telegram.botToken YOUR_BOT_TOKEN
+```
+
+Verify the configuration:
+
+```bash
+clawdbot config get channels.telegram
+```
+
+#### Restart the Gateway
+
+```bash
+clawdbot gateway stop
+nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
+```
+
+#### Complete Verification
+
+1. Open your bot's chat in Telegram and send `/start`
+2. A pairing code will appear. Approve the pairing request:
+```bash
+clawdbot pairing approve telegram PAIRING_CODE
+```
+
+You can now message your Moltbot through Telegram.
+
+---
+
+### Configure WhatsApp
+
+Set up WhatsApp to chat with Moltbot.
+
+#### Run Configuration
+
+```bash
+clawdbot config --section channels
+```
+
+When prompted:
+1. Select **Local (this machine)** for gateway location
+2. Choose **Configure/link**
+3. Select **WhatsApp channel**
+4. Select **WhatsApp (QR link)**
+5. Select **Yes** for "Link WhatsApp now (QR)?"
+
+#### Scan the QR Code
+
+Open WhatsApp on your phone, go to **Settings → Linked Devices → Link a Device**, and scan the QR code displayed in your terminal.
+
+Once paired, you'll see:
+```
+✅ Linked after restart; web session ready.
+```
+
+#### Set Up Your Phone Number
+
+Select **This is my personal phone number** (or choose the other option if you have a separate phone for Moltbot) and enter your phone number when prompted.
+
+#### Finish Configuration
+
+When prompted to select another channel, choose **Finished**. You'll see:
+```
+└  Configure complete.
+```
+
+#### Start Chatting
+
+Send a message to yourself in WhatsApp - Moltbot will respond. You can give it instructions and information on how to behave directly in the chat.
+
+:::tip
+To allow other users to chat with Moltbot, add their phone numbers to the **Allow From** list in **Channels → WhatsApp** inside the dashboard. When they send a message, Moltbot will respond.
+:::
