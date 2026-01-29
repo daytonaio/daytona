@@ -385,7 +385,7 @@ const Wallet = () => {
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="">
-                <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-center justify-between">
+                <div className="flex items-start sm:flex-row flex-col gap-4 sm:items-end justify-between">
                   <div className="flex gap-4 sm:gap-12 sm:flex-row flex-col">
                     <div className="flex flex-col gap-1">
                       <div className="">Current balance</div>
@@ -403,7 +403,7 @@ const Wallet = () => {
                   {billingPortalUrlQuery.isLoading ? (
                     <Skeleton className="h-8 w-[160px]" />
                   ) : billingPortalUrl ? (
-                    <Button variant="default" asChild className="flex items-center gap-2">
+                    <Button variant="link" asChild className="flex items-center gap-2 !px-0">
                       <a
                         href={`${billingPortalUrl}/customer-edit-information`}
                         target="_blank"
