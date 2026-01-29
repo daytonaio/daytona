@@ -770,7 +770,7 @@ export class OrganizationUsageService {
       end
 
       local pending = tonumber(redis.call("GET", pendingCacheKey))
-      if pending and delta ~= 0 then
+      if pending and pending > 0 and delta > 0 then
         redis.call("DECRBY", pendingCacheKey, delta)
       end
     `
