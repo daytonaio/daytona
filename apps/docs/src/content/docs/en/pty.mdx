@@ -66,13 +66,38 @@ await ptyHandle.disconnect()
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+pty_size = Daytona::PtySize.new(rows: 30, cols: 120)
+pty_handle = sandbox.process.create_pty_session(
+  id: 'my-interactive-session',
+  cwd: '/workspace',
+  envs: { 'TERM' => 'xterm-256color' },
+  pty_size: pty_size
+)
+
+# Use the PTY session
+pty_handle.send_input("ls -la\n")
+pty_handle.send_input("echo 'Hello, PTY!'\n")
+pty_handle.send_input("exit\n")
+
+# Handle output
+pty_handle.each { |data| print data }
+
+puts "PTY session completed with exit code: #{pty_handle.exit_code}"
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processcreate_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#createpty), and [Ruby SDK](/docs/en/ruby-sdk/process/#create_pty_session) references:
 
 > [**create_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processcreate_pty_session)
 >
 > [**createPty (TypeScript SDK)**](/docs/en/typescript-sdk/process/#createpty)
+>
+> [**create_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#create_pty_session)
 
 ## Connect to PTY session
 
@@ -115,13 +140,30 @@ await handle.disconnect()
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Connect to an existing PTY session
+pty_handle = sandbox.process.connect_pty_session('my-session')
+pty_handle.send_input("echo 'Hello World'\n")
+pty_handle.send_input("exit\n")
+
+# Handle output
+pty_handle.each { |data| print data }
+
+puts "Session exited with code: #{pty_handle.exit_code}"
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processconnect_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#connectpty), and [Ruby SDK](/docs/en/ruby-sdk/process/#connect_pty_session) references:
 
 > [**connect_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processconnect_pty_session)
 >
 > [**connectPty (TypeScript SDK)**](/docs/en/typescript-sdk/process/#connectpty)
+>
+> [**connect_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#connect_pty_session)
 
 ## List PTY sessions
 
@@ -156,13 +198,30 @@ for (const session of sessions) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# List all PTY sessions
+sessions = sandbox.process.list_pty_sessions
+
+sessions.each do |session|
+  puts "Session ID: #{session.id}"
+  puts "Active: #{session.active}"
+  puts "Terminal Size: #{session.cols}x#{session.rows}"
+  puts '---'
+end
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processlist_pty_sessions), [TypeScript SDK](/docs/en/typescript-sdk/process/#listptysessions), and [Ruby SDK](/docs/en/ruby-sdk/process/#list_pty_sessions) references:
 
 > [**list_pty_sessions (Python SDK)**](/docs/en/python-sdk/sync/process/#processlist_pty_sessions)
 >
 > [**listPtySessions (TypeScript SDK)**](/docs/en/typescript-sdk/process/#listptysessions)
+>
+> [**list_pty_sessions (Ruby SDK)**](/docs/en/ruby-sdk/process/#list_pty_sessions)
 
 ## Get PTY session info
 
@@ -199,13 +258,28 @@ if (session.processId) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Get details about a specific PTY session
+session_info = sandbox.process.get_pty_session_info('my-session')
+
+puts "Session ID: #{session_info.id}"
+puts "Active: #{session_info.active}"
+puts "Working Directory: #{session_info.cwd}"
+puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processget_pty_session_info), [TypeScript SDK](/docs/en/typescript-sdk/process/#getptysessioninfo), and [Ruby SDK](/docs/en/ruby-sdk/process/#get_pty_session_info) references:
 
 > [**get_pty_session_info (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_pty_session_info)
 >
 > [**getPtySessionInfo (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getptysessioninfo)
+>
+> [**get_pty_session_info (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_pty_session_info)
 
 ## Kill PTY session
 
@@ -241,13 +315,29 @@ try {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Delete a specific PTY session
+sandbox.process.delete_pty_session('my-session')
+
+# Verify the session no longer exists
+sessions = sandbox.process.list_pty_sessions
+sessions.each do |session|
+  puts "PTY session: #{session.id}"
+end
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processkill_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#killptysession), and [Ruby SDK](/docs/en/ruby-sdk/process/#delete_pty_session) references:
 
 > [**kill_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processkill_pty_session)
 >
 > [**killPtySession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#killptysession)
+>
+> [**delete_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#delete_pty_session)
 
 ## Resize PTY session
 
@@ -282,13 +372,26 @@ await ptyHandle.resize(150, 40) // cols, rows
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Resize a PTY session to a larger terminal
+pty_size = Daytona::PtySize.new(rows: 40, cols: 150)
+session_info = sandbox.process.resize_pty_session('my-session', pty_size)
+
+puts "Terminal resized to #{session_info.cols}x#{session_info.rows}"
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processresize_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#resizeptysession), and [Ruby SDK](/docs/en/ruby-sdk/process/#resize_pty_session) references:
 
 > [**resize_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processresize_pty_session)
 >
 > [**resizePtySession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#resizeptysession)
+>
+> [**resize_pty_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#resize_pty_session)
 
 ## Interactive commands
 
