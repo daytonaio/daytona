@@ -1076,8 +1076,11 @@ export class SandboxController {
     type: UrlDto,
   })
   @UseGuards(SandboxAccessGuard)
-  async getBuildLogsUrl(@Param('sandboxIdOrName') sandboxIdOrName: string): Promise<UrlDto> {
-    const buildLogsUrl = await this.sandboxService.getBuildLogsUrl(sandboxIdOrName)
+  async getBuildLogsUrl(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<UrlDto> {
+    const buildLogsUrl = await this.sandboxService.getBuildLogsUrl(sandboxIdOrName, authContext.organizationId)
 
     return new UrlDto(buildLogsUrl)
   }
