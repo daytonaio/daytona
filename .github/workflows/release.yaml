@@ -114,9 +114,9 @@ jobs:
             "version": "0.0.0"
           }' > apps/runner/package.json
 
-      - name: Publish Go SDK
-        run: |
-          VERSION=${{ inputs.version }} yarn nx publish sdk-go
+      # - name: Publish Go SDK
+      #   run: |
+      #     VERSION=${{ inputs.version }} yarn nx publish sdk-go
 
       - name: Create release
         run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
