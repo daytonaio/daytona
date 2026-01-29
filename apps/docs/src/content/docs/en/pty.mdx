@@ -89,9 +89,46 @@ puts "PTY session completed with exit code: #{pty_handle.exit_code}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create a PTY session with custom configuration
+handle, err := sandbox.Process.CreatePty(ctx, "my-interactive-session",
+	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+	options.WithCreatePtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+// Wait for connection to be established
+if err := handle.WaitForConnection(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Send commands to the terminal
+handle.SendInput([]byte("ls -la\n"))
+handle.SendInput([]byte("echo 'Hello, PTY!'\n"))
+handle.SendInput([]byte("exit\n"))
+
+// Read output from channel
+for data := range handle.DataChan() {
+	fmt.Print(string(data))
+}
+
+// Wait for completion and get result
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("PTY session completed with exit code: %d\n", *result.ExitCode)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processcreate_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#createpty), and [Ruby SDK](/docs/en/ruby-sdk/process/#create_pty_session) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processcreate_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#createpty), [Ruby SDK](/docs/en/ruby-sdk/process/#create_pty_session), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**create_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processcreate_pty_session)
 >
@@ -155,9 +192,43 @@ puts "Session exited with code: #{pty_handle.exit_code}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Connect to an existing PTY session
+handle, err := sandbox.Process.ConnectPty(ctx, "my-session")
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+// Wait for connection to be established
+if err := handle.WaitForConnection(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Send commands to the existing session
+handle.SendInput([]byte("pwd\n"))
+handle.SendInput([]byte("ls -la\n"))
+handle.SendInput([]byte("exit\n"))
+
+// Read output
+for data := range handle.DataChan() {
+	fmt.Print(string(data))
+}
+
+// Wait for completion
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Session exited with code: %d\n", *result.ExitCode)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processconnect_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#connectpty), and [Ruby SDK](/docs/en/ruby-sdk/process/#connect_pty_session) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processconnect_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#connectpty), [Ruby SDK](/docs/en/ruby-sdk/process/#connect_pty_session), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**connect_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processconnect_pty_session)
 >
@@ -213,9 +284,27 @@ end
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// List all PTY sessions
+sessions, err := sandbox.Process.ListPtySessions(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, session := range sessions {
+	fmt.Printf("Session ID: %s\n", session.Id)
+	fmt.Printf("Active: %t\n", session.Active)
+	fmt.Printf("Terminal Size: %dx%d\n", session.Cols, session.Rows)
+	fmt.Println("---")
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processlist_pty_sessions), [TypeScript SDK](/docs/en/typescript-sdk/process/#listptysessions), and [Ruby SDK](/docs/en/ruby-sdk/process/#list_pty_sessions) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processlist_pty_sessions), [TypeScript SDK](/docs/en/typescript-sdk/process/#listptysessions), [Ruby SDK](/docs/en/ruby-sdk/process/#list_pty_sessions), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**list_pty_sessions (Python SDK)**](/docs/en/python-sdk/sync/process/#processlist_pty_sessions)
 >
@@ -271,9 +360,29 @@ puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Get details about a specific PTY session
+session, err := sandbox.Process.GetPtySessionInfo(ctx, "my-session")
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Session ID: %s\n", session.Id)
+fmt.Printf("Active: %t\n", session.Active)
+fmt.Printf("Working Directory: %s\n", session.Cwd)
+fmt.Printf("Terminal Size: %dx%d\n", session.Cols, session.Rows)
+
+if session.ProcessId != nil {
+	fmt.Printf("Process ID: %d\n", *session.ProcessId)
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processget_pty_session_info), [TypeScript SDK](/docs/en/typescript-sdk/process/#getptysessioninfo), and [Ruby SDK](/docs/en/ruby-sdk/process/#get_pty_session_info) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processget_pty_session_info), [TypeScript SDK](/docs/en/typescript-sdk/process/#getptysessioninfo), [Ruby SDK](/docs/en/ruby-sdk/process/#get_pty_session_info), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**get_pty_session_info (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_pty_session_info)
 >
@@ -329,9 +438,30 @@ end
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Kill a specific PTY session
+err := sandbox.Process.KillPtySession(ctx, "my-session")
+if err != nil {
+	log.Fatal(err)
+}
+
+// Verify the session is no longer active
+sessions, err := sandbox.Process.ListPtySessions(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, session := range sessions {
+	fmt.Printf("PTY session: %s\n", session.Id)
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processkill_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#killptysession), and [Ruby SDK](/docs/en/ruby-sdk/process/#delete_pty_session) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processkill_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#killptysession), [Ruby SDK](/docs/en/ruby-sdk/process/#delete_pty_session), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**kill_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processkill_pty_session)
 >
@@ -383,9 +513,32 @@ puts "Terminal resized to #{session_info.cols}x#{session_info.rows}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Resize a PTY session to a larger terminal
+updatedInfo, err := sandbox.Process.ResizePtySession(ctx, "my-session", types.PtySize{
+	Cols: 150,
+	Rows: 40,
+})
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Terminal resized to %dx%d\n", updatedInfo.Cols, updatedInfo.Rows)
+
+// You can also use the PtyHandle's Resize method
+info, err := handle.Resize(ctx, 150, 40)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Terminal resized to %dx%d\n", info.Cols, info.Rows)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processresize_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#resizeptysession), and [Ruby SDK](/docs/en/ruby-sdk/process/#resize_pty_session) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/process/#processresize_pty_session), [TypeScript SDK](/docs/en/typescript-sdk/process/#resizeptysession), [Ruby SDK](/docs/en/ruby-sdk/process/#resize_pty_session), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**resize_pty_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processresize_pty_session)
 >
@@ -514,6 +667,53 @@ puts "Session completed with exit code: #{pty_handle.exit_code}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create PTY session
+handle, err := sandbox.Process.CreatePty(ctx, "interactive-session",
+	options.WithCreatePtySize(types.PtySize{Cols: 300, Rows: 100}),
+)
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+if err := handle.WaitForConnection(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Handle output in a goroutine
+go func() {
+	for data := range handle.DataChan() {
+		fmt.Print(string(data))
+	}
+}()
+
+// Send interactive command
+handle.SendInput([]byte(`printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi` + "\n"))
+time.Sleep(1 * time.Second)
+handle.SendInput([]byte("y\n"))
+
+// Resize terminal
+info, err := handle.Resize(ctx, 210, 110)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("\nPTY session resized to %dx%d\n", info.Cols, info.Rows)
+
+// Exit the session
+handle.SendInput([]byte("exit\n"))
+
+// Wait for completion
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Session completed with exit code: %d\n", *result.ExitCode)
+```
+
+</TabItem>
 </Tabs>
 
 ## Long-running processes
@@ -593,6 +793,80 @@ if (result.error) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+# Create PTY session
+pty_handle = sandbox.process.create_pty_session(
+  id: 'long-running-session',
+  pty_size: Daytona::PtySize.new(cols: 120, rows: 30)
+)
+
+# Handle output in a separate thread
+thread = Thread.new do
+  pty_handle.each { |data| print data }
+end
+
+# Start a long-running process
+pty_handle.send_input("while true; do echo \"Running... $(date)\"; sleep 1; done\n")
+sleep(3) # Let it run for a bit
+
+puts "Killing long-running process..."
+pty_handle.kill
+
+thread.join
+
+puts "\nProcess terminated with exit code: #{pty_handle.exit_code}"
+puts "Termination reason: #{pty_handle.error}" if pty_handle.error
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create PTY session
+handle, err := sandbox.Process.CreatePty(ctx, "long-running-session",
+	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+)
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+if err := handle.WaitForConnection(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Handle output in a goroutine
+go func() {
+	for data := range handle.DataChan() {
+		fmt.Print(string(data))
+	}
+}()
+
+// Start a long-running process
+handle.SendInput([]byte(`while true; do echo "Running... $(date)"; sleep 1; done` + "\n"))
+time.Sleep(3 * time.Second) // Let it run for a bit
+
+fmt.Println("Killing long-running process...")
+if err := handle.Kill(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Wait for termination
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("\nProcess terminated with exit code: %d\n", *result.ExitCode)
+if result.Error != nil {
+	fmt.Printf("Termination reason: %s\n", *result.Error)
+}
+```
+
+</TabItem>
 </Tabs>
 
 ## Resource management
@@ -645,6 +919,25 @@ ensure
 end
 ```
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Go: Use defer for cleanup
+handle, err := sandbox.Process.CreatePty(ctx, "session",
+	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+)
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+// Do work...
+
+// Or use Kill to terminate the process
+defer handle.Kill(ctx)
+```
+
+</TabItem>
 </Tabs>
 
 ## PtyHandle methods
@@ -678,9 +971,31 @@ await ptyHandle.sendInput(new Uint8Array([3])) // Ctrl+C
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Send a command
+pty_handle.send_input("ls -la\n")
+
+# Send user input
+pty_handle.send_input("y\n")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Send a command
+handle.SendInput([]byte("ls -la\n"))
+
+// Send Ctrl+C
+handle.SendInput([]byte{0x03})
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**sendInput (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#sendinput)
 
@@ -718,9 +1033,44 @@ if (result.exitCode === 0) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Wait by iterating over output (blocks until PTY session ends)
+pty_handle.each { |data| print data }
+
+if pty_handle.exit_code == 0
+  puts 'Process completed successfully'
+else
+  puts "Process failed with code: #{pty_handle.exit_code}"
+  puts "Error: #{pty_handle.error}" if pty_handle.error
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Wait for process to complete
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+if result.ExitCode != nil && *result.ExitCode == 0 {
+	fmt.Println("Process completed successfully")
+} else {
+	fmt.Printf("Process failed with code: %d\n", *result.ExitCode)
+	if result.Error != nil {
+		fmt.Printf("Error: %s\n", *result.Error)
+	}
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**wait (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#wait)
 
@@ -748,9 +1098,31 @@ await ptyHandle.sendInput('echo "Connected!"\n')
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Ruby handles connection internally during creation
+# No explicit wait needed - can send input immediately after creation
+pty_handle.send_input("echo 'Connected!'\n")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Wait for connection to be established
+if err := handle.WaitForConnection(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Now safe to send input
+handle.SendInput([]byte("echo 'Connected!'\n"))
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**waitForConnection (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#waitforconnection)
 
@@ -778,9 +1150,36 @@ console.log(`Process terminated with exit code: ${result.exitCode}`)
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Kill a long-running process
+pty_handle.kill
+
+puts "Process terminated with exit code: #{pty_handle.exit_code}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Kill a long-running process
+if err := handle.Kill(ctx); err != nil {
+	log.Fatal(err)
+}
+
+// Wait to confirm termination
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Process terminated with exit code: %d\n", *result.ExitCode)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**kill (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#kill)
 
@@ -806,9 +1205,29 @@ await ptyHandle.resize(120, 30)
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Resize to 120x30
+pty_handle.resize(Daytona::PtySize.new(cols: 120, rows: 30))
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Resize to 120x30
+info, err := handle.Resize(ctx, 120, 30)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Resized to %dx%d\n", info.Cols, info.Rows)
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**resize (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#resize)
 
@@ -836,9 +1255,35 @@ try {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Ruby: Use begin/ensure or kill the session
+begin
+  # ... use PTY session
+ensure
+  pty_handle.kill
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Always clean up when done using defer
+handle, err := sandbox.Process.CreatePty(ctx, "session")
+if err != nil {
+	log.Fatal(err)
+}
+defer handle.Disconnect()
+
+// ... use PTY session
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**disconnect (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#disconnect)
 
@@ -865,9 +1310,27 @@ if (ptyHandle.isConnected()) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Ruby: Check by using session info
+session_info = sandbox.process.get_pty_session_info('my-session')
+puts 'PTY session is active' if session_info.active
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+if handle.IsConnected() {
+	fmt.Println("PTY session is active")
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**isConnected (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#isconnected)
 
@@ -897,9 +1360,31 @@ if (ptyHandle.error) {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Access after process terminates
+puts "Exit code: #{pty_handle.exit_code}"
+puts "Error: #{pty_handle.error}" if pty_handle.error
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Access via methods after process terminates
+if exitCode := handle.ExitCode(); exitCode != nil {
+	fmt.Printf("Exit code: %d\n", *exitCode)
+}
+if errMsg := handle.Error(); errMsg != nil {
+	fmt.Printf("Error: %s\n", *errMsg)
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [TypeScript SDK](/docs/en/typescript-sdk/) reference:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**exitCode (TypeScript SDK)**](/docs/en/typescript-sdk/pty-handle/#exitcode)
 >
@@ -933,6 +1418,33 @@ const ptyHandle = await sandbox.process.createPty({
     process.stdout.write(text)
   },
 })
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Iterate over PTY output
+pty_handle.each do |data|
+  print data
+end
+
+puts "Session ended with exit code: #{pty_handle.exit_code}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Go uses a channel to receive output data
+for data := range handle.DataChan() {
+	fmt.Print(string(data))
+}
+
+// Or use as io.Reader
+io.Copy(os.Stdout, handle)
+
+fmt.Printf("Session ended with exit code: %d\n", *handle.ExitCode())
 ```
 
 </TabItem>
@@ -975,6 +1487,24 @@ if pty_handle.exit_code != 0
   puts "Error: #{pty_handle.error}"
 end
 ```
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Go: Check exit codes
+result, err := handle.Wait(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+if result.ExitCode != nil && *result.ExitCode != 0 {
+	fmt.Printf("Command failed: %d\n", *result.ExitCode)
+	if result.Error != nil {
+		fmt.Printf("Error: %s\n", *result.Error)
+	}
+}
+```
+
 </TabItem>
 </Tabs>
 
