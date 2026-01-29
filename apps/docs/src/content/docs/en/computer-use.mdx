@@ -47,6 +47,19 @@ puts "Computer use processes started: #{result.message}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.ComputerUse.Start(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+defer sandbox.ComputerUse.Stop(ctx)
+
+fmt.Println("Computer use processes started")
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -57,7 +70,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/start' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**start (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestart)
 >
@@ -96,6 +109,18 @@ puts "Computer use processes stopped: #{result.message}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.ComputerUse.Stop(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("Computer use processes stopped")
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -106,7 +131,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/stop' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computerusestop)
 >
@@ -145,6 +170,18 @@ puts "Computer use status: #{response.status}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+status, err := sandbox.ComputerUse.GetStatus(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Computer use status: %v\n", status["status"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -154,7 +191,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/status'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**get_status (Python SDK)**](/docs/en/python-sdk/sync/computer-use#computeruseget_status)
 >
@@ -392,6 +429,39 @@ const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Single left click
+result = sandbox.computer_use.mouse.click(x: 100, y: 200)
+
+# Double click
+double_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'left', double: true)
+
+# Right click
+right_click = sandbox.computer_use.mouse.click(x: 100, y: 200, button: 'right')
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Single left click
+result, err := sandbox.ComputerUse.Mouse().Click(ctx, 100, 200, nil, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Double click
+doubleClick := true
+result, err = sandbox.ComputerUse.Mouse().Click(ctx, 100, 200, nil, &doubleClick)
+
+// Right click
+rightButton := "right"
+result, err = sandbox.ComputerUse.Mouse().Click(ctx, 100, 200, &rightButton, nil)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -409,7 +479,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/click' 
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**click (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mouseclick)
 >
@@ -438,6 +508,26 @@ console.log(`Mouse moved to: ${result.x}, ${result.y}`);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+result = sandbox.computer_use.mouse.move(x: 100, y: 200)
+puts "Mouse moved to: #{result.x}, #{result.y}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+result, err := sandbox.ComputerUse.Mouse().Move(ctx, 100, 200)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Mouse moved to: %v, %v\n", result["x"], result["y"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -453,7 +543,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/move' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**move (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousemove)
 >
@@ -482,6 +572,26 @@ console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+result = sandbox.computer_use.mouse.drag(start_x: 50, start_y: 50, end_x: 150, end_y: 150)
+puts "Dragged from #{result.from_x},#{result.from_y} to #{result.to_x},#{result.to_y}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+result, err := sandbox.ComputerUse.Mouse().Drag(ctx, 50, 50, 150, 150, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Dragged to %v, %v\n", result["x"], result["y"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -500,7 +610,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/drag' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**drag (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousedrag)
 >
@@ -535,6 +645,33 @@ const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Scroll up
+scroll_up = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'up', amount: 3)
+
+# Scroll down
+scroll_down = sandbox.computer_use.mouse.scroll(x: 100, y: 200, direction: 'down', amount: 5)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Scroll up
+amount := 3
+success, err := sandbox.ComputerUse.Mouse().Scroll(ctx, 100, 200, "up", &amount)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Scroll down
+amount = 5
+success, err = sandbox.ComputerUse.Mouse().Scroll(ctx, 100, 200, "down", &amount)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -552,7 +689,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/scroll'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**scroll (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mousescroll)
 >
@@ -581,6 +718,26 @@ console.log(`Mouse is at: ${position.x}, ${position.y}`);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+position = sandbox.computer_use.mouse.position
+puts "Mouse is at: #{position.x}, #{position.y}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+position, err := sandbox.ComputerUse.Mouse().GetPosition(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Mouse is at: %v, %v\n", position["x"], position["y"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -590,7 +747,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/mouse/positio
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**get_position (Python SDK)**](/docs/en/python-sdk/sync/computer-use#mouseget_position)
 >
@@ -625,6 +782,30 @@ await sandbox.computerUse.keyboard.type('Slow typing', 100);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.computer_use.keyboard.type(text: "Hello, World!")
+
+# With delay between characters
+sandbox.computer_use.keyboard.type(text: "Slow typing", delay: 100)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.ComputerUse.Keyboard().Type(ctx, "Hello, World!", nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+// With delay between characters
+delay := 100
+err = sandbox.ComputerUse.Keyboard().Type(ctx, "Slow typing", &delay)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -640,7 +821,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/type
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**type (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardtype)
 >
@@ -681,6 +862,37 @@ await sandbox.computerUse.keyboard.press('t', ['ctrl', 'shift']);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Press Enter
+sandbox.computer_use.keyboard.press(key: "Return")
+
+# Press Ctrl+C
+sandbox.computer_use.keyboard.press(key: "c", modifiers: ["ctrl"])
+
+# Press Ctrl+Shift+T
+sandbox.computer_use.keyboard.press(key: "t", modifiers: ["ctrl", "shift"])
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Press Enter
+err := sandbox.ComputerUse.Keyboard().Press(ctx, "Return", nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Press Ctrl+C
+err = sandbox.ComputerUse.Keyboard().Press(ctx, "c", []string{"ctrl"})
+
+// Press Ctrl+Shift+T
+err = sandbox.ComputerUse.Keyboard().Press(ctx, "t", []string{"ctrl", "shift"})
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -698,7 +910,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/key'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**press (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardpress)
 >
@@ -738,6 +950,37 @@ await sandbox.computerUse.keyboard.hotkey('alt+tab');
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Copy
+sandbox.computer_use.keyboard.hotkey(keys: "ctrl+c")
+
+# Paste
+sandbox.computer_use.keyboard.hotkey(keys: "ctrl+v")
+
+# Alt+Tab
+sandbox.computer_use.keyboard.hotkey(keys: "alt+tab")
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Copy
+err := sandbox.ComputerUse.Keyboard().Hotkey(ctx, "ctrl+c")
+if err != nil {
+	log.Fatal(err)
+}
+
+// Paste
+err = sandbox.ComputerUse.Keyboard().Hotkey(ctx, "ctrl+v")
+
+// Alt+Tab
+err = sandbox.ComputerUse.Keyboard().Hotkey(ctx, "alt+tab")
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -752,7 +995,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/keyboard/hotk
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**hotkey (Python SDK)**](/docs/en/python-sdk/sync/computer-use#keyboardhotkey)
 >
@@ -789,6 +1032,33 @@ const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+screenshot = sandbox.computer_use.screenshot.take_full_screen
+puts "Screenshot size: #{screenshot.width}x#{screenshot.height}"
+
+# With cursor visible
+with_cursor = sandbox.computer_use.screenshot.take_full_screen(show_cursor: true)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+screenshot, err := sandbox.ComputerUse.Screenshot().TakeFullScreen(ctx, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Screenshot captured, size: %d bytes\n", *screenshot.SizeBytes)
+
+// With cursor visible
+showCursor := true
+withCursor, err := sandbox.ComputerUse.Screenshot().TakeFullScreen(ctx, &showCursor)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -798,7 +1068,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**take_full_screen (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_full_screen)
 >
@@ -831,6 +1101,28 @@ console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.hei
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+region = Daytona::ComputerUse::ScreenshotRegion.new(x: 100, y: 100, width: 300, height: 200)
+screenshot = sandbox.computer_use.screenshot.take_region(region: region)
+puts "Captured region: #{screenshot.region.width}x#{screenshot.region.height}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+region := types.ScreenshotRegion{X: 100, Y: 100, Width: 300, Height: 200}
+screenshot, err := sandbox.ComputerUse.Screenshot().TakeRegion(ctx, region, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Captured region: %dx%d\n", screenshot.Width, screenshot.Height)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -840,7 +1132,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/screenshot/re
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**take_region (Python SDK)**](/docs/en/python-sdk/sync/computer-use#screenshottake_region)
 >
@@ -894,6 +1186,24 @@ const scaled = await sandbox.computerUse.screenshot.takeCompressed({
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Default compression
+screenshot = sandbox.computer_use.screenshot.take_compressed
+
+# High quality JPEG
+jpeg = sandbox.computer_use.screenshot.take_compressed(
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "jpeg", quality: 95, show_cursor: true)
+)
+
+# Scaled down PNG
+scaled = sandbox.computer_use.screenshot.take_compressed(
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "png", scale: 0.5)
+)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -940,6 +1250,18 @@ const screenshot = await sandbox.computerUse.screenshot.takeCompressedRegion(reg
   showCursor: true
 });
 console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+region = Daytona::ComputerUse::ScreenshotRegion.new(x: 0, y: 0, width: 800, height: 600)
+screenshot = sandbox.computer_use.screenshot.take_compressed_region(
+  region: region,
+  options: Daytona::ComputerUse::ScreenshotOptions.new(format: "webp", quality: 80, show_cursor: true)
+)
+puts "Compressed size: #{screenshot.size_bytes} bytes"
 ```
 
 </TabItem>
@@ -990,6 +1312,30 @@ info.displays.forEach((display, index) => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+info = sandbox.computer_use.display.info
+puts "Primary display: #{info.primary_display.width}x#{info.primary_display.height}"
+puts "Total displays: #{info.total_displays}"
+info.displays.each_with_index do |display, i|
+  puts "Display #{i}: #{display.width}x#{display.height} at #{display.x},#{display.y}"
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+info, err := sandbox.ComputerUse.Display().GetInfo(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Displays: %v\n", info["displays"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -999,7 +1345,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/info'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**get_info (Python SDK)**](/docs/en/python-sdk/sync/computer-use#displayget_info)
 >
@@ -1033,6 +1379,29 @@ windows.windows.forEach(window => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+windows = sandbox.computer_use.display.windows
+puts "Found #{windows.count} open windows:"
+windows.windows.each do |window|
+  puts "- #{window.title} (ID: #{window.id})"
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+result, err := sandbox.ComputerUse.Display().GetWindows(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Open windows: %v\n", result["windows"])
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1042,7 +1411,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/display/windo
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
 
 > [**get_windows (Python SDK)**](/docs/en/python-sdk/sync/computer-use#displayget_windows)
 >
