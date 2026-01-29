@@ -64,9 +64,29 @@ lsp_server = sandbox.create_lsp_server(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create sandbox
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
+ctx := context.Background()
+sandbox, err := client.Create(ctx, nil)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Get LSP service for Python
+lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
 >
@@ -124,6 +144,18 @@ lsp.start  # Initialize the server
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+err := lsp.Start(ctx)  // Initialize the server
+if err != nil {
+	log.Fatal(err)
+}
+// Now ready for LSP operations
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -139,7 +171,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/start' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
 >
@@ -178,6 +210,17 @@ lsp.stop  # Clean up resources
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// When done with LSP features
+err := lsp.Stop(ctx)  // Clean up resources
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -193,7 +236,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/stop' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
 >
@@ -241,6 +284,19 @@ puts "Completions: #{completions}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+completions, err := lsp.Completions(ctx, "workspace/project/main.py",
+	types.Position{Line: 10, Character: 15},
+)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Completions: %v\n", completions)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -265,7 +321,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/completions' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
 >
@@ -308,6 +364,17 @@ lsp_server.did_open('workspace/project/main.py')
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Notify server that a file is open
+err := lsp.DidOpen(ctx, "workspace/project/main.py")
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -324,7 +391,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-open' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
 >
@@ -363,6 +430,17 @@ lsp_server.did_close('workspace/project/main.py')
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Notify server that a file is closed
+err := lsp.DidClose(ctx, "workspace/project/main.py")
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -379,7 +457,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-close' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
 >
@@ -423,6 +501,19 @@ end
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+symbols, err := lsp.DocumentSymbols(ctx, "workspace/project/main.py")
+if err != nil {
+	log.Fatal(err)
+}
+for _, symbol := range symbols {
+	fmt.Printf("Symbol: %v\n", symbol)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -432,7 +523,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/document-symbols?lang
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
 >
@@ -476,6 +567,19 @@ end
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+symbols, err := lsp.SandboxSymbols(ctx, "MyClass")
+if err != nil {
+	log.Fatal(err)
+}
+for _, symbol := range symbols {
+	fmt.Printf("Found: %v\n", symbol)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -485,7 +589,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?quer
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp) references:
 
 > [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
 >
