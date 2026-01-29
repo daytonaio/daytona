@@ -677,6 +677,7 @@ const Wallet = () => {
                   data={invoicesQuery.data?.items ?? []}
                   pagination={invoicesPagination}
                   pageCount={invoicesQuery.data?.totalPages ?? 0}
+                  totalItems={invoicesQuery.data?.totalItems ?? 0}
                   onPaginationChange={setInvoicesPagination}
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}

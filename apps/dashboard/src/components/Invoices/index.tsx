@@ -16,6 +16,7 @@ import { useInvoicesTable } from './useInvoicesTable'
 export function InvoicesTable({
   data,
   pagination,
+  totalItems,
   pageCount,
   onPaginationChange,
   loading,
@@ -113,7 +114,7 @@ export function InvoicesTable({
       </Table>
 
       <div className="flex items-center justify-end">
-        <Pagination className="pb-2 pt-6" table={table} entityName="Invoices" />
+        <Pagination className="pb-2 pt-6" table={table} entityName="Invoices" totalItems={totalItems} />
       </div>
     </>
   )

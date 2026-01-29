@@ -8,6 +8,7 @@ import { Table } from '@tanstack/react-table'
 
 export interface InvoicesTableProps {
   data: Invoice[]
+  totalItems: number
   pagination: {
     pageIndex: number
     pageSize: number
