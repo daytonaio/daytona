@@ -557,6 +557,15 @@ export const getSidebarConfig = (
             icon: 'recursive-lm.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/dspy-rlms', locale),
+          label: t('sidebarconfig.dspyRlms'),
+          disablePagination: true,
+          attrs: {
+            icon: 'dspy.svg',
+          },
+        },
       ],
     },
     {

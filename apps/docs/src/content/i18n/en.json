@@ -141,6 +141,7 @@
   "sidebarconfig.lettacode": "Letta Code",
   "sidebarconfig.trlGrpo": "TRL",
   "sidebarconfig.recursiveLms": "RLMs",
+  "sidebarconfig.dspyRlms": "RLMs via DSPy",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
   "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
 }
