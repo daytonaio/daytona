@@ -404,7 +404,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       relations: ['buildInfo'],
     })
 
-    if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
+    if (
+      [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
+        sandbox.state,
+      )
+    ) {
       await this.redisLockProvider.unlock(lockKey)
       return
     }

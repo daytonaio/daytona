@@ -44,6 +44,7 @@ import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.even
 import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
+import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { OrganizationService } from './organization.service'
 
@@ -605,6 +606,8 @@ export class OrganizationUsageService {
    */
   async fetchSandboxUsageFromDb(organizationId: string, regionId: string): Promise<SandboxUsageOverviewInternalDto> {
     // fetch from db
+    // For CPU/memory, we need to also count RESIZING sandboxes that were hot resizing (desiredState = 'started')
+    // since they are still running and consuming compute resources
     const sandboxUsageMetrics: {
       used_cpu: number
       used_mem: number
@@ -612,14 +615,16 @@ export class OrganizationUsageService {
     } = await this.sandboxRepository
       .createQueryBuilder('sandbox')
       .select([
-        'SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) THEN sandbox.cpu ELSE 0 END) as used_cpu',
-        'SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) THEN sandbox.mem ELSE 0 END) as used_mem',
+        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.cpu ELSE 0 END) as used_cpu`,
+        `SUM(CASE WHEN sandbox.state IN (:...statesConsumingCompute) OR (sandbox.state = :resizingState AND sandbox."desiredState" = :startedDesiredState) THEN sandbox.mem ELSE 0 END) as used_mem`,
         'SUM(CASE WHEN sandbox.state IN (:...statesConsumingDisk) THEN sandbox.disk ELSE 0 END) as used_disk',
       ])
       .where('sandbox.organizationId = :organizationId', { organizationId })
       .andWhere('sandbox.region = :regionId', { regionId })
       .setParameter('statesConsumingCompute', SANDBOX_STATES_CONSUMING_COMPUTE)
       .setParameter('statesConsumingDisk', SANDBOX_STATES_CONSUMING_DISK)
+      .setParameter('resizingState', SandboxState.RESIZING)
+      .setParameter('startedDesiredState', SandboxDesiredState.STARTED)
       .getRawOne()
 
     const cpuUsage = Number(sandboxUsageMetrics.used_cpu) || 0
