@@ -50,6 +50,19 @@
       "options": {
         "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.yaml\""
       }
+    },
+    "check-version-env": {},
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "commands": [
+          "cd apps/cli && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
+          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["check-version-env"]
     }
   }
 }
