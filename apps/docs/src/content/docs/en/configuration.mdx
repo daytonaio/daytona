@@ -4,7 +4,7 @@ title: Environment Configuration
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona supports multiple options to configure your environment, in order of precedence:
+Daytona supports multiple methods to configure your environment, in order of precedence:
 
 1. [Configuration in code](#configuration-in-code)
 2. [Environment variables](#environment-variables)
@@ -16,8 +16,8 @@ Daytona supports multiple options to configure your environment, in order of pre
 To configure your environment in code, use the `DaytonaConfig` class. The `DaytonaConfig` class accepts the following parameters:
 
 - `api_key`: Your Daytona [API Key](/docs/api-keys)
-- `api_url`: URL of your Daytona API
-- `target`: Target region to create the Sandboxes on (e.g. `us`)
+- `api_url`: URL of your [Daytona API](/docs/en/tools/api)
+- `target`: Target region to create the Sandboxes on (`us` / `eu`)
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -59,15 +59,40 @@ config = Daytona::Config.new(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    config := daytona.Config{
+        APIKey: "your-api-key",
+        APIURL: "your-api-url",
+        Target: "us",
+    }
+
+    client := daytona.NewClient(&config)
+
+    _ = client
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), and [Ruby SDK](/docs/en/ruby-sdk/daytona) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), [Ruby SDK](/docs/en/ruby-sdk/daytona), and [Go SDK](/docs/en/go-sdk/daytona) references:
 
 > [**DaytonaConfig (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonaconfig)
 >
 > [**DaytonaConfig (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#daytonaconfig)
 >
 > [**Config (Ruby SDK)**](/docs/en/ruby-sdk/daytona#config)
+>
+> [**Config (Go SDK)**](/docs/en/go-sdk/daytona)
 
 ## Environment variables
 
@@ -81,7 +106,7 @@ Daytona supports environment variables for configuration. The SDK automatically 
 
 ### Shell
 
-To set environment variables in your shell, use the following commands:
+Set environment variables in your shell using the following methods:
 
 <Tabs syncKey="shell">
   <TabItem label="Bash/Zsh" icon="seti:shell">
@@ -106,7 +131,7 @@ To set environment variables in your shell, use the following commands:
 
 ### .env file
 
-To set environment variables in a `.env` file, use the following syntax:
+Set the environment variables in a `.env` file using the following format:
 
 ```bash
 DAYTONA_API_KEY=YOUR_API_KEY
@@ -118,7 +143,7 @@ DAYTONA_TARGET=us
 
 If no configuration is provided, Daytona will use its built-in default values:
 
-| Option  | Value                               |
-| ------- | ----------------------------------- |
-| API URL | https://app.daytona.io/api          |
-| Target  | Default region for the organization |
+| **Option** | **Value**                           |
+| ---------- | ----------------------------------- |
+| API URL    | https://app.daytona.io/api          |
+| Target     | Default region for the organization |
