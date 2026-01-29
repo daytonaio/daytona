@@ -196,6 +196,7 @@
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.3",
     "vite-plugin-svgr": "^4.3.0",
+    "xdg-basedir": "^5.1.0",
     "xml2js": "^0.6.2",
     "yaml": "^2.8.0",
     "zod": "^4.2.1",
