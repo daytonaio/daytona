@@ -5,7 +5,6 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EventEmitter2 } from '@nestjs/event-emitter'
 import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -36,7 +35,6 @@ export class JobStateHandlerService {
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
-    private readonly eventEmitter: EventEmitter2,
     private readonly organizationUsageService: OrganizationUsageService,
   ) {}
 

@@ -1209,14 +1209,12 @@ export class OrganizationUsageService {
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
-    const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
-    await this.redisLockProvider.waitForLock(lockKey, 60)
-
-    // RESIZING transitions: usage handled by applyResizeUsageChange, not state events
     if (event.oldState === SandboxState.RESIZING || event.newState === SandboxState.RESIZING) {
-      await this.redisLockProvider.unlock(lockKey)
       return
     }
+
+    const lockKey = `sandbox:${event.sandbox.id}:quota-usage-update`
+    await this.redisLockProvider.waitForLock(lockKey, 60)
 
     // Special case for warm pool sandboxes (otherwise the quota usage deltas would be 0 due to the "unchanged" state)
     if (event.oldState === event.newState && event.newState === SandboxState.STARTED) {

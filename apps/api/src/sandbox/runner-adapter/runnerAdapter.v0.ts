@@ -31,7 +31,6 @@ import {
   ToolboxApi,
   UpdateNetworkSettingsDTO,
   RecoverSandboxDTO,
-  ResizeSandboxDTO,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
