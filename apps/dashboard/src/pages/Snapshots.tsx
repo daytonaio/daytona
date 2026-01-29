@@ -31,8 +31,9 @@ import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
-import { getRegionFullDisplayName } from '@/lib/utils'
+import { getRegionFullDisplayName, pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
@@ -319,30 +320,114 @@ const Snapshots: React.FC = () => {
   )
 
   const handleBulkDelete = async (snapshots: SnapshotDto[]) => {
-    setLoadingSnapshots((prev) => ({ ...prev, ...snapshots.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
+    let isCancelled = false
+    let processedCount = 0
+    let successCount = 0
+    let failureCount = 0
 
-    for (const snapshot of snapshots) {
-      updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
+    const totalLabel = pluralize(snapshots.length, 'snapshot', 'snapshots')
+    const onCancel = () => {
+      isCancelled = true
+    }
 
-      try {
-        await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
-        toast.success(`Deleting snapshot ${snapshot.name}`)
-      } catch (error) {
-        handleApiError(error, `Failed to delete snapshot ${snapshot.name}`)
-        updateSnapshotInCache(snapshot.id, { state: snapshot.state })
+    const bulkToast = createBulkActionToast(`Deleting 0 of ${totalLabel}.`, {
+      action: { label: 'Cancel', onClick: onCancel },
+    })
 
-        if (snapshots.indexOf(snapshot) < snapshots.length - 1) {
-          const shouldContinue = window.confirm(
-            `Failed to delete snapshot ${snapshot.name}. Do you want to continue with the remaining snapshots?`,
-          )
+    const previousStates = new Map(snapshots.map((s) => [s.id, s.state]))
 
-          if (!shouldContinue) {
-            break
-          }
+    try {
+      for (const snapshot of snapshots) {
+        if (isCancelled) break
+
+        processedCount += 1
+        bulkToast.loading(`Deleting ${processedCount} of ${totalLabel}.`, {
+          action: { label: 'Cancel', onClick: onCancel },
+        })
+
+        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
+        updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
+
+        try {
+          await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
+          successCount += 1
+        } catch (error) {
+          failureCount += 1
+          updateSnapshotInCache(snapshot.id, { state: previousStates.get(snapshot.id) })
+          console.error(`Failed to delete snapshot ${snapshot.name}`, error)
+        } finally {
+          setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
         }
-      } finally {
-        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
       }
+
+      bulkToast.result(
+        { successCount, failureCount },
+        {
+          successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deleted.`,
+          errorTitle: `Failed to delete ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+          warningTitle: 'Failed to delete some snapshots.',
+          canceledTitle: 'Delete canceled.',
+        },
+      )
+    } catch (error) {
+      console.error('Failed to delete snapshots', error)
+      bulkToast.error('Failed to delete snapshots.')
+    }
+  }
+
+  const handleBulkDeactivate = async (snapshots: SnapshotDto[]) => {
+    let isCancelled = false
+    let processedCount = 0
+    let successCount = 0
+    let failureCount = 0
+
+    const totalLabel = pluralize(snapshots.length, 'snapshot', 'snapshots')
+    const onCancel = () => {
+      isCancelled = true
+    }
+
+    const bulkToast = createBulkActionToast(`Deactivating 0 of ${totalLabel}.`, {
+      action: { label: 'Cancel', onClick: onCancel },
+    })
+
+    const previousStates = new Map(snapshots.map((s) => [s.id, s.state]))
+
+    try {
+      for (const snapshot of snapshots) {
+        if (isCancelled) break
+
+        processedCount += 1
+        bulkToast.loading(`Deactivating ${processedCount} of ${totalLabel}.`, {
+          action: { label: 'Cancel', onClick: onCancel },
+        })
+
+        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
+        updateSnapshotInCache(snapshot.id, { state: SnapshotState.INACTIVE })
+
+        try {
+          await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
+          successCount += 1
+        } catch (error) {
+          failureCount += 1
+          updateSnapshotInCache(snapshot.id, { state: previousStates.get(snapshot.id) })
+          console.error(`Failed to deactivate snapshot ${snapshot.name}`, error)
+        } finally {
+          setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+        }
+      }
+
+      bulkToast.result(
+        { successCount, failureCount },
+        {
+          successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deactivated.`,
+          errorTitle: `Failed to deactivate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+          warningTitle: 'Failed to deactivate some snapshots.',
+          canceledTitle: 'Deactivate canceled.',
+        },
+      )
+    } catch (error) {
+      console.error('Failed to deactivate snapshots', error)
+      bulkToast.error('Failed to deactivate snapshots.')
     }
   }
 
@@ -540,8 +625,10 @@ const Snapshots: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           onBulkDelete={handleBulkDelete}
+          onBulkDeactivate={handleBulkDeactivate}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
+          onCreateSnapshot={() => setShowCreateDialog(true)}
           pageCount={snapshotsData?.totalPages ?? 0}
           totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}

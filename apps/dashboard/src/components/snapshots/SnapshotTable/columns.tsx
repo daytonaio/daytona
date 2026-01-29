@@ -75,7 +75,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
       return (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
+          onCheckedChange={() => {
             table.getRowModel().rows.forEach((row) => {
               if (!row.original.general) {
                 row.toggleSelected()
@@ -284,20 +284,12 @@ const columns: ColumnDef<SnapshotDto>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {showActivate && (
-              <DropdownMenuItem
-                onClick={() => onActivate(row.original)}
-                className="cursor-pointer"
-                disabled={loadingSnapshots[row.original.id]}
-              >
+              <DropdownMenuItem onClick={() => onActivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
                 Activate
               </DropdownMenuItem>
             )}
             {showDeactivate && (
-              <DropdownMenuItem
-                onClick={() => onDeactivate(row.original)}
-                className="cursor-pointer"
-                disabled={loadingSnapshots[row.original.id]}
-              >
+              <DropdownMenuItem onClick={() => onDeactivate(row.original)} disabled={loadingSnapshots[row.original.id]}>
                 Deactivate
               </DropdownMenuItem>
             )}
@@ -305,7 +297,7 @@ const columns: ColumnDef<SnapshotDto>[] = [
             {showDelete && (
               <DropdownMenuItem
                 onClick={() => onDelete(row.original)}
-                className="cursor-pointer text-red-600 dark:text-red-400"
+                variant="destructive"
                 disabled={loadingSnapshots[row.original.id]}
               >
                 Delete

@@ -9,13 +9,18 @@ import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Pagination } from '../../Pagination'
 import { TableEmptyState } from '../../TableEmptyState'
-import { Button } from '../../ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../ui/table'
+import { SnapshotBulkAction, SnapshotBulkActionAlertDialog } from './BulkActionAlertDialog'
 import { columns } from './columns'
+import {
+  getSnapshotBulkActionCounts,
+  isSnapshotDeactivatable,
+  isSnapshotDeletable,
+  useSnapshotsCommands,
+} from './useSnapshotsCommands'
 import { convertApiSortingToTableSorting, convertTableSortingToApiSorting } from './utils'
 
 interface DataTableProps {
@@ -25,8 +30,10 @@ interface DataTableProps {
   getRegionName: (regionId: string) => string | undefined
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
+  onBulkDeactivate?: (snapshots: SnapshotDto[]) => void
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
+  onCreateSnapshot?: () => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -46,10 +53,12 @@ export function SnapshotTable({
   onDelete,
   onActivate,
   onDeactivate,
+  onCreateSnapshot,
   pagination,
   pageCount,
   totalItems,
   onBulkDelete,
+  onBulkDeactivate,
   onPaginationChange,
   sorting,
   onSortingChange,
@@ -96,7 +105,7 @@ export function SnapshotTable({
     meta: {
       snapshot: {
         writePermitted,
-        deletePermitted: false,
+        deletePermitted,
         loadingSnapshots,
         getRegionName,
         onDelete,
@@ -110,14 +119,68 @@ export function SnapshotTable({
   })
 
   const selectedRows = table.getSelectedRowModel().rows
-  const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
-  const selectedImages = selectedRows.map((row) => row.original)
+  const [pendingBulkAction, setPendingBulkAction] = useState<SnapshotBulkAction | null>(null)
+  const selectedSnapshots = selectedRows.map((row) => row.original)
 
-  const handleBulkDelete = () => {
-    if (onBulkDelete && selectedImages.length > 0) {
-      onBulkDelete(selectedImages)
+  const bulkActionCounts = useMemo(() => getSnapshotBulkActionCounts(selectedSnapshots), [selectedSnapshots])
+
+  const handleBulkActionConfirm = () => {
+    if (!pendingBulkAction) return
+
+    const handlers: Record<SnapshotBulkAction, () => void> = {
+      [SnapshotBulkAction.Delete]: () => {
+        if (onBulkDelete) {
+          onBulkDelete(selectedSnapshots.filter(isSnapshotDeletable))
+        }
+      },
+      [SnapshotBulkAction.Deactivate]: () => {
+        if (onBulkDeactivate) {
+          onBulkDeactivate(selectedSnapshots.filter(isSnapshotDeactivatable))
+        }
+      },
     }
+
+    handlers[pendingBulkAction]()
+    setPendingBulkAction(null)
+    table.toggleAllRowsSelected(false)
   }
+
+  const toggleAllRowsSelected = useCallback(
+    (selected: boolean) => {
+      if (selected) {
+        for (const row of table.getRowModel().rows) {
+          const isGeneral = row.original.general
+          const isLoading = loadingSnapshots[row.original.id]
+          const isRemoving = row.original.state === SnapshotState.REMOVING
+          if (!isGeneral && !isLoading && !isRemoving) {
+            row.toggleSelected(true)
+          }
+        }
+      } else {
+        table.toggleAllRowsSelected(false)
+      }
+    },
+    [table, loadingSnapshots],
+  )
+
+  const selectableCount = useMemo(() => {
+    return data.filter(
+      (snapshot) => !snapshot.general && !loadingSnapshots[snapshot.id] && snapshot.state !== SnapshotState.REMOVING,
+    ).length
+  }, [data, loadingSnapshots])
+
+  useSnapshotsCommands({
+    writePermitted,
+    deletePermitted,
+    selectedCount: selectedRows.length,
+    totalCount: data.length,
+    selectableCount,
+    toggleAllRowsSelected,
+    bulkActionCounts,
+    onDelete: () => setPendingBulkAction(SnapshotBulkAction.Delete),
+    onDeactivate: () => setPendingBulkAction(SnapshotBulkAction.Deactivate),
+    onCreateSnapshot: onCreateSnapshot,
+  })
 
   return (
     <div>
@@ -195,36 +258,22 @@ export function SnapshotTable({
         </Table>
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
-        {deletePermitted && selectedRows.length > 0 && (
-          <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-            <PopoverTrigger>
-              <Button variant="destructive" size="sm" className="h-8">
-                Bulk Delete
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent side="top">
-              <div className="flex flex-col gap-4">
-                <p>Are you sure you want to delete these Snapshots?</p>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      handleBulkDelete()
-                      setBulkDeleteConfirmationOpen(false)
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
         <Pagination table={table} selectionEnabled={deletePermitted} entityName="Snapshots" totalItems={totalItems} />
       </div>
+
+      <SnapshotBulkActionAlertDialog
+        action={pendingBulkAction}
+        count={
+          pendingBulkAction
+            ? {
+                [SnapshotBulkAction.Delete]: bulkActionCounts.deletable,
+                [SnapshotBulkAction.Deactivate]: bulkActionCounts.deactivatable,
+              }[pendingBulkAction]
+            : 0
+        }
+        onConfirm={handleBulkActionConfirm}
+        onCancel={() => setPendingBulkAction(null)}
+      />
     </div>
   )
 }
