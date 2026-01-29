@@ -26,10 +26,8 @@ import {
 import { InvoicesTableActionsProps } from './types'
 
 export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: InvoicesTableActionsProps) {
-  const handleDownload = () => {
-    if (invoice.fileUrl) {
-      window.open(invoice.fileUrl, '_blank')
-    }
+  if (!onView && !onVoid && !onPay) {
+    return null
   }
 
   return (
@@ -51,14 +49,7 @@ export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: Invoice
               Pay
             </DropdownMenuItem>
           )}
-          {invoice.fileUrl && (
-            <DropdownMenuItem className="cursor-pointer" onSelect={handleDownload}>
-              Download
-            </DropdownMenuItem>
-          )}
-          {Boolean(
-            invoice.status === 'finalized' && ['pending', 'failed'].includes(invoice.paymentStatus) && onVoid,
-          ) && (
+          {onVoid && (
             <>
               <DropdownMenuSeparator />
               <AlertDialog>

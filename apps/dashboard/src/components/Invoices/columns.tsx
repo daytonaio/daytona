@@ -182,13 +182,18 @@ export function getColumns({ onViewInvoice, onVoidInvoice, onPayInvoice }: GetCo
       size: 100,
       enableHiding: false,
       cell: ({ row }) => {
+        const isPayable = row.original.paymentStatus === 'pending' && row.original.status === 'finalized'
+        const isViewable = Boolean(row.original.fileUrl)
+        const isVoidable =
+          row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
+
         return (
           <div>
             <InvoicesTableActions
               invoice={row.original}
-              onView={row.original?.fileUrl ? onViewInvoice : undefined}
-              onVoid={onVoidInvoice}
-              onPay={onPayInvoice}
+              onView={isViewable ? onViewInvoice : undefined}
+              onVoid={isVoidable ? onVoidInvoice : undefined}
+              onPay={isPayable ? onPayInvoice : undefined}
             />
           </div>
         )
