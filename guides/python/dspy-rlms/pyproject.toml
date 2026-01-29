@@ -1,0 +1,15 @@
+[project]
+name = "dspy-rlms"
+version = "0.1.0"
+description = "DSPy Recursive Language Models with Daytona sandboxed code execution"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "dspy>=2.6.0",
+    "daytona>=0.136.0",
+    "python-dotenv>=1.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
