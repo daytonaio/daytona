@@ -39,14 +39,12 @@ Running sandboxes utilize CPU, memory, and disk storage. Every resource is charg
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import Daytona, CreateSandboxFromSnapshotParams
 
 daytona = Daytona()
-daytona = Daytona()
 
-# Create a sandbox
-sandbox = daytona.create()
 # Create a sandbox
 sandbox = daytona.create()
 
@@ -61,7 +59,6 @@ sandbox = daytona.create(params)
 # Create a sandbox with custom labels
 params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
 sandbox = daytona.create(params)
-
 ```
 
 </TabItem>
@@ -84,6 +81,7 @@ const sandbox = await daytona.create({ name: 'my_awesome_sandbox' });
 // Create a sandbox with custom labels
 const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
 ```
+
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
@@ -95,8 +93,8 @@ daytona = Daytona::Daytona.new
 # Create a sandbox
 sandbox = daytona.create
 ```
-</TabItem>
 
+</TabItem>
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
@@ -105,49 +103,15 @@ daytona create [flags]
 
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl https://app.daytona.io/api/sandbox \
   --request POST \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
-  --data '{
-  "name": "MySandbox",
-  "snapshot": "ubuntu-4vcpu-8ram-100gb",
-  "user": "daytona",
-  "env": {
-    "NODE_ENV": "production"
-  },
-  "labels": {
-    "daytona.io/public": "true"
-  },
-  "public": false,
-  "networkBlockAll": false,
-  "networkAllowList": "192.168.1.0/16,10.0.0.0/24",
-  "class": "small",
-  "target": "us",
-  "cpu": 2,
-  "gpu": 1,
-  "memory": 1,
-  "disk": 3,
-  "autoStopInterval": 30,
-  "autoArchiveInterval": 10080,
-  "autoDeleteInterval": 30,
-  "volumes": [
-    {
-      "volumeId": "volume123",
-      "mountPath": "/data",
-      "subpath": "users/alice"
-    }
-  ],
-  "buildInfo": {
-    "dockerfileContent": "FROM node:14\nWORKDIR /app\nCOPY . .\nRUN npm install\nCMD [\"npm\", \"start\"]",
-    "contextHashes": [
-      "hash1",
-      "hash2"
-    ]
-  }
-}'
+  --data '{}'
 ```
+
 </TabItem>
 </Tabs>
 
@@ -241,9 +205,11 @@ sandbox = daytona.create(
 
 </TabItem>
 <TabItem label="CLI" icon="seti:shell">
+
 ```bash
 daytona create [flags]
 ```
+
 </TabItem>
 </Tabs>
 
@@ -255,9 +221,11 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**Resources (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#resources)
 >
-> [**Resources (CLI)**](/docs/en/tools/cli/#daytona-create)
+> [**Resources (Ruby SDK)**](/docs/en/ruby-sdk/daytona)
 >
 > [**Resources (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
+>
+> [**Resources (CLI)**](/docs/en/tools/cli/#daytona-create)
 
 ### Ephemeral Sandboxes
 
@@ -431,15 +399,19 @@ console.log(sandbox.state)
 
 </TabItem>
 <TabItem label="CLI" icon="seti:shell">
+
 ```bash
 daytona list [flags]
 ```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
+
 ```bash
 curl https://app.daytona.io/api/sandbox \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
 ```
+
 </TabItem>
 </Tabs>
 
@@ -528,14 +500,9 @@ sandbox.start
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona stop [flags]
-```
-
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
 daytona sandbox stop [flags]
 ```
+
 </TabItem>
 <TabItem label="API" icon="seti:json">
 
@@ -607,32 +574,6 @@ daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona sandbox archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-# Archive Sandbox
-sandbox.archive
-```
-
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-
-```bash
-daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-
-</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -640,6 +581,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
   --request POST \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
 ```
+
 </TabItem>
 </Tabs>
 
@@ -654,6 +596,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sand
 > [**archive (CLI)**](/docs/en/tools/cli/#daytona-archive)
 >
 > [**archive (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive)
+
 ## Recover Sandboxes
 
 Daytona provides methods to recover sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/).
@@ -809,32 +752,6 @@ daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona sandbox delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-# Delete sandbox
-sandbox.delete
-```
-
-</TabItem>
-<TabItem label="CLI" icon="seti:shell">
-
-```bash
-daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
-```
-
-</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -894,6 +811,19 @@ const sandbox = await daytona.create({
       // Disables the auto-stop feature - default is 15 minutes
     autoStopInterval: 0,
 });
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'my-snapshot-name',
+    # Disables the auto-stop feature - default is 15 minutes
+    auto_stop_interval: 0
+  )
+)
 ```
 
 </TabItem>
@@ -1103,22 +1033,26 @@ Daytona provides methods to run sandboxes indefinitely using the [Python SDK](/d
 By default, Daytona Sandboxes auto-stop after 15 minutes of inactivity. To keep a sandbox running without interruption, set the auto-stop interval to `0` when creating a new sandbox:
 
 <Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-        snapshot="my_awesome_snapshot",
-        # Disables the auto-stop feature - default is 15 minutes
-        auto_stop_interval=0,
-    ))
-    ```
-  </TabItem>
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    const sandbox = await daytona.create({
-        snapshot: "my_awesome_snapshot",
-        // Disables the auto-stop feature - default is 15 minutes
-        autoStopInterval: 0,
-    });
-    ```
-  </TabItem>
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+    snapshot="my_awesome_snapshot",
+    # Disables the auto-stop feature - default is 15 minutes
+    auto_stop_interval=0,
+))
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const sandbox = await daytona.create({
+    snapshot: "my_awesome_snapshot",
+    // Disables the auto-stop feature - default is 15 minutes
+    autoStopInterval: 0,
+});
+```
+
+</TabItem>
 </Tabs>
