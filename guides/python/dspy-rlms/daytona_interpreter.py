@@ -1,14 +1,5 @@
-"""DaytonaInterpreter — DSPy CodeInterpreter backed by Daytona sandboxes.
-
-Provides secure, isolated Python code execution with persistent state
-across calls, suitable for use with DSPy's RLM module.
-
-Requirements:
-    pip install dspy daytona
-
-Environment:
-    DAYTONA_API_KEY - Your Daytona API key
-"""
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 import inspect
 import json
