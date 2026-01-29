@@ -113,6 +113,12 @@ export class SandboxService {
     return `sandbox:${id}:state-change`
   }
 
+  private assertSandboxNotErrored(sandbox: Sandbox): void {
+    if ([SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
+      throw new SandboxError('Sandbox is in an errored state')
+    }
+  }
+
   private async validateOrganizationQuotas(
     organization: Organization,
     regionId: string,
@@ -252,6 +258,8 @@ export class SandboxService {
 
   async archive(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    this.assertSandboxNotErrored(sandbox)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
       throw new SandboxError('State change in progress')
@@ -1196,6 +1204,8 @@ export class SandboxService {
         return sandbox
       }
 
+      this.assertSandboxNotErrored(sandbox)
+
       if (String(sandbox.state) !== String(sandbox.desiredState)) {
         // Allow start of stopped | archived and archiving | archived sandboxes
         if (
@@ -1259,6 +1269,8 @@ export class SandboxService {
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    this.assertSandboxNotErrored(sandbox)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
       throw new SandboxError('State change in progress')
