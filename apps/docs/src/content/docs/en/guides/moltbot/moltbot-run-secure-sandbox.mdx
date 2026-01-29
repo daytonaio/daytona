@@ -5,7 +5,7 @@ description: Learn how to set up and run Moltbot inside a Daytona sandbox for se
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-This guide walks you through setting up [Moltbot](https://www.molt.bot/) inside a Daytona sandbox and configuring messaging channels like Telegram and WhatsApp.
+This guide walks you through setting up [Moltbot](https://www.molt.bot/) inside a Daytona sandbox and configuring Telegram and WhatsApp channels.
 
 Running Moltbot in a Daytona sandbox keeps your AI assistant isolated from your local machine, provides a secure environment for code execution, and ensures your bot stays online 24/7 without tying up your personal computer.
 
@@ -116,7 +116,7 @@ daytona preview-url moltbot --port 18789
 
 This command generates a [signed preview URL](https://www.daytona.io/docs/en/preview/#signed-preview-url) that securely exposes the port.
 
-Open the URL in your browser, paste your gateway token, and click **Connect**.
+Open the URL in your browser, go to the **Overview** section, paste your gateway token in the **Gateway Token** field, and click **Connect**.
 
 :::tip
 The preview URL expires after 1 hour by default (customizable with `--expires` flag). When it expires, simply run the same CLI command to generate a new one.
@@ -127,14 +127,17 @@ The preview URL expires after 1 hour by default (customizable with `--expires` f
 Moltbot uses device pairing as a security measure - only approved devices can connect to and control your assistant. When you first attempt to connect from the dashboard, your browser registers as a new device that needs approval.
 
 List pending device requests:
+
 ```bash
 clawdbot devices list
 ```
 
 Approve your device:
+
 ```bash
 clawdbot devices approve REQUEST_ID
 ```
+
 Replace `REQUEST_ID` with the value from the **Request** column.
 
 Click **Connect** again in the dashboard.
@@ -193,8 +196,9 @@ nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
 
 #### Complete Verification
 
-1. Open your bot's chat in Telegram and send `/start`
+1. Open your bot's chat in Telegram and click **Start**
 2. A pairing code will appear. Approve the pairing request:
+
 ```bash
 clawdbot pairing approve telegram PAIRING_CODE
 ```
@@ -214,17 +218,18 @@ clawdbot config --section channels
 ```
 
 When prompted:
+
 1. Select **Local (this machine)** for gateway location
 2. Choose **Configure/link**
-3. Select **WhatsApp channel**
-4. Select **WhatsApp (QR link)**
-5. Select **Yes** for "Link WhatsApp now (QR)?"
+3. Select **WhatsApp (QR link)**
+4. Select **Yes** for "Link WhatsApp now (QR)?"
 
 #### Scan the QR Code
 
 Open WhatsApp on your phone, go to **Settings → Linked Devices → Link a Device**, and scan the QR code displayed in your terminal.
 
 Once paired, you'll see:
+
 ```
 ✅ Linked after restart; web session ready.
 ```
@@ -236,6 +241,7 @@ Select **This is my personal phone number** (or choose the other option if you h
 #### Finish Configuration
 
 When prompted to select another channel, choose **Finished**. You'll see:
+
 ```
 └  Configure complete.
 ```
