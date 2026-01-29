@@ -10,9 +10,14 @@ export interface OrganizationWallet {
   creditCardConnected: boolean
 
   automaticTopUp?: AutomaticTopUp
+  hasFailedOrPendingInvoice?: boolean
 }
 
 export type AutomaticTopUp = {
   thresholdAmount: number
   targetAmount: number
+}
+
+export interface WalletTopUpRequest {
+  amountCents: number
 }
