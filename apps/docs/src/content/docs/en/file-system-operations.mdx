@@ -574,6 +574,27 @@ results.forEach(result => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Download multiple files by calling download_file for each
+files_to_download = [
+  { remote: "data/file1.txt", local: nil },              # Download to memory
+  { remote: "data/file2.txt", local: "local_file2.txt" } # Download to local file
+]
+
+files_to_download.each do |f|
+  if f[:local]
+    sandbox.fs.download_file(f[:remote], f[:local])
+    puts "Downloaded #{f[:remote]} to #{f[:local]}"
+  else
+    content = sandbox.fs.download_file(f[:remote])
+    puts "Downloaded #{f[:remote]} to memory (#{content.size} bytes)"
+  end
+end
+```
+
+</TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
@@ -617,11 +638,13 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-download' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**download_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_files)
 >
 > [**downloadFiles (TypeScript SDK)**](/docs/en/typescript-sdk/file-system/#downloadfiles)
+>
+> [**download_file (Ruby SDK)**](/docs/en/ruby-sdk/file-system/#download_file)
 >
 > [**download multiple files (API)**](/docs/en/tools/api#daytona-toolbox/tag/file-system/POST/files/bulk-download)
 
