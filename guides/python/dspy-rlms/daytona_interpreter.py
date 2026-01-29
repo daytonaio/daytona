@@ -238,6 +238,10 @@ class DaytonaInterpreter:
         # detect when RLM (or the user) adds new ones after start().
         self._injected_tools: set[str] = set()
 
+        # Track whether typed SUBMIT has been registered, so we can detect
+        # when RLM sets output_fields after start().
+        self._submit_registered: bool = False
+
     @property
     def _final_output_marker(self) -> str:
         return "__DSPY_FINAL_OUTPUT__"
@@ -288,14 +292,21 @@ class DaytonaInterpreter:
             raise CodeInterpreterError(f"Failed to initialize sandbox: {result.error.value}")
 
         # If we have typed output fields, override SUBMIT with typed signature
-        if self.output_fields:
-            submit_code = self._generate_typed_submit()
-            result = self._sandbox.code_interpreter.run_code(
-                submit_code,
-                context=self._context,
-            )
-            if result.error:
-                raise CodeInterpreterError(f"Failed to register SUBMIT: {result.error.value}")
+        self._register_typed_submit()
+
+    def _register_typed_submit(self) -> None:
+        """Register typed SUBMIT if output_fields are set and not yet registered."""
+        if not self.output_fields or self._submit_registered:
+            return
+        submit_code = self._generate_typed_submit()
+        result = self._sandbox.code_interpreter.run_code(
+            submit_code,
+            context=self._context,
+        )
+        if result.error:
+            raise CodeInterpreterError(f"Failed to register SUBMIT: {result.error.value}")
+        self._submit_registered = True
+        logger.info("Registered typed SUBMIT with fields: %s", [f["name"] for f in self.output_fields])
 
     def _generate_typed_submit(self) -> str:
         """Generate SUBMIT function with typed output field signature."""
@@ -470,6 +481,8 @@ print("Broker server code written")
                     except Exception as e:
                         result = json.dumps({"error": str(e)})
 
+                    logger.info("Tool result for %s: %.500s", tool_name, result)
+
                     # Post result back to broker
                     url_result = f"{self._broker_url}/result/{call_id}"
                     payload = json.dumps({"result": result}).encode("utf-8")
@@ -550,6 +563,10 @@ print("Broker server code written")
         if variables:
             code = self._inject_variables(code, variables)
 
+        # RLM sets output_fields after start(), so register typed SUBMIT
+        # lazily on first execute() that has them.
+        self._register_typed_submit()
+
         # RLM (and users) can add tools to self.tools after start().
         # For example, RLM injects llm_query and llm_query_batched before
         # each execution via interpreter.tools.update(...).  We lazily
@@ -583,6 +600,7 @@ print("Broker server code written")
             context=self._context,
             on_stdout=on_stdout,
             on_stderr=on_stderr,
+            timeout=0,
         )
 
         stdout = "".join(stdout_parts)
@@ -611,6 +629,7 @@ print("Broker server code written")
                     context=self._context,
                     on_stdout=on_stdout,
                     on_stderr=on_stderr,
+                    timeout=0,
                 )
                 execution_result["result"] = result
                 execution_result["stdout"] = "".join(stdout_parts)
@@ -710,6 +729,7 @@ print("Broker server code written")
         self._broker_token = None
         self._broker_session_id = None
         self._injected_tools = set()
+        self._submit_registered = False
 
     def __enter__(self):
         self.start()
