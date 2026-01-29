@@ -211,6 +211,17 @@ daytona create [flags]
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{}'
+```
+
+</TabItem>
 </Tabs>
 
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
