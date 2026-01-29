@@ -38,12 +38,21 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 	log.Infof("Creating sandbox %s: cpus=%d, memoryMB=%d, storageGB=%d, snapshot=%s",
 		opts.SandboxId, opts.Cpus, opts.MemoryMB, opts.StorageGB, opts.Snapshot)
 
-	// Check if sandbox already exists
+	// Check if sandbox already exists (by socket OR disk)
+	// This prevents accidental deletion of existing sandboxes when CH process died
 	socketPath := c.getSocketPath(opts.SandboxId)
-	exists, _ := c.fileExists(ctx, socketPath)
-	if exists {
-		log.Infof("Sandbox %s already exists, returning existing info", opts.SandboxId)
+	socketExists, _ := c.fileExists(ctx, socketPath)
+	if socketExists {
+		log.Infof("Sandbox %s already exists (socket found), returning existing info", opts.SandboxId)
 		return c.GetSandboxInfo(ctx, opts.SandboxId)
+	}
+
+	// Also check if disk exists - sandbox may exist but CH process died
+	diskPath := c.getDiskPath(opts.SandboxId)
+	diskExists, _ := c.fileExists(ctx, diskPath)
+	if diskExists {
+		log.Warnf("Sandbox %s disk exists but socket missing - sandbox needs recovery, not creation", opts.SandboxId)
+		return nil, fmt.Errorf("sandbox %s exists but needs recovery (disk found, socket missing) - use start instead of create", opts.SandboxId)
 	}
 
 	// Check if this is a warm snapshot (has memory state for instant restore)

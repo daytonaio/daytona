@@ -31,10 +31,12 @@ Cloud Hypervisor runner for Daytona - implementation status and roadmap.
 ### VM Lifecycle
 
 - [x] Create sandbox (qcow2 overlay, instant CoW)
-- [x] Start sandbox (boot VM)
-- [x] Stop sandbox (pause VM)
+- [x] Start sandbox (boot VM or restore from checkpoint)
+- [x] Stop sandbox (pause + memory checkpoint for recovery)
 - [x] Destroy sandbox (cleanup resources)
 - [x] Get sandbox info
+- [x] **VM Recovery** (auto-recover VMs after CH restart)
+- [x] **Memory State Preservation** (checkpoint on stop, restore on recovery)
 
 ### Disk Management
 
@@ -350,6 +352,99 @@ Format: `tap-<11 chars from sandbox ID>` = 15 chars max
 | `/stats/memory` | GET | ✅ Memory stats JSON |
 | `/stats/memory/view` | GET | ✅ Memory stats HTML dashboard |
 
+## VM Recovery with Memory State Preservation
+
+### Problem
+
+When Cloud Hypervisor is restarted (e.g., due to system update or crash), all running VMs lose their CH process:
+
+- The Unix socket (`.sock` file) disappears
+- The VM state (paused/running) is lost
+- Only the disk and sandbox directory remain
+
+### Solution: Checkpoint on Stop
+
+`runner-ch` implements automatic VM recovery with **memory state preservation**:
+
+1. **Stop** creates a memory checkpoint (via `vm.snapshot`)
+2. **Recovery** restores from checkpoint if available (via `vm.restore`)
+3. **Start** cleans up checkpoint after successful resume
+
+### How It Works
+
+**Stop Flow:**
+
+```
+Stop(sandboxId)
+    → vm.pause (freeze VM)
+    → vm.snapshot → /sandboxes/<id>/checkpoint/
+    → VM remains paused with checkpoint saved
+```
+
+**Recovery Flow (after CH restart):**
+
+```
+RecoverSandbox(sandboxId)
+    → Check for checkpoint
+    → If exists: vm.restore (memory state preserved!)
+    → If not: cold boot (fresh kernel boot)
+    → Clean up checkpoint after restore
+```
+
+**Start Flow:**
+
+```
+StartVM(sandboxId)
+    → If socket missing: trigger recovery
+    → If paused: vm.resume + delete checkpoint
+    → If shutdown: vm.boot
+```
+
+### Checkpoint Structure
+
+```
+/var/lib/cloud-hypervisor/sandboxes/<sandbox-id>/
+├── disk.qcow2          # VM disk
+├── config.json         # Sandbox config (for recovery)
+├── checkpoint/         # Memory checkpoint (created on Stop)
+│   ├── state.json      # Device state
+│   ├── memory-ranges   # Memory content
+│   └── config.json     # VM config at snapshot time
+└── ...
+```
+
+### Sandbox Config Persistence
+
+Each sandbox saves its configuration to `config.json`:
+
+```json
+{
+  "sandboxId": "abc123...",
+  "cpus": 2,
+  "memoryMB": 2048,
+  "storageGB": 20,
+  "snapshot": "ubuntu-base.1",
+  "netnsId": 5,
+  "externalIP": "10.0.5.1",
+  "guestIP": "192.168.0.2",
+  "createdAt": "2026-01-28T12:00:00Z"
+}
+```
+
+### Performance
+
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Stop (with checkpoint) | ~2-5 sec | Creates memory snapshot |
+| Recovery (from checkpoint) | ~3-5 sec | Restores memory state |
+| Recovery (cold boot) | ~15-20 sec | Full kernel boot |
+
+### Limitations
+
+- Checkpoint is deleted after successful restore (one-time use)
+- Network namespace may be recreated with different IP if original was deleted
+- Sandboxes created before this feature won't have `config.json` (uses defaults)
+
 ## Known Issues
 
 1. **S3 pull not implemented** - Snapshot pull from S3 not yet implemented (push works)
@@ -451,4 +546,4 @@ Host Network
 
 ---
 
-_Last updated: 2026-01-25 (Memory Ballooning Implementation)_
+_Last updated: 2026-01-28 (Memory State Preservation on Stop/Recovery)_

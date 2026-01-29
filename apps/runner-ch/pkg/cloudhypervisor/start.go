@@ -14,12 +14,35 @@ import (
 
 // StartVM boots or resumes a VM
 // If the VM is paused, it resumes. If it's shut off, it boots.
+// If the CH process died (socket missing), it attempts recovery.
 func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 	mutex := c.getSandboxMutex(sandboxId)
 	mutex.Lock()
 	defer mutex.Unlock()
 
 	log.Infof("Starting sandbox %s", sandboxId)
+
+	// Check if socket exists - if not, the CH process died and we need recovery
+	socketPath := c.getSocketPath(sandboxId)
+	socketExists, _ := c.fileExists(ctx, socketPath)
+	if !socketExists {
+		// Check if disk exists (sandbox was created but CH died)
+		diskPath := c.getDiskPath(sandboxId)
+		diskExists, _ := c.fileExists(ctx, diskPath)
+		if diskExists {
+			log.Warnf("Sandbox %s socket missing but disk exists - attempting recovery", sandboxId)
+			// Unlock mutex before calling RecoverSandbox (which will re-lock)
+			mutex.Unlock()
+			err := c.RecoverSandbox(ctx, sandboxId)
+			mutex.Lock()
+			if err != nil {
+				return fmt.Errorf("failed to recover sandbox: %w", err)
+			}
+			log.Infof("Sandbox %s recovered successfully", sandboxId)
+			return nil
+		}
+		return fmt.Errorf("sandbox %s not found (no socket or disk)", sandboxId)
+	}
 
 	// Get current state
 	info, err := c.GetInfo(ctx, sandboxId)
@@ -37,6 +60,11 @@ func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 		log.Infof("Resuming paused sandbox %s", sandboxId)
 		if _, err := c.apiRequest(ctx, sandboxId, http.MethodPut, "vm.resume", nil); err != nil {
 			return fmt.Errorf("failed to resume VM: %w", err)
+		}
+		// Clean up checkpoint after successful resume (no longer needed)
+		if c.hasCheckpoint(ctx, sandboxId) {
+			log.Debugf("Cleaning up checkpoint for %s after resume", sandboxId)
+			_ = c.deleteCheckpoint(ctx, sandboxId)
 		}
 
 	case VmStateCreated, VmStateShutdown:

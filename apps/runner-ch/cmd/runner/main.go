@@ -119,6 +119,12 @@ func main() {
 		log.Warnf("Failed to initialize IP pool: %v", err)
 	}
 
+	// Recover orphaned sandboxes (VMs that lost their CH process due to restart)
+	log.Info("Checking for orphaned sandboxes to recover...")
+	if err := chClient.RecoverOrphanedSandboxes(ctx); err != nil {
+		log.Warnf("Failed to recover orphaned sandboxes: %v", err)
+	}
+
 	// List existing sandboxes
 	sandboxes, err := chClient.List(ctx)
 	if err != nil {
