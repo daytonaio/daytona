@@ -1,6 +1,7 @@
 {
   "header.copyForLlms": "Copy for LLM",
   "header.viewAsMarkdown": "View as Markdown",
+  "header.viewOpenApiSpec": "OpenAPI Specification",
   "footer.needHelp": "Need help?",
   "footer.reachSupport": "Reach support",
   "footer.latestUpdates": "Latest project updates?",
