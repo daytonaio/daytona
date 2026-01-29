@@ -77,6 +77,12 @@ export function SnapshotTable({
 
   const tableSorting = useMemo(() => convertApiSortingToTableSorting(sorting), [sorting])
 
+  const selectableCount = useMemo(() => {
+    return data.filter(
+      (snapshot) => !snapshot.general && !loadingSnapshots[snapshot.id] && snapshot.state !== SnapshotState.REMOVING,
+    ).length
+  }, [data, loadingSnapshots])
+
   const table = useReactTable({
     data,
     columns,
@@ -108,6 +114,7 @@ export function SnapshotTable({
         deletePermitted,
         loadingSnapshots,
         getRegionName,
+        selectableCount,
         onDelete,
         loading,
         onActivate,
@@ -162,12 +169,6 @@ export function SnapshotTable({
     },
     [table, loadingSnapshots],
   )
-
-  const selectableCount = useMemo(() => {
-    return data.filter(
-      (snapshot) => !snapshot.general && !loadingSnapshots[snapshot.id] && snapshot.state !== SnapshotState.REMOVING,
-    ).length
-  }, [data, loadingSnapshots])
 
   useSnapshotsCommands({
     writePermitted,

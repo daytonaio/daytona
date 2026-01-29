@@ -30,6 +30,7 @@ type SnapshotTableMeta = {
   onDeactivate?: (snapshot: SnapshotDto) => void
   onDelete: (snapshot: SnapshotDto) => void
   loading: boolean
+  selectableCount: number
 }
 
 declare module '@tanstack/react-table' {
@@ -66,21 +67,32 @@ const columns: ColumnDef<SnapshotDto>[] = [
   {
     id: 'select',
     header: ({ table }) => {
-      const { deletePermitted, loading } = getMeta(table)
+      const { deletePermitted, loading, selectableCount } = getMeta(table)
 
-      if (!deletePermitted) {
+      const selectedCount = table.getSelectedRowModel().rows.length
+      const anySelectable = selectableCount > 0
+      const allSelected = selectedCount > 0 && selectedCount === selectableCount
+      const partiallySelected = selectedCount > 0 && selectedCount < selectableCount
+
+      if (!deletePermitted || !anySelectable) {
         return null
       }
 
       return (
         <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          checked={allSelected || (partiallySelected && 'indeterminate')}
           onCheckedChange={() => {
-            table.getRowModel().rows.forEach((row) => {
-              if (!row.original.general) {
-                row.toggleSelected()
-              }
-            })
+            if (table)
+              table.getRowModel().rows.forEach((row) => {
+                if (row.original.general) {
+                  return
+                }
+                if (allSelected) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(true)
+                }
+              })
           }}
           aria-label="Select all"
           disabled={!deletePermitted || loading}
