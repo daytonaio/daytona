@@ -2,23 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
+    "module": "commonjs",
+    "moduleResolution": "node10",
     "types": [
+      "jest",
       "node"
     ],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "target": "es2022",
     "declaration": true,
     "resolveJsonModule": true
   },
   "include": [
-    ".opencode/**/*"
-  ],
-  "exclude": [
     "jest.config.ts",
+    ".opencode/**/*.test.ts",
     ".opencode/**/*.spec.ts",
-    ".opencode/**/*.test.ts"
+    ".opencode/**/*.d.ts"
   ]
 }

@@ -31,17 +31,35 @@
       "dependsOn": [
         {
           "target": "build",
-          "projects": ["sdk-typescript", "toolbox-api-client"]
-        }
+          "projects": ["sdk-typescript"]
+        },
+        "set-version"
       ]
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$NPM_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${NPM_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; npm version \"$VER\" --allow-same-version && echo \"Changed version to $VER\"; else echo \"Using version from package.json\"; fi"
+      },
+      "cache": true,
+      "inputs": ["{projectRoot}/package.json", { "env": "NPM_PKG_VERSION" }, { "env": "DEFAULT_PACKAGE_VERSION" }],
+      "outputs": ["{projectRoot}/package.json"]
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}/dist/libs/opencode-plugin",
-        "command": "npm publish --access public --registry https://registry.npmjs.org/"
+        "command": "npm publish --tag $NPM_TAG --access public --registry https://registry.npmjs.org/ --//registry.npmjs.org/:_authToken=$NPM_TOKEN",
+        "parallel": false
       },
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build",
+        {
+          "target": "publish",
+          "projects": ["sdk-typescript"]
+        }
+      ]
     }
   },
   "tags": []
