@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Sandbox } from '@daytonaio/sdk'
 import { logger } from '../core/logger'
 import { toast } from '../core/toast'

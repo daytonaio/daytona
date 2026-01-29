@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Handles file storage operations for project session data
  * Stores data per-project in ~/.local/share/opencode/storage/daytona/{projectId}.json
  */

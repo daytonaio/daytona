@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Manages Daytona sandbox sessions and persists session-sandbox mappings
  * Stores data per-project in ~/.local/share/opencode/storage/daytona/{projectId}.json
  */

@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * Global toast notification singleton
  * Queues toasts to prevent showing multiple at the same time
  */
