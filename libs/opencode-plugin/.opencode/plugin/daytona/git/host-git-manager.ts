@@ -15,7 +15,11 @@ type ExecResult = {
 
 function execCommand(cmd: string, options: any = {}): ExecResult {
   try {
-    const stdout = execSync(cmd, { stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8', ...options }) as unknown as string
+    const stdout = execSync(cmd, {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      encoding: 'utf8',
+      ...options,
+    }) as unknown as string
     return { ok: true, stdout: stdout ?? '', stderr: '', status: 0 }
   } catch (err: any) {
     const stdout = err?.stdout?.toString?.() ?? ''
@@ -60,10 +64,10 @@ export class HostGitManager {
         ? []
         : list
             .split('\n')
-            .map(s => s.trim())
+            .map((s) => s.trim())
             .filter(Boolean)
-            .map(s => Number.parseInt(s, 10))
-            .filter(n => Number.isFinite(n) && n > 0)
+            .map((s) => Number.parseInt(s, 10))
+            .filter((n) => Number.isFinite(n) && n > 0)
 
     let n = (nums.length ? Math.max(...nums) : 0) + 1
     const maxAttempts = 50 // Circuit-breaker
@@ -119,7 +123,8 @@ export class HostGitManager {
     })
     const treeOid = treeResult.stdout?.trim()
     if (treeResult.status !== 0 || !treeOid) {
-      const errorMsg = treeResult.stderr?.toString() || treeResult.error?.message || String(treeResult.error || 'unknown')
+      const errorMsg =
+        treeResult.stderr?.toString() || treeResult.error?.message || String(treeResult.error || 'unknown')
       throw new Error(`Failed to create empty tree: ${errorMsg}`)
     }
 

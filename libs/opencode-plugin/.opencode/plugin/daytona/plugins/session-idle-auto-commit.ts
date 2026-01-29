@@ -34,7 +34,9 @@ export function createSessionIdleAutoCommitPlugin(sessionManager: DaytonaSession
             }
             const sessionGit = new SessionGitManager(sandbox, repoPath, worktree, branchNumber)
             const didSync = await sessionGit.autoCommitAndPull(pluginCtx)
-            logger.info(`[idle] done sessionId=${sessionId} sandboxId=${sandbox.id} synced=${didSync} in ${Date.now() - start}ms`)
+            logger.info(
+              `[idle] done sessionId=${sessionId} sandboxId=${sandbox.id} synced=${didSync} in ${Date.now() - start}ms`,
+            )
           } catch (err: any) {
             logger.error(`[idle] error sessionId=${sessionId} in ${Date.now() - start}ms: ${err}`)
             toast.show({

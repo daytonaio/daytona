@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
-export const lspTool = (sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput) => ({
+export const lspTool = (
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+) => ({
   description: 'LSP operation in Daytona sandbox (code intelligence)',
   args: {
     op: z.string(),

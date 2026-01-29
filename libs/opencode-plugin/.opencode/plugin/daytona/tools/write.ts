@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
-export const writeTool = (sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput) => ({
+export const writeTool = (
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+) => ({
   description: 'Writes content to file in Daytona sandbox',
   args: {
     filePath: z.string(),
