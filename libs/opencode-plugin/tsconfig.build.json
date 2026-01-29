@@ -2,6 +2,11 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "@daytonaio/sdk": ["../../dist/libs/sdk-typescript/src/index.d.ts"],
+      "@daytonaio/toolbox-api-client": ["../../dist/libs/toolbox-api-client/src/index.d.ts"]
+    },
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

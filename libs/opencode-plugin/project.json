@@ -29,7 +29,8 @@
         ],
         "parallel": false
       },
-      "outputs": ["{projectRoot}/dist"]
+      "outputs": ["{projectRoot}/dist"],
+      "dependsOn": ["sdk-typescript:build", "toolbox-api-client:build"]
     },
     "publish": {
       "executor": "nx:run-commands",

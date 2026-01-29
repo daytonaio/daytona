@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod'
+import type { Match } from '@daytonaio/sdk'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
@@ -24,6 +25,6 @@ export const grepTool = (
       throw new Error('Work directory not available')
     }
     const matches = await sandbox.fs.findFiles(workDir, args.pattern)
-    return matches.map((m) => `${m.file}:${m.line}: ${m.content}`).join('\n')
+    return matches.map((m: Match) => `${m.file}:${m.line}: ${m.content}`).join('\n')
   },
 })
