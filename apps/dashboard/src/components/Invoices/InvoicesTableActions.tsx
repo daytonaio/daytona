@@ -25,19 +25,11 @@ import {
 } from '../ui/dropdown-menu'
 import { InvoicesTableActionsProps } from './types'
 
-export function InvoicesTableActions({ invoice, onView, onVoid }: InvoicesTableActionsProps) {
-  const handleView = () => {
-    onView?.(invoice)
-  }
-
+export function InvoicesTableActions({ invoice, onView, onVoid, onPay }: InvoicesTableActionsProps) {
   const handleDownload = () => {
     if (invoice.fileUrl) {
       window.open(invoice.fileUrl, '_blank')
     }
-  }
-
-  const handleVoid = () => {
-    onVoid?.(invoice)
   }
 
   return (
@@ -50,8 +42,13 @@ export function InvoicesTableActions({ invoice, onView, onVoid }: InvoicesTableA
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           {onView && (
-            <DropdownMenuItem className="cursor-pointer" onSelect={handleView}>
+            <DropdownMenuItem className="cursor-pointer" onSelect={() => onView?.(invoice)}>
               View
+            </DropdownMenuItem>
+          )}
+          {onPay && (
+            <DropdownMenuItem className="cursor-pointer" onSelect={() => onPay?.(invoice)}>
+              Pay
             </DropdownMenuItem>
           )}
           {invoice.fileUrl && (
@@ -85,7 +82,7 @@ export function InvoicesTableActions({ invoice, onView, onVoid }: InvoicesTableA
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleVoid} variant="destructive">
+                    <AlertDialogAction onClick={() => onVoid?.(invoice)} variant="destructive">
                       Void
                     </AlertDialogAction>
                   </AlertDialogFooter>

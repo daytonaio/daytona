@@ -22,6 +22,7 @@ export function InvoicesTable({
   onViewInvoice,
   onVoidInvoice,
   onRowClick,
+  onPayInvoice,
 }: InvoicesTableProps) {
   const { table } = useInvoicesTable({
     data,
@@ -30,6 +31,7 @@ export function InvoicesTable({
     onPaginationChange,
     onViewInvoice,
     onVoidInvoice,
+    onPayInvoice,
   })
 
   return (

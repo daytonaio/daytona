@@ -33,7 +33,7 @@ import {
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { CheckCircleIcon, CreditCardIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -61,6 +61,7 @@ const Wallet = () => {
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
 
   const wallet = walletQuery.data
+  const billingPortalUrl = billingPortalUrlQuery.data
   const organizationEmails = organizationEmailsQuery.data
 
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
@@ -242,14 +243,9 @@ const Wallet = () => {
     }
   }, [selectedOrganization, selectedPreset, oneTimeTopUpAmount, topUpWalletMutation])
 
-  const handleViewInvoice = useCallback(
+  const handlePayInvoice = useCallback(
     async (invoice: Invoice) => {
       if (!selectedOrganization) {
-        return
-      }
-
-      if (invoice.fileUrl) {
-        window.open(invoice.fileUrl, '_blank')
         return
       }
 
@@ -268,6 +264,17 @@ const Wallet = () => {
       }
     },
     [selectedOrganization, createInvoicePaymentUrlMutation],
+  )
+
+  const handleViewInvoice = useCallback(
+    async (invoice: Invoice) => {
+      if (!selectedOrganization) {
+        return
+      }
+
+      window.open(invoice.fileUrl, '_blank')
+    },
+    [selectedOrganization],
   )
 
   const handleVoidInvoice = useCallback(
@@ -290,7 +297,7 @@ const Wallet = () => {
     [selectedOrganization, voidInvoiceMutation],
   )
 
-  const isBillingLoading = walletQuery.isLoading || billingPortalUrlQuery.isLoading
+  const isBillingLoading = walletQuery.isLoading && billingPortalUrlQuery.isLoading
 
   return (
     <PageLayout>
@@ -393,6 +400,20 @@ const Wallet = () => {
                       </div>
                     </div>
                   </div>
+                  {billingPortalUrlQuery.isLoading ? (
+                    <Skeleton className="h-8 w-[160px]" />
+                  ) : billingPortalUrl ? (
+                    <Button variant="default" asChild className="flex items-center gap-2">
+                      <a
+                        href={`${billingPortalUrl}/customer-edit-information`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Update Billing Info
+                        <ArrowUpRight />
+                      </a>
+                    </Button>
+                  ) : null}
                 </div>
               </CardContent>
               <CardContent className="border-t border-border">
@@ -660,6 +681,7 @@ const Wallet = () => {
                   loading={invoicesQuery.isLoading}
                   onViewInvoice={handleViewInvoice}
                   onVoidInvoice={handleVoidInvoice}
+                  onPayInvoice={handlePayInvoice}
                 />
               </CardContent>
             </Card>

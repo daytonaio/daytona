@@ -28,6 +28,7 @@ interface UseInvoicesTableProps {
   data: Invoice[]
   onViewInvoice?: (invoice: Invoice) => void
   onVoidInvoice?: (invoice: Invoice) => void
+  onPayInvoice?: (invoice: Invoice) => void
 }
 
 export function useInvoicesTable({
@@ -37,11 +38,12 @@ export function useInvoicesTable({
   onPaginationChange,
   onViewInvoice,
   onVoidInvoice,
+  onPayInvoice,
 }: UseInvoicesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([
     {
-      id: 'number',
-      desc: false,
+      id: 'issuingDate',
+      desc: true,
     },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -51,8 +53,9 @@ export function useInvoicesTable({
       getColumns({
         onViewInvoice,
         onVoidInvoice,
+        onPayInvoice,
       }),
-    [onViewInvoice, onVoidInvoice],
+    [onViewInvoice, onVoidInvoice, onPayInvoice],
   )
 
   const table = useReactTable({
