@@ -1,0 +1,287 @@
+---
+title: "PtyHandle"
+hideTitleOnPage: true
+---
+
+## PtyHandle \{#ptyhandle\}
+
+単一の PTY セッションを管理するためのハンドル。
+
+**プロパティ**:
+
+* `sessionId` *string*
+
+入力の送信、ターミナルのリサイズ、完了までの待機、
+および PTY セッションへの WebSocket 接続の管理を行うメソッドを提供します。
+
+**例:**
+
+```typescript
+// PTYセッションを作成
+const ptyHandle = await process.createPty({
+  id: 'my-session',
+  cols: 120,
+  rows: 30,
+  onData: (data) => {
+    const text = new TextDecoder().decode(data);
+    process.stdout.write(text);
+  },
+});
+
+// コマンドを送信
+await ptyHandle.sendInput('ls -la\n');
+await ptyHandle.sendInput('exit\n');
+
+// 完了を待機
+const result = await ptyHandle.wait();
+console.log(`PTY exited with code: ${result.exitCode}`);
+
+// クリーンアップ
+await ptyHandle.disconnect();
+```
+
+### アクセッサ \{#accessors\}
+
+#### エラー \{#error\}
+
+##### 署名を取得 \{#get-signature\}
+
+```ts
+get error(): string
+```
+
+PTY の失敗時に返されるエラーメッセージ
+
+**戻り値**:
+
+* `string`
+
+***
+
+#### exitCode \{#exitcode\}
+
+##### 署名の取得 \{#get-signature\}
+
+```ts
+get exitCode(): number
+```
+
+PTY プロセスの終了コード（終了した場合）
+
+**戻り値**:
+
+* `number`
+
+### コンストラクタ \{#constructors\}
+
+#### new PtyHandle() \{#new-ptyhandle\}
+
+```ts
+new PtyHandle(
+   ws: WebSocket, 
+   handleResize: (cols: number, rows: number) => Promise<PtySessionInfo>, 
+   handleKill: () => Promise<void>, 
+   onPty: (data: Uint8Array) => void | Promise<void>, 
+   sessionId: string): PtyHandle
+```
+
+**パラメータ**:
+
+* `ws` *WebSocket*
+* `handleResize` *(cols: number, rows: number) =&gt; Promise&lt;PtySessionInfo&gt;*
+* `handleKill` *() =&gt; Promise&lt;void&gt;*
+* `onPty` *(data: Uint8Array) =&gt; void | Promise&lt;void&gt;*
+* `sessionId` *string*
+
+**返り値**:
+
+* `PtyHandle`
+
+### メソッド \{#methods\}
+
+#### disconnect() \{#disconnect\}
+
+```ts
+disconnect(): Promise<void>
+```
+
+PTY セッションから切断し、リソースをクリーンアップします。
+
+WebSocket 接続を閉じ、関連するリソースを解放します。
+PTY セッションの利用が完了したら呼び出してください。
+
+**Returns**:
+
+* `Promise<void>`
+
+**Example:**
+
+```ts
+// 完了時は必ずクリーンアップを行う
+try {
+  // ... PTYセッションを使用
+} finally {
+  await ptyHandle.disconnect();
+}
+```
+
+***
+
+#### isConnected() \{#isconnected\}
+
+```ts
+isConnected(): boolean
+```
+
+PTY セッションに接続されているかを確認します
+
+**戻り値**:
+
+* `boolean`
+
+***
+
+#### kill() \{#kill\}
+
+```ts
+kill(): Promise<void>
+```
+
+PTY プロセスをキルし、セッションを終了します。
+
+PTY セッションとその関連プロセスを強制終了します。
+この操作は取り消せず、PTY は即座に終了します。
+
+**Returns**:
+
+* `Promise<void>`
+
+**Throws**:
+
+キル操作に失敗した場合
+
+**Example:**
+
+```ts
+// 長時間実行中のプロセスを強制終了
+await ptyHandle.kill();
+
+// 終了確認を待機
+const result = await ptyHandle.wait();
+console.log(`プロセスが終了コード: ${result.exitCode} で終了しました`);
+```
+
+***
+
+#### resize() \{#resize\}
+
+```ts
+resize(cols: number, rows: number): Promise<PtySessionInfo>
+```
+
+PTY ターミナルのサイズを変更します。
+
+ターミナルのサイズを変更し、SIGWINCH シグナルで新しいサイズをターミナルアプリケーションに通知します。
+
+**パラメータ**:
+
+* `cols` *number* - 新しい列数
+* `rows` *number* - 新しい行数
+
+**戻り値**:
+
+* `Promise<PtySessionInfo>`
+
+**例:**
+
+```ts
+// 120x30にリサイズ
+await ptyHandle.resize(120, 30);
+```
+
+***
+
+#### sendInput() \{#sendinput\}
+
+```ts
+sendInput(data: string | Uint8Array<ArrayBufferLike>): Promise<void>
+```
+
+PTY セッションに入力データを送信します。
+
+キーボード入力やコマンドをターミナルセッションへ送ります。データはターミナルに手入力したのと同様に処理されます。
+
+**Parameters**:
+
+* `data` *送信する入力データ（コマンド、キーストロークなど）* - `string` | `Uint8Array`&lt;`ArrayBufferLike`&gt;
+
+**Returns**:
+
+* `Promise<void>`
+
+**Throws**:
+
+PTY が未接続である、または送信に失敗した場合
+
+**Example:**
+
+```ts
+// コマンドを送信
+await ptyHandle.sendInput('ls -la\n');
+
+// 生バイトを送信
+await ptyHandle.sendInput(new Uint8Array([3])); // Ctrl+C
+```
+
+***
+
+#### wait() \{#wait\}
+
+```ts
+wait(): Promise<PtyResult>
+```
+
+PTY プロセスが終了するまで待機し、結果を返します。
+
+このメソッドは PTY プロセスが終了するまでブロックし、終了時の情報を返します。
+
+**戻り値**:
+
+* `Promise<PtyResult>` - 終了コードとエラー情報を含む結果
+
+**例:**
+
+```ts
+// プロセスの完了を待機
+const result = await ptyHandle.wait();
+
+if (result.exitCode === 0) {
+  console.log('プロセスが正常に完了しました');
+} else {
+  console.log(`プロセスがコード ${result.exitCode} で失敗しました`);
+  if (result.error) {
+    console.log(`エラー: ${result.error}`);
+  }
+}
+```
+
+***
+
+#### waitForConnection() \{#waitforconnection\}
+
+```ts
+waitForConnection(): Promise<void>
+```
+
+WebSocket 接続が確立されるまで待機します。
+
+このメソッドは、PTY セッションが入力を受け取り出力を送信できる状態であることを保証します。
+サーバーが接続の確立を確認するまで待機します。
+
+**戻り値**:
+
+* `Promise<void>`
+
+**例外**:
+
+接続がタイムアウト（10 秒）する、または接続に失敗した場合
