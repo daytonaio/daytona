@@ -172,10 +172,10 @@ export class DaytonaSessionManager {
     const sandbox = await daytona.create().finally(() => clearTimeout(waitingLog))
     logger.info(`Daytona create done sessionId=${sessionId} sandboxId=${sandbox.id} in ${Date.now() - createStart}ms`)
     this.sessionSandboxes.set(sessionId, sandbox)
-    
+
     // Get or assign branch number for this sandbox
     let branchNumber = this.dataStorage.getBranchNumberForSandbox(projectId, sandbox.id)
-    
+
     if (!branchNumber) {
       try {
         branchNumber = SessionGitManager.allocateAndReserveBranchNumber(worktree)
@@ -185,9 +185,11 @@ export class DaytonaSessionManager {
         branchNumber = undefined
       }
     }
-    
+
     this.dataStorage.updateSession(projectId, worktree, sessionId, sandbox.id, branchNumber)
-    logger.info(`Sandbox created successfully: ${sandbox.id}${branchNumber ? ` with branch number ${branchNumber}` : ''}`)
+    logger.info(
+      `Sandbox created successfully: ${sandbox.id}${branchNumber ? ` with branch number ${branchNumber}` : ''}`,
+    )
 
     // Initialize git repo in the sandbox and sync with host
     try {

@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
-export const grepTool = (sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput) => ({
+export const grepTool = (
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+) => ({
   description: 'Searches for text pattern in files in Daytona sandbox',
   args: {
     pattern: z.string(),

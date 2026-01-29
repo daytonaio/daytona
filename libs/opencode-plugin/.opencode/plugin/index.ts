@@ -8,4 +8,4 @@
  * Re-exports all plugin components from the daytona module
  */
 
-export * from './daytona/index.js';
+export * from './daytona/index.js'

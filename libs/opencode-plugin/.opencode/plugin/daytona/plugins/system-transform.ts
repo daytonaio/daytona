@@ -4,10 +4,7 @@
  */
 
 import type { Plugin, PluginInput } from '@opencode-ai/plugin'
-import type {
-  ExperimentalChatSystemTransformInput,
-  ExperimentalChatSystemTransformOutput,
-} from '../core/types'
+import type { ExperimentalChatSystemTransformInput, ExperimentalChatSystemTransformOutput } from '../core/types'
 
 /**
  * Creates the system transform plugin for Daytona

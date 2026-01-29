@@ -7,7 +7,13 @@ import { z } from 'zod'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
-export const bashTool = (sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput, repoPath: string) => ({
+export const bashTool = (
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+  repoPath: string,
+) => ({
   description: 'Executes shell commands in a Daytona sandbox',
   args: {
     command: z.string(),

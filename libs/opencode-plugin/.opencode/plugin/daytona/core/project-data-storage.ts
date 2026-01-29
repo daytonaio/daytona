@@ -38,8 +38,8 @@ export class ProjectDataStorage {
   private listProjectIds(): string[] {
     try {
       return readdirSync(this.storageDir)
-        .filter(name => name.endsWith('.json'))
-        .map(name => name.slice(0, -'.json'.length))
+        .filter((name) => name.endsWith('.json'))
+        .map((name) => name.slice(0, -'.json'.length))
     } catch (err) {
       logger.error(`Failed to list project data files: ${err}`)
       return []
@@ -80,12 +80,11 @@ export class ProjectDataStorage {
       const found = otherData?.sessions?.[sessionId]
       if (!found) continue
 
-      const destination: ProjectSessionData =
-        current ?? {
-          projectId,
-          worktree,
-          sessions: {},
-        }
+      const destination: ProjectSessionData = current ?? {
+        projectId,
+        worktree,
+        sessions: {},
+      }
 
       // Remove from source first (best effort).
       try {
@@ -111,11 +110,7 @@ export class ProjectDataStorage {
   /**
    * Save project session data to disk
    */
-  save(
-    projectId: string,
-    worktree: string,
-    sessions: Record<string, SessionInfo>,
-  ): void {
+  save(projectId: string, worktree: string, sessions: Record<string, SessionInfo>): void {
     const filePath = this.getProjectFilePath(projectId)
     const projectData: ProjectSessionData = {
       projectId,
@@ -139,14 +134,20 @@ export class ProjectDataStorage {
     if (!projectData) {
       return undefined
     }
-    const session = Object.values(projectData.sessions).find(s => s.sandboxId === sandboxId)
+    const session = Object.values(projectData.sessions).find((s) => s.sandboxId === sandboxId)
     return session?.branchNumber
   }
 
   /**
    * Update a single session in the project file
    */
-  updateSession(projectId: string, worktree: string, sessionId: string, sandboxId: string, branchNumber?: number): void {
+  updateSession(
+    projectId: string,
+    worktree: string,
+    sessionId: string,
+    sandboxId: string,
+    branchNumber?: number,
+  ): void {
     const projectData = this.load(projectId) || {
       projectId,
       worktree,

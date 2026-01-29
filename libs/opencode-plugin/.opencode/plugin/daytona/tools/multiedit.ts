@@ -7,7 +7,12 @@ import { z } from 'zod'
 import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
-export const multieditTool = (sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput) => ({
+export const multieditTool = (
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+) => ({
   description: 'Applies multiple edits to a file in Daytona sandbox atomically',
   args: {
     filePath: z.string(),
@@ -18,10 +23,7 @@ export const multieditTool = (sessionManager: DaytonaSessionManager, projectId: 
       }),
     ),
   },
-  async execute(
-    args: { filePath: string; edits: Array<{ oldString: string; newString: string }> },
-    ctx: ToolContext,
-  ) {
+  async execute(args: { filePath: string; edits: Array<{ oldString: string; newString: string }> }, ctx: ToolContext) {
     const sandbox = await sessionManager.getSandbox(ctx.sessionID, projectId, worktree, pluginCtx)
     const buffer = await sandbox.fs.downloadFile(args.filePath)
     const decoder = new TextDecoder()

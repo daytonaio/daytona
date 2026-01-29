@@ -22,7 +22,12 @@ import { getPreviewURLTool } from './tools/get-preview-url'
 import type { DaytonaSessionManager } from './core/session-manager'
 import type { PluginInput } from '@opencode-ai/plugin'
 
-export function createDaytonaTools(sessionManager: DaytonaSessionManager, projectId: string, worktree: string, pluginCtx: PluginInput) {
+export function createDaytonaTools(
+  sessionManager: DaytonaSessionManager,
+  projectId: string,
+  worktree: string,
+  pluginCtx: PluginInput,
+) {
   const repoPath = sessionManager.repoPath
   return {
     bash: bashTool(sessionManager, projectId, worktree, pluginCtx, repoPath),

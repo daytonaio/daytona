@@ -36,10 +36,7 @@ export class DaytonaSandboxGitManager {
         return false
       }
       await this.sandbox.process.executeCommand('git add .', this.repoPath)
-      await this.sandbox.process.executeCommand(
-        'git commit -am "Auto-commit from Daytona plugin"',
-        this.repoPath,
-      )
+      await this.sandbox.process.executeCommand('git commit -am "Auto-commit from Daytona plugin"', this.repoPath)
       logger.info(`Auto-committed changes in sandbox at ${this.repoPath}`)
       return true
     } catch (err) {
