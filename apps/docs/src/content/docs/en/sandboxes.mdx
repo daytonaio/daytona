@@ -53,13 +53,7 @@ sandbox = daytona.create()
 # Create a sandbox with python
 params = CreateSandboxFromSnapshotParams(language="python")
 sandbox = daytona.create(params)
-# Create a sandbox with python
-params = CreateSandboxFromSnapshotParams(language="python")
-sandbox = daytona.create(params)
 
-# Create a sandbox with a custom name
-params = CreateSandboxFromSnapshotParams(name="my_awesome_sandbox")
-sandbox = daytona.create(params)
 # Create a sandbox with a custom name
 params = CreateSandboxFromSnapshotParams(name="my_awesome_sandbox")
 sandbox = daytona.create(params)
@@ -67,14 +61,12 @@ sandbox = daytona.create(params)
 # Create a sandbox with custom labels
 params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
 sandbox = daytona.create(params)
-```
-# Create a sandbox with custom labels
-params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
-sandbox = daytona.create(params)
+
 ```
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 import { Daytona } from '@daytonaio/sdk';
 
@@ -92,14 +84,27 @@ const sandbox = await daytona.create({ name: 'my_awesome_sandbox' });
 // Create a sandbox with custom labels
 const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
 ```
-
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Daytona.new
+
+# Create a sandbox
+sandbox = daytona.create
+```
+</TabItem>
+
 <TabItem label="CLI" icon="seti:shell">
+
 ```bash
 daytona create [flags]
 ```
+
 </TabItem>
-  <TabItem label="API" icon="seti:json">
+<TabItem label="API" icon="seti:json">
 ```bash
 curl https://app.daytona.io/api/sandbox \
   --request POST \
@@ -146,16 +151,15 @@ curl https://app.daytona.io/api/sandbox \
 </TabItem>
 </Tabs>
 
-To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [API](/docs/en/tools/api/#daytona/) and [CLI](/docs/en/tools/cli) references:
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#daytonacreate), [TypeScript SDK](/docs/en/typescript-sdk/daytona#create), and [Ruby SDK](/docs/en/ruby-sdk/daytona#create), [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox), and [CLI](/docs/en/tools/cli/#daytona-create) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [API](/docs/en/tools/api/#daytona/), and [CLI](/docs/en/tools/cli/) references:
 
 > [**create (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonacreate)
 >
 > [**create (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#create)
 >
-> [**create (CLI)**](/docs/en/tools/cli/#daytona-sandbox-create)
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
+>
+> [**create (CLI)**](/docs/en/tools/cli/#daytona-create)
 >
 > [**create (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
@@ -170,6 +174,7 @@ To set custom sandbox resources (CPU, memory, and disk space), use the `Resource
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
 
@@ -192,6 +197,7 @@ sandbox = daytona.create(params)
 
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 import { Daytona, Image } from "@daytonaio/sdk";
 
@@ -234,17 +240,24 @@ sandbox = daytona.create(
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+```bash
+daytona create [flags]
+```
+</TabItem>
 </Tabs>
 
 All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#resources), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), and [Ruby SDK](/docs/en/ruby-sdk/daytona#resources) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
 
 > [**Resources (Python SDK)**](/docs/en/python-sdk/sync/sandbox#resources)
 >
 > [**Resources (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#resources)
 >
-> [**Resources (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#resources)
+> [**Resources (CLI)**](/docs/en/tools/cli/#daytona-create)
+>
+> [**Resources (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
 ### Ephemeral Sandboxes
 
@@ -313,7 +326,7 @@ By default, network access follows standard security policies, but you can [cust
 
 ## Start Sandboxes
 
-Daytona provides options to start sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/#daytona-start), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start) references.
+Daytona provides options to start sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/) references.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the start icon (**▶**) next to the sandbox you want to start.
@@ -341,12 +354,6 @@ await sandbox.start();
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona start [flags]
-```
-
-</TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
@@ -363,11 +370,6 @@ daytona start [flags]
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona sandbox start [flags]
-```
-</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -375,16 +377,19 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/start' \
 --request POST \
 --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstart), [TypeScript SDK](/docs/typescript-sdk/sandbox#start), [Ruby SDK](/docs/ruby-sdk/sandbox#start), [CLI](/docs/en/tools/cli/#daytona-start), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**start (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstart)
 >
 > [**start (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#start)
 >
-> [**start (CLI)**](/docs/en/tools/cli/#daytona-sandbox-start)
+> [**start (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#start)
+>
+> [**start (CLI)**](/docs/en/tools/cli/#daytona-start)
 >
 > [**start (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start)
 
@@ -438,14 +443,15 @@ curl https://app.daytona.io/api/sandbox \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop), [TypeScript SDK](/docs/typescript-sdk/sandbox#stop), and [Ruby SDK](/docs/ruby-sdk/sandbox#list) references:
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox), [TypeScript SDK](/docs/typescript-sdk/sandbox), [API](/docs/en/tools/api/#daytona) and [CLI](/docs/en/tools/cli) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
 
-> [**list (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxlist)
+> [**list (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonalist)
 >
-> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#list)
+> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#list)
 >
-> [**list (CLI)**](/docs/en/tools/cli/#daytona-sandbox-list)
+> [**list (Ruby SDK)**](/docs/en/ruby-sdk/daytona#list)
+>
+> [**list (CLI)**](/docs/en/tools/cli/#daytona-list)
 >
 > [**list (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox)
 
@@ -501,11 +507,6 @@ await sandbox.start();
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:shell">
-```bash
-daytona stop [flags]
-```
-</TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
@@ -543,25 +544,23 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
   --request POST \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
 ```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [API](/docs/en/tools/api/#daytona) and [CLI](/docs/en/tools/cli) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstop)
 >
->[**stop (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#stop)
+> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#stop)
+>
+> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#stop)
 >
 > [**find_one (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonafind_one)
 >
 > [**findOne (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#findone)
 >
-> [**stop (CLI)**](/docs/en/tools/cli/#daytona-sandbox-stop)
->
->
-> [**stop (Ruby SDK)**](/docs/ruby-sdk/sandbox#stop)
->
-> [**find_one (Ruby SDK)**](/docs/ruby-sdk/sandbox#find_one)
+> [**find_one (Ruby SDK)**](/docs/en/ruby-sdk/daytona#find_one)
 >
 > [**stop (CLI)**](/docs/en/tools/cli/#daytona-stop)
 >
@@ -644,13 +643,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxarchive), [TypeScript SDK](/docs/typescript-sdk/sandbox#archive), [Ruby SDK](/docs/ruby-sdk/sandbox#archive), [CLI](/docs/en/tools/cli/#daytona-archive), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxarchive), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#archive), [Ruby SDK](/docs/en/ruby-sdk/sandbox#archive), [CLI](/docs/en/tools/cli/#daytona-archive), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive) references:
 
 > [**archive (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxarchive)
 >
 > [**archive (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#archive)
 >
-> [**archive (CLI)**](/docs/en/tools/cli/#daytona-sandbox-archive)
+> [**archive (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#archive)
+>
+> [**archive (CLI)**](/docs/en/tools/cli/#daytona-archive)
 >
 > [**archive (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive)
 ## Recover Sandboxes
@@ -693,13 +694,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/ruby-sdk/sandbox#recover), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/en/ruby-sdk/sandbox#recover), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
 
 > [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
 >
 > [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
 >
-> [**recover (Ruby SDK)**](/docs/ruby-sdk/sandbox#recover)
+> [**recover (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#recover)
 >
 > [**recover (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover)
 
@@ -755,13 +756,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/ruby-sdk/sandbox#recover), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/en/ruby-sdk/sandbox#recover), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
 
 > [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
 >
-> [**recover (TypeScript SDK)**](/docs/typescript-sdk/sandbox#recover)
+> [**recover (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#recover)
 >
-> [**recover (Ruby SDK)**](/docs/ruby-sdk/sandbox#recover)
+> [**recover (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#recover)
 >
 > [**recover (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover)
 
@@ -844,13 +845,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxdelete), [TypeScript SDK](/docs/typescript-sdk/sandbox#delete), [Ruby SDK](/docs/ruby-sdk/sandbox#delete), [CLI](/docs/en/tools/cli/#daytona-delete), and [API](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName}) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxdelete), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#delete), [Ruby SDK](/docs/en/ruby-sdk/sandbox#delete), [CLI](/docs/en/tools/cli/#daytona-delete), and [API](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName}) references:
 
 > [**delete (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxdelete)
 >
 > [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#delete)
 >
-> [**delete (CLI)**](/docs/en/tools/cli/#daytona-sandbox-delete)
+> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#delete)
+>
+> [**delete (CLI)**](/docs/en/tools/cli/#daytona-delete)
 >
 > [**delete (API)**](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName})
 
@@ -924,11 +927,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval), [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_stop_interval), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autostop/1) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautostopinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_stop_interval), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autostop/1) references:
 
-> [**set_auto_stop_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval)
+> [**set_autostop_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval)
 >
 > [**setAutostopInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautostopinterval)
+>
+> [**auto_stop_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_stop_interval)
 >
 > [**set_auto_stop_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autostop/1)
 
@@ -992,11 +997,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_archive_interval), [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_archive_interval), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval}) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_archive_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautoarchiveinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_archive_interval), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval}) references:
 
 > [**set_auto_archive_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
 >
 > [**setAutoArchiveInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautoarchiveinterval)
+>
+> [**auto_archive_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_archive_interval)
 >
 > [**set_auto_archive_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval})
 
@@ -1079,11 +1086,13 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), and [API](/docs/en/tools/api/#daytona) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_delete_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautodeleteinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_delete_interval), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autodelete/{interval}) references:
 
 > [**set_auto_delete_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
 >
 > [**setAutoDeleteInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautodeleteinterval)
+>
+> [**auto_delete_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_delete_interval)
 >
 > [**set_auto_delete_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autodelete/{interval})
 
