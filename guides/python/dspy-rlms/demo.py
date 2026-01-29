@@ -1,8 +1,5 @@
-"""Economic analysis of The Count of Monte Cristo using DSPy RLM on Daytona.
-
-Fetches the novel from Project Gutenberg, uses RLM to analyze character wealth
-trajectories across chapters, and plots the results with matplotlib.
-"""
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 import json
 import re
