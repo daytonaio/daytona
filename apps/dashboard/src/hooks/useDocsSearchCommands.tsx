@@ -146,7 +146,7 @@ const parseSDKLanguage = (hit: AlgoliaHit) => {
 }
 
 const handleSelect = (hit: AlgoliaHit) => {
-  const url = hit.url || `https://www.daytona.io/${hit.slug}`
+  const url = `https://www.daytona.io${hit.url}`
   window.open(url, '_blank')
 }
 
