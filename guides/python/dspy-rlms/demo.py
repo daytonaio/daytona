@@ -47,7 +47,7 @@ def fetch_chapters() -> list[str]:
     text = text[start:end]
 
     # Split on chapter headings like " Chapter 1. Marseilles—The Arrival"
-    parts = re.split(r"\n\s*Chapter \d+\.", text)
+    parts = re.split(r"(?:^|\n)\s*Chapter \d+\.", text)
     # First element is empty (before Chapter 1), rest are chapter bodies
     # Re-attach chapter numbers for context
     chapter_list = []
@@ -83,7 +83,7 @@ TASK = (
     "produce a dict with keys: chapter (int), character (str), wealth (int 1-10 "
     "where 1=destitute and 10=richest in Paris), and event (str, brief description "
     "of what changed). Track at least: Dantès, Danglars, Fernand/Morcerf, "
-    "Villefort, and Mercédès."
+    "Villefort, and Mercédès. You need to cover each chapter in the book."
 )
 
 WEALTH_DATA_PATH = Path(__file__).parent / "wealth_data.json"
@@ -128,7 +128,7 @@ plt.style.use("dark_background")
 plt.rcParams.update(
     {
         "font.family": "serif",
-        "font.size": 11,
+        "font.size": 14,
         "axes.spines.top": False,
         "axes.spines.right": False,
         "axes.facecolor": "#0d1117",
@@ -146,17 +146,17 @@ for char, (xs, ys) in sorted(series.items()):
     ax.scatter(xs, ys_arr, s=8, color=color, alpha=0.25, zorder=2)
 
 ax.set_yticks([1, 10])
-ax.set_yticklabels(["Destitute", "Richest\nin Paris"], fontsize=10)
+ax.set_yticklabels(["Destitute", "Richest\nin Paris"], fontsize=13)
 ax.set_ylim(0.5, 10.5)
 
 ax.set_xlim(1, 117)
 ax.set_xticks(range(1, 117, 10))
-ax.set_xlabel("Chapter", fontsize=12)
+ax.set_xlabel("Chapter", fontsize=15)
 
 ax.yaxis.grid(True, alpha=0.1, linestyle="--", color="#ffffff")
 ax.xaxis.grid(False)
 
-ax.set_title("The Count of Monte Cristo — Character Wealth Trajectories", fontsize=15, fontweight="bold", pad=14)
+ax.set_title("The Count of Monte Cristo — Character Wealth Trajectories", fontsize=18, fontweight="bold", pad=14)
 
 ax.legend(
     loc="upper left",
@@ -164,7 +164,7 @@ ax.legend(
     framealpha=0.6,
     fancybox=True,
     edgecolor="#333333",
-    fontsize=10,
+    fontsize=13,
     ncol=1,
     bbox_to_anchor=(0.01, 0.93),
 )
