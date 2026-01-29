@@ -313,6 +313,8 @@ const getColumns = ({
 
 const allPermissions = Object.values(CreateApiKeyPermissionsEnum)
 
+const IMPLICIT_READ_RESOURCES = ['Sandboxes', 'Snapshots', 'Registries', 'Regions']
+
 function PermissionsTooltip({
   permissions,
   availablePermissions,
@@ -348,8 +350,9 @@ function PermissionsTooltip({
         <div className="flex flex-col">
           {availableGroups.map((group) => {
             const selectedPermissions = group.permissions.filter((p) => permissions.includes(p))
+            const hasImplicitRead = IMPLICIT_READ_RESOURCES.includes(group.name)
 
-            if (selectedPermissions.length === 0) {
+            if (selectedPermissions.length === 0 && !hasImplicitRead) {
               return null
             }
 
@@ -357,6 +360,11 @@ function PermissionsTooltip({
               <div key={group.name} className="flex justify-between gap-3 border-b last:border-b-0 p-2">
                 <h3 className="text-sm">{group.name}</h3>
                 <div className="flex gap-2 flex-wrap justify-end">
+                  {hasImplicitRead && (
+                    <Badge variant="outline" className="capitalize rounded-sm">
+                      Read
+                    </Badge>
+                  )}
                   {selectedPermissions.map((p) => (
                     <Badge key={p} variant="outline" className="capitalize rounded-sm">
                       {p.split(':')[0]}

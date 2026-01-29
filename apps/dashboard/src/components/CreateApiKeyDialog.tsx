@@ -49,6 +49,8 @@ const isReadPermission = (permission: CreateApiKeyPermissionsEnum) => permission
 const isWritePermission = (permission: CreateApiKeyPermissionsEnum) => permission.startsWith('write:')
 const isDeletePermission = (permission: CreateApiKeyPermissionsEnum) => permission.startsWith('delete:')
 
+const IMPLICIT_READ_RESOURCES = ['Sandboxes', 'Snapshots', 'Registries', 'Regions']
+
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   expiresAt: z.date().optional(),
@@ -247,6 +249,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                               const readPermission = group.permissions.find(isReadPermission)
                               const writePermission = group.permissions.find(isWritePermission)
                               const deletePermission = group.permissions.find(isDeletePermission)
+                              const hasImplicitRead = IMPLICIT_READ_RESOURCES.includes(group.name)
 
                               return (
                                 <div
@@ -274,14 +277,26 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                                       ] as CreateApiKeyPermissionsEnum[])
                                     }}
                                   >
-                                    <ToggleGroupItem
-                                      value={readPermission ?? ''}
-                                      aria-label="Toggle read"
-                                      className="min-w-[64px]"
-                                      disabled={!readPermission}
-                                    >
-                                      {readPermission ? 'Read' : '-'}
-                                    </ToggleGroupItem>
+                                    {hasImplicitRead ? (
+                                      <ToggleGroupItem
+                                        value=""
+                                        aria-label="Implicit read access"
+                                        className="min-w-[64px]"
+                                        disabled
+                                        data-state="on"
+                                      >
+                                        Read*
+                                      </ToggleGroupItem>
+                                    ) : (
+                                      <ToggleGroupItem
+                                        value={readPermission ?? ''}
+                                        aria-label="Toggle read"
+                                        className="min-w-[64px]"
+                                        disabled={!readPermission}
+                                      >
+                                        {readPermission ? 'Read' : '-'}
+                                      </ToggleGroupItem>
+                                    )}
                                     <ToggleGroupItem
                                       value={writePermission ?? ''}
                                       aria-label="Toggle write"
@@ -306,6 +321,9 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                           {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
                             <FieldError errors={field.state.meta.errors} />
                           )}
+                          <p className="text-sm text-muted-foreground mt-3">
+                            *Read access is always granted for these resources.
+                          </p>
                         </Field>
                       )}
                     </form.Field>
