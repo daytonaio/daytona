@@ -485,6 +485,18 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/moltbot/moltbot-run-secure-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.moltbot'),
+          disablePagination: true,
+          attrs: {
+            icon: 'moltbot.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/codex/codex-sdk-interactive-terminal-sandbox',
             locale
           ),
