@@ -63,6 +63,24 @@ puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// List files in a directory
+files, err := sandbox.FileSystem.ListFiles(ctx, "workspace")
+if err != nil {
+	log.Fatal(err)
+}
+
+for _, file := range files {
+	fmt.Printf("Name: %s\n", file.Name)
+	fmt.Printf("Is directory: %t\n", file.IsDirectory)
+	fmt.Printf("Size: %d\n", file.Size)
+	fmt.Printf("Modified: %s\n", file.ModifiedTime)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -72,7 +90,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**list_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemlist_files)
 >
@@ -127,6 +145,29 @@ puts "Path is a directory" if info.is_dir
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Get file metadata
+info, err := sandbox.FileSystem.GetFileInfo(ctx, "workspace/data/file.txt")
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Size: %d bytes\n", info.Size)
+fmt.Printf("Modified: %s\n", info.ModifiedTime)
+fmt.Printf("Mode: %s\n", info.Mode)
+
+// Check if path is a directory
+info, err = sandbox.FileSystem.GetFileInfo(ctx, "workspace/data")
+if err != nil {
+	log.Fatal(err)
+}
+if info.IsDirectory {
+	fmt.Println("Path is a directory")
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -136,7 +177,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/info?path='
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**get_file_info (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemget_file_info)
 >
@@ -178,6 +219,19 @@ sandbox.fs.create_folder("workspace/secrets", "700")
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create with specific permissions
+err := sandbox.FileSystem.CreateFolder(ctx, "workspace/new-dir",
+	options.WithMode("755"),
+)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -188,7 +242,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/folder?path=&mode='
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**create_folder (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemcreate_folder)
 >
@@ -242,6 +296,24 @@ sandbox.fs.upload_file(data, "tmp/config.json")
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Upload from a local file path
+err := sandbox.FileSystem.UploadFile(ctx, "local_file.txt", "remote_file.txt")
+if err != nil {
+	log.Fatal(err)
+}
+
+// Or upload from byte content
+content := []byte("Hello, World!")
+err = sandbox.FileSystem.UploadFile(ctx, content, "hello.txt")
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -254,7 +326,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/upload?path=' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**upload_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemupload_file)
 >
@@ -334,6 +406,28 @@ sandbox.fs.upload_files(files)
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Upload multiple files by calling UploadFile for each
+filesToUpload := []struct {
+	source      string
+	destination string
+}{
+	{"file1.txt", "data/file1.txt"},
+	{"file2.txt", "data/file2.txt"},
+	{"settings.json", "config/settings.json"},
+}
+
+for _, f := range filesToUpload {
+	err := sandbox.FileSystem.UploadFile(ctx, f.source, f.destination)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -344,7 +438,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-upload' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**upload_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemupload_files)
 >
@@ -397,6 +491,25 @@ puts "Size of the downloaded file: #{size_mb} MB"
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Download and get contents in memory
+content, err := sandbox.FileSystem.DownloadFile(ctx, "file1.txt", nil)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(string(content))
+
+// Download and save to a local file
+localPath := "local_file.txt"
+content, err = sandbox.FileSystem.DownloadFile(ctx, "file1.txt", &localPath)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -406,7 +519,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/download?path='
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**download_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_file)
 >
@@ -461,6 +574,33 @@ results.forEach(result => {
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Download multiple files by calling DownloadFile for each
+filesToDownload := []struct {
+	remotePath string
+	localPath  *string
+}{
+	{"data/file1.txt", nil},                           // Download to memory
+	{"data/file2.txt", ptrString("local_file2.txt")},  // Download to local file
+}
+
+for _, f := range filesToDownload {
+	content, err := sandbox.FileSystem.DownloadFile(ctx, f.remotePath, f.localPath)
+	if err != nil {
+		fmt.Printf("Error downloading %s: %v\n", f.remotePath, err)
+		continue
+	}
+	if f.localPath == nil {
+		fmt.Printf("Downloaded %s to memory (%d bytes)\n", f.remotePath, len(content))
+	} else {
+		fmt.Printf("Downloaded %s to %s\n", f.remotePath, *f.localPath)
+	}
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -477,7 +617,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-download' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**download_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdownload_files)
 >
@@ -515,6 +655,23 @@ sandbox.fs.delete_file("workspace/old_dir", recursive: true)
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Delete a file
+err := sandbox.FileSystem.DeleteFile(ctx, "workspace/file.txt", false)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Delete a directory recursively
+err = sandbox.FileSystem.DeleteFile(ctx, "workspace/old_dir", true)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -525,7 +682,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files?path=' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**delete_file (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemdelete_file)
 >
@@ -586,6 +743,35 @@ sandbox.fs.set_file_permissions(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Set file permissions
+err := sandbox.FileSystem.SetFilePermissions(ctx, "workspace/file.txt",
+	options.WithPermissionMode("644"),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Set owner and group
+err = sandbox.FileSystem.SetFilePermissions(ctx, "workspace/file.txt",
+	options.WithOwner("daytona"),
+	options.WithGroup("daytona"),
+)
+if err != nil {
+	log.Fatal(err)
+}
+
+// Get file info to check permissions
+fileInfo, err := sandbox.FileSystem.GetFileInfo(ctx, "workspace/file.txt")
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Mode: %s\n", fileInfo.Mode)
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -596,7 +782,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/permissions?path=' 
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**set_file_permissions (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemset_file_permissions)
 >
@@ -684,6 +870,33 @@ end
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Search for text in files
+result, err := sandbox.FileSystem.FindFiles(ctx, "workspace/src", "text-of-interest")
+if err != nil {
+	log.Fatal(err)
+}
+matches := result.([]map[string]any)
+for _, match := range matches {
+	fmt.Printf("Absolute file path: %s\n", match["file"])
+	fmt.Printf("Line number: %v\n", match["line"])
+	fmt.Printf("Line content: %s\n\n", match["content"])
+}
+
+// Replace text in files
+_, err = sandbox.FileSystem.ReplaceInFiles(ctx,
+	[]string{"workspace/file1.txt", "workspace/file2.txt"},
+	"old_text",
+	"new_text",
+)
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 Find text in files:
@@ -710,7 +923,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/replace' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
 
 > [**find_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemfind_files)
 >
@@ -787,6 +1000,29 @@ sandbox.fs.move_files(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Rename a file
+err := sandbox.FileSystem.MoveFiles(ctx, "workspace/data/old_name.txt", "workspace/data/new_name.txt")
+if err != nil {
+	log.Fatal(err)
+}
+
+// Move a file to a different directory
+err = sandbox.FileSystem.MoveFiles(ctx, "workspace/data/file.txt", "workspace/archive/file.txt")
+if err != nil {
+	log.Fatal(err)
+}
+
+// Move a directory
+err = sandbox.FileSystem.MoveFiles(ctx, "workspace/old_dir", "workspace/new_dir")
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -797,7 +1033,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/move?source=&destin
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona-toolbox) references:
 
 > [**move_files (Python SDK)**](/docs/en/python-sdk/sync/file-system/#filesystemmove_files)
 >
