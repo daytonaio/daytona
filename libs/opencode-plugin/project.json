@@ -1,8 +1,8 @@
 {
   "name": "opencode-plugin",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/opencode-plugin/src",
   "projectType": "library",
+  "sourceRoot": "libs/opencode-plugin",
   "targets": {
     "format": {
       "executor": "nx:run-commands",
@@ -17,25 +17,28 @@
       }
     },
     "build": {
-      "executor": "nx:run-commands",
+      "executor": "@nx/js:tsc",
+      "inputs": ["default", "{projectRoot}/package.json"],
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "cwd": "{projectRoot}",
-        "commands": [
-          "rm -rf dist",
-          "tsc --project tsconfig.build.json",
-          "cp package.json dist/",
-          "cp README.md dist/",
-          "cp .npmignore dist/ 2>/dev/null || true"
-        ],
-        "parallel": false
+        "outputPath": "dist/libs/opencode-plugin",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
+        "packageJson": "{projectRoot}/package.json",
+        "main": "{projectRoot}/.opencode/plugin/index.ts",
+        "updateBuildableProjectDepsInPackageJson": true,
+        "assets": ["{projectRoot}/README.md", "{projectRoot}/.npmignore"]
       },
-      "outputs": ["{projectRoot}/dist"],
-      "dependsOn": ["sdk-typescript:build", "toolbox-api-client:build"]
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["sdk-typescript", "toolbox-api-client"]
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "libs/opencode-plugin/dist",
+        "cwd": "{workspaceRoot}/dist/libs/opencode-plugin",
         "command": "npm publish --access public --registry https://registry.npmjs.org/"
       },
       "dependsOn": ["build"]
