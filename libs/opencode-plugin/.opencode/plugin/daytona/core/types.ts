@@ -26,7 +26,8 @@ export type EventSessionIdle = {
 }
 
 export type ExperimentalChatSystemTransformInput = {
-  sessionID: string
+  sessionID?: string
+  model: any
 }
 
 export type ExperimentalChatSystemTransformOutput = {

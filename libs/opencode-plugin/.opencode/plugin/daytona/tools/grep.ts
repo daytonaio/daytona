@@ -5,7 +5,8 @@
 
 import { z } from 'zod'
 import type { Match } from '@daytonaio/sdk'
-import type { ToolContext, PluginInput } from '@opencode-ai/plugin'
+import type { PluginInput } from '@opencode-ai/plugin'
+import type { ToolContext } from '@opencode-ai/plugin/tool'
 import type { DaytonaSessionManager } from '../core/session-manager'
 
 export const grepTool = (
