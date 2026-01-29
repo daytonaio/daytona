@@ -4,6 +4,12 @@
   "sourceRoot": "libs/opencode-plugin/src",
   "projectType": "library",
   "targets": {
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && prettier --write \"**/*.{ts,json,md}\" --config ../../.prettierrc"
+      }
+    },
     "type-check": {
       "executor": "nx:run-commands",
       "options": {
