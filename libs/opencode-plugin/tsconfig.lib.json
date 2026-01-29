@@ -4,21 +4,13 @@
     "outDir": "../../dist/out-tsc",
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "target": "es2022",
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": [
-    ".opencode/**/*"
-  ],
-  "exclude": [
-    "jest.config.ts",
-    ".opencode/**/*.spec.ts",
-    ".opencode/**/*.test.ts"
-  ]
+  "include": [".opencode/**/*"],
+  "exclude": ["jest.config.ts", ".opencode/**/*.spec.ts", ".opencode/**/*.test.ts"]
 }
