@@ -70,25 +70,7 @@ jobs:
           poetry lock
           poetry install
           source "$(poetry env info --path)/bin/activate"
-          go work sync
           go env -w GOFLAGS="-buildvcs=false"
-
-      - name: Build projects
-        run: |
-          source "$(poetry env info --path)/bin/activate"
-          yarn build:production
-          yarn nx build-amd64 runner --configuration=production --nxBail=true
-
-      - name: Build CLI
-        run: |
-          cd ./apps/cli
-          GOOS=linux GOARCH=amd64 ./hack/build.sh --skip-env-file
-          GOOS=linux GOARCH=arm64 ./hack/build.sh --skip-env-file
-          GOOS=darwin GOARCH=amd64 ./hack/build.sh --skip-env-file
-          GOOS=darwin GOARCH=arm64 ./hack/build.sh --skip-env-file
-          GOOS=windows GOARCH=amd64 ./hack/build.sh --skip-env-file
-          GOOS=windows GOARCH=arm64 ./hack/build.sh --skip-env-file
-          cd ../..
 
       # Write version to required folders so nx release can run
       - name: Write package.json to required folders
@@ -120,6 +102,24 @@ jobs:
 
       - name: Create release
         run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+
+      - name: Build projects
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          go work sync
+          yarn build:production
+          yarn nx build-amd64 runner --configuration=production --nxBail=true
+
+      - name: Build CLI
+        run: |
+          cd ./apps/cli
+          GOOS=linux GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=linux GOARCH=arm64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=arm64 ./hack/build.sh --skip-env-file
+          GOOS=windows GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=windows GOARCH=arm64 ./hack/build.sh --skip-env-file
+          cd ../..
 
       - name: Upload runner to release assets
         run: |
