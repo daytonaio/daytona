@@ -41,6 +41,12 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -e .
 ```
 
+To also run `demo.py` (which plots results with matplotlib), install with the demo extra:
+
+```bash
+pip install -e ".[demo]"
+```
+
 3. Set your API keys in `.env` (copy from `.env.example`):
 
 ```bash
@@ -51,7 +57,7 @@ cp .env.example .env
 4. Run the example:
 
 ```bash
-python main.py
+python demo.py
 ```
 
 ## How It Works
