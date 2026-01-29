@@ -66,7 +66,7 @@ lsp_server = sandbox.create_lsp_server(
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#createlspserver), and [Ruby SDK](/docs/en/ruby-sdk/sandbox#create_lsp_server) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/) references:
 
 > [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
 >
@@ -124,15 +124,30 @@ lsp.start  # Initialize the server
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/start' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "languageId": "",
+  "pathToProject": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverstart), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#start), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#start) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
 >
 > [**start (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#start)
 >
 > [**start (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#start)
+>
+> [**start (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/start)
 
 ## Stop LSP servers
 
@@ -163,15 +178,30 @@ lsp.stop  # Clean up resources
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/stop' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "languageId": "",
+  "pathToProject": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverstop), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#stop), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#stop) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
 >
 > [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#stop)
 >
 > [**stop (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#stop)
+>
+> [**stop (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/stop)
 
 ## Code completions
 
@@ -211,15 +241,39 @@ puts "Completions: #{completions}"
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/completions' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "context": {
+    "triggerCharacter": "",
+    "triggerKind": 1
+  },
+  "languageId": "",
+  "pathToProject": "",
+  "position": {
+    "character": 1,
+    "line": 1
+  },
+  "uri": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#completions), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#completions) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
 >
 > [**completions (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#completions)
 >
 > [**completions (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#completions)
+>
+> [**completions (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/completions)
 
 ## File notifications
 
@@ -254,15 +308,31 @@ lsp_server.did_open('workspace/project/main.py')
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-open' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "languageId": "",
+  "pathToProject": "",
+  "uri": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#didopen), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#did_open) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
 >
 > [**didOpen (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didopen)
 >
 > [**did_open (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_open)
+>
+> [**did_open (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-open)
 
 ### Close file
 
@@ -293,15 +363,31 @@ lsp_server.did_close('workspace/project/main.py')
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-close' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "languageId": "",
+  "pathToProject": "",
+  "uri": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#didclose), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#did_close) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
 >
 > [**didClose (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didclose)
 >
 > [**did_close (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_close)
+>
+> [**did_close (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-close)
 
 ## Document symbols
 
@@ -337,15 +423,24 @@ end
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/document-symbols?languageId=&pathToProject=&uri='
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#documentsymbols), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#document_symbols) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp/) references:
 
 > [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
 >
 > [**documentSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#documentsymbols)
 >
 > [**document_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#document_symbols)
+>
+> [**document_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/document-symbols)
 
 ## Sandbox symbols
 
@@ -381,12 +476,21 @@ end
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?query=&languageId=&pathToProject='
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/), and [API](/docs/en/tools/api/#daytona-toolbox/tag/lsp) references:
 
 > [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
 >
 > [**sandboxSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols)
 >
 > [**sandbox_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols)
+>
+> [**sandbox_symbols (API)**](/docs/en/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/workspacesymbols)
