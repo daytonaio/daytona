@@ -1,3 +1,8 @@
+/**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import type { Plugin, PluginInput } from '@opencode-ai/plugin'
 import type { DaytonaSessionManager } from '../core/session-manager'
 import { EVENT_TYPE_SESSION_DELETED } from '../core/types'

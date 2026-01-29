@@ -1,4 +1,9 @@
 /**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+/**
  * OpenCode Plugin: Daytona Sandbox Integration
  *
  * OpenCode plugins extend the AI coding assistant by adding custom tools, handling events,
