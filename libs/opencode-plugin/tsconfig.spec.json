@@ -4,17 +4,9 @@
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
     "moduleResolution": "node10",
-    "types": [
-      "jest",
-      "node"
-    ],
+    "types": ["jest", "node"],
     "declaration": true,
     "resolveJsonModule": true
   },
-  "include": [
-    "jest.config.ts",
-    ".opencode/**/*.test.ts",
-    ".opencode/**/*.spec.ts",
-    ".opencode/**/*.d.ts"
-  ]
+  "include": ["jest.config.ts", ".opencode/**/*.test.ts", ".opencode/**/*.spec.ts", ".opencode/**/*.d.ts"]
 }
