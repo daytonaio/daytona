@@ -25,9 +25,6 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput 
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	// Strip whitespace and newlines from command to avoid issues
-	cmd = strings.TrimSpace(cmd)
-
 	cmdId := uuid.NewString()
 
 	command := &Command{
