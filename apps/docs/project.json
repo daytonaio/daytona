@@ -28,6 +28,7 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
+          "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json",
           "astro build",
           "node ./tools/update-search.js",
           "node ./tools/update-llms.js"
@@ -38,6 +39,7 @@
       "configurations": {
         "production": {
           "commands": [
+            "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json",
             "astro build --prod",
             "node ./tools/update-search.js",
             "node ./tools/update-llms.js"
