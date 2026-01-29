@@ -75,6 +75,7 @@ jobs:
       # Write version to required folders so nx release can run
       - name: Write package.json to required folders
         run: |
+          mkdir dist
           echo '{
             "name": "api",
             "version": "0.0.0"
