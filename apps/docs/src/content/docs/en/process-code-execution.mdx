@@ -98,6 +98,41 @@ response = sandbox.process.code_run(
 puts response.result
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [code_run (Python SDK)](/docs/python-sdk/sync/process/#processcode_run), [codeRun (TypeScript SDK)](/docs/typescript-sdk/process/#coderun), [code_run (Ruby SDK)](/docs/ruby-sdk/process/#code_run)
@@ -258,6 +293,32 @@ puts response.result
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Stop sandbox
+    err := sandbox.Stop(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [exec (Python SDK)](/docs/python-sdk/sync/process/#processexec), [executeCommand (TypeScript SDK)](/docs/typescript-sdk/process/#executecommand), [exec (Ruby SDK)](/docs/ruby-sdk/process/#exec)
@@ -324,6 +385,41 @@ end
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [get_session (Python SDK)](/docs/python-sdk/sync/process/#processget_session), [list_sessions (Python SDK)](/docs/python-sdk/sync/process/#processlist_sessions), [getSession (TypeScript SDK)](/docs/typescript-sdk/process/#getsession), [listSessions (TypeScript SDK)](/docs/typescript-sdk/process/#listsessions), [get_session (Ruby SDK)](/docs/ruby-sdk/process/#get_session), [list_sessions (Ruby SDK)](/docs/ruby-sdk/process/#list_sessions)
@@ -380,6 +476,32 @@ The following best practices apply to managing resources when executing processe
    end
    ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Delete sandbox
+    err := sandbox.Delete(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [create_session (Python SDK)](/docs/python-sdk/sync/process/#processcreate_session), [delete_session (Python SDK)](/docs/python-sdk/sync/process/#processdelete_session), [createSession (TypeScript SDK)](/docs/typescript-sdk/process/#createsession), [deleteSession (TypeScript SDK)](/docs/typescript-sdk/process/#deletesession), [create_session (Ruby SDK)](/docs/ruby-sdk/process/#create_session), [delete_session (Ruby SDK)](/docs/ruby-sdk/process/#delete_session)
@@ -428,6 +550,41 @@ rescue Daytona::ProcessExecutionError => e
 end
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Common Issues

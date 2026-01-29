@@ -68,6 +68,35 @@ lsp_server = sandbox.create_lsp_server(
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Start LSP server
+    lspID := "python-lsp"
+    err := sandbox.LSP.Start(ctx, lspID, "python")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("LSP server started: %s\n", lspID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [create_lsp_server (Python SDK)](/docs/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [createLspServer (TypeScript SDK)](/docs/typescript-sdk/sandbox#createlspserver), [create_lsp_server (Ruby SDK)](/docs/ruby-sdk/sandbox#create_lsp_server)
@@ -120,6 +149,35 @@ completions = lsp_server.completions(
 puts "Completions: #{completions}"
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Start LSP server
+    lspID := "python-lsp"
+    err := sandbox.LSP.Start(ctx, lspID, "python")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("LSP server started: %s\n", lspID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [completions (Python SDK)](/docs/python-sdk/sync/lsp-server/#lspservercompletions), [completions (TypeScript SDK)](/docs/typescript-sdk/lsp-server/#completions), [completions (Ruby SDK)](/docs/ruby-sdk/lsp-server/#completions)

@@ -125,6 +125,50 @@ Complete API reference for computer use operations in Python (sync & async).
     sandbox.computer_use.keyboard.hotkey('ctrl+s')
     ```
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    "time"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+
+    params := &types.SnapshotCreateParams{
+        Name: "my-snapshot",
+        Image: &types.Image{
+            User: "debian",
+            Tag:  "slim-3.12",
+        },
+    }
+
+    snapshot, buildLogs, err := client.Snapshot.Create(ctx, params, 90*time.Second)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Stream build logs
+    go func() {
+        for logLine := range buildLogs {
+            fmt.Printf("[BUILD] %s\n", logLine)
+        }
+    }()
+
+    log.Printf("Created snapshot: %s\n", snapshot.Name)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 **Environment Variables (.env file):**

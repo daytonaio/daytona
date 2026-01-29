@@ -108,91 +108,40 @@ Running sandboxes utilize CPU, memory, and disk storage. Every resource is charg
     ```
 
   </TabItem>
-</Tabs>
 
-To get the preview URL for a specific port, check out [Preview & Authentication](/docs/en/preview-and-authentication).
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
+import (
+    "context"
+    "log"
 
-> [**create (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonacreate)
->
-> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#create)
->
-> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
 
-### Resources
-
-Daytona Sandbox uses **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
-
-Daytona keeps a pool of warm sandboxes using default snapshots.
-When available, sandboxes launch within milliseconds instead of cold-booting.
-
-To set custom sandbox resources (CPU, memory, and disk space), use the `Resources` class:
-
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
-
-    daytona = Daytona()
-
-    # Create a sandbox with custom resources
-    resources = Resources(
-        cpu=2,    # 2 CPU cores
-        memory=4, # 4GB RAM
-        disk=8,   # 8GB disk space
-    )
-
-    params = CreateSandboxFromImageParams(
-        image=Image.debian_slim("3.12"),
-        resources=resources
-    )
-
-    sandbox = daytona.create(params)
-    ```
-
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona, Image } from "@daytonaio/sdk";
-
-    async function main() {
-      const daytona = new Daytona();
-
-      // Create a sandbox with custom resources
-      const sandbox = await daytona.create({
-        image: Image.debianSlim("3.13"),
-        resources: {
-          cpu: 2,     // 2 CPU cores
-          memory: 4,  // 4GB RAM
-          disk: 8,    // 8GB disk space
-        },
-      });
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
     }
 
-    main();
-    ```
+    ctx := context.Background()
 
-  </TabItem>
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-  <TabItem label="Ruby" icon="seti:ruby">
-    ```ruby
-    require 'daytona'
-
-    daytona = Daytona::Daytona.new
-
-    # Create a sandbox with custom resources
-    sandbox = daytona.create(
-      Daytona::CreateSandboxFromImageParams.new(
-        image: Daytona::Image.debian_slim('3.12'),
-        resources: Daytona::Resources.new(
-          cpu: 2,     # 2 CPU cores
-          memory: 4,  # 4GB RAM
-          disk: 8     # 8GB disk space
-        )
-      )
-    )
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
     ```
 
   </TabItem>
@@ -259,6 +208,43 @@ To create an ephemeral Sandbox, set the `ephemeral` parameter to `True` when cre
     ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 :::note
@@ -305,6 +291,43 @@ Starting sandbox with ID: <sandbox-id>
     sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
     # Start Sandbox
     sandbox.start
+    ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
     ```
 
   </TabItem>
@@ -367,6 +390,43 @@ Daytona provides options to view information about sandboxes (ID, root directory
     puts sandbox.id
     puts sandbox.auto_stop_interval
     puts sandbox.state
+    ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
     ```
 
   </TabItem>
@@ -449,6 +509,43 @@ The stopped state should be used when a sandbox is expected to be started again 
     ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop), [TypeScript SDK](/docs/typescript-sdk/sandbox#stop), and [Ruby SDK](/docs/ruby-sdk/sandbox#stop) references:
@@ -474,18 +571,52 @@ A sandbox must be stopped before it can be archived, and can be started again in
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    // Archive Sandbox
-    await sandbox.archive();
-    ```
-  </TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+  ```typescript // Archive Sandbox await sandbox.archive(); ```
+</TabItem>
 
   <TabItem label="Ruby" icon="seti:ruby">
     ```ruby
     # Archive Sandbox
     sandbox.archive
     ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -524,6 +655,43 @@ Daytona provides methods to recover sandboxes using Python, TypeScript, and Ruby
     ```ruby
     # Recover sandbox
     sandbox.recover
+    ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
     ```
 
   </TabItem>
@@ -574,6 +742,43 @@ Recovery actions are not performed automatically because they address errors tha
     end
     ```
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/typescript-sdk/sandbox#recover), and [Ruby SDK](/docs/ruby-sdk/sandbox#recover) references:
@@ -603,18 +808,52 @@ Stopping sandbox with ID: <sandbox-id>
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    // Delete sandbox
-    await sandbox.delete();
-    ```
-  </TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+  ```typescript // Delete sandbox await sandbox.delete(); ```
+</TabItem>
 
   <TabItem label="Ruby" icon="seti:ruby">
     ```ruby
     # Delete sandbox
     sandbox.delete
     ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -693,6 +932,43 @@ If the parameter is not set, the default interval of `15` minutes will be used.
     )
     ```
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval), and [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_stop_interval) references:
@@ -745,6 +1021,43 @@ If the parameter is not set, the default interval of `7 days` days will be used.
       )
     )
     ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -821,6 +1134,43 @@ If the parameter is not set, the sandbox will not be deleted automatically.
     ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval), [TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_delete_interval), and [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_delete_interval) references:
@@ -866,5 +1216,42 @@ By default, Daytona Sandboxes auto-stop after 15 minutes of inactivity. To keep 
       )
     )
     ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
   </TabItem>
 </Tabs>

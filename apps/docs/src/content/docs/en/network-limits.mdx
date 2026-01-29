@@ -88,6 +88,38 @@ sandbox = daytona.create(
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+
+    page := 1
+    limit := 10
+    snapshots, err := client.Snapshot.List(ctx, &page, &limit)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Total snapshots: %d\n", snapshots.Total)
+    for _, snap := range snapshots.Items {
+        fmt.Printf("  - %s (State: %s)\n", snap.Name, snap.State)
+    }
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 

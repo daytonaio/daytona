@@ -42,6 +42,43 @@ Install the Daytona SDK and Anthropic SDK to your project:
   <TabItem label="Ruby" icon="seti:ruby">
     `bash gem install daytona anthropic dotenv `
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 #### 1.2 Configure Environment
@@ -119,6 +156,41 @@ Now create a [Daytona sandbox](/docs/en/sandboxes/#basic-sandbox-creation) and u
     # Upload the dataset to the sandbox
     sandbox.fs.upload_file(File.read('dataset.csv'), '/home/daytona/dataset.csv')
     ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Upload a file
+    content := []byte("Hello, Daytona!")
+    err := sandbox.FileSystem.UploadFile(ctx, content, "workspace/hello.txt")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Download a file
+    downloadedContent, err := sandbox.FileSystem.DownloadFile(ctx, "workspace/hello.txt", nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("File content: %s\n", string(downloadedContent))
+}
+    ```
+
   </TabItem>
 </Tabs>
 

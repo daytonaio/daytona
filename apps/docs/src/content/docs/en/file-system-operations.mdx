@@ -58,339 +58,43 @@ end
 ```
 
 </TabItem>
-</Tabs>
 
-See: [list_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemlist_files), [listFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#listfiles), [list_files (Ruby SDK)](/docs/ruby-sdk/file-system/#list_files)
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
 
-### Creating Directories
+import (
+    "context"
+    "log"
 
-Daytona SDK provides an option to create directories with specific permissions using Python, TypeScript, and Ruby.
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
 
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Create with specific permissions
-sandbox.fs.create_folder("workspace/new-dir", "755")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Create with specific permissions
-await sandbox.fs.createFolder("workspace/new-dir", "755")
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Create with specific permissions
-sandbox.fs.create_folder('workspace/new-dir', '755')
-```
-
-</TabItem>
-</Tabs>
-
-See: [create_folder (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemcreate_folder), [createFolder (TypeScript SDK)](/docs/typescript-sdk/file-system/#createfolder), [create_folder (Ruby SDK)](/docs/ruby-sdk/file-system/#create_folder)
-
-### Uploading Files
-
-Daytona SDK provides options to read, write, upload, download, and delete files in Sandboxes using Python, TypeScript, and Ruby.
-
-#### Uploading a Single File
-
-The following example shows how to upload a single file:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload a single file
-with open("local_file.txt", "rb") as f:
-    content = f.read()
-sandbox.fs.upload_file(content, "remote_file.txt")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload a single file
-const fileContent = Buffer.from('Hello, World!')
-await sandbox.fs.uploadFile(fileContent, "data.txt")
-```
-
-</TabItem>
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Upload a single file
-content = 'Hello, World!'
-sandbox.fs.upload_file(content, 'data.txt')
-```
-
-</TabItem>
-</Tabs>
-
-See: [upload_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_file), [uploadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfile), [upload_file (Ruby SDK)](/docs/ruby-sdk/file-system/#upload_file)
-
-#### Uploading Multiple Files
-
-The following example shows how to efficiently upload multiple files with a single method call.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload multiple files at once
-files_to_upload = []
-
-with open("file1.txt", "rb") as f1:
-    files_to_upload.append(FileUpload(
-        source=f1.read(),
-        destination="data/file1.txt",
-    ))
-
-with open("file2.txt", "rb") as f2:
-    files_to_upload.append(FileUpload(
-        source=f2.read(),
-        destination="data/file2.txt",
-    ))
-
-with open("settings.json", "rb") as f3:
-    files_to_upload.append(FileUpload(
-        source=f3.read(),
-        destination="config/settings.json",
-    ))
-
-sandbox.fs.upload_files(files_to_upload)
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload multiple files at once
-const files = [
-    {
-        source: Buffer.from('Content of file 1'),
-        destination: 'data/file1.txt',
-    },
-    {
-        source: Buffer.from('Content of file 2'),
-        destination: 'data/file2.txt',
-    },
-    {
-        source: Buffer.from('{"key": "value"}'),
-        destination: 'config/settings.json',
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
     }
-]
 
-await sandbox.fs.uploadFiles(files)
-```
+    ctx := context.Background()
 
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Upload multiple files at once
-files = [
-  Daytona::FileUpload.new('Content of file 1', 'data/file1.txt'),
-  Daytona::FileUpload.new('Content of file 2', 'data/file2.txt'),
-  Daytona::FileUpload.new('{"key": "value"}', 'config/settings.json')
-]
-
-sandbox.fs.upload_files(files)
-```
-
-</TabItem>
-</Tabs>
-
-See: [upload_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemupload_files), [uploadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#uploadfiles), [upload_files (Ruby SDK)](/docs/ruby-sdk/file-system/#upload_files)
-
-### Downloading Files
-
-#### Downloading a Single File
-
-The following commands downloads a single file `file1.txt` from the Sandbox working directory and prints out the content:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-
-content = sandbox.fs.download_file("file1.txt")
-
-with open("local_file.txt", "wb") as f:
-    f.write(content)
-
-print(content.decode('utf-8'))
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-
-const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
-
-console.log('File content:', downloadedFile.toString())
-
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-
-# Download file and get a Tempfile reference
-file = sandbox.fs.download_file('file1.txt')
-
-# Read the content
-puts "File content: #{file.open.read}"
-
-# Or download and save to a specific path
-sandbox.fs.download_file('file1.txt', 'local_file.txt')
-
-```
-
-</TabItem>
-</Tabs>
-
-See: [download_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_file), [downloadFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfile), [download_file (Ruby SDK)](/docs/ruby-sdk/file-system/#download_file)
-
-#### Downloading Multiple Files
-
-The following example shows how to efficiently download multiple files with a single method call.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Download multiple files at once
-files_to_download = [
-    FileDownloadRequest(source="data/file1.txt"), # No destination - download to memory
-    FileDownloadRequest(source="data/file2.txt", destination="local_file2.txt"), # Download to local file
-]
-
-results = sandbox.fs.download_files(files_to_download)
-
-for result in results:
-    if result.error:
-        print(f"Error downloading {result.source}: {result.error}")
-    elif result.result:
-        print(f"Downloaded {result.source} to {result.result}")
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Download multiple files at once
-const files = [
-    { source: "data/file1.txt" }, // No destination - download to memory
-    { source: "data/file2.txt", destination: "local_file2.txt" }, // Download to local file
-]
-
-const results = await sandbox.fs.downloadFiles(files)
-
-results.forEach(result => {
-    if (result.error) {
-        console.error(`Error downloading ${result.source}: ${result.error}`)
-    } else if (result.result) {
-        console.log(`Downloaded ${result.source} to ${result.result}`)
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
     }
-})
-```
-</TabItem>
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Download multiple files at once
-files = [
-  Daytona::FileDownloadRequest.new(source: 'data/file1.txt'), # No destination - download to memory
-  Daytona::FileDownloadRequest.new(source: 'data/file2.txt', destination: 'local_file2.txt') # Download to local file
-]
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
 
-results = sandbox.fs.download_files(files)
-
-results.each do |result|
-  if result.error
-    puts "Error downloading #{result.source}: #{result.error}"
-  elsif result.result
-    puts "Downloaded #{result.source} to #{result.result}"
-  end
-end
-```
-</TabItem>
-</Tabs>
-
-See: [download_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdownload_files), [downloadFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#downloadfiles), [download_files (Ruby SDK)](/docs/ruby-sdk/file-system/#download_files)
-
-### Deleting files
-
-The following example shows how to delete a file:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-
-sandbox.fs.delete_file("workspace/file.txt")
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-
-await sandbox.fs.deleteFile("workspace/file.txt")
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-
-sandbox.fs.delete_file('workspace/file.txt')
-
-```
-
-</TabItem>
-</Tabs>
-
-See: [delete_file (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemdelete_file), [deleteFile (TypeScript SDK)](/docs/typescript-sdk/file-system/#deletefile), [delete_file (Ruby SDK)](/docs/ruby-sdk/file-system/#delete_file)
-
-## Advanced Operations
-
-Daytona SDK provides advanced file system operations like file permissions, search and replace, and more.
-
-### File Permissions
-
-Daytona SDK provides an option to set file permissions, get file permissions, and set directory permissions recursively using Python, TypeScript, and Ruby.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Set file permissions
-sandbox.fs.set_file_permissions("workspace/file.txt", "644")
-
-# Get file permissions
-
-file_info = sandbox.fs.get_file_info("workspace/file.txt")
-print(f"Permissions: {file_info.permissions}")
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Set file permissions
-await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
-
-// Get file permissions
-const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
-console.log(`Permissions: ${fileInfo.permissions}`)
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Set file permissions
-sandbox.fs.set_file_permissions('workspace/file.txt', '644')
-
-# Get file permissions
-file_info = sandbox.fs.get_file_info('workspace/file.txt')
-puts "Permissions: #{file_info.permissions}"
-```
-
-</TabItem>
+  </TabItem>
 </Tabs>
 
 See: [set_file_permissions (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemset_file_permissions), [setFilePermissions (TypeScript SDK)](/docs/typescript-sdk/file-system/#setfilepermissions), [set_file_permissions (Ruby SDK)](/docs/ruby-sdk/file-system/#set_file_permissions)
@@ -465,6 +169,43 @@ sandbox.fs.replace_in_files(
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [find_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemfind_files), [replace_in_files (Python SDK)](/docs/python-sdk/sync/file-system/#filesystemreplace_in_files), [findFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#findfiles), [replaceInFiles (TypeScript SDK)](/docs/typescript-sdk/file-system/#replaceinfiles), [find_files (Ruby SDK)](/docs/ruby-sdk/file-system/#find_files), [replace_in_files (Ruby SDK)](/docs/ruby-sdk/file-system/#replace_in_files)

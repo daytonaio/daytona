@@ -131,6 +131,41 @@ puts "Session completed with exit code: #{pty_handle.exit_code}"
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Long-Running Processes with PTY
@@ -235,6 +270,41 @@ puts "Termination reason: #{pty_handle.error}" if pty_handle.error
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Best Practices
@@ -288,6 +358,35 @@ ensure
 end
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Create PTY session
+    ptyID := "my-pty-session"
+    err := sandbox.Process.CreatePTY(ctx, ptyID)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("PTY session created: %s\n", ptyID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 ### Error Handling
@@ -327,6 +426,41 @@ if pty_handle.exit_code != 0
 end
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, _ := client.Create(ctx, params)
+
+    // Run Python code
+    result, err := sandbox.Process.ExecuteCommand(ctx, \`python -c 'print("Hello, Daytona!")'\`)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Common Use Cases

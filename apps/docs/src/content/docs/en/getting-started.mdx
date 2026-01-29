@@ -13,12 +13,12 @@ It serves as the primary point of control for managing your Daytona resources.
 
 ## SDKs
 
-Daytona provides Python, TypeScript and Ruby SDKs to programmatically interact with Daytona Sandboxes. They support sandbox lifecycle management, code execution, resource access, and more.
+Daytona provides Python, TypeScript, Ruby, and Go SDKs to programmatically interact with Daytona Sandboxes. They support sandbox lifecycle management, code execution, resource access, and more.
 
-To interact with Daytona Sandboxes from the SDK, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk) and [Ruby SDK](/docs/en/ruby-sdk) references.
+To interact with Daytona Sandboxes from the SDK, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), [Ruby SDK](/docs/en/ruby-sdk), and [Go SDK](/docs/en/go-sdk) references.
 
 :::tip
-Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) and [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby) examples to create Daytona Sandboxes and run your code.
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript), [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby), and [Go](https://github.com/daytonaio/daytona/tree/main/examples/go) examples to create Daytona Sandboxes and run your code.
 :::
 
 ## CLI
@@ -226,6 +226,59 @@ Create a Daytona Sandbox instance and run code securely inside it. The following
     ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        // Initialize the Daytona client
+        config := &types.DaytonaConfig{
+            APIKey: "YOUR_API_KEY",
+        }
+        client, err := daytona.NewClientWithConfig(config)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        ctx := context.Background()
+
+        // Create the Sandbox instance
+        params := types.SnapshotParams{
+            SandboxBaseParams: types.SandboxBaseParams{
+                Language: types.CodeLanguagePython,
+            },
+        }
+        sandbox, err := client.Create(ctx, params)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        // Run code securely inside the Sandbox
+        result, err := sandbox.Process.ExecuteCommand(ctx, `python -c 'print("Sum of 3 and 4 is", 3 + 4)'`)
+        if err != nil {
+            log.Fatalf("Error running code: %v", err)
+        }
+        if result.ExitCode != 0 {
+            log.Printf("Error running code: %d %s", result.ExitCode, result.Result)
+        } else {
+            log.Println(result.Result)
+        }
+
+        // Clean up the Sandbox
+        sandbox.Delete(ctx)
+    }
+    ```
+
+  </TabItem>
 </Tabs>
 
 <Tabs syncKey="language">
@@ -239,9 +292,13 @@ Create a Daytona Sandbox instance and run code securely inside it. The following
   ```bash npx tsx ./index.ts ```
 </TabItem>
 
-  <TabItem label="Ruby" icon="seti:ruby">
+<TabItem label="Ruby" icon="seti:ruby">
+  ```bash ruby main.rb ```
+</TabItem>
+
+  <TabItem label="Go" icon="seti:go">
     ```bash
-    ruby main.rb
+    go run main.go
     ```
   </TabItem>
 </Tabs>
@@ -429,6 +486,45 @@ Preview your app by uploading a file containing a simple Flask app to a Daytona 
     preview_info = sandbox.preview_url(3000)
     puts "Flask app is available at: #{preview_info.url}"
     ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+
+)
+
+func main() {
+client, err := daytona.NewClient()
+if err != nil {
+log.Fatal(err)
+}
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+
+}
+```
 
   </TabItem>
 </Tabs>
@@ -649,11 +745,121 @@ Connect to an LLM using the Anthropic API and ask Claude to generate code for ge
     ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+
+    ```go
+    package main
+
+    import (
+        "bytes"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "log"
+        "net/http"
+        "os"
+        "regexp"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func getClaudeResponse(apiKey, prompt string) (string, error) {
+        url := "https://api.anthropic.com/v1/messages"
+        data := map[string]interface{}{
+            "model":      "claude-3-7-sonnet-latest",
+            "max_tokens": 256,
+            "messages":   []map[string]string{{"role": "user", "content": prompt}},
+        }
+        jsonData, _ := json.Marshal(data)
+
+        req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+        req.Header.Set("x-api-key", apiKey)
+        req.Header.Set("anthropic-version", "2023-06-01")
+        req.Header.Set("Content-Type", "application/json")
+
+        client := &http.Client{}
+        resp, err := client.Do(req)
+        if err != nil {
+            return "", err
+        }
+        defer resp.Body.Close()
+
+        body, _ := io.ReadAll(resp.Body)
+        if resp.StatusCode != 200 {
+            return "", fmt.Errorf("error %d: %s", resp.StatusCode, string(body))
+        }
+
+        var result map[string]interface{}
+        json.Unmarshal(body, &result)
+        content := result["content"].([]interface{})
+        var text string
+        for _, item := range content {
+            m := item.(map[string]interface{})
+            if m["type"] == "text" {
+                text += m["text"].(string)
+            }
+        }
+        return text, nil
+    }
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        ctx := context.Background()
+        sandbox, err := client.Create(ctx, nil)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        prompt := "Python code that returns the factorial of 25. Output only the code. No explanation. No intro. No comments. Just raw code in a single code block."
+
+        result, err := getClaudeResponse(os.Getenv("ANTHROPIC_API_KEY"), prompt)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        // Extract code from the response using regex
+        re := regexp.MustCompile("```python\\n(.*?)```")
+        matches := re.FindStringSubmatch(result)
+
+        code := result
+        if len(matches) > 1 {
+            code = matches[1]
+        }
+
+        // Run Python code inside the Sandbox and get the output
+        response, err := sandbox.Process.ExecuteCommand(ctx, fmt.Sprintf("python -c '%s'", code))
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("The factorial of 25 is %s\n", response.Result)
+    }
+    ```
+
+    Ensure the following environment variables are set and run the snippet:
+
+    ```bash
+    ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
+    DAYTONA_API_KEY="YOUR_DAYTONA_API_KEY"
+    DAYTONA_TARGET=us
+    go run claude-example.go
+    ```
+
+    ```bash
+    > The factorial of 25 is 15511210043330985984000000
+    ```
+
+  </TabItem>
 </Tabs>
 
 ## Examples
 
-Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript) and [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby) examples to create Daytona Sandboxes and run your code.
+Daytona provides [Python](https://github.com/daytonaio/daytona/tree/main/examples/python), [TypeScript/JavaScript](https://github.com/daytonaio/daytona/tree/main/examples/typescript), [Ruby](https://github.com/daytonaio/daytona/tree/main/examples/ruby), and [Go](https://github.com/daytonaio/daytona/tree/main/examples/go) examples to create Daytona Sandboxes and run your code.
 
 :::tip
 Use our LLMs context files for faster development with AI agents and assistants. Copy the [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) or [llms.txt](https://www.daytona.io/docs/llms.txt) files and include them in your projects or chat contexts.

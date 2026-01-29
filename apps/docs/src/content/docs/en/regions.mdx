@@ -25,13 +25,16 @@ Regions are geographic or logical groupings of runners that execute sandbox work
 from daytona import Daytona, DaytonaConfig
 
 # Configure Daytona to use the US region
+
 config = DaytonaConfig(
-    target="us"
+target="us"
 )
 
 # Initialize the Daytona client with the specified configuration
+
 daytona = Daytona(config)
-```
+
+````
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
@@ -41,7 +44,48 @@ import { Daytona } from '@daytonaio/sdk';
 const daytona: Daytona = new Daytona({
     target: "eu"
 });
-```
+````
+
+</TabItem>
+
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+require 'daytona'
+
+# Configure Daytona to use the EU region
+
+config = Daytona::Config.new(target: 'eu')
+daytona = Daytona::Daytona.new(config)
+
+````
+</TabItem>
+
+<TabItem label="Go" icon="seti:go">
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    // Configure Daytona to use the EU region
+    config := &types.DaytonaConfig{
+        Target: "eu",
+    }
+
+    client, err := daytona.NewClientWithConfig(config)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Daytona client configured for region: %s\n", config.Target)
+}
+````
+
 </TabItem>
 </Tabs>
 

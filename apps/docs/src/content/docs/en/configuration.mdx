@@ -59,6 +59,43 @@ config = Daytona::Config.new(
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), and [Ruby SDK](/docs/en/ruby-sdk/daytona) references:

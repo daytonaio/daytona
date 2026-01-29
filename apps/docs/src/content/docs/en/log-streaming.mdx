@@ -154,6 +154,37 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
   ```
 
   </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Stream logs
+    logChan, err := sandbox.StreamLogs(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    for logLine := range logChan {
+        fmt.Printf("[LOG] %s\n", logLine)
+    }
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [get_session_command_logs_async (Python SDK)](/docs/python-sdk/sync/process/#processget_session_command_logs_async), [getSessionCommandLogs (TypeScript SDK)](/docs/typescript-sdk/process/#getsessioncommandlogs), [get_session_command_logs_stream (Ruby SDK)](/docs/ruby-sdk/process/#get_session_command_logs_stream)
@@ -281,6 +312,32 @@ periodically check all existing logs, you can use the following example to get t
 
   daytona.delete(sandbox)
   ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Delete sandbox
+    err := sandbox.Delete(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+    ```
+
   </TabItem>
 </Tabs>
 

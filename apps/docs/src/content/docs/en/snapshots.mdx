@@ -230,122 +230,45 @@ daytona.snapshot.create(
 ```
 
 </TabItem>
-</Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk), [TypeScript SDK](/docs/typescript-sdk), and [Ruby SDK](/docs/ruby-sdk) references:
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
 
-> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
->
-> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
->
-> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#create)
+import (
+    "context"
+    "log"
 
-### Specifying Region
-
-When creating a Snapshot, you can specify the region in which it will be available. If not specified, the Snapshot will be created in your organization's default region. 
-
-When you later create a Sandbox from this Snapshot, you can use the Snapshot's region as the target region for the Sandbox.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import (
-    Daytona,
-    CreateSnapshotParams,
-    Image,
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
-daytona = Daytona()
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
 
-# Create a Snapshot in a specific region
-daytona.snapshot.create(
-  CreateSnapshotParams(
-    name="my-snapshot",
-    image=Image.debian_slim("3.12"),
-    region_id="us",
-  ),
-  on_logs=print,
-)
+    // Create a sandbox with custom resources
+    params := types.ImageParams{
+        Image: types.Image{
+            User: "debian",
+            Tag:  "slim-3.12",
+        },
+        SandboxBaseParams: types.SandboxBaseParams{
+            Resources: &types.Resources{
+                CPU:    2,    // 2 CPU cores
+                Memory: 4,    // 4GB RAM
+                Disk:   8,    // 8GB disk space
+            },
+        },
+    }
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona, Image } from "@daytonaio/sdk";
-
-const daytona = new Daytona();
-
-// Create a Snapshot in a specific region
-await daytona.snapshot.create(
-  {
-    name: "my-snapshot",
-    image: Image.debianSlim("3.13"),
-    regionId: "us",
-  },
-  { onLogs: console.log }
-);
-```
-
-  </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
-```ruby
-require 'daytona'
-
-daytona = Daytona::Daytona.new
-
-# Create a Snapshot with custom resources
-daytona.snapshot.create(
-  Daytona::CreateSnapshotParams.new(
-    name: 'my-snapshot',
-    image: Daytona::Image.debian_slim('3.12'),
-    # All resource parameters are optional:
-    resources: Daytona::Resources.new(
-      cpu: 2,
-      memory: 4,
-      disk: 8
-    )
-  ),
-  on_logs: proc { |chunk| puts chunk }
-)
-```
-
-  </TabItem>
-</Tabs>
-
-## Get a Snapshot by name
-
-Daytona provides an option to get a snapshot by name.
-
-The following snippet returns the snapshot with the specified name:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-daytona = Daytona()
-snapshot = daytona.snapshot.get("my-awesome-snapshot")
-print(f"{snapshot.name} ({snapshot.image_name})")
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-const daytona = new Daytona()
-const snapshot = await daytona.snapshot.get('my-awesome-snapshot')
-console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
-```
-
-  </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-daytona = Daytona::Daytona.new
-snapshot = daytona.snapshot.get('my-awesome-snapshot')
-puts "#{snapshot.name} (#{snapshot.image_name})"
-```
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
 
   </TabItem>
 </Tabs>
@@ -397,6 +320,38 @@ result.items.each do |snapshot|
   puts "#{snapshot.name} (#{snapshot.image_name})"
 end
 ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+
+    page := 1
+    limit := 10
+    snapshots, err := client.Snapshot.List(ctx, &page, &limit)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Printf("Total snapshots: %d\n", snapshots.Total)
+    for _, snap := range snapshots.Items {
+        fmt.Printf("  - %s (State: %s)\n", snap.Name, snap.State)
+    }
+}
+    ```
 
   </TabItem>
 </Tabs>
@@ -465,6 +420,32 @@ daytona.snapshot.delete('my-awesome-snapshot')
 puts 'Snapshot deleted'
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Delete sandbox
+    err := sandbox.Delete(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/python-sdk/), [TypeScript SDK](/docs/typescript-sdk/), and [Ruby SDK](/docs/ruby-sdk/) references:

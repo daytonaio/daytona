@@ -57,80 +57,41 @@ puts "SSH Token: #{ssh_access.token}"
 ```
 
 </TabItem>
-</Tabs>
 
-## Connection Command
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
 
-Once you have your token, connect using:
+import (
+    "context"
+    "log"
 
-```bash
-ssh <token>@ssh.app.daytona.io
-```
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
 
-## Connecting with VSCode
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
 
-Connecting your local VSCode to a sandbox requires a few simple steps:
+    ctx := context.Background()
 
-1. Make sure that the [Remote Explorer extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-explorer) is installed in your VSCode.
-2. Add a new SSH connection
-3. When prompted for the SSH connection URL, paste your SSH command from above.
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-Find out more about the extension [here](https://code.visualstudio.com/docs/remote/ssh).
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
 
-## Connecting with JetBrains IDEs
-
-Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:
-
-1. Download the [JetBrains Gateway](https://www.jetbrains.com/remote-development/gateway/) app to your local machine.
-2. Add a new connection.
-3. When prompted for the SSH connection URL, paste your SSH command from above.
-4. Choose an IDE you want installed in your sandbox.
-
-## Managing SSH Access
-
-### Token Expiration
-
-SSH access tokens expire automatically for security:
-
-- **Default**: 60 minutes
-
-### Revoking Access
-
-You can revoke SSH access tokens at any time:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access()
-
-# Revoke specific SSH access for the sandbox
-sandbox.revoke_ssh_access(token="specific-token")
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-// Revoke all SSH access for the sandbox
-await sandbox.revokeSshAccess()
-
-// Revoke specific SSH access for the sandbox
-await sandbox.revokeSshAccess('specific-token')
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-
-```ruby
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access
-
-# Revoke specific SSH access for the sandbox
-sandbox.revoke_ssh_access(token: 'specific-token')
-```
-
-</TabItem>
+  </TabItem>
 </Tabs>

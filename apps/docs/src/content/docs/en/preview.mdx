@@ -72,6 +72,33 @@ puts "Preview link token: #{preview_info.token}"
 ```
 
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Get preview link for port 3000
+    previewURL, err := sandbox.GetPreviewLink(ctx, 3000)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Printf("Preview URL: %s\n", previewURL)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
@@ -148,6 +175,33 @@ puts "URL: #{signed_url.url}"
 puts "Token: #{signed_url.token}"
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, nil)
+
+    // Get preview link for port 3000
+    previewURL, err := sandbox.GetPreviewLink(ctx, 3000)
+    if err != nil {
+        log.Fatal(err)
+    }
+    log.Printf("Preview URL: %s\n", previewURL)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 See: [create_signed_preview_url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)

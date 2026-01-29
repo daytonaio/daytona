@@ -23,7 +23,7 @@ Daytona is an open-source, secure and elastic infrastructure for running AI-gene
 
 Daytona provides isolated sandbox environments that you can manage programmatically using the Daytona SDK to run and control code execution.
 
-Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk) and [Ruby](/docs/en/ruby-sdk) interfaces.
+Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), and [Go](/docs/en/go-sdk) interfaces.
 
 ## Create an account
 
@@ -39,7 +39,7 @@ Daytona supports multiple options to configure your environment: [in code](/docs
 
 ## Install the SDK
 
-Install the Daytona SDK to interact with sandboxes from your code using [Python](/docs/python-sdk), [TypeScript](/docs/typescript-sdk) or [Ruby](/docs/ruby-sdk).
+Install the Daytona SDK to interact with sandboxes from your code using [Python](/docs/python-sdk), [TypeScript](/docs/typescript-sdk), [Ruby](/docs/ruby-sdk), or [Go](/docs/go-sdk).
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -58,9 +58,13 @@ Install the Daytona SDK to interact with sandboxes from your code using [Python]
 
   </TabItem>
 
-  <TabItem label="Ruby" icon="seti:ruby">
+<TabItem label="Ruby" icon="seti:ruby">
+  ```bash gem install daytona ```
+</TabItem>
+
+  <TabItem label="Go" icon="seti:go">
     ```bash
-    gem install daytona
+    go get github.com/daytonaio/daytona/libs/sdk-go
     ```
   </TabItem>
 </Tabs>
@@ -128,6 +132,62 @@ Create a Daytona Sandbox to run your code securely in an isolated environment.
     # Clean up
     daytona.delete(sandbox)
     ```
+
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    Create a file named: `main.go`
+
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        // Initialize the Daytona client
+        config := &types.DaytonaConfig{
+            APIKey: "your-api-key",
+        }
+        client, err := daytona.NewClientWithConfig(config)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        ctx := context.Background()
+
+        // Create the Sandbox instance
+        params := types.SnapshotParams{
+            SandboxBaseParams: types.SandboxBaseParams{
+                Language: types.CodeLanguagePython,
+            },
+        }
+        sandbox, err := client.Create(ctx, params)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        // Run the code securely inside the Sandbox
+        result, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello World from code!'")
+        if err != nil {
+            log.Fatalf("Error: %v", err)
+        }
+        if result.ExitCode != 0 {
+            log.Printf("Error: %d %s", result.ExitCode, result.Result)
+        } else {
+            log.Println(result.Result)
+        }
+
+        // Clean up
+        sandbox.Delete(ctx)
+    }
+    ```
+
   </TabItem>
 </Tabs>
 
@@ -219,6 +279,67 @@ response = sandbox.process.code_run(code: 'print("Hello World")')
 ```
 
 </TabItem>
+
+<TabItem label="Go" icon="seti:go">
+
+`main.go`
+
+```go
+// Import the Daytona SDK
+package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    // Define the configuration
+    config := &types.DaytonaConfig{
+        APIKey: "YOUR_API_KEY", // Replace with your API key
+    }
+
+    // Initialize the Daytona client
+    client, err := daytona.NewClientWithConfig(config)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create the Sandbox instance
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Run the code securely inside the Sandbox
+    result, err := sandbox.Process.ExecuteCommand(ctx, `echo "Hello World"`)
+
+    // Check the response
+    if err != nil {
+        log.Fatalf("Error: %v", err)
+    }
+    if result.ExitCode != 0 {
+        log.Printf("Error: %d %s", result.ExitCode, result.Result)
+    } else {
+        log.Println(result.Result)
+    }
+
+    // Clean up
+    sandbox.Delete(ctx)
+}
+```
+
+</TabItem>
 </Tabs>
 
 ## Run code
@@ -242,11 +363,26 @@ npx tsx index.mts
 
 </TabItem>
 
+<TabItem label="Ruby" icon="seti:ruby">
+
+```bash
+ruby main.rb
+```
+
+</TabItem>
+
+<TabItem label="Go" icon="seti:go">
+
+```bash
+go run main.go
+```
+
+</TabItem>
+</Tabs>
+
 ```text
 Hello World
 ```
-
-</Tabs>
 
 ## Summary
 

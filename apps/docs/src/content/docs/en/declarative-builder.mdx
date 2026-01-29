@@ -75,174 +75,43 @@ sandbox = daytona.create(
 )
 ```
 </TabItem>
-</Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
 
-> [**CreateSandboxFromImageParams (Python SDK)**](/docs/python-sdk/sync/daytona#createsandboxfromimageparams)
->
-> [**CreateSandboxFromImageParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
->
-> [**CreateSandboxFromImageParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromimageparams)
+import (
+    "context"
+    "log"
 
-:::note
-Use the following best practices when working with the declarative builder:
-
-- **Layer Optimization**: Group related operations to minimize Docker layers
-
-- **Cache Utilization**: Identical build commands and context will be cached and subsequent builds will be almost instant
-
-- **Security**: Create non-root users for application workloads
-
-- **Resource Efficiency**: Use slim base images when appropriate
-
-- **Context Minimization**: Only include necessary files in the build context
-  :::
-
-## Create pre-built Snapshots
-
-Daytona provides an option to [create pre-built snapshots](/docs/snapshots#create-snapshots) that can be reused across multiple sandboxes.
-
-The snapshot remains visible in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) and is permanently cached, ensuring instant availability without rebuilding.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-# Create a python data science image
-snapshot_name = "data-science-snapshot"
-
-image = (
-  Image.debian_slim("3.12")
-  .pip_install(["pandas", "numpy"])
-  .workdir("/home/daytona")
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
-# Create the snapshot and stream the build logs
-daytona.snapshot.create(
-  CreateSnapshotParams(
-    name=snapshot_name,
-    image=image,
-  ),
-on_logs=print,
-)
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
 
-# Create a new sandbox using the pre-built snapshot
-sandbox = daytona.create(
-CreateSandboxFromSnapshotParams(snapshot=snapshot_name)
-)
+    ctx := context.Background()
 
-```
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
 
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
 
-```typescript
-// Create a python data science image
-const snapshotName = 'data-science-snapshot'
-
-const image = Image.debianSlim('3.12')
-  .pipInstall(['pandas', 'numpy'])
-  .workdir('/home/daytona')
-
-// Create the snapshot and stream the build logs
-await daytona.snapshot.create(
-  {
-    name: snapshotName,
-    image,
-  },
-  {
-    onLogs: console.log,
-  }
-)
-
-// Create a new sandbox using the pre-built snapshot
-const sandbox = await daytona.create({
-  snapshot: snapshotName,
-})
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Create a simple Python data science image
-snapshot_name = 'data-science-snapshot'
-
-image = Daytona::Image
-  .debian_slim('3.12')
-  .pip_install(['pandas', 'numpy'])
-  .workdir('/home/daytona')
-
-# Create the Snapshot and stream the build logs
-daytona.snapshot.create(
-  Daytona::CreateSnapshotParams.new(
-    name: snapshot_name,
-    image: image
-  ),
-  on_logs: proc { |chunk| puts chunk }
-)
-
-# Create a new Sandbox using the pre-built Snapshot
-sandbox = daytona.create(
-  Daytona::CreateSandboxFromSnapshotParams.new(snapshot: snapshot_name)
-)
-```
-</TabItem>
-</Tabs>
-
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
-
-> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
->
-> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#createsnapshotparams)
->
-> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#createsnapshotparams)
-
-## Image configuration
-
-Daytona provides an option to define images programmatically using the Daytona SDK. You can specify base images, install packages, add files, set environment variables, and more.
-
-For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
-
-### Base image selection
-
-Daytona provides an option to select base images. The following snippets demonstrate how to select and configure base images:
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```python
-# Create an image from a base
-image = Image.base("python:3.12-slim-bookworm")
-
-# Use a Debian slim image with Python 3.12
-image = Image.debian_slim("3.12")
-```
-
-</TabItem>
-
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```typescript
-// Create an image from a base
-const image = Image.base('python:3.12-slim-bookworm')
-
-// Use a Debian slim image with Python 3.12
-const image = Image.debianSlim('3.12')
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-# Create an image from a base
-image = Daytona::Image.base('python:3.12-slim-bookworm')
-
-# Use a Debian slim image with Python 3.12
-image = Daytona::Image.debian_slim('3.12')
-```
-</TabItem>
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -307,6 +176,43 @@ image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject
 )
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -361,6 +267,43 @@ image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home
 image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/src')
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -411,6 +354,43 @@ image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
 image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
@@ -482,6 +462,43 @@ image = Daytona::Image.debian_slim('3.12').entrypoint(['/bin/bash'])
 image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
 ```
 </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+    client, err := daytona.NewClient()
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    ctx := context.Background()
+
+    // Create a sandbox
+    params := types.SnapshotParams{
+        SandboxBaseParams: types.SandboxBaseParams{
+            Language: types.CodeLanguagePython,
+        },
+    }
+    sandbox, err := client.Create(ctx, params)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    log.Printf("Created sandbox: %s\n", sandbox.ID)
+}
+    ```
+
+  </TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
