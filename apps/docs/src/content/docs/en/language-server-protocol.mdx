@@ -48,6 +48,7 @@ const lspServer = await sandbox.createLspServer(
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 require 'daytona'
 
@@ -58,35 +59,6 @@ sandbox = daytona.create
 # Create LSP server for Python
 lsp_server = sandbox.create_lsp_server(
   language_id: Daytona::LspServer::Language::PYTHON,
-  path_to_project: 'workspace/project'
-)
-
-# Create LSP server for TypeScript
-lsp_server = sandbox.create_lsp_server(
-  language_id: Daytona::LspServer::Language::TYPESCRIPT,
-  path_to_project: 'workspace/project'
-)
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-```ruby
-require 'daytona'
-
-# Create Sandbox
-daytona = Daytona::Daytona.new
-sandbox = daytona.create
-
-# Create LSP server for Python
-lsp_server = sandbox.create_lsp_server(
-  language_id: Daytona::LspServer::Language::PYTHON,
-  path_to_project: 'workspace/project'
-)
-
-# Create LSP server for TypeScript
-lsp_server = sandbox.create_lsp_server(
-  language_id: Daytona::LspServer::Language::TYPESCRIPT,
   path_to_project: 'workspace/project'
 )
 ```
@@ -94,34 +66,28 @@ lsp_server = sandbox.create_lsp_server(
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/) and [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#createlspserver), and [Ruby SDK](/docs/en/ruby-sdk/sandbox#create_lsp_server) references:
 
-> [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/lsp-server#lspservercreate_lsp_server)
+> [**create_lsp_server (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
 >
-> [**createLspServer (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server#createlspserver)
+> [**createLspServer (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#createlspserver)
 >
-> [**create_lsp_server (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server#create_lsp_server)
->
-> [**createLspServer (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server#createlspserver)
+> [**create_lsp_server (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_lsp_server)
 
 ### Supported languages
 
 The supported languages for creating LSP servers with Daytona are defined by the `LspLanguageId` enum:
 
+| Enum Value                     | Description                            |
+| ------------------------------ | -------------------------------------- |
+| **`LspLanguageId.PYTHON`**     | Python language server                 |
+| **`LspLanguageId.TYPESCRIPT`** | TypeScript/JavaScript language server  |
 
-| Enum Value                 | Description                            |
-| -------------------------- | -------------------------------------- |
-| `LspLanguageId.PYTHON`     | Python language server.                |
-| `LspLanguageId.TYPESCRIPT` | TypeScript/JavaScript language server. |
-
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid) and [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#lsplanguageid) references:
 
 > [**LspLanguageId (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lsplanguageid)
 >
 > [**LspLanguageId (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#lsplanguageid)
->
-> [**LspLanguageId (Ruby SDK)**](/docs/en/ruby-sdk/daytona#lsplanguageid)
 
 ## Start LSP servers
 
@@ -146,13 +112,27 @@ await lsp.start() // Initialize the server
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+lsp = sandbox.create_lsp_server(
+  language_id: Daytona::LspServer::Language::PYTHON,
+  path_to_project: 'workspace/project'
+)
+lsp.start  # Initialize the server
+# Now ready for LSP operations
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverstart), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#start), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#start) references:
 
 > [**start (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstart)
 >
 > [**start (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#start)
+>
+> [**start (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#start)
 
 ## Stop LSP servers
 
@@ -175,13 +155,23 @@ await lsp.stop() // Clean up resources
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# When done with LSP features
+lsp.stop  # Clean up resources
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverstop), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#stop), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#stop) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverstop)
 >
 > [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#stop)
+>
+> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#stop)
 
 ## Code completions
 
@@ -211,21 +201,11 @@ console.log('Completions:', completions)
 </TabItem>
 
 <TabItem label="Ruby" icon="seti:ruby">
-```ruby
-completions = lsp_server.completions(
-  path: 'workspace/project/main.py',
-  position: Daytona::LspServer::Position.new(line: 10, character: 15)
-)
-puts "Completions: #{completions}"
-```
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
 completions = lsp_server.completions(
   path: 'workspace/project/main.py',
-  position: Daytona::LspServer::Position.new(line: 10, character: 15)
+  position: { line: 10, character: 15 }
 )
 puts "Completions: #{completions}"
 ```
@@ -233,11 +213,13 @@ puts "Completions: #{completions}"
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#completions), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#completions) references:
 
 > [**completions (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspservercompletions)
 >
 > [**completions (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#completions)
+>
+> [**completions (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#completions)
 
 ## File notifications
 
@@ -264,13 +246,23 @@ await lspServer.didOpen('workspace/project/main.ts')
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Notify server that a file is open
+lsp_server.did_open('workspace/project/main.py')
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#didopen), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#did_open) references:
 
 > [**did_open (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_open)
 >
 > [**didOpen (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didopen)
+>
+> [**did_open (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_open)
 
 ### Close file
 
@@ -293,13 +285,23 @@ await lspServer.didClose('workspace/project/main.ts')
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Notify server that a file is closed
+lsp_server.did_close('workspace/project/main.py')
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#didclose), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#did_close) references:
 
 > [**did_close (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdid_close)
 >
 > [**didClose (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#didclose)
+>
+> [**did_close (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#did_close)
 
 ## Document symbols
 
@@ -325,13 +327,25 @@ symbols.forEach((symbol) => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+symbols = lsp_server.document_symbols('workspace/project/main.py')
+symbols.each do |symbol|
+  puts "Symbol: #{symbol.name}, Kind: #{symbol.kind}"
+end
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#documentsymbols), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#document_symbols) references:
 
 > [**document_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
 >
 > [**documentSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#documentsymbols)
+>
+> [**document_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#document_symbols)
 
 ## Sandbox symbols
 
@@ -357,10 +371,22 @@ symbols.forEach((symbol) => {
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+symbols = lsp_server.sandbox_symbols('MyClass')
+symbols.each do |symbol|
+  puts "Found: #{symbol.name} at #{symbol.location}"
+end
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols), [TypeScript SDK](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols), and [Ruby SDK](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols) references:
 
 > [**sandbox_symbols (Python SDK)**](/docs/en/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
 >
 > [**sandboxSymbols (TypeScript SDK)**](/docs/en/typescript-sdk/lsp-server/#sandboxsymbols)
+>
+> [**sandbox_symbols (Ruby SDK)**](/docs/en/ruby-sdk/lsp-server/#sandbox_symbols)
