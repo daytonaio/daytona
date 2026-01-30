@@ -79,8 +79,8 @@ TASK = (
     "For each chapter where a character's wealth status is mentioned or implied, "
     "produce a dict with keys: chapter (int), character (str), wealth (int 1-10 "
     "where 1=destitute and 10=richest in Paris), and event (str, brief description "
-    "of what changed). Track at least: Dantès, Danglars, Fernand/Morcerf, "
-    "Villefort, and Mercédès. You need to cover each chapter in the book."
+    "of what changed). Track the following characters: Dantès, Danglars, Fernand/"
+    "Morcerf, Villefort, and Mercédès. You need to cover each chapter in the book."
 )
 
 WEALTH_DATA_PATH = Path(__file__).parent / "wealth_data.json"
