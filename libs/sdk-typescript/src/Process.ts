@@ -12,7 +12,6 @@ import {
   SessionExecuteResponse as ApiSessionExecuteResponse,
   PtyCreateRequest,
   PtySessionInfo,
-  SessionSendInputRequest,
 } from '@daytonaio/toolbox-api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
@@ -240,9 +239,9 @@ export class Process {
   /**
    * Get the sandbox entrypoint session
    *
-   * @returns {Promise<Session>} Session information including:
-   *                            - sessionId: The session's unique identifier
-   *                            - commands: List of commands executed in the session
+   * @returns {Promise<Session>} Entrypoint session information including:
+   *                            - sessionId: The entrypoint session's unique identifier
+   *                            - commands: List of commands executed in the entrypoint session
    *
    * @example
    * const session = await process.getEntrypointSession();
