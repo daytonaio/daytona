@@ -289,9 +289,9 @@ class Process:
         """Gets the sandbox entrypoint session.
 
         Returns:
-            Session: Session information including:
-                - session_id: The session's unique identifier
-                - commands: List of commands executed in the session
+            Session: Entrypoint session information including:
+                - session_id: The entrypoint session's unique identifier
+                - commands: List of commands executed in the entrypoint session
 
         Example:
             ```python
@@ -495,7 +495,7 @@ class Process:
         """
 
         self._ensure_toolbox_url()
-        _, url, headers, *_ = self._api_client._get_entrypoint_logs_serialize(  # pylint: disable=protected-access
+        _, url, headers, *_ = self._api_client._get_entrypoint_logs_serialize(
             follow=True,
             _request_auth=None,
             _content_type=None,
