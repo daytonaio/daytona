@@ -40,6 +40,7 @@ jobs:
         with:
           node-version: 22
       - run: corepack enable
+      - run: yarn install --immutable
       - name: Check CLI reference docs are up to date
         run: |
           cd apps/docs
