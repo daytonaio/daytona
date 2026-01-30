@@ -97,15 +97,14 @@
       }
     },
     "check-version-env": {},
-    "publish": {
+    "prepare-release": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
           "git add pkg/daytona/VERSION",
           "git add go.mod ../../apps/cli/go.mod",
-          "git commit -s -m \"chore(sdk-go): bump to ${VERSION:-v0.0.0-dev}\" || true",
-          "git push origin HEAD"
+          "git commit -s -m \"chore(sdk-go): bump to ${VERSION:-v0.0.0-dev}\" || true"
         ],
         "parallel": false
       },

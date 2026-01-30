@@ -28,7 +28,7 @@ jobs:
           cache: false
       - name: go work
         run: |
-          go work sync
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code -- 'go.work*' '*/go.mod' '*/go.sum' || (echo "Go workspace files are not up to date! Please run 'go work sync' and commit the changes." && exit 1)
 
   golangci:
@@ -138,7 +138,7 @@ jobs:
           yarn format
           poetry lock
           yarn docs
-          go work sync
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
 
   build:
