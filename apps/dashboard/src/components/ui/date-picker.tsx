@@ -33,9 +33,9 @@ export function DatePicker({ value, onChange, required, disabledBefore, id }: Da
           data-empty={!value}
           className="flex flex-1 data-[empty=true]:text-muted-foreground justify-between text-left font-normal focus-visible:outline-none pl-2 h-full"
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm">
             <CalendarIcon className="h-4 w-4" />
-            {value ? format(value, 'PPP') : <span className="text-sm">Select date</span>}
+            {value ? format(value, 'PPP') : <span>Select date</span>}
           </div>
         </PopoverTrigger>
         {value && (
