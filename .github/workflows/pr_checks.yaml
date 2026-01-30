@@ -36,15 +36,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-node@v4
         with:
-          go-version-file: go.work
-          cache: true
-      - name: Check CLI docs are up to date
+          node-version: 22
+      - run: corepack enable
+      - name: Check CLI reference docs are up to date
         run: |
-          cd apps/cli
-          ./hack/generate-cli-docs.sh
-          git diff --exit-code -- docs/ hack/docs/ || (echo "CLI reference docs are out of sync! Please run 'apps/cli/hack/generate-cli-docs.sh' and commit the changes." && exit 1)
+          cd apps/docs
+          node tools/update-cli-reference.js --local
+          git diff --exit-code -- src/content/docs/en/tools/cli.mdx || (echo "CLI reference docs on the docs site are out of sync! Please run 'cd apps/docs && node tools/update-cli-reference.js --local' and commit the changes." && exit 1)
 
   golangci:
     name: Go lint
