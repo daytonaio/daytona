@@ -12,7 +12,7 @@ fi
 if [ "$(uname -m)" = "x86_64" ]; then
     echo "Building computer-use for amd64 architecture (native build)..."
     cd libs/computer-use
-    go build -o ../../dist/libs/computer-use-amd64 main.go
+    GONOSUMDB=github.com/daytonaio/daytona go work sync go build -o ../../dist/libs/computer-use-amd64 main.go
     echo "Native build completed successfully"
     exit 0
 fi
