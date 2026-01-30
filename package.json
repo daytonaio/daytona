@@ -25,6 +25,7 @@
     "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add",
     "docs": "nx run-many --target=docs --all",
     "publish": "nx run-many --target=publish --exclude=sdk-go --all",
+    "prepare-release": "nx run-many --target=prepare-release --all",
     "translate:docs": "npx gtx-cli translate --config apps/docs/gt.config.json",
     "push-manifest": "nx run-many --target=push-manifest --all --parallel=$(getconf _NPROCESSORS_ONLN)"
   },

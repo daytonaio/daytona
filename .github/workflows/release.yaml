@@ -64,15 +64,23 @@ jobs:
           git config --global user.name "Daytona Release Bot"
           git config --global user.email "daytona-release@users.noreply.github.com"
 
+      - name: Tag Go modules
+        run: |
+          git tag libs/api-client-go/${{ inputs.version }}
+          git tag libs/toolbox-api-client-go/${{ inputs.version }}
+          git tag libs/sdk-go/${{ inputs.version }}
+          git push origin libs/api-client-go/${{ inputs.version }} libs/toolbox-api-client-go/${{ inputs.version }} libs/sdk-go/${{ inputs.version }}
+
       - name: Project dependencies
         run: |
           yarn install --immutable
           poetry lock
           poetry install
           source "$(poetry env info --path)/bin/activate"
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
           go env -w GOFLAGS="-buildvcs=false"
 
-      # Write version to required folders so nx release can run
+        # Write version to required folders so nx release can run
       - name: Write package.json to required folders
         run: |
           mkdir dist
@@ -97,17 +105,65 @@ jobs:
             "version": "0.0.0"
           }' > apps/runner/package.json
 
-      # - name: Publish Go SDK
-      #   run: |
-      #     VERSION=${{ inputs.version }} yarn nx publish sdk-go
-
       - name: Create release
         run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+
+  build_projects:
+    needs: publish
+    runs-on: release-runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          bundle install
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Project dependencies
+        run: |
+          yarn install --immutable
+          poetry lock
+          poetry install
+          source "$(poetry env info --path)/bin/activate"
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          go env -w GOFLAGS="-buildvcs=false"
 
       - name: Build projects
         run: |
           source "$(poetry env info --path)/bin/activate"
-          go work sync
           yarn build:production
           yarn nx build-amd64 runner --configuration=production --nxBail=true
 
@@ -157,7 +213,7 @@ jobs:
 
   # Separately build docker images for AMD64 and ARM64
   docker_build:
-    needs: publish
+    needs: build_projects
     runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
@@ -228,7 +284,7 @@ jobs:
           poetry lock
           poetry install
           source "$(poetry env info --path)/bin/activate"
-          go work sync
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
           go env -w GOFLAGS="-buildvcs=false"
 
       - name: Publish docker images
@@ -259,3 +315,47 @@ jobs:
       - name: Push manifest
         run: |
           VERSION=${{ inputs.version }} yarn push-manifest
+
+  sync_gosum:
+    needs: build_projects
+    runs-on: release-runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+
+      - name: Configure git
+        run: |
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Project dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+
+      - name: Sync go.sum and create PR
+        run: |
+          git checkout -b sync-gosum-${{ inputs.version }}
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          git add */go.sum
+          git commit -s -m "chore: sync go.sum for ${{ inputs.version }}" || true
+          git push origin sync-gosum-${{ inputs.version }}
+          gh pr create \
+            --title "chore: sync go.sum for ${{ inputs.version }}" \
+            --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
+            --base main \
+            --head sync-gosum-${{ inputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

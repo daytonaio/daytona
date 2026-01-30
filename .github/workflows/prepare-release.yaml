@@ -1,0 +1,83 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+
+env:
+  VERSION: ${{ inputs.version }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          bundle install
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Project dependencies
+        run: |
+          yarn install --immutable
+          poetry lock
+          poetry install
+          source "$(poetry env info --path)/bin/activate"
+          go work sync
+          go env -w GOFLAGS="-buildvcs=false"
+
+      - name: Create release branch
+        run: |
+          git checkout -b prepare-release-${{ inputs.version }}
+
+      - name: Prepare release
+        run: |
+          VERSION=${{ inputs.version }} yarn prepare-release
+
+      - name: Push branch and create PR
+        run: |
+          git push origin prepare-release-${{ inputs.version }}
+          gh pr create \
+            --title "chore: prepare release ${{ inputs.version }}" \
+            --body "Automated PR to prepare release ${{ inputs.version }}" \
+            --base main \
+            --head prepare-release-${{ inputs.version }}

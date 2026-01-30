@@ -85,7 +85,7 @@ jobs:
       - name: Project dependencies
         run: |
           yarn install --immutable
-          go work sync
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
           poetry lock
           poetry install
           go env -w GOFLAGS="-buildvcs=false"
