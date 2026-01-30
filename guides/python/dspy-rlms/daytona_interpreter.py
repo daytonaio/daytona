@@ -188,7 +188,7 @@ class DaytonaInterpreter:
     persistent state across calls.
 
     Prerequisites:
-        - Daytona SDK: pip install daytona-sdk
+        - Daytona SDK: pip install daytona
         - DAYTONA_API_KEY environment variable set
 
     Example:
