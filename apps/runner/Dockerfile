@@ -18,8 +18,39 @@ RUN yarn
 RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
 
 FROM docker:28.2.2-dind-alpine3.22 AS runner
+# Install dependencies
+RUN apk add --no-cache \
+    curl \
+    rsync \
+    fuse3 \
+    ca-certificates \
+    tar
 
-RUN apk add --no-cache curl rsync
+# Install AWS Mountpoint for S3 (mount-s3) from official AWS releases
+RUN set -eux; \
+    ARCH="$(uname -m)"; \
+    case "$ARCH" in \
+      x86_64) ARCH=x86_64 ;; \
+      aarch64) ARCH=aarch64 ;; \
+      *) echo "Unsupported architecture for mount-s3: $ARCH (supported: x86_64, aarch64)" >&2; exit 1 ;; \
+    esac; \
+    curl -fL --retry 3 --retry-delay 5 --retry-all-errors \
+      "https://s3.amazonaws.com/mountpoint-s3-release/latest/mountpoint-s3-linux-${ARCH}.tar.gz" \
+      -o /tmp/mountpoint-s3.tar.gz; \
+    if [ ! -s /tmp/mountpoint-s3.tar.gz ]; then \
+      echo "Downloaded mountpoint-s3 archive is missing or empty"; \
+      exit 1; \
+    fi; \
+    tar -tzf /tmp/mountpoint-s3.tar.gz >/dev/null; \
+    mkdir -p /tmp/mountpoint-s3-extract; \
+    tar -xzf /tmp/mountpoint-s3.tar.gz -C /tmp/mountpoint-s3-extract --strip-components=1; \
+    if [ ! -f /tmp/mountpoint-s3-extract/mount-s3 ]; then \
+      echo "mount-s3 binary not found in extracted archive"; \
+      exit 1; \
+    fi; \
+    mv /tmp/mountpoint-s3-extract/mount-s3 /usr/local/bin/mount-s3; \
+    chmod +x /usr/local/bin/mount-s3; \
+    rm -rf /tmp/mountpoint-s3.tar.gz /tmp/mountpoint-s3-extract
 
 WORKDIR /usr/local/bin
 
