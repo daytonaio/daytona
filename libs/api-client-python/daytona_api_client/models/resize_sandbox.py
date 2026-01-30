@@ -18,27 +18,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateSandboxStateDto(BaseModel):
+class ResizeSandbox(BaseModel):
     """
-    UpdateSandboxStateDto
+    ResizeSandbox
     """ # noqa: E501
-    state: StrictStr = Field(description="The new state for the sandbox")
-    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", serialization_alias="errorReason")
-    recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox is recoverable")
+    cpu: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="CPU cores to allocate to the sandbox (minimum: 1)")
+    memory: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="Memory in GB to allocate to the sandbox (minimum: 1)")
+    disk: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=None, description="Disk space in GB to allocate to the sandbox (can only be increased)")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["state", "errorReason", "recoverable"]
-
-    @field_validator('state')
-    def state_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['creating', 'restoring', 'destroyed', 'destroying', 'started', 'stopped', 'starting', 'stopping', 'error', 'build_failed', 'pending_build', 'building_snapshot', 'unknown', 'pulling_snapshot', 'archived', 'archiving', 'resizing']):
-            raise ValueError("must be one of enum values ('creating', 'restoring', 'destroyed', 'destroying', 'started', 'stopped', 'starting', 'stopping', 'error', 'build_failed', 'pending_build', 'building_snapshot', 'unknown', 'pulling_snapshot', 'archived', 'archiving', 'resizing')")
-        return value
+    __properties: ClassVar[List[str]] = ["cpu", "memory", "disk"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -58,7 +52,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a JSON string"""
+        """Create an instance of ResizeSandbox from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -90,7 +84,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a dict"""
+        """Create an instance of ResizeSandbox from a dict"""
         if obj is None:
             return None
 
@@ -98,9 +92,9 @@ class UpdateSandboxStateDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "state": obj.get("state"),
-            "error_reason": obj.get("errorReason"),
-            "recoverable": obj.get("recoverable")
+            "cpu": obj.get("cpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -37,6 +37,7 @@ const (
 	SANDBOXSTATE_PULLING_SNAPSHOT  SandboxState = "pulling_snapshot"
 	SANDBOXSTATE_ARCHIVED          SandboxState = "archived"
 	SANDBOXSTATE_ARCHIVING         SandboxState = "archiving"
+	SANDBOXSTATE_RESIZING          SandboxState = "resizing"
 )
 
 // All allowed values of SandboxState enum
@@ -57,6 +58,7 @@ var AllowedSandboxStateEnumValues = []SandboxState{
 	"pulling_snapshot",
 	"archived",
 	"archiving",
+	"resizing",
 }
 
 func (v *SandboxState) UnmarshalJSON(src []byte) error {

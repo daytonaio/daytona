@@ -10,4 +10,5 @@ export const SANDBOX_STATES_CONSUMING_DISK: SandboxState[] = [
   ...SANDBOX_STATES_CONSUMING_COMPUTE,
   SandboxState.STOPPED,
   SandboxState.ARCHIVING,
+  SandboxState.RESIZING,
 ]

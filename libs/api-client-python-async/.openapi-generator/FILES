@@ -139,6 +139,7 @@ daytona_api_client_async/models/region_usage_overview.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
+daytona_api_client_async/models/resize_sandbox.py
 daytona_api_client_async/models/runner.py
 daytona_api_client_async/models/runner_full.py
 daytona_api_client_async/models/runner_health_metrics.py

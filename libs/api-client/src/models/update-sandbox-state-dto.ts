@@ -55,6 +55,7 @@ export const UpdateSandboxStateDtoStateEnum = {
   PULLING_SNAPSHOT: 'pulling_snapshot',
   ARCHIVED: 'archived',
   ARCHIVING: 'archiving',
+  RESIZING: 'resizing',
 } as const
 
 export type UpdateSandboxStateDtoStateEnum =

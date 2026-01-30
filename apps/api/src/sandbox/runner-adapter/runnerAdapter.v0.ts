@@ -419,4 +419,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     }
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
   }
+
+  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
+    await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
+  }
 }

@@ -1766,6 +1766,10 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 1
                 },
+                "disk": {
+                    "type": "integer",
+                    "minimum": 1
+                },
                 "gpu": {
                     "type": "integer",
                     "minimum": 0

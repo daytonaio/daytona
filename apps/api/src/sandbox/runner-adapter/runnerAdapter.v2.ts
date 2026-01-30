@@ -519,4 +519,14 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
     )
   }
+
+  async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
+    await this.jobService.createJob(null, JobType.RESIZE_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, {
+      cpu,
+      memory,
+      disk,
+    })
+
+    this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
 }

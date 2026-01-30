@@ -214,6 +214,9 @@ definitions:
       cpu:
         minimum: 1
         type: integer
+      disk:
+        minimum: 1
+        type: integer
       gpu:
         minimum: 0
         type: integer

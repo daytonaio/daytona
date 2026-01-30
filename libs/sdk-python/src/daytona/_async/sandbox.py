@@ -9,7 +9,7 @@ from typing import cast
 
 from daytona_api_client_async import BuildInfo
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
-from daytona_api_client_async import PortPreviewUrl
+from daytona_api_client_async import PortPreviewUrl, ResizeSandbox
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import (
     SandboxApi,
@@ -38,6 +38,7 @@ from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
+from ..common.sandbox import Resources
 from ..internal.toolbox_api_client_proxy import AsyncToolboxApiClientProxyLazyBaseUrl
 from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
@@ -563,6 +564,89 @@ class AsyncSandbox(SandboxDto):
         """
         _ = await self._sandbox_api.archive_sandbox(self.id)
         await self.refresh_data()
+
+    @intercept_errors(message_prefix="Failed to resize sandbox: ")
+    @with_timeout(
+        error_message=lambda self, timeout: (
+            f"Sandbox {cast('AsyncSandbox', self).id} failed to resize within the {timeout} seconds timeout period"
+        )
+    )
+    async def resize(self, resources: Resources, timeout: float | None = 60) -> None:
+        """Resizes the Sandbox resources.
+
+        Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
+        sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+
+        Args:
+            resources (Resources): New resource configuration. Only specified fields will be updated.
+                - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+                - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+                - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
+            timeout (Optional[float]): Timeout (in seconds) for the resize operation. 0 means no timeout.
+                Default is 60 seconds.
+
+        Raises:
+            DaytonaError: If hot resize constraints are violated (CPU/memory decrease on running sandbox).
+            DaytonaError: If disk resize attempted on running sandbox.
+            DaytonaError: If disk size decrease is attempted.
+            DaytonaError: If resize operation times out.
+            DaytonaError: If no resource changes are specified.
+
+        Example:
+            ```python
+            # Increase CPU/memory on running sandbox (hot resize)
+            await sandbox.resize(Resources(cpu=4, memory=8))
+
+            # Change disk (sandbox must be stopped)
+            await sandbox.stop()
+            await sandbox.resize(Resources(cpu=2, memory=4, disk=30))
+            ```
+        """
+        start_time = time.time()
+        resize_request = ResizeSandbox(
+            cpu=resources.cpu,
+            memory=resources.memory,
+            disk=resources.disk,
+        )
+        sandbox = await self._sandbox_api.resize_sandbox(self.id, resize_request, _request_timeout=timeout or None)
+        self.__process_sandbox_dto(sandbox)
+        time_elapsed = time.time() - start_time
+        if timeout is None or timeout == 0:
+            remaining_timeout = timeout
+        else:
+            remaining_timeout = max(0.001, timeout - time_elapsed)
+        await self.wait_for_resize_complete(timeout=remaining_timeout)
+
+    @intercept_errors(message_prefix="Failure during waiting for resize to complete: ")
+    @with_timeout(
+        error_message=lambda self, timeout: (
+            f"Sandbox {cast('AsyncSandbox', self).id} resize did not complete within the {timeout}s timeout period"
+        )
+    )
+    async def wait_for_resize_complete(
+        self,
+        timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
+    ) -> None:
+        """Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
+        the state is no longer 'resizing'.
+
+        Args:
+            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+
+        Raises:
+            DaytonaError: If timeout is negative. If resize operation times out.
+        """
+        while self.state == "resizing":
+            await self.refresh_data()
+
+            if self.state != "resizing":
+                return
+
+            if self.state in ["error", "build_failed"]:
+                err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
+                raise DaytonaError(err_msg)
+
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     async def create_ssh_access(self, expires_in_minutes: int | None = None) -> SshAccessDto:

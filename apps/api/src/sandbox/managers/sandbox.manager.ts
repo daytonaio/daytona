@@ -258,7 +258,12 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         .createQueryBuilder('sandbox')
         .select(['sandbox.id'])
         .where('sandbox.state NOT IN (:...excludedStates)', {
-          excludedStates: [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED],
+          excludedStates: [
+            SandboxState.DESTROYED,
+            SandboxState.ERROR,
+            SandboxState.BUILD_FAILED,
+            SandboxState.RESIZING,
+          ],
         })
         .andWhere('sandbox."desiredState"::text != sandbox.state::text')
         .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
@@ -399,7 +404,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       relations: ['buildInfo'],
     })
 
-    if ([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED].includes(sandbox.state)) {
+    if (
+      [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
+        sandbox.state,
+      )
+    ) {
       await this.redisLockProvider.unlock(lockKey)
       return
     }

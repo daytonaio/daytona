@@ -512,6 +512,74 @@ possible to keep sandboxes available for an extended period. The tradeoff betwee
 and stopped states is that starting an archived sandbox takes more time, depending on its size.
 Sandbox must be stopped before archiving.
 
+#### Sandbox.resize
+
+```python
+@intercept_errors(message_prefix="Failed to resize sandbox: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {cast('Sandbox', self).id} failed to resize within the {timeout} seconds timeout period"
+))
+def resize(resources: Resources, timeout: float | None = 60) -> None
+```
+
+Resizes the Sandbox resources.
+
+Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
+sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+
+**Arguments**:
+
+- `resources` _Resources_ - New resource configuration. Only specified fields will be updated.
+  - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+  - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+  - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
+- `timeout` _Optional[float]_ - Timeout (in seconds) for the resize operation. 0 means no timeout.
+  Default is 60 seconds.
+  
+
+**Raises**:
+
+- `DaytonaError` - If hot resize constraints are violated (CPU/memory decrease on running sandbox).
+- `DaytonaError` - If disk resize attempted on running sandbox.
+- `DaytonaError` - If disk size decrease is attempted.
+- `DaytonaError` - If resize operation times out.
+- `DaytonaError` - If no resource changes are specified.
+  
+
+**Example**:
+
+```python
+# Increase CPU/memory on running sandbox (hot resize)
+sandbox.resize(Resources(cpu=4, memory=8))
+
+# Change disk (sandbox must be stopped)
+sandbox.stop()
+sandbox.resize(Resources(cpu=2, memory=4, disk=30))
+```
+
+#### Sandbox.wait\_for\_resize\_complete
+
+```python
+@intercept_errors(
+    message_prefix="Failure during waiting for resize to complete: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Sandbox {cast('Sandbox', self).id} resize did not complete within the {timeout} seconds timeout period"
+))
+def wait_for_resize_complete(timeout: float | None = 60) -> None
+```
+
+Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
+the state is no longer 'resizing'.
+
+**Arguments**:
+
+- `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+  
+
+**Raises**:
+
+- `DaytonaError` - If timeout is negative. If resize operation times out.
+
 #### Sandbox.create\_ssh\_access
 
 ```python

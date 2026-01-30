@@ -100,3 +100,21 @@ func (e *Executor) recoverSandbox(ctx context.Context, job *apiclient.Job) (any,
 
 	return nil, nil
 }
+
+func (e *Executor) resizeSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	var resizeSandboxDto dto.ResizeSandboxDTO
+	err := e.parsePayload(job.Payload, &resizeSandboxDto)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	err = e.docker.Resize(ctx, job.ResourceId, resizeSandboxDto)
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusFailure)).Inc()
+		return nil, common.FormatRecoverableError(err)
+	}
+
+	common.ContainerOperationCount.WithLabelValues("resize", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	return nil, nil
+}

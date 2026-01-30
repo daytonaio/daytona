@@ -16,7 +16,9 @@ import {
   SshAccessDto,
   SshAccessValidationDto,
   SignedPortPreviewUrl,
+  ResizeSandbox,
 } from '@daytonaio/api-client'
+import { Resources } from './Daytona'
 import {
   FileSystemApi,
   GitApi,
@@ -576,6 +578,87 @@ export class Sandbox implements SandboxDto {
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
     await this.refreshData()
+  }
+
+  /**
+   * Resizes the Sandbox resources.
+   *
+   * Changes the CPU, memory, or disk allocation for the Sandbox. Hot resize (on running
+   * sandbox) only allows CPU/memory increases. Disk resize requires a stopped sandbox.
+   *
+   * @param {Resources} resources - New resource configuration. Only specified fields will be updated.
+   *   - cpu: Number of CPU cores (minimum: 1). For hot resize, can only be increased.
+   *   - memory: Memory in GiB (minimum: 1). For hot resize, can only be increased.
+   *   - disk: Disk space in GiB (can only be increased, requires stopped sandbox).
+   * @param {number} [timeout=60] - Timeout in seconds for the resize operation. 0 means no timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - If hot resize constraints are violated, disk resize attempted on running sandbox,
+   *   disk size decrease is attempted, no resource changes are specified, or resize operation times out.
+   *
+   * @example
+   * // Increase CPU/memory on running sandbox (hot resize)
+   * await sandbox.resize({ cpu: 4, memory: 8 });
+   *
+   * // Change disk (sandbox must be stopped)
+   * await sandbox.stop();
+   * await sandbox.resize({ cpu: 2, memory: 4, disk: 30 });
+   */
+  public async resize(resources: Resources, timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaError('Timeout must be a non-negative number')
+    }
+
+    const startTime = Date.now()
+    const resizeRequest: ResizeSandbox = {
+      cpu: resources.cpu,
+      memory: resources.memory,
+      disk: resources.disk,
+    }
+    const response = await this.sandboxApi.resizeSandbox(this.id, resizeRequest, this.organizationId, {
+      timeout: timeout * 1000,
+    })
+    this.processSandboxDto(response.data)
+    const timeElapsed = Date.now() - startTime
+    await this.waitForResizeComplete(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)
+  }
+
+  /**
+   * Waits for the Sandbox resize operation to complete.
+   *
+   * This method polls the Sandbox status until the state is no longer 'resizing'.
+   *
+   * @param {number} [timeout=60] - Maximum time to wait in seconds. 0 means no timeout.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - If the sandbox ends up in an error state or resize times out.
+   */
+  public async waitForResizeComplete(timeout = 60): Promise<void> {
+    if (timeout < 0) {
+      throw new DaytonaError('Timeout must be a non-negative number')
+    }
+
+    const checkInterval = 100 // Wait 100 ms between checks
+    const startTime = Date.now()
+
+    while (this.state === SandboxState.RESIZING) {
+      await this.refreshData()
+
+      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
+      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
+        throw new DaytonaError(
+          `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`,
+        )
+      }
+
+      if (this.state !== SandboxState.RESIZING) {
+        return
+      }
+
+      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
+        throw new DaytonaError('Sandbox resize did not complete within the timeout period')
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+    }
   }
 
   /**
