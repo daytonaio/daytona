@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useCallback, useState } from 'react'
+'use client'
+
 import { toast } from 'sonner'
+
+import { useCallback, useState } from 'react'
 
 type CopyFn = (text: string) => Promise<boolean>
 
