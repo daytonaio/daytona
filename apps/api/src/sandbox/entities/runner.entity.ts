@@ -121,6 +121,17 @@ export class Runner {
   })
   availabilityScore: number
 
+  // Action load points and penalty are informative, not the source of truth
+  @Column({
+    default: 0,
+  })
+  actionLoadPoints: number
+
+  @Column({
+    default: 0,
+  })
+  actionLoadPenalty: number
+
   @Column()
   region: string
 

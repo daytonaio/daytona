@@ -567,9 +567,15 @@ export class SandboxService {
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
     // Treat this as a newly started sandbox
+    // Note: oldRunnerId = runnerId since runner isn't changing, just organization assignment
     this.eventEmitter.emit(
       SandboxEvents.STATE_UPDATED,
-      new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
+      new SandboxStateUpdatedEvent(
+        warmPoolSandbox,
+        SandboxState.STARTED,
+        SandboxState.STARTED,
+        warmPoolSandbox.runnerId,
+      ),
     )
     return SandboxDto.fromSandbox(result)
   }

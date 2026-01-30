@@ -6,6 +6,7 @@
 import {
   BadRequestException,
   ConflictException,
+  forwardRef,
   HttpException,
   HttpStatus,
   Inject,
@@ -23,6 +24,8 @@ import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
@@ -42,6 +45,7 @@ import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { Snapshot } from '../entities/snapshot.entity'
+import { ActionLoadService } from './action-load.service'
 
 @Injectable()
 export class RunnerService {
@@ -65,6 +69,9 @@ export class RunnerService {
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    @InjectRedis() private readonly redis: Redis,
+    @Inject(forwardRef(() => ActionLoadService))
+    private readonly actionLoadService: ActionLoadService,
   ) {
     this.scoreConfig = this.getAvailabilityScoreConfig()
   }
@@ -301,7 +308,32 @@ export class RunnerService {
       where: runnerFilter,
     })
 
-    return runners.sort((a, b) => b.availabilityScore - a.availabilityScore).slice(0, 10)
+    if (runners.length === 0) {
+      return []
+    }
+
+    // Fetch action load penalties from Redis for all runners
+    const runnerIds = runners.map((r) => r.id)
+    const actionLoadPenalties = await this.actionLoadService.getActionLoadPenalties(runnerIds)
+
+    // Get the effective threshold for filtering
+    const effectiveScoreThreshold =
+      params.availabilityScoreThreshold ?? this.configService.getOrThrow('runnerScore.thresholds.availability')
+
+    // Apply penalties to scores, filter by effective threshold, and sort
+    const runnersWithEffectiveScore = runners
+      .map((runner) => ({
+        runner,
+        effectiveScore: runner.availabilityScore - (actionLoadPenalties.get(runner.id) || 0),
+      }))
+      .filter((r) => r.effectiveScore >= effectiveScoreThreshold)
+      .sort((a, b) => b.effectiveScore - a.effectiveScore)
+
+    // Limit to subset percentage (minimum 10)
+    const subsetPercentage = this.configService.getOrThrow('runnerScore.selection.subsetPercentage')
+    const subsetCount = Math.max(10, Math.ceil((runnersWithEffectiveScore.length * subsetPercentage) / 100))
+
+    return runnersWithEffectiveScore.slice(0, subsetCount).map((r) => r.runner)
   }
 
   /**

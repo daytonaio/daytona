@@ -17,6 +17,7 @@ import { SnapshotService } from '../../services/snapshot.service'
 import { DockerRegistryService } from '../../../docker-registry/services/docker-registry.service'
 import { DockerRegistry } from '../../../docker-registry/entities/docker-registry.entity'
 import { RunnerService } from '../../services/runner.service'
+import { ActionLoadService } from '../../services/action-load.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
@@ -33,6 +34,7 @@ export class SandboxStartAction extends SandboxAction {
   protected readonly logger = new Logger(SandboxStartAction.name)
   constructor(
     protected runnerService: RunnerService,
+    protected actionLoadService: ActionLoadService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
@@ -177,9 +179,14 @@ export class SandboxStartAction extends SandboxAction {
     const errorSandboxState = isBuild ? SandboxState.BUILD_FAILED : SandboxState.ERROR
 
     for (const snapshotRunner of snapshotRunners) {
-      // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
-      if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
+
+      // Get action load penalty from Redis and calculate effective score
+      const penalties = await this.actionLoadService.getActionLoadPenalties([runner.id])
+      const penalty = penalties.get(runner.id) || 0
+      const effectiveScore = runner.availabilityScore - penalty
+
+      if (declarativeBuildScoreThreshold === undefined || effectiveScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox.id, targetSandboxState, lockCode, runner.id)
           return SYNC_AGAIN
@@ -380,10 +387,15 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
+      // Get action load penalty from Redis and calculate effective score
+      const penalties = await this.actionLoadService.getActionLoadPenalties([runner.id])
+      const penalty = penalties.get(runner.id) || 0
+      const effectiveScore = runner.availabilityScore - penalty
+
       const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
 
       const shouldMoveToNewRunner =
-        (runner.unschedulable || runner.state != RunnerState.READY || runner.availabilityScore < startScoreThreshold) &&
+        (runner.unschedulable || runner.state != RunnerState.READY || effectiveScore < startScoreThreshold) &&
         sandbox.backupState === BackupState.COMPLETED
 
       // if the runner is unschedulable/not ready and sandbox has a valid backup, move sandbox to a new runner
@@ -400,7 +412,7 @@ export class SandboxStartAction extends SandboxAction {
       // If the sandbox is on a runner and its backupState is COMPLETED
       // but there are too many running sandboxes on that runner, move it to a less used runner
       if (sandbox.backupState === BackupState.COMPLETED) {
-        if (runner.availabilityScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
+        if (effectiveScore < this.configService.getOrThrow('runnerScore.thresholds.availability')) {
           const availableRunners = await this.runnerService.findAvailableRunners({
             regions: [sandbox.region],
             sandboxClass: sandbox.class,
