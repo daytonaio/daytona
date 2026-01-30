@@ -48,6 +48,7 @@ const config: DaytonaConfig = {
 </TabItem>
 
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 require 'daytona'
 
@@ -82,9 +83,26 @@ func main() {
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/api-keys \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+  "name": "",
+  "permissions": [
+    "write:registries"
+  ],
+  "expiresAt": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), [Ruby SDK](/docs/en/ruby-sdk/daytona), and [Go SDK](/docs/en/go-sdk/daytona) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeScript SDK](/docs/en/typescript-sdk/daytona), [Ruby SDK](/docs/en/ruby-sdk/daytona), [Go SDK](/docs/en/go-sdk/daytona), and [API](/docs/en/tools/api/#daytona/tag/api-keys) references:
 
 > [**DaytonaConfig (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonaconfig)
 >
@@ -93,6 +111,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeSc
 > [**Config (Ruby SDK)**](/docs/en/ruby-sdk/daytona#config)
 >
 > [**Config (Go SDK)**](/docs/en/go-sdk/daytona)
+>
+> [**Config (API)**](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys)
 
 ## Environment variables
 
