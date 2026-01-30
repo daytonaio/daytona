@@ -24,6 +24,7 @@
       "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
+          "rm -rf {projectRoot}/src",
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/api-client/src"
         ],
         "parallel": false

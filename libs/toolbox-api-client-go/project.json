@@ -36,11 +36,25 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "outputs": [
+        "{projectRoot}/api",
+        "{projectRoot}/docs",
+        "{projectRoot}/model_*.go",
+        "{projectRoot}/api_*.go",
+        "{projectRoot}/client.go",
+        "{projectRoot}/configuration.go",
+        "{projectRoot}/response.go",
+        "{projectRoot}/utils.go"
+      ],
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
+          "rm -f *.go",
           "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/toolbox-api-client-go --git-user-id=daytonaio -i ../../apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=packageName=toolbox,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o ."
-        ]
+        ],
+        "parallel": false
       },
       "dependsOn": [
         {

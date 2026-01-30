@@ -1,5 +1,6 @@
 .gitignore
 .npmignore
+.openapi-generator-ignore
 api.ts
 api/default-api.ts
 api/sandbox-api.ts
