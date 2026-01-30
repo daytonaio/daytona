@@ -416,6 +416,8 @@ print("Broker server code written")
         for tool_name, tool_func in self.tools.items():
             if tool_name in self._injected_tools:
                 continue
+            if not tool_name.isidentifier() or keyword.iskeyword(tool_name):
+                raise CodeInterpreterError(f"Invalid tool name: '{tool_name}'")
             wrapper_code = self._generate_tool_wrapper(tool_name, tool_func)
             result = self._sandbox.code_interpreter.run_code(
                 wrapper_code,
