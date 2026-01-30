@@ -29,6 +29,7 @@ const Onboarding: React.FC = () => {
   const navigate = useNavigate()
 
   const [language, setLanguage] = useState<'typescript' | 'python'>('python')
+  const [selectedPackageManager, setSelectedPackageManager] = useState<'npm' | 'pnpm' | 'yarn' | 'bun'>('npm')
   const [apiKeyName, setApiKeyName] = useState('')
   const [apiKeyPermissions, setApiKeyPermissions] = useState<CreateApiKeyPermissionsEnum[]>([])
   const [createdApiKey, setCreatedApiKey] = useState<ApiKeyResponse | null>(null)
@@ -122,7 +123,7 @@ const Onboarding: React.FC = () => {
               <h1 className="text-2xl font-bold mb-2">Get Started</h1>
               <p className="text-muted-foreground">Install and get your Sandboxes running.</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <Tabs value={language} onValueChange={(value) => setLanguage(value as 'typescript' | 'python')}>
                 <TabsList className="bg-foreground/10 p-0 rounded-none">
                   <TabsTrigger
@@ -157,7 +158,26 @@ const Onboarding: React.FC = () => {
                   <h2 className="text-xl font-semibold mb-4">Install the SDK</h2>
                   <p className="mb-4">Run the following command in your terminal to install the Daytona SDK:</p>
                   <div className="transition-all duration-500">
-                    <CodeBlock code={codeExamples[language].install} language="bash" showCopy />
+                    {language === 'typescript' ? (
+                      <CodeBlock
+                        snippets={[
+                          { label: 'npm', code: codeExamples.typescript.npm.install },
+                          { label: 'pnpm', code: codeExamples.typescript.pnpm.install },
+                          { label: 'yarn', code: codeExamples.typescript.yarn.install },
+                          { label: 'bun', code: codeExamples.typescript.bun.install },
+                        ]}
+                        language="bash"
+                        showCopy
+                        selectedSnippetLabel={selectedPackageManager}
+                        onSelectSnippet={(label) => setSelectedPackageManager(label as 'npm' | 'pnpm' | 'yarn' | 'bun')}
+                      />
+                    ) : (
+                      <CodeBlock
+                        snippets={[{ label: 'pip', code: codeExamples.python.pip.install }]}
+                        language="bash"
+                        showCopy
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -287,7 +307,26 @@ const Onboarding: React.FC = () => {
                   <h2 className="text-xl font-semibold mb-4">Run the Example</h2>
                   <p className="mb-4">Run the following command in your terminal to run the example:</p>
                   <div className="transition-all duration-500">
-                    <CodeBlock code={codeExamples[language].run} language="bash" showCopy />
+                    {language === 'typescript' ? (
+                      <CodeBlock
+                        snippets={[
+                          { label: 'npm', code: codeExamples.typescript.npm.run },
+                          { label: 'pnpm', code: codeExamples.typescript.pnpm.run },
+                          { label: 'yarn', code: codeExamples.typescript.yarn.run },
+                          { label: 'bun', code: codeExamples.typescript.bun.run },
+                        ]}
+                        language="bash"
+                        showCopy
+                        selectedSnippetLabel={selectedPackageManager}
+                        onSelectSnippet={(label) => setSelectedPackageManager(label as 'npm' | 'pnpm' | 'yarn' | 'bun')}
+                      />
+                    ) : (
+                      <CodeBlock
+                        snippets={[{ label: 'python', code: codeExamples.python.pip.run }]}
+                        language="bash"
+                        showCopy
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -322,8 +361,22 @@ const Onboarding: React.FC = () => {
 
 const codeExamples = {
   typescript: {
-    install: `npm install @daytonaio/sdk`,
-    run: `npx tsx index.mts`,
+    npm: {
+      install: `npm install @daytonaio/sdk`,
+      run: `npx tsx index.mts`,
+    },
+    pnpm: {
+      install: `pnpm add @daytonaio/sdk`,
+      run: `pnpm dlx tsx index.mts`,
+    },
+    yarn: {
+      install: `yarn add @daytonaio/sdk`,
+      run: `npx tsx index.mts`,
+    },
+    bun: {
+      install: `bun add @daytonaio/sdk`,
+      run: `bunx tsx index.mts`,
+    },
     example: `import { Daytona } from '@daytonaio/sdk'
   
 // Initialize the Daytona client
@@ -340,8 +393,10 @@ console.log(response.result);
   `,
   },
   python: {
-    install: `pip install daytona`,
-    run: `python main.py`,
+    pip: {
+      install: `pip install daytona`,
+      run: `python main.py`,
+    },
     example: `from daytona import Daytona, DaytonaConfig
   
 # Define the configuration
