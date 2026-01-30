@@ -12,6 +12,7 @@ import {
   SessionExecuteResponse as ApiSessionExecuteResponse,
   PtyCreateRequest,
   PtySessionInfo,
+  SessionSendInputRequest,
 } from '@daytonaio/toolbox-api-client'
 import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
