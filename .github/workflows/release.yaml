@@ -349,10 +349,10 @@ jobs:
         run: |
           git checkout -b sync-gosum-${{ inputs.version }}
           GONOSUMDB=github.com/daytonaio/daytona go work sync
-          if git diff --quiet -- */go.sum; then
+          if git diff --quiet -- go.work.sum **/go.sum; then
             echo "No go.sum changes detected; skipping commit and PR creation."
           else
-            git add */go.sum
+            git add go.work.sum **/go.sum
             git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
             git push origin sync-gosum-${{ inputs.version }}
             gh pr create \
