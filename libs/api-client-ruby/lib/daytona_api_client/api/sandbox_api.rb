@@ -1024,7 +1024,7 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"]
+      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing"]
       if @api_client.config.client_side_validation && opts[:'states'] && !opts[:'states'].all? { |item| allowable_values.include?(item) }
         fail ArgumentError, "invalid value for \"states\", must include one of #{allowable_values}"
       end
@@ -1255,6 +1255,81 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#replace_labels\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Resize sandbox resources
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param resize_sandbox [ResizeSandbox] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Sandbox]
+    def resize_sandbox(sandbox_id_or_name, resize_sandbox, opts = {})
+      data, _status_code, _headers = resize_sandbox_with_http_info(sandbox_id_or_name, resize_sandbox, opts)
+      data
+    end
+
+    # Resize sandbox resources
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param resize_sandbox [ResizeSandbox] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def resize_sandbox_with_http_info(sandbox_id_or_name, resize_sandbox, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.resize_sandbox ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.resize_sandbox"
+      end
+      # verify the required parameter 'resize_sandbox' is set
+      if @api_client.config.client_side_validation && resize_sandbox.nil?
+        fail ArgumentError, "Missing the required parameter 'resize_sandbox' when calling SandboxApi.resize_sandbox"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/resize'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+        header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(resize_sandbox)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Sandbox'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.resize_sandbox",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#resize_sandbox\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

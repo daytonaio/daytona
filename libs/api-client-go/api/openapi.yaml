@@ -9868,6 +9868,7 @@ components:
         - destroyed
         - started
         - stopped
+        - resized
         - archived
       type: string
     SandboxVolume:

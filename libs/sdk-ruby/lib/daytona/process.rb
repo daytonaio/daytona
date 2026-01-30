@@ -124,6 +124,17 @@ module Daytona
     #   end
     def get_session(session_id) = toolbox_api.get_session(session_id)
 
+    # Gets the Sandbox entrypoint session
+    #
+    # @return [DaytonaApiClient::Session] Entrypoint session information including session_id and commands
+    #
+    # @example
+    #   session = sandbox.process.get_entrypoint_session()
+    #   session.commands.each do |cmd|
+    #     puts "Command: #{cmd.command}"
+    #   end
+    def get_entrypoint_session = toolbox_api.get_entrypoint_session
+
     # Gets information about a specific command executed in a session
     #
     # @param session_id [String] Unique identifier of the session
@@ -220,6 +231,70 @@ module Daytona
       url = URI.parse(preview_link.url)
       url.scheme = url.scheme == 'https' ? 'wss' : 'ws'
       url.path = "/process/session/#{session_id}/command/#{command_id}/logs"
+      url.query = 'follow=true'
+
+      completion_queue = Queue.new
+
+      ws = WebSocket::Client::Simple.connect(
+        url.to_s,
+        headers: toolbox_api.api_client.default_headers.dup.merge(
+          'X-Daytona-Preview-Token' => preview_link.token,
+          'Content-Type' => 'text/plain',
+          'Accept' => 'text/plain'
+        )
+      )
+
+      ws.on(:message) do |message|
+        if message.type == :close
+          ws.close
+          completion_queue.push(:close)
+        else
+          stdout, stderr = Util.demux(message.data.to_s)
+
+          on_stdout.call(stdout) unless stdout.empty?
+          on_stderr.call(stderr) unless stderr.empty?
+        end
+      end
+
+      ws.on(:close) do
+        completion_queue.push(:close)
+      end
+
+      ws.on(:error) do |e|
+        completion_queue.push(:error)
+        raise Sdk::Error, "WebSocket error: #{e.message}"
+      end
+
+      # Wait for completion
+      completion_queue.pop
+    end
+
+    # Get the sandbox entrypoint logs
+    #
+    # @return [Daytona::SessionCommandLogsResponse] Entrypoint logs including output, stdout, and stderr
+    #
+    # @example
+    #   logs = sandbox.process.get_entrypoint_logs()
+    #   puts "Command stdout: #{logs.stdout}"
+    #   puts "Command stderr: #{logs.stderr}"
+    def get_entrypoint_logs = parse_session_command_logs(toolbox_api.get_entrypoint_logs)
+
+    # Asynchronously retrieves and processes the sandbox entrypoint logs as they become available
+    #
+    # @param on_stdout [Proc] Callback function to handle stdout log chunks as they arrive
+    # @param on_stderr [Proc] Callback function to handle stderr log chunks as they arrive
+    # @return [WebSocket::Client::Simple::Client]
+    #
+    # @example
+    #   sandbox.process.get_entrypoint_logs_async(
+    #     on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+    #     on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+    #   )
+    def get_entrypoint_logs_async(on_stdout:, on_stderr:) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+      preview_link = get_preview_link.call(WS_PORT)
+      url = URI.parse(preview_link.url)
+      url.scheme = url.scheme == 'https' ? 'wss' : 'ws'
+      url.path = '/process/session/entrypoint/logs'
       url.query = 'follow=true'
 
       completion_queue = Queue.new
