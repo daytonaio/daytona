@@ -5,6 +5,7 @@ import inspect
 import json
 import keyword
 import logging
+import math
 import threading
 import time
 import urllib.error
@@ -510,22 +511,45 @@ print("Broker server code written")
 
     def _serialize_value(self, value: Any) -> str:
         """Convert a Python value to a string that can be evaluated."""
-        if value is None:
-            return "None"
-        if isinstance(value, bool):
-            return "True" if value else "False"
-        if isinstance(value, (int, float)):
-            return repr(value)
-        if isinstance(value, str):
-            return repr(value)
-        if isinstance(value, (list, dict)):
-            return json.dumps(value)
-        if isinstance(value, set):
-            try:
-                return json.dumps(list(value))
-            except TypeError:
-                return repr(list(value))
-        raise CodeInterpreterError(f"Unsupported value type: {type(value).__name__}")
+
+        # Use Python literals (not JSON) so nested bool/None serialize correctly.
+        def to_literal(obj: Any) -> str:
+            if obj is None:
+                return "None"
+            if isinstance(obj, bool):
+                return "True" if obj else "False"
+            if isinstance(obj, int):
+                return repr(obj)
+            if isinstance(obj, float):
+                if math.isnan(obj):
+                    return "float('nan')"
+                if math.isinf(obj):
+                    return "float('inf')" if obj > 0 else "float('-inf')"
+                return repr(obj)
+            if isinstance(obj, str):
+                return repr(obj)
+            if isinstance(obj, list):
+                return "[" + ", ".join(to_literal(v) for v in obj) + "]"
+            if isinstance(obj, tuple):
+                inner = ", ".join(to_literal(v) for v in obj)
+                if len(obj) == 1:
+                    inner += ","
+                return "(" + inner + ")"
+            if isinstance(obj, set):
+                if not obj:
+                    return "set()"
+                return "{" + ", ".join(to_literal(v) for v in obj) + "}"
+            if isinstance(obj, dict):
+                parts = []
+                for k, v in obj.items():
+                    parts.append(f"{to_literal(k)}: {to_literal(v)}")
+                return "{" + ", ".join(parts) + "}"
+            raise CodeInterpreterError(f"Unsupported value type: {type(obj).__name__}")
+
+        try:
+            return to_literal(value)
+        except TypeError as exc:
+            raise CodeInterpreterError(f"Unsupported value type: {type(value).__name__}") from exc
 
     def execute(
         self,
