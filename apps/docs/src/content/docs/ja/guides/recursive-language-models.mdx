@@ -1,0 +1,409 @@
+---
+title: 高度な再帰型言語モデルを構築する
+description: 各エージェントがそれぞれ専用の隔離された Daytona サンドボックス内で実行される再帰型言語モデルエージェントを実装する。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+このガイドでは、[Recursive Language Models](https://arxiv.org/abs/2512.24601)（Zhang, Kraska, Khattab）で提案され、[Prime Intellect](https://www.primeintellect.ai/blog/rlm) によってさらに発展させられた手法に基づき、Daytona のサンドボックスを利用する再帰言語モデル（RLM）エージェントシステムの構築方法を示します。
+
+元論文および Prime Intellect の実装は単一レベルの再帰（depth=1）に焦点を当てていますが、このガイドではその概念を **無制限の再帰深度** へと拡張します。つまり、エージェントはサブエージェントを生成でき、そのサブエージェントもさらにサブエージェントを生成できる、ということです。各エージェントは、対象リポジトリを新規にクローンした専用の Daytona サンドボックス内で実行されます。
+
+***
+
+### 1. ワークフロー概要 \{#1-workflow-overview\}
+
+このシステムは、エージェントが子エージェントにサブタスクを委譲できる再帰的なエージェントアーキテクチャを実装しています。
+
+1. **初期化**: ルートエージェントがタスクを受け取り、リポジトリを新規クローンした Daytona サンドボックスを取得する
+2. **反復**: エージェントがループを実行する: LLM を呼び出す → Python コードを抽出 → REPL で実行
+3. **委譲**: コードは `rlm_query()` を呼び出してサブエージェントを生成でき、各エージェントはそれぞれ独自のサンドボックスを持つ
+4. **集約**: サブエージェントが結果を返し、親エージェントが知見を統合し、必要に応じてさらにコードを実行する
+5. **完了**: ルートエージェントがすべてのサブエージェントの結果を受け取り、git パッチを生成する。すべてのサンドボックスはクリーンアップされる
+
+```
+Root Agent (depth=0)
+├── Sub-Agent A (depth=1)
+│   ├── Sub-Agent A1 (depth=2)
+│   └── Sub-Agent A2 (depth=2)
+└── Sub-Agent B (depth=1)
+    ├── Sub-Agent B1 (depth=2)
+    └── Sub-Agent B2 (depth=2)
+```
+
+各エージェントは、それぞれ独立したDaytonaのサンドボックス内で新しくクローンしたリポジトリを用いて動作し、コードベースを並列に探索できます。
+
+### 2. セットアップ \{#2-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+[Daytona リポジトリ](https://github.com/daytonaio/daytona.git) をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/python/recursive-language-models
+```
+
+#### 仮想環境の作成 \{#create-virtual-environment\}
+
+```bash
+python3.10 -m venv venv
+source venv/bin/activate  # Windows の場合: venv\Scripts\activate
+```
+
+#### 依存関係をインストール \{#install-dependencies\}
+
+```bash
+pip install -e .
+```
+
+これにより、次のものがインストールされます:
+
+* `daytona` - サンドボックス管理用の Daytona SDK
+* `litellm` - 各種プロバイダー向けの統一 LLM インターフェース
+* `typer` - CLI フレームワーク
+* `pyyaml` - 設定ファイルの解析用ライブラリ
+
+#### 環境の設定 \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から Daytona API キーを取得し、`.env` ファイルを作成します。
+
+```bash
+DAYTONA_API_KEY=your_daytona_api_key
+LLM_API_KEY=your_llm_api_key
+```
+
+`LLM_API_KEY` は [LiteLLM](https://docs.litellm.ai/) を介して利用され、OpenRouter、OpenAI、Anthropic などの各種プロバイダーに対応しています。
+
+### 3. エージェントの実行 \{#3-running-an-agent\}
+
+セットアップが完了したら、エージェントを実行してみましょう。以下は、scikit-learn にある TODO コメントを調査するエージェントの例です。
+
+```bash
+python run.py https://github.com/scikit-learn/scikit-learn \
+  -p "Investigate TODO comments across this repository. Spawn sub-agents to explore different modules. Find the easiest TODO and fix it."
+```
+
+これにより、コードベースを探索し、並列に調査を行うためにサブエージェントへ処理を委譲し、見つけた TODO のうち最も簡単なものを修正する git パッチを生成するルートエージェントが起動されます。結果と実行の詳細なトレースについては後ほど確認しますが、まずはコードがどのように動作しているかを見ていきましょう。
+
+#### CLI オプション \{#cli-options\}
+
+| オプション | 説明 |
+|--------|-------------|
+| `repo` | GitHub リポジトリの URL（必須） |
+| `-p, --prompt` | エージェント用のタスクプロンプト（必須） |
+| `-b, --branch` | ブランチ名（任意） |
+| `--commit` | 特定のコミットの SHA（任意） |
+| `-c, --config` | 設定ファイルへのパス（デフォルト: `config.yaml`） |
+| `-o, --output` | パッチの出力ファイル（デフォルト: 標準出力） |
+
+### 4. コードの理解 \{#4-understanding-the-code\}
+
+エージェントシステムの主要なコンポーネントを順を追って見ていきます。
+
+#### エージェントの実行ループ \{#agent-execution-loop\}
+
+各エージェントは、LLM を呼び出し、コードブロックを抽出して実行するイテレーションループを回します。`agent.py` におけるコアとなるループは次のとおりです:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def _run_loop(self) -> None:
+        """Run the main iteration loop."""
+        system_prompt = build_system_prompt(depth=self.depth)
+        messages = [{"role": "system", "content": system_prompt}]
+        execution_result = None
+
+        for iteration in range(self.config.rlm.max_iterations):
+            # Check global timeout
+            if self._is_timeout():
+                break
+
+            # Build user prompt with previous execution result
+            user_prompt = build_user_prompt(iteration, execution_result)
+            messages.append({"role": "user", "content": user_prompt})
+
+            # Get model completion
+            response = self.client.completion(messages)
+            messages.append({"role": "assistant", "content": response})
+
+            # Execute code blocks in REPL
+            repl_result = self.repl.execute_response(response)
+
+            # Check for final answer
+            if repl_result.final_answer is not None:
+                self._result = repl_result.final_answer
+                break
+
+            # Format result for next iteration
+            execution_result = format_execution_result(...)
+    ```
+  </TabItem>
+</Tabs>
+
+各イテレーションで行われる処理は次のとおりです:
+
+1. 前回の実行結果をコンテキストとしてプロンプトを構築する
+2. LLM からの completion を取得する
+3. Python のコードブロックを抽出して実行する
+4. エージェントが結果を送信するために `FINAL()` を呼び出したか確認する
+5. 次のイテレーション用に出力を整形する
+
+#### サブエージェントの生成 \{#sub-agent-spawning\}
+
+エージェントコードが `rlm_query()` を呼び出すと、専用のサンドボックスを持つ新しいサブエージェントが作成されます:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def _handle_rlm_query(self, task: str) -> str:
+        """特定のタスク用のサブエージェントを生成します。"""
+        # サンドボックスの利用枠を確認
+        if not self.sandbox_manager.budget.can_acquire():
+            return "Error: sandbox budget exhausted"
+
+        # 深さを 1 段階増やしてサブエージェントを作成
+        sub_agent = RLMAgent(
+            client=self.client,
+            sandbox_manager=self.sandbox_manager,
+            config=self.config,
+            depth=self.depth + 1,
+            task=task,
+            # ... その他のパラメータ
+        )
+
+        # サブエージェントを実行（ブロッキング）
+        result = sub_agent.run()
+
+        # 必要に応じて切り詰めた結果を返す
+        return result.result or "No result"
+    ```
+  </TabItem>
+</Tabs>
+
+並列生成を行う場合は、`rlm_query_batched()` がスレッドプールを使用します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def _handle_rlm_query_batched(self, tasks: list[str]) -> list[str]:
+        """複数のサブエージェントを並列に生成します。"""
+        results = [""] * len(tasks)
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_idx = {
+                executor.submit(self._handle_rlm_query, task): i
+                for i, task in enumerate(tasks)
+            }
+            for future in as_completed(future_to_idx):
+                idx = future_to_idx[future]
+                results[idx] = future.result()
+
+        return results
+    ```
+  </TabItem>
+</Tabs>
+
+#### エージェントコードインターフェース \{#agent-code-interface\}
+
+REPL 内では、エージェントは次の関数を利用できます。
+
+| Function | Description |
+|----------|-------------|
+| `rlm_query(task)` | 単一のサブエージェントを生成し、結果文字列を返す |
+| `rlm_query_batched(tasks)` | 複数のサブエージェントを並列で生成する |
+| `FINAL(answer)` | 最終結果を送信する（ルートエージェントではパッチ抽出をトリガー） |
+| `FINAL_VAR(var_name)` | 変数の値を最終結果として送信する |
+| `edit_file(path, old, new)` | 構文検証付きでファイルを編集する |
+
+エージェントが使用するサブエージェント生成パターンの例:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 複数のサブエージェントを生成して、異なるモジュールを調査する
+    results = rlm_query_batched([
+        "sklearn/linear_model/ 内の TODO コメントを探し、難易度を評価する",
+        "sklearn/ensemble/ 内の TODO コメントを探し、難易度を評価する",
+        "sklearn/tree/ 内の TODO コメントを探し、難易度を評価する",
+    ])
+
+    for i, result in enumerate(results):
+        print(f"=== サブエージェント {i+1} の検出結果 ===")
+        print(result)
+    ```
+  </TabItem>
+</Tabs>
+
+### 5. 例によるウォークスルー \{#5-example-walkthrough\}
+
+代表的な機械学習ライブラリである scikit-learn を対象にエージェントを実行したときに何が起こるかを追ってみましょう。
+
+```bash
+python run.py https://github.com/scikit-learn/scikit-learn \
+  -p "Investigate TODO comments across this repository. Spawn sub-agents to explore different modules under sklearn/ in parallel. For each TODO found, assess how difficult it would be to fix (easy/medium/hard). After gathering results, pick the easiest TODO and fix it."
+```
+
+scikit-learn には、文字列「# TODO」を含む行が約 400 行存在する点に注意してください。
+
+**ステップ 1: ルートエージェントが探索し、深さ 1 のサブエージェントを生成する**
+
+ルートエージェント（depth=0）はリポジトリ構造を調べ、すべての sklearn モジュールを特定し、25 個のサブエージェントを並列に生成します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Define the subdirectories to investigate
+    subdirs = [
+        "cluster", "compose", "covariance", "cross_decomposition", "datasets",
+        "decomposition", "ensemble", "feature_extraction", "feature_selection",
+        "gaussian_process", "impute", "inspection", "linear_model", "manifold",
+        "metrics", "mixture", "model_selection", "neighbors", "neural_network",
+        "preprocessing", "semi_supervised", "svm", "tree", "utils"
+    ]
+
+    # Create queries for sub-agents
+    queries = [
+        f"Search for 'TODO' comments in 'sklearn/{subdir}/'. For each TODO found, provide: "
+        f"1. The file path and line number. 2. The content of the TODO. 3. An assessment "
+        f"of how difficult it would be to fix (easy/medium/hard) with a brief justification."
+        for subdir in subdirs
+    ]
+
+    results = rlm_query_batched(queries)
+    ```
+  </TabItem>
+</Tabs>
+
+これら 25 個のサブエージェントそれぞれに、scikit-learn の新しいクローンを含む専用の Daytona サンドボックスが割り当てられます。
+
+**ステップ 2: 深さ 1 のエージェントが深さ 2 のエージェントを生成する**
+
+一部の深さ 1 のエージェントは、自分が担当するモジュールが大きすぎると判断し、さらにサブエージェントを生成します。たとえば、`sklearn/metrics/` エージェントは 3 つの深さ 2 エージェントを生成しました:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Inside the sklearn/metrics/ agent (depth=1)
+    # To efficiently handle the large number of TODOs, spawn sub-agents for sub-directories
+
+    tasks = [
+        "Identify and assess TODOs in 'sklearn/metrics/cluster/'. Provide file, line, content, and difficulty.",
+        "Identify and assess TODOs in 'sklearn/metrics/tests/'. Provide file, line, content, and difficulty.",
+        "Identify and assess TODOs in 'sklearn/metrics/_plot/' and its 'tests' sub-directory."
+    ]
+
+    results = rlm_query_batched(tasks)
+    ```
+  </TabItem>
+</Tabs>
+
+**ステップ 3: 結果の伝播**
+
+各サブエージェントは `FINAL()` を通じて調査結果を返します。結果は次のように上位へ伝播します:
+
+* 深さ 2 → 深さ 1: 特定のサブディレクトリに関する詳細な分析
+* 深さ 1 → ルート: 難易度評価付きのモジュール単位の要約
+
+**ステップ 4: ルートエージェントが統合して実行**
+
+ルートエージェントはすべての結果を確認し、最も簡単な TODO を特定して修正を行います。
+
+**ステップ 5: Git パッチの生成**
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import subprocess
+    subprocess.run(['git', 'add', '-A'], cwd='/workspace')
+    result = subprocess.run(['git', 'diff', '--cached', 'HEAD'],
+                            capture_output=True, text=True, cwd='/workspace')
+    FINAL(result.stdout)
+    ```
+  </TabItem>
+</Tabs>
+
+#### 結果 \{#results\}
+
+* 実行時間: **316 秒**（約 5.3 分）
+* 生成されたエージェント数: **40**（深さ 1 が 25、深さ 2 が 15）
+
+**生成されたパッチ:**
+
+```diff
+diff --git a/sklearn/utils/_array_api.py b/sklearn/utils/_array_api.py
+--- a/sklearn/utils/_array_api.py
++++ b/sklearn/utils/_array_api.py
+@@ -19,8 +19,7 @@ from sklearn.externals.array_api_compat import numpy as np_compat
+ from sklearn.utils._dataframe import is_df_or_series
+ from sklearn.utils.fixes import parse_version
+
+-# TODO: __all__ を完成させる
+-__all__ = ["xpx"]  # ruff を満たすために xpx をここでインポートして再エクスポートする必要がある
++__all__ = ['device', 'get_namespace', 'get_namespace_and_device', 'indexing_dtype', 'move_to', 'size', 'supported_float_dtypes', 'xpx', 'yield_namespace_device_dtype_combinations', 'yield_namespaces']
+```
+
+エージェントは最も取り組みやすい TODO（`sklearn/utils/_array_api.py` 内の `# TODO: complete __all__`）を見つけ、モジュール内のすべての公開シンボルを列挙して `__all__` リストを完成させました。
+
+### 6. 設定 \{#6-configuration\}
+
+`config.yaml` でエージェントを設定します。
+
+<Tabs>
+  <TabItem label="YAML" icon="seti:yaml">
+    ```yaml
+    # Model configuration - using LiteLLM format
+    model:
+      name: "openrouter/google/gemini-3-flash-preview"
+
+    # RLM configuration
+    rlm:
+      max_sandboxes: 50
+      max_iterations: 50
+      global_timeout: 3600
+      result_truncation_limit: 10000
+    ```
+  </TabItem>
+</Tabs>
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `model.name` | `openrouter/google/gemini-3-flash-preview` | LiteLLM 形式の LLM モデル |
+| `rlm.max_sandboxes` | 50 | ロールアウト全体でのサンドボックスの最大合計数 |
+| `rlm.max_iterations` | 50 | エージェントごとの最大反復回数 |
+| `rlm.global_timeout` | 3600 | 合計タイムアウト（秒） |
+| `rlm.result_truncation_limit` | 10000 | サブエージェント結果の最大文字数 |
+
+:::tip[スケーリングのヒント]
+
+* より多くの並列探索が必要なタスクでは、`max_sandboxes` を増やすことを検討してください
+* サンドボックス予算は、ロールアウト期間全体を通して作成されたサンドボックスの総数を追跡します
+* サブエージェントのサンドボックスは、完了後ただちに削除されます
+  :::
+
+### 7. 結果の表示 \{#7-viewing-results\}
+
+結果は JSON ファイルとして `results/` ディレクトリに保存されます。組み込みビューアーを使用してください:
+
+```bash
+python -m http.server 8000
+# http://localhost:8000/viewer/ を開いてください
+```
+
+ビューアーは次の機能を提供します：
+
+* エージェント階層のインタラクティブなツリー表示
+* 各エージェントのコードおよび出力を含むイテレーションの詳細
+* 統計情報：エージェント数、最大深度、総イテレーション数
+
+### 8. 結論 \{#8-conclusion\}
+
+現在の言語モデルは再帰的な委譲を活用するように特別に事前学習されているわけではないため、RLM はまだベンチマークにおいて単一エージェント手法を必ずしも上回るとは限りません。しかし、このアーキテクチャは複雑なタスクに対して説得力のある特性を示しています。
+
+scikit-learn の例では、エージェントツリー全体にわたって 40 個のエージェントが並列に実行され、それぞれが独自の分離されたサンドボックスを持ち、全体の実行はわずか 5 分強で完了しました。このレベルの並列性では、各エージェントが他に影響を与えることなく自由にファイルを変更し、テストを実行し、探索できるようにするには、エージェントごとのサンドボックスがなければ実現は困難でしょう。
+
+**このアプローチの主な利点:**
+
+* **再帰的分解**: 複雑なタスクは、専門化されたエージェントが処理するサブタスクへと自然に分割される
+* **分離された実行**: 各エージェントには新しいサンドボックスが割り当てられ、相互干渉を防ぐ
+* **並列探索**: `rlm_query_batched()` により並行しての調査・探索が可能になる

@@ -1,0 +1,564 @@
+---
+title: Google ADK Agent で検証済みコードを生成する
+description: Daytona の分離されたサンドボックス環境を使用してコードを生成・テストする Google ADK エージェントを構築します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+このガイドでは、Google ADK 向けの `DaytonaPlugin` を使用して、安全なサンドボックス環境でコードの生成、テスト、検証を行うエージェントを構築する方法を説明します。このプラグインにより、エージェントは Python、JavaScript、TypeScript のコードを実行し、シェルコマンドを実行し、分離された Daytona サンドボックス内でファイルを管理できるようになります。
+
+この例では、関数の自然言語による説明を入力として受け取り、その実装を TypeScript で生成し、テストケースを作成してサンドボックス内で実行し、すべてのテストに合格するまで反復処理を行ったうえで、検証済みのコードを返すコード生成エージェントを構築します。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+実現したい関数の内容を、使用する言語（Python、JavaScript、または TypeScript）を指定しつつ、平易な英語で記述します。エージェントはその実装を生成し、それに対するテストを書き、すべてを Daytona のサンドボックス内で実行します。テストが失敗した場合、エージェントは自動的にコードを修正し、すべてのテストに合格するまで再実行します。そのうえで初めて、検証済みの動作するコードを返します。
+
+主な利点は、単に生成されたコードではなく、すでにテストおよび検証が行われたコードを受け取れる点にあります。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+Daytona のリポジトリをクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona
+cd daytona/guides/python/google-adk/code-generator-agent/gemini
+```
+
+#### 依存関係のインストール \{#install-dependencies\}
+
+:::note[Python バージョン要件]
+このサンプルには **Python 3.10 以上** が必要です。プロジェクトの依存関係を分離するために、`venv` や `poetry` などの仮想環境を使用することが推奨されます。
+:::
+
+このサンプルに必要なパッケージをインストールします:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```bash
+    pip install -U google-adk daytona-adk python-dotenv
+    ```
+
+    これらのパッケージには以下が含まれます:
+
+    * `google-adk`: AI エージェントを構築するための Google 製 Agent Development Kit
+    * `daytona-adk`: Daytona のサンドボックス内で安全なコード実行を可能にする `DaytonaPlugin` を提供
+    * `python-dotenv`: `.env` ファイルから環境変数を読み込むために使用
+  </TabItem>
+</Tabs>
+
+#### 環境を設定する \{#configure-environment\}
+
+API キーを取得して、環境を設定します:
+
+1. **Daytona API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得します
+2. **Google API キー:** [Google AI Studio](https://aistudio.google.com/apikey) から取得します
+
+プロジェクト内に `.env` ファイルを作成します:
+
+```bash
+DAYTONA_API_KEY=dtn_***
+GOOGLE_API_KEY=***
+```
+
+### 3. コアコンポーネントを理解する \{#3-understanding-the-core-components\}
+
+実装に入る前に、これから使用する主要なコンポーネントについて確認しておきましょう。
+
+#### Google ADK コンポーネント \{#google-adk-components\}
+
+* **Agent**: リクエストを処理し、どのツールを使用するかを決定する AI モデルのラッパーです。指示を受け取り、ツールにアクセスし、レスポンスを生成します。
+* **App**: エージェントとプラグインを 1 つの構成単位としてまとめるトップレベルのコンテナです。共有リソースの集中管理を提供し、ワークフローのルートエージェントを定義します。
+* **InMemoryRunner**: エージェントを実行し、会話状態を管理する実行エンジンです。イベント駆動型の実行ループをオーケストレーションし、メッセージ処理を行い、セッション履歴やアーティファクトのストレージといったサービスを管理します。
+
+:::note[Agent の実行]
+Google ADK エージェントを実行する方法は 2 つあります。`App` クラスと `InMemoryRunner` を組み合わせて使用する方法と、エージェントのみと `InMemoryRunner` を直接使用する方法です。`App` はエージェントとプラグインをまとめる構成コンテナとして機能し、`Runner` は実際の実行とライフサイクル管理を担当します。このガイドでは、エージェントとプラグインをより整理して構成できるように、`App` を用いるアプローチを採用しています。
+:::
+
+#### Daytona プラグイン \{#daytona-plugin\}
+
+`DaytonaPlugin` は、エージェントが次のことを行えるようにするツールを提供します:
+
+* Python、JavaScript、または TypeScript でコードを実行する
+* シェルコマンドを実行する
+* ファイルをアップロードおよび読み込む
+* 長時間実行されるバックグラウンドプロセスを開始する
+
+すべての操作は、完了時に自動的にクリーンアップされる分離されたサンドボックス内で実行されます。
+
+### 4. 環境とインポートの初期化 \{#4-initialize-environment-and-imports\}
+
+まず、必要なモジュールをインポートし、環境変数を読み込みます。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import asyncio
+    import logging
+
+    from dotenv import load_dotenv
+    from google.adk.agents import Agent
+    from google.adk.apps import App
+    from google.adk.runners import InMemoryRunner
+
+    from daytona_adk import DaytonaPlugin
+
+    load_dotenv()
+
+    logging.basicConfig(level=logging.DEBUG)
+    ```
+
+    **各インポートの役割:**
+
+    * `asyncio`: 非同期 ADK ランナーを実行するために必要
+    * `logging`: エージェントの推論を確認するためのデバッグ出力を有効化
+    * `load_dotenv`: `.env` ファイルから API キーを読み込む
+    * `Agent`, `App`, `InMemoryRunner`: Google ADK のコアコンポーネント
+    * `DaytonaPlugin`: エージェントにサンドボックス実行ツールを提供
+
+    **ログの設定:**
+    `logging.basicConfig(level=logging.DEBUG)` 行は、詳細なデバッグ出力を表示するように Python のログを設定します。異なる値を渡すことで、ログレベルを調整できます:
+
+    * `logging.DEBUG`: 最も詳細で、DaytonaPlugin によるサンドボックス作成やツール呼び出しを含む、すべての内部処理を表示
+    * `logging.INFO`: エージェントの進行状況に関する情報メッセージを表示
+    * `logging.WARNING`: 警告とエラーのみを表示
+    * `logging.ERROR`: エラーのみを表示
+
+    :::tip[内部処理]
+    `DEBUG` レベルのログを有効にすると、サンドボックスが作成されるタイミング、`execute_code_in_daytona` ツールが呼び出されるタイミング、クリーンアップが行われるタイミングなど、DaytonaPlugin の内部処理を確認できます。プラグインの `plugin_name`（設定可能で、デフォルトは `daytona_plugin`）はこれらのログメッセージ内に表示されるため、プラグインの動作を簡単に追跡できます。
+    :::
+  </TabItem>
+</Tabs>
+
+### 5. レスポンス抽出器を定義する \{#5-define-the-response-extractor\}
+
+ADK ランナーは、エージェントの実行からイベントのリストを返します。最終的なテキストレスポンスを抽出するためのヘルパー関数を定義します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def extract_final_response(response: list) -> str:
+        """Extract the final text response from a list of ADK events."""
+        for event in reversed(response):
+            text_parts = []
+
+            if hasattr(event, "text") and event.text:
+                return event.text
+            if hasattr(event, "content") and event.content:
+                content = event.content
+                if hasattr(content, "parts") and content.parts:
+                    for part in content.parts:
+                        if hasattr(part, "text") and part.text:
+                            text_parts.append(part.text)
+                    if text_parts:
+                        return "".join(text_parts)
+                if hasattr(content, "text") and content.text:
+                    return content.text
+            if isinstance(event, dict):
+                text = event.get("text") or event.get("content", {}).get("text")
+                if text:
+                    return text
+
+        return ""
+    ```
+
+    この関数はイベントを逆順に走査して、最後のテキストレスポンスを見つけます。ADK が返す可能性のある複数のイベント構造に対応しています。
+  </TabItem>
+</Tabs>
+
+### 6. エージェントのインストラクションを定義する \{#6-define-the-agent-instruction\}
+
+インストラクションは非常に重要で、エージェントの振る舞いを定義します。ここではテスト駆動のワークフローを強制するインストラクションを使用します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    AGENT_INSTRUCTION = """You are a code generator agent that writes verified, working code.
+    You support Python, JavaScript, and TypeScript.
+
+    Your workflow for every code request:
+    1. Write the function
+    2. Write tests for it
+    3. EXECUTE the code in the sandbox to verify it works - do not skip this step
+    4. If execution fails, fix and re-execute until tests pass
+    5. Once verified, respond with ONLY the function (no tests)
+
+    You must always execute code before responding. Never return untested code.
+    Only include tests in your response if the user explicitly asks for them.
+    """
+    ```
+
+    **このインストラクションの主なポイント:**
+
+    * **実行を強制**: エージェントは応答する前に必ずサンドボックス内でコードを実行しなければなりません
+    * **反復的な修正**: テストが失敗した場合、エージェントは修正して再実行します
+    * **出力の制御**: デフォルトでは、最終的な応答には動作する関数のみが含まれます。テストも確認したい場合は、プロンプト内でテストも返すように明示的に指示してください。
+    * **マルチ言語対応**: Python、JavaScript、TypeScript をサポートします
+  </TabItem>
+</Tabs>
+
+### 7. Daytona プラグインを設定する \{#7-configure-the-daytona-plugin\}
+
+サンドボックスの実行機能を提供するプラグインを初期化します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    plugin = DaytonaPlugin(
+        labels={"example": "code-generator"},
+    )
+    ```
+
+    **設定オプション:**
+
+    * `labels`: サンドボックス用のカスタムメタデータタグ（追跡やフィルタリングに便利）
+    * `api_key`: Daytona API キー（デフォルトは `DAYTONA_API_KEY` 環境変数）
+    * `sandbox_name`: サンドボックスのカスタム名
+    * `plugin_name`: プラグインがメッセージをログ出力する際にログに表示される名前（デフォルト: `daytona_plugin`）
+    * `env_vars`: サンドボックス内で設定する環境変数
+    * `auto_stop_interval`: 自動停止までの時間（分）（デフォルト: 15）
+    * `auto_delete_interval`: 自動削除までの時間（分）（デフォルトでは無効）
+  </TabItem>
+</Tabs>
+
+### 8. エージェントを作成する \{#8-create-the-agent\}
+
+Gemini モデル、先ほど定義した指示文、Daytona ツールを使ってエージェントを作成します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    agent = Agent(
+        model="gemini-2.5-pro",
+        name="code_generator_agent",
+        instruction=AGENT_INSTRUCTION,
+        tools=plugin.get_tools(),
+    )
+    ```
+
+    **パラメーターの説明:**
+
+    * `model`: 推論とコード生成に使用する Gemini モデル
+    * `name`: エージェントの識別子
+    * `instruction`: 定義した振る舞いのガイドライン
+    * `tools`: エージェントが使用できる、Daytona プラグインから提供されるツールの一覧
+  </TabItem>
+</Tabs>
+
+### 9. アプリとランナーを作成する \{#9-create-the-app-and-runner\}
+
+エージェントとプラグインを App にバンドルし、実行します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    app = App(
+        name="code_generator_app",
+        root_agent=agent,
+        plugins=[plugin],
+    )
+
+    async with InMemoryRunner(app=app) as runner:
+        prompt = "Write a TypeScript function called 'groupBy' that takes an array and a key function, and groups array elements by the key. Use proper type annotations."
+
+        response = await runner.run_debug(prompt)
+
+        final_response = extract_final_response(response)
+        print(final_response)
+    ```
+  </TabItem>
+</Tabs>
+
+**ここで行われていること:**
+
+1. `App` はエージェントとプラグインをバンドルし、ライフサイクルを適切に管理します
+2. `InMemoryRunner` は非同期コンテキストマネージャー（`async with` 文）として使用されます。Python のコンテキストマネージャーはセットアップとクリーンアップを自動的に処理します。コードが `async with` ブロックに入るとランナーが初期化され、ブロックを抜けるとき（正常終了の場合もエラーの場合も）に、ランナーがリソースをクリーンアップします。
+3. `run_debug` はプロンプトを送信し、すべての実行イベントを返します
+4. `async with` ブロックを抜けると、サンドボックスは自動的に削除されます。このクリーンアップは、コードが正常に完了したか例外を送出したかに関係なく行われます
+
+### 10. サンプルの実行 \{#10-running-the-example\}
+
+サンプル全体を実行します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```bash
+    python main.py
+    ```
+  </TabItem>
+</Tabs>
+
+#### エージェントの実行フローの理解 \{#understanding-the-agents-execution-flow\}
+
+コードを実行すると、エージェントはリクエストを段階的に処理します。`logging.DEBUG` を有効にすると、次のような詳細な出力が表示されます。
+
+* **DaytonaPlugin の操作**: サンドボックスの作成、ツール呼び出し（`execute_code_in_daytona`）、およびクリーンアップ
+* **LLM へのリクエストとレスポンス**: Gemini に送信されたプロンプトと、受信したレスポンス
+* **プラグインの登録**: `daytona_plugin` がエージェントに登録されたことの確認
+
+デバッグ出力からは、各ステップで次の点が確認できます。
+
+**ステップ 1: サンドボックスの作成**
+
+```
+DEBUG:daytona_adk.plugin:Daytona sandbox created: e38f8574-48ac-48f1-a0ff-d922d02b0fcb
+INFO:google_adk.google.adk.plugins.plugin_manager:Plugin 'daytona_plugin' registered.
+```
+
+DaytonaPlugin は分離されたサンドボックスを作成し、自分自身をエージェントに登録します。
+
+**ステップ 2：エージェントがリクエストを受け取る**
+
+エージェントはあなたのプロンプトを受け取り、適切な型注釈を備えた TypeScript の `groupBy` 関数を作成する必要があることを理解します。
+
+**ステップ 3：エージェントがコードとテストを生成**
+
+エージェントは実装とテストケースの両方を作成し、その後 `execute_code_in_daytona` ツールを呼び出します。
+
+```
+DEBUG:google_adk.google.adk.models.google_llm:
+LLM Response:
+-----------------------------------------------------------
+Function calls:
+name: execute_code_in_daytona, args: {'code': "...", 'language': 'typescript'}
+```
+
+**ステップ 4: サンドボックス内でコードを実行**
+
+```
+DEBUG:daytona_adk.plugin:Before tool: execute_code_in_daytona
+DEBUG:daytona_adk.tools:Executing typescript code (length: 1570 chars)
+DEBUG:daytona_adk.tools:Code execution completed with exit_code: 0
+DEBUG:daytona_adk.plugin:After tool: execute_code_in_daytona
+```
+
+プラグインはコードを隔離された TypeScript 環境で実行し、その結果を返します。
+
+**ステップ 5: 必要に応じたエージェントの反復処理**
+
+テストが失敗した場合（exit&#95;code != 0）、エージェントはエラーを解析し、コードを修正して、すべてのテストが通るまで再実行します。
+
+**ステップ 6: エージェントが検証済みコードを返す**
+
+テストが通ったら、エージェントは正常に動作する関数のみを返します。プロンプトにテストも返すよう指示を含めていた場合は、レスポンスにテストも含まれます。
+
+**ステップ 7: クリーンアップ**
+
+```
+INFO:daytona_adk.plugin:Daytonaサンドボックスを削除中...
+INFO:daytona_adk.plugin:Daytonaサンドボックスを削除しました。
+INFO:google_adk.google.adk.runners:ランナーを閉じました。
+```
+
+コンテキストマネージャーの処理が終了すると、サンドボックスは自動的に削除されます。
+
+#### 出力例 \{#example-output\}
+
+エージェントがタスクを完了すると、次のような出力が表示されます。
+
+````
+AGENT RESPONSE:
+------------------------------------------------------------
+```typescript
+function groupBy<T, K extends keyof any>(
+  array: T[],
+  keyFn: (item: T) => K
+): Record<K, T[]> {
+  return array.reduce((result, item) => {
+    const key = keyFn(item);
+    if (!result[key]) {
+      result[key] = [];
+    }
+    result[key].push(item);
+    return result;
+  }, {} as Record<K, T[]>);
+}
+```
+============================================================
+
+App closed, sandbox cleaned up. Done!
+````
+
+エージェントはこのコードを返す前にサンドボックス内で既にテストしているため、実装が正しく動作すると信頼して問題ありません。
+
+#### レスポンス内でテストを要求する \{#requesting-tests-in-the-response\}
+
+サンドボックス内で実行されたテストを確認したい場合は、プロンプト内でレスポンスにそれらを含めるよう指示を追加してください。
+
+```python
+prompt = "Write a TypeScript function called 'groupBy' that takes an array and a key function, and groups array elements by the key. Use proper type annotations. Return the tests also in a separate code block"
+```
+
+このプロンプトを与えると、エージェントは関数本体とテストコードの両方を返します。
+
+````
+```typescript
+function groupBy<T, K extends keyof any>(
+  array: T[],
+  keyFn: (item: T) => K
+): Record<K, T[]> {
+  return array.reduce((result, item) => {
+    const key = keyFn(item);
+    if (!result[key]) {
+      result[key] = [];
+    }
+    result[key].push(item);
+    return result;
+  }, {} as Record<K, T[]>);
+}
+```
+
+```typescript
+import { deepStrictEqual } from 'assert';
+
+// テストケース1: オブジェクトのプロパティでグループ化
+const array1 = [
+  { id: 1, category: 'A' },
+  { id: 2, category: 'B' },
+  { id: 3, category: 'A' },
+];
+const result1 = groupBy(array1, (item) => item.category);
+deepStrictEqual(result1, {
+  A: [
+    { id: 1, category: 'A' },
+    { id: 3, category: 'A' },
+  ],
+  B: [{ id: 2, category: 'B' }],
+});
+
+// Test case 2: Group by length of strings
+const array2 = ['apple', 'banana', 'cherry', 'date'];
+const result2 = groupBy(array2, (item) => item.length);
+deepStrictEqual(result2, {
+  5: ['apple'],
+  6: ['banana', 'cherry'],
+  4: ['date'],
+});
+
+console.log('All tests passed!');
+```
+````
+
+### 11. 完全な実装 \{#11-complete-implementation\}
+
+以下は、可読性を高めるための追加の出力フォーマットを施した、すぐに実行可能な完全なサンプルです:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    """Code Generator & Tester Agent Example."""
+
+    import asyncio
+    import logging
+
+    from dotenv import load_dotenv
+    from google.adk.agents import Agent
+    from google.adk.apps import App
+    from google.adk.runners import InMemoryRunner
+
+    from daytona_adk import DaytonaPlugin
+
+    load_dotenv()
+
+    logging.basicConfig(level=logging.DEBUG)
+
+
+    def extract_final_response(response: list) -> str:
+        """Extract the final text response from a list of ADK events."""
+        for event in reversed(response):
+            text_parts = []
+
+            if hasattr(event, "text") and event.text:
+                return event.text
+            if hasattr(event, "content") and event.content:
+                content = event.content
+                if hasattr(content, "parts") and content.parts:
+                    for part in content.parts:
+                        if hasattr(part, "text") and part.text:
+                            text_parts.append(part.text)
+                    if text_parts:
+                        return "".join(text_parts)
+                if hasattr(content, "text") and content.text:
+                    return content.text
+            if isinstance(event, dict):
+                text = event.get("text") or event.get("content", {}).get("text")
+                if text:
+                    return text
+
+        return ""
+
+
+    AGENT_INSTRUCTION = """You are a code generator agent that writes verified, working code.
+    You support Python, JavaScript, and TypeScript.
+
+    Your workflow for every code request:
+    1. Write the function
+    2. Write tests for it
+    3. EXECUTE the code in the sandbox to verify it works - do not skip this step
+    4. If execution fails, fix and re-execute until tests pass
+    5. Once verified, respond with ONLY the function (no tests)
+
+    You must always execute code before responding. Never return untested code.
+    Only include tests in your response if the user explicitly asks for them.
+    """
+
+
+    async def main() -> None:
+        """Run the code generator agent example."""
+        plugin = DaytonaPlugin(
+            labels={"example": "code-generator"},
+        )
+
+        agent = Agent(
+            model="gemini-2.5-pro",
+            name="code_generator_agent",
+            instruction=AGENT_INSTRUCTION,
+            tools=plugin.get_tools(),
+        )
+
+        app = App(
+            name="code_generator_app",
+            root_agent=agent,
+            plugins=[plugin],
+        )
+
+        async with InMemoryRunner(app=app) as runner:
+            prompt = "Write a TypeScript function called 'groupBy' that takes an array and a key function, and groups array elements by the key. Use proper type annotations."
+
+            print("\n" + "=" * 60)
+            print("USER PROMPT:")
+            print("=" * 60)
+            print(prompt)
+            print("-" * 60)
+
+            response = await runner.run_debug(prompt)
+
+            final_response = extract_final_response(response)
+            print("\nAGENT RESPONSE:")
+            print("-" * 60)
+            print(final_response)
+            print("=" * 60)
+
+        print("\nApp closed, sandbox cleaned up. Done!")
+
+
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
+  </TabItem>
+</Tabs>
+
+**このアプローチの主な利点：**
+
+* **検証済みコード：** すべての応答は実際の実行環境でテストされています
+* **安全な実行：** コードはあなたのマシン上ではなく、分離された Daytona サンドボックス内で実行されます
+* **マルチ言語対応：** Python、JavaScript、TypeScript の生成とテストが可能です
+* **自動反復：** テストが通過するまでエージェントが問題を修正し続けます
+* **柔軟な出力：** デフォルトでは動作が確認された関数のみを返し、プロンプトで明示的に要求された場合にのみテストを含めます
+
+### 12. API リファレンス \{#12-api-reference\}
+
+利用可能なすべてのツールおよび設定オプションを含む Daytona ADK プラグインの完全な API リファレンスについては、[daytona-adk のドキュメント](https://github.com/daytonaio/daytona-adk-plugin#available-tools) を参照してください。
