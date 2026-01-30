@@ -49,6 +49,38 @@ logs = sandbox.process.get_session_command_logs(session_id: session_id, command_
 puts "[STDOUT] #{logs.stdout}"
 puts "[STDERR] #{logs.stderr}"
 
+# Demonstrate sending input to an interactive command
+puts "\n--- Testing send_session_command_input ---"
+interactive_command = sandbox.process.execute_session_command(
+  session_id: session_id,
+  req: Daytona::SessionExecuteRequest.new(
+    command: 'printf "Enter your name: \n" && read name && printf "Hello, %s\n" "$name"',
+    run_async: true
+  )
+)
+
+# Wait a moment for the command to start
+sleep 1
+
+# Send input to the command
+puts 'Sending input to the command...'
+sandbox.process.send_session_command_input(
+  session_id: session_id,
+  command_id: interactive_command.cmd_id,
+  data: 'Alice'
+)
+puts 'Input sent to the command'
+
+# Get logs for the interactive command asynchronously
+puts 'Retrieving command logs...'
+sandbox.process.get_session_command_logs_async(
+  session_id: session_id,
+  command_id: interactive_command.cmd_id,
+  on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+  on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+)
+puts 'Command completed with interactive input'
+
 # List active sessions
 sessions = sandbox.process.list_sessions
 puts sessions

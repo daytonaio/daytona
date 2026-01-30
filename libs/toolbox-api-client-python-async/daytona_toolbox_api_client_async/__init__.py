@@ -106,6 +106,7 @@ from daytona_toolbox_api_client_async.models.search_files_response import Search
 from daytona_toolbox_api_client_async.models.session import Session
 from daytona_toolbox_api_client_async.models.session_execute_request import SessionExecuteRequest
 from daytona_toolbox_api_client_async.models.session_execute_response import SessionExecuteResponse
+from daytona_toolbox_api_client_async.models.session_send_input_request import SessionSendInputRequest
 from daytona_toolbox_api_client_async.models.status import Status
 from daytona_toolbox_api_client_async.models.user_home_dir_response import UserHomeDirResponse
 from daytona_toolbox_api_client_async.models.window_info import WindowInfo
@@ -200,6 +201,7 @@ __all__ = [
     "Session",
     "SessionExecuteRequest",
     "SessionExecuteResponse",
+    "SessionSendInputRequest",
     "Status",
     "UserHomeDirResponse",
     "WindowInfo",

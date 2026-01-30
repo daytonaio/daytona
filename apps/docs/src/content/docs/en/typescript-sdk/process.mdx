@@ -718,6 +718,30 @@ await ptyHandle.resize(150, 40); // cols, rows
 
 ***
 
+#### sendSessionCommandInput()
+
+```ts
+sendSessionCommandInput(
+   sessionId: string, 
+   commandId: string, 
+data: string): Promise<void>
+```
+
+Sends input data to a command executed in a session.
+
+**Parameters**:
+
+- `sessionId` _string_ - Unique identifier of the session
+- `commandId` _string_ - Unique identifier of the command
+- `data` _string_ - Input data to send
+
+
+**Returns**:
+
+- `Promise<void>`
+
+***
+
 
 ## SessionCommandLogsResponse
 

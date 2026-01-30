@@ -63,9 +63,16 @@ async function sessionExecLogsAsync(sandbox: Sandbox) {
 
   const command = await sandbox.process.executeSessionCommand(sessionId, {
     command:
-      'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ((counter++)); sleep 2; done; non-existent-command',
+      'printf "Enter your name: \\n" && read name && printf "Hello, %s\\n" "$name"; ' +
+      'counter=1; while (( counter <= 3 )); do echo "Count: $counter"; ' +
+      '((counter++)); sleep 2; done; non-existent-command',
     runAsync: true,
   })
+
+  console.log('sending input to the command after 1 second')
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  await sandbox.process.sendSessionCommandInput(sessionId, command.cmdId!, 'Alice')
+  console.log('input sent to the command')
 
   await sandbox.process.getSessionCommandLogs(
     sessionId,
