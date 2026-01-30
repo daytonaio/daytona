@@ -54,6 +54,7 @@ import { JobController } from './controllers/job.controller'
 import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
+import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { Job } from './entities/job.entity'
     ToolboxService,
     SnapshotService,
     ProxyCacheInvalidationService,
+    SandboxLookupCacheInvalidationService,
     SnapshotManager,
     SandboxSubscriber,
     RedisLockProvider,
