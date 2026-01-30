@@ -349,13 +349,17 @@ jobs:
         run: |
           git checkout -b sync-gosum-${{ inputs.version }}
           GONOSUMDB=github.com/daytonaio/daytona go work sync
-          git add */go.sum
-          git commit -s -m "chore: sync go.sum for ${{ inputs.version }}" || true
-          git push origin sync-gosum-${{ inputs.version }}
-          gh pr create \
-            --title "chore: sync go.sum for ${{ inputs.version }}" \
-            --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
-            --base main \
-            --head sync-gosum-${{ inputs.version }}
+          if git diff --quiet -- */go.sum; then
+            echo "No go.sum changes detected; skipping commit and PR creation."
+          else
+            git add */go.sum
+            git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
+            git push origin sync-gosum-${{ inputs.version }}
+            gh pr create \
+              --title "chore: sync go.sum for ${{ inputs.version }}" \
+              --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
+              --base main \
+              --head sync-gosum-${{ inputs.version }}
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
