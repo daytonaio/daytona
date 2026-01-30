@@ -27,10 +27,10 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 
 	if cmdId == util.EmptyCommandID {
 		cmdId = uuid.NewString()
-	} else {
-		if _, ok := session.commands.Get(cmdId); ok {
-			return nil, common_errors.NewConflictError(errors.New("command with the given ID already exists"))
-		}
+	}
+
+	if _, ok := session.commands.Get(cmdId); ok {
+		return nil, common_errors.NewConflictError(errors.New("command with the given ID already exists"))
 	}
 
 	command := &Command{

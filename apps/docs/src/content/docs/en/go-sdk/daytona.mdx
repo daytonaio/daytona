@@ -183,6 +183,9 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(p \*ProcessService\) DeleteSession\(ctx context.Context, sessionID string\) error](<#ProcessService.DeleteSession>)
   - [func \(p \*ProcessService\) ExecuteCommand\(ctx context.Context, command string, opts ...func\(\*options.ExecuteCommand\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.ExecuteCommand>)
   - [func \(p \*ProcessService\) ExecuteSessionCommand\(ctx context.Context, sessionID, command string, runAsync bool\) \(map\[string\]any, error\)](<#ProcessService.ExecuteSessionCommand>)
+  - [func \(p \*ProcessService\) GetEntrypointLogs\(ctx context.Context\) \(map\[string\]any, error\)](<#ProcessService.GetEntrypointLogs>)
+  - [func \(p \*ProcessService\) GetEntrypointLogsStream\(ctx context.Context, stdout, stderr chan\<\- string\) error](<#ProcessService.GetEntrypointLogsStream>)
+  - [func \(p \*ProcessService\) GetEntrypointSession\(ctx context.Context\) \(map\[string\]any, error\)](<#ProcessService.GetEntrypointSession>)
   - [func \(p \*ProcessService\) GetPtySessionInfo\(ctx context.Context, sessionID string\) \(\*types.PtySessionInfo, error\)](<#ProcessService.GetPtySessionInfo>)
   - [func \(p \*ProcessService\) GetSession\(ctx context.Context, sessionID string\) \(map\[string\]any, error\)](<#ProcessService.GetSession>)
   - [func \(p \*ProcessService\) GetSessionCommand\(ctx context.Context, sessionID, commandID string\) \(map\[string\]any, error\)](<#ProcessService.GetSessionCommand>)
@@ -2814,6 +2817,107 @@ cmdID := result["id"].(string)
 ```
 
 Returns command result including id, exitCode \(if completed\), stdout, and stderr.
+
+<a name="ProcessService.GetEntrypointLogs"></a>
+### func \(\*ProcessService\) GetEntrypointLogs
+
+```go
+func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (map[string]any, error)
+```
+
+GetEntrypointLogs retrieves the output logs of the sandbox entrypoint.
+
+Example:
+
+```
+logs, err := sandbox.Process.GetEntrypointLogs(ctx)
+if err != nil {
+    return err
+}
+fmt.Println(logs["logs"])
+```
+
+Returns a map containing the "logs" key with command output.
+
+<a name="ProcessService.GetEntrypointLogsStream"></a>
+### func \(\*ProcessService\) GetEntrypointLogsStream
+
+```go
+func (p *ProcessService) GetEntrypointLogsStream(ctx context.Context, stdout, stderr chan<- string) error
+```
+
+GetEntrypointLogsStream streams entrypoint logs as they become available.
+
+This method establishes a WebSocket connection to stream sandbox entrypoint logs in real\-time. The stdout and stderr channels receive log chunks as strings and are closed when the stream ends or an error occurs.
+
+Parameters:
+
+- stdout: Channel to receive stdout output
+- stderr: Channel to receive stderr output
+
+The caller should provide buffered channels to avoid blocking.
+
+Example:
+
+```
+stdout := make(chan string, 100)
+stderr := make(chan string, 100)
+
+go func() {
+    err := sandbox.Process.GetEntrypointLogsStream(ctx, stdout, stderr)
+    if err != nil {
+        log.Printf("Stream error: %v", err)
+    }
+}()
+
+for {
+    select {
+    case chunk, ok := <-stdout:
+        if !ok {
+            stdout = nil
+        } else {
+            fmt.Print(chunk)
+        }
+    case chunk, ok := <-stderr:
+        if !ok {
+            stderr = nil
+        } else {
+            fmt.Fprint(os.Stderr, chunk)
+        }
+    }
+    if stdout == nil && stderr == nil {
+        break
+    }
+}
+```
+
+Returns an error if the connection fails or stream encounters an error.
+
+<a name="ProcessService.GetEntrypointSession"></a>
+### func \(\*ProcessService\) GetEntrypointSession
+
+```go
+func (p *ProcessService) GetEntrypointSession(ctx context.Context) (map[string]any, error)
+```
+
+GetEntrypointSession retrieves information about the entrypoint session.
+
+Returns a map containing:
+
+- sessionId: The entrypoint session identifier
+- commands: List of commands executed in the entrypoint session
+
+Example:
+
+```
+info, err := sandbox.Process.GetEntrypointSession(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Session: %s\n", info["sessionId"])
+```
+
+Returns an error if the session doesn't exist.
 
 <a name="ProcessService.GetPtySessionInfo"></a>
 ### func \(\*ProcessService\) GetPtySessionInfo
