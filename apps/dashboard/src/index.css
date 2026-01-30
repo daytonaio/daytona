@@ -190,3 +190,36 @@ body {
 .scrollbar-sm {
   @apply scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-background;
 }
+
+.animate-shimmer-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-color: hsl(var(--muted-foreground) / 0.5);
+  background-image: -webkit-gradient(
+    linear,
+    100% 0,
+    0 0,
+    from(hsl(var(--muted-foreground) / 0.5)),
+    color-stop(0.5, hsl(var(--foreground) / 1)),
+    to(hsl(var(--muted-foreground) / 0.5))
+  );
+  animation: shimmer-text 1.5s forwards;
+  background-repeat: no-repeat;
+  background-size: 50% 200%;
+  transition: all 0.25s;
+}
+
+@keyframes shimmer-text {
+  0% {
+    background-position: -100% top;
+  }
+  50% {
+    background-position: 200% top;
+  }
+  100% {
+    transition: all 0.25s;
+    background-color: hsl(var(--foreground) / 1);
+    background-position: 200% top;
+  }
+}
