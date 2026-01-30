@@ -11,6 +11,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+from concurrent.futures import Future, ThreadPoolExecutor
 from typing import Any, Callable
 
 from dspy.primitives.code_interpreter import CodeInterpreterError, FinalOutput
@@ -61,7 +62,7 @@ app = Flask(__name__)
 
 # Thread-safe storage for pending requests and results
 _lock = threading.Lock()
-_pending_requests = {}  # id -> {tool_name, args, kwargs}
+_pending_requests = {}  # id -> {tool_name, args, kwargs, claimed}
 _results = {}  # id -> result
 
 @app.route("/health", methods=["GET"])
@@ -87,6 +88,7 @@ def tool_call():
             "tool_name": tool_name,
             "args": args,
             "kwargs": kwargs,
+            "claimed": False,
         }
 
     # Poll for result (50ms interval, 2 minute timeout)
@@ -111,18 +113,36 @@ def tool_call():
 
 @app.route("/pending", methods=["GET"])
 def get_pending():
-    """Host polls this to get pending tool requests."""
+    """Host polls this to get pending tool requests.
+
+    Returns up to `max` unclaimed requests and marks them claimed so multiple
+    host workers can process calls concurrently without duplicates.
+    """
+    try:
+        max_items = int(request.args.get("max", "1"))
+    except ValueError:
+        max_items = 1
+    if max_items < 1:
+        max_items = 1
+
+    requests_out = []
     with _lock:
-        # Return first pending request that doesn't have a result yet
+        # Return up to `max` pending requests that don't have a result yet.
         for call_id, req in _pending_requests.items():
-            if call_id not in _results:
-                return jsonify({
-                    "id": call_id,
-                    "tool_name": req["tool_name"],
-                    "args": req["args"],
-                    "kwargs": req["kwargs"],
-                })
-    return jsonify({})  # No pending requests
+            if len(requests_out) >= max_items:
+                break
+            if call_id in _results:
+                continue
+            if req.get("claimed"):
+                continue
+            req["claimed"] = True
+            requests_out.append({
+                "id": call_id,
+                "tool_name": req["tool_name"],
+                "args": req["args"],
+                "kwargs": req["kwargs"],
+            })
+    return jsonify({"requests": requests_out})
 
 @app.route("/result/<call_id>", methods=["POST"])
 def post_result(call_id):
@@ -204,6 +224,7 @@ class DaytonaInterpreter:
         tools: dict[str, Callable[..., str]] | None = None,
         output_fields: list[dict] | None = None,
         sandbox_params: dict[str, Any] | None = None,
+        max_concurrent_tool_calls: int = 32,
     ) -> None:
         """
         Args:
@@ -214,6 +235,9 @@ class DaytonaInterpreter:
         self.tools = dict(tools) if tools else {}
         self.output_fields = output_fields
         self.sandbox_params = sandbox_params or {}
+        if max_concurrent_tool_calls < 1:
+            raise ValueError("max_concurrent_tool_calls must be >= 1")
+        self.max_concurrent_tool_calls = max_concurrent_tool_calls
 
         self._daytona = None
         self._sandbox = None
@@ -442,60 +466,84 @@ print("Broker server code written")
 
     def _poll_and_execute_tools(self, code_done_event: threading.Event) -> None:
         """Poll for pending tool requests and execute them on the host."""
-        url_pending = f"{self._broker_url}/pending"
         headers = {"x-daytona-preview-token": self._broker_token}
 
-        while not code_done_event.is_set():
+        def fetch_pending(max_items: int) -> list[dict[str, Any]]:
+            url_pending = f"{self._broker_url}/pending?max={max_items}"
+            req = urllib.request.Request(url_pending, headers=headers, method="GET")
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            if isinstance(data, dict) and isinstance(data.get("requests"), list):
+                return [r for r in data["requests"] if isinstance(r, dict) and "id" in r]
+            if isinstance(data, dict) and "id" in data:
+                return [data]
+            return []
+
+        def execute_one(pending: dict[str, Any]) -> None:
+            call_id = pending["id"]
+            tool_name = pending["tool_name"]
+            args = pending.get("args", [])
+            kwargs = pending.get("kwargs", {})
+
+            logger.info("Executing tool on host: %s(%s, %s)", tool_name, args, kwargs)
+
             try:
-                # Poll for pending requests
-                req = urllib.request.Request(url_pending, headers=headers, method="GET")
-                with urllib.request.urlopen(req, timeout=5) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-
-                if data and "id" in data:
-                    call_id = data["id"]
-                    tool_name = data["tool_name"]
-                    args = data.get("args", [])
-                    kwargs = data.get("kwargs", {})
-
-                    logger.info("Executing tool on host: %s(%s, %s)", tool_name, args, kwargs)
-
-                    # Execute the tool on the host
-                    try:
-                        tool_func = self.tools.get(tool_name)
-                        if tool_func is None:
-                            result = json.dumps({"error": f"Unknown tool: {tool_name}"})
-                        else:
-                            result = tool_func(*args, **kwargs)
-                            # Ensure result is JSON-serializable string
-                            if not isinstance(result, str):
-                                result = json.dumps(result)
-                    except Exception as e:
-                        result = json.dumps({"error": str(e)})
-
-                    logger.info("Tool result for %s: %.500s", tool_name, result)
-
-                    # Post result back to broker
-                    url_result = f"{self._broker_url}/result/{call_id}"
-                    payload = json.dumps({"result": result}).encode("utf-8")
-                    req = urllib.request.Request(
-                        url_result,
-                        data=payload,
-                        headers={**headers, "Content-Type": "application/json"},
-                        method="POST",
-                    )
-                    with urllib.request.urlopen(req, timeout=5):
-                        pass
-
-                    logger.info("Tool result posted for call %s", call_id)
-
-            except (urllib.error.URLError, urllib.error.HTTPError, OSError):
-                pass  # Connection error, will retry
+                tool_func = self.tools.get(tool_name)
+                if tool_func is None:
+                    result = json.dumps({"error": f"Unknown tool: {tool_name}"})
+                else:
+                    result = tool_func(*args, **kwargs)
+                    if not isinstance(result, str):
+                        result = json.dumps(result)
             except Exception as e:
-                logger.warning("Error in tool polling loop: %s", e)
+                result = json.dumps({"error": str(e)})
 
-            # Small sleep to avoid hammering the broker
-            time.sleep(0.05)
+            logger.info("Tool result for %s: %.500s", tool_name, result)
+
+            url_result = f"{self._broker_url}/result/{call_id}"
+            payload = json.dumps({"result": result}).encode("utf-8")
+            req = urllib.request.Request(
+                url_result,
+                data=payload,
+                headers={**headers, "Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=5):
+                pass
+
+            logger.info("Tool result posted for call %s", call_id)
+
+        inflight: dict[str, Future[None]] = {}
+
+        with ThreadPoolExecutor(max_workers=self.max_concurrent_tool_calls) as executor:
+            while not code_done_event.is_set() or inflight:
+                for call_id, fut in list(inflight.items()):
+                    if not fut.done():
+                        continue
+                    inflight.pop(call_id, None)
+                    try:
+                        fut.result()
+                    except Exception as e:
+                        logger.warning("Tool execution failed for call %s: %s", call_id, e)
+
+                if code_done_event.is_set():
+                    time.sleep(0.01)
+                    continue
+
+                capacity = self.max_concurrent_tool_calls - len(inflight)
+                if capacity > 0:
+                    try:
+                        for pending in fetch_pending(capacity):
+                            call_id = pending.get("id")
+                            if not call_id or call_id in inflight:
+                                continue
+                            inflight[call_id] = executor.submit(execute_one, pending)
+                    except (urllib.error.URLError, urllib.error.HTTPError, OSError):
+                        pass
+                    except Exception as e:
+                        logger.warning("Error in tool polling loop: %s", e)
+
+                time.sleep(0.05)
 
     def _inject_variables(self, code: str, variables: dict[str, Any]) -> str:
         """Insert Python assignments for each variable at the top of the code."""
