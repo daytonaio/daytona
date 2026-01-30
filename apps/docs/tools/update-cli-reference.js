@@ -1,11 +1,14 @@
 import * as _fs from 'fs'
-import { extname } from 'path'
+import { join } from 'path'
 import { parseArgs } from 'util'
 import * as yaml from 'yaml'
 
 const fs = _fs.promises
 
 const __dirname = import.meta.dirname
+
+// Default local path relative to this script (apps/docs/tools -> apps/cli/hack/docs)
+const DEFAULT_LOCAL_PATH = join(__dirname, '../../cli/hack/docs')
 
 // content to appear above the commands outline
 const prepend = `---
@@ -53,6 +56,21 @@ async function fetchRawDocs(ref) {
     contents = yaml.parse(contents)
 
     files.push(contents)
+  }
+
+  return files
+}
+
+async function readLocalDocs(localPath) {
+  const dirEntries = await fs.readdir(localPath)
+  const yamlFiles = dirEntries.filter(f => f.endsWith('.yaml'))
+
+  const files = []
+
+  for (const fileName of yamlFiles) {
+    const filePath = join(localPath, fileName)
+    const contents = await fs.readFile(filePath, 'utf-8')
+    files.push(yaml.parse(contents))
   }
 
   return files
@@ -114,11 +132,18 @@ function yamlToMarkdown(files) {
 }
 
 async function process(args) {
-  const { output, ref } = args.values
-  console.log(`grabbing docs for ${ref}...`)
+  const { output, ref, local, path } = args.values
 
-  // grab the files from GitHub
-  const files = await fetchRawDocs(ref)
+  let files
+  if (local || path) {
+    const localPath = path || DEFAULT_LOCAL_PATH
+    console.log(`reading local docs from ${localPath}...`)
+    files = await readLocalDocs(localPath)
+  } else {
+    console.log(`fetching docs for ${ref} from GitHub...`)
+    files = await fetchRawDocs(ref)
+  }
+
   const transformed = yamlToMarkdown(files)
 
   const singleMarkdown = transformed.join('\n')
@@ -130,7 +155,16 @@ async function process(args) {
 const commandOpts = {
   ref: {
     type: 'string',
-    default: `v0.14.0`,
+    default: 'main',
+  },
+  local: {
+    type: 'boolean',
+    short: 'l',
+    default: false,
+  },
+  path: {
+    type: 'string',
+    short: 'p',
   },
   output: {
     type: 'string',
