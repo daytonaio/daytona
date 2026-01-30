@@ -1342,163 +1342,169 @@ export class SandboxService {
   }
 
   async resize(sandboxIdOrName: string, resizeDto: ResizeSandboxDto, organization: Organization): Promise<Sandbox> {
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
+
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
-    // Validate sandbox is in a valid state for resize
-    if (sandbox.state !== SandboxState.STARTED && sandbox.state !== SandboxState.STOPPED) {
-      throw new BadRequestError('Sandbox must be in started or stopped state to resize')
-    }
-
-    if (sandbox.pending) {
-      throw new SandboxError('Sandbox state change in progress')
-    }
-
-    // If no resize parameters provided, throw error
-    if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
-      throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
-    }
-
-    // Disk resize requires stopped sandbox (cold resize only)
-    if (resizeDto.disk !== undefined && sandbox.state !== SandboxState.STOPPED) {
-      throw new BadRequestError('Disk resize can only be performed on a stopped sandbox')
-    }
-
-    // Hot resize (sandbox is running): only CPU and memory can be increased
-    const isHotResize = sandbox.state === SandboxState.STARTED
-
-    // Validate hot resize constraints
-    if (isHotResize) {
-      if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
-        throw new BadRequestError('Sandbox must be in stopped state to decrease the number of CPU cores')
-      }
-
-      if (resizeDto.memory !== undefined && resizeDto.memory < sandbox.mem) {
-        throw new BadRequestError('Sandbox must be in stopped state to decrease memory')
-      }
-    }
-
-    // Disk can only be increased (never decreased)
-    if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
-      throw new BadRequestError('Sandbox disk size cannot be decreased')
-    }
-
-    // Calculate new resource values
-    const newCpu = resizeDto.cpu ?? sandbox.cpu
-    const newMem = resizeDto.memory ?? sandbox.mem
-    const newDisk = resizeDto.disk ?? sandbox.disk
-
-    // Throw if nothing actually changes
-    if (newCpu === sandbox.cpu && newMem === sandbox.mem && newDisk === sandbox.disk) {
-      throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
-    }
-
-    // Validate organization quotas for the new resource values
-    this.organizationService.assertOrganizationIsNotSuspended(organization)
-
-    // Validate per-sandbox quotas with total new values
-    if (newCpu > organization.maxCpuPerSandbox) {
-      throw new ForbiddenException(
-        `CPU request ${newCpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
-      )
-    }
-    if (newMem > organization.maxMemoryPerSandbox) {
-      throw new ForbiddenException(
-        `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
-      )
-    }
-    if (newDisk > organization.maxDiskPerSandbox) {
-      throw new ForbiddenException(
-        `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
-      )
-    }
-
-    // For cold resize, cpu/memory don't affect quota until sandbox is STARTED.
-    // For hot resize, track all deltas (positive reserves quota, negative frees quota for others).
-    const cpuDeltaForQuota = isHotResize ? newCpu - sandbox.cpu : 0
-    const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
-    const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
-
-    // Track pending for rollback on error
-    let pendingCpuIncrement = 0
-    let pendingMemoryIncrement = 0
-    let pendingDiskIncrement = 0
-
-    // Validate and track pending for any non-zero quota changes
-    if (cpuDeltaForQuota !== 0 || memDeltaForQuota !== 0 || diskDeltaForQuota !== 0) {
-      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
-        await this.validateOrganizationQuotas(
-          organization,
-          sandbox.region,
-          cpuDeltaForQuota,
-          memDeltaForQuota,
-          diskDeltaForQuota,
-        )
-
-      if (pendingCpuIncremented) {
-        pendingCpuIncrement = cpuDeltaForQuota
-      }
-      if (pendingMemoryIncremented) {
-        pendingMemoryIncrement = memDeltaForQuota
-      }
-      if (pendingDiskIncremented) {
-        pendingDiskIncrement = diskDeltaForQuota
-      }
-    }
-
-    // Get runner and validate before changing state
-    if (!sandbox.runnerId) {
-      throw new BadRequestError('Sandbox has no runner assigned')
-    }
-
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
-    }
-
-    // Capture the previous state before transitioning to RESIZING (STARTED or STOPPED)
-    const previousState =
-      sandbox.state === SandboxState.STARTED
-        ? SandboxState.STARTED
-        : sandbox.state === SandboxState.STOPPED
-          ? SandboxState.STOPPED
-          : null
-
-    if (!previousState) {
-      throw new BadRequestError('Sandbox must be in started or stopped state to resize')
-    }
-
-    // Now transition to RESIZING state
-    sandbox.state = SandboxState.RESIZING
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
-
     try {
-      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      // Validate sandbox is in a valid state for resize
+      if (sandbox.state !== SandboxState.STARTED && sandbox.state !== SandboxState.STOPPED) {
+        throw new BadRequestError('Sandbox must be in started or stopped state to resize')
+      }
 
-      await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+      if (sandbox.pending) {
+        throw new SandboxError('Sandbox state change in progress')
+      }
 
-      // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
-      // For V2 runners, job handler will update resources on completion
-      if (runner.apiVersion === '0') {
-        sandbox.cpu = newCpu
-        sandbox.mem = newMem
-        sandbox.disk = newDisk
+      // If no resize parameters provided, throw error
+      if (resizeDto.cpu === undefined && resizeDto.memory === undefined && resizeDto.disk === undefined) {
+        throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
+      }
+
+      // Disk resize requires stopped sandbox (cold resize only)
+      if (resizeDto.disk !== undefined && sandbox.state !== SandboxState.STOPPED) {
+        throw new BadRequestError('Disk resize can only be performed on a stopped sandbox')
+      }
+
+      // Hot resize (sandbox is running): only CPU and memory can be increased
+      const isHotResize = sandbox.state === SandboxState.STARTED
+
+      // Validate hot resize constraints
+      if (isHotResize) {
+        if (resizeDto.cpu !== undefined && resizeDto.cpu < sandbox.cpu) {
+          throw new BadRequestError('Sandbox must be in stopped state to decrease the number of CPU cores')
+        }
+
+        if (resizeDto.memory !== undefined && resizeDto.memory < sandbox.mem) {
+          throw new BadRequestError('Sandbox must be in stopped state to decrease memory')
+        }
+      }
+
+      // Disk can only be increased (never decreased)
+      if (resizeDto.disk !== undefined && resizeDto.disk < sandbox.disk) {
+        throw new BadRequestError('Sandbox disk size cannot be decreased')
+      }
+
+      // Calculate new resource values
+      const newCpu = resizeDto.cpu ?? sandbox.cpu
+      const newMem = resizeDto.memory ?? sandbox.mem
+      const newDisk = resizeDto.disk ?? sandbox.disk
+
+      // Throw if nothing actually changes
+      if (newCpu === sandbox.cpu && newMem === sandbox.mem && newDisk === sandbox.disk) {
+        throw new BadRequestError('No resource changes specified - sandbox is already at the desired configuration')
+      }
+
+      // Validate organization quotas for the new resource values
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      // Validate per-sandbox quotas with total new values
+      if (newCpu > organization.maxCpuPerSandbox) {
+        throw new ForbiddenException(
+          `CPU request ${newCpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox}).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        )
+      }
+      if (newMem > organization.maxMemoryPerSandbox) {
+        throw new ForbiddenException(
+          `Memory request ${newMem}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        )
+      }
+      if (newDisk > organization.maxDiskPerSandbox) {
+        throw new ForbiddenException(
+          `Disk request ${newDisk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB).\n${PER_SANDBOX_LIMIT_MESSAGE}`,
+        )
+      }
+
+      // For cold resize, cpu/memory don't affect quota until sandbox is STARTED.
+      // For hot resize, track all deltas (positive reserves quota, negative frees quota for others).
+      const cpuDeltaForQuota = isHotResize ? newCpu - sandbox.cpu : 0
+      const memDeltaForQuota = isHotResize ? newMem - sandbox.mem : 0
+      const diskDeltaForQuota = newDisk - sandbox.disk // Disk only increases (validated at start of method)
+
+      // Validate and track pending for any non-zero quota changes
+      if (cpuDeltaForQuota !== 0 || memDeltaForQuota !== 0 || diskDeltaForQuota !== 0) {
+        const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+          await this.validateOrganizationQuotas(
+            organization,
+            sandbox.region,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+          )
+
+        if (pendingCpuIncremented) {
+          pendingCpuIncrement = cpuDeltaForQuota
+        }
+        if (pendingMemoryIncremented) {
+          pendingMemoryIncrement = memDeltaForQuota
+        }
+        if (pendingDiskIncremented) {
+          pendingDiskIncrement = diskDeltaForQuota
+        }
+      }
+
+      // Get runner and validate before changing state
+      if (!sandbox.runnerId) {
+        throw new BadRequestError('Sandbox has no runner assigned')
+      }
+
+      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      if (!runner) {
+        throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
+      }
+
+      // Capture the previous state before transitioning to RESIZING (STARTED or STOPPED)
+      const previousState =
+        sandbox.state === SandboxState.STARTED
+          ? SandboxState.STARTED
+          : sandbox.state === SandboxState.STOPPED
+            ? SandboxState.STOPPED
+            : null
+
+      if (!previousState) {
+        throw new BadRequestError('Sandbox must be in started or stopped state to resize')
+      }
+
+      // Now transition to RESIZING state
+      sandbox.state = SandboxState.RESIZING
+      await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
+
+      try {
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+        await runnerAdapter.resizeSandbox(sandbox.id, resizeDto.cpu, resizeDto.memory, resizeDto.disk)
+
+        // For V0 runners, update resources immediately (subscriber emits STATE_UPDATED)
+        // For V2 runners, job handler will update resources on completion
+        if (runner.apiVersion === '0') {
+          sandbox.cpu = newCpu
+          sandbox.mem = newMem
+          sandbox.disk = newDisk
+          sandbox.state = previousState
+          await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
+
+          // Apply the usage change (increments current, decrements pending)
+          // Only apply deltas for quotas that were validated/pending-incremented
+          await this.organizationUsageService.applyResizeUsageChange(
+            organization.id,
+            sandbox.region,
+            cpuDeltaForQuota,
+            memDeltaForQuota,
+            diskDeltaForQuota,
+          )
+        }
+
+        return await this.findOneByIdOrName(sandbox.id, organization.id)
+      } catch (error) {
+        // Return to previous state on error
         sandbox.state = previousState
         await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
 
-        // Apply the usage change (increments current, decrements pending)
-        // Only apply deltas for quotas that were validated/pending-incremented
-        await this.organizationUsageService.applyResizeUsageChange(
-          organization.id,
-          sandbox.region,
-          cpuDeltaForQuota,
-          memDeltaForQuota,
-          diskDeltaForQuota,
-        )
+        throw error
       }
-
-      return await this.findOneByIdOrName(sandbox.id, organization.id)
     } catch (error) {
-      // Rollback pending usage on error
       await this.rollbackPendingUsage(
         organization.id,
         sandbox.region,
@@ -1506,10 +1512,6 @@ export class SandboxService {
         pendingMemoryIncrement,
         pendingDiskIncrement,
       )
-
-      // Return to previous state on error
-      sandbox.state = previousState
-      await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.RESIZING })
       throw error
     }
   }
