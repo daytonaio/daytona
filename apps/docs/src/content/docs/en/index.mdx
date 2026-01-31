@@ -30,7 +30,7 @@ Open the [Daytona Dashboard ↗](https://app.daytona.io/) and create your accoun
 
 ## 2. Obtain an API key
 
-Generate an [API key](/docs/en/api-keys) from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. Save the API key securely, as it won't be shown again.
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or using the [Daytona API](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys) to authenticate SDK requests and access Daytona services. Save the API key securely, as it won't be shown again.
 
 :::tip
 Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
@@ -75,7 +75,7 @@ go get github.com/daytonaio/daytona/libs/sdk-go
 
 ## 4. Create a Sandbox
 
-Create a Daytona Sandbox to run your code securely in an isolated environment.
+Create a [Daytona Sandbox](/docs/en/sandboxes) to run your code securely in an isolated environment.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -197,7 +197,7 @@ func main() {
 </TabItem>
 </Tabs>
 
-## 5. Write code
+## 5. Write and run code
 
 Create a program that runs code inside a Daytona Sandbox. The following snippet is an example "Hello World" program that runs securely inside a Daytona Sandbox.
 
@@ -344,46 +344,9 @@ func main() {
 </TabItem>
 </Tabs>
 
-## 6. Run code
-
-Run the program to execute your code in a secure and isolated Daytona Sandbox environment.
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-
-```bash
-python main.py
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-
-```bash
-npx tsx index.mts
-```
-
-</TabItem>
-
-<TabItem label="Ruby" icon="seti:ruby">
-
-```bash
-ruby main.rb
-```
-
-</TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```bash
-go run main.go
-```
-
-</TabItem>
-
 ```text
 Hello World
 ```
-
-</Tabs>
 
 ## Summary
 
