@@ -327,7 +327,7 @@ export const getSidebarConfig = (
           label: t('sidebarconfig.vncAccess'),
           description: t('sidebarconfig.vncAccessDescription'),
           attrs: {
-            icon: 'terminal.svg',
+            icon: 'computer.svg',
           },
         },
         {
