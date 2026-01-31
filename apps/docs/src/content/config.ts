@@ -323,6 +323,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/vnc-access', locale),
+          label: t('sidebarconfig.vncAccess'),
+          description: t('sidebarconfig.vncAccessDescription'),
+          attrs: {
+            icon: 'terminal.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/vpn-connections', locale),
           label: t('sidebarconfig.vpnConnection'),
           description: t('sidebarconfig.vpnConnectionDescription'),
