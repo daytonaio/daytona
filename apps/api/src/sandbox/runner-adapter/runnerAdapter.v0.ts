@@ -382,6 +382,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     _snapshotName: string,
     _organizationId: string,
     _live?: boolean,
+    _registry?: DockerRegistry,
   ): Promise<void> {
     throw new Error('createSnapshotFromSandbox is not supported for V0 runners')
   }

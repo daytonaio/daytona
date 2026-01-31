@@ -424,12 +424,22 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     live?: boolean,
+    registry?: DockerRegistry,
   ): Promise<void> {
-    const payload = {
+    const payload: any = {
       sandboxId,
       name: snapshotName,
       organizationId,
       live: live ?? false,
+    }
+
+    if (registry) {
+      payload.registry = {
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      }
     }
 
     await this.jobService.createJob(

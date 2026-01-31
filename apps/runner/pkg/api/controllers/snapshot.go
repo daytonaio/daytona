@@ -326,6 +326,41 @@ func GetBuildLogs(ctx *gin.Context) {
 	}
 }
 
+// CreateSnapshot godoc
+//
+//	@Tags			snapshots
+//	@Summary		Create a snapshot from a sandbox
+//	@Description	Create a snapshot by committing a running sandbox container to a local image
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		dto.CreateSnapshotDTO	true	"Create snapshot request"
+//	@Success		201		{object}	dto.CreateSnapshotResponseDTO
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Router			/snapshots/create [post]
+//
+//	@id				CreateSnapshot
+func CreateSnapshot(ctx *gin.Context) {
+	var request dto.CreateSnapshotDTO
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	response, err := runner.Docker.CreateSnapshot(ctx.Request.Context(), request)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, response)
+}
+
 // GetSnapshotInfo godoc
 //
 //	@Tags			snapshots

@@ -98,6 +98,7 @@ export interface RunnerAdapter {
     snapshotName: string,
     organizationId: string,
     live?: boolean,
+    registry?: DockerRegistry,
   ): Promise<void>
 
   forkSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void>

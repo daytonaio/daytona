@@ -55,6 +55,7 @@ import { SandboxDto, SandboxVolume } from '../dto/sandbox.dto'
 import { isValidUuid } from '../../common/utils/uuid'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { validateNetworkAllowList } from '../utils/network-validation.util'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SshAccess } from '../entities/ssh-access.entity'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
@@ -118,6 +119,7 @@ export class SandboxService {
     private readonly redisLockProvider: RedisLockProvider,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -807,8 +809,14 @@ export class SandboxService {
       throw new NotFoundException(`Runner for sandbox not found`)
     }
 
+    // Get internal registry for pushing the snapshot (only needed for linux runners)
+    let internalRegistry = undefined
+    if (runner.class === RunnerClass.LINUX) {
+      internalRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    }
+
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, organizationId, live)
+    await runnerAdapter.createSnapshotFromSandbox(sandbox.id, snapshotName, organizationId, live, internalRegistry)
 
     // Set backupState to IN_PROGRESS to track snapshot creation
     sandbox.state = SandboxState.SNAPSHOTTING
