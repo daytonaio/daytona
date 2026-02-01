@@ -1,13 +1,13 @@
 ---
-title: Run Moltbot in a Secure Daytona Sandbox
-description: Learn how to set up and run Moltbot inside a Daytona sandbox for secure, isolated, and always-on AI assistant with Telegram and WhatsApp integrations.
+title: Run OpenClaw in a Secure Daytona Sandbox
+description: Learn how to set up and run OpenClaw inside a Daytona sandbox for secure, isolated, and always-on AI assistant with Telegram and WhatsApp integrations.
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-This guide walks you through setting up [Moltbot](https://www.molt.bot/) inside a Daytona sandbox and configuring Telegram and WhatsApp channels.
+This guide walks you through setting up [OpenClaw](https://openclaw.ai/) inside a Daytona sandbox and configuring Telegram and WhatsApp channels.
 
-Running Moltbot in a Daytona sandbox keeps your AI assistant isolated from your local machine, provides a secure environment for code execution, and ensures your bot stays online 24/7 without tying up your personal computer.
+Running OpenClaw in a Daytona sandbox keeps your AI assistant isolated from your local machine, provides a secure environment for code execution, and ensures your bot stays online 24/7 without tying up your personal computer.
 
 ### Prerequisites
 
@@ -45,16 +45,16 @@ Replace `YOUR_API_KEY` with your actual Daytona API key.
 
 ### Create a Sandbox
 
-Create a sandbox for running Moltbot:
+Create a sandbox for running OpenClaw:
 
 ```bash
-daytona sandbox create --name moltbot --snapshot daytona-medium --auto-stop 0
+daytona sandbox create --name openclaw --snapshot daytona-medium --auto-stop 0
 ```
 
-Moltbot comes preinstalled in the default Daytona snapshot, so the command above is all you need.
+OpenClaw comes preinstalled in the default Daytona snapshot, so the command above is all you need.
 
 :::note
-The `--auto-stop 0` flag disables automatic shutdown, keeping Moltbot accessible until you manually stop or delete the sandbox. The `daytona-medium` snapshot is required because the Moltbot gateway needs a minimum of 2GB memory.
+The `--auto-stop 0` flag disables automatic shutdown, keeping OpenClaw accessible until you manually stop or delete the sandbox. The `daytona-medium` snapshot is required because the OpenClaw gateway needs a minimum of 2GB memory.
 :::
 
 ### Connect to the Sandbox
@@ -62,10 +62,10 @@ The `--auto-stop 0` flag disables automatic shutdown, keeping Moltbot accessible
 SSH into your sandbox:
 
 ```bash
-daytona ssh moltbot
+daytona ssh openclaw
 ```
 
-### Run Moltbot Onboarding
+### Run OpenClaw Onboarding
 
 Start the onboarding process:
 
@@ -104,12 +104,12 @@ The `&` runs the gateway as a background process, keeping your terminal free for
 
 ### Access the Dashboard
 
-The Moltbot dashboard is a web interface for managing your assistant, monitoring connections, and configuring channels. To access it, you need a [preview URL](https://www.daytona.io/docs/en/preview/) that exposes the gateway port running inside your sandbox.
+The OpenClaw dashboard is a web interface for managing your assistant, monitoring connections, and configuring channels. To access it, you need a [preview URL](https://www.daytona.io/docs/en/preview/) that exposes the gateway port running inside your sandbox.
 
 In your local terminal (not inside the sandbox SSH session), generate the preview URL:
 
 ```bash
-daytona preview-url moltbot --port 18789
+daytona preview-url openclaw --port 18789
 ```
 
 This command generates a [signed preview URL](https://www.daytona.io/docs/en/preview/#signed-preview-url) that securely exposes the port.
@@ -122,7 +122,7 @@ The preview URL expires after 1 hour by default (customizable with `--expires` f
 
 ### Pair Your Browser
 
-Moltbot uses device pairing as a security measure - only approved devices can connect to and control your assistant. When you first attempt to connect from the dashboard, your browser registers as a new device that needs approval.
+OpenClaw uses device pairing as a security measure - only approved devices can connect to and control your assistant. When you first attempt to connect from the dashboard, your browser registers as a new device that needs approval.
 
 List pending device requests:
 
@@ -140,11 +140,11 @@ Replace `REQUEST_ID` with the value from the **Request** column.
 
 Click **Connect** again in the dashboard.
 
-Once connected, you should see a green status indicator - your Moltbot is now ready to use.
+Once connected, you should see a green status indicator - your OpenClaw is now ready to use.
 
 ### Security
 
-Running Moltbot this way provides three layers of security:
+Running OpenClaw this way provides three layers of security:
 
 1. **Preview URL:** Time-limited access to the dashboard port
 2. **Gateway token:** Required to authenticate with the dashboard
@@ -160,7 +160,7 @@ Keep your gateway token and preview URL secret. Do not share them publicly.
 
 ### Configure Telegram
 
-Set up a Telegram bot to chat with Moltbot.
+Set up a Telegram bot to chat with OpenClaw.
 
 #### Create a Telegram Bot
 
@@ -170,7 +170,7 @@ Set up a Telegram bot to chat with Moltbot.
 4. Enter a username for your bot
 5. Copy the bot token provided
 
-#### Configure Moltbot
+#### Configure OpenClaw
 
 Enable Telegram and set your bot token:
 
@@ -201,13 +201,13 @@ nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
 clawdbot pairing approve telegram PAIRING_CODE
 ```
 
-You can now message your Moltbot through Telegram.
+You can now message your OpenClaw through Telegram.
 
 ---
 
 ### Configure WhatsApp
 
-Set up WhatsApp to chat with Moltbot.
+Set up WhatsApp to chat with OpenClaw.
 
 #### Run Configuration
 
@@ -234,7 +234,7 @@ Once paired, you'll see:
 
 #### Set Up Your Phone Number
 
-Select **This is my personal phone number** (or choose the other option if you have a separate phone for Moltbot) and enter your phone number when prompted.
+Select **This is my personal phone number** (or choose the other option if you have a separate phone for OpenClaw) and enter your phone number when prompted.
 
 #### Finish Configuration
 
@@ -246,8 +246,8 @@ When prompted to select another channel, choose **Finished**. You'll see:
 
 #### Start Chatting
 
-Send a message to yourself in WhatsApp - Moltbot will respond. You can give it instructions and information on how to behave directly in the chat.
+Send a message to yourself in WhatsApp - OpenClaw will respond. You can give it instructions and information on how to behave directly in the chat.
 
 :::tip
-To allow other users to chat with Moltbot, add their phone numbers to the **Allow From** list in **Channels → WhatsApp** inside the dashboard. When they send a message, Moltbot will respond.
+To allow other users to chat with OpenClaw, add their phone numbers to the **Allow From** list in **Channels → WhatsApp** inside the dashboard. When they send a message, OpenClaw will respond.
 :::

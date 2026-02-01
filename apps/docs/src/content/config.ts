@@ -485,13 +485,13 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
-            '/docs/guides/moltbot/moltbot-run-secure-sandbox',
+            '/docs/guides/openclaw/openclaw-run-secure-sandbox',
             locale
           ),
-          label: t('sidebarconfig.moltbot'),
+          label: t('sidebarconfig.openclaw'),
           disablePagination: true,
           attrs: {
-            icon: 'moltbot.svg',
+            icon: 'openclaw.svg',
           },
         },
         {
