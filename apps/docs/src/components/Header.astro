@@ -5,6 +5,7 @@ import packageIcon from '@assets/sidebar/package.svg?raw'
 import serverIcon from '@assets/sidebar/server.svg?raw'
 import terminalIcon from '@assets/sidebar/terminal.svg?raw'
 import Search from '@components/Search'
+import DocSearchSidepanel from '@components/DocSearchSidepanel'
 import Version from '@components/Version.astro'
 import gtconfig from '../../gt.config.json'
 import '../styles/components/search.scss'
@@ -23,6 +24,15 @@ const algoliaEnabled =
 
 // Show search in production when enabled, or always in dev mode
 const showSearch = algoliaEnabled || import.meta.env.DEV
+
+// DocSearch sidepanel (Ask AI) - separate from SiteSearch
+const docSearchEnabled =
+  import.meta.env.PUBLIC_DOCSEARCH_APP_ID &&
+  import.meta.env.PUBLIC_DOCSEARCH_API_KEY &&
+  import.meta.env.PUBLIC_DOCSEARCH_INDEX_NAME &&
+  Astro.props.lang === gtconfig.defaultLocale
+
+const showDocSearch = docSearchEnabled || import.meta.env.DEV
 
 const {
   isTypescriptSdkActive,
@@ -158,6 +168,11 @@ const {
 {
   // Skip search for translations (for now)
   showSearch && <Search client:load locale={Astro.props.lang} />
+}
+
+{
+  // DocSearch sidepanel with Ask AI
+  showDocSearch && <DocSearchSidepanel client:only="react" />
 }
 
 <style>

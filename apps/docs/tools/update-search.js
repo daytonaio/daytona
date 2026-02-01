@@ -439,6 +439,14 @@ function main() {
       'utf8'
     )
   )
+
+  const allRecords = fileRecords.flatMap(({ records }) => records)
+  fs.writeFileSync(
+    path.join(outputDir, 'ai.json'),
+    JSON.stringify(allRecords, null, 2),
+    'utf8'
+  )
+
   console.log('search index updated')
 }
 
