@@ -1,5 +1,8 @@
 FROM mcr.microsoft.com/devcontainers/python
 
+# Remove yarn repo with expired GPG key from base image
+RUN rm -f /etc/apt/sources.list.d/yarn.list
+
 # Update package list and install required dependencies
 RUN apt-get update && apt-get install -y \
     curl \
@@ -54,7 +57,7 @@ RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d
 RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use node" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
-RUN npm install -g ts-node typescript typescript-language-server
+RUN npm install -g ts-node typescript typescript-language-server @anthropic-ai/claude-code
 
 # Create directory for computer use plugin
 RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib

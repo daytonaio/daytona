@@ -38,6 +38,21 @@ type SandboxAPI interface {
 	ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		CloneSandbox Clone a sandbox
+
+		Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxIdOrName ID or name of the sandbox to clone
+		@return SandboxAPICloneSandboxRequest
+	*/
+	CloneSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPICloneSandboxRequest
+
+	// CloneSandboxExecute executes the request
+	//  @return CloneSandboxResponse
+	CloneSandboxExecute(r SandboxAPICloneSandboxRequest) (*CloneSandboxResponse, *http.Response, error)
+
+	/*
 		CreateBackup Create sandbox backup
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -459,6 +474,131 @@ func (a *SandboxAPIService) ArchiveSandboxExecute(r SandboxAPIArchiveSandboxRequ
 	if r.xDaytonaOrganizationID != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPICloneSandboxRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxIdOrName        string
+	cloneSandbox           *CloneSandbox
+	xDaytonaOrganizationID *string
+}
+
+func (r SandboxAPICloneSandboxRequest) CloneSandbox(cloneSandbox CloneSandbox) SandboxAPICloneSandboxRequest {
+	r.cloneSandbox = &cloneSandbox
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPICloneSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPICloneSandboxRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPICloneSandboxRequest) Execute() (*CloneSandboxResponse, *http.Response, error) {
+	return r.ApiService.CloneSandboxExecute(r)
+}
+
+/*
+CloneSandbox Clone a sandbox
+
+Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxIdOrName ID or name of the sandbox to clone
+	@return SandboxAPICloneSandboxRequest
+*/
+func (a *SandboxAPIService) CloneSandbox(ctx context.Context, sandboxIdOrName string) SandboxAPICloneSandboxRequest {
+	return SandboxAPICloneSandboxRequest{
+		ApiService:      a,
+		ctx:             ctx,
+		sandboxIdOrName: sandboxIdOrName,
+	}
+}
+
+// Execute executes the request
+//
+//	@return CloneSandboxResponse
+func (a *SandboxAPIService) CloneSandboxExecute(r SandboxAPICloneSandboxRequest) (*CloneSandboxResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CloneSandboxResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.CloneSandbox")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxIdOrName}/clone"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxIdOrName"+"}", url.PathEscape(parameterValueToString(r.sandboxIdOrName, "sandboxIdOrName")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.cloneSandbox == nil {
+		return localVarReturnValue, nil, reportError("cloneSandbox is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.cloneSandbox
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

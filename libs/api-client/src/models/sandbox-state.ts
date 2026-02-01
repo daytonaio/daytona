@@ -37,6 +37,7 @@ export const SandboxState = {
   ARCHIVING: 'archiving',
   SNAPSHOTTING: 'snapshotting',
   FORKING: 'forking',
+  CLONING: 'cloning',
 } as const
 
 export type SandboxState = (typeof SandboxState)[keyof typeof SandboxState]

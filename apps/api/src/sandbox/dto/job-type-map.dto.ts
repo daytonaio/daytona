@@ -44,6 +44,9 @@ export interface JobTypeMap {
   [JobType.FORK_SANDBOX]: {
     resourceType: ResourceType.SANDBOX
   }
+  [JobType.CLONE_SANDBOX]: {
+    resourceType: ResourceType.SANDBOX
+  }
 }
 
 /**

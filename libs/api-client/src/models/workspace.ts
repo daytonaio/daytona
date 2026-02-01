@@ -225,6 +225,12 @@ export interface Workspace {
    */
   parentSandboxId?: string
   /**
+   * The ID of the source sandbox if this sandbox was cloned
+   * @type {string}
+   * @memberof Workspace
+   */
+  sourceSandboxId?: string
+  /**
    * The image used for the workspace
    * @type {string}
    * @memberof Workspace

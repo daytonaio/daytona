@@ -51,13 +51,18 @@ var (
 	// sshProxyCmd holds the running SSH process for the SOCKS proxy
 	sshProxyCmd   *exec.Cmd
 	sshProxyMu    sync.Mutex
-	sshProxyReady = make(chan struct{})
+	sshProxyReady chan struct{}
 	sshProxyOnce  sync.Once
 
 	// Cached transports for reuse (keyed by SSH host)
 	transportCache   = make(map[string]*http.Transport)
 	transportCacheMu sync.RWMutex
 )
+
+func init() {
+	// Initialize the ready channel
+	sshProxyReady = make(chan struct{})
+}
 
 // ensureSOCKSProxy starts a persistent SSH SOCKS proxy if not already running.
 // This creates a single SSH connection that handles all traffic, eliminating
@@ -125,9 +130,15 @@ func ensureSOCKSProxy(sshHost string) error {
 			}
 			sshProxyMu.Lock()
 			sshProxyCmd = nil
-			sshProxyMu.Unlock()
-			// Reset the once so it can be restarted
+			// Reset the once AND create a new ready channel so it can be restarted
 			sshProxyOnce = sync.Once{}
+			sshProxyReady = make(chan struct{})
+			// Clear transport cache to force reconnection
+			transportCacheMu.Lock()
+			transportCache = make(map[string]*http.Transport)
+			transportCacheMu.Unlock()
+			sshProxyMu.Unlock()
+			log.Info("SSH SOCKS proxy state reset, will restart on next request")
 		}()
 
 		// Wait for proxy to be ready

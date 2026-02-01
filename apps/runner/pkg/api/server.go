@@ -117,6 +117,7 @@ func (a *ApiServer) Start() error {
 		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
 		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 		sandboxController.POST("/:sandboxId/network-settings", controllers.UpdateNetworkSettings)
+		sandboxController.POST("/:sandboxId/clone", controllers.Clone)
 
 		// Add proxy endpoint within the sandbox controller for toolbox
 		// Using Any() to handle all HTTP methods for the toolbox proxy

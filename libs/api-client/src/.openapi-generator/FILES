@@ -32,6 +32,8 @@ models/api-key-list.ts
 models/api-key-response.ts
 models/audit-log.ts
 models/build-info.ts
+models/clone-sandbox-response.ts
+models/clone-sandbox.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts

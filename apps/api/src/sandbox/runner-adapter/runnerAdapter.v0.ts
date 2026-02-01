@@ -390,4 +390,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   async forkSandbox(_sourceSandboxId: string, _newSandboxId: string, _sourceState?: string): Promise<void> {
     throw new Error('forkSandbox is not supported for V0 runners')
   }
+
+  async cloneSandbox(_sourceSandboxId: string, _newSandboxId: string, _sourceState?: string): Promise<void> {
+    throw new Error('cloneSandbox is not supported for V0 runners')
+  }
 }

@@ -32,6 +32,10 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
+import type { CloneSandbox } from '../models'
+// @ts-ignore
+import type { CloneSandboxResponse } from '../models'
+// @ts-ignore
 import type { CreateSandbox } from '../models'
 // @ts-ignore
 import type { CreateSandboxSnapshot } from '../models'
@@ -103,6 +107,61 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+     * @summary Clone a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to clone
+     * @param {CloneSandbox} cloneSandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    cloneSandbox: async (
+      sandboxIdOrName: string,
+      cloneSandbox: CloneSandbox,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxIdOrName' is not null or undefined
+      assertParamExists('cloneSandbox', 'sandboxIdOrName', sandboxIdOrName)
+      // verify required parameter 'cloneSandbox' is not null or undefined
+      assertParamExists('cloneSandbox', 'cloneSandbox', cloneSandbox)
+      const localVarPath = `/sandbox/{sandboxIdOrName}/clone`.replace(
+        `{${'sandboxIdOrName'}}`,
+        encodeURIComponent(String(sandboxIdOrName)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(cloneSandbox, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -1602,6 +1661,38 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+     * @summary Clone a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to clone
+     * @param {CloneSandbox} cloneSandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async cloneSandbox(
+      sandboxIdOrName: string,
+      cloneSandbox: CloneSandbox,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CloneSandboxResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.cloneSandbox(
+        sandboxIdOrName,
+        cloneSandbox,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SandboxApi.cloneSandbox']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      *
      * @summary Create sandbox backup
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -2491,6 +2582,25 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+     * @summary Clone a sandbox
+     * @param {string} sandboxIdOrName ID or name of the sandbox to clone
+     * @param {CloneSandbox} cloneSandbox
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    cloneSandbox(
+      sandboxIdOrName: string,
+      cloneSandbox: CloneSandbox,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CloneSandboxResponse> {
+      return localVarFp
+        .cloneSandbox(sandboxIdOrName, cloneSandbox, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      *
      * @summary Create sandbox backup
      * @param {string} sandboxIdOrName ID or name of the sandbox
@@ -3048,6 +3158,27 @@ export class SandboxApi extends BaseAPI {
   public archiveSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
       .archiveSandbox(sandboxIdOrName, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+   * @summary Clone a sandbox
+   * @param {string} sandboxIdOrName ID or name of the sandbox to clone
+   * @param {CloneSandbox} cloneSandbox
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SandboxApi
+   */
+  public cloneSandbox(
+    sandboxIdOrName: string,
+    cloneSandbox: CloneSandbox,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return SandboxApiFp(this.configuration)
+      .cloneSandbox(sandboxIdOrName, cloneSandbox, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -3629,6 +3760,7 @@ export const ListSandboxesPaginatedStatesEnum = {
   ARCHIVING: 'archiving',
   SNAPSHOTTING: 'snapshotting',
   FORKING: 'forking',
+  CLONING: 'cloning',
 } as const
 export type ListSandboxesPaginatedStatesEnum =
   (typeof ListSandboxesPaginatedStatesEnum)[keyof typeof ListSandboxesPaginatedStatesEnum]

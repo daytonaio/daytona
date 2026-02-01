@@ -283,6 +283,11 @@ const Sandboxes: React.FC = () => {
   const [forkSandboxId, setForkSandboxId] = useState<string>('')
   const [forkName, setForkName] = useState<string>('')
 
+  // Clone Sandbox Dialog
+  const [showCloneDialog, setShowCloneDialog] = useState(false)
+  const [cloneSandboxId, setCloneSandboxId] = useState<string>('')
+  const [cloneName, setCloneName] = useState<string>('')
+
   // View Forks Dialog
   const [showForkTreeDialog, setShowForkTreeDialog] = useState(false)
   const [forkTreeSandboxId, setForkTreeSandboxId] = useState<string | null>(null)
@@ -880,6 +885,42 @@ const Sandboxes: React.FC = () => {
     setShowForkTreeDialog(true)
   }
 
+  // Clone Sandbox
+  const openCloneDialog = (id: string) => {
+    setCloneSandboxId(id)
+    setCloneName('')
+    setShowCloneDialog(true)
+  }
+
+  const handleClone = async () => {
+    if (!cloneName.trim()) {
+      toast.error('Please enter a name for the cloned sandbox')
+      return
+    }
+
+    setSandboxIsLoading((prev) => ({ ...prev, [cloneSandboxId]: true }))
+
+    // Optimistically update the backup state to show progress immediately
+    await cancelQueryRefetches(queryKey)
+    updateSandboxInCache(cloneSandboxId, { backupState: SandboxBackupStateEnum.IN_PROGRESS })
+
+    try {
+      await sandboxApi.cloneSandbox(cloneSandboxId, { name: cloneName }, selectedOrganization?.id)
+      setShowCloneDialog(false)
+      setCloneName('')
+      setCloneSandboxId('')
+      toast.success('Clone creation started')
+      // Refetch to get the new cloned sandbox
+      await markAllSandboxQueriesAsStale(true)
+    } catch (error) {
+      // Revert optimistic update on error
+      updateSandboxInCache(cloneSandboxId, { backupState: SandboxBackupStateEnum.NONE })
+      handleApiError(error, 'Failed to clone sandbox')
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [cloneSandboxId]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
 
@@ -949,6 +990,7 @@ const Sandboxes: React.FC = () => {
         handleScreenRecordings={handleScreenRecordings}
         handleFork={openForkDialog}
         handleViewForks={openForkTreeDialog}
+        handleClone={openCloneDialog}
         handleRefresh={handleRefresh}
         isRefreshing={sandboxDataIsRefreshing}
         data={sandboxesData?.items || []}
@@ -1212,6 +1254,50 @@ const Sandboxes: React.FC = () => {
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
             >
               {sandboxIsLoading[forkSandboxId] ? 'Forking...' : 'Fork Sandbox'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clone Sandbox Dialog */}
+      <AlertDialog
+        open={showCloneDialog}
+        onOpenChange={(isOpen) => {
+          setShowCloneDialog(isOpen)
+          if (!isOpen) {
+            setCloneName('')
+            setCloneSandboxId('')
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clone Sandbox</AlertDialogTitle>
+            <AlertDialogDescription>
+              Create an independent copy of this sandbox. Unlike fork, the clone will have a complete flattened
+              filesystem with no dependency on the source sandbox.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Clone Name:</Label>
+              <input
+                type="text"
+                value={cloneName}
+                onChange={(e) => setCloneName(e.target.value)}
+                placeholder="Enter name for the cloned sandbox"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClone}
+              disabled={!cloneName.trim() || !cloneSandboxId || sandboxIsLoading[cloneSandboxId]}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              {sandboxIsLoading[cloneSandboxId] ? 'Cloning...' : 'Clone Sandbox'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

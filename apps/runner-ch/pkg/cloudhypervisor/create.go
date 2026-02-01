@@ -797,6 +797,18 @@ cat "%s/config.json" | jq '.disks[0].path = "%s"' > "%s/config.json"
 	// Step 7: Clean up temporary snapshot directory
 	_ = c.runCommand(ctx, "rm", "-rf", tempSnapshotDir)
 
+	// Step 8: Save config.json for future clone/fork operations
+	vmInfo, err := c.GetInfo(ctx, opts.SandboxId)
+	if err == nil && vmInfo.Config != nil {
+		configPath := c.getConfigPath(opts.SandboxId)
+		configJSON, err := json.MarshalIndent(vmInfo.Config, "", "  ")
+		if err == nil {
+			if err := c.writeFile(ctx, configPath, configJSON); err != nil {
+				log.Warnf("Failed to save config.json for %s: %v", opts.SandboxId, err)
+			}
+		}
+	}
+
 	// Wait briefly for daemon to be ready (should be almost instant since memory is restored)
 	if err := c.waitForDaemon(ctx, opts.SandboxId, netns.ExternalIP, 10*time.Second); err != nil {
 		log.Warnf("Daemon health check failed after warm restore for %s: %v", opts.SandboxId, err)

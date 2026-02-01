@@ -208,6 +208,11 @@ export class Sandbox {
   @Column({ type: 'uuid', nullable: true })
   parentSandboxId?: string
 
+  // Source sandbox ID for cloned sandboxes - tracks where the clone came from
+  // Unlike fork, cloned sandboxes have a flattened filesystem with no disk dependency on source
+  @Column({ type: 'uuid', nullable: true })
+  sourceSandboxId?: string
+
   constructor(region: string, name?: string) {
     this.id = uuidv4()
     // Set name - use provided name or fallback to ID
@@ -291,6 +296,7 @@ export class Sandbox {
             SandboxState.BUILD_FAILED,
             SandboxState.FORKING,
             SandboxState.SNAPSHOTTING,
+            SandboxState.CLONING,
           ].includes(this.state)
         ) {
           break
@@ -306,6 +312,7 @@ export class Sandbox {
             SandboxState.BUILD_FAILED,
             SandboxState.FORKING,
             SandboxState.SNAPSHOTTING,
+            SandboxState.CLONING,
           ].includes(this.state)
         ) {
           break

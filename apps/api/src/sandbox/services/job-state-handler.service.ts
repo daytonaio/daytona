@@ -86,6 +86,9 @@ export class JobStateHandlerService {
       case JobType.FORK_SANDBOX:
         await this.handleForkSandboxJobCompletion(job)
         break
+      case JobType.CLONE_SANDBOX:
+        await this.handleCloneSandboxJobCompletion(job)
+        break
       default:
         break
     }
@@ -567,6 +570,84 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling FORK_SANDBOX job completion for sandbox ${forkedSandboxId}:`, error)
+    }
+  }
+
+  private async handleCloneSandboxJobCompletion(job: Job): Promise<void> {
+    const clonedSandboxId = job.resourceId
+    if (!clonedSandboxId) return
+
+    try {
+      // Parse job payload to get source sandbox ID
+      const payload = job.payload ? JSON.parse(job.payload) : {}
+      const sourceSandboxId = payload.sourceSandboxId
+
+      // Get the source sandbox to clear its state (do this first so we always clear it)
+      let sourceSandbox: Sandbox | null = null
+      if (sourceSandboxId) {
+        sourceSandbox = await this.sandboxRepository.findOne({ where: { id: sourceSandboxId } })
+
+        if (sourceSandbox) {
+          switch (sourceSandbox.desiredState) {
+            case SandboxDesiredState.STARTED:
+              sourceSandbox.state = SandboxState.STARTED
+              sourceSandbox.pending = false
+              break
+            case SandboxDesiredState.STOPPED:
+              sourceSandbox.state = SandboxState.STOPPED
+              sourceSandbox.pending = false
+              break
+            default:
+              console.error(
+                `Unknown desired state ${sourceSandbox.desiredState} for source sandbox ${sourceSandboxId} after CLONE_SANDBOX job completed`,
+              )
+              sourceSandbox.state = SandboxState.ERROR
+              sourceSandbox.pending = false
+              break
+          }
+
+          await this.sandboxRepository.save(sourceSandbox)
+        }
+      } else {
+        this.logger.warn(`Source sandbox ${sourceSandboxId} not found for CLONE_SANDBOX job ${job.id}`)
+        return
+      }
+
+      // Get the cloned sandbox
+      const clonedSandbox = await this.sandboxRepository.findOne({ where: { id: clonedSandboxId } })
+      if (!clonedSandbox) {
+        this.logger.warn(`Cloned sandbox ${clonedSandboxId} not found for CLONE_SANDBOX job ${job.id}`)
+        return
+      }
+
+      if (clonedSandbox.desiredState !== SandboxDesiredState.STARTED) {
+        this.logger.error(
+          `Cloned sandbox ${clonedSandboxId} is not in desired state STARTED for CLONE_SANDBOX job ${job.id}. Desired state: ${clonedSandbox.desiredState}`,
+        )
+        return
+      }
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(
+          `CLONE_SANDBOX job ${job.id} completed successfully, marking cloned sandbox ${clonedSandboxId} as STARTED`,
+        )
+        clonedSandbox.state = SandboxState.STARTED
+        clonedSandbox.pending = false
+        clonedSandbox.errorReason = null
+        const metadata = job.getResultMetadata()
+        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
+          clonedSandbox.daemonVersion = metadata.daemonVersion
+        }
+        await this.sandboxRepository.save(clonedSandbox)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`CLONE_SANDBOX job ${job.id} failed for sandbox ${clonedSandboxId}: ${job.errorMessage}`)
+        clonedSandbox.state = SandboxState.ERROR
+        clonedSandbox.pending = false
+        clonedSandbox.errorReason = job.errorMessage || 'Failed to clone sandbox'
+        await this.sandboxRepository.save(clonedSandbox)
+      }
+    } catch (error) {
+      this.logger.error(`Error handling CLONE_SANDBOX job completion for sandbox ${clonedSandboxId}:`, error)
     }
   }
 }

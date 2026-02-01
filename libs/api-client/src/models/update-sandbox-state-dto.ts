@@ -51,6 +51,7 @@ export const UpdateSandboxStateDtoStateEnum = {
   ARCHIVING: 'archiving',
   SNAPSHOTTING: 'snapshotting',
   FORKING: 'forking',
+  CLONING: 'cloning',
 } as const
 
 export type UpdateSandboxStateDtoStateEnum =

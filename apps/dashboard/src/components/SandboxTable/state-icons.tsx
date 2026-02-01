@@ -37,4 +37,5 @@ export const STATE_ICONS: Record<SandboxState, React.ReactNode> = {
   [SandboxState.RESTORING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.SNAPSHOTTING]: <Loader2 className="w-3 h-3 animate-spin" />,
   [SandboxState.FORKING]: <Loader2 className="w-3 h-3 animate-spin" />,
+  [SandboxState.CLONING]: <Loader2 className="w-3 h-3 animate-spin" />,
 }

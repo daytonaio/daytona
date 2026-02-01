@@ -432,3 +432,52 @@ func RemoveDestroyed(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, "Sandbox removed")
 }
+
+// Clone 			godoc
+//
+//	@Tags			sandbox
+//	@Summary		Clone a sandbox
+//	@Description	Create an independent copy of a sandbox with flattened filesystem
+//	@Param			sandboxId	path		string					true	"Source Sandbox ID"
+//	@Param			clone		body		dto.CloneSandboxDTO		true	"Clone configuration"
+//	@Produce		json
+//	@Success		201			{object}	dto.CloneSandboxResponseDTO
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		409			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Router			/sandboxes/{sandboxId}/clone [post]
+//
+//	@id				Clone
+func Clone(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	var cloneDTO dto.CloneSandboxDTO
+	err := ctx.ShouldBindJSON(&cloneDTO)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	// Source is stopped if SourceState is "stopped"
+	sourceStopped := false // Default to running since we don't have state info from API call
+
+	info, err := runner.LibVirt.CloneVM(ctx.Request.Context(), sandboxId, cloneDTO.NewSandboxId, sourceStopped)
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusFailure)).Inc()
+		ctx.Error(err)
+		return
+	}
+
+	common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	ctx.JSON(http.StatusCreated, dto.CloneSandboxResponseDTO{
+		Id:              info.Id,
+		State:           info.State,
+		SourceSandboxId: sandboxId,
+		DaemonVersion:   info.DaemonVersion,
+	})
+}

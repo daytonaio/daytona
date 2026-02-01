@@ -34,6 +34,7 @@ export function SandboxTableActions({
   onScreenRecordings,
   onFork,
   onViewForks,
+  onClone,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -100,6 +101,16 @@ export function SandboxTableActions({
         })
       }
 
+      // Add Clone option (for STARTED or STOPPED sandboxes on all runner classes)
+      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+        items.push({
+          key: 'clone',
+          label: 'Clone',
+          onClick: () => onClone(sandbox.id),
+          disabled: isLoading,
+        })
+      }
+
       // Add View Forks option (only for linux-exp runner class)
       if (runnerClass === 'linux-exp') {
         items.push({
@@ -158,6 +169,7 @@ export function SandboxTableActions({
     onCreateSnapshot,
     onFork,
     onViewForks,
+    onClone,
   ])
 
   if (!writePermitted && !deletePermitted) {

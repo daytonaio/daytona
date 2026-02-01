@@ -84,6 +84,8 @@ type Workspace struct {
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
 	// The ID of the parent sandbox if this sandbox was forked
 	ParentSandboxId *string `json:"parentSandboxId,omitempty"`
+	// The ID of the source sandbox if this sandbox was cloned
+	SourceSandboxId *string `json:"sourceSandboxId,omitempty"`
 	// The image used for the workspace
 	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
@@ -1018,6 +1020,38 @@ func (o *Workspace) SetParentSandboxId(v string) {
 	o.ParentSandboxId = &v
 }
 
+// GetSourceSandboxId returns the SourceSandboxId field value if set, zero value otherwise.
+func (o *Workspace) GetSourceSandboxId() string {
+	if o == nil || IsNil(o.SourceSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.SourceSandboxId
+}
+
+// GetSourceSandboxIdOk returns a tuple with the SourceSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetSourceSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.SourceSandboxId) {
+		return nil, false
+	}
+	return o.SourceSandboxId, true
+}
+
+// HasSourceSandboxId returns a boolean if a field has been set.
+func (o *Workspace) HasSourceSandboxId() bool {
+	if o != nil && !IsNil(o.SourceSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetSourceSandboxId gets a reference to the given string and assigns it to the SourceSandboxId field.
+func (o *Workspace) SetSourceSandboxId(v string) {
+	o.SourceSandboxId = &v
+}
+
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *Workspace) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -1223,6 +1257,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ParentSandboxId) {
 		toSerialize["parentSandboxId"] = o.ParentSandboxId
 	}
+	if !IsNil(o.SourceSandboxId) {
+		toSerialize["sourceSandboxId"] = o.SourceSandboxId
+	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
@@ -1321,6 +1358,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
 		delete(additionalProperties, "parentSandboxId")
+		delete(additionalProperties, "sourceSandboxId")
 		delete(additionalProperties, "image")
 		delete(additionalProperties, "snapshotState")
 		delete(additionalProperties, "snapshotCreatedAt")

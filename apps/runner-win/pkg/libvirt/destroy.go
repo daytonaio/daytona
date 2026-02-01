@@ -138,8 +138,12 @@ func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 	}
 
 	// Build paths for disk and NVRAM
+	// Standard path used by create.go
 	diskPath := filepath.Join(sandboxesBasePath, fmt.Sprintf("%s.qcow2", domainId))
 	nvramPath := filepath.Join(nvramBasePath, fmt.Sprintf("%s_VARS.fd", domainId))
+
+	// Clone directory path (clone.go creates /var/lib/libvirt/{id}/{id}.qcow2)
+	cloneDirPath := filepath.Join("/var/lib/libvirt", domainId)
 
 	const maxRetries = 3
 	retryDelay := time.Second
@@ -194,6 +198,34 @@ func (l *LibVirt) cleanupDomainFiles(ctx context.Context, domainId string) {
 		} else {
 			log.Errorf("Failed to remove NVRAM %s after %d attempts: %v (output: %s)",
 				nvramPath, maxRetries, err, string(output))
+		}
+	}
+
+	// Reset retry delay for clone directory
+	retryDelay = time.Second
+
+	// Remove clone directory if it exists (clone.go creates /var/lib/libvirt/{id}/)
+	log.Infof("Removing clone directory if exists: %s", cloneDirPath)
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		var cmd *exec.Cmd
+		if isLocal {
+			cmd = exec.CommandContext(ctx, "rm", "-rf", cloneDirPath)
+		} else {
+			cmd = exec.CommandContext(ctx, "ssh", host, fmt.Sprintf("rm -rf %s", cloneDirPath))
+		}
+		output, err := cmd.CombinedOutput()
+		if err == nil {
+			log.Infof("Successfully removed clone directory %s", cloneDirPath)
+			break
+		}
+		if attempt < maxRetries {
+			log.Warnf("Failed to remove clone directory %s (attempt %d/%d): %v (output: %s), retrying in %v",
+				cloneDirPath, attempt, maxRetries, err, string(output), retryDelay)
+			time.Sleep(retryDelay)
+			retryDelay *= 2 // Exponential backoff
+		} else {
+			log.Errorf("Failed to remove clone directory %s after %d attempts: %v (output: %s)",
+				cloneDirPath, maxRetries, err, string(output))
 		}
 	}
 

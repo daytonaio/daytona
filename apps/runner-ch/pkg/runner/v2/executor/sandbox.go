@@ -110,3 +110,35 @@ func (e *Executor) forkSandbox(ctx context.Context, job *apiclient.Job) (any, er
 		ParentId: payload.SourceSandboxId,
 	}, nil
 }
+
+// CloneSandboxPayload matches the payload sent by the API for CLONE_SANDBOX jobs
+type CloneSandboxPayload struct {
+	SourceSandboxId string `json:"sourceSandboxId"`
+	NewSandboxId    string `json:"newSandboxId"`
+	SourceState     string `json:"sourceState"` // "started" or "stopped"
+}
+
+func (e *Executor) cloneSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	var payload CloneSandboxPayload
+	err := e.parsePayload(job.Payload, &payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	info, err := e.chClient.CloneVM(ctx, cloudhypervisor.CloneOptions{
+		SourceSandboxId: payload.SourceSandboxId,
+		NewSandboxId:    payload.NewSandboxId,
+	})
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusFailure)).Inc()
+		return nil, err
+	}
+
+	common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	return dto.CloneSandboxResponseDTO{
+		Id:              info.Id,
+		State:           string(info.State),
+		SourceSandboxId: payload.SourceSandboxId,
+	}, nil
+}

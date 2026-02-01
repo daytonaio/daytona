@@ -475,4 +475,26 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       `Created FORK_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} (state: ${sourceState}) on runner ${this.runner.id}`,
     )
   }
+
+  @Transactional()
+  async cloneSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void> {
+    const payload = {
+      sourceSandboxId,
+      newSandboxId,
+      sourceState: sourceState || 'started',
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.CLONE_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      newSandboxId,
+      payload,
+    )
+
+    this.logger.debug(
+      `Created CLONE_SANDBOX job for sandbox ${sourceSandboxId} -> ${newSandboxId} (state: ${sourceState}) on runner ${this.runner.id}`,
+    )
+  }
 }

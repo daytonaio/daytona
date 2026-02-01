@@ -32,6 +32,7 @@ const (
 	JOBTYPE_UPDATE_SANDBOX_NETWORK_SETTINGS JobType = "UPDATE_SANDBOX_NETWORK_SETTINGS"
 	JOBTYPE_CREATE_SANDBOX_SNAPSHOT         JobType = "CREATE_SANDBOX_SNAPSHOT"
 	JOBTYPE_FORK_SANDBOX                    JobType = "FORK_SANDBOX"
+	JOBTYPE_CLONE_SANDBOX                   JobType = "CLONE_SANDBOX"
 )
 
 // All allowed values of JobType enum
@@ -47,6 +48,7 @@ var AllowedJobTypeEnumValues = []JobType{
 	"UPDATE_SANDBOX_NETWORK_SETTINGS",
 	"CREATE_SANDBOX_SNAPSHOT",
 	"FORK_SANDBOX",
+	"CLONE_SANDBOX",
 }
 
 func (v *JobType) UnmarshalJSON(src []byte) error {

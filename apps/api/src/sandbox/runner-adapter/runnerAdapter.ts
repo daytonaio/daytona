@@ -102,6 +102,8 @@ export interface RunnerAdapter {
   ): Promise<void>
 
   forkSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void>
+
+  cloneSandbox(sourceSandboxId: string, newSandboxId: string, sourceState?: string): Promise<void>
 }
 
 @Injectable()

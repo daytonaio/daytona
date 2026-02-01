@@ -43,6 +43,7 @@ interface UseSandboxTableProps {
   handleScreenRecordings: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleClone: (id: string) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -75,6 +76,7 @@ export function useSandboxTable({
   handleScreenRecordings,
   handleFork,
   handleViewForks,
+  handleClone,
   pagination,
   pageCount,
   onPaginationChange,
@@ -132,6 +134,7 @@ export function useSandboxTable({
         handleScreenRecordings,
         handleFork,
         handleViewForks,
+        handleClone,
         getRegionName,
         runnerClassMap,
       }),
@@ -151,6 +154,7 @@ export function useSandboxTable({
       handleScreenRecordings,
       handleFork,
       handleViewForks,
+      handleClone,
       getRegionName,
       runnerClassMap,
     ],

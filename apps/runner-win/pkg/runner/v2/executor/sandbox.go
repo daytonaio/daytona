@@ -80,3 +80,34 @@ func (e *Executor) updateNetworkSettings(ctx context.Context, job *apiclient.Job
 
 	return nil, e.libvirt.UpdateNetworkSettings(ctx, job.ResourceId, updateNetworkSettingsDto)
 }
+
+// CloneSandboxPayload represents the payload for cloning a sandbox
+type CloneSandboxPayload struct {
+	SourceSandboxId string `json:"sourceSandboxId"`
+	NewSandboxId    string `json:"newSandboxId"`
+	SourceState     string `json:"sourceState"`
+}
+
+func (e *Executor) cloneSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	var payload CloneSandboxPayload
+	err := e.parsePayload(job.Payload, &payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	sourceStopped := payload.SourceState == "stopped"
+	info, err := e.libvirt.CloneVM(ctx, payload.SourceSandboxId, payload.NewSandboxId, sourceStopped)
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusFailure)).Inc()
+		return nil, err
+	}
+
+	common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	return dto.CloneSandboxResponseDTO{
+		Id:              info.Id,
+		State:           info.State,
+		SourceSandboxId: payload.SourceSandboxId,
+		DaemonVersion:   info.DaemonVersion,
+	}, nil
+}

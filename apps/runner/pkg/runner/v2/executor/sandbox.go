@@ -80,3 +80,32 @@ func (e *Executor) updateNetworkSettings(ctx context.Context, job *apiclient.Job
 
 	return nil, e.docker.UpdateNetworkSettings(ctx, job.ResourceId, updateNetworkSettingsDto)
 }
+
+// CloneSandboxPayload matches the payload sent by the API for CLONE_SANDBOX jobs
+type CloneSandboxPayload struct {
+	SourceSandboxId string `json:"sourceSandboxId"`
+	NewSandboxId    string `json:"newSandboxId"`
+	SourceState     string `json:"sourceState"` // "started" or "stopped"
+}
+
+func (e *Executor) cloneSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
+	var payload CloneSandboxPayload
+	err := e.parsePayload(job.Payload, &payload)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
+	}
+
+	info, err := e.docker.CloneSandbox(ctx, payload.SourceSandboxId, payload.NewSandboxId)
+	if err != nil {
+		common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusFailure)).Inc()
+		return nil, err
+	}
+
+	common.ContainerOperationCount.WithLabelValues("clone", string(common.PrometheusOperationStatusSuccess)).Inc()
+
+	return dto.CloneSandboxResponseDTO{
+		Id:              info.Id,
+		State:           string(info.State),
+		SourceSandboxId: payload.SourceSandboxId,
+	}, nil
+}

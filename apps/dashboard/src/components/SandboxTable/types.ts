@@ -42,6 +42,7 @@ export interface SandboxTableProps {
   handleScreenRecordings: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleClone: (id: string) => void
   handleRefresh: () => void
   isRefreshing?: boolean
   onRowClick?: (sandbox: Sandbox) => void
@@ -76,6 +77,7 @@ export interface SandboxTableActionsProps {
   onScreenRecordings: (id: string) => void
   onFork: (id: string) => void
   onViewForks: (id: string) => void
+  onClone: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

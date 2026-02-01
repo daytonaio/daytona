@@ -1686,6 +1686,7 @@ paths:
                 - archiving
                 - snapshotting
                 - forking
+                - cloning
               type: string
             type: array
           style: form
@@ -2736,6 +2737,60 @@ paths:
             - profile
             - email
       summary: Fork a sandbox
+      tags:
+        - sandbox
+  /sandbox/{sandboxIdOrName}/clone:
+    post:
+      description: "Create an independent copy of a sandbox with a complete flattened\
+        \ filesystem. Unlike fork, the cloned sandbox has no dependency on the source\
+        \ sandbox."
+      operationId: cloneSandbox
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID or name of the sandbox to clone
+          explode: false
+          in: path
+          name: sandboxIdOrName
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloneSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloneSandboxResponse'
+          description: Clone job has been created. The cloned sandbox will be available
+            once the job completes.
+        '400':
+          description: Sandbox is not in a valid state for cloning (must be STARTED
+            or STOPPED) or runner availability score is too low
+        '404':
+          description: Sandbox not found
+        '409':
+          description: "Clone operation is already in progress, source sandbox has\
+            \ a backup/snapshot in progress, or sandbox name already exists"
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Clone a sandbox
       tags:
         - sandbox
   /sandbox/{sandboxIdOrName}/forks:
@@ -9677,6 +9732,7 @@ components:
         - archiving
         - snapshotting
         - forking
+        - cloning
       type: string
     SandboxDesiredState:
       description: The desired state of the sandbox
@@ -9787,6 +9843,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
+        sourceSandboxId: source-sandbox-123
         name: MySandbox
         backupState: None
         user: daytona
@@ -9941,6 +9998,10 @@ components:
           description: The ID of the parent sandbox if this sandbox was forked
           example: parent-sandbox-123
           type: string
+        sourceSandboxId:
+          description: The ID of the source sandbox if this sandbox was cloned
+          example: source-sandbox-123
+          type: string
       required:
         - cpu
         - disk
@@ -9996,6 +10057,7 @@ components:
               daytona.io/public: 'true'
             target: local
             disk: 10
+            sourceSandboxId: source-sandbox-123
             name: MySandbox
             backupState: None
             user: daytona
@@ -10035,6 +10097,7 @@ components:
               daytona.io/public: 'true'
             target: local
             disk: 10
+            sourceSandboxId: source-sandbox-123
             name: MySandbox
             backupState: None
             user: daytona
@@ -10251,6 +10314,7 @@ components:
             - archiving
             - snapshotting
             - forking
+            - cloning
           example: started
           type: string
         errorReason:
@@ -10424,6 +10488,7 @@ components:
             - archiving
             - snapshotting
             - forking
+            - cloning
           example: creating
           type: string
         parentSandboxId:
@@ -10434,6 +10499,65 @@ components:
         - id
         - name
         - parentSandboxId
+        - state
+      type: object
+    CloneSandbox:
+      example:
+        name: my-cloned-sandbox
+      properties:
+        name:
+          description: "The name for the cloned sandbox. If not provided, a unique\
+            \ name will be generated."
+          example: my-cloned-sandbox
+          type: string
+      type: object
+    CloneSandboxResponse:
+      example:
+        sourceSandboxId: source-sandbox-123
+        name: my-cloned-sandbox
+        id: cloned-sandbox-123
+        state: creating
+      properties:
+        id:
+          description: The ID of the newly cloned sandbox
+          example: cloned-sandbox-123
+          type: string
+        name:
+          description: The name of the cloned sandbox
+          example: my-cloned-sandbox
+          type: string
+        state:
+          description: The current state of the cloned sandbox
+          enum:
+            - creating
+            - restoring
+            - destroyed
+            - destroying
+            - started
+            - stopped
+            - starting
+            - stopping
+            - error
+            - build_failed
+            - pending_build
+            - building_snapshot
+            - unknown
+            - pulling_snapshot
+            - archived
+            - archiving
+            - snapshotting
+            - forking
+            - cloning
+          example: creating
+          type: string
+        sourceSandboxId:
+          description: The ID of the source sandbox that was cloned
+          example: source-sandbox-123
+          type: string
+      required:
+        - id
+        - name
+        - sourceSandboxId
         - state
       type: object
     CreateRunner:
@@ -12671,6 +12795,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
+        sourceSandboxId: source-sandbox-123
         name: MySandbox
         backupState: None
         user: daytona
@@ -12824,6 +12949,10 @@ components:
         parentSandboxId:
           description: The ID of the parent sandbox if this sandbox was forked
           example: parent-sandbox-123
+          type: string
+        sourceSandboxId:
+          description: The ID of the source sandbox if this sandbox was cloned
+          example: source-sandbox-123
           type: string
         image:
           description: The image used for the workspace
@@ -13097,6 +13226,7 @@ components:
         - UPDATE_SANDBOX_NETWORK_SETTINGS
         - CREATE_SANDBOX_SNAPSHOT
         - FORK_SANDBOX
+        - CLONE_SANDBOX
       type: string
     Job:
       example:

@@ -22,4 +22,5 @@ export enum SandboxState {
   ARCHIVING = 'archiving',
   SNAPSHOTTING = 'snapshotting',
   FORKING = 'forking',
+  CLONING = 'cloning',
 }

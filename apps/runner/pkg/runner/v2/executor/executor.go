@@ -146,6 +146,8 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, err
 		resultMetadata, err = e.updateNetworkSettings(ctx, job)
 	case apiclient.JOBTYPE_CREATE_SANDBOX_SNAPSHOT:
 		resultMetadata, err = e.createSandboxSnapshot(ctx, job)
+	case apiclient.JOBTYPE_CLONE_SANDBOX:
+		resultMetadata, err = e.cloneSandbox(ctx, job)
 	default:
 		err = fmt.Errorf("unknown job type: %s", job.GetType())
 	}

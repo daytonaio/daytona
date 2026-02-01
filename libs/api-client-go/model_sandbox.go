@@ -83,7 +83,9 @@ type Sandbox struct {
 	// The version of the daemon running in the sandbox
 	DaemonVersion *string `json:"daemonVersion,omitempty"`
 	// The ID of the parent sandbox if this sandbox was forked
-	ParentSandboxId      *string `json:"parentSandboxId,omitempty"`
+	ParentSandboxId *string `json:"parentSandboxId,omitempty"`
+	// The ID of the source sandbox if this sandbox was cloned
+	SourceSandboxId      *string `json:"sourceSandboxId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -1010,6 +1012,38 @@ func (o *Sandbox) SetParentSandboxId(v string) {
 	o.ParentSandboxId = &v
 }
 
+// GetSourceSandboxId returns the SourceSandboxId field value if set, zero value otherwise.
+func (o *Sandbox) GetSourceSandboxId() string {
+	if o == nil || IsNil(o.SourceSandboxId) {
+		var ret string
+		return ret
+	}
+	return *o.SourceSandboxId
+}
+
+// GetSourceSandboxIdOk returns a tuple with the SourceSandboxId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetSourceSandboxIdOk() (*string, bool) {
+	if o == nil || IsNil(o.SourceSandboxId) {
+		return nil, false
+	}
+	return o.SourceSandboxId, true
+}
+
+// HasSourceSandboxId returns a boolean if a field has been set.
+func (o *Sandbox) HasSourceSandboxId() bool {
+	if o != nil && !IsNil(o.SourceSandboxId) {
+		return true
+	}
+
+	return false
+}
+
+// SetSourceSandboxId gets a reference to the given string and assigns it to the SourceSandboxId field.
+func (o *Sandbox) SetSourceSandboxId(v string) {
+	o.SourceSandboxId = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -1086,6 +1120,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ParentSandboxId) {
 		toSerialize["parentSandboxId"] = o.ParentSandboxId
+	}
+	if !IsNil(o.SourceSandboxId) {
+		toSerialize["sourceSandboxId"] = o.SourceSandboxId
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -1173,6 +1210,7 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "class")
 		delete(additionalProperties, "daemonVersion")
 		delete(additionalProperties, "parentSandboxId")
+		delete(additionalProperties, "sourceSandboxId")
 		o.AdditionalProperties = additionalProperties
 	}
 

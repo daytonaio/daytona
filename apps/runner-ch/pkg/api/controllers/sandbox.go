@@ -371,6 +371,48 @@ func Fork(ctx *gin.Context) {
 	})
 }
 
+// Clone creates a complete copy of a sandbox with flattened filesystem
+//
+//	@Summary		Clone a sandbox
+//	@Description	Create an independent copy of a sandbox with flattened filesystem (no disk dependency)
+//	@Tags			sandboxes
+//	@Accept			json
+//	@Produce		json
+//	@Param			sandboxId	path		string					true	"Source Sandbox ID"
+//	@Param			clone		body		dto.CloneSandboxDTO		true	"Clone configuration"
+//	@Success		201			{object}	dto.CloneSandboxResponseDTO
+//	@Failure		400			{object}	error
+//	@Failure		500			{object}	error
+//	@Router			/sandboxes/{sandboxId}/clone [post]
+func Clone(ctx *gin.Context) {
+	sandboxId := ctx.Param("sandboxId")
+
+	var cloneDTO dto.CloneSandboxDTO
+	if err := ctx.ShouldBindJSON(&cloneDTO); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	log.Infof("Cloning sandbox %s to %s", sandboxId, cloneDTO.NewSandboxId)
+
+	// Clone the sandbox using Cloud Hypervisor
+	info, err := Runner.CHClient.CloneVM(ctx.Request.Context(), cloudhypervisor.CloneOptions{
+		SourceSandboxId: sandboxId,
+		NewSandboxId:    cloneDTO.NewSandboxId,
+	})
+	if err != nil {
+		log.Errorf("Failed to clone sandbox %s: %v", sandboxId, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, dto.CloneSandboxResponseDTO{
+		Id:              info.Id,
+		State:           string(info.State),
+		SourceSandboxId: sandboxId,
+	})
+}
+
 // HealthCheck returns health status
 //
 //	@Summary		Health check

@@ -221,6 +221,12 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   parentSandboxId?: string
+  /**
+   * The ID of the source sandbox if this sandbox was cloned
+   * @type {string}
+   * @memberof Sandbox
+   */
+  sourceSandboxId?: string
 }
 
 export const SandboxBackupStateEnum = {

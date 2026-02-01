@@ -74,6 +74,7 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { CreateSandboxSnapshotDto } from '../dto/create-sandbox-snapshot.dto'
 import { ForkSandboxDto, ForkSandboxResponseDto } from '../dto/fork-sandbox.dto'
+import { CloneSandboxDto, CloneSandboxResponseDto } from '../dto/clone-sandbox.dto'
 import { GetForkChildrenQueryDto, GetForkParentQueryDto } from '../dto/fork-tree.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
@@ -1188,6 +1189,68 @@ export class SandboxController {
       name: startedSandbox.name,
       state: startedSandbox.state!,
       parentSandboxId: startedSandbox.parentSandboxId,
+    }
+  }
+
+  @Post(':sandboxIdOrName/clone')
+  @HttpCode(200)
+  @SkipThrottle({ authenticated: true })
+  @ThrottlerScope('sandbox-create')
+  @ApiOperation({
+    summary: 'Clone a sandbox',
+    description:
+      'Create an independent copy of a sandbox with a complete flattened filesystem. Unlike fork, the cloned sandbox has no dependency on the source sandbox.',
+    operationId: 'cloneSandbox',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox to clone',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Clone job has been created. The cloned sandbox will be available once the job completes.',
+    type: CloneSandboxResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Sandbox is not in a valid state for cloning (must be STARTED or STOPPED) or runner availability score is too low',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Sandbox not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Clone operation is already in progress, source sandbox has a backup/snapshot in progress, or sandbox name already exists',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.CLONE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxIdOrName,
+    targetIdFromResult: (result: CloneSandboxResponseDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CloneSandboxDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
+  async cloneSandbox(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: CloneSandboxDto,
+  ): Promise<CloneSandboxResponseDto> {
+    const clonedSandbox = await this.sandboxService.cloneSandbox(sandboxIdOrName, authContext.organization, dto.name)
+
+    return {
+      id: clonedSandbox.id,
+      name: clonedSandbox.name,
+      state: clonedSandbox.state!,
+      sourceSandboxId: clonedSandbox.sourceSandboxId,
     }
   }
 

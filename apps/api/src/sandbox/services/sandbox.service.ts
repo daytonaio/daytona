@@ -995,6 +995,146 @@ export class SandboxService {
     }
   }
 
+  @Transactional()
+  async cloneSandbox(sandboxIdOrName: string, organization: Organization, name?: string): Promise<SandboxDto> {
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
+
+    const sourceSandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+
+    // Validate source sandbox state - must be STARTED or STOPPED for cloning
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sourceSandbox.state)) {
+      throw new BadRequestException(
+        `Sandbox must be in STARTED or STOPPED state to clone. Current state: ${sourceSandbox.state}`,
+      )
+    }
+
+    // Get the runner and validate availability score
+    const runner = await this.runnerService.findOne(sourceSandbox.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner for sandbox not found`)
+    }
+
+    const availabilityScoreThreshold = this.configService.getOrThrow('runnerUsage.availabilityScoreThreshold')
+    if (runner.availabilityScore < availabilityScoreThreshold) {
+      throw new BadRequestException(
+        `Runner availability score (${runner.availabilityScore}) is below threshold (${availabilityScoreThreshold}). Clone operation cannot proceed.`,
+      )
+    }
+
+    // Check for existing active clone jobs for this sandbox
+    const existingJob = await this.jobRepository.findOne({
+      where: {
+        resourceType: ResourceType.SANDBOX,
+        resourceId: sourceSandbox.id,
+        type: JobType.CLONE_SANDBOX,
+        completedAt: IsNull(),
+      },
+    })
+
+    if (existingJob) {
+      throw new ConflictException('Clone operation is already in progress for this sandbox')
+    }
+
+    this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+    try {
+      // Validate organization quotas - clone inherits parent's resources
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(
+          organization,
+          sourceSandbox.region,
+          sourceSandbox.cpu,
+          sourceSandbox.mem,
+          sourceSandbox.disk,
+        )
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = sourceSandbox.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = sourceSandbox.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = sourceSandbox.disk
+      }
+
+      // Create new sandbox entity for the clone
+      const clonedSandbox = new Sandbox(sourceSandbox.region, name)
+
+      // Copy properties from source sandbox
+      clonedSandbox.organizationId = organization.id
+      clonedSandbox.class = sourceSandbox.class
+      clonedSandbox.snapshot = sourceSandbox.snapshot
+      clonedSandbox.osUser = sourceSandbox.osUser
+      clonedSandbox.env = { ...sourceSandbox.env }
+      clonedSandbox.labels = { ...sourceSandbox.labels }
+      clonedSandbox.cpu = sourceSandbox.cpu
+      clonedSandbox.gpu = sourceSandbox.gpu
+      clonedSandbox.mem = sourceSandbox.mem
+      clonedSandbox.disk = sourceSandbox.disk
+      clonedSandbox.public = sourceSandbox.public
+      clonedSandbox.networkBlockAll = sourceSandbox.networkBlockAll
+      clonedSandbox.networkAllowList = sourceSandbox.networkAllowList
+      clonedSandbox.autoStopInterval = sourceSandbox.autoStopInterval
+      clonedSandbox.autoArchiveInterval = sourceSandbox.autoArchiveInterval
+      clonedSandbox.autoDeleteInterval = sourceSandbox.autoDeleteInterval
+      clonedSandbox.wakeOnRequest = sourceSandbox.wakeOnRequest
+
+      // Set clone lineage - store source sandbox ID for reference
+      // Unlike fork, clone is an independent copy with no disk dependency
+      clonedSandbox.sourceSandboxId = sourceSandbox.id
+
+      // Clone runs on the same runner as the source
+      clonedSandbox.runnerId = sourceSandbox.runnerId
+      clonedSandbox.pending = true
+
+      // Set initial state to CREATING to prevent syncInstanceState from creating a CREATE_SANDBOX job
+      // The CLONE_SANDBOX job will handle the actual creation
+      clonedSandbox.state = SandboxState.CREATING
+
+      sourceSandbox.state = SandboxState.CLONING
+      sourceSandbox.pending = true
+      await this.sandboxRepository.save(sourceSandbox)
+
+      await this.sandboxRepository.insert(clonedSandbox)
+
+      // Get runner adapter and create the clone job
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      await runnerAdapter.cloneSandbox(sourceSandbox.id, clonedSandbox.id, sourceSandbox.state)
+
+      this.logger.log(`Created clone job for sandbox ${sourceSandbox.id} -> ${clonedSandbox.id}`)
+
+      return SandboxDto.fromSandbox(clonedSandbox)
+    } catch (error) {
+      if (error.code === '23505') {
+        throw new ConflictException(`Sandbox with name ${name} already exists`)
+      }
+
+      // Reset source sandbox's state on error
+      if (sourceSandbox.state === SandboxState.CLONING) {
+        try {
+          sourceSandbox.state = SandboxState.STOPPED
+          sourceSandbox.pending = false
+          await this.sandboxRepository.save(sourceSandbox)
+        } catch (resetError) {
+          this.logger.error(`Failed to reset state on source sandbox ${sourceSandbox.id}:`, resetError)
+        }
+      }
+
+      await this.rollbackPendingUsage(
+        organization.id,
+        sourceSandbox.region,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+
+      throw error
+    }
+  }
+
   async findAllDeprecated(
     organizationId: string,
     labels?: { [key: string]: string },

@@ -122,6 +122,7 @@ interface GetColumnsProps {
   handleScreenRecordings: (id: string) => void
   handleFork: (id: string) => void
   handleViewForks: (id: string) => void
+  handleClone: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
   runnerClassMap: Record<string, RunnerClass>
 }
@@ -142,6 +143,7 @@ export function getColumns({
   handleScreenRecordings,
   handleFork,
   handleViewForks,
+  handleClone,
   getRegionName,
   runnerClassMap,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
@@ -424,6 +426,7 @@ export function getColumns({
               onScreenRecordings={handleScreenRecordings}
               onFork={handleFork}
               onViewForks={handleViewForks}
+              onClone={handleClone}
             />
           </div>
         )

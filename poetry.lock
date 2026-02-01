@@ -1044,7 +1044,7 @@ databind = ">=4.5.2,<5.0.0"
 
 [[package]]
 name = "daytona"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 description = "Python SDK for Daytona"
 optional = false
 python-versions = ">=3.9,<4.0"
@@ -1054,6 +1054,10 @@ develop = true
 
 [package.dependencies]
 aiofiles = ">=24.1.0,<24.2.0"
+daytona-api-client = "0.131.0a1"
+daytona-api-client-async = "0.131.0a1"
+daytona-toolbox-api-client = "0.131.0a1"
+daytona-toolbox-api-client-async = "0.131.0a1"
 Deprecated = ">=1.2.18,<2.0.0"
 environs = ">=10.0.0,<15.0.0"
 httpx = ">=0.28.0,<0.29.0"
@@ -1070,7 +1074,7 @@ url = "libs/sdk-python"
 
 [[package]]
 name = "daytona-api-client"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 description = "Daytona"
 optional = false
 python-versions = "^3.8"
@@ -1090,7 +1094,7 @@ url = "libs/api-client-python"
 
 [[package]]
 name = "daytona-api-client-async"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 description = "Daytona"
 optional = false
 python-versions = "^3.8"
@@ -1112,7 +1116,7 @@ url = "libs/api-client-python-async"
 
 [[package]]
 name = "daytona-toolbox-api-client"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 description = "Daytona Daemon API"
 optional = false
 python-versions = "^3.8"
@@ -1132,7 +1136,7 @@ url = "libs/toolbox-api-client-python"
 
 [[package]]
 name = "daytona-toolbox-api-client-async"
-version = "0.0.0-dev"
+version = "0.131.0a1"
 description = "Daytona Daemon API"
 optional = false
 python-versions = "^3.8"

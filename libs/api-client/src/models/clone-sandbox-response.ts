@@ -15,36 +15,36 @@
 /**
  *
  * @export
- * @interface ForkSandboxResponse
+ * @interface CloneSandboxResponse
  */
-export interface ForkSandboxResponse {
+export interface CloneSandboxResponse {
   /**
-   * The ID of the newly forked sandbox
+   * The ID of the newly cloned sandbox
    * @type {string}
-   * @memberof ForkSandboxResponse
+   * @memberof CloneSandboxResponse
    */
   id: string
   /**
-   * The name of the forked sandbox
+   * The name of the cloned sandbox
    * @type {string}
-   * @memberof ForkSandboxResponse
+   * @memberof CloneSandboxResponse
    */
   name: string
   /**
-   * The current state of the forked sandbox
+   * The current state of the cloned sandbox
    * @type {string}
-   * @memberof ForkSandboxResponse
+   * @memberof CloneSandboxResponse
    */
-  state: ForkSandboxResponseStateEnum
+  state: CloneSandboxResponseStateEnum
   /**
-   * The ID of the parent sandbox that was forked
+   * The ID of the source sandbox that was cloned
    * @type {string}
-   * @memberof ForkSandboxResponse
+   * @memberof CloneSandboxResponse
    */
-  parentSandboxId: string
+  sourceSandboxId: string
 }
 
-export const ForkSandboxResponseStateEnum = {
+export const CloneSandboxResponseStateEnum = {
   CREATING: 'creating',
   RESTORING: 'restoring',
   DESTROYED: 'destroyed',
@@ -66,5 +66,5 @@ export const ForkSandboxResponseStateEnum = {
   CLONING: 'cloning',
 } as const
 
-export type ForkSandboxResponseStateEnum =
-  (typeof ForkSandboxResponseStateEnum)[keyof typeof ForkSandboxResponseStateEnum]
+export type CloneSandboxResponseStateEnum =
+  (typeof CloneSandboxResponseStateEnum)[keyof typeof CloneSandboxResponseStateEnum]
