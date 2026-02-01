@@ -20,6 +20,12 @@ const configuration = {
       enabled: process.env.DB_TLS_ENABLED === 'true',
       rejectUnauthorized: process.env.DB_TLS_REJECT_UNAUTHORIZED !== 'false',
     },
+    pool: {
+      max: parseInt(process.env.DB_POOL_MAX || '10', 10),
+      min: parseInt(process.env.DB_POOL_MIN || '2', 10),
+      idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS || '30000', 10),
+      connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS || '5000', 10),
+    },
   },
   redis: {
     host: process.env.REDIS_HOST,
