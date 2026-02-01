@@ -108,29 +108,40 @@ export class SandboxWarmPoolService {
       },
     })
     if (warmPoolItem) {
-      const unschedulableRunners = await this.runnerRepository.find({
-        where: {
-          region: params.target,
-          unschedulable: true,
-        },
-      })
+      const availabilityScoreThreshold = this.configService.get<number>('runnerScore.thresholds.availability')
 
-      const warmPoolSandboxes = await this.sandboxRepository.find({
-        where: {
-          runnerId: Not(In(unschedulableRunners.map((runner) => runner.id))),
-          class: warmPoolItem.class,
-          cpu: warmPoolItem.cpu,
-          mem: warmPoolItem.mem,
-          disk: warmPoolItem.disk,
-          snapshot: snapshot.name, // Use snapshot.name instead of sandboxSnapshot
-          osUser: warmPoolItem.osUser,
-          env: warmPoolItem.env,
+      // Build subquery to find excluded runners (unschedulable OR low score)
+      const excludedRunnersSubquery = this.runnerRepository
+        .createQueryBuilder('runner')
+        .select('runner.id')
+        .where('runner.region = :region')
+        .andWhere(
+          availabilityScoreThreshold !== undefined
+            ? '(runner.unschedulable = true OR runner.availabilityScore < :scoreThreshold)'
+            : 'runner.unschedulable = true',
+        )
+
+      const queryBuilder = this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .where('sandbox.class = :class', { class: warmPoolItem.class })
+        .andWhere('sandbox.cpu = :cpu', { cpu: warmPoolItem.cpu })
+        .andWhere('sandbox.mem = :mem', { mem: warmPoolItem.mem })
+        .andWhere('sandbox.disk = :disk', { disk: warmPoolItem.disk })
+        .andWhere('sandbox.snapshot = :snapshot', { snapshot: snapshot.name })
+        .andWhere('sandbox.osUser = :osUser', { osUser: warmPoolItem.osUser })
+        .andWhere('sandbox.env = :env', { env: warmPoolItem.env })
+        .andWhere('sandbox.organizationId = :organizationId', {
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+        })
+        .andWhere('sandbox.region = :region', { region: warmPoolItem.target })
+        .andWhere('sandbox.state = :state', { state: SandboxState.STARTED })
+        .andWhere(`sandbox.runnerId NOT IN (${excludedRunnersSubquery.getQuery()})`)
+        .setParameters({
           region: warmPoolItem.target,
-          state: SandboxState.STARTED,
-        },
-        take: 10,
-      })
+          ...(availabilityScoreThreshold !== undefined && { scoreThreshold: availabilityScoreThreshold }),
+        })
+
+      const warmPoolSandboxes = await queryBuilder.orderBy('RANDOM()').take(300).getMany()
 
       //  make sure we only release warm pool sandbox once
       let warmPoolSandbox: Sandbox | null = null
