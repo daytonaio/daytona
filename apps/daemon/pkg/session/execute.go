@@ -145,34 +145,9 @@ var cmdWrapperFormat string = `
 	cleanup() { rm -f "$sp" "$ep" "$ip"; }
 	trap 'cleanup' EXIT HUP INT TERM
 
-	# Timeout-based pipe reader: reads line-by-line when available, flushes partial lines after 0.5s timeout
-  read_pipe() {
-    local pipe=$1
-    local prefix=$2
-    while true; do
-      if IFS= read -r -t 0.5 line; then
-        # Got a complete line with newline
-        printf "$prefix%%s\n" "$line" >> "$log"
-      else
-        read_status=$?
-        if [ $read_status -gt 128 ] && [ -n "$line" ]; then
-          # Timeout occurred (status > 128) and we have partial data - flush it
-          printf "$prefix%%s" "$line" >> "$log"
-          line=""
-        elif [ $read_status -eq 0 ] || [ $read_status -gt 128 ]; then
-          # Either EOF (0) or timeout (>128) with no data - continue or break
-          [ -p "$pipe" ] || break
-        else
-          # Pipe closed or error
-          break
-        fi
-      fi
-    done < "$pipe"
-  }
-
-  # Start readers for stdout and stderr
-  read_pipe "$sp" '%s' & r1=$!
-  read_pipe "$ep" '%s' & r2=$!
+  # prefix each stream and append to shared log
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
+	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
 
 	# Keep input FIFO open to prevent blocking when command opens stdin
 	sleep infinity > "$ip" &
