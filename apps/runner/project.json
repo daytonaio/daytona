@@ -23,6 +23,7 @@
     "copy-computeruse-plugin": {
       "executor": "nx:run-commands",
       "options": {
+        "cwd": "{workspaceRoot}",
         "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
       },
       "cache": true,
