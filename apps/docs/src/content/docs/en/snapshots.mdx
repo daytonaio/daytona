@@ -7,15 +7,26 @@ import Label from '@components/Label.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
+Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [Typescript](/docs/en/getting-started#sdks), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
+
+Snapshots can be created using:
+
+- [public images](#using-public-images)
+- [local images](#using-local-images)
+- [images from private registries](#using-images-from-private-registries)
+- [the declarative builder](#using-the-declarative-builder)
+
+Daytona also supports running [Docker](#run-docker-in-a-sandbox) and [Kubernetes](#run-kubernetes-in-a-sandbox) workloads inside sandboxes using snapshots.
+
 ## Create Snapshots
 
 Daytona provides methods to create snapshots from [public images](#using-public-images), [private images](#using-images-from-private-registries), [local images](#using-local-images), and the [declarative builder](#using-the-declarative-builder). You can create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots), or programmatically using the Daytona [SDK](/docs/en/getting-started#sdks), [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Enter the snapshot name, image (tag or digest), entrypoint, and resources
+3. Enter the **snapshot name**, **image** (tag or digest), **entrypoint**, and **resources**
 
-- **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI
+- **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI.
 - **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
 - [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
@@ -78,15 +89,37 @@ snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotPara
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:terminal">
+
+```bash
+daytona snapshot create my-snapshot --image python:3.11-slim --resources 2 4096
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{},
+  "regionId": ""
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#create), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#create), [Ruby SDK](/docs/en/ruby-sdk/snapshot#create), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
 >
 > [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
 >
 > [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (CLI)**](/docs/en/tools/cli/#daytona-snapshot-create)
 >
 > [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
@@ -96,7 +129,7 @@ Daytona supports creating snapshots from public images from Docker Hub or other 
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Enter the snapshot name and image tag or digest of any publicly accessible image from Docker Hub or from another public container registry.
+3. Enter the **snapshot name** and **image** (tag or digest) of any publicly accessible image from Docker Hub or from another public container registry.
 
 Once the snapshot is pulled, validated, and has an `Active` state, it is ready to be used.
 
@@ -152,6 +185,8 @@ for log := range logChan {
 </TabItem>
 </Tabs>
 
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
+
 ### Using local images
 
 Daytona supports creating snapshots from local images or from local Dockerfiles. To create a snapshot from a local image or from a local Dockerfile, use the [Daytona CLI](/docs/en/getting-started#cli).
@@ -197,12 +232,14 @@ Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), 
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and private image tag or digest. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
+6. Enter the **snapshot name** and private **image** (tag or digest). When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
 
 Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 #### Docker Hub
 
@@ -210,7 +247,7 @@ Daytona supports creating snapshots from Docker Hub images.
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: `docker.io`
 - **Username**: Docker Hub username (the account with access to the image)
@@ -219,7 +256,7 @@ Daytona supports creating snapshots from Docker Hub images.
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
 
 #### Google Artifact Registry
 
@@ -229,7 +266,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: base URL for your region (e.g., `https://us-central1-docker.pkg.dev` or `https://us-central1-docker.pkg.dev/your-org`).
 - **Username**: `_json_key`
@@ -239,7 +276,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
 
 #### GitHub Container Registry (GHCR)
 
@@ -247,7 +284,7 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: `ghcr.io`
 - **Username**: GitHub username (the account with access to the image)
@@ -255,7 +292,7 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
 
 ### Using the declarative builder
 
@@ -504,9 +541,8 @@ result.items.forEach(snapshot =>
 )
 ```
 
-  </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
 daytona = Daytona::Daytona.new
@@ -516,16 +552,43 @@ result.items.each do |snapshot|
 end
 ```
 
-  </TabItem>
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// List first page with default limit
+result, err := client.Snapshots.List(ctx, nil, nil)
+if err != nil {
+    return err
+}
+
+// List with pagination
+page, limit := 2, 10
+result, err := client.Snapshots.List(ctx, &page, &limit)
+fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.Total)
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:terminal">
+
+```bash
+daytona snapshot list
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist), [TypeScript SDK](/docs/typescript-sdk/snapshot#list), and [Ruby SDK](/docs/ruby-sdk/snapshot#list) references:
+For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot), [TypeScript SDK](/docs/typescript-sdk/snapshot), and [Ruby SDK](/docs/ruby-sdk/snapshot), [Go SDK](/docs/go-sdk/), [CLI](/docs/tools/cli#daytona-snapshot), and [API](/docs/tools/api/#daytona/tag/snapshots) references.
 
 > [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
 >
 > [**list (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#list)
 >
 > [**list (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#list)
+>
+> [**list (CLI)**](/docs/en/tools/cli#daytona-snapshot)
+>
+> [**list (API)**](/docs/en/tools/api#daytona/tag/snapshots/GET/snapshots)
 
 ## Activate Snapshots
 
