@@ -1,0 +1,126 @@
+---
+title: SSH アクセス
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+トークンベースの認証を使用して、任意のサンドボックスに SSH で接続できます。
+
+## SSH アクセストークンの作成 \{#creating-an-ssh-access-token\}
+
+サンドボックスに接続するには、まず SSH アクセストークンを作成する必要があります。このトークンにより、サンドボックスへ安全かつ期限付きでアクセスできます。
+
+SSH アクセスは、ダッシュボードでサンドボックスのオプションメニューを開き、`Create SSH Access` を選択して初期化できます。
+また、以下のいずれかの SDK を使用してプログラムから初期化することもできます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    daytona = Daytona()
+    sandbox = daytona.get("sandbox-abc123")
+
+    # Create SSH access token
+    ssh_access = sandbox.create_ssh_access(expires_in_minutes=60)
+    print(f"SSH Token: {ssh_access.token}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    const daytona = new Daytona()
+    const sandbox = await daytona.get('sandbox-abc123')
+
+    // Create SSH access token
+    const sshAccess = await sandbox.createSshAccess(60)
+    console.log(`SSH Token: ${sshAccess.token}`)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.get('sandbox-abc123')
+
+    # Create SSH access token
+    ssh_access = sandbox.create_ssh_access(expires_in_minutes: 60)
+    puts "SSH Token: #{ssh_access.token}"
+    ```
+  </TabItem>
+</Tabs>
+
+## 接続コマンド \{#connection-command\}
+
+トークンを取得したら、次のコマンドで接続します：
+
+```bash
+ssh <token>@ssh.app.daytona.io
+```
+
+## VS Code での接続 \{#connecting-with-vscode\}
+
+ローカルの VS Code をサンドボックスに接続するには、次の簡単な手順を実行します。
+
+1. VS Code に [Remote Explorer 拡張機能](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-explorer) がインストールされていることを確認します。
+2. 新しい SSH 接続を追加します。
+3. SSH 接続の URL を求められたら、上記の SSH コマンドを貼り付けます。
+
+拡張機能の詳細は[こちら](https://code.visualstudio.com/docs/remote/ssh)をご覧ください。
+
+## JetBrains IDE との接続 \{#connecting-with-jetbrains-ides\}
+
+ローカルの JetBrains IDE をサンドボックスに接続するには、次の簡単な手順に従います。
+
+1. ローカルマシンに [JetBrains Gateway](https://www.jetbrains.com/remote-development/gateway/) アプリをダウンロードします。
+2. 新規接続を追加します。
+3. SSH 接続 URL の入力を求められたら、上記の SSH コマンドを貼り付けます。
+4. サンドボックスにインストールする IDE を選択します。
+
+## SSH アクセスの管理 \{#managing-ssh-access\}
+
+### トークンの有効期限 \{#token-expiration\}
+
+セキュリティ保護のため、SSH アクセス トークンは自動的に失効します:
+
+* **既定**: 60分
+
+### アクセスの取り消し \{#revoking-access\}
+
+SSH アクセストークンはいつでも無効化できます:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # サンドボックスの SSH アクセスをすべて無効化
+    sandbox.revoke_ssh_access()
+
+    # サンドボックスの特定の SSH アクセスを無効化
+    sandbox.revoke_ssh_access(token="specific-token")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // サンドボックスの SSH アクセスをすべて無効化
+    await sandbox.revokeSshAccess()
+
+    // サンドボックスの特定の SSH アクセスを無効化
+    await sandbox.revokeSshAccess('specific-token')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # サンドボックスの SSH アクセスをすべて無効化
+    sandbox.revoke_ssh_access
+
+    # サンドボックスの特定の SSH アクセスを無効化
+    sandbox.revoke_ssh_access(token: 'specific-token')
+    ```
+  </TabItem>
+</Tabs>

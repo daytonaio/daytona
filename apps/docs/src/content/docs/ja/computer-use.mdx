@@ -1,0 +1,137 @@
+---
+title: コンピューター使用
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+コンピューター使用は、Daytona のサンドボックス内にあるデスクトップ環境のプログラムによる制御を可能にします。GUI の操作自動化やデスクトップアプリケーションのテストのために、マウス、キーボード、スクリーンショット、およびディスプレイ操作を提供します。
+
+**Linux**、**Windows**、または **macOS** アプリケーションと対話する必要がある場合は、このインスタンスタイプの使用を推奨します。
+
+:::caution[アルファ版へのアクセスが必要]
+macOS および Windows 向けのコンピューター使用は現在 **非公開アルファ** 段階にあります。アクセスをリクエストするには、[Computer Use Windows Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog) または [Computer Use macOS Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing\&ouid=103304973264148733944) にご記入ください。送信後、当社チームがリクエスト内容を確認し、セットアップ手順および利用可能状況の詳細についてご連絡します。
+:::
+
+## よくあるユースケース \{#common-use-cases\}
+
+* **GUI アプリケーションテスト** - ネイティブ macOS アプリケーションの操作を自動化し、ボタンのクリックやフォーム入力を行い、UI の動作を検証する
+* **ビジュアルテストとスクリーンショット** - アプリケーションのスクリーンショットをキャプチャし、UI 状態を比較してビジュアル回帰テストを行う
+* **デスクトップ自動化** - 繰り返し発生する macOS デスクトップ作業や GUI を介したファイル管理、複雑なワークフローを自動化する
+
+## はじめに \{#getting-started\}
+
+コンピューター使用 Alpha へのアクセス権が付与されると、Daytona のサンドボックス内にあるデスクトップ環境をプログラムから制御できるようになります。この機能には、マウス操作、キーボード操作の自動化、スクリーンショットの取得、および選択したオペレーティングシステム向けに最適化されたディスプレイ管理が含まれます。
+
+## SDK リファレンス \{#sdk-references\}
+
+コンピューター使用の自動化を始めるには、使用する SDK を選択してください。
+
+### TypeScript SDK \{#typescript-sdk\}
+
+TypeScript におけるコンピューター使用操作の完全な API リファレンス。
+
+[TypeScript SDK を表示 →](/docs/ja/typescript-sdk/computer-use)
+
+### Python SDK \{#python-sdk\}
+
+Python におけるコンピューター使用に関する操作（同期・非同期）の完全な API リファレンスです。
+
+[Python SDK を表示 →](/docs/ja/python-sdk/sync/computer-use)
+
+## 簡単な例 \{#quick-example\}
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+
+    # 環境変数を使って初期化（推奨）
+    daytona = DaytonaConfig()
+    # または明示的に設定:
+    # daytona = Daytona(
+    #     api_key=os.getenv('DAYTONA_API_KEY'),
+    #     api_url=os.getenv('DAYTONA_API_URL', 'https://app.daytona.io/api')
+    # )
+
+    # デフォルトのスナップショットからサンドボックスを作成（デスクトップ環境を含む）
+    sandbox = daytona.create()
+
+    # コンピューター使用のプロセスを開始
+    result = sandbox.computer_use.start()
+    print("Computer use started:", result.message)
+
+    # スクリーンショットを撮影
+    screenshot = sandbox.computer_use.screenshot.take_full_screen()
+
+    # クリックと文字入力
+    sandbox.computer_use.mouse.click(100, 200)
+    sandbox.computer_use.keyboard.type('Hello, Linux!')
+    sandbox.computer_use.keyboard.hotkey('ctrl+s')
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    // 環境変数を使って初期化（推奨）
+    const daytona = new Daytona();
+    // または明示的に設定:
+    // const daytona = new Daytona({
+    //     apiKey: process.env.DAYTONA_API_KEY,
+    //     apiUrl: process.env.DAYTONA_API_URL || 'https://app.daytona.io/api'
+    // });
+
+    // デフォルトのスナップショットからサンドボックスを作成（デスクトップ環境を含む）
+    const sandbox = await daytona.create();
+
+    // コンピューター使用のプロセスを開始
+    await sandbox.computerUse.start();
+
+    // スクリーンショットを撮影
+    const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+
+    // クリックと文字入力
+    await sandbox.computerUse.mouse.click(100, 200);
+    await sandbox.computerUse.keyboard.type('Hello, Linux!');
+    await sandbox.computerUse.keyboard.hotkey('ctrl+s');
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # 環境変数を使って初期化（推奨）
+    daytona = Daytona::Daytona.new
+    # または明示的に設定:
+    # config = Daytona::Config.new(
+    #   api_key: ENV['DAYTONA_API_KEY'],
+    #   api_url: ENV.fetch('DAYTONA_API_URL', 'https://app.daytona.io/api')
+    # )
+    # daytona = Daytona::Daytona.new(config)
+
+    # デフォルトのスナップショットからサンドボックスを作成（デスクトップ環境を含む）
+    sandbox = daytona.create
+
+    # コンピューター使用のプロセスを開始
+    result = sandbox.computer_use.start
+    puts "Computer use started: #{result.message}"
+
+    # スクリーンショットを撮影
+    screenshot = sandbox.computer_use.screenshot.take_full_screen
+
+    # クリックと文字入力
+    sandbox.computer_use.mouse.click(100, 200)
+    sandbox.computer_use.keyboard.type('Hello, Linux!')
+    sandbox.computer_use.keyboard.hotkey('ctrl+s')
+    ```
+  </TabItem>
+</Tabs>
+
+**環境変数（.env ファイル）：**
+
+```bash
+DAYTONA_API_KEY=your-api-key-here
+DAYTONA_API_URL=https://app.daytona.io/api
+```
