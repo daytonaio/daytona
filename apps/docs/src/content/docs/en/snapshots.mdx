@@ -630,6 +630,165 @@ FROM ubuntu:22.04
 RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 ```
 
+### Run Docker Compose in a Sandbox
+
+Docker Compose allows you to define and run multi-container applications. With Docker-in-Docker enabled in a Daytona Sandbox, you can use Docker Compose to orchestrate services like databases, caches, and application containers.
+
+First, create a Docker-in-Docker snapshot using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or [CLI](/docs/en/tools/cli#daytona-snapshot-create) with one of the [pre-built images](#using-pre-built-images) (e.g., `docker:28.3.3-dind`). Then use the following snippet to run Docker Compose services inside a sandbox:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+# Initialize the Daytona client
+daytona = Daytona()
+
+# Create a sandbox from a Docker-in-Docker snapshot
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(snapshot='docker-dind'))
+
+# Create a docker-compose.yml file
+compose_content = '''
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+'''
+sandbox.fs.upload_file(compose_content.encode(), 'docker-compose.yml')
+
+# Start Docker Compose services
+result = sandbox.process.exec('docker compose -p demo up -d')
+print(result.result)
+
+# Check running services
+result = sandbox.process.exec('docker compose -p demo ps')
+print(result.result)
+
+# Clean up
+sandbox.process.exec('docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+// Initialize the Daytona client
+const daytona = new Daytona()
+
+// Create a sandbox from a Docker-in-Docker snapshot
+const sandbox = await daytona.create({ snapshot: 'docker-dind' })
+
+// Create a docker-compose.yml file
+const composeContent = `
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+`
+await sandbox.fs.uploadFile(Buffer.from(composeContent), 'docker-compose.yml')
+
+// Start Docker Compose services
+let result = await sandbox.process.executeCommand('docker compose -p demo up -d')
+console.log(result.result)
+
+// Check running services
+result = await sandbox.process.executeCommand('docker compose -p demo ps')
+console.log(result.result)
+
+// Clean up
+await sandbox.process.executeCommand('docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+# Initialize the Daytona client
+daytona = Daytona::Daytona.new
+
+# Create a sandbox from a Docker-in-Docker snapshot
+sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'docker-dind'))
+
+# Create a docker-compose.yml file
+compose_content = <<~YAML
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+YAML
+sandbox.fs.upload_file(compose_content, 'docker-compose.yml')
+
+# Start Docker Compose services
+result = sandbox.process.exec(command: 'docker compose -p demo up -d')
+puts result.result
+
+# Check running services
+result = sandbox.process.exec(command: 'docker compose -p demo ps')
+puts result.result
+
+# Clean up
+sandbox.process.exec(command: 'docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/daytonaio/sdk-go/daytona"
+	"github.com/daytonaio/sdk-go/types"
+)
+
+func main() {
+	ctx := context.Background()
+
+	// Initialize the Daytona client
+	client, _ := daytona.NewDaytona(nil)
+
+	// Create a sandbox from a Docker-in-Docker snapshot
+	sandbox, _ := client.Create(ctx, &types.CreateSandboxFromSnapshotParams{
+		Snapshot: daytona.Ptr("docker-dind"),
+	}, nil)
+
+	// Create a docker-compose.yml file
+	composeContent := `
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+`
+	sandbox.Fs.UploadFile(ctx, []byte(composeContent), "docker-compose.yml")
+
+	// Start Docker Compose services
+	result, _ := sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo up -d", nil)
+	fmt.Println(result.Result)
+
+	// Check running services
+	result, _ = sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo ps", nil)
+	fmt.Println(result.Result)
+
+	// Clean up
+	sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo down", nil)
+}
+```
+
+</TabItem>
+</Tabs>
+
 ## Run Kubernetes in a Sandbox
 
 Daytona Sandboxes can run a Kubernetes cluster inside the sandbox. Kubernetes runs entirely inside the sandbox and is removed when the sandbox is deleted, keeping environments secure and reproducible.
