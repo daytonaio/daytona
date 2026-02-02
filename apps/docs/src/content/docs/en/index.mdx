@@ -26,7 +26,7 @@ Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/e
 
 ## 1. Create an account
 
-Open the [Daytona Dashboard ↗](https://app.daytona.io/) and create your account. Daytona supports account creation using an email and password, or by connecting your Google or GitHub account.
+Open the [Daytona Dashboard ↗](https://app.daytona.io/) to create your account. Daytona supports account creation using an email and password, or by connecting your Google or GitHub account.
 
 ## 2. Obtain an API key
 
@@ -95,6 +95,8 @@ daytona = Daytona(config)
 sandbox = daytona.create()
 ```
 
+For more information, see the [**Python SDK**](/docs/en/python-sdk) reference.
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
 `index.mts`
@@ -112,8 +114,9 @@ const sandbox = await daytona.create({
 });
 ```
 
-</TabItem>
+For more information, see the [**TypeScript SDK**](/docs/en/typescript-sdk) reference.
 
+</TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 `main.rb`
 
@@ -139,8 +142,9 @@ end
 daytona.delete(sandbox)
 ```
 
-</TabItem>
+For more information, see the [**Ruby SDK**](/docs/en/ruby-sdk) reference.
 
+</TabItem>
 <TabItem label="Go" icon="seti:go">
 `main.go`
 
@@ -193,6 +197,21 @@ func main() {
     sandbox.Delete(ctx)
 }
 ```
+
+For more information, see the [**Go SDK**](/docs/en/go-sdk) reference.
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/sandbox \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{}'
+```
+
+For more information, see the [**API Reference**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox).
 
 </TabItem>
 </Tabs>
