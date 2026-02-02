@@ -11,6 +11,7 @@ import { AwsSigv4Signer, AwsSigv4SignerResponse } from '@opensearch-project/open
 import { defaultProvider } from '@aws-sdk/credential-provider-node'
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers'
 import { ClientOptions } from '@opensearch-project/opensearch'
+import { RedisOptions } from 'ioredis'
 
 type Configuration = typeof configuration
 
@@ -157,6 +158,23 @@ export class TypedConfigService {
           rejectUnauthorized: this.get('opensearch.tls.rejectUnauthorized'),
         },
       }
+    }
+  }
+
+  /**
+   * Get the Redis configuration
+   * @param overrides Optional overrides for the Redis configuration
+   * @returns The Redis configuration
+   */
+  getRedisConfig(overrides?: Partial<RedisOptions>): RedisOptions {
+    return {
+      host: this.getOrThrow('redis.host'),
+      port: this.getOrThrow('redis.port'),
+      username: this.get('redis.username'),
+      password: this.get('redis.password'),
+      tls: this.get('redis.tls'),
+      lazyConnect: this.get('skipConnections'),
+      ...overrides,
     }
   }
 }

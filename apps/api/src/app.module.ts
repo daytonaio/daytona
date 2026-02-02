@@ -88,13 +88,7 @@ import { AdminModule } from './admin/admin.module'
           cache: {
             type: 'ioredis',
             ignoreErrors: true,
-            options: {
-              keyPrefix: 'typeorm:',
-              host: configService.get('redis.host'),
-              port: configService.get('redis.port'),
-              tls: configService.get('redis.tls'),
-              lazyConnect: configService.get('skipConnections'),
-            },
+            options: configService.getRedisConfig({ keyPrefix: 'typeorm:' }),
           },
           entitySkipConstructor: true,
         }
@@ -119,33 +113,18 @@ import { AdminModule } from './admin/admin.module'
     }),
     RedisModule.forRootAsync({
       inject: [TypedConfigService],
-      useFactory: (configService: TypedConfigService) => {
-        return {
-          type: 'single',
-          options: {
-            host: configService.getOrThrow('redis.host'),
-            port: configService.getOrThrow('redis.port'),
-            tls: configService.get('redis.tls'),
-            lazyConnect: configService.get('skipConnections'),
-          },
-        }
-      },
+      useFactory: (configService: TypedConfigService) => ({
+        type: 'single',
+        options: configService.getRedisConfig(),
+      }),
     }),
     RedisModule.forRootAsync(
       {
         inject: [TypedConfigService],
-        useFactory: (configService: TypedConfigService) => {
-          return {
-            type: 'single',
-            options: {
-              host: configService.getOrThrow('redis.host'),
-              port: configService.getOrThrow('redis.port'),
-              tls: configService.get('redis.tls'),
-              lazyConnect: configService.get('skipConnections'),
-              db: 1,
-            },
-          }
-        },
+        useFactory: (configService: TypedConfigService) => ({
+          type: 'single',
+          options: configService.getRedisConfig({ db: 1 }),
+        }),
       },
       'throttler',
     ),
