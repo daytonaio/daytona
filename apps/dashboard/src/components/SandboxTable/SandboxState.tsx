@@ -4,7 +4,7 @@
  */
 
 import { SandboxState as SandboxStateType } from '@daytonaio/api-client'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { getStateLabel } from './constants'
 import { STATE_ICONS } from './state-icons'
 
@@ -34,14 +34,12 @@ export function SandboxState({ state, errorReason, recoverable }: SandboxStatePr
     }
 
     return (
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger asChild>{errorContent}</TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-[300px]">{errorReason}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip delayDuration={100}>
+        <TooltipTrigger asChild>{errorContent}</TooltipTrigger>
+        <TooltipContent>
+          <p className="max-w-[300px]">{errorReason}</p>
+        </TooltipContent>
+      </Tooltip>
     )
   }
 

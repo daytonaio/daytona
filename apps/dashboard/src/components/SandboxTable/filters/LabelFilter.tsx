@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Plus, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 
 interface LabelFilterProps {
@@ -81,28 +81,25 @@ export function LabelFilter({ value, onFilterChange }: LabelFilterProps) {
             {labelPairs.map((pair, index) => (
               <div key={index} className="flex items-center gap-2 p-2 bg-muted/50 rounded-sm">
                 <div className="flex-1 flex items-center gap-1 text-sm min-w-0">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="truncate flex-shrink-0 max-w-[50%] rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1 cursor-default">
-                          {pair.key}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-[300px] break-words">{pair.key}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className="truncate flex-1 text-muted-foreground cursor-default">{pair.value}</span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-[300px] break-words">{pair.value}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="truncate flex-shrink-0 max-w-[50%] rounded-sm bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-200 px-1 cursor-default">
+                        {pair.key}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[300px] break-words">{pair.key}</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="truncate flex-1 text-muted-foreground cursor-default">{pair.value}</span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-[300px] break-words">{pair.value}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => removeKeyValuePair(index)}>
                   <Trash2 className="h-3 w-3" />

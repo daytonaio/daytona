@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { getRelativeTimeString } from '@/lib/utils'
+import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -12,10 +14,13 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
-import { Button } from './ui/button'
+import { AlertTriangle, Box, CheckCircle, Loader2, MoreHorizontal, Pause, Timer } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Pause, Box } from 'lucide-react'
+import { Pagination } from './Pagination'
+import { TableEmptyState } from './TableEmptyState'
+import { Badge } from './ui/badge'
+import { Button } from './ui/button'
+import { Checkbox } from './ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,15 +28,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { Pagination } from './Pagination'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { Checkbox } from './ui/checkbox'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { getRelativeTimeString } from '@/lib/utils'
-import { TableEmptyState } from './TableEmptyState'
-import { Loader2 } from 'lucide-react'
-import { Badge } from './ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 interface DataTableProps {
   data: SnapshotDto[]
@@ -351,25 +350,23 @@ const getColumns = ({
         }
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate max-w-[150px]">{firstRegion}</span>
-                  <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
-                    +{remainingCount}
-                  </Badge>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <div className="flex flex-col gap-1">
-                  {regionNames.map((name, idx) => (
-                    <span key={idx}>{name}</span>
-                  ))}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-1.5">
+                <span className="truncate max-w-[150px]">{firstRegion}</span>
+                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                  +{remainingCount}
+                </Badge>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="flex flex-col gap-1">
+                {regionNames.map((name, idx) => (
+                  <span key={idx}>{name}</span>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -393,19 +390,17 @@ const getColumns = ({
           !!snapshot.errorReason
         ) {
           return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className={`flex items-center gap-2 ${color}`}>
-                    {getStateIcon(snapshot.state)}
-                    {getStateLabel(snapshot.state)}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-[300px]">{snapshot.errorReason}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className={`flex items-center gap-2 ${color}`}>
+                  {getStateIcon(snapshot.state)}
+                  {getStateLabel(snapshot.state)}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-[300px]">{snapshot.errorReason}</p>
+              </TooltipContent>
+            </Tooltip>
           )
         }
 
