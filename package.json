@@ -222,6 +222,7 @@
     "@nx/webpack": "21.4.1",
     "@nx/workspace": "21.4.1",
     "@openapitools/openapi-generator-cli": "^2.16.3",
+    "@opencode-ai/plugin": "^1.1.42",
     "@suites/unit": "^3.0.1",
     "@swc-node/register": "~1.9.1",
     "@swc/cli": "0.6.0",

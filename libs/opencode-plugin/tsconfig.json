@@ -1,17 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ],
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "../../",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "types": ["node"],
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "bundler",
-    "module": "ES2022"
-  },
-  "include": [".opencode/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts"]
+    "esModuleInterop": true
+  }
 }

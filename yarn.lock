@@ -8247,6 +8247,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@opencode-ai/plugin@npm:^1.1.42":
+  version: 1.1.42
+  resolution: "@opencode-ai/plugin@npm:1.1.42"
+  dependencies:
+    "@opencode-ai/sdk": "npm:1.1.42"
+    zod: "npm:4.1.8"
+  checksum: 10c0/5fd5a470cf808e0a33d0fd3b2757a9d316046aa8e816c4df98ff3fd710303e25e97dcc5a98369f86473a3b934ed3c926b232c5b8e15c82953dad28941fb73230
+  languageName: node
+  linkType: hard
+
+"@opencode-ai/sdk@npm:1.1.42":
+  version: 1.1.42
+  resolution: "@opencode-ai/sdk@npm:1.1.42"
+  checksum: 10c0/52ece79398a0da896b9e21638531949ffe47e32fda5a5520abbeb7f908732363030e5d5e1092ba29a13af3d438a0a6581c313d94b780dc9d23a1acca417bfee5
+  languageName: node
+  linkType: hard
+
 "@openfeature/core@npm:^1.9.0":
   version: 1.9.0
   resolution: "@openfeature/core@npm:1.9.0"
@@ -19099,6 +19116,7 @@ __metadata:
     "@nx/webpack": "npm:21.4.1"
     "@nx/workspace": "npm:21.4.1"
     "@openapitools/openapi-generator-cli": "npm:^2.16.3"
+    "@opencode-ai/plugin": "npm:^1.1.42"
     "@openfeature/core": "npm:^1.9.0"
     "@openfeature/nestjs-sdk": "npm:^0.2.5"
     "@openfeature/react-sdk": "npm:^1.0.1"
@@ -39290,6 +39308,13 @@ __metadata:
     typescript: ^4.9.4 || ^5.0.2
     zod: ^3
   checksum: 10c0/69375a29b04ac93fcfb7df286984a287c06219b51a0a70f15088baa662378d2078f4f96730f0090713df9172f02fe84ba9767cd2e1fbbc55f7d48b2190d9b0d9
+  languageName: node
+  linkType: hard
+
+"zod@npm:4.1.8":
+  version: 4.1.8
+  resolution: "zod@npm:4.1.8"
+  checksum: 10c0/5eae39da09d7bd0564a30dfd2348811e4e2e7dd15955d8f3444f8e196f35e5422b1482eda234b722fafb0738f4a8b718adb042b860936bfdd2cc19cdbdac8a9a
   languageName: node
   linkType: hard
 
