@@ -70,7 +70,7 @@ daytona ssh openclaw
 Start the onboarding process:
 
 ```bash
-clawdbot onboard
+openclaw onboard
 ```
 
 :::note
@@ -92,12 +92,14 @@ Follow the prompts:
 
 When onboarding finishes, the output will display a **Dashboard ready** section with a dashboard link. Your gateway token is the value after `?token=` in the URL. Save this token - you'll need it to connect to the dashboard.
 
+Also, OpenClaw will ask you to **Install shell completion script?** - choose whatever you prefer, this is optional and doesn't affect functionality.
+
 ### Start the Gateway
 
 Run the gateway in the background:
 
 ```bash
-nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
+nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
 ```
 
 The `&` runs the gateway as a background process, keeping your terminal free for other commands. The `nohup` ensures the gateway keeps running even after you close the SSH connection.
@@ -127,13 +129,13 @@ OpenClaw uses device pairing as a security measure - only approved devices can c
 List pending device requests:
 
 ```bash
-clawdbot devices list
+openclaw devices list
 ```
 
 Approve your device:
 
 ```bash
-clawdbot devices approve REQUEST_ID
+openclaw devices approve REQUEST_ID
 ```
 
 Replace `REQUEST_ID` with the value from the **Request** column.
@@ -175,21 +177,21 @@ Set up a Telegram bot to chat with OpenClaw.
 Enable Telegram and set your bot token:
 
 ```bash
-clawdbot config set channels.telegram.enabled true
-clawdbot config set channels.telegram.botToken YOUR_BOT_TOKEN
+openclaw config set channels.telegram.enabled true
+openclaw config set channels.telegram.botToken YOUR_BOT_TOKEN
 ```
 
 Verify the configuration:
 
 ```bash
-clawdbot config get channels.telegram
+openclaw config get channels.telegram
 ```
 
 #### Restart the Gateway
 
 ```bash
-clawdbot gateway stop
-nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
+openclaw gateway stop
+nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
 ```
 
 #### Complete Verification
@@ -198,7 +200,7 @@ nohup clawdbot gateway run > /tmp/gateway.log 2>&1 &
 2. A pairing code will appear. Approve the pairing request:
 
 ```bash
-clawdbot pairing approve telegram PAIRING_CODE
+openclaw pairing approve telegram PAIRING_CODE
 ```
 
 You can now message your OpenClaw through Telegram.
@@ -212,7 +214,7 @@ Set up WhatsApp to chat with OpenClaw.
 #### Run Configuration
 
 ```bash
-clawdbot config --section channels
+openclaw config --section channels
 ```
 
 When prompted:
