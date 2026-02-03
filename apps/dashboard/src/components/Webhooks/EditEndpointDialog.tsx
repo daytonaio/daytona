@@ -24,15 +24,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Spinner } from '@/components/ui/spinner'
+import { WEBHOOK_EVENT_CATEGORIES, WEBHOOK_EVENTS } from '@/constants/webhook-events'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { WEBHOOK_EVENT_CATEGORIES, WEBHOOK_EVENTS } from '@/constants/webhook-events'
+import { useForm } from '@tanstack/react-form'
 import { ChevronsUpDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
+import { z } from 'zod'
+
+const formSchema = z.object({
+  url: z.string().min(1, 'URL is required').url('Must be a valid URL'),
+  description: z.string().optional(),
+  filterTypes: z.array(z.string()),
+})
+
+type FormValues = z.infer<typeof formSchema>
 
 interface EditEndpointDialogProps {
   endpoint: EndpointOut | null
@@ -43,55 +55,65 @@ interface EditEndpointDialogProps {
 
 export const EditEndpointDialog: React.FC<EditEndpointDialogProps> = ({ endpoint, open, onOpenChange, onSuccess }) => {
   const [eventsPopoverOpen, setEventsPopoverOpen] = useState(false)
-  const [url, setUrl] = useState('')
-  const [description, setDescription] = useState('')
-  const [eventTypes, setEventTypes] = useState<string[]>([])
 
   const updateMutation = useUpdateWebhookEndpointMutation()
 
+  const form = useForm({
+    defaultValues: {
+      url: '',
+      description: '',
+      filterTypes: [],
+    } as FormValues,
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      if (!endpoint) return
+
+      try {
+        await updateMutation.mutateAsync({
+          endpointId: endpoint.id,
+          update: {
+            url: value.url.trim(),
+            description: value.description?.trim() || undefined,
+            filterTypes: value.filterTypes.length > 0 ? value.filterTypes : undefined,
+          },
+        })
+        toast.success('Endpoint updated')
+        onSuccess()
+        onOpenChange(false)
+      } catch (error) {
+        handleApiError(error, 'Failed to update endpoint')
+      }
+    },
+  })
+
   useEffect(() => {
     if (endpoint && open) {
-      setUrl(endpoint.url)
-      setDescription(endpoint.description || '')
-      setEventTypes(endpoint.filterTypes || [])
-    }
-  }, [endpoint, open])
-
-  const handleUpdateEndpoint = async () => {
-    if (!url.trim() || !endpoint) {
-      return
-    }
-
-    try {
-      await updateMutation.mutateAsync({
-        endpointId: endpoint.id,
-        update: {
-          url: url.trim(),
-          description: description.trim() || undefined,
-          filterTypes: eventTypes.length > 0 ? eventTypes : undefined,
-        },
+      form.reset({
+        url: endpoint.url,
+        description: endpoint.description || '',
+        filterTypes: endpoint.filterTypes || [],
       })
-      onSuccess()
-      onOpenChange(false)
-    } catch (error) {
-      handleApiError(error, 'Failed to update endpoint')
     }
-  }
-
-  const toggleEvent = (eventValue: string) => {
-    if (eventTypes.includes(eventValue)) {
-      setEventTypes(eventTypes.filter((e) => e !== eventValue))
-    } else {
-      setEventTypes([...eventTypes, eventValue])
-    }
-  }
+  }, [endpoint, open, form])
 
   const handleOpenChange = (isOpen: boolean) => {
     onOpenChange(isOpen)
     if (!isOpen) {
-      setUrl('')
-      setDescription('')
-      setEventTypes([])
+      form.reset()
+    }
+  }
+
+  const toggleEvent = (eventValue: string) => {
+    const currentEvents = form.getFieldValue('filterTypes')
+    if (currentEvents.includes(eventValue)) {
+      form.setFieldValue(
+        'filterTypes',
+        currentEvents.filter((e) => e !== eventValue),
+      )
+    } else {
+      form.setFieldValue('filterTypes', [...currentEvents, eventValue])
     }
   }
 
@@ -105,92 +127,130 @@ export const EditEndpointDialog: React.FC<EditEndpointDialogProps> = ({ endpoint
         <form
           id="edit-endpoint-form"
           className="space-y-6 overflow-y-auto px-1 pb-1"
-          onSubmit={async (e) => {
+          onSubmit={(e) => {
             e.preventDefault()
-            await handleUpdateEndpoint()
+            e.stopPropagation()
+            form.handleSubmit()
           }}
         >
-          <div className="space-y-3">
-            <Label htmlFor="endpoint-name">Endpoint Name</Label>
-            <Input
-              id="endpoint-name"
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="My Webhook Endpoint"
-            />
-          </div>
-          <div className="space-y-3">
-            <Label htmlFor="endpoint-url">Endpoint URL</Label>
-            <Input
-              id="endpoint-url"
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://example.com/webhook"
-            />
-          </div>
-          <div className="space-y-3">
-            <Label>Events</Label>
-            <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={eventsPopoverOpen}
-                  className="w-full justify-between h-auto min-h-10"
-                >
-                  <div className="flex flex-wrap gap-1">
-                    {eventTypes.length === 0 ? (
-                      <span className="text-muted-foreground">Select events...</span>
-                    ) : eventTypes.length > 2 ? (
-                      <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                        {eventTypes.length} events selected
-                      </Badge>
-                    ) : (
-                      eventTypes.map((event) => (
-                        <Badge key={event} variant="secondary" className="rounded-sm px-1 font-normal">
-                          {WEBHOOK_EVENTS.find((e) => e.value === event)?.label || event}
-                        </Badge>
-                      ))
-                    )}
-                  </div>
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[400px] p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Search events..." />
-                  <CommandList>
-                    <CommandEmpty>No events found.</CommandEmpty>
-                    {WEBHOOK_EVENT_CATEGORIES.map((category) => (
-                      <CommandGroup key={category} heading={category}>
-                        {WEBHOOK_EVENTS.filter((event) => event.category === category).map((event) => (
-                          <CommandCheckboxItem
-                            key={event.value}
-                            checked={eventTypes.includes(event.value)}
-                            onSelect={() => toggleEvent(event.value)}
-                          >
-                            {event.label}
-                          </CommandCheckboxItem>
-                        ))}
-                      </CommandGroup>
-                    ))}
-                    {eventTypes.length > 0 && (
-                      <>
-                        <CommandSeparator />
-                        <CommandGroup>
-                          <CommandItem onSelect={() => setEventTypes([])} className="justify-center text-center">
-                            Clear selection
-                          </CommandItem>
-                        </CommandGroup>
-                      </>
-                    )}
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+          <form.Field name="description">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Endpoint Name</FieldLabel>
+                  <Input
+                    aria-invalid={isInvalid}
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="My Webhook Endpoint"
+                  />
+                  {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              )
+            }}
+          </form.Field>
+
+          <form.Field name="url">
+            {(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>Endpoint URL</FieldLabel>
+                  <Input
+                    aria-invalid={isInvalid}
+                    id={field.name}
+                    name={field.name}
+                    type="url"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="https://example.com/webhook"
+                  />
+                  {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
+                </Field>
+              )
+            }}
+          </form.Field>
+
+          <form.Field name="filterTypes">
+            {(field) => {
+              const selectedEvents = field.state.value
+              return (
+                <Field>
+                  <FieldLabel>Events</FieldLabel>
+                  <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={eventsPopoverOpen}
+                        className="w-full justify-between h-auto min-h-10"
+                      >
+                        <div className="flex flex-wrap gap-1">
+                          {selectedEvents.length === 0 ? (
+                            <span className="text-muted-foreground">Select events...</span>
+                          ) : selectedEvents.length > 2 ? (
+                            <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+                              {selectedEvents.length} events selected
+                            </Badge>
+                          ) : (
+                            selectedEvents.map((event) => (
+                              <Badge key={event} variant="secondary" className="rounded-sm px-1 font-normal">
+                                {WEBHOOK_EVENTS.find((e) => e.value === event)?.label || event}
+                              </Badge>
+                            ))
+                          )}
+                        </div>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[400px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Search events..." />
+                        <CommandList>
+                          <CommandEmpty>No events found.</CommandEmpty>
+                          {WEBHOOK_EVENT_CATEGORIES.map((category) => (
+                            <CommandGroup key={category} heading={category}>
+                              {WEBHOOK_EVENTS.filter((event) => event.category === category).map((event) => (
+                                <CommandCheckboxItem
+                                  key={event.value}
+                                  checked={selectedEvents.includes(event.value)}
+                                  onSelect={() => toggleEvent(event.value)}
+                                >
+                                  {event.label}
+                                </CommandCheckboxItem>
+                              ))}
+                            </CommandGroup>
+                          ))}
+                          {selectedEvents.length > 0 && (
+                            <>
+                              <CommandSeparator />
+                              <CommandGroup>
+                                <CommandItem
+                                  onSelect={() => field.handleChange([])}
+                                  className="justify-center text-center"
+                                >
+                                  Clear selection
+                                </CommandItem>
+                              </CommandGroup>
+                            </>
+                          )}
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </Field>
+              )
+            }}
+          </form.Field>
         </form>
         <DialogFooter>
           <DialogClose asChild>
@@ -198,15 +258,15 @@ export const EditEndpointDialog: React.FC<EditEndpointDialogProps> = ({ endpoint
               Cancel
             </Button>
           </DialogClose>
-          {updateMutation.isPending ? (
-            <Button type="button" variant="default" disabled>
-              Saving...
-            </Button>
-          ) : (
-            <Button type="submit" form="edit-endpoint-form" variant="default" disabled={!url.trim()}>
-              Save
-            </Button>
-          )}
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button type="submit" form="edit-endpoint-form" variant="default" disabled={!canSubmit || isSubmitting}>
+                {isSubmitting && <Spinner />}
+                Save
+              </Button>
+            )}
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>
