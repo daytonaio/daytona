@@ -8,8 +8,14 @@ import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 @ApiSchema({ name: 'WebhookAppPortalAccess' })
 export class WebhookAppPortalAccessDto {
   @ApiProperty({
+    description: 'The authentication token for the Svix consumer app portal',
+    example: 'appsk_...',
+  })
+  token: string
+
+  @ApiProperty({
     description: 'The URL to the webhook app portal',
-    example: 'https://app.svix.com/app_1234567890',
+    example: 'https://app.svix.com/login#key=...',
   })
   url: string
 }
