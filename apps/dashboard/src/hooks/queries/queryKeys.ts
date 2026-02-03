@@ -15,7 +15,8 @@ export const queryKeys = {
   },
   webhooks: {
     all: ['webhooks'] as const,
-    token: (organizationId: string) => [...queryKeys.webhooks.all, organizationId, 'token'] as const,
+    appPortalAccess: (organizationId: string) =>
+      [...queryKeys.webhooks.all, organizationId, 'app-portal-access'] as const,
     initializationStatus: (organizationId: string) =>
       [...queryKeys.webhooks.all, organizationId, 'initialization-status'] as const,
   },
