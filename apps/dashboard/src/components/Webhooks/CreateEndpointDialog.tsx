@@ -28,19 +28,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { WEBHOOK_EVENT_CATEGORIES, WEBHOOK_EVENTS } from '@/constants/webhook-events'
 import { ChevronsUpDown, Plus } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNewEndpoint } from 'svix-react'
-
-const AVAILABLE_EVENTS = [
-  { value: 'sandbox.created', label: 'Sandbox Created', category: 'Sandbox' },
-  { value: 'sandbox.state.updated', label: 'Sandbox State Updated', category: 'Sandbox' },
-  { value: 'snapshot.created', label: 'Snapshot Created', category: 'Snapshot' },
-  { value: 'snapshot.removed', label: 'Snapshot Removed', category: 'Snapshot' },
-  { value: 'snapshot.state.updated', label: 'Snapshot State Updated', category: 'Snapshot' },
-  { value: 'volume.created', label: 'Volume Created', category: 'Volume' },
-  { value: 'volume.state.updated', label: 'Volume State Updated', category: 'Volume' },
-]
 
 interface CreateEndpointDialogProps {
   onSuccess: () => void
@@ -159,7 +150,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                     ) : (
                       selectedEvents.map((event) => (
                         <Badge key={event} variant="secondary" className="rounded-sm px-1 font-normal">
-                          {AVAILABLE_EVENTS.find((e) => e.value === event)?.label || event}
+                          {WEBHOOK_EVENTS.find((e) => e.value === event)?.label || event}
                         </Badge>
                       ))
                     )}
@@ -172,9 +163,9 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                   <CommandInput placeholder="Search events..." />
                   <CommandList>
                     <CommandEmpty>No events found.</CommandEmpty>
-                    {['Sandbox', 'Snapshot', 'Volume'].map((category) => (
+                    {WEBHOOK_EVENT_CATEGORIES.map((category) => (
                       <CommandGroup key={category} heading={category}>
-                        {AVAILABLE_EVENTS.filter((event) => event.category === category).map((event) => (
+                        {WEBHOOK_EVENTS.filter((event) => event.category === category).map((event) => (
                           <CommandCheckboxItem
                             key={event.value}
                             checked={selectedEvents.includes(event.value)}
