@@ -85,6 +85,12 @@ import { AdminModule } from './admin/admin.module'
                 rejectUnauthorized: configService.get('database.tls.rejectUnauthorized'),
               }
             : undefined,
+          extra: {
+            max: configService.get('database.pool.max'),
+            min: configService.get('database.pool.min'),
+            idleTimeoutMillis: configService.get('database.pool.idleTimeoutMillis'),
+            connectionTimeoutMillis: configService.get('database.pool.connectionTimeoutMillis'),
+          },
           cache: {
             type: 'ioredis',
             ignoreErrors: true,
