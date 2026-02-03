@@ -66,6 +66,7 @@ export default function DocSearchSidepanel() {
         .DocSearch-Menu-item, .DocSearch-Menu-item:hover, .DocSearch-Menu-content open {background-color: var(--bg-color);}
         .DocSearch-Markdown-Content li {color: var(--secondary-text-color);}
         .DocSearch-AskAiScreen-RelatedSources-Item-Link, .DocSearch-AskAiScreen-RelatedSources-Item-Link:hover {background-color: var(--block-bg-color); color: var(--secondary-text-color);}
+        .DocSearch-Hit-icon-sparkles, .DocSearch-Sidepanel-Header-TitleIcon {color: var(--primary-text-color);}
       `}</style>
       <Sidepanel {...(sidepanelProps as any)} />
     </>
