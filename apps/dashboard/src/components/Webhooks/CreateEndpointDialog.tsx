@@ -11,9 +11,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command'
 import {
   Dialog,
@@ -179,7 +177,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
               return (
                 <Field>
                   <FieldLabel>Events</FieldLabel>
-                  <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen}>
+                  <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen} modal>
                     <PopoverTrigger asChild>
                       <Button
                         variant="outline"
@@ -205,7 +203,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[400px] p-0" align="start">
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
                       <Command>
                         <CommandInput placeholder="Search events..." />
                         <CommandList>
@@ -223,19 +221,6 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                               ))}
                             </CommandGroup>
                           ))}
-                          {selectedEvents.length > 0 && (
-                            <>
-                              <CommandSeparator />
-                              <CommandGroup>
-                                <CommandItem
-                                  onSelect={() => field.handleChange([])}
-                                  className="justify-center text-center"
-                                >
-                                  Clear selection
-                                </CommandItem>
-                              </CommandGroup>
-                            </>
-                          )}
                         </CommandList>
                       </Command>
                     </PopoverContent>
