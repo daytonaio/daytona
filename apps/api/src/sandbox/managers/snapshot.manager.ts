@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, LessThan, Not, Repository } from 'typeorm'
+import { In, LessThan, Like, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -1142,5 +1142,32 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   })
   private async handleSnapshotCreatedEvent(event: SnapshotCreatedEvent) {
     await this.syncSnapshotState(event.snapshot.id)
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-error-daytona-snapshot-runners' })
+  async cleanupErrorDaytonaSnapshotRunners(): Promise<void> {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
+
+    try {
+      const errorSnapshotRunners = await this.snapshotRunnerRepository.find({
+        where: {
+          state: SnapshotRunnerState.ERROR,
+          snapshotRef: Like('daytona-%'),
+          updatedAt: LessThan(thirtyMinutesAgo),
+        },
+        take: 100,
+      })
+
+      if (errorSnapshotRunners.length === 0) {
+        return
+      }
+
+      const ids = errorSnapshotRunners.map((sr) => sr.id)
+      await this.snapshotRunnerRepository.delete(ids)
+
+      this.logger.log(`Cleaned up ${errorSnapshotRunners.length} error snapshot_runner entries with "daytona-" prefix`)
+    } catch (error) {
+      this.logger.error(`Error cleaning up error daytona snapshot runners: ${error.message}`, error.stack)
+    }
   }
 }
