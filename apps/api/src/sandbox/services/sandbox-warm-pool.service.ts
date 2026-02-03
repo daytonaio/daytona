@@ -108,18 +108,14 @@ export class SandboxWarmPoolService {
       },
     })
     if (warmPoolItem) {
-      const availabilityScoreThreshold = this.configService.get<number>('runnerScore.thresholds.availability')
+      const availabilityScoreThreshold = this.configService.getOrThrow<number>('runnerScore.thresholds.availability')
 
       // Build subquery to find excluded runners (unschedulable OR low score)
       const excludedRunnersSubquery = this.runnerRepository
         .createQueryBuilder('runner')
         .select('runner.id')
         .where('runner.region = :region')
-        .andWhere(
-          availabilityScoreThreshold !== undefined
-            ? '(runner.unschedulable = true OR runner.availabilityScore < :scoreThreshold)'
-            : 'runner.unschedulable = true',
-        )
+        .andWhere('(runner.unschedulable = true OR runner.availabilityScore < :scoreThreshold)')
 
       const queryBuilder = this.sandboxRepository
         .createQueryBuilder('sandbox')
@@ -138,10 +134,11 @@ export class SandboxWarmPoolService {
         .andWhere(`sandbox.runnerId NOT IN (${excludedRunnersSubquery.getQuery()})`)
         .setParameters({
           region: warmPoolItem.target,
-          ...(availabilityScoreThreshold !== undefined && { scoreThreshold: availabilityScoreThreshold }),
+          scoreThreshold: availabilityScoreThreshold,
         })
 
-      const warmPoolSandboxes = await queryBuilder.orderBy('RANDOM()').take(300).getMany()
+      const candidateLimit = this.configService.getOrThrow<number>('warmPool.candidateLimit')
+      const warmPoolSandboxes = await queryBuilder.orderBy('RANDOM()').take(candidateLimit).getMany()
 
       //  make sure we only release warm pool sandbox once
       let warmPoolSandbox: Sandbox | null = null
