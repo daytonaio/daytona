@@ -28,18 +28,16 @@
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
-          "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json",
           "astro build",
           "node ./tools/update-search.js",
           "node ./tools/update-llms.js"
         ],
         "parallel": false
       },
-      "dependsOn": ["api:openapi"],
+      "dependsOn": ["api:openapi", "copy-toolbox-openapi"],
       "configurations": {
         "production": {
           "commands": [
-            "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json",
             "astro build --prod",
             "node ./tools/update-search.js",
             "node ./tools/update-llms.js"
@@ -75,6 +73,16 @@
         "command": "node ./update-api-reference.js"
       },
       "dependsOn": ["api:openapi"]
+    },
+    "copy-toolbox-openapi": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "outputs": ["{projectRoot}/public/toolbox-openapi.json"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json"
+      }
     },
     "check-version-env": {},
     "docker": {
