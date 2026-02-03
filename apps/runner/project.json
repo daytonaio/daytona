@@ -11,7 +11,7 @@
         "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
       },
       "cache": true,
-      "inputs": ["{workspaceRoot}/dist/apps/daemon-amd64"],
+      "inputs": [{ "dependentTasksOutputFiles": "**/*" }],
       "outputs": ["{projectRoot}/pkg/daemon/static/daemon-amd64"],
       "dependsOn": [
         {
