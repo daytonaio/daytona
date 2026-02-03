@@ -75,6 +75,12 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import {
+  SANDBOX_LOOKUP_CACHE_TTL_MS,
+  sandboxLookupCacheKeyById,
+  sandboxLookupCacheKeyByName,
+} from '../utils/sandbox-lookup-cache.util'
+import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -107,7 +113,39 @@ export class SandboxService {
     @InjectRedis() private readonly redis: Redis,
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
+    private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
   ) {}
+
+  /**
+   * Central place for Sandbox partial updates that also invalidates lookup cache.
+   */
+  async updateById(
+    sandboxId: string,
+    patch: Partial<Omit<Sandbox, 'id' | 'createdAt' | 'updatedAt'>>,
+    sandboxInfo?: Pick<Sandbox, 'id' | 'name' | 'organizationId'>,
+  ): Promise<void> {
+    const result = await this.sandboxRepository.update(sandboxId, patch)
+    if (!result.affected) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+
+    // Best-effort cache invalidation (only when sandboxInfo is provided)
+    if (!sandboxInfo) {
+      return
+    }
+
+    const nextOrganizationId =
+      typeof patch.organizationId === 'string' ? patch.organizationId : sandboxInfo.organizationId
+    const nextName = typeof patch.name === 'string' ? patch.name : sandboxInfo.name
+
+    this.sandboxLookupCacheInvalidationService.invalidate({
+      sandboxId: sandboxInfo.id,
+      organizationId: nextOrganizationId,
+      name: nextName,
+      previousOrganizationId: sandboxInfo.organizationId,
+      previousName: sandboxInfo.name,
+    })
+  }
 
   protected getLockKey(id: string): string {
     return `sandbox:${id}:state-change`
@@ -926,26 +964,39 @@ export class SandboxService {
 
   async findOneByIdOrName(
     sandboxIdOrName: string,
-    organizationId?: string,
+    organizationId: string,
     returnDestroyed?: boolean,
   ): Promise<Sandbox> {
+    const stateFilter = returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }
+    const relations: ['buildInfo'] = ['buildInfo']
+
+    // Try lookup by ID first
     let sandbox = await this.sandboxRepository.findOne({
       where: {
         id: sandboxIdOrName,
-        ...(organizationId ? { organizationId: organizationId } : {}),
-        ...(returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }),
+        organizationId,
+        ...stateFilter,
       },
-      relations: ['buildInfo'],
+      relations,
+      cache: {
+        id: sandboxLookupCacheKeyById({ organizationId, returnDestroyed, sandboxId: sandboxIdOrName }),
+        milliseconds: SANDBOX_LOOKUP_CACHE_TTL_MS,
+      },
     })
 
-    if (!sandbox && organizationId) {
+    // Fallback to lookup by name
+    if (!sandbox) {
       sandbox = await this.sandboxRepository.findOne({
         where: {
           name: sandboxIdOrName,
-          organizationId: organizationId,
-          ...(returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }),
+          organizationId,
+          ...stateFilter,
         },
-        relations: ['buildInfo'],
+        relations,
+        cache: {
+          id: sandboxLookupCacheKeyByName({ organizationId, returnDestroyed, sandboxName: sandboxIdOrName }),
+          milliseconds: SANDBOX_LOOKUP_CACHE_TTL_MS,
+        },
       })
     }
 
@@ -1545,11 +1596,7 @@ export class SandboxService {
       return
     }
 
-    const result = await this.sandboxRepository.update({ id: sandboxId }, { lastActivityAt })
-
-    if (!result.affected) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+    await this.updateById(sandboxId, { lastActivityAt })
   }
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {
@@ -1564,8 +1611,8 @@ export class SandboxService {
     return this.configService.getOrThrow('proxy.toolboxUrl')
   }
 
-  async getBuildLogsUrl(sandboxIdOrName: string): Promise<string> {
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName)
+  async getBuildLogsUrl(sandboxIdOrName: string, organizationId: string): Promise<string> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (!sandbox.buildInfo?.snapshotRef) {
       throw new NotFoundException(`Sandbox ${sandboxIdOrName} has no build info`)
@@ -1990,9 +2037,6 @@ export class SandboxService {
       updateData.runnerId = sandboxToUpdate.runnerId
     }
 
-    const updateResult = await this.sandboxRepository.update(sandboxId, updateData)
-    if (!updateResult.affected) {
-      throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
-    }
+    await this.updateById(sandboxId, updateData, sandboxToUpdate)
   }
 }

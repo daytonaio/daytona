@@ -27,6 +27,7 @@ import { Organization } from '../../../organization/entities/organization.entity
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import { SandboxService } from '../../services/sandbox.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -36,6 +37,7 @@ export class SandboxStartAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxService: SandboxService,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
@@ -391,10 +393,14 @@ export class SandboxStartAction extends SandboxAction {
         sandbox.prevRunnerId = originalRunnerId
         sandbox.runnerId = null
 
-        await this.sandboxRepository.update(sandbox.id, {
-          prevRunnerId: originalRunnerId,
-          runnerId: null,
-        })
+        await this.sandboxService.updateById(
+          sandbox.id,
+          {
+            prevRunnerId: originalRunnerId,
+            runnerId: null,
+          },
+          sandbox,
+        )
       }
 
       // If the sandbox is on a runner and its backupState is COMPLETED
@@ -409,10 +415,14 @@ export class SandboxStartAction extends SandboxAction {
 
           //  temp workaround to move sandboxes to less used runner
           if (lessUsedRunners.length > 0) {
-            await this.sandboxRepository.update(sandbox.id, {
-              runnerId: null,
-              prevRunnerId: originalRunnerId,
-            })
+            await this.sandboxService.updateById(
+              sandbox.id,
+              {
+                runnerId: null,
+                prevRunnerId: originalRunnerId,
+              },
+              sandbox,
+            )
             try {
               const runnerAdapter = await this.runnerAdapterFactory.create(runner)
               await runnerAdapter.removeDestroyedSandbox(sandbox.id)
@@ -816,9 +826,7 @@ export class SandboxStartAction extends SandboxAction {
     if (!runner) {
       this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
 
-      await this.sandboxRepository.update(sandbox.id, {
-        prevRunnerId: null,
-      })
+      await this.sandboxService.updateById(sandbox.id, { prevRunnerId: null }, sandbox)
       return
     }
 
@@ -849,9 +857,7 @@ export class SandboxStartAction extends SandboxAction {
       // Finally remove the destroyed sandbox
       await runnerAdapter.removeDestroyedSandbox(sandbox.id)
 
-      await this.sandboxRepository.update(sandbox.id, {
-        prevRunnerId: null,
-      })
+      await this.sandboxService.updateById(sandbox.id, { prevRunnerId: null }, sandbox)
     } catch (error) {
       this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
     }
