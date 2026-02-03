@@ -249,33 +249,35 @@ sandbox = daytona.create(
 package main
 
 import (
-"context"
-"log"
+	"context"
+	"log"
 
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
-client, err := daytona.NewClient()
-if err != nil {
-    log.Fatal(err)
-}
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-ctx := context.Background()
+	ctx := context.Background()
 
-// Create a sandbox
-params := types.SnapshotParams{
-    SandboxBaseParams: types.SandboxBaseParams{
-        Language: types.CodeLanguagePython,
-    },
-}
-sandbox, err := client.Create(ctx, params)
-if err != nil {
-    log.Fatal(err)
-}
+	// Create a sandbox with custom resources
+	sandbox, err := client.Create(ctx, types.ImageParams{
+		Image: "python:3.11",
+		Resources: &types.Resources{
+			CPU:    2,    // 2 CPU cores
+			Memory: 4096, // 4GB RAM
+			Disk:   8192, // 8GB disk space
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
-log.Printf("Created sandbox: %s\n", sandbox.ID)
+	log.Printf("Created sandbox: %s\n", sandbox.ID)
 }
 ```
 
@@ -464,33 +466,33 @@ sandbox.start
 package main
 
 import (
-"context"
-"log"
+	"context"
+	"log"
 
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
 func main() {
-client, err := daytona.NewClient()
-if err != nil {
-    log.Fatal(err)
-}
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-ctx := context.Background()
+	ctx := context.Background()
 
-// Create a sandbox
-params := types.SnapshotParams{
-    SandboxBaseParams: types.SandboxBaseParams{
-        Language: types.CodeLanguagePython,
-    },
-}
-sandbox, err := client.Create(ctx, params)
-if err != nil {
-    log.Fatal(err)
-}
+	// Get a sandbox by ID
+	sandbox, err := client.Get(ctx, "my-sandbox-id")
+	if err != nil {
+		log.Fatal(err)
+	}
 
-log.Printf("Created sandbox: %s\n", sandbox.ID)
+	// Start sandbox
+	err = sandbox.Start(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("Sandbox started successfully")
 }
 ```
 
@@ -567,16 +569,16 @@ console.log(sandbox.state)
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Get sandbox ID
-sandbox_id = sandbox.id
+# List all sandboxes
+result = daytona.list
 
-# Get the root directory of the sandbox user
-root_dir = sandbox.get_user_root_dir
+# Iterate through results
+result.items.each do |sandbox|
+  puts "Sandbox: #{sandbox.id} (state: #{sandbox.state})"
+end
 
-# Get the sandbox id, auto-stop interval and state
-puts sandbox.id
-puts sandbox.auto_stop_interval
-puts sandbox.state
+# List sandboxes with labels filter
+result = daytona.list({ 'env' => 'dev' })
 ```
 
 </TabItem>
@@ -586,33 +588,31 @@ puts sandbox.state
 package main
 
 import (
-"context"
-"log"
+	"context"
+	"fmt"
+	"log"
 
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
 func main() {
-client, err := daytona.NewClient()
-if err != nil {
-    log.Fatal(err)
-}
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-ctx := context.Background()
+	ctx := context.Background()
 
-// Create a sandbox
-params := types.SnapshotParams{
-    SandboxBaseParams: types.SandboxBaseParams{
-        Language: types.CodeLanguagePython,
-    },
-}
-sandbox, err := client.Create(ctx, params)
-if err != nil {
-    log.Fatal(err)
-}
+	// List all sandboxes
+	result, err := client.List(ctx, nil, nil, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-log.Printf("Created sandbox: %s\n", sandbox.ID)
+	// Iterate through results
+	for _, sandbox := range result.Items {
+		fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
+	}
 }
 ```
 
