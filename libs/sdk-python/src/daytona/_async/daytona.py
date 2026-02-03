@@ -401,7 +401,8 @@ class AsyncDaytona:
         volumes = []
         if params.volumes:
             volumes = [
-                SandboxVolume(volume_id=volume.volume_id, mount_path=volume.mount_path) for volume in params.volumes
+                SandboxVolume(volume_id=volume.volume_id, mount_path=volume.mount_path, subpath=volume.subpath)
+                for volume in params.volumes
             ]
 
         # Create sandbox using dictionary
