@@ -21,10 +21,11 @@ const configuration = {
       rejectUnauthorized: process.env.DB_TLS_REJECT_UNAUTHORIZED !== 'false',
     },
     pool: {
-      max: parseInt(process.env.DB_POOL_MAX || '10', 10),
-      min: parseInt(process.env.DB_POOL_MIN || '2', 10),
-      idleTimeoutMillis: parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS || '30000', 10),
-      connectionTimeoutMillis: parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS || '5000', 10),
+      max: process.env.DB_POOL_MAX && parseInt(process.env.DB_POOL_MAX, 10),
+      min: process.env.DB_POOL_MIN && parseInt(process.env.DB_POOL_MIN, 10),
+      idleTimeoutMillis: process.env.DB_POOL_IDLE_TIMEOUT_MS && parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS, 10),
+      connectionTimeoutMillis:
+        process.env.DB_POOL_CONNECTION_TIMEOUT_MS && parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS, 10),
     },
   },
   redis: {
