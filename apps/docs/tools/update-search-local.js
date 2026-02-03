@@ -64,6 +64,7 @@ function processContent(content) {
 }
 
 function extractSentences(text) {
+  // Return text
   const match = text.match(/[^.!?]*[.!?]/g)
   const sentences = match ? match.map(m => m.trim()) : text.trim().split('\n')
   return sentences.length > 0
@@ -127,6 +128,7 @@ function extractCodeSnippets(content) {
 }
 
 function extractHeadings(content, tag, slug) {
+  // First, temporarily replace code blocks with placeholders to avoid matching # inside code
   const codeBlockRegex = /```[\s\S]*?```/g
   const codeBlocks = []
   let codeBlockIndex = 0
@@ -137,11 +139,13 @@ function extractHeadings(content, tag, slug) {
     return placeholder
   })
 
+  // Extract headings from content without code blocks
   const headingRegex = /^(#{1,6})\s+(.+)$/gm
   const headings = []
   const headingMatches = []
   let match
 
+  // Collect all heading positions from content WITHOUT code blocks -> we use them later to restore code blocks
   while ((match = headingRegex.exec(contentWithoutCode)) !== null) {
     headingMatches.push({
       title: match[2].trim().replace(/\\_/g, '_'),
@@ -150,14 +154,17 @@ function extractHeadings(content, tag, slug) {
     })
   }
 
+  // Process each heading content
   for (let i = 0; i < headingMatches.length; i++) {
     const current = headingMatches[i]
     const next = headingMatches[i + 1]
 
+    // Content below current heading and the next heading (or end)
     const startIndex = current.index + current.length
     const endIndex = next ? next.index : contentWithoutCode.length
     let currentTextBelow = contentWithoutCode.substring(startIndex, endIndex)
 
+    // Restore code blocks
     currentTextBelow = currentTextBelow.replace(
       /___CODE_BLOCK_(\d+)___/g,
       (match, index) => codeBlocks[parseInt(index)]
@@ -224,6 +231,7 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
     const specContent = fs.readFileSync(specPath, 'utf8')
     const spec = JSON.parse(specContent)
 
+    // Handle both OpenAPI 3.x and Swagger 2.0
     const paths = spec.paths || {}
     const urlPrefix = baseUrl || '/docs/tools/api'
 
@@ -249,6 +257,7 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
         const description = operation.description || ''
         const tags = Array.isArray(operation.tags) ? operation.tags : []
 
+        // Extract parameter descriptions
         const parameters = (operation.parameters || [])
           .map(param => {
             const paramDesc = param.description || ''
@@ -259,6 +268,7 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
           .filter(Boolean)
           .join('; ')
 
+        // Extract response descriptions
         const responseDescriptions = Object.entries(operation.responses || {})
           .map(([code, response]) => {
             const respDesc =
@@ -269,6 +279,7 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
           .filter(Boolean)
           .join('; ')
 
+        // Build searchable content
         const searchableContent = [
           summary,
           description,
@@ -282,22 +293,28 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
           .filter(Boolean)
           .join(' ')
 
+        // Create title (e.g., "GET /api/sandboxes - Create sandbox")
         const title = `${method.toUpperCase()} ${path}${summary ? ` - ${summary}` : ''}`
 
+        // Build description from available fields
         const recordDescription =
           description ||
           summary ||
           `${method.toUpperCase()} endpoint for ${path}`
 
+        // Create slug for linking
         const slug = `${path}${operationId ? `#${operationId}` : ''}`
 
+        // Use first tag for URL, or fallback to path-based tag
         const primaryTag =
           tags.length > 0
             ? tags[0]
             : path.split('/').filter(Boolean)[0] || 'default'
 
+        // For toolbox API, use 'daytona-toolbox' in the URL hash
         const hashApiName = apiName === 'toolbox' ? 'daytona-toolbox' : apiName
 
+        // Format URL to match the hash format: #apiName/tag/tagName/METHOD/path
         const scalarHash = `${hashApiName}/tag/${primaryTag}/${method.toUpperCase()}${path}`
 
         records.push({
@@ -343,13 +360,15 @@ function searchDocs() {
             if (SDK_FOLDER_NAMES.includes(directoryName)) return
             break
           case 'SDK':
+            // For SDK we traverse all subfolders inside given initial SDK directory
             break
         }
+        // Traverse directory if we passed the checks
         traverseDirectory(fullPath, tag, recordsData)
       } else if (
         stat.isFile() &&
         (file.endsWith('.md') || file.endsWith('.mdx')) &&
-        ![...EXCLUDE_FILES, path.basename(CLI_FILE_PATH)].includes(file)
+        ![...EXCLUDE_FILES, path.basename(CLI_FILE_PATH)].includes(file) // CLI file is handled separately -> exclude it from directory traversals
       ) {
         parseMarkdownFile(fullPath, tag).forEach(data =>
           recordsData.push({
