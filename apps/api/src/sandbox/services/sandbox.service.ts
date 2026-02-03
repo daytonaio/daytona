@@ -120,36 +120,29 @@ export class SandboxService {
    */
   async updateById(
     sandboxId: string,
-    patch: Partial<Sandbox>,
+    patch: Partial<Omit<Sandbox, 'id' | 'createdAt' | 'updatedAt'>>,
     sandboxInfo?: Pick<Sandbox, 'id' | 'name' | 'organizationId'>,
   ): Promise<void> {
-    const previous =
-      sandboxInfo ??
-      (await this.sandboxRepository.findOne({
-        where: { id: sandboxId },
-        select: ['id', 'name', 'organizationId'],
-        loadEagerRelations: false,
-      }))
-
     const result = await this.sandboxRepository.update(sandboxId, patch)
     if (!result.affected) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    // Best-effort cache invalidation
-    if (!previous) {
+    // Best-effort cache invalidation (only when sandboxInfo is provided)
+    if (!sandboxInfo) {
       return
     }
 
-    const nextOrganizationId = typeof patch.organizationId === 'string' ? patch.organizationId : previous.organizationId
-    const nextName = typeof patch.name === 'string' ? patch.name : previous.name
+    const nextOrganizationId =
+      typeof patch.organizationId === 'string' ? patch.organizationId : sandboxInfo.organizationId
+    const nextName = typeof patch.name === 'string' ? patch.name : sandboxInfo.name
 
     this.sandboxLookupCacheInvalidationService.invalidate({
-      sandboxId: previous.id,
+      sandboxId: sandboxInfo.id,
       organizationId: nextOrganizationId,
       name: nextName,
-      previousOrganizationId: previous.organizationId,
-      previousName: previous.name,
+      previousOrganizationId: sandboxInfo.organizationId,
+      previousName: sandboxInfo.name,
     })
   }
 

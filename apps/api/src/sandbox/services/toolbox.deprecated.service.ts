@@ -115,7 +115,7 @@ export class ToolboxService {
       // redis for cooldown period - 10 seconds
       // prevents database flooding when multiple requests are made at the same time
       if (acquired) {
-        await this.sandboxService.updateById(sandboxId, { lastActivityAt: new Date() }, sandbox ?? undefined)
+        await this.sandboxService.updateById(sandboxId, { lastActivityAt: new Date() })
       }
     }
   }
