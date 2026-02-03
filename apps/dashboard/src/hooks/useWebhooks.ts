@@ -3,56 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState, useEffect, useCallback } from 'react'
-import { useWebhookService } from '@/services/webhookService'
+import { useWebhookInitializationStatusQuery } from './queries/useWebhookInitializationStatusQuery'
 import { useSelectedOrganization } from './useSelectedOrganization'
 
 export function useWebhooks() {
   const { selectedOrganization } = useSelectedOrganization()
-  const { isWebhookInitialized, getAppPortalAccess } = useWebhookService()
-  const [isInitialized, setIsInitialized] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [appPortalUrl, setAppPortalUrl] = useState<string | null>(null)
+  const { data, isLoading, refetch } = useWebhookInitializationStatusQuery(selectedOrganization?.id)
 
-  const checkInitializationStatus = useCallback(async () => {
-    if (!selectedOrganization?.id) {
-      setIsInitialized(false)
-      setIsLoading(false)
-      return
-    }
-
-    try {
-      setIsLoading(true)
-      const initialized = await isWebhookInitialized(selectedOrganization.id)
-      setIsInitialized(initialized)
-
-      if (initialized) {
-        const url = await getAppPortalAccess(selectedOrganization.id)
-        setAppPortalUrl(url)
-      }
-    } catch (error) {
-      console.error('Failed to check webhook initialization status:', error)
-      setIsInitialized(false)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [selectedOrganization?.id, isWebhookInitialized, getAppPortalAccess])
-
-  useEffect(() => {
-    checkInitializationStatus()
-  }, [checkInitializationStatus])
-
-  const openAppPortal = useCallback(() => {
-    if (appPortalUrl) {
-      window.open(appPortalUrl, '_blank', 'noopener,noreferrer')
-    }
-  }, [appPortalUrl])
+  const isInitialized = data?.svixApplicationId != null
 
   return {
     isInitialized,
     isLoading,
-    appPortalUrl,
-    openAppPortal,
-    refresh: checkInitializationStatus,
+    refresh: refetch,
   }
 }
