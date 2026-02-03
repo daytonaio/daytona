@@ -38,6 +38,7 @@ import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
 import EmailVerify from './pages/EmailVerify'
+import Experimental from './pages/Experimental'
 import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
@@ -51,9 +52,11 @@ import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
-import Experimental from './pages/Experimental'
+import WebhookEndpointDetails from './pages/WebhookEndpointDetails'
+import Webhooks from './pages/Webhooks'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
+import { SvixProvider } from './providers/SvixProvider'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -263,6 +266,22 @@ function App() {
             <OwnerAccessOrganizationPageWrapper>
               <Experimental />
             </OwnerAccessOrganizationPageWrapper>
+          }
+        />
+        <Route
+          path={getRouteSubPath(RoutePath.WEBHOOKS)}
+          element={
+            <SvixProvider>
+              <Webhooks />
+            </SvixProvider>
+          }
+        />
+        <Route
+          path={getRouteSubPath(RoutePath.WEBHOOK_ENDPOINT_DETAILS)}
+          element={
+            <SvixProvider>
+              <WebhookEndpointDetails />
+            </SvixProvider>
           }
         />
       </Route>
