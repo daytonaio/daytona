@@ -7,13 +7,12 @@ import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/Pag
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useWebhookTokenQuery } from '@/hooks/queries/useWebhookTokenQuery'
+import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
+import { useWebhookInitializationStatusQuery } from '@/hooks/queries/useWebhookInitializationStatusQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { RefreshCcw } from 'lucide-react'
 import React from 'react'
 import { SvixProvider as SvixReactProvider } from 'svix-react'
-
-const SVIX_APP_ID = 'app_id_123'
 
 interface SvixProviderProps {
   children: React.ReactNode
@@ -21,7 +20,25 @@ interface SvixProviderProps {
 
 export function SvixProvider({ children }: SvixProviderProps) {
   const { selectedOrganization } = useSelectedOrganization()
-  const { data, isLoading, error, refetch } = useWebhookTokenQuery(selectedOrganization?.id)
+  const {
+    data: appPortalAccess,
+    isLoading: isLoadingAppPortalAccess,
+    error: appPortalAccessError,
+    refetch: refetchAppPortalAccess,
+  } = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
+  const {
+    data: initStatus,
+    isLoading: isLoadingInitStatus,
+    error: initStatusError,
+    refetch: refetchInitStatus,
+  } = useWebhookInitializationStatusQuery(selectedOrganization?.id)
+
+  const isLoading = isLoadingAppPortalAccess || isLoadingInitStatus
+  const error = appPortalAccessError || initStatusError
+  const refetch = () => {
+    refetchAppPortalAccess()
+    refetchInitStatus()
+  }
 
   if (isLoading) {
     return (
@@ -45,7 +62,7 @@ export function SvixProvider({ children }: SvixProviderProps) {
     )
   }
 
-  if (error || !data?.token) {
+  if (error || !appPortalAccess?.token || !initStatus?.svixApplicationId) {
     return (
       <PageLayout>
         <PageHeader>
@@ -70,10 +87,8 @@ export function SvixProvider({ children }: SvixProviderProps) {
   }
 
   return (
-    <SvixReactProvider token={data.token} appId={SVIX_APP_ID}>
+    <SvixReactProvider token={appPortalAccess.token} appId={initStatus.svixApplicationId}>
       {children}
     </SvixReactProvider>
   )
 }
-
-export { SVIX_APP_ID }
