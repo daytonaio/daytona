@@ -160,6 +160,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
 >
+> [**Create (Go SDK)**](/docs/en/go-sdk/daytona/#Client.Create)
+>
 > [**create (CLI)**](/docs/en/tools/cli/#daytona-create)
 >
 > [**create (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
@@ -519,6 +521,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**start (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#start)
 >
+> [**Start (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Start)
+>
 > [**start (CLI)**](/docs/en/tools/cli/#daytona-start)
 >
 > [**start (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/start)
@@ -567,7 +571,12 @@ console.log(sandbox.state)
 sandbox_id = sandbox.id
 
 # Get the root directory of the sandbox user
-root_dir = sandbox.get_user_root_dir()
+root_dir = sandbox.get_user_root_dir
+
+# Get the sandbox id, auto-stop interval and state
+puts sandbox.id
+puts sandbox.auto_stop_interval
+puts sandbox.state
 ```
 
 </TabItem>
@@ -632,6 +641,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**list (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#list)
 >
 > [**list (Ruby SDK)**](/docs/en/ruby-sdk/daytona#list)
+>
+> [**List (Go SDK)**](/docs/en/go-sdk/daytona/#Client.List)
 >
 > [**list (CLI)**](/docs/en/tools/cli/#daytona-list)
 >
@@ -748,7 +759,7 @@ func main() {
 	log.Printf("Stopped sandbox: %s\n", sandbox.ID)
 
 	// The sandbox ID can later be used to find the sandbox and start it
-	sandbox, err = client.Find(ctx, sandbox.ID)
+	sandbox, err = client.Get(ctx, sandbox.ID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -765,7 +776,7 @@ func main() {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona sandbox stop [flags]
+daytona stop [flags]
 ```
 
 </TabItem>
@@ -780,7 +791,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstop)
 >
@@ -788,11 +799,15 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**stop (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#stop)
 >
+> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Stop)
+>
 > [**find_one (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonafind_one)
 >
 > [**findOne (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#findone)
 >
 > [**find_one (Ruby SDK)**](/docs/en/ruby-sdk/daytona#find_one)
+>
+> [**FindOne (Go SDK)**](/docs/en/go-sdk/daytona/#Client.FindOne)
 >
 > [**stop (CLI)**](/docs/en/tools/cli/#daytona-stop)
 >
@@ -853,7 +868,7 @@ func main() {
 	ctx := context.Background()
 
 	// Find a sandbox by ID
-	sandbox, err := client.Find(ctx, "sandbox-id")
+	sandbox, err := client.Get(ctx, "sandbox-id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -887,13 +902,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxarchive), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#archive), [Ruby SDK](/docs/en/ruby-sdk/sandbox#archive), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/#daytona-archive), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/archive) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**archive (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxarchive)
 >
 > [**archive (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#archive)
 >
 > [**archive (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#archive)
+>
+> [**Archive (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Archive)
 >
 > [**archive (CLI)**](/docs/en/tools/cli/#daytona-archive)
 >
@@ -928,43 +945,6 @@ sandbox.recover
 ```
 
 </TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Find a sandbox by ID
-	sandbox, err := client.Find(ctx, "sandbox-id")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Recover sandbox
-	err = sandbox.Recover(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Recovered sandbox: %s\n", sandbox.ID)
-}
-```
-
-</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -976,7 +956,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/en/ruby-sdk/sandbox#recover), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
 >
@@ -1027,44 +1007,6 @@ end
 ```
 
 </TabItem>
-<TabItem label="Go" icon="seti:go">
-
-```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Find a sandbox by ID
-	sandbox, err := client.Find(ctx, "sandbox-id")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Check if the Sandbox is recoverable
-	if sandbox.Recoverable != nil && *sandbox.Recoverable {
-		err = sandbox.Recover(ctx)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println("Sandbox recovered successfully")
-	}
-}
-```
-
-</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -1076,7 +1018,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxrecover), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#recover), [Ruby SDK](/docs/en/ruby-sdk/sandbox#recover), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/recover) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**recover (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxrecover)
 >
@@ -1143,7 +1085,7 @@ func main() {
 	ctx := context.Background()
 
 	// Find a sandbox by ID
-	sandbox, err := client.Find(ctx, "sandbox-id")
+	sandbox, err := client.Get(ctx, "sandbox-id")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -1176,13 +1118,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxdelete), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#delete), [Ruby SDK](/docs/en/ruby-sdk/sandbox#delete), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/#daytona-delete), and [API](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName}) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**delete (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxdelete)
 >
 > [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#delete)
 >
 > [**delete (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#delete)
+>
+> [**Delete (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Delete)
 >
 > [**delete (CLI)**](/docs/en/tools/cli/#daytona-delete)
 >
@@ -1291,7 +1235,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautostopinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_stop_interval), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autostop/1) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**set_autostop_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_autostop_interval)
 >
@@ -1419,13 +1363,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_archive_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautoarchiveinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_archive_interval), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval}) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**set_auto_archive_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
 >
 > [**setAutoArchiveInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautoarchiveinterval)
 >
 > [**auto_archive_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_archive_interval)
+>
+> [**SetAutoArchiveInterval (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.SetAutoArchiveInterval)
 >
 > [**set_auto_archive_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autoarchive/{interval})
 
@@ -1559,13 +1505,15 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/1' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_delete_interval), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#setautodeleteinterval), [Ruby SDK](/docs/en/ruby-sdk/sandbox#auto_delete_interval), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autodelete/{interval}) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona/), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
 
 > [**set_auto_delete_interval (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
 >
 > [**setAutoDeleteInterval (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#setautodeleteinterval)
 >
 > [**auto_delete_interval (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#auto_delete_interval)
+>
+> [**SetAutoDeleteInterval (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.SetAutoDeleteInterval)
 >
 > [**set_auto_delete_interval (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/autodelete/{interval})
 
@@ -1595,6 +1543,19 @@ const sandbox = await daytona.create({
     // Disables the auto-stop feature - default is 15 minutes
     autoStopInterval: 0,
 });
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox = daytona.create(
+  Daytona::CreateSandboxFromSnapshotParams.new(
+    snapshot: 'my_awesome_snapshot',
+    # Disables the auto-stop feature - default is 15 minutes
+    auto_stop_interval: 0
+  )
+)
 ```
 
 </TabItem>
