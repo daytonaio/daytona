@@ -62,6 +62,10 @@ export default function DocSearchSidepanel() {
         .DocSearch-Sidepanel-RecentConversation { background-color: var(--bg-color); }
         .DocSearch-Sidepanel-Prompt--submit {background-color: var(--border-color) !important;}
         .DocSearch-SidepanelButton.floating svg { width: 24px; height: 24px; }
+        .DocSearch-Back-Icon, .DocSearch-Action:hover {color: var(--primary-text-color);}
+        .DocSearch-Menu-item, .DocSearch-Menu-item:hover, .DocSearch-Menu-content open {background-color: var(--bg-color);}
+        .DocSearch-Markdown-Content li {color: var(--secondary-text-color);}
+        .DocSearch-AskAiScreen-RelatedSources-Item-Link, .DocSearch-AskAiScreen-RelatedSources-Item-Link:hover {background-color: var(--block-bg-color);}
       `}</style>
       <Sidepanel {...(sidepanelProps as any)} />
     </>
