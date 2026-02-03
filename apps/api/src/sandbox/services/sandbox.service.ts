@@ -546,16 +546,16 @@ export class SandboxService {
       throw new SandboxError('Runner not found for warm pool sandbox')
     }
 
-    const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
-    }
-
     if (
       createSandboxDto.networkBlockAll !== undefined ||
       createSandboxDto.networkAllowList !== undefined ||
       organization.sandboxLimitedNetworkEgress
     ) {
+      const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
+      if (!runner) {
+        throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
+      }
+
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
       await runnerAdapter.updateNetworkSettings(
         warmPoolSandbox.id,
