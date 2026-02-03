@@ -21,5 +21,49 @@ export default function DocSearchSidepanel() {
     suggestedQuestions: true,
   }
 
-  return <Sidepanel {...(sidepanelProps as any)} />
+  return (
+    <>
+      <style>{`
+        .DocSearch-Sidepanel-Title { display: none; }
+        .DocSearch-SidepanelButton.floating {
+          background-color: var(--secondary-btn-color);
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+        }
+        .DocSearch-SidepanelButton.floating:hover,
+        .DocSearch-SidepanelButton.floating:focus {
+          background-color: var(--hover-color) !important;
+        }
+        .DocSearch-Sidepanel-Prompt--submit,
+        .DocSearch-AskAiScreen-RelatedSources-Item-Link, {
+          width: 24px;
+          height: 24px;          
+          background-color: var(--border-color) !important;
+        }
+        .DocSearch-Sidepanel-Content, 
+        .DocSearch-AskAiScreen-Response, 
+        .DocSearch-Sidepanel-Prompt, 
+        .DocSearch-Sidepanel-Header {
+          background-color: var(--bg-color);
+          scrollbar-color: var(--border-color) var(--bg-color);
+        }
+        .DocSearch-Sidepanel-Prompt { border-top: 1px solid var(--border-color); }
+        .DocSearch-Sidepanel--powered-by {display: none;}
+        .DocSearch-Sidepanel-Header { border-bottom: 1px solid var(--border-color); }
+        .DocSearch-Sidepanel-Prompt--form {border: 1px solid var(--border-color); }
+        .DocSearch-Sidepanel-Prompt--form:hover {border: 1px solid var(--hover-color); }
+        .DocSearch-Sidepanel-Prompt--form::active {border: 1px solid var(--hover-color); }
+        .DocSearch-Sidepanel-Prompt--form:focus-within {border: 1px solid var(--hover-color); }
+        .DocSearch-Sidepanel-SuggestedQuestion { border: 1px solid var(--border-color); }
+        .DocSearch-Sidepanel-Footer { background-color: var(--bg-color); }
+        .DocSearch-Sidepanel-Prompt--disclaimer { color: var(--secondary-text-color); }
+        .DocSearch-Markdown-Content code, .DocSearch-Markdown-Content pre, .DocSearch-CodeSnippet-CopyButton { background-color: var(--block-bg-color); color: var(--primary-text-color); }
+        .DocSearch-Sidepanel-RecentConversation { background-color: var(--bg-color); }
+        .DocSearch-Sidepanel-Prompt--submit {background-color: var(--border-color) !important;}
+        .DocSearch-SidepanelButton.floating svg { width: 24px; height: 24px; }
+      `}</style>
+      <Sidepanel {...(sidepanelProps as any)} />
+    </>
+  )
 }
