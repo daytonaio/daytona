@@ -53,8 +53,11 @@ import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
+import WebhookEndpointDetails from './pages/WebhookEndpointDetails'
+import Webhooks from './pages/Webhooks'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
+import { SvixProvider } from './providers/SvixProvider'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -267,6 +270,22 @@ function App() {
           }
         />
         <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
+        <Route
+          path={getRouteSubPath(RoutePath.WEBHOOKS)}
+          element={
+            <SvixProvider>
+              <Webhooks />
+            </SvixProvider>
+          }
+        />
+        <Route
+          path={getRouteSubPath(RoutePath.WEBHOOK_ENDPOINT_DETAILS)}
+          element={
+            <SvixProvider>
+              <WebhookEndpointDetails />
+            </SvixProvider>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
