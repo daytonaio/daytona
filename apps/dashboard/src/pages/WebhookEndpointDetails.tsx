@@ -122,7 +122,7 @@ const WebhookEndpointDetails: React.FC = () => {
 
       <PageContent>
         <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon" onClick={() => navigate(RoutePath.WEBHOOKS)}>
+          <Button variant="ghost" size="icon-sm" onClick={() => navigate(RoutePath.WEBHOOKS)}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           {endpoint.loading ? (
@@ -150,7 +150,7 @@ const WebhookEndpointDetails: React.FC = () => {
               <div className="ml-auto">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" disabled={isMutating}>
+                    <Button variant="outline" size="icon-sm" disabled={isMutating}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
