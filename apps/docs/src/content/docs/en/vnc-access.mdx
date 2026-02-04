@@ -8,11 +8,11 @@ VNC (Virtual Network Computing) access provides a graphical desktop environment 
 
 VNC and [Computer Use](/docs/en/computer-use) work together to enable both manual and automated desktop interactions. VNC provides the visual interface for users to manually interact with the desktop, while Computer Use provides the programmatic API for AI agents to automate mouse, keyboard, and screenshot operations. Through VNC, you can observe AI agents performing automated tasks via Computer Use in real-time.
 
-- **GUI Application Development**: Build and test desktop applications with visual interfaces
-- **Browser Testing**: Run and debug web applications in a full browser environment
-- **Visual Debugging**: Inspect graphical output and UI behavior in real-time
-- **Desktop Tool Access**: Use graphical IDEs, design tools, or other desktop software
-- **Agent Observation**: Watch AI agents perform automated tasks through Computer Use
+- **GUI application development**: build and test desktop applications with visual interfaces
+- **Browser testing**: run and debug web applications in a full browser environment
+- **Visual debugging**: inspect graphical output and UI behavior in real-time
+- **Desktop tool access**: use graphical IDEs, design tools, or other desktop software
+- **Agent observation**: watch AI agents perform automated tasks through Computer Use
 
 ## Access VNC from Dashboard
 
@@ -254,7 +254,7 @@ sandbox.computer_use.start()
 sandbox.computer_use.mouse.click(50, 50)
 
 # Type a URL
-sandbox.computer_use.keyboard.type("https://example.com")
+sandbox.computer_use.keyboard.type("https://www.daytona.io/docs/")
 sandbox.computer_use.keyboard.press("Return")
 
 # Take a screenshot
@@ -272,7 +272,7 @@ await sandbox.computerUse.start();
 await sandbox.computerUse.mouse.click(50, 50);
 
 // Type a URL
-await sandbox.computerUse.keyboard.type('https://example.com');
+await sandbox.computerUse.keyboard.type('https://www.daytona.io/docs/');
 await sandbox.computerUse.keyboard.press('Return');
 
 // Take a screenshot
