@@ -87,7 +87,7 @@ snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotPara
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:terminal">
+<TabItem label="CLI" icon="seti:shell">
 
 ```bash
 daytona snapshot create my-snapshot --image python:3.11-slim --resources 2 4096
@@ -595,7 +595,7 @@ fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.
 ```
 
 </TabItem>
-<TabItem label="CLI" icon="seti:terminal">
+<TabItem label="CLI" icon="seti:shell">
 
 ```bash
 daytona snapshot list
@@ -715,7 +715,7 @@ if err != nil {
 fmt.Println("Snapshot deleted")
 ```
 </TabItem>
-<TabItem label="CLI" icon="seti:terminal">
+<TabItem label="CLI" icon="seti:shell">
 ```bash
 daytona snapshot delete my-awesome-snapshot
 ```
