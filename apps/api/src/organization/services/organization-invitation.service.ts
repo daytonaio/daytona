@@ -24,8 +24,10 @@ import { OrganizationInvitation } from '../entities/organization-invitation.enti
 import { OrganizationInvitationStatus } from '../enums/organization-invitation-status.enum'
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
 import { OrganizationInvitationCreatedEvent } from '../events/organization-invitation-created.event'
+import { OrganizationDeletedEvent } from '../events/organization-deleted.event'
 import { UserService } from '../../user/user.service'
 import { EmailUtils } from '../../common/utils/email.util'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 @Injectable()
 export class OrganizationInvitationService {
@@ -231,6 +233,15 @@ export class OrganizationInvitationService {
   async cancel(invitationId: string): Promise<void> {
     const invitation = await this.prepareStatusUpdate(invitationId, OrganizationInvitationStatus.CANCELLED)
     await this.organizationInvitationRepository.save(invitation)
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    await entityManager.delete(OrganizationInvitation, { organizationId })
   }
 
   private async prepareStatusUpdate(

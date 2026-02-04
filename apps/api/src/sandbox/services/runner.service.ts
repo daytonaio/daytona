@@ -46,6 +46,9 @@ import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationAssertDeletableEvent } from '../../organization/events/organization-assert-deletable.event'
 
 @Injectable()
 export class RunnerService {
@@ -1025,6 +1028,37 @@ export class RunnerService {
           this.configService.getOrThrow('runnerScore.targetValues.critical.startedSandboxes'),
         ],
       },
+    }
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.ASSERT_NO_RUNNERS,
+  })
+  async handleAssertNoRunners(event: OrganizationAssertDeletableEvent): Promise<void> {
+    let count = 0
+
+    try {
+      const regions = await this.regionService.findAllByOrganization(event.organizationId, RegionType.CUSTOM)
+      if (regions.length === 0) {
+        return
+      }
+
+      const regionIds = regions.map((region) => region.id)
+      count = await this.runnerRepository.count({
+        where: {
+          region: In(regionIds),
+        },
+      })
+    } catch (error) {
+      this.logger.error(
+        `Failed to check if the organization ${event.organizationId} has runners that must be removed`,
+        error,
+      )
+      throw new Error('Failed to check if the organization has runners that must be removed')
+    }
+
+    if (count > 0) {
+      throw new Error(`Organization has ${count} runner(s) in its custom regions that must be removed`)
     }
   }
 }

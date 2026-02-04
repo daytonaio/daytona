@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
 import { OrganizationUser } from './organization-user.entity'
 import { OrganizationRole } from './organization-role.entity'
 import { OrganizationInvitation } from './organization-invitation.entity'
 import { RegionQuota } from './region-quota.entity'
 
 @Entity()
+@Index('idx_organization_deleted_at', ['deletedAt'], { where: '"deletedAt" IS NOT NULL' })
+@Index('idx_organization_created_at_not_deleted', ['createdAt'], { where: '"deletedAt" IS NULL' })
 export class Organization {
   @PrimaryGeneratedColumn('uuid')
   id: string
@@ -141,6 +143,9 @@ export class Organization {
   })
   invitations: OrganizationInvitation[]
 
+  /**
+   * @see {@link isSuspended} to account for temporary suspensions.
+   */
   @Column({
     default: false,
   })
@@ -198,6 +203,30 @@ export class Organization {
       organizationName: this.name,
       limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
     }
+  }
+
+  @Column({
+    nullable: true,
+    type: 'timestamp with time zone',
+  })
+  deletedAt?: Date
+
+  /**
+   * Whether the organization is currently suspended, accounting for temporary suspensions via {@link suspendedUntil}.
+   */
+  get isSuspended(): boolean {
+    // not suspended
+    if (!this.suspended) {
+      return false
+    }
+
+    // permanently suspended
+    if (!this.suspendedUntil) {
+      return true
+    }
+
+    // temporarily suspended, check if suspended until is in the future
+    return this.suspendedUntil > new Date()
   }
 
   constructor(defaultRegionId?: string) {

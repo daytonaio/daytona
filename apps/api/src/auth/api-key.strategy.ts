@@ -17,6 +17,7 @@ import { SystemRole } from '../user/enums/system-role.enum'
 import { RunnerService } from '../sandbox/services/runner.service'
 import { generateApiKeyHash } from '../common/utils/api-key'
 import { RegionService } from '../region/services/region.service'
+import { getApiKeyUserCacheKey, getApiKeyValidationCacheKey } from '../api-key/constants/api-key-cache-keys.constant'
 
 type UserCache = {
   userId: string
@@ -213,10 +214,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
   }
 
   private generateValidationCacheKey(token: string): string {
-    return `api-key:validation:${generateApiKeyHash(token)}`
+    const keyHash = generateApiKeyHash(token)
+    return getApiKeyValidationCacheKey(keyHash)
   }
 
   private generateUserCacheKey(userId: string): string {
-    return `api-key:user:${userId}`
+    return getApiKeyUserCacheKey(userId)
   }
 }
