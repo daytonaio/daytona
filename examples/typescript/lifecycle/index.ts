@@ -40,20 +40,6 @@ async function main() {
 
   console.log(`Printing first sandbox -> id: ${result.items[0].id} state: ${result.items[0].state}`)
 
-  // Hot resize: increase CPU and memory on a running sandbox
-  console.log('Resizing sandbox (hot resize)...')
-  await sandbox.resize({ cpu: 2, memory: 2 })
-  console.log(`Hot resize complete: CPU=${sandbox.cpu}, Memory=${sandbox.memory}GB, Disk=${sandbox.disk}GB`)
-
-  // Cold resize: stop sandbox first, then resize (can also change disk)
-  console.log('Stopping sandbox for cold resize...')
-  await sandbox.stop()
-  console.log('Resizing sandbox (cold resize)...')
-  await sandbox.resize({ cpu: 4, memory: 4, disk: 20 })
-  console.log(`Cold resize complete: CPU=${sandbox.cpu}, Memory=${sandbox.memory}GB, Disk=${sandbox.disk}GB`)
-  await sandbox.start()
-  console.log('Sandbox restarted with new resources')
-
   console.log('Deleting sandbox')
   await sandbox.delete()
   console.log('Sandbox deleted')

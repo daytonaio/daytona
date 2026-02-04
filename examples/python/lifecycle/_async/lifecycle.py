@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona import AsyncDaytona, Resources
+from daytona import AsyncDaytona
 
 
 async def main():
@@ -37,20 +37,6 @@ async def main():
         print("Total sandboxes count:", result.total)
 
         print(f"Printing first sandbox -> id: {result.items[0].id} state: {result.items[0].state}")
-
-        # Hot resize: increase CPU and memory on a running sandbox
-        print("Resizing sandbox (hot resize)...")
-        await sandbox.resize(Resources(cpu=2, memory=2))
-        print(f"Hot resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
-
-        # Cold resize: stop sandbox first, then resize (can also change disk)
-        print("Stopping sandbox for cold resize...")
-        await daytona.stop(sandbox)
-        print("Resizing sandbox (cold resize)...")
-        await sandbox.resize(Resources(cpu=4, memory=4, disk=20))
-        print(f"Cold resize complete: CPU={sandbox.cpu}, Memory={sandbox.memory}GB, Disk={sandbox.disk}GB")
-        await daytona.start(sandbox)
-        print("Sandbox restarted with new resources")
 
         print("Removing sandbox")
         await daytona.delete(sandbox)
