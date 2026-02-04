@@ -199,7 +199,8 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
         break
       }
       case MouseActions.SCROLL: {
-        const mouseScrollResponse = await MouseActionsClient[MouseActions.SCROLL](
+        // The scroll promise never resolves, so we don't await it
+        const mouseScrollResponse = MouseActionsClient[MouseActions.SCROLL](
           mouseScrollParams.x,
           mouseScrollParams.y,
           mouseScrollParams.direction,
