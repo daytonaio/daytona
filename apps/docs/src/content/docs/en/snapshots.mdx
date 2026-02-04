@@ -90,7 +90,7 @@ snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotPara
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot create my-snapshot --image python:3.11-slim --resources 2 4096
+daytona snapshot create my-snapshot --image python:3.11-slim --cpu 2 --memory 4
 ```
 
 </TabItem>
@@ -101,15 +101,18 @@ curl https://app.daytona.io/api/snapshots \
   --request POST \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
-  --data '{},
-  "regionId": ""
-}'
+  --data '{
+    "name": "my-snapshot",
+    "imageName": "python:3.11-slim",
+    "cpu": 2,
+    "memory": 4
+  }'
 ```
 
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
 >
@@ -180,6 +183,27 @@ if err != nil {
 for log := range logChan {
     fmt.Println(log)
 }
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-snapshot --image python:3.11-slim
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-snapshot",
+    "imageName": "python:3.11-slim"
+  }'
 ```
 
 </TabItem>
@@ -417,9 +441,33 @@ for log := range logChan {
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-snapshot --image python:3.11-slim --cpu 2 --memory 4 --disk 8
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-snapshot",
+    "imageName": "python:3.11-slim",
+    "cpu": 2,
+    "memory": 4,
+    "disk": 8
+  }'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), [Ruby SDK](/docs/en/ruby-sdk), and [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create) references:
+For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), [Ruby SDK](/docs/en/ruby-sdk), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot-create), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**CreateSnapshotParams (Python SDK)**](/docs/en/python-sdk/sync/snapshot#createsnapshotparams)
 >
@@ -428,6 +476,10 @@ For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK
 > [**CreateSnapshotParams (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#create)
 >
 > [**CreateSnapshotParams (Go SDK)**](/docs/en/go-sdk/types#CreateSnapshotParams)
+>
+> [**create (CLI)**](/docs/en/tools/cli#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
 ### Regions
 
@@ -498,7 +550,41 @@ daytona.snapshot.create(
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-snapshot --image python:3.11-slim --region us
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-snapshot",
+    "imageName": "python:3.11-slim",
+    "regionId": "us"
+  }'
+```
+
+</TabItem>
 </Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [CLI](/docs/en/tools/cli#daytona-snapshot-create), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
+
+> [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
+>
+> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (CLI)**](/docs/en/tools/cli#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
 ## Get a Snapshot by name
 
@@ -545,9 +631,17 @@ fmt.Printf("%s (%s)\n", snapshot.Name, snapshot.ImageName)
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-awesome-snapshot \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceget), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#get), [Ruby SDK](/docs/en/ruby-sdk/snapshot#get), and [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Get) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceget), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#get), [Ruby SDK](/docs/en/ruby-sdk/snapshot#get), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Get), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**get (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceget)
 >
@@ -556,6 +650,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#sna
 > [**get (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#get)
 >
 > [**get (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Get)
+>
+> [**get (API)**](/docs/en/tools/api/#daytona/tag/snapshots/GET/snapshots/{snapshotName})
 
 ## List Snapshots
 
@@ -616,13 +712,22 @@ fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot list
+# List snapshots with pagination
+daytona snapshot list --page 2 --limit 10
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/snapshots?page=2&limit=10' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
 ```
 
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.List), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.List), [CLI](/docs/en/tools/cli#daytona-snapshot-list), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 > [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
 >
@@ -632,7 +737,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [
 >
 > [**list (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.List)
 >
-> [**list (CLI)**](/docs/en/tools/cli#daytona-snapshot)
+> [**list (CLI)**](/docs/en/tools/cli#daytona-snapshot-list)
 >
 > [**list (API)**](/docs/en/tools/api#daytona/tag/snapshots/GET/snapshots)
 
@@ -669,15 +774,26 @@ activated_snapshot = daytona.snapshot.activate(snapshot)
 puts "Snapshot #{activated_snapshot.name} activated"
 ```
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-inactive-snapshot/activate \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#activate), and [Ruby SDK](/docs/en/ruby-sdk/snapshot#activate) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#activate), [Ruby SDK](/docs/en/ruby-sdk/snapshot#activate), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**activate (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate)
 >
 > [**activate (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#activate)
 >
 > [**activate (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#activate)
+>
+> [**activate (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots/{snapshotName}/activate)
 
 ## Deactivate Snapshots
 
@@ -734,13 +850,24 @@ fmt.Println("Snapshot deleted")
 ```
 </TabItem>
 <TabItem label="CLI" icon="seti:shell">
+
 ```bash
 daytona snapshot delete my-awesome-snapshot
 ```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-awesome-snapshot \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#delete), [Ruby SDK](/docs/en/ruby-sdk/snapshot#delete), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Delete), and [CLI](/docs/en/tools/cli#daytona-snapshot-delete) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#delete), [Ruby SDK](/docs/en/ruby-sdk/snapshot#delete), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Delete), [CLI](/docs/en/tools/cli#daytona-snapshot-delete), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**delete (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete)
 >
@@ -751,6 +878,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#sna
 > [**delete (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Delete)
 >
 > [**delete (CLI)**](/docs/en/tools/cli#daytona-snapshot-delete)
+>
+> [**delete (API)**](/docs/en/tools/api/#daytona/tag/snapshots/DELETE/snapshots/{snapshotName})
 
 ## Run Docker in a Sandbox
 
