@@ -63,8 +63,9 @@ class Sandbox(BaseModel):
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
     daemon_version: Optional[StrictStr] = Field(default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion")
     parent_sandbox_id: Optional[StrictStr] = Field(default=None, description="The ID of the parent sandbox if this sandbox was forked", alias="parentSandboxId")
+    source_sandbox_id: Optional[StrictStr] = Field(default=None, description="The ID of the source sandbox if this sandbox was cloned", alias="sourceSandboxId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "wakeOnRequest", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "parentSandboxId"]
+    __properties: ClassVar[List[str]] = ["id", "organizationId", "name", "snapshot", "user", "env", "labels", "public", "networkBlockAll", "networkAllowList", "target", "cpu", "gpu", "memory", "disk", "state", "desiredState", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "autoDeleteInterval", "wakeOnRequest", "volumes", "buildInfo", "createdAt", "updatedAt", "class", "daemonVersion", "parentSandboxId", "sourceSandboxId"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -184,7 +185,8 @@ class Sandbox(BaseModel):
             "updatedAt": obj.get("updatedAt"),
             "class": obj.get("class"),
             "daemonVersion": obj.get("daemonVersion"),
-            "parentSandboxId": obj.get("parentSandboxId")
+            "parentSandboxId": obj.get("parentSandboxId"),
+            "sourceSandboxId": obj.get("sourceSandboxId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -32,6 +32,8 @@ daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/audit_log.py
 daytona_api_client/models/build_info.py
+daytona_api_client/models/clone_sandbox.py
+daytona_api_client/models/clone_sandbox_response.py
 daytona_api_client/models/command.py
 daytona_api_client/models/completion_context.py
 daytona_api_client/models/completion_item.py

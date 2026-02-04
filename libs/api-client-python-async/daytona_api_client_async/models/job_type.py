@@ -38,6 +38,7 @@ class JobType(str, Enum):
     UPDATE_SANDBOX_NETWORK_SETTINGS = 'UPDATE_SANDBOX_NETWORK_SETTINGS'
     CREATE_SANDBOX_SNAPSHOT = 'CREATE_SANDBOX_SNAPSHOT'
     FORK_SANDBOX = 'FORK_SANDBOX'
+    CLONE_SANDBOX = 'CLONE_SANDBOX'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

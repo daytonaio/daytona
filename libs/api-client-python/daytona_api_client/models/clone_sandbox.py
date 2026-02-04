@@ -18,26 +18,18 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateSandboxStateDto(BaseModel):
+class CloneSandbox(BaseModel):
     """
-    UpdateSandboxStateDto
+    CloneSandbox
     """ # noqa: E501
-    state: StrictStr = Field(description="The new state for the sandbox")
-    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
+    name: Optional[StrictStr] = Field(default=None, description="The name for the cloned sandbox. If not provided, a unique name will be generated.")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["state", "errorReason"]
-
-    @field_validator('state')
-    def state_validate_enum(cls, value):
-        """Validates the enum"""
-        if value not in set(['creating', 'restoring', 'destroyed', 'destroying', 'started', 'stopped', 'starting', 'stopping', 'error', 'build_failed', 'pending_build', 'building_snapshot', 'unknown', 'pulling_snapshot', 'archived', 'archiving', 'snapshotting', 'forking', 'cloning']):
-            raise ValueError("must be one of enum values ('creating', 'restoring', 'destroyed', 'destroying', 'started', 'stopped', 'starting', 'stopping', 'error', 'build_failed', 'pending_build', 'building_snapshot', 'unknown', 'pulling_snapshot', 'archived', 'archiving', 'snapshotting', 'forking', 'cloning')")
-        return value
+    __properties: ClassVar[List[str]] = ["name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,7 +49,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a JSON string"""
+        """Create an instance of CloneSandbox from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -89,7 +81,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a dict"""
+        """Create an instance of CloneSandbox from a dict"""
         if obj is None:
             return None
 
@@ -97,8 +89,7 @@ class UpdateSandboxStateDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "state": obj.get("state"),
-            "errorReason": obj.get("errorReason")
+            "name": obj.get("name")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

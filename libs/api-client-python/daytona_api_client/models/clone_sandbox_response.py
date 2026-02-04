@@ -19,18 +19,20 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
-class UpdateSandboxStateDto(BaseModel):
+class CloneSandboxResponse(BaseModel):
     """
-    UpdateSandboxStateDto
+    CloneSandboxResponse
     """ # noqa: E501
-    state: StrictStr = Field(description="The new state for the sandbox")
-    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
+    id: StrictStr = Field(description="The ID of the newly cloned sandbox")
+    name: StrictStr = Field(description="The name of the cloned sandbox")
+    state: StrictStr = Field(description="The current state of the cloned sandbox")
+    source_sandbox_id: StrictStr = Field(description="The ID of the source sandbox that was cloned", alias="sourceSandboxId")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["state", "errorReason"]
+    __properties: ClassVar[List[str]] = ["id", "name", "state", "sourceSandboxId"]
 
     @field_validator('state')
     def state_validate_enum(cls, value):
@@ -57,7 +59,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a JSON string"""
+        """Create an instance of CloneSandboxResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -89,7 +91,7 @@ class UpdateSandboxStateDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of UpdateSandboxStateDto from a dict"""
+        """Create an instance of CloneSandboxResponse from a dict"""
         if obj is None:
             return None
 
@@ -97,8 +99,10 @@ class UpdateSandboxStateDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "id": obj.get("id"),
+            "name": obj.get("name"),
             "state": obj.get("state"),
-            "errorReason": obj.get("errorReason")
+            "sourceSandboxId": obj.get("sourceSandboxId")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

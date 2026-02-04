@@ -17,6 +17,8 @@ import {
   SshAccessValidationDto,
   ForkSandbox,
   ForkSandboxResponse,
+  CloneSandbox,
+  CloneSandboxResponse,
   WakeOnRequest,
 } from '@daytonaio/api-client'
 import {
@@ -550,6 +552,25 @@ export class Sandbox implements SandboxDto {
   public async fork(name?: string): Promise<ForkSandboxResponse> {
     const forkRequest: ForkSandbox = { name }
     const response = await this.sandboxApi.forkSandbox(this.id, forkRequest)
+    return response.data
+  }
+
+  /**
+   * Creates an independent copy of the sandbox with a complete flattened filesystem.
+   * Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+   *
+   * The source sandbox can be in either STARTED or STOPPED state.
+   *
+   * @param {string} [name] - Optional name for the cloned sandbox. If not provided, a unique name will be generated.
+   * @returns {Promise<CloneSandboxResponse>} The response containing the cloned sandbox ID, name, state, and source sandbox ID.
+   *
+   * @example
+   * const cloneResult = await sandbox.clone('my-cloned-sandbox');
+   * console.log(`Cloned sandbox ID: ${cloneResult.id}`);
+   */
+  public async clone(name?: string): Promise<CloneSandboxResponse> {
+    const cloneRequest: CloneSandbox = { name }
+    const response = await this.sandboxApi.cloneSandbox(this.id, cloneRequest)
     return response.data
   }
 

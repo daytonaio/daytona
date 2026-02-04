@@ -9,7 +9,7 @@ import time
 from types import MethodType
 from typing import Callable, Dict, List, Optional
 
-from daytona_api_client import ForkSandbox, ForkSandboxResponse
+from daytona_api_client import CloneSandbox, CloneSandboxResponse, ForkSandbox, ForkSandboxResponse
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl
 from daytona_api_client import Sandbox as SandboxDto
@@ -536,6 +536,30 @@ class Sandbox(SandboxDto):
         """
         fork_request = ForkSandbox(name=name)
         return self._sandbox_api.fork_sandbox(self.id, fork_request)
+
+    @intercept_errors(message_prefix="Failed to clone sandbox: ")
+    def clone(self, name: Optional[str] = None) -> CloneSandboxResponse:
+        """Creates an independent copy of the sandbox with a complete flattened filesystem.
+        Unlike fork, the cloned sandbox has no dependency on the source sandbox.
+
+        The source sandbox can be in either STARTED or STOPPED state.
+
+        Args:
+            name (Optional[str]): Optional name for the cloned sandbox. If not provided,
+                a unique name will be generated.
+
+        Returns:
+            CloneSandboxResponse: The response containing the cloned sandbox ID, name, state,
+                and source sandbox ID.
+
+        Example:
+            ```python
+            clone_result = sandbox.clone("my-cloned-sandbox")
+            print(f"Cloned sandbox ID: {clone_result.id}")
+            ```
+        """
+        clone_request = CloneSandbox(name=name)
+        return self._sandbox_api.clone_sandbox(self.id, clone_request)
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     def create_ssh_access(self, expires_in_minutes: Optional[int] = None) -> SshAccessDto:
