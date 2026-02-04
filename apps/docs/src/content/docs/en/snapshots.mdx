@@ -7,7 +7,7 @@ import Label from '@components/Label.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
-Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [Typescript](/docs/en/getting-started#sdks), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
+Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
 
 Snapshots can be created using:
 
@@ -111,13 +111,15 @@ curl https://app.daytona.io/api/snapshots \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
 >
 > [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
 >
 > [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Create)
 >
 > [**create (CLI)**](/docs/en/tools/cli/#daytona-snapshot-create)
 >
@@ -185,7 +187,7 @@ for log := range logChan {
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 ### Using local images
 
@@ -239,7 +241,7 @@ Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), 
 
 Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
 
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 #### Docker Hub
 
@@ -296,13 +298,13 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 ### Using the declarative builder
 
-[Declarative Builder](/docs/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
+[Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
 
 ### Snapshot resources
 
 Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**. For more information, see [sandbox resources](/docs/en/sandboxes#resources).
 
-To view your available resources and limits, see [limits](/docs/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
+To view your available resources and limits, see [limits](/docs/en/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
 
 Snapshot resources can be customized using the `Resources` class.
 
@@ -384,13 +386,13 @@ daytona.snapshot.create(
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk), [TypeScript SDK](/docs/typescript-sdk), and [Ruby SDK](/docs/ruby-sdk) references:
+For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), and [Ruby SDK](/docs/en/ruby-sdk) references:
 
-> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+> [**CreateSnapshotParams (Python SDK)**](/docs/en/python-sdk/sync/snapshot#createsnapshotparams)
 >
-> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#createsnapshotparams)
 >
-> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#create)
+> [**CreateSnapshotParams (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#create)
 
 ### Snapshot regions
 
@@ -505,13 +507,15 @@ puts "#{snapshot.name} (#{snapshot.image_name})"
   </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotget), [TypeScript SDK](/docs/typescript-sdk/snapshot#get), and [Ruby SDK](/docs/ruby-sdk/snapshot#get) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceget), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#get), [Ruby SDK](/docs/en/ruby-sdk/snapshot#get), and [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Get) references:
 
 > [**get (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceget)
 >
 > [**get (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#get)
 >
 > [**get (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#get)
+>
+> [**get (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Get)
 
 ## List Snapshots
 
@@ -578,13 +582,15 @@ daytona snapshot list
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot), [TypeScript SDK](/docs/typescript-sdk/snapshot), and [Ruby SDK](/docs/ruby-sdk/snapshot), [Go SDK](/docs/go-sdk/), [CLI](/docs/tools/cli#daytona-snapshot), and [API](/docs/tools/api/#daytona/tag/snapshots) references.
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.List), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 > [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
 >
 > [**list (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#list)
 >
 > [**list (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#list)
+>
+> [**list (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.List)
 >
 > [**list (CLI)**](/docs/en/tools/cli#daytona-snapshot)
 >
@@ -598,7 +604,7 @@ Snapshots automatically become inactive after 2 weeks of not being used. To acti
 2. Click the three dots at the end of the row for the snapshot you want to activate
 3. Click the **Activate** button
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotactivate), [TypeScript SDK](/docs/typescript-sdk/snapshot#activate), and [Ruby SDK](/docs/ruby-sdk/snapshot#activate) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#activate), and [Ruby SDK](/docs/en/ruby-sdk/snapshot#activate) references:
 
 > [**activate (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate)
 >
@@ -648,13 +654,15 @@ puts 'Snapshot deleted'
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/), [TypeScript SDK](/docs/typescript-sdk/), and [Ruby SDK](/docs/ruby-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Delete) references:
 
-> [**delete (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotdelete)
+> [**delete (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete)
 >
-> [**delete (TypeScript SDK)**](/docs/typescript-sdk/snapshot#delete)
+> [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#delete)
 >
-> [**delete (Ruby SDK)**](/docs/ruby-sdk/snapshot#delete)
+> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#delete)
+>
+> [**delete (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Delete)
 
 ## Run Docker in a Sandbox
 
