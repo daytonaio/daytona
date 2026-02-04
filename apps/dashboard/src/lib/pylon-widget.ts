@@ -27,8 +27,7 @@ export const addPylonWidget = (appId: string) => {
     e.setAttribute('async', 'true')
     e.setAttribute('src', `https://widget.usepylon.com/widget/${appId}`)
     var n = t.getElementsByTagName('script')[0]
-    // @ts-expect-error ignore
-    n.parentNode.insertBefore(e, n)
+    if (n.parentNode) n.parentNode.insertBefore(e, n)
   }
   if (t.readyState === 'complete') {
     r()
