@@ -306,7 +306,7 @@ export class OrganizationController {
     targetIdFromRequest: (req) => req.params.organizationId,
   })
   async delete(@Param('organizationId') organizationId: string): Promise<void> {
-    return this.organizationService.delete(organizationId)
+    return this.organizationService.delete({ organizationId })
   }
 
   @Get('/:organizationId/usage')

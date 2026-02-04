@@ -12,6 +12,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
+import { getOrganizationCacheKey, getOrganizationUserCacheKey } from '../constants/organization-cache-keys.constant'
 
 @Injectable()
 export class OrganizationAccessGuard implements CanActivate {
@@ -99,13 +100,14 @@ export class OrganizationAccessGuard implements CanActivate {
 
   private async getCachedOrganization(organizationId: string): Promise<Organization | null> {
     try {
-      const cachedOrganization = await this.redis.get(`organization:${organizationId}`)
+      const cacheKey = getOrganizationCacheKey(organizationId)
+      const cachedOrganization = await this.redis.get(cacheKey)
       if (cachedOrganization) {
         return JSON.parse(cachedOrganization)
       }
       const organization = await this.organizationService.findOne(organizationId)
       if (organization) {
-        await this.redis.set(`organization:${organizationId}`, JSON.stringify(organization), 'EX', 10)
+        await this.redis.set(cacheKey, JSON.stringify(organization), 'EX', 10)
         return organization
       }
       return null
@@ -117,18 +119,14 @@ export class OrganizationAccessGuard implements CanActivate {
 
   private async getCachedOrganizationUser(organizationId: string, userId: string): Promise<OrganizationUser | null> {
     try {
-      const cachedOrganizationUser = await this.redis.get(`organization-user:${organizationId}:${userId}`)
+      const cacheKey = getOrganizationUserCacheKey(organizationId, userId)
+      const cachedOrganizationUser = await this.redis.get(cacheKey)
       if (cachedOrganizationUser) {
         return JSON.parse(cachedOrganizationUser)
       }
       const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
       if (organizationUser) {
-        await this.redis.set(
-          `organization-user:${organizationId}:${userId}`,
-          JSON.stringify(organizationUser),
-          'EX',
-          10,
-        )
+        await this.redis.set(cacheKey, JSON.stringify(organizationUser), 'EX', 10)
         return organizationUser
       }
       return null

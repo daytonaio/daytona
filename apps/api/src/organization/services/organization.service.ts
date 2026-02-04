@@ -11,9 +11,11 @@ import {
   OnModuleInit,
   OnApplicationShutdown,
   ConflictException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, In, Not, Repository } from 'typeorm'
+import { EntityManager, In, IsNull, Not, Repository } from 'typeorm'
 import { CreateOrganizationInternalDto } from '../dto/create-organization.internal.dto'
 import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { Organization } from '../entities/organization.entity'
@@ -46,10 +48,19 @@ import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { RegionQuota } from '../entities/region-quota.entity'
 import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { RegionService } from '../../region/services/region.service'
+import {
+  PAYMENT_METHOD_REQUIRED_SUSPENSION_REASON,
+  VERIFY_EMAIL_SUSPENSION_REASON,
+} from '../constants/suspension-reasons.constant'
 import { Region } from '../../region/entities/region.entity'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionDto } from '../../region/dto/region.dto'
+import { OrganizationDeletedEvent } from '../events/organization-deleted.event'
+import { OrganizationAssertDeletableEvent } from '../events/organization-assert-deletable.event'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { getOrganizationCacheKey } from '../constants/organization-cache-keys.constant'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -73,6 +84,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     @InjectRepository(Region)
     private readonly regionRepository: Repository<Region>,
     private readonly regionService: RegionService,
+    @InjectRedis() private readonly redis: Redis,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -113,13 +125,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
         users: {
           userId,
         },
+        deletedAt: IsNull(),
       },
     })
   }
 
   async findOne(organizationId: string): Promise<Organization | null> {
     return this.organizationRepository.findOne({
-      where: { id: organizationId },
+      where: { id: organizationId, deletedAt: IsNull() },
     })
   }
 
@@ -132,21 +145,63 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       return null
     }
 
-    return this.organizationRepository.findOne({ where: { id: sandbox.organizationId } })
+    return this.organizationRepository.findOne({
+      where: {
+        id: sandbox.organizationId,
+        deletedAt: IsNull(),
+      },
+    })
   }
 
   async findPersonal(userId: string): Promise<Organization> {
     return this.findPersonalWithEntityManager(this.organizationRepository.manager, userId)
   }
 
-  async delete(organizationId: string): Promise<void> {
-    const organization = await this.organizationRepository.findOne({ where: { id: organizationId } })
+  async delete(params: {
+    organizationId: string
+    organization?: Organization
+    allowPersonalDeletion?: boolean
+    entityManager?: EntityManager
+  }): Promise<void> {
+    const { organizationId, allowPersonalDeletion = false, entityManager } = params
+
+    if (!entityManager) {
+      return this.organizationRepository.manager.transaction((em) => this.delete({ ...params, entityManager: em }))
+    }
+
+    let organization = params.organization
+    if (!organization) {
+      organization = await entityManager.findOne(Organization, {
+        where: { id: organizationId, deletedAt: IsNull() },
+      })
+    }
 
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    return this.removeWithEntityManager(this.organizationRepository.manager, organization)
+    if (organization.personal && !allowPersonalDeletion) {
+      throw new ForbiddenException('Cannot delete personal organization')
+    }
+
+    await this.assertOrganizationCanBeDeleted(organization)
+
+    // Soft delete the organization
+    organization.deletedAt = new Date()
+    await entityManager.save(organization)
+
+    // Emit event for side effects handled by other services
+    await this.eventEmitter.emitAsync(
+      OrganizationEvents.DELETED,
+      new OrganizationDeletedEvent(entityManager, organization.id),
+    )
+
+    // Invalidate organization cache
+    try {
+      await this.redis.del(getOrganizationCacheKey(organizationId))
+    } catch (error) {
+      this.logger.error(`Failed to invalidate organization cache for ${organizationId}:`, error)
+    }
   }
 
   async updateQuota(organizationId: string, updateDto: UpdateOrganizationQuotaDto): Promise<void> {
@@ -346,7 +401,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   ): Promise<Organization> {
     if (personal) {
       const count = await entityManager.count(Organization, {
-        where: { createdBy, personal: true },
+        where: { createdBy, deletedAt: IsNull(), personal: true },
       })
       if (count > 0) {
         throw new ForbiddenException('Personal organization already exists')
@@ -355,7 +410,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
     // set some limit to the number of created organizations
     const createdCount = await entityManager.count(Organization, {
-      where: { createdBy },
+      where: { createdBy, deletedAt: IsNull() },
     })
     if (createdCount >= 10) {
       throw new ForbiddenException('You have reached the maximum number of created organizations')
@@ -377,11 +432,11 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     if (!creatorEmailVerified && !this.configService.get('skipUserEmailVerification')) {
       organization.suspended = true
       organization.suspendedAt = new Date()
-      organization.suspensionReason = 'Please verify your email address'
+      organization.suspensionReason = VERIFY_EMAIL_SUSPENSION_REASON
     } else if (this.configService.get('billingApiUrl') && !personal) {
       organization.suspended = true
       organization.suspendedAt = new Date()
-      organization.suspensionReason = 'Payment method required'
+      organization.suspensionReason = PAYMENT_METHOD_REQUIRED_SUSPENSION_REASON
     }
 
     organization.sandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
@@ -415,19 +470,6 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return organization
   }
 
-  private async removeWithEntityManager(
-    entityManager: EntityManager,
-    organization: Organization,
-    force = false,
-  ): Promise<void> {
-    if (!force) {
-      if (organization.personal) {
-        throw new ForbiddenException('Cannot delete personal organization')
-      }
-    }
-    await entityManager.remove(organization)
-  }
-
   private async unsuspendPersonalWithEntityManager(entityManager: EntityManager, userId: string): Promise<void> {
     const organization = await this.findPersonalWithEntityManager(entityManager, userId)
 
@@ -440,7 +482,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
 
   private async findPersonalWithEntityManager(entityManager: EntityManager, userId: string): Promise<Organization> {
     const organization = await entityManager.findOne(Organization, {
-      where: { createdBy: userId, personal: true },
+      where: { createdBy: userId, deletedAt: IsNull(), personal: true },
     })
 
     if (!organization) {
@@ -607,20 +649,77 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
     const organization = await this.findPersonalWithEntityManager(payload.entityManager, payload.userId)
 
-    await this.removeWithEntityManager(payload.entityManager, organization, true)
+    await this.delete({
+      organizationId: organization.id,
+      organization,
+      allowPersonalDeletion: true,
+      entityManager: payload.entityManager,
+    })
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    await entityManager.delete(RegionQuota, { organizationId })
   }
 
   assertOrganizationIsNotSuspended(organization: Organization): void {
-    if (!organization.suspended) {
+    if (!organization.isSuspended) {
       return
     }
 
-    if (organization.suspendedUntil ? organization.suspendedUntil > new Date() : true) {
-      if (organization.suspensionReason) {
-        throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
-      } else {
-        throw new ForbiddenException('Organization is suspended')
+    if (organization.suspensionReason) {
+      throw new ForbiddenException(`Organization is suspended: ${organization.suspensionReason}`)
+    } else {
+      throw new ForbiddenException('Organization is suspended')
+    }
+  }
+
+  /**
+   * Asserts that the organization can be deleted.
+   *
+   * @param organization - The organization to check
+   * @throws HttpException - If the organization cannot be deleted because of a suspension or resources that must be cleaned up first, with concatenated error messages and HTTP status 428
+   */
+  async assertOrganizationCanBeDeleted(organization: Organization): Promise<void> {
+    const errors: string[] = []
+
+    // assert organization is not suspended due to a reason that prohibits deletion
+    if (
+      organization.isSuspended &&
+      organization.suspensionReason !== VERIFY_EMAIL_SUSPENSION_REASON &&
+      organization.suspensionReason !== PAYMENT_METHOD_REQUIRED_SUSPENSION_REASON
+    ) {
+      errors.push('Organization is currently suspended. Please contact support to resolve the suspension first.')
+    }
+
+    // assert organization has no resources that must be cleaned up first
+    const event = new OrganizationAssertDeletableEvent(organization.id)
+
+    const results = await Promise.allSettled([
+      this.eventEmitter.emitAsync(OrganizationEvents.ASSERT_NO_USERS, event),
+      this.eventEmitter.emitAsync(OrganizationEvents.ASSERT_NO_SANDBOXES, event),
+      this.eventEmitter.emitAsync(OrganizationEvents.ASSERT_NO_SNAPSHOTS, event),
+      this.eventEmitter.emitAsync(OrganizationEvents.ASSERT_NO_VOLUMES, event),
+      this.eventEmitter.emitAsync(OrganizationEvents.ASSERT_NO_RUNNERS, event),
+    ])
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        const reason = result.reason
+        if (reason instanceof Error) {
+          errors.push(reason.message)
+        } else {
+          errors.push(String(reason))
+        }
       }
+    }
+
+    if (errors.length > 0) {
+      throw new HttpException(errors.join('; '), HttpStatus.PRECONDITION_REQUIRED)
     }
   }
 }
