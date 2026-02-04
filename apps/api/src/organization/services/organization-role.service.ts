@@ -6,9 +6,12 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { In, Repository } from 'typeorm'
+import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationRoleDto } from '../dto/create-organization-role.dto'
 import { UpdateOrganizationRoleDto } from '../dto/update-organization-role.dto'
 import { OrganizationRole } from '../entities/organization-role.entity'
+import { OrganizationDeletedEvent } from '../events/organization-deleted.event'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 
 @Injectable()
 export class OrganizationRoleService {
@@ -84,5 +87,14 @@ export class OrganizationRoleService {
     }
 
     await this.organizationRoleRepository.remove(role)
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    await entityManager.delete(OrganizationRole, { organizationId })
   }
 }

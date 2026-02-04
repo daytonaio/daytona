@@ -20,6 +20,7 @@ import { Organization } from '../entities/organization.entity'
 import { OrganizationUser } from '../entities/organization-user.entity'
 import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 import { AccessDeniedException } from '../../common/exceptions/access-denied.exception'
+import { getOrganizationCacheKey, getOrganizationUserCacheKey } from '../constants/organization-cache-keys.constant'
 
 /**
  * Guard that validates access to an organization, enforces role/permission requirements, and enriches the auth context with organization data.
@@ -100,7 +101,8 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
    */
   private async getOrganization(organizationId: string): Promise<Organization | null> {
     try {
-      const cachedOrganization = await this.redis.get(`organization:${organizationId}`)
+      const cacheKey = getOrganizationCacheKey(organizationId)
+      const cachedOrganization = await this.redis.get(cacheKey)
       if (cachedOrganization) {
         return JSON.parse(cachedOrganization)
       }
@@ -125,7 +127,8 @@ export class OrganizationAuthContextGuard extends AuthContextGuard {
    */
   private async getOrganizationUser(organizationId: string, userId: string): Promise<OrganizationUser | null> {
     try {
-      const cachedOrganizationUser = await this.redis.get(`organization-user:${organizationId}:${userId}`)
+      const cacheKey = getOrganizationUserCacheKey(organizationId, userId)
+      const cachedOrganizationUser = await this.redis.get(cacheKey)
       if (cachedOrganizationUser) {
         return JSON.parse(cachedOrganizationUser)
       }

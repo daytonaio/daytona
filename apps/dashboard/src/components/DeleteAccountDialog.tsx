@@ -22,27 +22,24 @@ import { Spinner } from '@/components/ui/spinner'
 import { cn, pluralize } from '@/lib/utils'
 import React, { useState } from 'react'
 
-interface DeleteOrganizationDialogProps {
-  organizationName: string
-  onDeleteOrganization: () => Promise<{ success: boolean; reasons: string[] }>
+interface DeleteAccountDialogProps {
+  onDeleteAccount: () => Promise<{ success: boolean; reasons: string[] }>
   loading: boolean
 }
 
-export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> = ({
-  organizationName,
-  onDeleteOrganization,
-  loading,
-}) => {
+const CONFIRM_TEXT = 'DELETE'
+
+export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onDeleteAccount, loading }) => {
   const [open, setOpen] = useState(false)
-  const [confirmName, setConfirmName] = useState('')
+  const [confirmText, setConfirmText] = useState('')
   const [prerequisites, setPrerequisites] = useState<DeletePrerequisite[]>([])
 
-  const handleDeleteOrganization = async () => {
+  const handleDeleteAccount = async () => {
     setPrerequisites([])
-    const result = await onDeleteOrganization()
+    const result = await onDeleteAccount()
     if (result.success) {
       setOpen(false)
-      setConfirmName('')
+      setConfirmText('')
       setPrerequisites([])
     } else {
       setPrerequisites(parseDeleteErrors(result.reasons))
@@ -57,25 +54,25 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
       onOpenChange={(isOpen) => {
         setOpen(isOpen)
         if (!isOpen) {
-          setConfirmName('')
+          setConfirmText('')
           setPrerequisites([])
         }
       }}
     >
       <DialogTrigger asChild>
         <Button variant="destructive" className="w-auto px-4">
-          Delete Organization
+          Delete Account
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle className={cn('flex items-center gap-2')}>
-            {hasBlockers ? 'Cannot Delete Organization' : 'Delete Organization'}
+            {hasBlockers ? 'Cannot Delete Account' : 'Delete Account'}
           </DialogTitle>
           <DialogDescription>
             {hasBlockers
               ? 'We found active resources or requirements that must be resolved before deletion can proceed.'
-              : 'This will permanently delete all associated data. This action cannot be undone.'}
+              : 'This will permanently delete your account and all associated data including sandboxes, snapshots, and organizations you created. This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -90,30 +87,30 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
           </div>
         ) : (
           <form
-            id="delete-organization-form"
+            id="delete-account-form"
             className="space-y-6 overflow-y-auto px-1 pb-1"
             onSubmit={async (e) => {
               e.preventDefault()
-              await handleDeleteOrganization()
+              await handleDeleteAccount()
             }}
           >
             <div className="space-y-6">
               <div className="space-y-3">
                 <Label htmlFor="confirm-action">
-                  Please type <span className="font-bold cursor-text select-all">{organizationName}</span> to confirm
+                  Please type <span className="font-bold cursor-text select-all">{CONFIRM_TEXT}</span> to confirm
                 </Label>
                 <Input
                   id="confirm-action"
-                  value={confirmName}
-                  onChange={(e) => setConfirmName(e.target.value)}
-                  placeholder={organizationName}
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder={CONFIRM_TEXT}
                 />
               </div>
             </div>
           </form>
         )}
 
-        <DialogFooter className="sm:justify-between">
+        <DialogFooter className="sm:justify-between items-center">
           {hasBlockers && (
             <p className="text-sm text-muted-foreground">
               {pluralize(prerequisites.length, 'issue', 'issues')} preventing deletion.
@@ -127,12 +124,12 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
             </DialogClose>
             <Button
               type={hasBlockers ? 'button' : 'submit'}
-              form={hasBlockers ? undefined : 'delete-organization-form'}
+              form={hasBlockers ? undefined : 'delete-account-form'}
               variant="destructive"
-              disabled={hasBlockers || confirmName !== organizationName || loading}
+              disabled={hasBlockers || confirmText !== CONFIRM_TEXT || loading}
             >
               {loading && <Spinner />}
-              Delete Organization
+              Delete Account
             </Button>
           </div>
         </DialogFooter>

@@ -28,6 +28,7 @@ import { RegionSSHGatewayAuthContext } from '../common/interfaces/region-ssh-gat
 import { OtelCollectorAuthContext } from '../common/interfaces/otel-collector-auth-context.interface'
 import { HealthCheckAuthContext } from '../common/interfaces/health-check-auth-context.interface'
 import { handleAuthError } from './utils/handle-auth-error.util'
+import { getApiKeyUserCacheKey, getApiKeyValidationCacheKey } from '../api-key/constants/api-key-cache-keys.constant'
 
 type ApiKeyAuthContext =
   | UserAuthContext
@@ -250,10 +251,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
   }
 
   private generateValidationCacheKey(token: string): string {
-    return `api-key:validation:${generateApiKeyHash(token)}`
+    const keyHash = generateApiKeyHash(token)
+    return getApiKeyValidationCacheKey(keyHash)
   }
 
   private generateUserCacheKey(userId: string): string {
-    return `api-key:user:${userId}`
+    return getApiKeyUserCacheKey(userId)
   }
 }
