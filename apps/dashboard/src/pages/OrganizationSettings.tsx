@@ -62,15 +62,22 @@ const OrganizationSettings: React.FC = () => {
     }
   }
 
-  const handleDeleteOrganization = async () => {
+  const parseDeleteOrganizationError = (error: unknown): string[] => {
+    const rawMessage = String((error as { message?: string } | undefined)?.message || error || '')
+    return rawMessage
+      .split(';')
+      .map((reason) => reason.trim())
+      .filter(Boolean)
+  }
+
+  const handleDeleteOrganization = async (): Promise<{ success: boolean; reasons: string[] }> => {
     try {
       await deleteOrganizationMutation.mutateAsync({ organizationId: selectedOrganization.id })
       toast.success('Organization deleted successfully')
       await refreshOrganizations()
-      return true
+      return { success: true, reasons: [] }
     } catch (error) {
-      handleApiError(error, 'Failed to delete organization')
-      return false
+      return { success: false, reasons: parseDeleteOrganizationError(error) }
     }
   }
 

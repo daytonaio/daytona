@@ -21,8 +21,6 @@ import { OrganizationResourcePermissionsUnassignedEvent } from '../events/organi
 import { OrganizationDeletedEvent } from '../events/organization-deleted.event'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
-import { UserEvents } from '../../user/constants/user-events.constant'
-import { UserDeletedEvent } from '../../user/events/user-deleted.event'
 import { OrganizationAssertDeletableEvent } from '../events/organization-assert-deletable.event'
 import { getOrganizationUserCacheKey } from '../constants/organization-cache-keys.constant'
 
@@ -219,32 +217,6 @@ export class OrganizationUserService {
   }
 
   @OnAsyncEvent({
-    event: UserEvents.DELETED,
-  })
-  async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
-    const memberships = await payload.entityManager.find(OrganizationUser, {
-      where: {
-        userId: payload.userId,
-        organization: {
-          personal: false,
-        },
-      },
-      relations: {
-        organization: true,
-      },
-    })
-
-    /*
-    // TODO
-    // user deletion will fail if the user is the only owner of some non-personal organization
-    // potential improvements:
-    //  - auto-delete the organization if there are no other members
-    //  - auto-promote a new owner if there are other members
-    */
-    await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
-  }
-
-  @OnAsyncEvent({
     event: OrganizationEvents.ASSERT_NO_USERS,
   })
   async handleAssertNoUsers(event: OrganizationAssertDeletableEvent): Promise<void> {
@@ -266,6 +238,10 @@ export class OrganizationUserService {
     if (count > 1) {
       throw new Error(`Organization has ${count - 1} user(s) that must be removed from the organization`)
     }
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    return this.organizationUserRepository.count({ where: { userId } })
   }
 
   @OnAsyncEvent({
