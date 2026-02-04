@@ -12,14 +12,15 @@ import { cn } from '@/lib/utils'
 const Accordion = AccordionPrimitive.Root
 
 const AccordionItem = ({ className, ...props }: React.ComponentProps<typeof AccordionPrimitive.Item>) => (
-  <AccordionPrimitive.Item className={cn('border-b', className)} {...props} />
+  <AccordionPrimitive.Item className={cn('border-b last:border-b-0', className)} {...props} />
 )
 
 const AccordionTrigger = ({
   className,
   children,
+  icon,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger>) => (
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger> & { icon?: React.ReactNode }) => (
   <AccordionPrimitive.Header className="flex">
     <AccordionPrimitive.Trigger
       className={cn(
@@ -29,7 +30,7 @@ const AccordionTrigger = ({
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+      {icon || <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 )

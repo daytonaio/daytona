@@ -38,11 +38,13 @@ import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
 import EmailVerify from './pages/EmailVerify'
+import Experimental from './pages/Experimental'
 import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
 import Logout from './pages/Logout'
 import NotFound from './pages/NotFound'
+import Playground from './pages/Playground'
 import Regions from './pages/Regions'
 import Registries from './pages/Registries'
 import Runners from './pages/Runners'
@@ -51,7 +53,6 @@ import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
-import Experimental from './pages/Experimental'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 
@@ -265,6 +266,7 @@ function App() {
             </OwnerAccessOrganizationPageWrapper>
           }
         />
+        <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

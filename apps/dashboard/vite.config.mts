@@ -6,6 +6,7 @@ import fs from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
 import checker from 'vite-plugin-checker'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 const outDir = '../../dist/apps/dashboard'
 
@@ -26,6 +27,14 @@ export default defineConfig((mode) => ({
   },
   plugins: [
     react(),
+    // Required for @daytonaio/sdk
+    nodePolyfills({
+      globals: { global: true, process: true, Buffer: true },
+      overrides: {
+        path: 'path-browserify-win32',
+      },
+      protocolImports: false,
+    }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
     // enforce typechecking for build mode
@@ -52,9 +61,19 @@ export default defineConfig((mode) => ({
     },
   ],
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
-    },
+    alias: [
+      // Resolve @daytonaio/sdk to the built distribution
+      {
+        find: '@daytonaio/sdk',
+        replacement: path.resolve(__dirname, '../../libs/sdk-typescript/src'),
+      },
+      // Target @ but not @daytonaio,
+      {
+        // find: /^@(?!daytonaio)/,
+        find: '@',
+        replacement: path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
+      },
+    ],
   },
   // Uncomment this if you are using workers.
   // worker: {

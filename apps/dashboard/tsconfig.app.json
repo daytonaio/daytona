@@ -9,7 +9,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@daytonaio/*": ["../../libs/*"] // Re-declare the monorepo library paths
+      "@daytonaio/*": ["../../libs/*"],
+      "@daytonaio/sdk": ["../../libs/sdk-typescript/src/index.ts"]
     }
   },
   "exclude": [
