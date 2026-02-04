@@ -19,6 +19,7 @@ export enum AuditAction {
   DECLINE = 'decline',
   LINK_ACCOUNT = 'link_account',
   UNLINK_ACCOUNT = 'unlink_account',
+  DELETE_ACCOUNT = 'delete_account',
   LEAVE_ORGANIZATION = 'leave_organization',
   REGENERATE_KEY_PAIR = 'regenerate_key_pair',
   UPDATE_SCHEDULING = 'update_scheduling',

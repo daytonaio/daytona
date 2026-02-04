@@ -1355,6 +1355,21 @@ paths:
       tags:
         - organizations
   /users/me:
+    delete:
+      operationId: deleteAuthenticatedUser
+      parameters: []
+      responses:
+        '204':
+          description: Account deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete authenticated user account
+      tags:
+        - users
     get:
       operationId: getAuthenticatedUser
       parameters: []
@@ -9868,6 +9883,7 @@ components:
         - destroyed
         - started
         - stopped
+        - resized
         - archived
       type: string
     SandboxVolume:
