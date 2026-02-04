@@ -43,6 +43,7 @@ import { BuildInfo } from './build-info.entity'
 @Index('sandbox_pending_idx', ['id'], {
   where: `"pending" = true`,
 })
+@Index('sandbox_unassigned_idx', ['unassigned'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
   @PrimaryGeneratedColumn('uuid')
@@ -203,6 +204,11 @@ export class Sandbox {
 
   @Column({ default: false })
   pending?: boolean
+
+  //  internal flag to indicate if the sandbox is unassigned (e.g. warm pool)
+  //  unassigned sandboxes are not visible to users and cannot be interacted with
+  @Column({ default: false })
+  unassigned: boolean
 
   @Column({ default: () => 'MD5(random()::text)' })
   authToken: string
