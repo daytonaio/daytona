@@ -1,0 +1,100 @@
+---
+title: Daytona サンドボックスで Claude Code を実行する
+description: Daytona のサンドボックスで Claude Code を実行するための手順を解説したガイド。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Claude Code を使用すると、自然言語とコードを用いてタスクの自動化およびオーケストレーションを行うことができます。Daytona を使えば、分離されたサンドボックス内で Claude Code を簡単に実行できるため、安全に実験したりタスクを実行したりできます。
+
+## Daytona サンドボックスで Claude Code を実行する \{#running-claude-code-in-a-daytona-sandbox\}
+
+Claude Code を Daytona のサンドボックス内で直接動かしてタスクを実行できます。次の例では、サンドボックスのセットアップ、Claude Code のインストール、タスクのプログラムからの実行、およびログをリアルタイムでストリーミングする方法を示します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    > **注:** sync モードおよび async モードの両方で PTY 出力のストリーミングをサポートしていますが、`on_data` による自動バックグラウンドコールバックを提供するため、`AsyncDaytona` の利用を推奨します。同期 API では、出力を処理するためにブロッキングな反復処理または手動でスレッドを扱う必要があります。
+
+    ```python
+    import os
+    import asyncio
+    from daytona import AsyncDaytona
+
+    async def run_claude_code():
+        async with AsyncDaytona() as daytona:
+            sandbox = await daytona.create()
+
+            # 実行する Claude Code コマンドを定義
+            claude_command = "claude --dangerously-skip-permissions -p 'write a dad joke about penguins' --output-format stream-json --verbose"
+
+            # サンドボックス内に Claude Code をインストール
+            await sandbox.process.exec("npm install -g @anthropic-ai/claude-code")
+
+            pty_handle = await sandbox.process.create_pty_session(
+                id="claude", on_data=lambda data: print(data.decode(), end="")
+            )
+
+            await pty_handle.wait_for_connection()
+
+            # サンドボックス内で Claude Code コマンドを実行
+            await pty_handle.send_input(
+                f"ANTHROPIC_API_KEY={os.environ['ANTHROPIC_API_KEY']} {claude_command}\n"
+            )
+
+            # これ以上コマンドを実行しない場合は、これを使ってターミナルセッションを閉じる
+            # await pty_handle.send_input("exit\n")
+
+            await pty_handle.wait()
+
+            # 作業が完了し PTY ターミナルを閉じたら、サンドボックスを削除してリソースをクリーンアップすることが推奨されます
+            # await sandbox.delete()
+
+    if __name__ == "__main__":
+        asyncio.run(run_claude_code())
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from "@daytonaio/sdk";
+
+    const daytona = new Daytona();
+
+    try {
+        const sandbox = await daytona.create();
+
+        // 実行する Claude Code コマンドを定義
+        const claudeCommand =
+        "claude --dangerously-skip-permissions -p 'write a dad joke about penguins' --output-format stream-json --verbose";
+
+        // サンドボックス内に Claude Code をインストール
+        await sandbox.process.executeCommand("npm install -g @anthropic-ai/claude-code");
+
+        const ptyHandle = await sandbox.process.createPty({
+            id: "claude",
+            onData: (data) => {
+                process.stdout.write(data);
+            },
+        });
+
+        await ptyHandle.waitForConnection();
+
+        // サンドボックス内で Claude Code コマンドを実行
+        ptyHandle.sendInput(
+        `ANTHROPIC_API_KEY=${process.env.ANTHROPIC_API_KEY} ${claudeCommand}\n`
+        );
+
+        // これ以上コマンドを実行しない場合は、これを使ってターミナルセッションを閉じる
+        // ptyHandle.sendInput("exit\n")
+
+        await ptyHandle.wait();
+
+        // 作業が完了し PTY ターミナルを閉じたら、サンドボックスを削除してリソースをクリーンアップすることが推奨されます
+        // await sandbox.delete();
+    } catch (error) {
+        console.error("Failed to run Claude Code in Daytona sandbox:", error);
+    }
+    ```
+  </TabItem>
+</Tabs>
