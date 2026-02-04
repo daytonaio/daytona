@@ -5,10 +5,12 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
@@ -116,7 +118,8 @@ func (d *DockerClient) unmountAndRemoveDir(path string) {
 		}
 
 	} else {
-		garbagePath := filepath.Join(basePath, "garbage-"+strings.TrimPrefix(filepath.Base(cleanPath), volumeMountPrefix))
+		timestamp := time.Now().Unix()
+		garbagePath := filepath.Join(basePath, fmt.Sprintf("garbage-%d-%s", timestamp, strings.TrimPrefix(filepath.Base(cleanPath), volumeMountPrefix)))
 		log.Debugf("Renaming non-empty volume directory: %s", garbagePath)
 		err := os.Rename(cleanPath, garbagePath)
 		if err != nil {
@@ -126,7 +129,11 @@ func (d *DockerClient) unmountAndRemoveDir(path string) {
 }
 
 func isDirEmpty(path string) bool {
-	entries, _ := os.ReadDir(path)
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		log.Errorf("Failed to read directory %s: %v", path, err)
+		return false
+	}
 	return len(entries) == 0
 }
 
@@ -138,5 +145,13 @@ func (d *DockerClient) isRecentlyCreated(path string, exclusionPeriod time.Durat
 	if err != nil {
 		return false
 	}
-	return time.Since(info.ModTime()) < exclusionPeriod
+
+	// Use ctime (inode change time) instead of mtime (content modification time)
+	stat, ok := info.Sys().(*syscall.Stat_t)
+	if !ok {
+		// Fallback to mtime if syscall.Stat_t is not available
+		return time.Since(info.ModTime()) < exclusionPeriod
+	}
+	ctime := time.Unix(stat.Ctim.Sec, stat.Ctim.Nsec)
+	return time.Since(ctime) < exclusionPeriod
 }
