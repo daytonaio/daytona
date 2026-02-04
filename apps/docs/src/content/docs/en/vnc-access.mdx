@@ -14,6 +14,10 @@ VNC and [Computer Use](/docs/en/computer-use) work together to enable both manua
 - **Desktop tool access**: use graphical IDEs, design tools, or other desktop software
 - **Agent observation**: watch AI agents perform automated tasks through Computer Use
 
+:::note[Sandbox image requirement]
+VNC and Computer Use require a sandbox with the default image. Sandboxes created with custom images do not include VNC support unless you install the [required packages](#required-packages).
+:::
+
 ## Access VNC from Dashboard
 
 Access the VNC desktop environment directly from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/sandboxes).
@@ -281,3 +285,31 @@ const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
 
 </TabItem>
 </Tabs>
+
+## Required packages
+
+The default sandbox image includes all packages required for VNC and Computer Use. If you are using a custom image, you need to install the following packages.
+
+### VNC and desktop environment
+
+| Package              | Description                                |
+| -------------------- | ------------------------------------------ |
+| **`xvfb`**           | X Virtual Framebuffer for headless display |
+| **`xfce4`**          | Desktop environment                        |
+| **`xfce4-terminal`** | Terminal emulator                          |
+| **`x11vnc`**         | VNC server                                 |
+| **`novnc`**          | Web-based VNC client                       |
+| **`dbus-x11`**       | D-Bus session support                      |
+
+### X11 libraries
+
+| Library           | Description                                 |
+| ----------------- | ------------------------------------------- |
+| **`libx11-6`**    | X11 client library                          |
+| **`libxrandr2`**  | X11 RandR extension (display configuration) |
+| **`libxext6`**    | X11 extensions library                      |
+| **`libxrender1`** | X11 rendering extension                     |
+| **`libxfixes3`**  | X11 fixes extension                         |
+| **`libxss1`**     | X11 screen saver extension                  |
+| **`libxtst6`**    | X11 testing extension (input simulation)    |
+| **`libxi6`**      | X11 input extension                         |
