@@ -32,6 +32,22 @@ const motionLoadingProps = {
   transition: { duration: 0.175 },
 }
 
+const computerUseMissingErrorMessage = (
+  <div>
+    <div>Computer-use dependencies are missing in the runtime environment.</div>
+    <div className="mt-2">
+      <a
+        href={`${DAYTONA_DOCS_URL}/en/vnc-access/`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary hover:underline"
+      >
+        See documentation on how to configure the runtime for computer-use
+      </a>
+    </div>
+  </div>
+)
+
 const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ getPortPreviewUrl, className }) => {
   const [loadingVNCUrl, setLoadingVNCUrl] = useState(true)
   const [VNCLoadingError, setVNCLoadingError] = useState<string | ReactNode>('')
@@ -103,37 +119,9 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
         const errorMessage = error?.response?.data?.message || error?.message || String(error)
         if (errorMessage === 'Computer-use functionality is not available') {
           toast.error('Computer-use functionality is not available', {
-            description: (
-              <div>
-                <div>Computer-use dependencies are missing in the runtime environment.</div>
-                <div className="mt-2">
-                  <a
-                    href={`${DAYTONA_DOCS_URL}/getting-started/computer-use`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                  >
-                    See documentation on how to configure the runtime for computer-use
-                  </a>
-                </div>
-              </div>
-            ),
+            description: computerUseMissingErrorMessage,
           })
-          setVNCLoadingError(
-            <div>
-              <div>Computer-use dependencies are missing in the runtime environment.</div>
-              <div className="mt-2">
-                <a
-                  href={`${DAYTONA_DOCS_URL}/getting-started/computer-use`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline"
-                >
-                  See documentation on how to configure the runtime for computer-use
-                </a>
-              </div>
-            </div>,
-          )
+          setVNCLoadingError(computerUseMissingErrorMessage)
         }
         handleApiError(error, 'Failed to check VNC status')
       }
