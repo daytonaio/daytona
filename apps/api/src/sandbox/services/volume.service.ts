@@ -20,6 +20,9 @@ import { v4 as uuidv4 } from 'uuid'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Organization } from '../../organization/entities/organization.entity'
 import { OnEvent } from '@nestjs/event-emitter'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationAssertDeletableEvent } from '../../organization/events/organization-assert-deletable.event'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -300,6 +303,32 @@ export class VolumeService {
       })
     } catch (err) {
       this.logger.error(err)
+    }
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.ASSERT_NO_VOLUMES,
+  })
+  async handleAssertNoVolumes(event: OrganizationAssertDeletableEvent): Promise<void> {
+    let count = 0
+
+    try {
+      count = await this.volumeRepository.count({
+        where: {
+          organizationId: event.organizationId,
+          state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
+        },
+      })
+    } catch (error) {
+      this.logger.error(
+        `Failed to check if the organization ${event.organizationId} has volumes that must be deleted`,
+        error,
+      )
+      throw new Error('Failed to check if the organization has volumes that must be deleted')
+    }
+
+    if (count > 0) {
+      throw new Error(`Organization has ${count} volume(s) that must be deleted`)
     }
   }
 }

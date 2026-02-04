@@ -22,6 +22,8 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 import { SandboxWarmPoolService } from './sandbox-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { OrganizationAssertDeletableEvent } from '../../organization/events/organization-assert-deletable.event'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { Runner } from '../entities/runner.entity'
@@ -2067,5 +2069,31 @@ export class SandboxService {
     )
 
     await this.sandboxRepository.update(sandboxId, { updateData, entity: sandboxToUpdate })
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.ASSERT_NO_SANDBOXES,
+  })
+  async handleAssertNoSandboxes(event: OrganizationAssertDeletableEvent): Promise<void> {
+    let count = 0
+
+    try {
+      count = await this.sandboxRepository.count({
+        where: {
+          organizationId: event.organizationId,
+          state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
+        },
+      })
+    } catch (error) {
+      this.logger.error(
+        `Failed to check if the organization ${event.organizationId} has sandboxes that must be destroyed`,
+        error,
+      )
+      throw new Error('Failed to check if the organization has sandboxes that must be destroyed')
+    }
+
+    if (count > 0) {
+      throw new Error(`Organization has ${count} sandbox(es) that must be destroyed`)
+    }
   }
 }
