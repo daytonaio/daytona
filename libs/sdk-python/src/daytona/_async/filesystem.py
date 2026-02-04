@@ -571,14 +571,14 @@ class AsyncFileSystem:
         )
 
     @overload
-    async def upload_file(self, file: bytes, remote_path: str, timeout: int = 30 * 60) -> None:
+    async def upload_file(self, src: bytes, dst: str, timeout: int = 30 * 60) -> None:
         """Uploads a file to the specified path in the Sandbox. If a file already exists at
         the destination path, it will be overwritten. This method is useful when you want to upload
         small files that fit into memory.
 
         Args:
-            file (bytes): File contents as a bytes object.
-            remote_path (str): Path to the destination file. Relative paths are resolved based on
+            src (bytes): File contents as a bytes object.
+            dst (str): Path to the destination file. Relative paths are resolved based on
             the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
@@ -602,15 +602,15 @@ class AsyncFileSystem:
         """
 
     @overload
-    async def upload_file(self, local_path: str, remote_path: str, timeout: int = 30 * 60) -> None:
+    async def upload_file(self, src: str, dst: str, timeout: int = 30 * 60) -> None:
         """Uploads a file from the local file system to the specified path in the Sandbox.
         If a file already exists at the destination path, it will be overwritten. This method uses
         streaming to upload the file, so it is useful when you want to upload larger files that may
         not fit into memory.
 
         Args:
-            local_path (str): Path to the local file to upload.
-            remote_path (str): Path to the destination file in the Sandbox. Relative paths are
+            src (str): Path to the local file to upload.
+            dst (str): Path to the destination file in the Sandbox. Relative paths are
             resolved based on the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
@@ -620,7 +620,7 @@ class AsyncFileSystem:
             ```
         """
 
-    async def upload_file(  # pyright: ignore[reportInconsistentOverload]
+    async def upload_file(
         self, src: str | bytes, dst: str, timeout: int = 30 * 60
     ) -> None:
         await self.upload_files([FileUpload(src, dst)], timeout)
