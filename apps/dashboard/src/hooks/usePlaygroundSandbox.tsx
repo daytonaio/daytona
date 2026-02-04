@@ -69,8 +69,13 @@ export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePla
       const newSandbox = await createSandboxFromParams()
       setSandbox(newSandbox)
     } catch (error) {
-      console.error('Failed to create sandbox:', error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       toast.error('Failed to create sandbox', {
+        description: (
+          <div>
+            <div>{errorMessage}</div>
+          </div>
+        ),
         action: {
           label: 'Try again',
           onClick: () => {
@@ -78,7 +83,7 @@ export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePla
           },
         },
       })
-      setError(error instanceof Error ? error.message : String(error))
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
       creatingRef.current = false
