@@ -106,10 +106,20 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
                     ? orgLimits.sandboxLifecycle
                     : undefined
 
-            if (customLimit) {
+            const customTtl =
+              throttler.name === 'authenticated'
+                ? orgLimits.authenticatedTtl
+                : throttler.name === 'sandbox-create'
+                  ? orgLimits.sandboxCreateTtl
+                  : throttler.name === 'sandbox-lifecycle'
+                    ? orgLimits.sandboxLifecycleTtl
+                    : undefined
+
+            if (customLimit || customTtl) {
               const modifiedProps = {
                 ...requestProps,
-                limit: customLimit,
+                ...(customLimit && { limit: customLimit }),
+                ...(customTtl && { ttl: customTtl * 1000, blockDuration: customTtl * 1000 }),
               }
               return super.handleRequest(modifiedProps)
             }
@@ -136,9 +146,14 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     return user?.role === 'ssh-gateway' || user?.role === 'proxy' || user?.role === 'runner'
   }
 
-  private async getCachedOrganizationRateLimits(
-    organizationId: string,
-  ): Promise<{ authenticated: number | null; sandboxCreate: number | null; sandboxLifecycle: number | null } | null> {
+  private async getCachedOrganizationRateLimits(organizationId: string): Promise<{
+    authenticated: number | null
+    sandboxCreate: number | null
+    sandboxLifecycle: number | null
+    authenticatedTtl: number | null
+    sandboxCreateTtl: number | null
+    sandboxLifecycleTtl: number | null
+  } | null> {
     // If OrganizationService is not available (e.g., in UserModule), use default rate limits
     if (!this.organizationService) {
       return null
@@ -158,6 +173,9 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
           authenticated: organization.authenticatedRateLimit,
           sandboxCreate: organization.sandboxCreateRateLimit,
           sandboxLifecycle: organization.sandboxLifecycleRateLimit,
+          authenticatedTtl: organization.authenticatedRateLimitTtl,
+          sandboxCreateTtl: organization.sandboxCreateRateLimitTtl,
+          sandboxLifecycleTtl: organization.sandboxLifecycleRateLimitTtl,
         }
         await this.redis.set(cacheKey, JSON.stringify(limits), 'EX', 60)
         return limits

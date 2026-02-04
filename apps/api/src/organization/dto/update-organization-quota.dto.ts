@@ -33,4 +33,13 @@ export class UpdateOrganizationQuotaDto {
 
   @ApiProperty({ nullable: true })
   sandboxLifecycleRateLimit?: number
+
+  @ApiProperty({ nullable: true })
+  authenticatedRateLimitTtl?: number
+
+  @ApiProperty({ nullable: true })
+  sandboxCreateRateLimitTtl?: number
+
+  @ApiProperty({ nullable: true })
+  sandboxLifecycleRateLimitTtl?: number
 }
