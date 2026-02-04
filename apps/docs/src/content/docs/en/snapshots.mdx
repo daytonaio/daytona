@@ -396,15 +396,38 @@ daytona.snapshot.create(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create a snapshot with custom resources
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:      "my-snapshot",
+    Image:     image,
+    Resources: &types.Resources{CPU: 2, Memory: 4, Disk: 8},
+})
+if err != nil {
+    return err
+}
+
+// Stream build logs
+for log := range logChan {
+    fmt.Println(log)
+}
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), and [Ruby SDK](/docs/en/ruby-sdk) references:
+For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), [Ruby SDK](/docs/en/ruby-sdk), and [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create) references:
 
 > [**CreateSnapshotParams (Python SDK)**](/docs/en/python-sdk/sync/snapshot#createsnapshotparams)
 >
 > [**CreateSnapshotParams (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#createsnapshotparams)
 >
 > [**CreateSnapshotParams (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#create)
+>
+> [**CreateSnapshotParams (Go SDK)**](/docs/en/go-sdk/types#CreateSnapshotParams)
 
 ### Regions
 
@@ -463,17 +486,12 @@ require 'daytona'
 
 daytona = Daytona::Daytona.new
 
-# Create a Snapshot with custom resources
+# Create a Snapshot in a specific region
 daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
     name: 'my-snapshot',
     image: Daytona::Image.debian_slim('3.12'),
-    # All resource parameters are optional:
-    resources: Daytona::Resources.new(
-      cpu: 2,
-      memory: 4,
-      disk: 8
-    )
+    region_id: 'us'
   ),
   on_logs: proc { |chunk| puts chunk }
 )
