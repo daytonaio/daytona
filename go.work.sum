@@ -127,8 +127,10 @@ github.com/danieljoos/wincred v1.2.1 h1:dl9cBrupW8+r5250DYkYxocLeZ1Y4vB1kxgtjxw8
 github.com/danieljoos/wincred v1.2.1/go.mod h1:uGaFL9fDn3OLTvzCGulzE+SzjEe5NGlh5FdCcyfPwps=
 github.com/daytonaio/daytona/libs/api-client-go v0.137.0/go.mod h1:1wKpdKRwUzXN7KqR+8MMpq2iEGrprBCgFgFbli89DMo=
 github.com/daytonaio/daytona/libs/api-client-go v0.138.0/go.mod h1:1wKpdKRwUzXN7KqR+8MMpq2iEGrprBCgFgFbli89DMo=
+github.com/daytonaio/daytona/libs/api-client-go v0.139.0/go.mod h1:1wKpdKRwUzXN7KqR+8MMpq2iEGrprBCgFgFbli89DMo=
 github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.137.0/go.mod h1:YJD2yevQHDl0jIrlrzTerZJxJZS6wBOVMfl1A2efkVY=
 github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.138.0/go.mod h1:YJD2yevQHDl0jIrlrzTerZJxJZS6wBOVMfl1A2efkVY=
+github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.139.0/go.mod h1:YJD2yevQHDl0jIrlrzTerZJxJZS6wBOVMfl1A2efkVY=
 github.com/dblohm7/wingoes v0.0.0-20240820181039-f2b84150679e/go.mod h1:SUxUaAK/0UG5lYyZR1L1nC4AaYYvSSYTWQSH3FPcxKU=
 github.com/docker/go-connections v0.4.0 h1:El9xVISelRB7BuFusrZozjnkIM5YnzCViNKohAFqRJQ=
 github.com/docker/go-connections v0.4.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
