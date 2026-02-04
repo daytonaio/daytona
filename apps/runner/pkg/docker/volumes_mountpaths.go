@@ -89,8 +89,14 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		err = d.waitForMountReady(ctx, runnerVolumeMountPath)
 		if err != nil {
 			if !dirExisted {
-				exec.Command("umount", runnerVolumeMountPath).Run()
-				os.Remove(runnerVolumeMountPath)
+				umountErr := exec.Command("umount", runnerVolumeMountPath).Run()
+				if umountErr != nil {
+					log.Warnf("Failed to unmount %s during cleanup: %v", runnerVolumeMountPath, umountErr)
+				}
+				removeErr := os.Remove(runnerVolumeMountPath)
+				if removeErr != nil {
+					log.Warnf("Failed to remove mount directory %s during cleanup: %v", runnerVolumeMountPath, removeErr)
+				}
 			}
 			return nil, fmt.Errorf("mount %s not ready after mounting: %s", runnerVolumeMountPath, err)
 		}
