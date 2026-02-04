@@ -10,6 +10,7 @@ import {
   Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   Logger,
   NotFoundException,
   Param,
@@ -69,6 +70,43 @@ export class UserController {
     }
 
     return UserDto.fromUser(user)
+  }
+
+  @Delete('/me')
+  @HttpCode(204)
+  @ApiOperation({
+    summary: 'Delete authenticated user account',
+    operationId: 'deleteAuthenticatedUser',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Account deleted successfully',
+  })
+  @Audit({
+    action: AuditAction.DELETE_ACCOUNT,
+    targetType: AuditTarget.USER,
+  })
+  async deleteAuthenticatedUser(@AuthContext() authContext: IAuthContext): Promise<void> {
+    await this.userService.remove(authContext.userId)
+
+    if (this.configService.get('oidc.managementApi.enabled')) {
+      try {
+        const token = await this.getManagementApiToken()
+        await axios.delete(
+          `${this.configService.getOrThrow('oidc.issuer')}/api/v2/users/${encodeURIComponent(authContext.userId)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+      } catch (error) {
+        this.logger.error(
+          `Failed to delete user ${authContext.userId} from OIDC provider`,
+          error?.message || String(error),
+        )
+      }
+    }
   }
 
   @Post()

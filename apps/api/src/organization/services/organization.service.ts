@@ -64,6 +64,7 @@ import { OrganizationAssertDeletableEvent } from '../events/organization-assert-
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { getOrganizationCacheKey } from '../constants/organization-cache-keys.constant'
+import { OrganizationUserService } from './organization-user.service'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit, TrackableJobExecutions, OnApplicationShutdown {
@@ -88,6 +89,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly regionService: RegionService,
     private readonly encryptionService: EncryptionService,
     @InjectRedis() private readonly redis: Redis,
+    private readonly organizationUserService: OrganizationUserService,
   ) {
     this.defaultOrganizationQuota = this.configService.getOrThrow('defaultOrganizationQuota')
     this.defaultSandboxLimitedNetworkEgress = this.configService.getOrThrow(
@@ -763,6 +765,14 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
   })
   @TrackJobExecution()
   async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
+    const count = await this.organizationUserService.countByUserId(payload.userId)
+    if (count > 1) {
+      throw new HttpException(
+        'You must leave or delete any non-personal organizations you are a member of before deleting your account',
+        HttpStatus.PRECONDITION_REQUIRED,
+      )
+    }
+
     const organization = await this.findPersonalWithEntityManager(payload.entityManager, payload.userId)
 
     await this.delete({
