@@ -14,11 +14,11 @@ import { BoltIcon, FolderIcon, GitBranchIcon, SquareTerminalIcon } from 'lucide-
 import { useCallback, useEffect, useState } from 'react'
 import SandboxFileSystem from './FileSystem'
 import SandboxGitOperations from './GitOperations'
-import SandboxManagmentParameters from './Managment'
+import SandboxManagementParameters from './Management'
 import SandboxProcessCodeExecution from './ProcessCodeExecution'
 
 const sectionIcons = {
-  [SandboxParametersSections.SANDBOX_MANAGMENT]: <BoltIcon strokeWidth={1.5} />,
+  [SandboxParametersSections.SANDBOX_MANAGEMENT]: <BoltIcon strokeWidth={1.5} />,
   [SandboxParametersSections.GIT_OPERATIONS]: <GitBranchIcon strokeWidth={1.5} />,
   [SandboxParametersSections.FILE_SYSTEM]: <FolderIcon strokeWidth={1.5} />,
   [SandboxParametersSections.PROCESS_CODE_EXECUTION]: <SquareTerminalIcon strokeWidth={1.5} />,
@@ -26,7 +26,7 @@ const sectionIcons = {
 
 const SandboxParameters = ({ className }: { className?: string }) => {
   const [openedParametersSections, setOpenedParametersSections] = useState<SandboxParametersSections[]>([
-    SandboxParametersSections.SANDBOX_MANAGMENT,
+    SandboxParametersSections.SANDBOX_MANAGEMENT,
   ])
 
   const [snapshotsData, setSnapshotsData] = useState<Array<SnapshotDto>>([])
@@ -83,8 +83,8 @@ const SandboxParameters = ({ className }: { className?: string }) => {
                   <div className="space-y-4">
                     {section.value === SandboxParametersSections.FILE_SYSTEM && <SandboxFileSystem />}
                     {section.value === SandboxParametersSections.GIT_OPERATIONS && <SandboxGitOperations />}
-                    {section.value === SandboxParametersSections.SANDBOX_MANAGMENT && (
-                      <SandboxManagmentParameters snapshotsData={snapshotsData} snapshotsLoading={snapshotsLoading} />
+                    {section.value === SandboxParametersSections.SANDBOX_MANAGEMENT && (
+                      <SandboxManagementParameters snapshotsData={snapshotsData} snapshotsLoading={snapshotsLoading} />
                     )}
                     {section.value === SandboxParametersSections.PROCESS_CODE_EXECUTION && (
                       <SandboxProcessCodeExecution />

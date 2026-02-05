@@ -17,12 +17,15 @@ import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 
-type SandboxManagmentParametersProps = {
+type SandboxManagementParametersProps = {
   snapshotsData: Array<SnapshotDto>
   snapshotsLoading: boolean
 }
 
-const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({ snapshotsData, snapshotsLoading }) => {
+const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = ({
+  snapshotsData,
+  snapshotsLoading,
+}) => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
   const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(sandboxParametersState['language'])
   const [sandboxSnapshotName, setSandboxSnapshotName] = useState<string | undefined>(
@@ -168,4 +171,4 @@ const SandboxManagmentParameters: React.FC<SandboxManagmentParametersProps> = ({
   )
 }
 
-export default SandboxManagmentParameters
+export default SandboxManagementParameters
