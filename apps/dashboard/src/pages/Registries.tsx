@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
@@ -189,16 +189,14 @@ const Registries: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center gap-1.5">
             <Label htmlFor="url">Registry URL</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Defaults to docker.io when left blank</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Defaults to docker.io when left blank</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <Input
             id="url"
@@ -230,16 +228,15 @@ const Registries: React.FC = () => {
         <div className="space-y-3">
           <div className="flex items-center gap-1.5">
             <Label htmlFor="project">Project</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Leave this empty for private Docker Hub entries</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Leave this empty for private Docker Hub entries</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
           <Input
             id="project"

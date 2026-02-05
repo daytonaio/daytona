@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useLinkAccountMutation } from '@/hooks/mutations/useLinkAccountMutation'
 import { useUnlinkAccountMutation } from '@/hooks/mutations/useUnlinkAccountMutation'
 import { useAccountProvidersQuery } from '@/hooks/queries/useAccountProvidersQuery'
@@ -192,19 +192,17 @@ const LinkedAccount = ({
           <AccountProviderIcon provider={provider.name} className="h-4 w-4" />
           <div>{provider.displayName}</div>
           {provider.isPrimary && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="gap-1 text-xs">
-                    <ShieldCheck className="h-3 w-3" />
-                    Primary
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Primary accounts cannot be unlinked</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="gap-1 text-xs">
+                  <ShieldCheck className="h-3 w-3" />
+                  Primary
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Primary accounts cannot be unlinked</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         <p className="text-sm text-muted-foreground">

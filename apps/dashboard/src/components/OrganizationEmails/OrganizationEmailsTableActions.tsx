@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
 import { Button } from '../ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { OrganizationEmailsTableActionsProps } from './types'
 
 export function OrganizationEmailsTableActions({
@@ -39,24 +39,22 @@ export function OrganizationEmailsTableActions({
 
   return (
     <div className="flex items-center gap-1">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResendVerification}
-              disabled={isLoading || email.verified}
-              className="h-8 w-8 p-0"
-            >
-              <Mail className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="left">
-            <p>{email.verified ? 'Email already verified' : 'Resend verification email'}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResendVerification}
+            disabled={isLoading || email.verified}
+            className="h-8 w-8 p-0"
+          >
+            <Mail className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">
+          <p>{email.verified ? 'Email already verified' : 'Resend verification email'}</p>
+        </TooltipContent>
+      </Tooltip>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogTrigger asChild>

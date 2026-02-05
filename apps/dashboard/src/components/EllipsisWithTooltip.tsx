@@ -6,7 +6,7 @@
 import { cn } from '@/lib/utils'
 import { Slot } from '@radix-ui/react-slot'
 import { useRef, useState } from 'react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 export function EllipsisWithTooltip({
   children,
@@ -24,28 +24,26 @@ export function EllipsisWithTooltip({
   const Comp = asChild ? Slot : 'div'
 
   return (
-    <TooltipProvider>
-      <Tooltip
-        open={isOpen}
-        onOpenChange={(shouldOpen) => {
-          if (shouldOpen) {
-            const isTruncated = triggerRef.current && triggerRef.current.scrollWidth > triggerRef.current.clientWidth
-            if (isTruncated) {
-              setIsOpen(true)
-            }
-          } else {
-            setIsOpen(false)
+    <Tooltip
+      open={isOpen}
+      onOpenChange={(shouldOpen) => {
+        if (shouldOpen) {
+          const isTruncated = triggerRef.current && triggerRef.current.scrollWidth > triggerRef.current.clientWidth
+          if (isTruncated) {
+            setIsOpen(true)
           }
-        }}
-        delayDuration={300}
-      >
-        <TooltipTrigger asChild>
-          <Comp ref={triggerRef} className={cn('truncate', className)} {...props}>
-            {children}
-          </Comp>
-        </TooltipTrigger>
-        <TooltipContent>{children}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+        } else {
+          setIsOpen(false)
+        }
+      }}
+      delayDuration={300}
+    >
+      <TooltipTrigger asChild>
+        <Comp ref={triggerRef} className={cn('truncate', className)} {...props}>
+          {children}
+        </Comp>
+      </TooltipTrigger>
+      <TooltipContent>{children}</TooltipContent>
+    </Tooltip>
   )
 }

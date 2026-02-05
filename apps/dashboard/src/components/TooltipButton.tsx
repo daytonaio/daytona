@@ -5,7 +5,7 @@
 
 import { ComponentProps, ReactNode } from 'react'
 import { Button } from './ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 type Props = ComponentProps<typeof Button> & {
   tooltipText: string
@@ -24,14 +24,12 @@ function TooltipButton({
   ...props
 }: Props) {
   return (
-    <TooltipProvider>
-      <Tooltip delayDuration={0}>
-        <TooltipTrigger asChild>
-          <Button ref={ref} {...props} size={size} aria-label={tooltipText} />
-        </TooltipTrigger>
-        <TooltipContent side={side}>{tooltipContent || <div>{tooltipText}</div>}</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip delayDuration={0}>
+      <TooltipTrigger asChild>
+        <Button ref={ref} {...props} size={size} aria-label={tooltipText} />
+      </TooltipTrigger>
+      <TooltipContent side={side}>{tooltipContent || <div>{tooltipText}</div>}</TooltipContent>
+    </Tooltip>
   )
 }
 
