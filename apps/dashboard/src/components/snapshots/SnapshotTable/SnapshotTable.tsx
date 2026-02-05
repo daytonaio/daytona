@@ -3,12 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { useCommandPaletteActions } from '@/components/CommandPalette'
+import { SelectionToast } from '@/components/SelectionToast'
+import { Skeleton } from '@/components/ui/skeleton'
 import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { Box } from 'lucide-react'
+import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { Pagination } from '../../Pagination'
 import { TableEmptyState } from '../../TableEmptyState'
@@ -17,6 +21,7 @@ import { SnapshotBulkAction, SnapshotBulkActionAlertDialog } from './BulkActionA
 import { columns } from './columns'
 import {
   getSnapshotBulkActionCounts,
+  isSnapshotActivatable,
   isSnapshotDeactivatable,
   isSnapshotDeletable,
   useSnapshotsCommands,
@@ -31,6 +36,7 @@ interface DataTableProps {
   onDelete: (snapshot: SnapshotDto) => void
   onBulkDelete?: (snapshots: SnapshotDto[]) => void
   onBulkDeactivate?: (snapshots: SnapshotDto[]) => void
+  onBulkActivate?: (snapshots: SnapshotDto[]) => void
   onActivate?: (snapshot: SnapshotDto) => void
   onDeactivate?: (snapshot: SnapshotDto) => void
   onCreateSnapshot?: () => void
@@ -58,6 +64,7 @@ export function SnapshotTable({
   pageCount,
   totalItems,
   onBulkDelete,
+  onBulkActivate,
   onBulkDeactivate,
   onPaginationChange,
   sorting,
@@ -126,6 +133,8 @@ export function SnapshotTable({
   })
 
   const selectedRows = table.getSelectedRowModel().rows
+  const hasSelection = selectedRows.length > 0
+
   const [pendingBulkAction, setPendingBulkAction] = useState<SnapshotBulkAction | null>(null)
   const selectedSnapshots = selectedRows.map((row) => row.original)
 
@@ -180,8 +189,14 @@ export function SnapshotTable({
     bulkActionCounts,
     onDelete: () => setPendingBulkAction(SnapshotBulkAction.Delete),
     onDeactivate: () => setPendingBulkAction(SnapshotBulkAction.Deactivate),
+    onActivate: () => onBulkActivate?.(selectedSnapshots.filter(isSnapshotActivatable)),
     onCreateSnapshot: onCreateSnapshot,
   })
+
+  const { setIsOpen } = useCommandPaletteActions()
+  const handleOpenCommandPalette = () => {
+    setIsOpen(true)
+  }
 
   return (
     <div>
@@ -205,11 +220,19 @@ export function SnapshotTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(10)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column, i, arr) =>
+                      i === arr.length - 1 ? null : (
+                        <TableCell key={column.id}>
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -260,6 +283,16 @@ export function SnapshotTable({
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <Pagination table={table} selectionEnabled={deletePermitted} entityName="Snapshots" totalItems={totalItems} />
+        <AnimatePresence>
+          {hasSelection && (
+            <SelectionToast
+              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+              selectedCount={selectedRows.length}
+              onClearSelection={() => table.resetRowSelection()}
+              onActionClick={handleOpenCommandPalette}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       <SnapshotBulkActionAlertDialog

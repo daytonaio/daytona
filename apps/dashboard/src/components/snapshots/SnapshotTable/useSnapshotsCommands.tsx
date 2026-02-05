@@ -5,13 +5,14 @@
 
 import { pluralize } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytonaio/api-client'
-import { CheckSquare2Icon, MinusSquareIcon, PauseIcon, PlusIcon, TrashIcon } from 'lucide-react'
+import { CheckSquare2Icon, MinusSquareIcon, PauseIcon, PlayIcon, PlusIcon, TrashIcon } from 'lucide-react'
 import { useMemo } from 'react'
 import { CommandConfig, useRegisterCommands } from '../../CommandPalette'
 
 export interface SnapshotBulkActionCounts {
   deletable: number
   deactivatable: number
+  activatable: number
 }
 
 export function isSnapshotDeletable(snapshot: SnapshotDto): boolean {
@@ -22,10 +23,15 @@ export function isSnapshotDeactivatable(snapshot: SnapshotDto): boolean {
   return snapshot.state === SnapshotState.ACTIVE
 }
 
+export function isSnapshotActivatable(snapshot: SnapshotDto): boolean {
+  return snapshot.state === SnapshotState.INACTIVE
+}
+
 export function getSnapshotBulkActionCounts(snapshots: SnapshotDto[]): SnapshotBulkActionCounts {
   return {
     deletable: snapshots.filter(isSnapshotDeletable).length,
     deactivatable: snapshots.filter(isSnapshotDeactivatable).length,
+    activatable: snapshots.filter(isSnapshotActivatable).length,
   }
 }
 
@@ -39,6 +45,7 @@ interface UseSnapshotsCommandsProps {
   bulkActionCounts: SnapshotBulkActionCounts
   onDelete: () => void
   onDeactivate: () => void
+  onActivate: () => void
   onCreateSnapshot?: () => void
 }
 
@@ -50,6 +57,7 @@ export function useSnapshotsCommands({
   toggleAllRowsSelected,
   bulkActionCounts,
   onDelete,
+  onActivate,
   onDeactivate,
   onCreateSnapshot,
 }: UseSnapshotsCommandsProps) {
@@ -94,6 +102,15 @@ export function useSnapshotsCommands({
       })
     }
 
+    if (writePermitted && bulkActionCounts.activatable > 0) {
+      commands.push({
+        id: 'activate-snapshots',
+        label: `Activate ${pluralize(bulkActionCounts.activatable, 'Snapshot', 'Snapshots')}`,
+        icon: <PlayIcon className="w-4 h-4" />,
+        onSelect: onActivate,
+      })
+    }
+
     if (deletePermitted && bulkActionCounts.deletable > 0) {
       commands.push({
         id: 'delete-snapshots',
@@ -113,6 +130,7 @@ export function useSnapshotsCommands({
     bulkActionCounts,
     onDelete,
     onDeactivate,
+    onActivate,
     onCreateSnapshot,
   ])
 
