@@ -568,6 +568,8 @@ export class SandboxService {
     warmPoolSandbox.labels = createSandboxDto.labels || {}
     warmPoolSandbox.organizationId = organization.id
     warmPoolSandbox.createdAt = new Date()
+    // Reset lastActivityAt when warm pool sandbox is assigned to an organization
+    warmPoolSandbox.lastActivityAt = new Date()
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       warmPoolSandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)

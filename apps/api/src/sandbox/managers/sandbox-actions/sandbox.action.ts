@@ -84,6 +84,11 @@ export abstract class SandboxAction {
 
     sandbox.state = state
 
+    // Reset lastActivityAt when sandbox becomes STARTED to prevent immediate auto-stop
+    if (state === SandboxState.STARTED) {
+      sandbox.lastActivityAt = new Date()
+    }
+
     if (runnerId !== undefined) {
       sandbox.runnerId = runnerId
     }

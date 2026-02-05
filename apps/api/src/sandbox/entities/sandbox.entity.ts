@@ -221,6 +221,9 @@ export class Sandbox {
     // Set name - use provided name or fallback to ID
     this.name = name || this.id
     this.region = region
+    // Initialize lastActivityAt to track when sandbox was created
+    // This value is then only updated via explicit updateLastActivityAt() calls
+    this.lastActivityAt = new Date()
   }
 
   public setBackupState(
@@ -264,11 +267,6 @@ export class Sandbox {
     this.desiredState = SandboxDesiredState.DESTROYED
     this.backupState = BackupState.NONE
     this.name = 'DESTROYED_' + this.name + '_' + Date.now()
-  }
-
-  @BeforeUpdate()
-  updateLastActivityAt() {
-    this.lastActivityAt = new Date()
   }
 
   @BeforeUpdate()

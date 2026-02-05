@@ -111,6 +111,8 @@ export class JobStateHandlerService {
         )
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
+        // Reset lastActivityAt when sandbox becomes STARTED to prevent immediate auto-stop
+        sandbox.lastActivityAt = new Date()
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           sandbox.daemonVersion = metadata.daemonVersion
@@ -151,6 +153,8 @@ export class JobStateHandlerService {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
+        // Reset lastActivityAt when sandbox becomes STARTED to prevent immediate auto-stop
+        sandbox.lastActivityAt = new Date()
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           sandbox.daemonVersion = metadata.daemonVersion
@@ -426,6 +430,8 @@ export class JobStateHandlerService {
         )
         sandbox.state = SandboxState.STARTED
         sandbox.errorReason = null
+        // Reset lastActivityAt when sandbox becomes STARTED to prevent immediate auto-stop
+        sandbox.lastActivityAt = new Date()
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         sandbox.state = SandboxState.ERROR
