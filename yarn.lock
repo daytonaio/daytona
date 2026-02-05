@@ -19615,6 +19615,7 @@ __metadata:
     vaul: "npm:^1.1.2"
     verdaccio: "npm:6.0.5"
     vite: "npm:^7.1.12"
+    vite-bundle-analyzer: "npm:^1.3.6"
     vite-plugin-checker: "npm:^0.8.0"
     vite-plugin-node-polyfills: "npm:^0.24.0"
     vite-plugin-svgr: "npm:^4.3.0"
@@ -38928,6 +38929,15 @@ __metadata:
     d3-time: "npm:^3.0.0"
     d3-timer: "npm:^3.0.1"
   checksum: 10c0/bad36de3bf4d406834743c2e99a8281d786af324d7e84b7f7a2fc02c27a3779034fb0c3c4707d4c8e68683334d924a67100cfa13985235565e83b9877f8e2ffd
+  languageName: node
+  linkType: hard
+
+"vite-bundle-analyzer@npm:^1.3.6":
+  version: 1.3.6
+  resolution: "vite-bundle-analyzer@npm:1.3.6"
+  bin:
+    analyze: dist/bin.js
+  checksum: 10c0/0a999c91fc30cf0fc02784ae252df9de16f29ad4343f09611c0064de454e52c46e59c13dcf2a2325eea04aa960d46ce213e9b14acce6349c56231ef4fb567828
   languageName: node
   linkType: hard
 
