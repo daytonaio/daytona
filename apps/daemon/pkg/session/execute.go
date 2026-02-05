@@ -160,7 +160,7 @@ var cmdWrapperFormat string = `
 
 	# Run your command
 	{ %s; } < "$ip" > "$sp" 2> "$ep"
-	echo "$?" >> %s
+	echo "$?" >> %q
 
 	# drain labelers (cleanup via trap)
 	wait "$r1" "$r2"
