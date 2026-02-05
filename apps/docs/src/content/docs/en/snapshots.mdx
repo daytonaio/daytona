@@ -90,7 +90,7 @@ snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotPara
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot create my-snapshot --image python:3.11-slim --cpu 2 --memory 4
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --cpu 2 --memory 4
 ```
 
 </TabItem>
@@ -102,7 +102,7 @@ curl https://app.daytona.io/api/snapshots \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
   --data '{
-    "name": "my-snapshot",
+    "name": "my-awesome-snapshot",
     "imageName": "python:3.11-slim",
     "cpu": 2,
     "memory": 4
@@ -140,9 +140,8 @@ Once the snapshot is pulled, validated, and has an `Active` state, it is ready t
 <TabItem label="Python" icon="seti:python">
 
 ```python
-image = Image.debian_slim('3.12').pip_install('numpy')
 daytona.snapshot.create(
-    CreateSnapshotParams(name='my-snapshot', image=image),
+    CreateSnapshotParams(name='my-awesome-snapshot', image='python:3.11-slim'),
     on_logs=lambda chunk: print(chunk, end=""),
 )
 ```
@@ -151,16 +150,14 @@ daytona.snapshot.create(
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-const image = Image.debianSlim('3.12').pipInstall('numpy');
-await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: console.log });
+await daytona.snapshot.create({ name: 'my-awesome-snapshot', image: 'python:3.11-slim' }, { onLogs: console.log });
 ```
 
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-image = Image.debian_slim('3.12').pip_install('numpy')
-params = CreateSnapshotParams.new(name: 'my-snapshot', image: image)
+params = CreateSnapshotParams.new(name: 'my-awesome-snapshot', image: 'python:3.11-slim')
 snapshot = daytona.snapshot.create(params) do |chunk|
   print chunk
 end
@@ -170,7 +167,6 @@ end
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Create from Docker Hub image
 snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
     Name:  "my-awesome-snapshot",
     Image: "python:3.11-slim",
@@ -189,7 +185,7 @@ for log := range logChan {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot create my-snapshot --image python:3.11-slim
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim
 ```
 
 </TabItem>
@@ -201,7 +197,7 @@ curl https://app.daytona.io/api/snapshots \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
   --data '{
-    "name": "my-snapshot",
+    "name": "my-awesome-snapshot",
     "imageName": "python:3.11-slim"
   }'
 ```
@@ -360,7 +356,7 @@ daytona = Daytona()
 # Create a snapshot with custom resources
 daytona.snapshot.create(
   CreateSnapshotParams(
-    name="my-snapshot",
+    name="my-awesome-snapshot",
     image=Image.debian_slim("3.12"),
     resources=Resources(
       cpu=2,
@@ -383,7 +379,7 @@ const daytona = new Daytona()
 // Create a snapshot with custom resources
 await daytona.snapshot.create(
   {
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Image.debianSlim('3.13'),
     resources: {
       cpu: 2,
@@ -407,7 +403,7 @@ daytona = Daytona::Daytona.new
 # Create a snapshot with custom resources
 daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Daytona::Image.debian_slim('3.12'),
     resources: Daytona::Resources.new(
       cpu: 2,
@@ -426,7 +422,7 @@ daytona.snapshot.create(
 // Create a snapshot with custom resources
 image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
 snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
-    Name:      "my-snapshot",
+    Name:      "my-awesome-snapshot",
     Image:     image,
     Resources: &types.Resources{CPU: 2, Memory: 4, Disk: 8},
 })
@@ -444,7 +440,7 @@ for log := range logChan {
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot create my-snapshot --image python:3.11-slim --cpu 2 --memory 4 --disk 8
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --cpu 2 --memory 4 --disk 8
 ```
 
 </TabItem>
@@ -456,7 +452,7 @@ curl https://app.daytona.io/api/snapshots \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
   --data '{
-    "name": "my-snapshot",
+    "name": "my-awesome-snapshot",
     "imageName": "python:3.11-slim",
     "cpu": 2,
     "memory": 4,
@@ -502,7 +498,7 @@ daytona = Daytona()
 # Create a Snapshot in a specific region
 daytona.snapshot.create(
   CreateSnapshotParams(
-    name="my-snapshot",
+    name="my-awesome-snapshot",
     image=Image.debian_slim("3.12"),
     region_id="us",
   ),
@@ -522,7 +518,7 @@ const daytona = new Daytona();
 // Create a Snapshot in a specific region
 await daytona.snapshot.create(
   {
-    name: "my-snapshot",
+    name: "my-awesome-snapshot",
     image: Image.debianSlim("3.13"),
     regionId: "us",
   },
@@ -541,7 +537,7 @@ daytona = Daytona::Daytona.new
 # Create a Snapshot in a specific region
 daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Daytona::Image.debian_slim('3.12'),
     region_id: 'us'
   ),
@@ -553,7 +549,7 @@ daytona.snapshot.create(
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona snapshot create my-snapshot --image python:3.11-slim --region us
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --region us
 ```
 
 </TabItem>
@@ -565,7 +561,7 @@ curl https://app.daytona.io/api/snapshots \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
   --data '{
-    "name": "my-snapshot",
+    "name": "my-awesome-snapshot",
     "imageName": "python:3.11-slim",
     "regionId": "us"
   }'
