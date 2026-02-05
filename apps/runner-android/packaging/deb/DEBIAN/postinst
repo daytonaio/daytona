@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e
+
+# Create required directories
+mkdir -p /var/lib/cloud-hypervisor/{sandboxes,snapshots,images,kernels,firmware}
+mkdir -p /var/run/cloud-hypervisor
+mkdir -p /etc/daytona
+
+# Create default environment file if it doesn't exist
+if [ ! -f /etc/daytona/runner-ch.env ]; then
+    cat > /etc/daytona/runner-ch.env << 'EOF'
+# Daytona Runner CH Configuration
+# DAYTONA_API_URL=https://api.daytona.io
+# DAYTONA_RUNNER_TOKEN=your-token-here
+
+# Cloud Hypervisor paths
+CH_SOCKETS_PATH=/var/run/cloud-hypervisor
+CH_SANDBOXES_PATH=/var/lib/cloud-hypervisor/sandboxes
+CH_SNAPSHOTS_PATH=/var/lib/cloud-hypervisor/snapshots
+CH_KERNEL_PATH=/var/lib/cloud-hypervisor/kernels/vmlinux
+CH_FIRMWARE_PATH=/var/lib/cloud-hypervisor/firmware/hypervisor-fw
+
+# Network
+CH_BRIDGE_NAME=br0
+
+# For remote CH host mode (optional)
+# CH_SSH_HOST=root@ch-host.example.com
+# CH_SSH_KEY_PATH=/root/.ssh/id_rsa
+EOF
+    chmod 600 /etc/daytona/runner-ch.env
+fi
+
+# Reload systemd
+systemctl daemon-reload
+
+echo ""
+echo "Daytona Runner CH installed successfully!"
+echo ""
+echo "To configure, edit /etc/daytona/runner-ch.env"
+echo "Then start the service with: systemctl start daytona-runner"
+echo ""
+
+exit 0

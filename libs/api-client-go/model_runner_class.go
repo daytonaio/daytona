@@ -24,6 +24,7 @@ const (
 	RUNNERCLASS_LINUX       RunnerClass = "linux"
 	RUNNERCLASS_LINUX_EXP   RunnerClass = "linux-exp"
 	RUNNERCLASS_WINDOWS_EXP RunnerClass = "windows-exp"
+	RUNNERCLASS_ANDROID_EXP RunnerClass = "android-exp"
 )
 
 // All allowed values of RunnerClass enum
@@ -31,6 +32,7 @@ var AllowedRunnerClassEnumValues = []RunnerClass{
 	"linux",
 	"linux-exp",
 	"windows-exp",
+	"android-exp",
 }
 
 func (v *RunnerClass) UnmarshalJSON(src []byte) error {

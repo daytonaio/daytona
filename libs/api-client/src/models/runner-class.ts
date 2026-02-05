@@ -22,6 +22,7 @@ export const RunnerClass = {
   LINUX: 'linux',
   LINUX_EXP: 'linux-exp',
   WINDOWS_EXP: 'windows-exp',
+  ANDROID_EXP: 'android-exp',
 } as const
 
 export type RunnerClass = (typeof RunnerClass)[keyof typeof RunnerClass]

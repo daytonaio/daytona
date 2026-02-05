@@ -222,12 +222,13 @@ export class SandboxStartAction extends SandboxAction {
   async pullSnapshotToRunner(snapshotRef: string, runner: Runner) {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    // Windows runners use qcow2 snapshots from object storage, not Docker registries
+    // Experimental runners use qcow2 snapshots from object storage, not Docker registries
     // The runner will pull from object storage directly when creating the sandbox
     const isWindowsRunner = runner.class === RunnerClass.WINDOWS_EXPERIMENTAL
-    const isLinuxRunner = runner.class === RunnerClass.LINUX_EXPERIMENTAL
-    if (isWindowsRunner || isLinuxRunner) {
-      // For Windows runners, we call pullSnapshot without a Docker registry
+    const isLinuxExpRunner = runner.class === RunnerClass.LINUX_EXPERIMENTAL
+    const isAndroidRunner = runner.class === RunnerClass.ANDROID_EXPERIMENTAL
+    if (isWindowsRunner || isLinuxExpRunner || isAndroidRunner) {
+      // For experimental runners, we call pullSnapshot without a Docker registry
       // The runner will handle pulling from object storage
       let retries = 0
       while (retries < 10) {
@@ -335,9 +336,11 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    // Windows runners use qcow2 snapshots from object storage, not Docker registries
-    const isWindowsOrLinuxRunner =
-      runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
+    // Experimental runners use qcow2 snapshots from object storage, not Docker registries
+    const isExperimentalRunner =
+      runner.class === RunnerClass.WINDOWS_EXPERIMENTAL ||
+      runner.class === RunnerClass.LINUX_EXPERIMENTAL ||
+      runner.class === RunnerClass.ANDROID_EXPERIMENTAL
 
     let registry: DockerRegistry | undefined
     let entrypoint: string[]
@@ -347,7 +350,7 @@ export class SandboxStartAction extends SandboxAction {
       const snapshotRef = snapshot.ref
 
       // Only look up Docker registry for traditional runners
-      if (!isWindowsOrLinuxRunner) {
+      if (!isExperimentalRunner) {
         registry = await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRef, sandbox.organizationId)
         if (!registry) {
           throw new Error('No registry found for snapshot')

@@ -1,0 +1,89 @@
+{
+  "name": "runner-android",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner-android",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "go build -o ../../dist/apps/runner-android ./cmd/runner"
+      },
+      "configurations": {
+        "production": {
+          "command": "go build -o ../../dist/apps/runner-android -ldflags \"-X 'github.com/daytonaio/runner-android/internal.Version=$VERSION'\" ./cmd/runner"
+        }
+      }
+    },
+    "build-amd64": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "GOARCH=amd64 GOOS=linux go build -o ../../dist/apps/runner-android-amd64 ./cmd/runner"
+      },
+      "configurations": {
+        "production": {
+          "command": "GOARCH=amd64 GOOS=linux go build -o ../../dist/apps/runner-android-amd64 -ldflags \"-X 'github.com/daytonaio/runner-android/internal.Version=$VERSION'\" ./cmd/runner"
+        }
+      }
+    },
+    "serve3": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "cwd": "apps/runner-android",
+        "main": "./cmd/runner/main.go"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": ["build"]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}/pkg/api",
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
+      }
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "runner-android"
+      },
+      "dependsOn": ["check-version-env"]
+    },
+    "package-deb": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/apps/runner-android-deb/deb/opt/daytona",
+          "mkdir -p dist/apps/runner-android-deb/deb/etc/systemd/system",
+          "mkdir -p dist/apps/runner-android-deb/deb/DEBIAN",
+          "cp dist/apps/runner-android-amd64 dist/apps/runner-android-deb/deb/opt/daytona/runner-android",
+          "cp {projectRoot}/packaging/systemd/daytona-runner.service dist/apps/runner-android-deb/deb/etc/systemd/system/",
+          "cp {projectRoot}/packaging/deb/DEBIAN/postinst {projectRoot}/packaging/deb/DEBIAN/prerm {projectRoot}/packaging/deb/DEBIAN/postrm dist/apps/runner-android-deb/deb/DEBIAN/",
+          "VERSION=${VERSION:-0.1.0} envsubst < {projectRoot}/packaging/deb/DEBIAN/control > dist/apps/runner-android-deb/deb/DEBIAN/control",
+          "dpkg-deb --build dist/apps/runner-android-deb/deb dist/apps/runner-android-deb/daytona-runner-android_${VERSION:-0.0.0-dev}_amd64.deb"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build-amd64", "check-version-env"]
+    },
+    "push-manifest": {}
+  }
+}

@@ -388,10 +388,11 @@ export class SnapshotService {
       throw new ForbiddenException('You cannot delete a general snapshot')
     }
 
-    // Delete S3 artifacts immediately for linux-exp and windows-exp snapshots
+    // Delete S3 artifacts immediately for linux-exp, windows-exp, and android-exp snapshots
     if (
       snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
-      snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
+      snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+      snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
     ) {
       this.logger.log(
         `Deleting S3 artifacts for snapshot ${snapshotId} (runnerClass=${snapshot.runnerClass}, ref=${snapshot.ref})`,

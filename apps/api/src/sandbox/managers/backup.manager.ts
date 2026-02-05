@@ -306,10 +306,11 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       if (
         snapshot &&
         (snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
-          snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL)
+          snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL)
       ) {
         this.logger.log(
-          `Skipping backup for sandbox ${sandbox.id} with windows-exp or linux-exp snapshot ${sandbox.snapshot}`,
+          `Skipping backup for sandbox ${sandbox.id} with windows-exp, linux-exp, or android-exp snapshot ${sandbox.snapshot}`,
         )
         return
       }

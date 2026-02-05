@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+# Only on purge
+if [ "$1" = "purge" ]; then
+    # Remove configuration
+    rm -rf /etc/daytona/runner-ch.env
+    
+    # Note: We don't remove /var/lib/cloud-hypervisor to preserve VMs
+    echo "Note: /var/lib/cloud-hypervisor was preserved. Remove manually if needed."
+fi
+
+# Reload systemd
+systemctl daemon-reload
+
+exit 0

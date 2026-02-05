@@ -1,0 +1,1014 @@
+definitions:
+  BuildArgument:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    required:
+      - key
+      - value
+    type: object
+  BuildSnapshotRequestDTO:
+    properties:
+      buildArgs:
+        items:
+          $ref: '#/definitions/BuildArgument'
+        type: array
+      dockerfile:
+        type: string
+      path:
+        type: string
+      ref:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - dockerfile
+      - path
+      - ref
+    type: object
+  CreateSandboxDTO:
+    properties:
+      cpuQuota:
+        minimum: 1
+        type: integer
+      entrypoint:
+        items:
+          type: string
+        type: array
+      env:
+        additionalProperties:
+          type: string
+        type: object
+      fromVolumeId:
+        type: string
+      gpuDevices:
+        description: VFIO device paths for GPU passthrough
+        items:
+          type: string
+        type: array
+      gpuQuota:
+        minimum: 0
+        type: integer
+      id:
+        type: string
+      memoryQuota:
+        minimum: 1
+        type: integer
+      metadata:
+        additionalProperties:
+          type: string
+        type: object
+      networkAllowList:
+        type: string
+      networkBlockAll:
+        type: boolean
+      osUser:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
+      storageQuota:
+        minimum: 1
+        type: integer
+      userId:
+        type: string
+      volumes:
+        items:
+          $ref: '#/definitions/VolumeDTO'
+        type: array
+    required:
+      - id
+      - osUser
+      - snapshot
+      - userId
+    type: object
+  CreateSnapshotRequestDTO:
+    properties:
+      live:
+        description: If true, use optimistic mode (no pause); if false (default),
+          pause VM for consistency
+        type: boolean
+      name:
+        description: Name for the snapshot (e.g., "myapp-v1.0")
+        type: string
+      organizationId:
+        description: Organization ID to namespace the snapshot in S3
+        type: string
+      sandboxId:
+        description: ID of the sandbox to create snapshot from
+        type: string
+    required:
+      - name
+      - organizationId
+      - sandboxId
+    type: object
+  ForkSandboxDTO:
+    properties:
+      newSandboxId:
+        type: string
+      prefault:
+        description: Prefault memory pages for faster access
+        type: boolean
+    required:
+      - newSandboxId
+    type: object
+  ForkSandboxResponseDTO:
+    properties:
+      id:
+        type: string
+      parentId:
+        type: string
+      state:
+        type: string
+    type: object
+  PullSnapshotRequestDTO:
+    properties:
+      ref:
+        type: string
+      snapshot:
+        description: Snapshot name for the pulled image
+        type: string
+    required:
+      - ref
+    type: object
+  PushSnapshotRequestDTO:
+    properties:
+      ref:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - ref
+    type: object
+  RegistryDTO:
+    properties:
+      password:
+        type: string
+      server:
+        type: string
+      username:
+        type: string
+    type: object
+  RemoveImageRequestDTO:
+    properties:
+      ref:
+        type: string
+    required:
+      - ref
+    type: object
+  ResizeSandboxDTO:
+    properties:
+      cpu:
+        minimum: 1
+        type: integer
+      gpu:
+        minimum: 0
+        type: integer
+      memory:
+        minimum: 1
+        type: integer
+    type: object
+  SandboxInfoResponse:
+    properties:
+      backupError:
+        type: string
+      backupState:
+        $ref: '#/definitions/controllers.BackupState'
+      daemonVersion:
+        type: string
+      state:
+        $ref: '#/definitions/controllers.SandboxState'
+    type: object
+  SnapshotInfoResponseDTO:
+    properties:
+      created:
+        type: string
+      size:
+        type: integer
+    type: object
+  StartSandboxResponse:
+    properties:
+      daemonVersion:
+        type: string
+    type: object
+  TagImageRequestDTO:
+    properties:
+      source:
+        type: string
+      target:
+        type: string
+    required:
+      - source
+      - target
+    type: object
+  UpdateNetworkSettingsDTO:
+    properties:
+      networkAllowList:
+        type: string
+      networkBlockAll:
+        type: boolean
+      networkLimitEgress:
+        type: boolean
+    type: object
+  VolumeDTO:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+      target:
+        type: string
+    type: object
+  cloudhypervisor.MemoryStatsRecord:
+    properties:
+      available_kib:
+        type: integer
+      balloon_active:
+        type: boolean
+      balloon_size_kib:
+        type: integer
+      id:
+        type: integer
+      max_memory_kib:
+        type: integer
+      sandbox_id:
+        type: string
+      timestamp:
+        type: string
+      used_kib:
+        type: integer
+    type: object
+  controllers.BackupState:
+    enum:
+      - none
+      - in_progress
+      - completed
+      - failed
+    type: string
+    x-enum-varnames:
+      - BackupStateNone
+      - BackupStateInProgress
+      - BackupStateCompleted
+      - BackupStateFailed
+  controllers.MemoryStatsResponse:
+    properties:
+      count:
+        type: integer
+      from_time:
+        type: string
+      sandbox_ids:
+        items:
+          type: string
+        type: array
+      stats:
+        items:
+          $ref: '#/definitions/cloudhypervisor.MemoryStatsRecord'
+        type: array
+      to_time:
+        type: string
+    type: object
+  controllers.SandboxState:
+    enum:
+      - started
+      - stopped
+      - error
+      - creating
+      - unknown
+    type: string
+    x-enum-varnames:
+      - SandboxStateStarted
+      - SandboxStateStopped
+      - SandboxStateError
+      - SandboxStateCreating
+      - SandboxStateUnknown
+info:
+  contact: {}
+  description: Daytona Runner API - Cloud Hypervisor
+  title: Daytona Runner CH API
+  version: v0.0.0-dev
+paths:
+  /:
+    get:
+      description: Returns OK if the runner is healthy
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+        - health
+  /info:
+    get:
+      description: Returns information about the runner
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Runner info
+      tags:
+        - info
+  /sandboxes:
+    post:
+      consumes:
+        - application/json
+      description: Create a new sandbox from a snapshot
+      parameters:
+        - description: Sandbox configuration
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/StartSandboxResponse'
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Create a new sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}:
+    delete:
+      description: Clean up resources for a destroyed sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Sandbox removed
+          schema:
+            type: string
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Remove destroyed sandbox
+      tags:
+        - sandboxes
+    get:
+      description: Get information about a sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SandboxInfoResponse'
+        '404':
+          description: Not Found
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Get sandbox info
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/backup:
+    post:
+      description: Create a backup (snapshot) of a running sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '201':
+          description: Backup started
+          schema:
+            type: string
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Create backup
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/destroy:
+    post:
+      description: Destroy a sandbox and all its resources
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Sandbox destroyed
+          schema:
+            type: string
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Destroy a sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/fork:
+    post:
+      consumes:
+        - application/json
+      description: Create a CoW fork of a running/paused sandbox with memory state
+      parameters:
+        - description: Source Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Fork configuration
+          in: body
+          name: fork
+          required: true
+          schema:
+            $ref: '#/definitions/ForkSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/ForkSandboxResponseDTO'
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Fork a sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/network-settings:
+    post:
+      consumes:
+        - application/json
+      description: Update network blocking and allow list settings
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Network settings
+          in: body
+          name: settings
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateNetworkSettingsDTO'
+      responses:
+        '200':
+          description: Network settings updated
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Update network settings
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/proxy/{port}/{path}:
+    delete:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
+    get:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
+    post:
+      description: Forwards the request to the daemon's proxy endpoint which routes
+        to localhost:port
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Target port number
+          in: path
+          name: port
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to applications on specific ports
+      tags:
+        - proxy
+  /sandboxes/{sandboxId}/resize:
+    post:
+      consumes:
+        - application/json
+      description: Resize CPU, memory, or GPU allocation for a sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: New resource allocation
+          in: body
+          name: resize
+          required: true
+          schema:
+            $ref: '#/definitions/ResizeSandboxDTO'
+      responses:
+        '200':
+          description: Sandbox resized
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Resize a sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/start:
+    post:
+      description: Start a stopped or paused sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/StartSandboxResponse'
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Start a sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/stop:
+    post:
+      description: Stop (pause) a running sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Sandbox stopped
+          schema:
+            type: string
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Stop a sandbox
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/toolbox/{path}:
+    delete:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+    get:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+    post:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+  /snapshots/build:
+    post:
+      consumes:
+        - application/json
+      description: Builds a snapshot from a Dockerfile
+      parameters:
+        - description: Build request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/BuildSnapshotRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Build snapshot
+      tags:
+        - snapshots
+  /snapshots/create:
+    post:
+      consumes:
+        - application/json
+      description: Creates a snapshot from a running sandbox
+      parameters:
+        - description: Create request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSnapshotRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Create snapshot
+      tags:
+        - snapshots
+  /snapshots/exists:
+    get:
+      description: Checks if a snapshot exists
+      parameters:
+        - description: Snapshot reference
+          in: query
+          name: ref
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: boolean
+      summary: Check snapshot exists
+      tags:
+        - snapshots
+  /snapshots/info:
+    get:
+      description: Returns information about a snapshot
+      parameters:
+        - description: Snapshot reference
+          in: query
+          name: ref
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotInfoResponseDTO'
+      summary: Get snapshot info
+      tags:
+        - snapshots
+  /snapshots/logs:
+    get:
+      description: Returns build logs for a snapshot build
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: string
+      summary: Get build logs
+      tags:
+        - snapshots
+  /snapshots/pull:
+    post:
+      consumes:
+        - application/json
+      description: Pulls a snapshot from the registry
+      parameters:
+        - description: Pull request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PullSnapshotRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Pull snapshot
+      tags:
+        - snapshots
+  /snapshots/push:
+    post:
+      consumes:
+        - application/json
+      description: Pushes a snapshot to the registry
+      parameters:
+        - description: Push request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PushSnapshotRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Push snapshot
+      tags:
+        - snapshots
+  /snapshots/remove:
+    post:
+      consumes:
+        - application/json
+      description: Removes a snapshot
+      parameters:
+        - description: Remove request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/RemoveImageRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Remove snapshot
+      tags:
+        - snapshots
+  /snapshots/tag:
+    post:
+      consumes:
+        - application/json
+      description: Tags an image with a new reference
+      parameters:
+        - description: Tag request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/TagImageRequestDTO'
+      responses:
+        '200':
+          description: OK
+      summary: Tag image
+      tags:
+        - snapshots
+  /stats/memory:
+    get:
+      description: Returns memory statistics for sandboxes over a time range
+      operationId: GetMemoryStatsJSON
+      parameters:
+        - description: Filter by sandbox ID
+          in: query
+          name: sandbox
+          type: string
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.MemoryStatsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get memory statistics
+      tags:
+        - stats
+  /stats/memory/view:
+    get:
+      description: Returns an interactive HTML page with memory usage charts
+      operationId: GetMemoryStatsViewHTML
+      parameters:
+        - description: 'Lookback hours (default: 24)'
+          in: query
+          name: hours
+          type: integer
+      produces:
+        - text/html
+      responses:
+        '200':
+          description: HTML page
+          schema:
+            type: string
+      summary: Memory stats visualization
+      tags:
+        - stats
+security:
+  - Bearer: []
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and an API token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: '2.0'

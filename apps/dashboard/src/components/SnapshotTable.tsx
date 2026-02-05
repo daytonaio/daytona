@@ -45,6 +45,16 @@ const UbuntuIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 )
 
+const AndroidIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg viewBox="0 0 16 16" fill="currentColor" className={className}>
+    <path
+      fillRule="evenodd"
+      d="M15.48 9.83c-.39-2.392-1.768-4.268-3.653-5.338l1.106-2.432a.75.75 0 1 0-1.366-.62l-1.112 2.446A7.9 7.9 0 0 0 8 3.5a7.9 7.9 0 0 0-2.455.386L4.433 1.44a.75.75 0 1 0-1.366.62l1.106 2.432C2.288 5.562.909 7.438.52 9.83c-.13.798-.178 1.655.107 2.433.325.89.989 1.441 1.768 1.75.701.28 1.54.383 2.404.433.887.052 1.963.054 3.201.054s2.314-.002 3.2-.054c.864-.05 1.704-.154 2.405-.432.78-.31 1.443-.86 1.768-1.75.285-.78.237-1.636.107-2.434M2 10.071C1.53 12.961 3 13 8 13s6.47-.038 6-2.929C13.5 7 11 5 8 5s-5.5 2-6 5.071m8.5 1.179a.75.75 0 0 1-.75-.75V9a.75.75 0 0 1 1.5 0v1.5a.75.75 0 0 1-.75.75m-5.75-.75a.75.75 0 0 0 1.5 0V9a.75.75 0 0 0-1.5 0z"
+      clipRule="evenodd"
+    />
+  </svg>
+)
+
 const RunnerClassIcon: React.FC<{ runnerClass: RunnerClass }> = ({ runnerClass }) => {
   const iconClass = 'h-4 w-4'
 
@@ -90,6 +100,21 @@ const RunnerClassIcon: React.FC<{ runnerClass: RunnerClass }> = ({ runnerClass }
             </TooltipTrigger>
             <TooltipContent>
               <p>Windows (Experimental)</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )
+    case 'android-exp':
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <AndroidIcon className={iconClass} />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Android (Experimental)</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

@@ -7,4 +7,5 @@ export enum RunnerClass {
   LINUX = 'linux',
   LINUX_EXPERIMENTAL = 'linux-exp',
   WINDOWS_EXPERIMENTAL = 'windows-exp',
+  ANDROID_EXPERIMENTAL = 'android-exp',
 }

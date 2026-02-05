@@ -1,0 +1,17 @@
+Package: daytona-runner-ch
+Version: ${VERSION}
+Section: admin
+Priority: optional
+Architecture: amd64
+Depends: libc6 (>= 2.17), qemu-utils, iproute2, iptables, openssh-client
+Maintainer: Daytona Platforms Inc <support@daytona.io>
+Description: Daytona Runner for Cloud Hypervisor
+ The Daytona Runner for Cloud Hypervisor provides virtual machine management
+ capabilities for the Daytona platform using Cloud Hypervisor as the VMM.
+ .
+ Features:
+ - Fast VM creation and boot
+ - Live snapshot/restore for instant fork
+ - GPU passthrough via VFIO
+ - Hot-plug CPU and memory resizing
+ - Network isolation via iptables

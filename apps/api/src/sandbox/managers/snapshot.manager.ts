@@ -329,6 +329,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       // Separate runners by class type
       const windowsRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.WINDOWS_EXPERIMENTAL)
       const linuxExpRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX_EXPERIMENTAL)
+      const androidRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.ANDROID_EXPERIMENTAL)
       const dockerRunners = runnersToPropagateTo.filter((runner) => runner.class === RunnerClass.LINUX)
 
       // For Docker-based runners, get the registry
@@ -348,8 +349,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       const results = await Promise.allSettled(
         runnersToPropagateTo.map(async (runner) => {
           const snapshotRunner = await this.runnerService.getSnapshotRunner(runner.id, snapshot.ref)
-          const isWindowsOrLinuxRunner =
-            runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
+          const isExperimentalRunner =
+            runner.class === RunnerClass.WINDOWS_EXPERIMENTAL ||
+            runner.class === RunnerClass.LINUX_EXPERIMENTAL ||
+            runner.class === RunnerClass.ANDROID_EXPERIMENTAL
 
           try {
             if (!snapshotRunner) {
@@ -358,11 +361,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                 snapshot.ref,
                 SnapshotRunnerState.PULLING_SNAPSHOT,
               )
-              // Windows runners pull from object storage, Docker runners use registry
+              // Experimental runners pull from object storage, Docker runners use registry
               await this.pullSnapshotRunnerWithRetries(
                 runner,
                 snapshot.ref,
-                isWindowsOrLinuxRunner ? undefined : dockerRegistry,
+                isExperimentalRunner ? undefined : dockerRegistry,
               )
             } else if (snapshotRunner.state === SnapshotRunnerState.PULLING_SNAPSHOT) {
               await this.handleSnapshotRunnerStatePullingSnapshot(snapshotRunner, runner)
@@ -433,10 +436,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const retryTimeoutMinutes = 10
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > retryTimeoutMs) {
-      // Windows and Linux experimental runners pull from object storage, not Docker registries
-      const isWindowsOrLinuxRunner =
-        runner.class === RunnerClass.WINDOWS_EXPERIMENTAL || runner.class === RunnerClass.LINUX_EXPERIMENTAL
-      const dockerRegistry = isWindowsOrLinuxRunner
+      // Experimental runners pull from object storage, not Docker registries
+      const isExperimentalRunner =
+        runner.class === RunnerClass.WINDOWS_EXPERIMENTAL ||
+        runner.class === RunnerClass.LINUX_EXPERIMENTAL ||
+        runner.class === RunnerClass.ANDROID_EXPERIMENTAL
+      const dockerRegistry = isExperimentalRunner
         ? undefined
         : await this.dockerRegistryService.findOneBySnapshotImageName(snapshotRunner.snapshotRef)
       await this.pullSnapshotRunnerWithRetries(runner, snapshotRunner.snapshotRef, dockerRegistry)
@@ -497,11 +502,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
             },
           )
 
-          // Delete S3 artifacts directly from the API for linux-exp and windows-exp snapshots
+          // Delete S3 artifacts directly from the API for linux-exp, windows-exp, and android-exp snapshots
           // This handles the case where there are no SnapshotRunner records to trigger deletion
           if (
             snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
-            snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL
+            snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+            snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
           ) {
             this.logger.log(
               `Deleting S3 artifacts for snapshot ${snapshot.id} (runnerClass=${snapshot.runnerClass}, ref=${snapshot.ref})`,

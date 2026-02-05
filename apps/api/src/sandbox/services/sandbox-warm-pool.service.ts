@@ -116,9 +116,11 @@ export class SandboxWarmPoolService {
         },
       })
 
-      // Windows warm pool sandboxes wait in STOPPED state, Linux in STARTED state
+      // Experimental warm pool sandboxes wait in STOPPED state, Linux in STARTED state
       const expectedState =
-        snapshot.runnerClass === (RunnerClass.WINDOWS_EXPERIMENTAL || RunnerClass.LINUX_EXPERIMENTAL)
+        snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+        snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+        snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
           ? SandboxState.STOPPED
           : SandboxState.STARTED
 
@@ -176,12 +178,15 @@ export class SandboxWarmPoolService {
           where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
         })
 
-        // For Windows: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
+        // For experimental runners: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
         // For Linux: count only STARTED
-        const desiredStateFilter =
-          snapshot?.runnerClass === (RunnerClass.WINDOWS_EXPERIMENTAL || RunnerClass.LINUX_EXPERIMENTAL)
-            ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
-            : SandboxDesiredState.STARTED
+        const isExperimentalRunner =
+          snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+          snapshot?.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+          snapshot?.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
+        const desiredStateFilter = isExperimentalRunner
+          ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
+          : SandboxDesiredState.STARTED
 
         const sandboxCount = await this.sandboxRepository.count({
           where: {
@@ -248,12 +253,15 @@ export class SandboxWarmPoolService {
       where: [{ name: warmPoolItem.snapshot, general: true }, { name: warmPoolItem.snapshot }],
     })
 
-    // For Windows: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
+    // For experimental runners: count both STARTED (being created) and STOPPED (ready) to prevent over-provisioning
     // For Linux: count only STARTED
-    const desiredStateFilter =
-      snapshot?.runnerClass === (RunnerClass.WINDOWS_EXPERIMENTAL || RunnerClass.LINUX_EXPERIMENTAL)
-        ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
-        : SandboxDesiredState.STARTED
+    const isExperimentalRunner =
+      snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+      snapshot?.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+      snapshot?.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
+    const desiredStateFilter = isExperimentalRunner
+      ? In([SandboxDesiredState.STARTED, SandboxDesiredState.STOPPED])
+      : SandboxDesiredState.STARTED
 
     const sandboxCount = await this.sandboxRepository.count({
       where: {
@@ -299,11 +307,15 @@ export class SandboxWarmPoolService {
       ],
     })
 
-    if (!snapshot || snapshot.runnerClass !== (RunnerClass.WINDOWS_EXPERIMENTAL || RunnerClass.LINUX_EXPERIMENTAL)) {
+    const isExperimentalRunner =
+      snapshot?.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+      snapshot?.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+      snapshot?.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
+    if (!snapshot || !isExperimentalRunner) {
       return
     }
 
-    // Stop Windows warm pool sandboxes after they start
+    // Stop experimental warm pool sandboxes after they start
     this.logger.debug(`Stopping Windows warm pool sandbox ${event.sandbox.id} after start`)
 
     // Update the sandbox to stop it
