@@ -229,6 +229,17 @@ daytona create
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+```
+
+</TabItem>
 </Tabs>
 
 ### Create and run code in a sandbox
@@ -314,6 +325,32 @@ daytona.delete(sandbox)
 daytona create --name my-sandbox
 daytona exec my-sandbox -- echo 'Hello, World!'
 daytona delete my-sandbox
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Create a sandbox
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+
+# Execute a command in the sandbox
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "command": "echo '\''Hello, World!'\''"
+}'
+
+# Delete the sandbox
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}' \
+  --request DELETE \
+  --header 'Authorization: Bearer <API_KEY>'
 ```
 
 </TabItem>
@@ -408,6 +445,21 @@ daytona create --class small
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "cpu": 2,
+  "memory": 4,
+  "disk": 8
+}'
+```
+
+</TabItem>
 </Tabs>
 
 ### Create an ephemeral sandbox
@@ -490,6 +542,20 @@ sandbox = daytona.create(
 
 ```shell
 daytona create --auto-stop 5 --auto-delete 0
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "autoStopInterval": 5,
+  "autoDeleteInterval": 0
+}'
 ```
 
 </TabItem>
@@ -578,6 +644,19 @@ sandbox = daytona.create(
 <TabItem label="CLI" icon="seti:shell">
 ```shell
 daytona create --snapshot my-snapshot-name
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "snapshot": "my-snapshot-name"
+}'
 ```
 
 </TabItem>
@@ -675,6 +754,21 @@ sandbox = daytona.create(
 
 ```shell
 daytona create --dockerfile ./Dockerfile
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "buildInfo": {
+    "dockerfileContent": "FROM python:3.12-slim\nRUN pip install requests pandas numpy\nWORKDIR /home/daytona"
+  }
+}'
 ```
 
 </TabItem>
@@ -780,6 +874,24 @@ daytona create --volume my-volume:/home/daytona/data
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "volumes": [
+    {
+      "volumeId": "<VOLUME_ID>",
+      "mountPath": "/home/daytona/data"
+    }
+  ]
+}'
+```
+
+</TabItem>
 </Tabs>
 
 ### Create a sandbox with a Git repository cloned
@@ -860,6 +972,32 @@ sandbox = daytona.create
 sandbox.git.clone(url: "https://github.com/daytonaio/daytona.git", path: "/home/daytona/daytona")
 status = sandbox.git.status("/home/daytona/daytona")
 puts "Branch: #{status.current_branch}"
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Create a sandbox
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{}'
+
+# Clone a Git repository in the sandbox
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "url": "https://github.com/daytonaio/daytona.git",
+  "path": "/home/daytona/daytona"
+}'
+
+# Get repository status
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/status?path=/home/daytona/daytona' \
+  --header 'Authorization: Bearer <API_KEY>'
 ```
 
 </TabItem>
@@ -952,6 +1090,22 @@ puts "Found sandbox: #{found.id}"
 <TabItem label="CLI" icon="seti:shell">
 ```shell
 daytona create --label project=my-app --label env=dev
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "labels": {
+    "project": "my-app",
+    "env": "dev"
+  }
+}'
 ```
 
 </TabItem>
