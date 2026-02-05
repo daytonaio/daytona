@@ -172,6 +172,15 @@ OTEL_EXPORTER_OTLP_HEADERS="api-key=YOUR_NEW_RELIC_LICENSE_KEY"
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 ```
 
+### Grafana Cloud
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-<region>.grafana.net/otlp
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <BASE64_ENCODED_CREDENTIALS>"
+```
+
+Setup: Go to [Grafana Cloud Portal](https://grafana.com) → **Connections** → **Add new connection** → Search for **OpenTelemetry (OTLP)** → Follow the wizard to create an access token. The endpoint and headers will be provided in the instrumentation instructions. See the [Grafana dashboard example](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana) for detailed setup steps.
+
 ---
 
 ## Complete Example
@@ -300,6 +309,7 @@ Each trace includes valuable metadata such as:
 ## Dashboard Examples
 
 - [New Relic](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/new-relic)
+- [Grafana](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana)
 
 ## Troubleshooting
 
