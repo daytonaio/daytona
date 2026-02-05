@@ -85,6 +85,9 @@ export default defineConfig((mode) => ({
   // worker: {
   //  plugins: [ nxViteTsPaths() ],
   // },
+  optimizeDeps: {
+    exclude: ['tar'],
+  },
   build: {
     outDir,
     emptyOutDir: true,
