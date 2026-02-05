@@ -93,7 +93,7 @@ export class OrganizationRegionController {
     },
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async createRegion(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
@@ -153,7 +153,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async deleteRegion(@Param('id') id: string): Promise<void> {
     await this.regionService.delete(id)
   }
@@ -182,7 +182,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async regenerateProxyApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateProxyApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
@@ -212,7 +212,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async updateRegion(@Param('id') id: string, @Body() updateRegionDto: UpdateRegionDto): Promise<void> {
     return await this.regionService.update(id, updateRegionDto)
   }
@@ -241,7 +241,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async regenerateSshGatewayApiKey(@Param('id') id: string): Promise<RegenerateApiKeyResponseDto> {
     const apiKey = await this.regionService.regenerateSshGatewayApiKey(id)
     return new RegenerateApiKeyResponseDto(apiKey)
@@ -271,7 +271,7 @@ export class OrganizationRegionController {
   })
   @UseGuards(RegionAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async regenerateSnapshotManagerCredentials(@Param('id') id: string): Promise<SnapshotManagerCredentialsDto> {
     return await this.regionService.regenerateSnapshotManagerCredentials(id)
   }

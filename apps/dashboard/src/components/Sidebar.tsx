@@ -55,7 +55,7 @@ import {
   TextSearch,
   Users,
 } from 'lucide-react'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -64,6 +64,7 @@ import { Button } from './ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
+import { useFeatureFlagEnabled } from '@/hooks/useFeatureFlagEnabled'
 
 interface SidebarProps {
   isBannerVisible: boolean

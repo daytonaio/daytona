@@ -34,7 +34,7 @@ export class OpenFeaturePostHogProvider implements Provider {
       try {
         this.client = new PostHog(config.apiKey, config.clientOptions)
       } catch (error) {
-        console.warn('Failed to initialize PostHog client:', error)
+        console.log('Posthog not configured. Feature flags are disabled')
       }
     }
   }
