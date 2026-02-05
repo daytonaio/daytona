@@ -584,6 +584,103 @@ For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandbox
 >
 > [**recover (Ruby SDK)**](/docs/ruby-sdk/sandbox#recover)
 
+## Resize Sandboxes
+
+Daytona provides methods to resize sandbox resources (CPU, memory, and disk) after creation.
+
+Resizing a started sandbox allows you to `increase CPU and memory` without interruption. 
+To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be stopped first.
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, Resources
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+
+    # Resize a started sandbox (CPU and memory can be increased)
+    sandbox.resize(Resources(cpu=2, memory=4))
+
+    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    sandbox.stop()
+    sandbox.resize(Resources(cpu=4, memory=8, disk=20))
+    sandbox.start()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create();
+
+    // Resize a started sandbox (CPU and memory can be increased)
+    await sandbox.resize({ cpu: 2, memory: 4 });
+
+    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    await sandbox.stop();
+    await sandbox.resize({ cpu: 4, memory: 8, disk: 20 });
+    await sandbox.start();
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    import (
+        "context"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    client, _ := daytona.NewClient()
+    ctx := context.Background()
+    sandbox, _ := client.Create(ctx, types.SnapshotParams{})
+
+    // Resize a started sandbox (CPU and memory can be increased)
+    sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4})
+
+    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    sandbox.Stop(ctx)
+    sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
+    sandbox.Start(ctx)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    # Resize a started sandbox (CPU and memory can be increased)
+    sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4))
+
+    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    sandbox.stop
+    sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
+    sandbox.start
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+- **started** sandboxes: CPU and memory can only be increased, not decreased. Disk cannot be changed.
+- **stopped** sandboxes: CPU, memory, and disk can be changed. Disk can only be increased.
+:::
+
+For more information, see the [Python SDK](/docs/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/typescript-sdk/sandbox#resize), [Go SDK](/docs/go-sdk/sandbox#resize), and [Ruby SDK](/docs/ruby-sdk/sandbox#resize) references:
+
+> [**resize (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxresize)
+>
+> [**resize (TypeScript SDK)**](/docs/typescript-sdk/sandbox#resize)
+>
+> [**Resize (Go SDK)**](/docs/go-sdk/sandbox#resize)
+>
+> [**resize (Ruby SDK)**](/docs/ruby-sdk/sandbox#resize)
+
 ## Delete Sandboxes
 
 Daytona provides methods to delete sandboxes.

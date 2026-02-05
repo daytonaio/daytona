@@ -10,6 +10,7 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/daytonaio/daytona/libs/toolbox-api-client-go"
 )
 
@@ -197,7 +198,7 @@ func (s *Sandbox) Start(ctx context.Context) error {
 // StartWithTimeout starts the sandbox with a custom timeout.
 //
 // The method blocks until the sandbox reaches the "started" state or the timeout
-// is exceeded.
+// is exceeded. 0 means no timeout.
 //
 // Example:
 //
@@ -206,13 +207,15 @@ func (s *Sandbox) Start(ctx context.Context) error {
 //	    return err
 //	}
 func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error {
-	if timeout <= 0 {
-		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
 
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	authCtx := s.client.getAuthContext(ctx)
 	_, httpResp, err := s.client.apiClient.SandboxAPI.StartSandbox(authCtx, s.ID).Execute()
@@ -238,19 +241,21 @@ func (s *Sandbox) Stop(ctx context.Context) error {
 // StopWithTimeout stops the sandbox with a custom timeout.
 //
 // The method blocks until the sandbox reaches the "stopped" state or the timeout
-// is exceeded.
+// is exceeded. 0 means no timeout.
 //
 // Example:
 //
 //	err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error {
-	if timeout <= 0 {
-		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
 
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	authCtx := s.client.getAuthContext(ctx)
 	_, httpResp, err := s.client.apiClient.SandboxAPI.StopSandbox(authCtx, s.ID).Execute()
@@ -273,19 +278,21 @@ func (s *Sandbox) Delete(ctx context.Context) error {
 	return s.DeleteWithTimeout(ctx, 60*time.Second)
 }
 
-// DeleteWithTimeout deletes the sandbox with a custom timeout.
+// DeleteWithTimeout deletes the sandbox with a custom timeout. 0 means no timeout.
 //
 // Example:
 //
 //	err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error {
-	if timeout <= 0 {
-		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
 
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	authCtx := s.client.getAuthContext(ctx)
 	_, httpResp, err := s.client.apiClient.SandboxAPI.DeleteSandbox(authCtx, s.ID).Execute()
@@ -322,7 +329,7 @@ func (s *Sandbox) Archive(ctx context.Context) error {
 // WaitForStart waits for the sandbox to reach the "started" state.
 //
 // This method polls the sandbox state until it's started, encounters an error
-// state, or the timeout is exceeded.
+// state, or the timeout is exceeded. 0 means no timeout.
 //
 // Example:
 //
@@ -332,13 +339,15 @@ func (s *Sandbox) Archive(ctx context.Context) error {
 //	}
 //	// Sandbox is now running
 func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error {
-	if timeout <= 0 {
-		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
 
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -365,18 +374,21 @@ func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error
 // WaitForStop waits for the sandbox to reach the "stopped" state.
 //
 // This method polls the sandbox state until it's stopped or the timeout is exceeded.
+// 0 means no timeout.
 //
 // Example:
 //
 //	err := sandbox.WaitForStop(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error {
-	if timeout <= 0 {
-		return errors.NewDaytonaError("Timeout must be non-negative", 0, nil)
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
 
-	var cancel context.CancelFunc
-	ctx, cancel = context.WithTimeout(ctx, timeout)
-	defer cancel()
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
 
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -529,4 +541,121 @@ func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *in
 
 	s.AutoDeleteInterval = *intervalMinutes
 	return nil
+}
+
+// Resize resizes the sandbox resources with a default timeout of 60 seconds.
+//
+// Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started
+// sandbox allows increasing CPU and memory. To resize disk or decrease resources,
+// the sandbox must be stopped first.
+//
+// Example:
+//
+//	// Resize a started sandbox (CPU and memory can be increased)
+//	err := sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8})
+//
+//	// Resize a stopped sandbox (CPU, memory, and disk can be changed)
+//	sandbox.Stop(ctx)
+//	err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
+func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error {
+	return s.ResizeWithTimeout(ctx, resources, 60*time.Second)
+}
+
+// ResizeWithTimeout resizes the sandbox resources with a custom timeout.
+//
+// Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started
+// sandbox allows increasing CPU and memory. To resize disk or decrease resources,
+// the sandbox must be stopped first. 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
+func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	startTime := time.Now()
+
+	resizeRequest := apiclient.NewResizeSandbox()
+	if resources.CPU > 0 {
+		resizeRequest.SetCpu(int32(resources.CPU))
+	}
+	if resources.Memory > 0 {
+		resizeRequest.SetMemory(int32(resources.Memory))
+	}
+	if resources.Disk > 0 {
+		resizeRequest.SetDisk(int32(resources.Disk))
+	}
+
+	authCtx := s.client.getAuthContext(ctx)
+	sandboxResp, httpResp, err := s.client.apiClient.SandboxAPI.ResizeSandbox(authCtx, s.ID).ResizeSandbox(*resizeRequest).Execute()
+	if err != nil {
+		return errors.ConvertAPIError(err, httpResp)
+	}
+
+	// Update sandbox data from response
+	s.Name = sandboxResp.GetName()
+	s.State = sandboxResp.GetState()
+	s.Target = sandboxResp.GetTarget()
+
+	var remainingTimeout time.Duration
+	if timeout == 0 {
+		remainingTimeout = 0
+	} else {
+		timeElapsed := time.Since(startTime)
+		remainingTimeout = timeout - timeElapsed
+		if remainingTimeout <= 0 {
+			remainingTimeout = time.Millisecond
+		}
+	}
+
+	return s.WaitForResize(ctx, remainingTimeout)
+}
+
+// WaitForResize waits for the sandbox resize operation to complete.
+//
+// This method polls the sandbox state until it's no longer resizing, encounters an
+// error state, or the timeout is exceeded. 0 means no timeout.
+//
+// Example:
+//
+//	err := sandbox.WaitForResize(ctx, 2*time.Minute)
+func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error {
+	if timeout < 0 {
+		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+	}
+
+	if timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+		defer cancel()
+	}
+
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
+		case <-ticker.C:
+			if err := s.RefreshData(ctx); err != nil {
+				return err
+			}
+
+			if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+				return errors.NewDaytonaError("Sandbox resize failed", 0, nil)
+			}
+			if s.State != apiclient.SANDBOXSTATE_RESIZING {
+				return nil
+			}
+		}
+	}
 }

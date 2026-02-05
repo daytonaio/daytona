@@ -104,6 +104,30 @@ func main() {
 		log.Printf("First sandbox -> ID: %s, State: %s\n", sandboxList.Items[0].ID, sandboxList.Items[0].State)
 	}
 
+	// Resize a started sandbox (CPU and memory can be increased)
+	log.Println("\nResizing started sandbox...")
+	resources := &types.Resources{CPU: 2, Memory: 2}
+	if err := sandbox.Resize(ctx, resources); err != nil {
+		log.Fatalf("Failed to resize sandbox: %v", err)
+	}
+	log.Printf("✓ Resize complete: CPU=%d, Memory=%d\n", resources.CPU, resources.Memory)
+
+	// Resize a stopped sandbox (CPU, memory, and disk can be changed)
+	log.Println("\nStopping sandbox for resize...")
+	if err := sandbox.Stop(ctx); err != nil {
+		log.Fatalf("Failed to stop sandbox: %v", err)
+	}
+	log.Println("Resizing stopped sandbox...")
+	resources = &types.Resources{CPU: 4, Memory: 4, Disk: 20}
+	if err := sandbox.Resize(ctx, resources); err != nil {
+		log.Fatalf("Failed to resize sandbox: %v", err)
+	}
+	log.Printf("✓ Resize complete: CPU=%d, Memory=%d, Disk=%d\n", resources.CPU, resources.Memory, resources.Disk)
+	if err := sandbox.Start(ctx); err != nil {
+		log.Fatalf("Failed to start sandbox: %v", err)
+	}
+	log.Println("✓ Sandbox restarted with new resources")
+
 	// Delete the sandbox
 	log.Println("\nDeleting sandbox...")
 	if err := sandbox.Delete(ctx); err != nil {
