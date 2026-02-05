@@ -33,7 +33,7 @@ export const SortOrderIcon = ({ hideDefaultState = false, sort, className }: Pro
           : ArrowUpDownIcon
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <motion.span
         key={sort || 'none'}
         {...motionProps}
