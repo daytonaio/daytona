@@ -15,7 +15,7 @@ type InlineInputFormControlProps = {
 const InlineInputFormControl: React.FC<InlineInputFormControlProps> = ({ formItem, children }) => {
   return (
     <div className="flex items-center gap-4">
-      <InputLabel formItem={formItem} isInline />
+      <InputLabel formItem={formItem} />
       {children}
     </div>
   )

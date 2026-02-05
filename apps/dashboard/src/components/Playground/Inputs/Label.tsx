@@ -8,14 +8,13 @@ import { ParameterFormItem } from '@/enums/Playground'
 
 type InputLabelProps = {
   formItem: ParameterFormItem
-  isInline?: boolean
 }
 
-const InputLabel: React.FC<InputLabelProps> = ({ formItem, isInline }) => {
+const InputLabel: React.FC<InputLabelProps> = ({ formItem }) => {
   return (
     <Label htmlFor={formItem.key} className="w-32 flex-shrink-0">
       <span className="relative">
-        {`${formItem.label}${isInline ? '' : ''}`}
+        {formItem.label}
         {formItem.required ? <span className="text-muted-foreground">* </span> : null}
       </span>
     </Label>
