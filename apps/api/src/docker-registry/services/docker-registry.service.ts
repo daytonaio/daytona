@@ -376,7 +376,16 @@ export class DockerRegistryService {
       where: whereCondition,
     })
 
-    return this.findRegistryByUrlMatch(registries, imageName)
+    // Prioritize ORGANIZATION registries over others
+    // This ensures user-configured credentials take precedence over shared internal ones
+    const priority: Partial<Record<RegistryType, number>> = {
+      [RegistryType.ORGANIZATION]: 0,
+    }
+    const sortedRegistries = [...registries].sort(
+      (a, b) => (priority[a.registryType] ?? 1) - (priority[b.registryType] ?? 1),
+    )
+
+    return this.findRegistryByUrlMatch(sortedRegistries, imageName)
   }
 
   /**
@@ -544,16 +553,7 @@ export class DockerRegistryService {
    * @returns The matching registry, or null if no match is found.
    */
   private findRegistryByUrlMatch(registries: DockerRegistry[], targetString: string): DockerRegistry | null {
-    // Prioritize ORGANIZATION registries over others
-    // This ensures user-configured credentials take precedence over shared internal ones
-    const priority: Partial<Record<RegistryType, number>> = {
-      [RegistryType.ORGANIZATION]: 0,
-    }
-    const sortedRegistries = [...registries].sort(
-      (a, b) => (priority[a.registryType] ?? 1) - (priority[b.registryType] ?? 1),
-    )
-
-    for (const registry of sortedRegistries) {
+    for (const registry of registries) {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (targetString.startsWith(strippedUrl)) {
         return registry
