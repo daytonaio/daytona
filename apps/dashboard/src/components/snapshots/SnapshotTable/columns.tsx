@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import { ColumnDef, RowData, Table } from '@tanstack/react-table'
@@ -19,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../../ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../../ui/tooltip'
 
 type SnapshotTableMeta = {
   writePermitted: boolean
@@ -178,25 +179,23 @@ const columns: ColumnDef<SnapshotDto>[] = [
       }
 
       return (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5">
-                <span className="truncate max-w-[150px]">{firstRegion}</span>
-                <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
-                  +{remainingCount}
-                </Badge>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <div className="flex flex-col gap-1">
-                {regionNames.map((name, idx) => (
-                  <span key={idx}>{name}</span>
-                ))}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex items-center gap-1.5">
+              <span className="truncate max-w-[150px]">{firstRegion}</span>
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-5">
+                +{remainingCount}
+              </Badge>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <div className="flex flex-col gap-1">
+              {regionNames.map((name, idx) => (
+                <span key={idx}>{name}</span>
+              ))}
+            </div>
+          </TooltipContent>
+        </Tooltip>
       )
     },
   },
@@ -237,16 +236,14 @@ const columns: ColumnDef<SnapshotDto>[] = [
         !!snapshot.errorReason
       ) {
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <Badge variant={variant}>{getStateLabel(snapshot.state)}</Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-[300px]">{snapshot.errorReason}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <Badge variant={variant}>{getStateLabel(snapshot.state)}</Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-[300px]">{snapshot.errorReason}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       }
 
@@ -259,7 +256,15 @@ const columns: ColumnDef<SnapshotDto>[] = [
     header: ({ column }) => <SortableHeader column={column} label="Created" />,
     cell: ({ row }) => {
       const snapshot = row.original
-      return snapshot.general ? '' : getRelativeTimeString(snapshot.createdAt).relativeTimeString
+      if (snapshot.general) {
+        return <span className="text-muted-foreground">-</span>
+      }
+
+      const timestamp = getRelativeTimeString(snapshot.createdAt)
+
+      return (
+        <TimestampTooltip timestamp={snapshot.createdAt.toString()}>{timestamp.relativeTimeString}</TimestampTooltip>
+      )
     },
   },
   {
@@ -268,7 +273,15 @@ const columns: ColumnDef<SnapshotDto>[] = [
     header: ({ column }) => <SortableHeader column={column} label="Last Used" />,
     cell: ({ row }) => {
       const snapshot = row.original
-      return snapshot.general ? '' : getRelativeTimeString(snapshot.lastUsedAt).relativeTimeString
+      if (snapshot.general || !snapshot.lastUsedAt) {
+        return <span className="text-muted-foreground">-</span>
+      }
+
+      const timestamp = getRelativeTimeString(snapshot.lastUsedAt)
+
+      return (
+        <TimestampTooltip timestamp={snapshot.lastUsedAt.toString()}>{timestamp.relativeTimeString}</TimestampTooltip>
+      )
     },
   },
   {
