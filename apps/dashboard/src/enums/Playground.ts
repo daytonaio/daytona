@@ -40,14 +40,14 @@ export type KeysOf<T> = T extends any ? keyof T : never
 export type ParameterFormData<T> = ((ParameterFormItem | NumberParameterFormItem) & { key: KeysOf<T> })[]
 
 export enum SandboxParametersSections {
-  SANDBOX_MANAGMENT = 'sandbox_managment',
+  SANDBOX_MANAGEMENT = 'sandbox_management',
   FILE_SYSTEM = 'file_system',
   GIT_OPERATIONS = 'git_operations',
   PROCESS_CODE_EXECUTION = 'process_code_execution',
 }
 
 export const sandboxParametersSectionsData = [
-  { value: SandboxParametersSections.SANDBOX_MANAGMENT, label: 'Managment' },
+  { value: SandboxParametersSections.SANDBOX_MANAGEMENT, label: 'Management' },
   { value: SandboxParametersSections.FILE_SYSTEM, label: 'File System' },
   { value: SandboxParametersSections.GIT_OPERATIONS, label: 'Git Operations' },
   { value: SandboxParametersSections.PROCESS_CODE_EXECUTION, label: 'Process & Code Execution' },
