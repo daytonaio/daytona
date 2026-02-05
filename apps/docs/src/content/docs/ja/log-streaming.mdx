@@ -2,208 +2,432 @@
 title: ログストリーミング
 ---
 
-サンドボックス（隔離された一時的な実行環境）で長時間動作するプロセスを扱う場合、**リアルタイム**でログにアクセスし処理したいことがよくあります。
+ログストリーミングを使用すると、プロセスがまだ実行中の間に、生成中のログにアクセスして処理できます。サンドボックス内で長時間実行されるプロセスを実行する場合、それらのログに**リアルタイム**でアクセスして処理したいことがよくあります。
 
-Daytona（サンドボックスを作成・管理するプラットフォーム）のSDKは次の両方をサポートします:
+リアルタイムストリーミングは、特に**デバッグ**、**モニタリング**、あるいは**オブザーバビリティツール**との統合に役立ちます。
 
-- `Fetching log snapshot` — 指定時点までのすべてのログを取得します。
-- `Log streaming` — プロセスの実行中に生成されるログをストリーミングします。
+* [**ログストリーミング**](#stream-logs-with-callbacks): プロセスがまだ実行中の間に、生成されているログをストリーミングします。
+* [**ログスナップショットの取得**](#retrieve-all-existing-logs): 特定の時点までのすべてのログを取得します。
 
-このガイドでは、非同期モードと同期モードの両方でログストリーミングを使用する方法を説明します。
-リアルタイムストリーミングは、**デバッグ**、**モニタリング**、および**可観測性ツール**との統合に特に有用です。
+このガイドでは、コールバックを用いたログストリーミングと、非同期モードおよび同期モードの両方でのログスナップショットの取得方法を説明します。
 
-## 非同期
+:::note
+バージョン `0.27.0` 以降では、セッションコマンドのログを **stdout** と **stderr** の 2 つの別々のストリームとして取得できます。
+:::
 
-サンドボックス（隔離された一時的な実行環境）内のプロセスが大規模なシステムの一部で、長時間（あるいは無期限に）稼働する場合でも、
-システムの他の処理を進めながら、ログを**バックグラウンド**で非同期に処理できます。
+## コールバックを用いたログのストリーミング \{#stream-logs-with-callbacks\}
 
-この方法は次の用途に最適です:
+サンドボックス内のプロセスが大規模なシステムの一部で、長時間（または無期限）実行される想定の場合は、
+システムの他の部分を動かし続けながら、**バックグラウンド**でログを非同期処理できます。
 
-- 継続的な監視
-- 長時間実行ジョブのデバッグ
-- ライブログの転送や可視化
+これは次の用途に最適です:
+
+* 継続的な監視
+* 長時間実行ジョブのデバッグ
+* ライブログの転送や可視化
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-import asyncio
-from daytona import Daytona, SessionExecuteRequest
-
-async def main():
-    daytona = Daytona()
-    sandbox = daytona.create()
-
-    try:
-        session_id = "exec-session-1"
-        sandbox.process.create_session(session_id)
-
-        command = sandbox.process.execute_session_command(
-            session_id,
-            SessionExecuteRequest(
-                command='for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
-                var_async=True,
-            ),
-        )
-
-        logs_task = asyncio.create_task(
-            sandbox.process.get_session_command_logs_async(
-                session_id, command.cmd_id, lambda chunk: print(f"Log chunk: {chunk}")
-            )
-        )
-
-        print("Continuing execution while logs are streaming...")
-        await asyncio.sleep(1)
-        print("Other operations completed!")
-
-        print("At the end wait for any asynchronous task to complete and clean up resources...")
-        await logs_task
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        print("Cleaning up sandbox...")
-        sandbox.delete()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-
-```
-</TabItem>
-  <TabItem label="Typescript" icon="seti:typescript">
-  ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
-
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
-
-    try {           
-      const sessionId = 'exec-session-async-logs'
-      await sandbox.process.createSession(sessionId)
-
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'for i in {1..10}; do echo "Processing step $i..."; sleep 1; done',
-        async: true,
-      })
-
-      const logTask = sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        console.log('Log chunk:', chunk)
-      })
-
-      console.log('Continuing execution while logs are streaming...')
-      sleep(1)
-      console.log('Other operations completed!')
-
-      console.log('At the end wait for any asynchronous task to complete and clean up resources...')
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
-      await sandbox.delete()
-    }
-  }
-
-  main()
-  ```
-
-  </TabItem>
-</Tabs>
-
-## 同期実行
-
-コマンドの実行時間が予測できる場合、またはバックグラウンドで動かす必要がない場合は、
-ログストリームを同期的に処理できます。たとえば、ログをファイルやその他のストレージに書き出せます。
-
-<Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
-  ```python
-  import asyncio
-  import os
-  from daytona import Daytona, SessionExecuteRequest
+    ```python
+    import asyncio
+    from daytona import Daytona, SessionExecuteRequest
 
-  async def main():
+    async def main():
       daytona = Daytona()
       sandbox = daytona.create()
 
-      try:
-          session_id = "exec-session-1"
-          sandbox.process.create_session(session_id)
+      session_id = "streaming-session"
+      sandbox.process.create_session(session_id)
 
-          command = sandbox.process.execute_session_command(
-              session_id,
-              SessionExecuteRequest(
-                  command='counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-                  var_async=True,
-              ),
-          )
+      command = sandbox.process.execute_session_command(
+        session_id,
+        SessionExecuteRequest(
+          command='for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+          var_async=True,
+        ),
+      )
 
-          log_file_path = f"./logs/logs-session_{session_id}-command_{command.cmd_id}.log"
-          os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+      # Stream logs with separate callbacks
+      logs_task = asyncio.create_task(
+        sandbox.process.get_session_command_logs_async(
+          session_id,
+          command.cmd_id,
+          lambda stdout: print(f"[STDOUT]: {stdout}"),
+          lambda stderr: print(f"[STDERR]: {stderr}"),
+        )
+      )
 
-          with open(log_file_path, "w") as log_file:
-              def handle_chunk(chunk: str):
-                  #  nullバイトを削除
-                  clean_chunk = chunk.replace("\x00", "")
-                  #  ファイルに書き込む
-                  log_file.write(clean_chunk)
-                  log_file.flush()
+      print("ログをストリーミングしながら実行を継続します...")
+      await asyncio.sleep(3)
+      print("Other operations completed!")
 
-              await sandbox.process.get_session_command_logs_async(
-                  session_id, command.cmd_id, handle_chunk
-              )
-      except Exception as e:
-          print(f"Error: {e}")
-      finally:
-          print("Cleaning up sandbox...")
-          sandbox.delete()
+      # Wait for the logs to complete
+      await logs_task
 
-  if __name__ == "__main__":
-      asyncio.run(main())
-
-  ```
+      sandbox.delete()
+      
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
   </TabItem>
-  <TabItem label="Typescript" icon="seti:typescript">
-  ```typescript
-  import { Daytona, Sandbox } from '@daytonaio/sdk'
 
-  async function main() {
-    const daytona = new Daytona()
-    const sandbox = await daytona.create()
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
 
-    try {           
-      const sessionId = 'exec-session-async-logs'
+    async function main() {
+      const daytona = new Daytona()
+      const sandbox = await daytona.create()
+      const sessionId = "exec-session-1"
       await sandbox.process.createSession(sessionId)
 
-      const command = await sandbox.process.executeSessionCommand(sessionId, {
-        command: 'counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 2; done',
-        async: true,
-      })
+      const command = await sandbox.process.executeSessionCommand(
+        sessionId,
+        {
+          command: 'for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+          runAsync: true,
+        },
+      )
 
-      const logFilePath = `./logs/logs-session-${sessionId}-command-${command.cmdId}.log`
-      const logsDir = path.dirname(logFilePath)
-      if (!fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir, { recursive: true })
-      }
+      // Stream logs with separate callbacks
+      const logsTask = sandbox.process.getSessionCommandLogs(
+        sessionId,
+        command.cmdId!,
+        (stdout) => console.log('[STDOUT]:', stdout),
+        (stderr) => console.log('[STDERR]:', stderr),
+      )
 
-      const stream = fs.createWriteStream(logFilePath)
-      await sandbox.process.getSessionCommandLogs(sessionId, command.cmdId!, (chunk) => {
-        const cleanChunk = chunk.replace(/\x00/g, '')
-        stream.write(cleanChunk)
-      })
-      stream.end()
-      await logTask
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      console.log('Cleaning up sandbox...')
+      console.log('ログをストリーミングしながら実行を継続します...')
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      console.log('Other operations completed!')
+
+      // Wait for the logs to complete
+      await logsTask
+
       await sandbox.delete()
     }
-  }
 
-  main()
-  ```
+    main()
+    ```
+  </TabItem>
 
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    session_id = 'streaming-session'
+    sandbox.process.create_session(session_id)
+
+    command = sandbox.process.execute_session_command(
+      session_id,
+      Daytona::SessionExecuteRequest.new(
+        command: 'for i in {1..5}; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done',
+        var_async: true
+      )
+    )
+
+    # スレッドを使ってログをストリーミング
+    log_thread = Thread.new do
+      sandbox.process.get_session_command_logs_stream(
+        session_id,
+        command.cmd_id,
+        on_stdout: ->(stdout) { puts "[STDOUT]: #{stdout}" },
+        on_stderr: ->(stderr) { puts "[STDERR]: #{stderr}" }
+      )
+    end
+
+    puts 'ログをストリーミングしながら実行を継続します...'
+    sleep(3)
+    puts 'その他の処理が完了しました。'
+
+    # ログの完了を待つ
+    log_thread.join
+
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"log"
+    	"os"
+
+    	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func main() {
+    	client, _ := daytona.NewClient()
+    	ctx := context.Background()
+    	sandbox, _ := client.Create(ctx, nil)
+
+    	sessionID := "streaming-session"
+    	sandbox.Process.CreateSession(ctx, sessionID)
+
+    	// Execute async command that outputs to stdout and stderr
+    	cmd := `for i in 1 2 3 4 5; do echo "Step $i"; echo "Error $i" >&2; sleep 1; done`
+    	cmdResult, _ := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, cmd, true)
+    	cmdID, _ := cmdResult["id"].(string)
+
+    	// Create channels for stdout and stderr
+    	stdout := make(chan string, 100)
+    	stderr := make(chan string, 100)
+
+    	// Stream logs in a goroutine
+    	go func() {
+    		err := sandbox.Process.GetSessionCommandLogsStream(ctx, sessionID, cmdID, stdout, stderr)
+    		if err != nil {
+    			log.Printf("Stream error: %v", err)
+    		}
+    	}()
+
+    	fmt.Println("ログをストリーミングしながら実行を継続します...")
+
+    	// Read from channels until both are closed
+    	stdoutOpen, stderrOpen := true, true
+    	for stdoutOpen || stderrOpen {
+    		select {
+    		case chunk, ok := <-stdout:
+    			if !ok {
+    				stdoutOpen = false
+    			} else {
+    				fmt.Fprintf(os.Stdout, "[STDOUT]: %s", chunk)
+    			}
+    		case chunk, ok := <-stderr:
+    			if !ok {
+    				stderrOpen = false
+    			} else {
+    				fmt.Fprintf(os.Stderr, "[STDERR]: %s", chunk)
+    			}
+    		}
+    	}
+
+    	fmt.Println("Streaming completed!")
+    	sandbox.Delete(ctx)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/logs'
+    ```
   </TabItem>
 </Tabs>
+
+詳しくは、[Python SDK](/docs/python-sdk/sync/process/)、[TypeScript SDK](/docs/typescript-sdk/process/)、[Ruby SDK](/docs/ruby-sdk/process/)、[Go SDK](/docs/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/process) の各リファレンスを参照してください。
+
+> [**get&#95;session&#95;command&#95;logs&#95;async (Python SDK)**](/docs/python-sdk/sync/process/#processget_session_command_logs_async)
+>
+> [**getSessionCommandLogs (TypeScript SDK)**](/docs/typescript-sdk/process/#getsessioncommandlogs)
+>
+> [**get&#95;session&#95;command&#95;logs&#95;async (Ruby SDK)**](/docs/ruby-sdk/process/#get_session_command_logs_async)
+>
+> [**GetSessionCommandLogsStream (Go SDK)**](/docs/go-sdk/daytona/#ProcessService.GetSessionCommandLogsStream)
+>
+> [**get session command logs (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/session/\{sessionId}/exec)
+
+## 既存のログをすべて取得する \{#retrieve-all-existing-logs\}
+
+コマンドの実行時間が予測できる場合、あるいはバックグラウンド実行は不要だが
+定期的に既存のログをまとめて確認したい場合は、次の例で現時点までのログを取得できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import time
+    from daytona import Daytona, SessionExecuteRequest
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+    session_id = "exec-session-1"
+    sandbox.process.create_session(session_id)
+
+    # Execute a blocking command and wait for the result
+    command = sandbox.process.execute_session_command(
+      session_id, SessionExecuteRequest(command="echo 'Hello from stdout' && echo 'Hello from stderr' >&2")
+    )
+    print(f"[STDOUT]: {command.stdout}")
+    print(f"[STDERR]: {command.stderr}")
+    print(f"[OUTPUT]: {command.output}")
+
+    # もしくはコマンドをバックグラウンドで実行し、後からログを取得する
+    command = sandbox.process.execute_session_command(
+      session_id, 
+      SessionExecuteRequest(
+        command='while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+        run_async=True
+      )
+    )
+    time.sleep(5)
+    # Get the logs up to the current point in time
+    logs = sandbox.process.get_session_command_logs(session_id, command.cmd_id)
+    print(f"[STDOUT]: {logs.stdout}")
+    print(f"[STDERR]: {logs.stderr}")
+    print(f"[OUTPUT]: {logs.output}")
+
+    sandbox.delete()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, SessionExecuteRequest } from '@daytonaio/sdk'
+
+    async function main() {
+      const daytona = new Daytona()
+      const sandbox = await daytona.create()
+      const sessionId = "exec-session-1"
+      await sandbox.process.createSession(sessionId)
+
+      // ブロッキングなコマンドを実行して結果を待つ
+      const command = await sandbox.process.executeSessionCommand(
+        sessionId,
+        {
+          command: 'echo "Hello from stdout" && echo "Hello from stderr" >&2',
+        },
+      )
+      console.log(`[STDOUT]: ${command.stdout}`)
+      console.log(`[STDERR]: ${command.stderr}`)
+      console.log(`[OUTPUT]: ${command.output}`)
+
+      // もしくはコマンドをバックグラウンドで実行し、後からログを取得する
+      const command2 = await sandbox.process.executeSessionCommand(
+        sessionId,
+        {
+          command: 'while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+          runAsync: true,
+        },
+      )
+      await new Promise((resolve) => setTimeout(resolve, 5000))
+      // 現時点までのログを取得
+      const logs = await sandbox.process.getSessionCommandLogs(sessionId, command2.cmdId!)
+      console.log(`[STDOUT]: ${logs.stdout}`)
+      console.log(`[STDERR]: ${logs.stderr}`)
+      console.log(`[OUTPUT]: ${logs.output}`)
+
+      await sandbox.delete()
+    }
+
+    main()
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+    session_id = 'exec-session-1'
+    sandbox.process.create_session(session_id)
+
+    # ブロッキングなコマンドを実行して結果を待つ
+    command = sandbox.process.execute_session_command(
+      session_id,
+      Daytona::SessionExecuteRequest.new(
+        command: 'echo "Hello from stdout" && echo "Hello from stderr" >&2'
+      )
+    )
+    puts "[STDOUT]: #{command.stdout}"
+    puts "[STDERR]: #{command.stderr}"
+    puts "[OUTPUT]: #{command.output}"
+
+    # もしくはコマンドをバックグラウンドで実行し、後からログを取得する
+    command = sandbox.process.execute_session_command(
+      session_id,
+      Daytona::SessionExecuteRequest.new(
+        command: 'while true; do if (( RANDOM % 2 )); then echo "All good at $(date)"; else echo "Oops, an error at $(date)" >&2; fi; sleep 1; done',
+        var_async: true
+      )
+    )
+    sleep(5)
+    # 現時点までのログを取得
+    logs = sandbox.process.get_session_command_logs(session_id, command.cmd_id)
+    puts "[STDOUT]: #{logs.stdout}"
+    puts "[STDERR]: #{logs.stderr}"
+    puts "[OUTPUT]: #{logs.output}"
+
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+    	"context"
+    	"fmt"
+    	"log"
+    	"time"
+
+    	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func main() {
+    	client, _ := daytona.NewClient()
+    	ctx := context.Background()
+    	sandbox, _ := client.Create(ctx, nil)
+
+    	sessionID := "exec-session-1"
+    	sandbox.Process.CreateSession(ctx, sessionID)
+
+    	// ブロッキングなコマンドを実行して結果を待つ
+    	cmd1, _ := sandbox.Process.ExecuteSessionCommand(ctx, sessionID,
+    		`echo "Hello from stdout" && echo "Hello from stderr" >&2`, false)
+    	if stdout, ok := cmd1["stdout"].(string); ok {
+    		fmt.Printf("[STDOUT]: %s\n", stdout)
+    	}
+    	if stderr, ok := cmd1["stderr"].(string); ok {
+    		fmt.Printf("[STDERR]: %s\n", stderr)
+    	}
+
+    	// もしくはコマンドをバックグラウンドで実行し、後からログを取得する
+    	cmd := `counter=1; while (( counter <= 5 )); do echo "Count: $counter"; ((counter++)); sleep 1; done`
+    	cmdResult, _ := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, cmd, true)
+    	cmdID, _ := cmdResult["id"].(string)
+
+    	time.Sleep(5 * time.Second)
+
+    	// 現時点までのログを取得
+    	logs, err := sandbox.Process.GetSessionCommandLogs(ctx, sessionID, cmdID)
+    	if err != nil {
+    		log.Fatalf("Failed to get logs: %v", err)
+    	}
+    	if logContent, ok := logs["logs"].(string); ok {
+    		fmt.Printf("[LOGS]: %s\n", logContent)
+    	}
+
+    	sandbox.Delete(ctx)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/logs'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/process/)、[TypeScript SDK](/docs/typescript-sdk/process/)、[Ruby SDK](/docs/ruby-sdk/process/)、[Go SDK](/docs/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/process) の各リファレンスを参照してください。
+
+> [**get&#95;session&#95;command&#95;logs (Python SDK)**](/docs/python-sdk/sync/process/#processget_session_command_logs)
+>
+> [**getSessionCommandLogs (TypeScript SDK)**](/docs/typescript-sdk/process/#getsessioncommandlogs)
+>
+> [**get&#95;session&#95;command&#95;logs (Ruby SDK)**](/docs/ruby-sdk/process/#get_session_command_logs)
+>
+> [**GetSessionCommandLogs (Go SDK)**](/docs/go-sdk/daytona/#ProcessService.GetSessionCommandLogs)
+>
+> [**get session command logs (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/session/\{sessionId}/exec)
