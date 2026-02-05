@@ -477,6 +477,7 @@ export class OrganizationController {
       organizationId,
       organizationSuspensionDto?.reason,
       organizationSuspensionDto?.until,
+      organizationSuspensionDto?.suspensionCleanupGracePeriodHours,
     )
   }
 

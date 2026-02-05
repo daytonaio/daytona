@@ -9215,7 +9215,7 @@ components:
       example:
         reason: reason
         until: 2000-01-23T04:56:07.000+00:00
-        suspensionCleanupGracePeriodHours: 0.8008281904610115
+        suspensionCleanupGracePeriodHours: 0.08008281904610115
       properties:
         reason:
           description: Suspension reason
@@ -9226,10 +9226,10 @@ components:
           type: string
         suspensionCleanupGracePeriodHours:
           description: Suspension cleanup grace period hours
+          minimum: 0
           type: number
       required:
         - reason
-        - suspensionCleanupGracePeriodHours
         - until
       type: object
     RegionQuota:
