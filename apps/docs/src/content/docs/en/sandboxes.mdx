@@ -436,7 +436,7 @@ Starting sandbox with ID: <sandbox-id>
 <TabItem label="Python" icon="seti:python">
 
 ```python
-sandbox = daytona.create(CreateSandboxParams(language="python"))
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
 # Start Sandbox
 sandbox.start()
 ```
@@ -540,8 +540,8 @@ Daytona provides options to view information about sandboxes (ID, root directory
 # Get sandbox ID
 sandbox_id = sandbox.id
 
-# Get the root directory of the sandbox user
-root_dir = sandbox.get_user_root_dir()
+# Get the home directory of the sandbox user
+root_dir = sandbox.get_user_home_dir()
 
 # Get the sandbox id, auto-stop interval and state
 print(sandbox.id)
@@ -556,8 +556,8 @@ print(sandbox.state)
 // Get sandbox ID
 const sandboxId = sandbox.id;
 
-// Get the root directory of the sandbox user
-const rootDir = await sandbox.getUserRootDir();
+// Get the home directory of the sandbox user
+const rootDir = await sandbox.getUserHomeDir();
 
 // Get the sandbox id, auto-stop interval and state
 console.log(sandbox.id)
@@ -667,7 +667,7 @@ The stopped state should be used when a sandbox is expected to be started again 
 <TabItem label="Python" icon="seti:python">
 
 ```python
-sandbox = daytona.create(CreateSandboxParams(language="python"))
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(language="python"))
 
 # Stop sandbox
 sandbox.stop()
@@ -691,12 +691,6 @@ const sandbox = await daytona.create({ language: 'typescript' });
 await sandbox.stop();
 
 console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
-
-// The sandbox ID can later be used to find the sandbox and start it
-const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
-
-// Start sandbox
-await sandbox.start();
 ```
 
 </TabItem>
@@ -1436,10 +1430,10 @@ sandbox = daytona.create(
 )
 
 # Delete the sandbox immediately after it has been stopped
-sandbox.set_auto_delete_interval(0)
+sandbox.auto_delete_interval = 0
 
 # Disable auto-deletion
-sandbox.set_auto_delete_interval(-1)
+sandbox.auto_delete_interval = -1
 ```
 
 </TabItem>
