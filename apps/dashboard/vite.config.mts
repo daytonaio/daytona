@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react'
 import fs from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
+import { analyzer } from 'vite-bundle-analyzer'
 import checker from 'vite-plugin-checker'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
@@ -33,7 +34,7 @@ export default defineConfig((mode) => ({
       overrides: {
         path: 'path-browserify-win32',
       },
-      protocolImports: false,
+      protocolImports: true,
     }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
@@ -59,6 +60,11 @@ export default defineConfig((mode) => ({
         }
       },
     },
+    analyzer({
+      openAnalyzer: false,
+      analyzerPort: 4000,
+      enabled: mode.mode === 'analyze',
+    }),
   ],
   resolve: {
     alias: [
@@ -85,6 +91,10 @@ export default defineConfig((mode) => ({
     reportCompressedSize: true,
     commonjsOptions: {
       transformMixedEsModules: true,
+    },
+    // we'd ideally polyfill it but until https://github.com/davidmyersdev/vite-plugin-node-polyfills/issues/118 gets resolved we can just exclude it
+    rollupOptions: {
+      external: ['tar'],
     },
   },
 }))
