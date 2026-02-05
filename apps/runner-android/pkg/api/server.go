@@ -119,6 +119,19 @@ func (a *ApiServer) Start() error {
 		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 		sandboxController.POST("/:sandboxId/network-settings", controllers.UpdateNetworkSettings)
 
+		// ADB connection info endpoint
+		sandboxController.GET("/:sandboxId/adb/info", controllers.GetADBInfo)
+
+		// Android-specific endpoints
+		sandboxController.POST("/:sandboxId/android/install", controllers.InstallAPK)
+		sandboxController.POST("/:sandboxId/android/uninstall", controllers.UninstallApp)
+		sandboxController.GET("/:sandboxId/android/packages", controllers.ListPackages)
+		sandboxController.POST("/:sandboxId/android/launch", controllers.LaunchApp)
+		sandboxController.POST("/:sandboxId/android/stop", controllers.ForceStopApp)
+		sandboxController.GET("/:sandboxId/android/props", controllers.GetSystemProps)
+		sandboxController.GET("/:sandboxId/android/logcat", controllers.StreamLogcatSSE)
+		sandboxController.GET("/:sandboxId/android/device", controllers.GetDeviceInfo)
+
 		// Proxy endpoints for toolbox and port forwarding
 		sandboxController.Any("/:sandboxId/toolbox/*path", controllers.ProxyRequest)
 		sandboxController.Any("/:sandboxId/proxy/:port/*path", controllers.ProxyToPort)

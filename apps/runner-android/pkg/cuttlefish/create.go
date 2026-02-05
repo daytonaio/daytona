@@ -264,6 +264,10 @@ func (c *Client) cleanupInstance(ctx context.Context, sandboxId string, instance
 	// Stop the instance if running
 	_ = c.stopInstance(ctx, instanceNum)
 
+	// Force remove any stale CVD state for this instance
+	// This handles cases where cvd create fails midway and leaves stale device registrations
+	c.forceCleanupInstance(ctx, instanceNum)
+
 	// Remove from tracking
 	c.mutex.Lock()
 	delete(c.instances, sandboxId)
@@ -276,6 +280,35 @@ func (c *Client) cleanupInstance(ctx context.Context, sandboxId string, instance
 	// Remove instance directory
 	instanceDir := c.getInstanceDir(sandboxId)
 	_ = c.runCommand(ctx, "rm", "-rf", instanceDir)
+}
+
+// forceCleanupInstance forcefully cleans up CVD state for a specific instance
+// This is necessary when cvd create fails midway and leaves stale state
+func (c *Client) forceCleanupInstance(ctx context.Context, instanceNum int) {
+	log.Infof("Force cleaning up CVD state for instance %d", instanceNum)
+
+	// Kill any processes associated with this instance number
+	killCmd := fmt.Sprintf(
+		"pkill -9 -f 'instance_nums.*%d|CUTTLEFISH_INSTANCE=%d|cvd-%d' 2>/dev/null || true",
+		instanceNum, instanceNum, instanceNum,
+	)
+	_, _ = c.runShellScript(ctx, killCmd)
+
+	// Clean up temp directories for this instance
+	cleanupCmd := fmt.Sprintf(
+		"rm -rf /tmp/cf_avd_*/%d /tmp/cf_env_*/%d 2>/dev/null || true; "+
+			"find /var/tmp/cvd -type d -name '*cvd-%d*' -exec rm -rf {} + 2>/dev/null || true",
+		instanceNum, instanceNum, instanceNum,
+	)
+	_, _ = c.runShellScript(ctx, cleanupCmd)
+
+	// Try to remove from CVD fleet (in case it was partially registered)
+	// The group name follows the pattern cvd_N where N is instance_num
+	rmCmd := fmt.Sprintf(
+		"HOME=%s %s rm --group_name=cvd_%d 2>/dev/null || true",
+		c.config.CVDHome, c.config.CVDPath, instanceNum,
+	)
+	_, _ = c.runShellScript(ctx, rmCmd)
 }
 
 // stopInstance stops a Cuttlefish instance

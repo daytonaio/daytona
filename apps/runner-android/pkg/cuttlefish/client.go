@@ -27,6 +27,9 @@ type Client struct {
 	sandboxMutex map[string]*sync.Mutex
 	sandboxMuMu  sync.Mutex
 
+	// ADB client for interacting with Android devices
+	adbClient *ADBClient
+
 	// Exported for proxy access
 	SSHHost    string
 	SSHKeyPath string
@@ -83,6 +86,7 @@ func NewClient(config ClientConfig) (*Client, error) {
 		instances:    make(map[string]*InstanceInfo),
 		instanceNums: make(map[int]string),
 		sandboxMutex: make(map[string]*sync.Mutex),
+		adbClient:    NewADBClient(config.ADBPath, config.SSHHost, config.SSHKeyPath),
 		SSHHost:      config.SSHHost,
 		SSHKeyPath:   config.SSHKeyPath,
 	}
@@ -536,6 +540,29 @@ func (c *Client) GetRemoteMetrics(ctx context.Context) (*RemoteMetrics, error) {
 // Close cleans up client resources
 func (c *Client) Close() error {
 	return c.saveInstanceMappings()
+}
+
+// ADB returns the ADB client for interacting with Android devices
+func (c *Client) ADB() *ADBClient {
+	return c.adbClient
+}
+
+// GetADBSerial returns the ADB serial for a sandbox
+func (c *Client) GetADBSerial(sandboxId string) (string, error) {
+	info, exists := c.GetInstance(sandboxId)
+	if !exists {
+		return "", fmt.Errorf("sandbox %s not found", sandboxId)
+	}
+	return info.ADBSerial, nil
+}
+
+// GetADBPort returns the ADB port for a sandbox
+func (c *Client) GetADBPort(sandboxId string) (int, error) {
+	info, exists := c.GetInstance(sandboxId)
+	if !exists {
+		return 0, fmt.Errorf("sandbox %s not found", sandboxId)
+	}
+	return info.ADBPort, nil
 }
 
 // needsQuoting checks if a string needs to be quoted for shell

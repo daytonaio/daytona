@@ -52,23 +52,8 @@ func ProxyRequest(ctx *gin.Context) {
 		return
 	}
 
-	r := runner.GetInstance()
-	if r == nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Runner not initialized"})
-		return
-	}
-
-	target, err := getProxyTarget(ctx, r.CVDClient)
-	if err != nil {
-		return // Error already set in context
-	}
-
-	// For Cuttlefish, proxy is limited since Android uses ADB
-	log.Infof("Proxy request to %s (limited support for Cuttlefish)", target.String())
-	ctx.JSON(http.StatusNotImplemented, gin.H{
-		"error": "HTTP proxy not fully supported for Cuttlefish. Use ADB for Android device communication.",
-		"adb":   "Use adb -s <serial> to communicate with the device",
-	})
+	// Route toolbox requests to ADB-based handlers
+	HandleToolboxRequest(ctx)
 }
 
 // handleComputerUseStatus returns the status of computer use (WebRTC display) for Android
