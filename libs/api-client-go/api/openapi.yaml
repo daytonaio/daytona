@@ -9525,7 +9525,10 @@ components:
         maxDiskPerSandbox: 1.4658129805029452
         sandboxLifecycleRateLimit: 3.616076749251911
         maxMemoryPerSandbox: 6.027456183070403
+        sandboxLifecycleRateLimitTtl: 7.386281948385884
         volumeQuota: 2.3021358869347655
+        sandboxCreateRateLimitTtl: 4.145608029883936
+        authenticatedRateLimitTtl: 2.027123023002322
         maxSnapshotSize: 5.637376656633329
         authenticatedRateLimit: 7.061401241503109
         sandboxCreateRateLimit: 9.301444243932576
@@ -9557,14 +9560,26 @@ components:
         sandboxLifecycleRateLimit:
           nullable: true
           type: number
+        authenticatedRateLimitTtl:
+          nullable: true
+          type: number
+        sandboxCreateRateLimitTtl:
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimitTtl:
+          nullable: true
+          type: number
       required:
         - authenticatedRateLimit
+        - authenticatedRateLimitTtl
         - maxCpuPerSandbox
         - maxDiskPerSandbox
         - maxMemoryPerSandbox
         - maxSnapshotSize
         - sandboxCreateRateLimit
+        - sandboxCreateRateLimitTtl
         - sandboxLifecycleRateLimit
+        - sandboxLifecycleRateLimitTtl
         - snapshotQuota
         - volumeQuota
       type: object

@@ -21,16 +21,19 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	MaxCpuPerSandbox          NullableFloat32 `json:"maxCpuPerSandbox"`
-	MaxMemoryPerSandbox       NullableFloat32 `json:"maxMemoryPerSandbox"`
-	MaxDiskPerSandbox         NullableFloat32 `json:"maxDiskPerSandbox"`
-	SnapshotQuota             NullableFloat32 `json:"snapshotQuota"`
-	MaxSnapshotSize           NullableFloat32 `json:"maxSnapshotSize"`
-	VolumeQuota               NullableFloat32 `json:"volumeQuota"`
-	AuthenticatedRateLimit    NullableFloat32 `json:"authenticatedRateLimit"`
-	SandboxCreateRateLimit    NullableFloat32 `json:"sandboxCreateRateLimit"`
-	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
-	AdditionalProperties      map[string]interface{}
+	MaxCpuPerSandbox             NullableFloat32 `json:"maxCpuPerSandbox"`
+	MaxMemoryPerSandbox          NullableFloat32 `json:"maxMemoryPerSandbox"`
+	MaxDiskPerSandbox            NullableFloat32 `json:"maxDiskPerSandbox"`
+	SnapshotQuota                NullableFloat32 `json:"snapshotQuota"`
+	MaxSnapshotSize              NullableFloat32 `json:"maxSnapshotSize"`
+	VolumeQuota                  NullableFloat32 `json:"volumeQuota"`
+	AuthenticatedRateLimit       NullableFloat32 `json:"authenticatedRateLimit"`
+	SandboxCreateRateLimit       NullableFloat32 `json:"sandboxCreateRateLimit"`
+	SandboxLifecycleRateLimit    NullableFloat32 `json:"sandboxLifecycleRateLimit"`
+	AuthenticatedRateLimitTtl    NullableFloat32 `json:"authenticatedRateLimitTtl"`
+	SandboxCreateRateLimitTtl    NullableFloat32 `json:"sandboxCreateRateLimitTtl"`
+	SandboxLifecycleRateLimitTtl NullableFloat32 `json:"sandboxLifecycleRateLimitTtl"`
+	AdditionalProperties         map[string]interface{}
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -39,7 +42,7 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, authenticatedRateLimitTtl NullableFloat32, sandboxCreateRateLimitTtl NullableFloat32, sandboxLifecycleRateLimitTtl NullableFloat32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
@@ -50,6 +53,9 @@ func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSa
 	this.AuthenticatedRateLimit = authenticatedRateLimit
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
+	this.AuthenticatedRateLimitTtl = authenticatedRateLimitTtl
+	this.SandboxCreateRateLimitTtl = sandboxCreateRateLimitTtl
+	this.SandboxLifecycleRateLimitTtl = sandboxLifecycleRateLimitTtl
 	return &this
 }
 
@@ -295,6 +301,84 @@ func (o *UpdateOrganizationQuota) SetSandboxLifecycleRateLimit(v float32) {
 	o.SandboxLifecycleRateLimit.Set(&v)
 }
 
+// GetAuthenticatedRateLimitTtl returns the AuthenticatedRateLimitTtl field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetAuthenticatedRateLimitTtl() float32 {
+	if o == nil || o.AuthenticatedRateLimitTtl.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.AuthenticatedRateLimitTtl.Get()
+}
+
+// GetAuthenticatedRateLimitTtlOk returns a tuple with the AuthenticatedRateLimitTtl field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetAuthenticatedRateLimitTtlOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.AuthenticatedRateLimitTtl.Get(), o.AuthenticatedRateLimitTtl.IsSet()
+}
+
+// SetAuthenticatedRateLimitTtl sets field value
+func (o *UpdateOrganizationQuota) SetAuthenticatedRateLimitTtl(v float32) {
+	o.AuthenticatedRateLimitTtl.Set(&v)
+}
+
+// GetSandboxCreateRateLimitTtl returns the SandboxCreateRateLimitTtl field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetSandboxCreateRateLimitTtl() float32 {
+	if o == nil || o.SandboxCreateRateLimitTtl.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxCreateRateLimitTtl.Get()
+}
+
+// GetSandboxCreateRateLimitTtlOk returns a tuple with the SandboxCreateRateLimitTtl field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetSandboxCreateRateLimitTtlOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxCreateRateLimitTtl.Get(), o.SandboxCreateRateLimitTtl.IsSet()
+}
+
+// SetSandboxCreateRateLimitTtl sets field value
+func (o *UpdateOrganizationQuota) SetSandboxCreateRateLimitTtl(v float32) {
+	o.SandboxCreateRateLimitTtl.Set(&v)
+}
+
+// GetSandboxLifecycleRateLimitTtl returns the SandboxLifecycleRateLimitTtl field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetSandboxLifecycleRateLimitTtl() float32 {
+	if o == nil || o.SandboxLifecycleRateLimitTtl.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxLifecycleRateLimitTtl.Get()
+}
+
+// GetSandboxLifecycleRateLimitTtlOk returns a tuple with the SandboxLifecycleRateLimitTtl field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetSandboxLifecycleRateLimitTtlOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxLifecycleRateLimitTtl.Get(), o.SandboxLifecycleRateLimitTtl.IsSet()
+}
+
+// SetSandboxLifecycleRateLimitTtl sets field value
+func (o *UpdateOrganizationQuota) SetSandboxLifecycleRateLimitTtl(v float32) {
+	o.SandboxLifecycleRateLimitTtl.Set(&v)
+}
+
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -314,6 +398,9 @@ func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["authenticatedRateLimit"] = o.AuthenticatedRateLimit.Get()
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
+	toSerialize["authenticatedRateLimitTtl"] = o.AuthenticatedRateLimitTtl.Get()
+	toSerialize["sandboxCreateRateLimitTtl"] = o.SandboxCreateRateLimitTtl.Get()
+	toSerialize["sandboxLifecycleRateLimitTtl"] = o.SandboxLifecycleRateLimitTtl.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -336,6 +423,9 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		"authenticatedRateLimit",
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
+		"authenticatedRateLimitTtl",
+		"sandboxCreateRateLimitTtl",
+		"sandboxLifecycleRateLimitTtl",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -374,6 +464,9 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "authenticatedRateLimit")
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")
+		delete(additionalProperties, "authenticatedRateLimitTtl")
+		delete(additionalProperties, "sandboxCreateRateLimitTtl")
+		delete(additionalProperties, "sandboxLifecycleRateLimitTtl")
 		o.AdditionalProperties = additionalProperties
 	}
 

@@ -72,4 +72,22 @@ export interface UpdateOrganizationQuota {
    * @memberof UpdateOrganizationQuota
    */
   sandboxLifecycleRateLimit: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof UpdateOrganizationQuota
+   */
+  authenticatedRateLimitTtl: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof UpdateOrganizationQuota
+   */
+  sandboxCreateRateLimitTtl: number | null
+  /**
+   *
+   * @type {number}
+   * @memberof UpdateOrganizationQuota
+   */
+  sandboxLifecycleRateLimitTtl: number | null
 }

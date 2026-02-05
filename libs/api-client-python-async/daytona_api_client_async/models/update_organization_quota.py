@@ -36,8 +36,11 @@ class UpdateOrganizationQuota(BaseModel):
     authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="authenticatedRateLimit")
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimit")
+    authenticated_rate_limit_ttl: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="authenticatedRateLimitTtl")
+    sandbox_create_rate_limit_ttl: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxCreateRateLimitTtl")
+    sandbox_lifecycle_rate_limit_ttl: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimitTtl")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
+    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtl", "sandboxCreateRateLimitTtl", "sandboxLifecycleRateLimitTtl"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -130,6 +133,21 @@ class UpdateOrganizationQuota(BaseModel):
         if self.sandbox_lifecycle_rate_limit is None and "sandbox_lifecycle_rate_limit" in self.model_fields_set:
             _dict['sandboxLifecycleRateLimit'] = None
 
+        # set to None if authenticated_rate_limit_ttl (nullable) is None
+        # and model_fields_set contains the field
+        if self.authenticated_rate_limit_ttl is None and "authenticated_rate_limit_ttl" in self.model_fields_set:
+            _dict['authenticatedRateLimitTtl'] = None
+
+        # set to None if sandbox_create_rate_limit_ttl (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_create_rate_limit_ttl is None and "sandbox_create_rate_limit_ttl" in self.model_fields_set:
+            _dict['sandboxCreateRateLimitTtl'] = None
+
+        # set to None if sandbox_lifecycle_rate_limit_ttl (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_lifecycle_rate_limit_ttl is None and "sandbox_lifecycle_rate_limit_ttl" in self.model_fields_set:
+            _dict['sandboxLifecycleRateLimitTtl'] = None
+
         return _dict
 
     @classmethod
@@ -150,7 +168,10 @@ class UpdateOrganizationQuota(BaseModel):
             "volume_quota": obj.get("volumeQuota"),
             "authenticated_rate_limit": obj.get("authenticatedRateLimit"),
             "sandbox_create_rate_limit": obj.get("sandboxCreateRateLimit"),
-            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit")
+            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
+            "authenticated_rate_limit_ttl": obj.get("authenticatedRateLimitTtl"),
+            "sandbox_create_rate_limit_ttl": obj.get("sandboxCreateRateLimitTtl"),
+            "sandbox_lifecycle_rate_limit_ttl": obj.get("sandboxLifecycleRateLimitTtl")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
