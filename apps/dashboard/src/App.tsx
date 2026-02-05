@@ -18,7 +18,7 @@ import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
-import { CommandPaletteProvider, useIsCommandPaletteEnabled } from './components/CommandPalette'
+import { CommandPaletteProvider } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
 import { Button } from './components/ui/button'
 import {
@@ -107,8 +107,6 @@ function App() {
     }
   }, [location, posthog])
 
-  const cmdkEnabled = useIsCommandPaletteEnabled()
-
   if (authError) {
     return (
       <Dialog open>
@@ -141,7 +139,7 @@ function App() {
                   <RegionsProvider>
                     <UserOrganizationInvitationsProvider>
                       <NotificationSocketProvider>
-                        <CommandPaletteProvider enableGlobalShortcut={cmdkEnabled}>
+                        <CommandPaletteProvider>
                           <BannerProvider>
                             <Dashboard />
                           </BannerProvider>

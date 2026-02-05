@@ -5,13 +5,11 @@
 
 'use client'
 
-import { useConfig } from '@/hooks/useConfig'
 import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { cn, pluralize } from '@/lib/utils'
 import { useCommandState } from 'cmdk'
 import { AlertCircle, ChevronRight, Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, useAnimate } from 'motion/react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { createStore, useStore, type StoreApi } from 'zustand'
 import {
@@ -276,17 +274,6 @@ export type CommandPaletteProviderProps = {
   children: ReactNode
   defaultPage?: string
   enableGlobalShortcut?: boolean
-}
-
-export function useIsCommandPaletteEnabled() {
-  const config = useConfig()
-  const enabled = useFeatureFlagEnabled('dashboard-command-palette')
-
-  if (!config.posthog) {
-    return true
-  }
-
-  return enabled
 }
 
 export function CommandPaletteProvider({
@@ -565,7 +552,7 @@ function CommandFooter({
   )
 }
 
-const CommandEmpty = function CommandEmpty({ search }: { search: string }) {
+function CommandEmpty({ search }: { search: string }) {
   return (
     <CommandEmptyPrimitive className="text-muted-foreground py-6 text-center text-sm">
       No results found for <span className="text-foreground">"{search}"</span>.
@@ -573,15 +560,7 @@ const CommandEmpty = function CommandEmpty({ search }: { search: string }) {
   )
 }
 
-const PulseBar = function PulseBar({
-  mode,
-  isVisible,
-  className,
-}: {
-  mode: 'flash' | 'pulse'
-  isVisible: boolean
-  className?: string
-}) {
+function PulseBar({ mode, isVisible, className }: { mode: 'flash' | 'pulse'; isVisible: boolean; className?: string }) {
   const gradientBackground = `linear-gradient(90deg, transparent, #66F0C2, #00C241, #66F0C2, transparent)`
 
   if (!isVisible) return null
