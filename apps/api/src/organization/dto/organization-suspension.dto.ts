@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
-import { IsOptional } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsNumber, IsOptional, Min } from 'class-validator'
 
 @ApiSchema({ name: 'OrganizationSuspension' })
 export class OrganizationSuspensionDto {
@@ -19,9 +19,13 @@ export class OrganizationSuspensionDto {
   @IsOptional()
   until?: Date
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Suspension cleanup grace period hours',
+    type: 'number',
+    minimum: 0,
   })
   @IsOptional()
+  @IsNumber()
+  @Min(0)
   suspensionCleanupGracePeriodHours?: number
 }
