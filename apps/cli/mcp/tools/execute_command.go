@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -54,7 +55,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 	command := strings.TrimSpace(*args.Command)
 	if strings.Contains(command, "&&") || strings.HasPrefix(command, "cd ") {
 		// Wrap complex commands in /bin/sh -c
-		command = fmt.Sprintf("/bin/sh -c %s", shellQuote(command))
+		command = fmt.Sprintf("/bin/sh -c %s", utils.ShellQuote(command))
 	}
 
 	log.Infof("Executing command: %s", command)
@@ -121,10 +122,4 @@ func returnCommandError(message, errorType string) (*mcp.CallToolResult, error) 
 			},
 		},
 	}, nil
-}
-
-// Helper function to quote shell commands
-func shellQuote(s string) string {
-	// Simple shell quoting - wrap in single quotes and escape existing single quotes
-	return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'"
 }
