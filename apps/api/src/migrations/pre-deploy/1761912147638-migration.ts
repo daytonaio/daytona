@@ -4,7 +4,7 @@
  */
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
-import { configuration } from '../config/configuration'
+import { configuration } from '../../config/configuration'
 
 export class Migration1761912147638 implements MigrationInterface {
   name = 'Migration1761912147638'

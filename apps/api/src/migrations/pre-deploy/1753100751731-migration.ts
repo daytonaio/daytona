@@ -4,7 +4,7 @@
  */
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
-import { GlobalOrganizationRolesIds } from '../organization/constants/global-organization-roles.constant'
+import { GlobalOrganizationRolesIds } from '../../organization/constants/global-organization-roles.constant'
 
 export class Migration1753100751731 implements MigrationInterface {
   name = 'Migration1753100751731'

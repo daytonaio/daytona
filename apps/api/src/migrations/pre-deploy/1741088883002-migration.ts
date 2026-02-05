@@ -4,8 +4,8 @@
  */
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
-import { GlobalOrganizationRolesIds } from '../organization/constants/global-organization-roles.constant'
-import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
+import { GlobalOrganizationRolesIds } from '../../organization/constants/global-organization-roles.constant'
+import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 
 export class Migration1741088883002 implements MigrationInterface {
   name = 'Migration1741088883002'
