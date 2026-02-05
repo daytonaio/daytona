@@ -64,7 +64,7 @@ const Playground: React.FC = () => {
   const pageContentRef = useRef<HTMLDivElement>(null)
 
   useResizeObserver({
-    ref: pageContentRef,
+    ref: pageContentRef as React.RefObject<HTMLElement>,
     onResize: () => {
       if (pageContentRef.current) {
         const { width } = pageContentRef.current.getBoundingClientRect()

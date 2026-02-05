@@ -673,7 +673,7 @@ main().catch(console.error)`,
                 onClick={() => {
                   runCodeSnippet()
 
-                  if (resultPanelRef.current.isCollapsed) {
+                  if (resultPanelRef.current?.isCollapsed) {
                     resultPanelRef.current.resize(100)
                   }
                 }}
@@ -686,10 +686,10 @@ main().catch(console.error)`,
                 size="icon-sm"
                 variant="outline"
                 onClick={() => {
-                  if (resultPanelRef.current.isCollapsed()) {
+                  if (resultPanelRef.current?.isCollapsed()) {
                     resultPanelRef.current.resize('20%')
                   } else {
-                    resultPanelRef.current.collapse()
+                    resultPanelRef.current?.collapse()
                   }
                 }}
               >
@@ -729,7 +729,7 @@ main().catch(console.error)`,
                   <div className="text-muted-foreground font-mono">Result</div>
                   <div className="flex items-center gap-2">
                     <TooltipButton
-                      onClick={() => resultPanelRef.current.resize('80%')}
+                      onClick={() => resultPanelRef.current?.resize('80%')}
                       tooltipText="Maximize"
                       className="h-6 w-6"
                       size="sm"
@@ -742,7 +742,7 @@ main().catch(console.error)`,
                       className="h-6 w-6"
                       size="sm"
                       variant="ghost"
-                      onClick={() => resultPanelRef.current.collapse()}
+                      onClick={() => resultPanelRef.current?.collapse()}
                     >
                       <XIcon />
                     </TooltipButton>

@@ -44,15 +44,18 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
     [getPortPreviewUrl],
   )
 
-  const setupWebTerminal = useCallback(async () => {
-    setLoadingTerminalUrl(true)
-    await getWebTerminalUrl(terminalSandbox)
-    setLoadingTerminalUrl(false)
-  }, [terminalSandbox, getWebTerminalUrl])
+  const setupWebTerminal = useCallback(
+    async (terminalSandbox: Sandbox) => {
+      setLoadingTerminalUrl(true)
+      await getWebTerminalUrl(terminalSandbox)
+      setLoadingTerminalUrl(false)
+    },
+    [getWebTerminalUrl],
+  )
 
   useEffect(() => {
     if (terminalSandbox) {
-      setupWebTerminal()
+      setupWebTerminal(terminalSandbox)
     } else if (terminalSandboxError) setLoadingTerminalUrl(false)
   }, [terminalSandbox, terminalSandboxError, getWebTerminalUrl, setupWebTerminal])
 
@@ -75,16 +78,18 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
                     {...motionLoadingProps}
                   >
                     There was an error loading the terminal.
-                    <Button
-                      variant="outline"
-                      className="ml-2"
-                      onClick={() => {
-                        setupWebTerminal()
-                      }}
-                    >
-                      <RefreshCcw className="size-4" />
-                      Retry
-                    </Button>
+                    {terminalSandbox && (
+                      <Button
+                        variant="outline"
+                        className="ml-2"
+                        onClick={() => {
+                          setupWebTerminal(terminalSandbox)
+                        }}
+                      >
+                        <RefreshCcw className="size-4" />
+                        Retry
+                      </Button>
+                    )}
                   </motion.p>
                 )}
               </AnimatePresence>

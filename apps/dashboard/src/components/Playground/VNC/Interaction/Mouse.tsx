@@ -206,7 +206,7 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
           mouseScrollParams.direction,
           mouseScrollParams.amount ?? undefined,
         )
-        mouseActionResponseText = mouseScrollResponse
+        mouseActionResponseText = (await mouseScrollResponse)
           ? `Mouse scrolled ${mouseScrollParams.direction} at (${mouseScrollParams.x}, ${mouseScrollParams.y}) by ${mouseScrollParams.amount ?? 1}`
           : `Failed to scroll ${mouseScrollParams.direction} at (${mouseScrollParams.x}, ${mouseScrollParams.y})`
         break
