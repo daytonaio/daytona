@@ -134,7 +134,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
           {resourcesFormData.map((resourceParamFormItem) => (
             <InlineInputFormControl key={resourceParamFormItem.key} formItem={resourceParamFormItem}>
               <FormNumberInput
-                disabled={nonDefaultSnapshotSelected}
+                disabled={Boolean(nonDefaultSnapshotSelected)}
                 numberValue={resources[resourceParamFormItem.key]}
                 numberFormItem={resourceParamFormItem}
                 onChangeHandler={(value) => {

@@ -32,6 +32,11 @@ const motionLoadingProps = {
   transition: { duration: 0.175 },
 }
 
+function isComputerUseUnavailableError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error)
+  return message === 'Computer-use functionality is not available'
+}
+
 const computerUseMissingErrorMessage = (
   <div>
     <div>Computer-use dependencies are missing in the runtime environment.</div>
@@ -115,9 +120,8 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
           }
         }
       } catch (error) {
-        // Check if this is a computer-use availability error
-        const errorMessage = error?.response?.data?.message || error?.message || String(error)
-        if (errorMessage === 'Computer-use functionality is not available') {
+        const isComputerUseError = isComputerUseUnavailableError(error)
+        if (isComputerUseError) {
           toast.error('Computer-use functionality is not available', {
             description: computerUseMissingErrorMessage,
           })
@@ -129,26 +133,29 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
     [getVNCUrl, selectedOrganization, toolboxApi, setVNCInteractionOptionsParamValue],
   )
 
-  const setupVNCComputerUse = useCallback(async () => {
-    setLoadingVNCUrl(true)
-    await getVNCComputerUseUrl(VNCSandboxData.sandbox as Sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
-    setLoadingVNCUrl(false)
-  }, [VNCSandboxData, getVNCComputerUseUrl])
+  const setupVNCComputerUse = useCallback(
+    async (sandbox: Sandbox) => {
+      setLoadingVNCUrl(true)
+      await getVNCComputerUseUrl(sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
+      setLoadingVNCUrl(false)
+    },
+    [getVNCComputerUseUrl],
+  )
 
   useEffect(() => {
     setVNCInteractionOptionsParamValue('VNCUrl', null) // Reset VNCurl value
     if (!VNCSandboxData) return
     if (VNCSandboxData.sandbox) {
       // Sandbox created -> setup VNC
-      setupVNCComputerUse()
+      setupVNCComputerUse(VNCSandboxData.sandbox)
     } else if (VNCSandboxData.error) setLoadingVNCUrl(false)
   }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl, setupVNCComputerUse])
 
   const resultPanelRef = usePanelRef()
 
   useEffect(() => {
-    if (resultPanelRef.current.isCollapsed()) {
-      resultPanelRef.current.resize('20%')
+    if (resultPanelRef.current?.isCollapsed()) {
+      resultPanelRef.current?.resize('20%')
     }
   }, [VNCInteractionOptionsParamsState.responseContent, resultPanelRef])
 
@@ -173,17 +180,19 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
                         {...motionLoadingProps}
                       >
                         {VNCLoadingError || 'There was an error loading VNC.'}
-                        <Button
-                          variant="outline"
-                          className="ml-2"
-                          onClick={() => {
-                            setVNCLoadingError('')
-                            setupVNCComputerUse()
-                          }}
-                        >
-                          <RefreshCcw className="size-4" />
-                          Retry
-                        </Button>
+                        {VNCSandboxData?.sandbox && (
+                          <Button
+                            variant="outline"
+                            className="ml-2"
+                            onClick={() => {
+                              setVNCLoadingError('')
+                              setupVNCComputerUse(VNCSandboxData.sandbox!)
+                            }}
+                          >
+                            <RefreshCcw className="size-4" />
+                            Retry
+                          </Button>
+                        )}
                       </motion.p>
                     )}
                   </AnimatePresence>
@@ -200,7 +209,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
                 <div className="text-muted-foreground font-mono">Result</div>
                 <div className="flex items-center gap-2">
                   <TooltipButton
-                    onClick={() => resultPanelRef.current.resize('80%')}
+                    onClick={() => resultPanelRef.current?.resize('80%')}
                     tooltipText="Maximize"
                     className="h-6 w-6"
                     size="sm"
@@ -213,7 +222,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
                     className="h-6 w-6"
                     size="sm"
                     variant="ghost"
-                    onClick={() => resultPanelRef.current.collapse()}
+                    onClick={() => resultPanelRef.current?.collapse()}
                   >
                     <XIcon />
                   </TooltipButton>
