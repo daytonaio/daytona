@@ -88,8 +88,9 @@ func main() {
 			log.Infof("Created entrypoint session with ID: %s", util.EntrypointSessionID)
 		}
 
-		// Execute command asynchronously via session
 		command := strings.Join(args, " ")
+		// Execute command asynchronously via session
+		// command := utils.ShellQuoteJoin(args)
 		_, err := sessionService.Execute(
 			util.EntrypointSessionID,
 			util.EntrypointCommandID,
