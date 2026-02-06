@@ -349,7 +349,7 @@ The working directory defaults to the sandbox working directory. It uses the WOR
 
 ### Execute commands
 
-Daytona provides methods to execute shell commands in sandboxes by providing the command string and optional parameters for working directory, timeout, and environment variables.
+Daytona provides methods to execute shell commands in sandboxes by providing the command string and optional parameters for working directory, timeout, and environment variables. You can also use the `daytona exec` CLI command for quick command execution.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -446,6 +446,20 @@ fmt.Println(response.Result)
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+# Execute any shell command
+daytona exec my-sandbox -- ls -la
+
+# Setting a working directory and a timeout
+daytona exec my-sandbox --cwd workspace/src --timeout 5 -- sleep 3
+
+# Passing environment variables (use shell syntax)
+daytona exec my-sandbox -- sh -c 'CUSTOM_SECRET=DAYTONA echo $CUSTOM_SECRET'
+```
+
+</TabItem>
 <TabItem label="API" icon="seti:json">
 
 ```bash
@@ -462,7 +476,7 @@ curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
 
 > [**exec (Python SDK)**](/docs/en/python-sdk/sync/process/#processexec)
 >
@@ -471,6 +485,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**exec (Ruby SDK)**](/docs/en/ruby-sdk/process/#exec)
 >
 > [**ExecuteCommand (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ExecuteCommand)
+>
+> [**daytona exec (CLI)**](/docs/en/tools/cli/#daytona-exec)
 >
 > [**execute command (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
 
