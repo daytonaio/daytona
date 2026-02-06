@@ -506,9 +506,7 @@ Sandbox must be stopped before archiving.
 
 ```python
 @intercept_errors(message_prefix="Failed to resize sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to resize within the {timeout} seconds timeout period"
-))
+@with_timeout()
 def resize(resources: Resources, timeout: float | None = 60) -> None
 ```
 
@@ -552,9 +550,7 @@ sandbox.resize(Resources(cpu=2, memory=4, disk=30))
 ```python
 @intercept_errors(
     message_prefix="Failure during waiting for resize to complete: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} resize did not complete within the {timeout} seconds timeout period"
-))
+@with_timeout()
 def wait_for_resize_complete(timeout: float | None = 60) -> None
 ```
 

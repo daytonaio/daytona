@@ -44,7 +44,9 @@ exclude = [
     "libs/sdk-python/scripts",
     "libs/*api-client*",
     "apps",
-    "guides"
+    "guides",
+    "tmp",
+    ".nx"
 ]
 reportUnknownMemberType = "none"
 reportAny = "none"

@@ -536,11 +536,7 @@ class Sandbox(SandboxDto):
         self.refresh_data()
 
     @intercept_errors(message_prefix="Failed to resize sandbox: ")
-    @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Sandbox {cast('Sandbox', self).id} failed to resize within the {timeout} seconds timeout period"
-        )
-    )
+    @with_timeout()
     def resize(self, resources: Resources, timeout: float | None = 60) -> None:
         """Resizes the Sandbox resources.
 
@@ -572,7 +568,6 @@ class Sandbox(SandboxDto):
             sandbox.resize(Resources(cpu=2, memory=4, disk=30))
             ```
         """
-        start_time = time.time()
         resize_request = ResizeSandbox(
             cpu=resources.cpu,
             memory=resources.memory,
@@ -580,19 +575,10 @@ class Sandbox(SandboxDto):
         )
         sandbox = self._sandbox_api.resize_sandbox(self.id, resize_request, _request_timeout=timeout or None)
         self.__process_sandbox_dto(sandbox)
-        time_elapsed = time.time() - start_time
-        if timeout is None or timeout == 0:
-            remaining_timeout = timeout
-        else:
-            remaining_timeout = max(0.001, timeout - time_elapsed)
-        self.wait_for_resize_complete(timeout=remaining_timeout)
+        self.wait_for_resize_complete(timeout=0)
 
     @intercept_errors(message_prefix="Failure during waiting for resize to complete: ")
-    @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Sandbox {cast('Sandbox', self).id} resize did not complete within the {timeout} seconds timeout period"
-        )
-    )
+    @with_timeout()
     def wait_for_resize_complete(
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
