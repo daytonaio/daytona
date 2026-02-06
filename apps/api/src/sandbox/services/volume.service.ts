@@ -142,10 +142,17 @@ export class VolumeService {
       throw new NotFoundException(`Volume with ID ${volumeId} not found`)
     }
 
+    if (volume.state !== VolumeState.READY) {
+      throw new BadRequestError(`Volume must be in '${VolumeState.READY}' state in order to be deleted`)
+    }
+
     // Check if any non-destroyed sandboxes are using this volume
     const sandboxUsingVolume = await this.sandboxRepository
       .createQueryBuilder('sandbox')
-      .where('sandbox.volumes @> :volFilter::jsonb', {
+      .where('sandbox.organizationId = :organizationId', {
+        organizationId: volume.organizationId,
+      })
+      .andWhere('sandbox.volumes @> :volFilter::jsonb', {
         volFilter: JSON.stringify([{ volumeId }]),
       })
       .andWhere('sandbox.desiredState != :destroyed', {
@@ -158,10 +165,6 @@ export class VolumeService {
       throw new ConflictException(
         `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
       )
-    }
-
-    if (volume.state !== VolumeState.READY) {
-      throw new BadRequestError(`Volume must be in '${VolumeState.READY}' state in order to be deleted`)
     }
 
     // Update state to mark as deleting
