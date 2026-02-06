@@ -1,0 +1,152 @@
+name: Default Snapshot Images Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (e.g., "0.1.2")
+        required: true
+        default: '0.0.0-dev'
+      push_latest:
+        description: Push latest tags (disable for rc/pre-release)
+        type: boolean
+        default: true
+
+env:
+  VERSION: ${{ inputs.version }}
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  REGISTRY_IMAGE: daytonaio/sandbox
+
+jobs:
+  docker_build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
+            platform: linux/arm64
+          - runner: [self-hosted, Linux, X64, github-actions-runner-amd64]
+            platform: linux/amd64
+
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Build and push sandbox by digest
+        id: build-sandbox
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/sandbox
+          file: ./images/sandbox/Dockerfile
+          platforms: ${{ matrix.platform }}
+          tags: ${{ env.REGISTRY_IMAGE }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export sandbox digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/sandbox
+          digest="${{ steps.build-sandbox.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/sandbox/${digest#sha256:}"
+
+      - name: Build and push sandbox-slim by digest
+        id: build-sandbox-slim
+        uses: docker/build-push-action@v6
+        with:
+          context: ./images/sandbox-slim
+          file: ./images/sandbox-slim/Dockerfile
+          platforms: ${{ matrix.platform }}
+          tags: ${{ env.REGISTRY_IMAGE }}
+          outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export sandbox-slim digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests/sandbox-slim
+          digest="${{ steps.build-sandbox-slim.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/sandbox-slim/${digest#sha256:}"
+
+      - name: Upload sandbox digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-default-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/sandbox/*
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Upload sandbox-slim digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-slim-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/sandbox-slim/*
+          if-no-files-found: error
+          retention-days: 1
+
+  docker_manifest:
+    needs: docker_build
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+
+    steps:
+      - name: Download sandbox digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests/sandbox
+          pattern: digests-default-*
+          merge-multiple: true
+
+      - name: Download sandbox-slim digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests/sandbox-slim
+          pattern: digests-slim-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Create and push sandbox manifest
+        working-directory: ${{ runner.temp }}/digests/sandbox
+        run: |
+          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}"
+          if [ "${{ inputs.push_latest }}" = "true" ]; then
+            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest"
+          fi
+          docker buildx imagetools create $TAGS \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Create and push sandbox-slim manifest
+        working-directory: ${{ runner.temp }}/digests/sandbox-slim
+        run: |
+          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim"
+          if [ "${{ inputs.push_latest }}" = "true" ]; then
+            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest-slim"
+          fi
+          docker buildx imagetools create $TAGS \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect images
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim
