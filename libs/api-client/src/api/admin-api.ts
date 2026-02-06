@@ -37,6 +37,8 @@ import type { AdminCreateRunner } from '../models'
 import type { CreateRunnerResponse } from '../models'
 // @ts-ignore
 import type { RunnerFull } from '../models'
+// @ts-ignore
+import type { Sandbox } from '../models'
 /**
  * AdminApi - axios parameter creator
  * @export
@@ -201,6 +203,46 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
     },
     /**
      *
+     * @summary Recover sandbox from error state as an admin
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    adminRecoverSandbox: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('adminRecoverSandbox', 'sandboxId', sandboxId)
+      const localVarPath = `/admin/sandbox/{sandboxId}/recover`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
@@ -340,6 +382,29 @@ export const AdminApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Recover sandbox from error state as an admin
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async adminRecoverSandbox(
+      sandboxId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.adminRecoverSandbox(sandboxId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['AdminApi.adminRecoverSandbox']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
@@ -416,6 +481,16 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
     },
     /**
      *
+     * @summary Recover sandbox from error state as an admin
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    adminRecoverSandbox(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
+      return localVarFp.adminRecoverSandbox(sandboxId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
@@ -487,6 +562,20 @@ export class AdminApi extends BaseAPI {
   public adminListRunners(regionId?: string, options?: RawAxiosRequestConfig) {
     return AdminApiFp(this.configuration)
       .adminListRunners(regionId, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Recover sandbox from error state as an admin
+   * @param {string} sandboxId ID of the sandbox
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof AdminApi
+   */
+  public adminRecoverSandbox(sandboxId: string, options?: RawAxiosRequestConfig) {
+    return AdminApiFp(this.configuration)
+      .adminRecoverSandbox(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

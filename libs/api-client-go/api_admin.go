@@ -72,6 +72,19 @@ type AdminAPI interface {
 	AdminListRunnersExecute(r AdminAPIAdminListRunnersRequest) ([]RunnerFull, *http.Response, error)
 
 	/*
+		AdminRecoverSandbox Recover sandbox from error state as an admin
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return AdminAPIAdminRecoverSandboxRequest
+	*/
+	AdminRecoverSandbox(ctx context.Context, sandboxId string) AdminAPIAdminRecoverSandboxRequest
+
+	// AdminRecoverSandboxExecute executes the request
+	//  @return Sandbox
+	AdminRecoverSandboxExecute(r AdminAPIAdminRecoverSandboxRequest) (*Sandbox, *http.Response, error)
+
+	/*
 		AdminUpdateRunnerScheduling Update runner scheduling status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -442,6 +455,108 @@ func (a *AdminAPIService) AdminListRunnersExecute(r AdminAPIAdminListRunnersRequ
 	if r.regionId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "regionId", r.regionId, "form", "")
 	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type AdminAPIAdminRecoverSandboxRequest struct {
+	ctx        context.Context
+	ApiService AdminAPI
+	sandboxId  string
+}
+
+func (r AdminAPIAdminRecoverSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
+	return r.ApiService.AdminRecoverSandboxExecute(r)
+}
+
+/*
+AdminRecoverSandbox Recover sandbox from error state as an admin
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return AdminAPIAdminRecoverSandboxRequest
+*/
+func (a *AdminAPIService) AdminRecoverSandbox(ctx context.Context, sandboxId string) AdminAPIAdminRecoverSandboxRequest {
+	return AdminAPIAdminRecoverSandboxRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Sandbox
+func (a *AdminAPIService) AdminRecoverSandboxExecute(r AdminAPIAdminRecoverSandboxRequest) (*Sandbox, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Sandbox
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminRecoverSandbox")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/sandbox/{sandboxId}/recover"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
