@@ -97,6 +97,8 @@
   "sidebarconfig.networkLimits": "Network Limits",
   "sidebarconfig.networkLimitsDescription": "Network egress limits for Daytona Sandboxes.",
   "sidebarconfig.sshAccess": "SSH Access",
+  "sidebarconfig.vncAccess": "VNC Access",
+  "sidebarconfig.vncAccessDescription": "VNC access to Daytona Sandboxes.",
   "sidebarconfig.vpnConnection": "VPN Connections",
   "sidebarconfig.vpnConnectionDescription": "Connect Daytona Sandboxes to VPN networks.",
   "sidebarconfig.sshAccessDescription": "SSH access to Daytona Sandboxes.",
