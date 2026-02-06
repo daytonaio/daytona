@@ -28,7 +28,7 @@ import {
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -227,6 +227,8 @@ const Wallet = () => {
   )
 
   const isBillingLoading = walletQuery.isLoading && billingPortalUrlQuery.isLoading
+  const topUpEnabled =
+    wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
 
   return (
     <PageLayout>
@@ -570,16 +572,7 @@ const Wallet = () => {
                 <div className="text-sm text-muted-foreground">
                   You will be redirected to Stripe to complete the payment.
                 </div>
-                <Button
-                  onClick={handleTopUpWallet}
-                  disabled={
-                    walletQuery.isLoading ||
-                    !wallet ||
-                    topUpWalletMutation.isPending ||
-                    (selectedPreset === null && !oneTimeTopUpAmount)
-                  }
-                  size="sm"
-                >
+                <Button onClick={handleTopUpWallet} disabled={!topUpEnabled} size="sm">
                   {topUpWalletMutation.isPending && <Spinner />}
                   Top up
                 </Button>
