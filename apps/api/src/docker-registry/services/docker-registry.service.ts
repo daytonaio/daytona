@@ -40,7 +40,8 @@ function normalizeRegistryUrl(url: string): string {
   if (!url || url.trim() === '' || url.toLowerCase().includes('docker.io')) {
     return DOCKER_HUB_URL
   }
-  return url
+  // Strip trailing slashes for consistent matching
+  return url.replace(/\/+$/, '')
 }
 
 export interface ImageDetails {
@@ -554,9 +555,14 @@ export class DockerRegistryService {
    */
   private findRegistryByUrlMatch(registries: DockerRegistry[], targetString: string): DockerRegistry | null {
     for (const registry of registries) {
-      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
+      const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '').replace(/\/+$/, '')
       if (targetString.startsWith(strippedUrl)) {
-        return registry
+        // Ensure match is at a proper boundary (followed by '/', ':', or end-of-string)
+        // to prevent "registry.depot.dev" from matching "registry.depot.dev-evil.com/..."
+        const nextChar = targetString[strippedUrl.length]
+        if (nextChar === undefined || nextChar === '/' || nextChar === ':') {
+          return registry
+        }
       }
     }
     return null
