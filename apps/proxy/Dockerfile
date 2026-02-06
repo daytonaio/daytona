@@ -27,25 +27,6 @@ COPY --from=build /daytona/dist/apps/proxy daytona-proxy
 
 RUN chmod +x daytona-proxy
 
-ENV DAYTONA_API_URL=http://api:3000/api
-
-ENV PROXY_PORT=4000
-ENV PROXY_API_KEY=super_secret_key
-ENV PROXY_PROTOCOL=http
-
-ENV OIDC_CLIENT_ID=daytona
-ENV OIDC_CLIENT_SECRET=
-ENV OIDC_DOMAIN=http://dex:5556/dex
-ENV OIDC_PUBLIC_DOMAIN=http://localhost:5556/dex
-ENV OIDC_AUDIENCE=daytona
-
-ENV REDIS_HOST=redis
-ENV REDIS_PORT=6379
-
-ENV TOOLBOX_ONLY_MODE=false
-
-ENV PREVIEW_WARNING_ENABLED=false
-
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:4000/health" ]
 
 ENTRYPOINT ["daytona-proxy"]
