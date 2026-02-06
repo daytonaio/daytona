@@ -281,19 +281,23 @@ export function SnapshotTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Snapshots" totalItems={totalItems} />
-        <AnimatePresence>
-          {hasSelection && (
-            <SelectionToast
-              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
-              selectedCount={selectedRows.length}
-              onClearSelection={() => table.resetRowSelection()}
-              onActionClick={handleOpenCommandPalette}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+      <Pagination
+        table={table}
+        selectionEnabled={deletePermitted}
+        entityName="Snapshots"
+        totalItems={totalItems}
+        className="mt-4"
+      />
+      <AnimatePresence>
+        {hasSelection && (
+          <SelectionToast
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+            selectedCount={selectedRows.length}
+            onClearSelection={() => table.resetRowSelection()}
+            onActionClick={handleOpenCommandPalette}
+          />
+        )}
+      </AnimatePresence>
 
       <SnapshotBulkActionAlertDialog
         action={pendingBulkAction}

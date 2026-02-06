@@ -319,117 +319,118 @@ const Snapshots: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
-  const handleBulkDelete = async (snapshots: SnapshotDto[]) => {
-    let isCancelled = false
-    let processedCount = 0
-    let successCount = 0
-    let failureCount = 0
+  const executeBulkAction = useCallback(
+    async ({
+      ids,
+      actionName,
+      optimisticState,
+      apiCall,
+      toastMessages,
+    }: {
+      ids: string[]
+      actionName: string
+      optimisticState: SnapshotState
+      apiCall: (id: string) => Promise<unknown>
+      toastMessages: {
+        successTitle: string
+        errorTitle: string
+        warningTitle: string
+        canceledTitle: string
+      }
+    }) => {
+      const previousStatesById = new Map((snapshotsData?.items ?? []).map((snapshot) => [snapshot.id, snapshot.state]))
 
-    const totalLabel = pluralize(snapshots.length, 'snapshot', 'snapshots')
-    const onCancel = () => {
-      isCancelled = true
-    }
+      let isCancelled = false
+      let processedCount = 0
+      let successCount = 0
+      let failureCount = 0
 
-    const bulkToast = createBulkActionToast(`Deleting 0 of ${totalLabel}.`, {
-      action: { label: 'Cancel', onClick: onCancel },
-    })
-
-    const previousStates = new Map(snapshots.map((s) => [s.id, s.state]))
-
-    try {
-      for (const snapshot of snapshots) {
-        if (isCancelled) break
-
-        processedCount += 1
-        bulkToast.loading(`Deleting ${processedCount} of ${totalLabel}.`, {
-          action: { label: 'Cancel', onClick: onCancel },
-        })
-
-        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-        updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
-
-        try {
-          await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
-          successCount += 1
-        } catch (error) {
-          failureCount += 1
-          updateSnapshotInCache(snapshot.id, { state: previousStates.get(snapshot.id) })
-          console.error(`Failed to delete snapshot ${snapshot.name}`, error)
-        } finally {
-          setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
-        }
+      const totalLabel = pluralize(ids.length, 'snapshot', 'snapshots')
+      const onCancel = () => {
+        isCancelled = true
       }
 
-      bulkToast.result(
-        { successCount, failureCount },
-        {
-          successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deleted.`,
-          errorTitle: `Failed to delete ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
-          warningTitle: 'Failed to delete some snapshots.',
-          canceledTitle: 'Delete canceled.',
-        },
-      )
-    } catch (error) {
-      console.error('Failed to delete snapshots', error)
-      bulkToast.error('Failed to delete snapshots.')
-    }
-  }
+      const bulkToast = createBulkActionToast(`${actionName} 0 of ${totalLabel}.`, {
+        action: { label: 'Cancel', onClick: onCancel },
+      })
 
-  const handleBulkDeactivate = async (snapshots: SnapshotDto[]) => {
-    let isCancelled = false
-    let processedCount = 0
-    let successCount = 0
-    let failureCount = 0
+      try {
+        for (const id of ids) {
+          if (isCancelled) break
 
-    const totalLabel = pluralize(snapshots.length, 'snapshot', 'snapshots')
-    const onCancel = () => {
-      isCancelled = true
-    }
+          processedCount += 1
+          bulkToast.loading(`${actionName} ${processedCount} of ${totalLabel}.`, {
+            action: { label: 'Cancel', onClick: onCancel },
+          })
 
-    const bulkToast = createBulkActionToast(`Deactivating 0 of ${totalLabel}.`, {
-      action: { label: 'Cancel', onClick: onCancel },
-    })
+          setLoadingSnapshots((prev) => ({ ...prev, [id]: true }))
+          updateSnapshotInCache(id, { state: optimisticState })
 
-    const previousStates = new Map(snapshots.map((s) => [s.id, s.state]))
-
-    try {
-      for (const snapshot of snapshots) {
-        if (isCancelled) break
-
-        processedCount += 1
-        bulkToast.loading(`Deactivating ${processedCount} of ${totalLabel}.`, {
-          action: { label: 'Cancel', onClick: onCancel },
-        })
-
-        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-        updateSnapshotInCache(snapshot.id, { state: SnapshotState.INACTIVE })
-
-        try {
-          await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
-          successCount += 1
-        } catch (error) {
-          failureCount += 1
-          updateSnapshotInCache(snapshot.id, { state: previousStates.get(snapshot.id) })
-          console.error(`Failed to deactivate snapshot ${snapshot.name}`, error)
-        } finally {
-          setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+          try {
+            await apiCall(id)
+            successCount += 1
+          } catch (error) {
+            failureCount += 1
+            updateSnapshotInCache(id, { state: previousStatesById.get(id) })
+            console.error(`${actionName} snapshot failed`, id, error)
+          } finally {
+            setLoadingSnapshots((prev) => ({ ...prev, [id]: false }))
+          }
         }
+
+        await markAllSnapshotQueriesAsStale(true)
+        bulkToast.result({ successCount, failureCount }, toastMessages)
+      } catch (error) {
+        console.error(`${actionName} snapshots failed`, error)
+        bulkToast.error(`${actionName} snapshots failed.`)
       }
 
-      bulkToast.result(
-        { successCount, failureCount },
-        {
-          successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deactivated.`,
-          errorTitle: `Failed to deactivate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
-          warningTitle: 'Failed to deactivate some snapshots.',
-          canceledTitle: 'Deactivate canceled.',
-        },
-      )
-    } catch (error) {
-      console.error('Failed to deactivate snapshots', error)
-      bulkToast.error('Failed to deactivate snapshots.')
-    }
-  }
+      return { successCount, failureCount }
+    },
+    [snapshotsData?.items, updateSnapshotInCache, markAllSnapshotQueriesAsStale],
+  )
+
+  const handleBulkDelete = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Deleting',
+      optimisticState: SnapshotState.REMOVING,
+      apiCall: (id) => snapshotApi.removeSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deleted.`,
+        errorTitle: `Failed to delete ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to delete some snapshots.',
+        canceledTitle: 'Delete canceled.',
+      },
+    })
+
+  const handleBulkDeactivate = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Deactivating',
+      optimisticState: SnapshotState.INACTIVE,
+      apiCall: (id) => snapshotApi.deactivateSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deactivated.`,
+        errorTitle: `Failed to deactivate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to deactivate some snapshots.',
+        canceledTitle: 'Deactivate canceled.',
+      },
+    })
+
+  const handleBulkActivate = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Activating',
+      optimisticState: SnapshotState.ACTIVE,
+      apiCall: (id) => snapshotApi.activateSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} activated.`,
+        errorTitle: `Failed to activate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to activate some snapshots.',
+        canceledTitle: 'Activate canceled.',
+      },
+    })
 
   return (
     <PageLayout>
@@ -626,6 +627,7 @@ const Snapshots: React.FC = () => {
           }}
           onBulkDelete={handleBulkDelete}
           onBulkDeactivate={handleBulkDeactivate}
+          onBulkActivate={handleBulkActivate}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
           onCreateSnapshot={() => setShowCreateDialog(true)}

@@ -599,7 +599,7 @@ const Sandboxes: React.FC = () => {
           } catch (error) {
             failureCount += 1
             revertSandboxStateOptimisticUpdate(id, previousStatesById.get(id))
-            console.error(`Failed to ${actionName.toLowerCase()} sandbox`, id, error)
+            console.error(`${actionName} sandbox failed`, id, error)
           } finally {
             setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
             setTimeout(() => {
@@ -611,8 +611,8 @@ const Sandboxes: React.FC = () => {
         await markAllSandboxQueriesAsStale()
         bulkToast.result({ successCount, failureCount }, toastMessages)
       } catch (error) {
-        console.error(`Failed to ${actionName.toLowerCase()} sandboxes`, error)
-        bulkToast.error(`Failed to ${actionName.toLowerCase()} sandboxes.`)
+        console.error(`${actionName} sandboxes failed`, error)
+        bulkToast.error(`${actionName} sandboxes failed.`)
       }
 
       return { successCount, failureCount }
