@@ -25,7 +25,7 @@ export function SelectionToast({
       initial={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
       animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
       exit={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
-      className={cn('bg-popover  gap-3 max-w-[90vw]', className)}
+      className={cn('bg-popover gap-3 max-w-[90vw]', className)}
     >
       <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
