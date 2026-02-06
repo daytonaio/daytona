@@ -19,6 +19,13 @@ RUN apt-get update && apt-get install -y \
     libxss1 \
     libxtst6 \
     libxi6 \
+    # XCB libraries for screen recording
+    libxcb1 \
+    libxcb-shm0 \
+    libxcb-shape0 \
+    libxcb-xfixes0 \
+    # FFmpeg for screen recording
+    ffmpeg \
     # VNC and desktop environment for computer use
     xvfb \
     x11vnc \
