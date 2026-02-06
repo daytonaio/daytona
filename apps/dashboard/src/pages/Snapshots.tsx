@@ -41,7 +41,7 @@ const Snapshots: React.FC = () => {
   const queryClient = useQueryClient()
 
   const { snapshotApi } = useApi()
-  const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
+  const { getRegionName } = useRegions()
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
 
@@ -262,7 +262,7 @@ const Snapshots: React.FC = () => {
           } catch (error) {
             failureCount += 1
             updateSnapshotInCache(id, { state: previousStatesById.get(id) })
-            console.error(`Failed to ${actionName.toLowerCase()} snapshot`, id, error)
+            console.error(`${actionName} snapshot failed`, id, error)
           } finally {
             setLoadingSnapshots((prev) => ({ ...prev, [id]: false }))
           }
@@ -271,8 +271,8 @@ const Snapshots: React.FC = () => {
         await markAllSnapshotQueriesAsStale(true)
         bulkToast.result({ successCount, failureCount }, toastMessages)
       } catch (error) {
-        console.error(`Failed to ${actionName.toLowerCase()} snapshots`, error)
-        bulkToast.error(`Failed to ${actionName.toLowerCase()} snapshots.`)
+        console.error(`${actionName} snapshots failed`, error)
+        bulkToast.error(`${actionName} snapshots failed.`)
       }
 
       return { successCount, failureCount }
