@@ -283,17 +283,10 @@ const Wallet = () => {
                     </AlertDescription>
                   </Alert>
                 )}
-                {!wallet.creditCardConnected && user.profile.email_verified && (
-                  <Alert variant="warning">
-                    <CreditCardIcon />
-                    <AlertTitle> Credit card not connected</AlertTitle>
-                    <AlertDescription>
-                      {selectedOrganization?.personal ? (
-                        <>Connect a credit card to receive an additional $100 of credits.</>
-                      ) : (
-                        <>Please connect your credit card to your account to continue using our service.</>
-                      )}
-                    </AlertDescription>
+                {!wallet.creditCardConnected && user.profile.email_verified && selectedOrganization?.personal && (
+                  <Alert variant="neutral">
+                    <SparklesIcon />
+                    <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
                   </Alert>
                 )}
               </>
