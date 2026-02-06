@@ -18,7 +18,7 @@ Daytona provides options to create snapshots using [public images](#using-public
 - **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI
 - **Image**: Base image for the snapshot. Must include either a tag (e.g., **`ubuntu:22.04`**) or a digest. The **`latest`** tag is not allowed.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
-- **Resources** (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
+- **Resources** (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **2 vCPU**, **4GiB memory**, and **8GiB storage**.
 
 :::note
 Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
@@ -148,7 +148,7 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 ### Snapshot resources
 
-Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**. For more information, see [sandbox resources](/docs/en/sandboxes#resources).
+Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **2 vCPU**, **4GB RAM**, and **8GiB disk**. For more information, see [sandbox resources](/docs/en/sandboxes#resources).
 
 To view your available resources and limits, see [limits](/docs/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
 

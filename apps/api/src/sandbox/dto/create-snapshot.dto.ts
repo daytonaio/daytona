@@ -44,7 +44,7 @@ export class CreateSnapshotDto {
 
   @ApiPropertyOptional({
     description: 'CPU cores allocated to the resulting sandbox',
-    example: 1,
+    example: 2,
     type: 'integer',
   })
   @IsOptional()
@@ -62,7 +62,7 @@ export class CreateSnapshotDto {
 
   @ApiPropertyOptional({
     description: 'Memory allocated to the resulting sandbox in GB',
-    example: 1,
+    example: 4,
     type: 'integer',
   })
   @IsOptional()
@@ -71,7 +71,7 @@ export class CreateSnapshotDto {
 
   @ApiPropertyOptional({
     description: 'Disk space allocated to the sandbox in GB',
-    example: 3,
+    example: 8,
     type: 'integer',
   })
   @IsOptional()

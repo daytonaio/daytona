@@ -116,7 +116,7 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'Memory allocated to the sandbox in GB',
-    example: 1,
+    example: 4,
     type: 'integer',
   })
   @IsOptional()
@@ -125,7 +125,7 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'Disk space allocated to the sandbox in GB',
-    example: 3,
+    example: 8,
     type: 'integer',
   })
   @IsOptional()

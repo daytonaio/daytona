@@ -10377,11 +10377,11 @@ components:
           type: integer
         memory:
           description: Memory allocated to the sandbox in GB
-          example: 1
+          example: 4
           type: integer
         disk:
           description: Disk space allocated to the sandbox in GB
-          example: 3
+          example: 8
           type: integer
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
@@ -12571,14 +12571,14 @@ components:
     CreateSnapshot:
       example:
         general: true
-        disk: 3
+        disk: 8
         imageName: ubuntu:22.04
-        memory: 1
+        memory: 4
         buildInfo: ''
         regionId: regionId
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
-        cpu: 1
+        cpu: 2
         gpu: 0
       properties:
         name:
@@ -12600,7 +12600,7 @@ components:
           type: boolean
         cpu:
           description: CPU cores allocated to the resulting sandbox
-          example: 1
+          example: 2
           type: integer
         gpu:
           description: GPU units allocated to the resulting sandbox
@@ -12608,11 +12608,11 @@ components:
           type: integer
         memory:
           description: Memory allocated to the resulting sandbox in GB
-          example: 1
+          example: 4
           type: integer
         disk:
           description: Disk space allocated to the sandbox in GB
-          example: 3
+          example: 8
           type: integer
         buildInfo:
           allOf:
@@ -13147,11 +13147,11 @@ components:
           type: integer
         memory:
           description: Memory allocated to the workspace in GB
-          example: 1
+          example: 4
           type: integer
         disk:
           description: Disk space allocated to the workspace in GB
-          example: 3
+          example: 8
           type: integer
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)

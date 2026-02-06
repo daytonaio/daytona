@@ -496,7 +496,7 @@ const Snapshots: React.FC = () => {
                       type="number"
                       className="w-full"
                       min="1"
-                      placeholder="1"
+                      placeholder="2"
                       onChange={(e) => setCpu(parseInt(e.target.value) || undefined)}
                     />
                   </div>
@@ -509,7 +509,7 @@ const Snapshots: React.FC = () => {
                       type="number"
                       className="w-full"
                       min="1"
-                      placeholder="1"
+                      placeholder="4"
                       onChange={(e) => setMemory(parseInt(e.target.value) || undefined)}
                     />
                   </div>
@@ -522,13 +522,13 @@ const Snapshots: React.FC = () => {
                       type="number"
                       className="w-full"
                       min="1"
-                      placeholder="3"
+                      placeholder="8"
                       onChange={(e) => setDisk(parseInt(e.target.value) || undefined)}
                     />
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
+                  If not specified, default values will be used (2 vCPU, 4 GiB memory, 8 GiB storage).
                 </p>
               </div>
               <div className="space-y-3">

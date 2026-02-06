@@ -347,12 +347,12 @@ __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
 | `--context` | `-c` | Files or directories to include in the build context (can be specified multiple times). If not provided, context will be automatically determined from COPY/ADD commands in the Dockerfile |
-| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
-| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
+| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 2) |
+| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 8) |
 | `--dockerfile` | `-f` | Path to Dockerfile to build |
 | `--entrypoint` | `-e` | The entrypoint command for the snapshot |
 | `--image` | `-i` | The image name for the snapshot |
-| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
+| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 4) |
 | `--region` |  | ID of the region where the snapshot will be available (defaults to organization default region) |
 | `--help` |  | help for daytona |
 
@@ -397,10 +397,10 @@ daytona snapshot push [SNAPSHOT] [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 1) |
-| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 3) |
+| `--cpu` |  | CPU cores that will be allocated to the underlying sandboxes (default: 2) |
+| `--disk` |  | Disk space that will be allocated to the underlying sandboxes in GB (default: 8) |
 | `--entrypoint` | `-e` | The entrypoint command for the image |
-| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 1) |
+| `--memory` |  | Memory that will be allocated to the underlying sandboxes in GB (default: 4) |
 | `--name` | `-n` | Specify the Snapshot name |
 | `--region` |  | ID of the region where the snapshot will be available (defaults to organization default region) |
 | `--help` |  | help for daytona |
