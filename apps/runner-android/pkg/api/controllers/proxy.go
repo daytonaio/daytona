@@ -5,6 +5,7 @@ package controllers
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -149,11 +150,16 @@ func ProxyToPort(ctx *gin.Context) {
 // proxyWebRTC handles proxying to the Cuttlefish WebRTC operator for display streaming
 func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefish.InstanceInfo, path string) {
 	// Cuttlefish WebRTC operator runs on port 1443 (HTTPS)
-	// The device URL pattern is: /devices/cvd_1-{instanceNum}-{instanceNum}/files/client.html
-	// CVD uses pattern: cvd_{groupNum}-{instanceNum}-{instanceNum}
-	// Since we always use group cvd_1, the pattern is cvd_1-{N}-{N}
 	operatorPort := 1443
-	deviceId := fmt.Sprintf("cvd_1-%d-%d", instance.InstanceNum, instance.InstanceNum)
+
+	// Get the actual device ID by querying the host orchestrator
+	// Device ID format varies based on CVD group assignment: {group}-{instance}-{instance}
+	deviceId := getDeviceIdForInstance(client, instance, operatorPort)
+	if deviceId == "" {
+		// Fallback to default pattern if lookup fails
+		deviceId = fmt.Sprintf("cvd_1-%d-%d", instance.InstanceNum, instance.InstanceNum)
+		log.Warnf("WebRTC proxy: could not look up device ID, using fallback: %s", deviceId)
+	}
 	deviceFilesPath := fmt.Sprintf("/devices/%s/files", deviceId)
 
 	// Handle VNC-style URLs by redirecting to the correct Cuttlefish path structure
@@ -370,4 +376,75 @@ func getProxyTarget(ctx *gin.Context, client *cuttlefish.Client) (*url.URL, erro
 	}
 
 	return target, nil
+}
+
+// deviceInfo represents a device from the host orchestrator
+type deviceInfo struct {
+	DeviceId  string `json:"device_id"`
+	GroupName string `json:"group_name"`
+	Name      string `json:"name"`
+	ADBPort   int    `json:"adb_port"`
+}
+
+// getDeviceIdForInstance queries the host orchestrator to find the actual device ID
+// CVD assigns group names dynamically, so we need to look up the device by ADB port
+func getDeviceIdForInstance(client *cuttlefish.Client, instance *cuttlefish.InstanceInfo, operatorPort int) string {
+	// Build target host
+	var targetHost string
+	if client.IsRemote() {
+		targetHost = client.SSHHost
+		if idx := strings.Index(targetHost, "@"); idx != -1 {
+			targetHost = targetHost[idx+1:]
+		}
+	} else {
+		targetHost = "localhost"
+	}
+
+	// Query the devices endpoint
+	devicesURL := fmt.Sprintf("https://%s:%d/devices", targetHost, operatorPort)
+
+	httpClient := &http.Client{
+		Timeout: 5 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := httpClient.Get(devicesURL)
+	if err != nil {
+		log.Debugf("WebRTC proxy: failed to query devices: %v", err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Debugf("WebRTC proxy: devices endpoint returned %d", resp.StatusCode)
+		return ""
+	}
+
+	var devices []deviceInfo
+	if err := json.NewDecoder(resp.Body).Decode(&devices); err != nil {
+		log.Debugf("WebRTC proxy: failed to decode devices: %v", err)
+		return ""
+	}
+
+	// Find device by ADB port
+	for _, dev := range devices {
+		if dev.ADBPort == instance.ADBPort {
+			log.Debugf("WebRTC proxy: found device %s for instance %d (ADB port %d)", dev.DeviceId, instance.InstanceNum, instance.ADBPort)
+			return dev.DeviceId
+		}
+	}
+
+	// Fallback: find by instance name (the "name" field is the instance number as string)
+	instanceName := fmt.Sprintf("%d", instance.InstanceNum)
+	for _, dev := range devices {
+		if dev.Name == instanceName {
+			log.Debugf("WebRTC proxy: found device %s for instance %d by name", dev.DeviceId, instance.InstanceNum)
+			return dev.DeviceId
+		}
+	}
+
+	log.Debugf("WebRTC proxy: no device found for instance %d (ADB port %d)", instance.InstanceNum, instance.ADBPort)
+	return ""
 }
