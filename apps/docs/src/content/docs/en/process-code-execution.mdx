@@ -59,11 +59,11 @@ response = await sandbox.process.codeRun(
 );
 console.log(response.result);
 
-// Run code with timeout
+// Run code with timeout (5 seconds)
 response = await sandbox.process.codeRun(
     'setTimeout(() => console.log("Done"), 2000);',
     undefined,
-    5000
+    5
 );
 console.log(response.result);
 ```
@@ -81,41 +81,28 @@ response = sandbox.process.code_run(code: <<~PYTHON)
 PYTHON
 
 puts response.result
-
-# Run code with environment variables
-response = sandbox.process.code_run(
-  code: 'import os; print(f"FOO: {os.environ.get(\'FOO\')}")',
-  env: { 'FOO' => 'BAR' }
-)
-puts response.result
-
-# Run code with timeout
-response = sandbox.process.code_run(
-  code: 'import time; time.sleep(2); print("Done")',
-  timeout: 5
-)
-puts response.result
 ```
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Run code
-result, err := sandbox.Process.CodeRun(ctx, `
+// Run code using shell command execution
+// Note: For stateless code execution in Go, use ExecuteCommand with the appropriate interpreter
+result, err := sandbox.Process.ExecuteCommand(ctx, `python3 -c '
 def greet(name):
     return f"Hello, {name}!"
 
 print(greet("Daytona"))
-`)
+'`)
 if err != nil {
 	log.Fatal(err)
 }
 fmt.Println(result.Result)
 
 // Run code with environment variables
-result, err = sandbox.Process.CodeRun(ctx, `import os; print(f"FOO: {os.environ.get('FOO')}")`,
-	options.WithCodeRunParams(types.CodeRunParams{Env: map[string]string{"FOO": "BAR"}}),
+result, err = sandbox.Process.ExecuteCommand(ctx, `python3 -c 'import os; print(f"FOO: {os.environ.get(\"FOO\")}")'`,
+	options.WithCommandEnv(map[string]string{"FOO": "BAR"}),
 )
 if err != nil {
 	log.Fatal(err)
@@ -123,8 +110,8 @@ if err != nil {
 fmt.Println(result.Result)
 
 // Run code with timeout
-result, err = sandbox.Process.CodeRun(ctx, `import time; time.sleep(2); print("Done")`,
-	options.WithCodeRunTimeout(5*time.Second),
+result, err = sandbox.Process.ExecuteCommand(ctx, `python3 -c 'import time; time.sleep(2); print("Done")'`,
+	options.WithExecuteTimeout(5*time.Second),
 )
 if err != nil {
 	log.Fatal(err)
@@ -159,7 +146,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**code_run (Ruby SDK)**](/docs/en/ruby-sdk/process/#code_run)
 >
-> [**CodeRun (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.CodeRun)
+> [**ExecuteCommand (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.ExecuteCommand)
 >
 > [**execute command (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
 
@@ -268,7 +255,7 @@ ctxInfo, err := sandbox.CodeInterpreter.CreateContext(ctx, nil)
 if err != nil {
 	log.Fatal(err)
 }
-contextID := ctxInfo["contextId"].(string)
+contextID := ctxInfo["id"].(string)
 
 // Run code in the context
 channels, err := sandbox.CodeInterpreter.RunCode(ctx,
@@ -280,8 +267,8 @@ if err != nil {
 }
 
 // Read output
-for stdout := range channels.Stdout {
-	fmt.Printf("[STDOUT] %s\n", stdout)
+for msg := range channels.Stdout {
+	fmt.Printf("[STDOUT] %s\n", msg.Text)
 }
 
 // Clean up context
@@ -504,7 +491,7 @@ Daytona provides methods to get session status and list all sessions in a sandbo
 ```python
 # Check session's executed commands
 session = sandbox.process.get_session(session_id)
-print(f"Session {process_id}:")
+print(f"Session {session_id}:")
 for command in session.commands:
     print(f"Command: {command.command}, Exit Code: {command.exit_code}")
 
@@ -512,7 +499,7 @@ for command in session.commands:
 
 sessions = sandbox.process.list_sessions()
 for session in sessions:
-    print(f"PID: {session.id}, Commands: {session.commands}")
+    print(f"Session: {session.session_id}, Commands: {session.commands}")
 ```
 
 </TabItem>
@@ -529,7 +516,7 @@ for (const command of session.commands) {
 // List all running sessions
 const sessions = await sandbox.process.listSessions();
 for (const session of sessions) {
-    console.log(`PID: ${session.id}, Commands: ${session.commands}`);
+    console.log(`Session: ${session.sessionId}, Commands: ${session.commands}`);
 }
 ```
 
@@ -548,7 +535,7 @@ end
 # List all running sessions
 sessions = sandbox.process.list_sessions
 sessions.each do |session|
-  puts "PID: #{session.id}, Commands: #{session.commands}"
+  puts "Session: #{session.session_id}, Commands: #{session.commands}"
 end
 ```
 
@@ -574,7 +561,7 @@ if err != nil {
 	log.Fatal(err)
 }
 for _, sess := range sessions {
-	fmt.Printf("PID: %s, Commands: %v\n", sess["id"], sess["commands"])
+	fmt.Printf("Session: %s, Commands: %v\n", sess["sessionId"], sess["commands"])
 }
 ```
 
@@ -972,13 +959,13 @@ end
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 ```go
-result, err := sandbox.Process.CodeRun(ctx, "invalid python code")
+result, err := sandbox.Process.ExecuteCommand(ctx, "python3 -c 'invalid python code'")
 if err != nil {
 	fmt.Println("Execution failed:", err)
 }
 if result != nil && result.ExitCode != 0 {
 	fmt.Println("Exit code:", result.ExitCode)
-	fmt.Println("Error output:", result.Artifacts.Stderr)
+	fmt.Println("Error output:", result.Result)
 }
 ```
 </TabItem>
