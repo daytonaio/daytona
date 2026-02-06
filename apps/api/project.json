@@ -93,15 +93,6 @@
         }
       ]
     },
-    "push-manifest": {},
-    "migration:generate": {
-      "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": ["default"],
-      "outputs": ["{projectRoot}/src/migrations/**/*"],
-      "options": {
-        "command": "npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:generate -d ./src/data-source.ts ./src/migrations/migration"
-      }
-    }
+    "push-manifest": {}
   }
 }

@@ -6,7 +6,6 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
-      "cache": true,
       "inputs": ["goProduction", "^goProduction"],
       "outputs": [],
       "options": {
@@ -53,7 +52,7 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["default"],
-      "outputs": [],
+      "outputs": ["{projectRoot}/**/*"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "go fmt ./..."
