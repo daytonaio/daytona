@@ -31,7 +31,10 @@
       ]
     },
     "deps-check": {
-      "inputs": [{ "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "dependsOn": ["add-api-clients"]
     },
     "build": {
