@@ -60,6 +60,12 @@ func (c *Client) CreateWithOptions(ctx context.Context, opts CreateOptions) (*Sa
 
 	log.Infof("Allocated instance number %d for sandbox %s", instanceNum, opts.SandboxId)
 
+	// Ensure the instance number is actually available in CVD
+	// This handles stale CVD state from previous runs
+	if err := c.EnsureInstanceAvailable(ctx, instanceNum); err != nil {
+		return nil, fmt.Errorf("failed to ensure instance %d is available: %w", instanceNum, err)
+	}
+
 	// Create instance directory
 	instanceDir := c.getInstanceDir(opts.SandboxId)
 	if err := c.runCommand(ctx, "mkdir", "-p", instanceDir); err != nil {

@@ -121,16 +121,17 @@ export function SandboxTableActions({
         })
       }
 
-      // Add SSH access options
+      // Add SSH/ADB access options (ADB for Android, SSH for others)
+      const isAndroid = runnerClass === 'android-exp'
       items.push({
         key: 'create-ssh',
-        label: 'Create SSH Access',
-        onClick: () => onCreateSshAccess(sandbox.id),
+        label: isAndroid ? 'Create ADB Access' : 'Create SSH Access',
+        onClick: () => onCreateSshAccess(sandbox.id, isAndroid),
         disabled: isLoading,
       })
       items.push({
         key: 'revoke-ssh',
-        label: 'Revoke SSH Access',
+        label: isAndroid ? 'Revoke ADB Access' : 'Revoke SSH Access',
         onClick: () => onRevokeSshAccess(sandbox.id),
         disabled: isLoading,
       })

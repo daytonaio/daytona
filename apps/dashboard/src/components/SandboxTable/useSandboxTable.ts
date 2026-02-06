@@ -37,7 +37,7 @@ interface UseSandboxTableProps {
   handleArchive: (id: string) => void
   handleVnc: (id: string) => void
   getWebTerminalUrl: (id: string) => Promise<string | null>
-  handleCreateSshAccess: (id: string) => void
+  handleCreateSshAccess: (id: string, isAndroid: boolean) => void
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleScreenRecordings: (id: string) => void

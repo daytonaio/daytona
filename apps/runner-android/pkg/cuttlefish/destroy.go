@@ -67,6 +67,11 @@ func (c *Client) Destroy(ctx context.Context, sandboxId string) error {
 	delete(c.sandboxMutex, sandboxId)
 	c.sandboxMuMu.Unlock()
 
+	// Notify health monitor
+	if c.healthMonitor != nil {
+		c.healthMonitor.ClearSandbox(sandboxId)
+	}
+
 	log.Infof("Sandbox %s destroyed successfully", sandboxId)
 	return nil
 }

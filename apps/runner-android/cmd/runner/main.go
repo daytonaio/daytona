@@ -24,6 +24,7 @@ import (
 	"github.com/daytonaio/runner-android/pkg/runner/v2/executor"
 	"github.com/daytonaio/runner-android/pkg/runner/v2/healthcheck"
 	"github.com/daytonaio/runner-android/pkg/runner/v2/poller"
+	"github.com/daytonaio/runner-android/pkg/sshgateway"
 	"github.com/joho/godotenv"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -81,10 +82,16 @@ func main() {
 		log.Infof("  Local mode")
 	}
 
-	// Recover orphaned sandboxes
+	// Recover orphaned sandboxes (runner-side)
 	log.Info("Checking for orphaned sandboxes to recover...")
 	if err := cvdClient.RecoverOrphanedSandboxes(ctx); err != nil {
 		log.Warnf("Failed to recover orphaned sandboxes: %v", err)
+	}
+
+	// Sync CVD state - remove stale CVD instances not tracked by runner
+	log.Info("Synchronizing CVD state with runner state...")
+	if err := cvdClient.SyncCVDState(ctx); err != nil {
+		log.Warnf("Failed to sync CVD state: %v", err)
 	}
 
 	// List existing sandboxes
@@ -169,8 +176,35 @@ func main() {
 		// Start healthcheck in background
 		go healthcheckService.Start(ctx)
 		log.Info("Healthcheck service started")
+
+		// Create and start CVD health monitor to detect crashed instances
+		cvdHealthMonitor, err := cuttlefish.NewHealthMonitor(cvdClient, &cuttlefish.HealthMonitorConfig{
+			Interval:   30 * time.Second,
+			MaxRetries: 2, // Report crash after 2 consecutive failed checks (~1 minute)
+		})
+		if err != nil {
+			log.Warnf("Failed to create CVD health monitor: %v", err)
+		} else {
+			// Connect health monitor to CVD client for notifications
+			cvdClient.SetHealthMonitor(cvdHealthMonitor)
+			cvdHealthMonitor.Start(ctx)
+			log.Info("CVD health monitor started")
+		}
 	} else {
 		log.Warn("No Daytona API URL configured - running in standalone mode (no job polling or healthcheck)")
+	}
+
+	// Start SSH gateway for ADB tunneling (if enabled)
+	if sshgateway.IsSSHGatewayEnabled() {
+		sshGatewayService := sshgateway.NewService(cvdClient)
+		go func() {
+			if err := sshGatewayService.Start(ctx); err != nil {
+				log.Errorf("SSH Gateway error: %v", err)
+			}
+		}()
+		log.Infof("SSH Gateway started on port %d", sshGatewayService.GetPort())
+	} else {
+		log.Info("SSH Gateway disabled (set SSH_GATEWAY_ENABLE=true to enable)")
 	}
 
 	log.Info("Runner is ready!")

@@ -60,4 +60,16 @@ export interface SshAccessDto {
    * @memberof SshAccessDto
    */
   sshCommand: string
+  /**
+   * ADB connect command (only for Android sandboxes)
+   * @type {string}
+   * @memberof SshAccessDto
+   */
+  adbCommand?: string
+  /**
+   * Whether this is an Android sandbox (uses ADB tunneling instead of shell)
+   * @type {boolean}
+   * @memberof SshAccessDto
+   */
+  isAndroid?: boolean
 }

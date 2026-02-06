@@ -270,6 +270,7 @@ const Sandboxes: React.FC = () => {
   const [sshExpiryMinutes, setSshExpiryMinutes] = useState<number>(60)
   const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
+  const [isAndroidSshDialog, setIsAndroidSshDialog] = useState<boolean>(false)
   const [copied, setCopied] = useState<string | null>(null)
 
   // Create Snapshot Dialog
@@ -765,7 +766,8 @@ const Sandboxes: React.FC = () => {
     }
   }
 
-  const openCreateSshDialog = (id: string) => {
+  const openCreateSshDialog = (id: string, isAndroid: boolean) => {
+    setIsAndroidSshDialog(isAndroid)
     setSshSandboxId(id)
     setShowCreateSshDialog(true)
   }
@@ -1060,16 +1062,21 @@ const Sandboxes: React.FC = () => {
             setSshAccess(null)
             setSshExpiryMinutes(60)
             setSshSandboxId('')
+            setIsAndroidSshDialog(false)
           }
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create SSH Access</AlertDialogTitle>
+            <AlertDialogTitle>{isAndroidSshDialog ? 'Create ADB Access' : 'Create SSH Access'}</AlertDialogTitle>
             <AlertDialogDescription>
               {sshAccess
-                ? 'SSH access has been created successfully. Use the token below to connect:'
-                : 'Set the expiration time for SSH access:'}
+                ? isAndroidSshDialog
+                  ? 'ADB access has been created. Run these commands to connect Android Studio:'
+                  : 'SSH access has been created successfully. Use the command below to connect:'
+                : isAndroidSshDialog
+                  ? 'Set the expiration time for ADB access:'
+                  : 'Set the expiration time for SSH access:'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="space-y-4">
@@ -1084,6 +1091,44 @@ const Sandboxes: React.FC = () => {
                   onChange={(e) => setSshExpiryMinutes(Number(e.target.value))}
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
+              </div>
+            ) : isAndroidSshDialog ? (
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Step 1: Start SSH tunnel (keep running)
+                  </Label>
+                  <div className="mt-1 p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
+                    <span className="overflow-x-auto pr-2 cursor-text select-all text-sm font-mono">
+                      {sshAccess.sshCommand}
+                    </span>
+                    {(copied === 'SSH Command' && <Check className="w-4 h-4 flex-shrink-0" />) || (
+                      <Copy
+                        className="w-4 h-4 cursor-pointer flex-shrink-0"
+                        onClick={() => copyToClipboard(sshAccess.sshCommand, 'SSH Command')}
+                      />
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">
+                    Step 2: Connect ADB (in another terminal)
+                  </Label>
+                  <div className="mt-1 p-3 flex justify-between items-center rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                    <span className="overflow-x-auto pr-2 cursor-text select-all text-sm font-mono">
+                      {sshAccess.adbCommand}
+                    </span>
+                    {(copied === 'ADB Command' && <Check className="w-4 h-4 flex-shrink-0" />) || (
+                      <Copy
+                        className="w-4 h-4 cursor-pointer flex-shrink-0"
+                        onClick={() => copyToClipboard(sshAccess.adbCommand!, 'ADB Command')}
+                      />
+                    )}
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  After connecting, the device will appear in Android Studio&apos;s Device Manager.
+                </p>
               </div>
             ) : (
               <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">

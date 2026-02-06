@@ -51,6 +51,11 @@ func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 	info.State = InstanceStateRunning
 	c.mutex.Unlock()
 
+	// Reset health monitor state for this sandbox
+	if c.healthMonitor != nil {
+		c.healthMonitor.ResetSandboxState(sandboxId)
+	}
+
 	log.Infof("Sandbox %s started successfully", sandboxId)
 	return nil
 }

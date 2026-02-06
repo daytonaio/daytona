@@ -169,11 +169,34 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 	defer serverConn.Close()
 
 	// Extract token from username and validate it
-	token := serverConn.User()
-	if token == "" {
+	username := serverConn.User()
+	if username == "" {
 		log.Printf("No token provided in username")
 		conn.Close()
 		return
+	}
+
+	// Check if this is an ADB tunnel request (format: adb-<sandboxId>-<token>)
+	isADB := strings.HasPrefix(username, "adb-")
+	var token string
+	var sandboxIdFromUsername string
+
+	if isADB {
+		// Parse ADB username format: adb-<sandboxId>-<token>
+		// SandboxId is a UUID like "3a031ba4-42ff-4198-a560-1deb944feb68" (5 parts with 4 dashes)
+		rest := strings.TrimPrefix(username, "adb-")
+		parts := strings.Split(rest, "-")
+		if len(parts) < 6 {
+			log.Printf("Invalid ADB username format: %s", username)
+			conn.Close()
+			return
+		}
+		// UUID is first 5 parts, token is the rest
+		sandboxIdFromUsername = strings.Join(parts[:5], "-")
+		token = strings.Join(parts[5:], "-")
+		log.Printf("ADB tunnel request for sandbox: %s", sandboxIdFromUsername)
+	} else {
+		token = username
 	}
 
 	log.Printf("Validating token: %s", token)
@@ -188,6 +211,13 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 
 	if !validation.Valid {
 		log.Printf("Invalid token: %s", token)
+		conn.Close()
+		return
+	}
+
+	// For ADB requests, verify the sandbox ID matches
+	if isADB && sandboxIdFromUsername != validation.SandboxId {
+		log.Printf("ADB sandbox ID mismatch: expected %s, got %s", sandboxIdFromUsername, validation.SandboxId)
 		conn.Close()
 		return
 	}
@@ -272,12 +302,18 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 
 	// Handle channels
 	for newChannel := range chans {
-		go g.handleChannel(newChannel, runnerID, runnerDomain, token, sandboxId)
+		go g.handleChannel(newChannel, runnerID, runnerDomain, token, sandboxId, isADB)
 	}
 }
 
-func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, runnerDomain string, token string, sandboxId string) {
-	log.Printf("New channel: %s for runner: %s", newChannel.ChannelType(), runnerID)
+func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, runnerDomain string, token string, sandboxId string, isADB bool) {
+	log.Printf("New channel: %s for runner: %s (isADB: %v)", newChannel.ChannelType(), runnerID, isADB)
+
+	// For ADB tunnels, handle direct-tcpip channels specially
+	if isADB && newChannel.ChannelType() == "direct-tcpip" {
+		g.handleADBDirectTCPIP(newChannel, runnerDomain, sandboxId)
+		return
+	}
 
 	// Use the loaded private key instead of fetching from API
 	signer := g.privateKey
@@ -390,6 +426,78 @@ func (g *SSHGateway) handleChannel(newChannel ssh.NewChannel, runnerID string, r
 	}
 
 	log.Printf("Channel closed for runner: %s", runnerID)
+}
+
+// directTCPIPPayload represents the payload for direct-tcpip channel requests
+type directTCPIPPayload struct {
+	DestHost string
+	DestPort uint32
+	SrcHost  string
+	SrcPort  uint32
+}
+
+// handleADBDirectTCPIP handles direct-tcpip channels for ADB port forwarding
+func (g *SSHGateway) handleADBDirectTCPIP(newChannel ssh.NewChannel, runnerDomain string, sandboxId string) {
+	// Parse the destination from extra data
+	var payload directTCPIPPayload
+	if err := ssh.Unmarshal(newChannel.ExtraData(), &payload); err != nil {
+		log.Printf("Failed to parse direct-tcpip payload: %v", err)
+		newChannel.Reject(ssh.ConnectionFailed, "failed to parse destination")
+		return
+	}
+
+	destAddr := fmt.Sprintf("%s:%d", payload.DestHost, payload.DestPort)
+	log.Printf("ADB direct-tcpip request to %s for sandbox %s", destAddr, sandboxId)
+
+	// Connect to the runner's SSH gateway
+	signer := g.privateKey
+	runnerConn, err := g.connectToRunner(sandboxId, runnerDomain, signer)
+	if err != nil {
+		log.Printf("Failed to connect to runner for ADB: %v", err)
+		newChannel.Reject(ssh.ConnectionFailed, fmt.Sprintf("could not connect to runner: %v", err))
+		return
+	}
+	defer runnerConn.Close()
+
+	// Open a direct-tcpip channel through the runner to forward to the ADB port
+	runnerChannel, runnerReqs, err := runnerConn.OpenChannel("direct-tcpip", newChannel.ExtraData())
+	if err != nil {
+		log.Printf("Failed to open direct-tcpip channel to runner: %v", err)
+		newChannel.Reject(ssh.ConnectionFailed, fmt.Sprintf("could not open channel to runner: %v", err))
+		return
+	}
+	defer runnerChannel.Close()
+
+	// Discard runner channel requests
+	go ssh.DiscardRequests(runnerReqs)
+
+	// Accept the client channel
+	clientChannel, clientReqs, err := newChannel.Accept()
+	if err != nil {
+		log.Printf("Could not accept ADB client channel: %v", err)
+		return
+	}
+	defer clientChannel.Close()
+
+	// Discard client channel requests
+	go ssh.DiscardRequests(clientReqs)
+
+	// Bidirectional copy
+	done := make(chan struct{}, 2)
+
+	go func() {
+		io.Copy(runnerChannel, clientChannel)
+		done <- struct{}{}
+	}()
+
+	go func() {
+		io.Copy(clientChannel, runnerChannel)
+		done <- struct{}{}
+	}()
+
+	// Wait for either direction to finish
+	<-done
+	log.Printf("ADB direct-tcpip channel closed for sandbox %s", sandboxId)
 }
 
 func (g *SSHGateway) connectToRunner(sandboxId string, runnerDomain string, signer ssh.Signer) (*ssh.Client, error) {

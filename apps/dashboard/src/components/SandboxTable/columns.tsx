@@ -141,7 +141,7 @@ interface GetColumnsProps {
   sandboxIsLoading: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
-  handleCreateSshAccess: (id: string) => void
+  handleCreateSshAccess: (id: string, isAndroid: boolean) => void
   handleRevokeSshAccess: (id: string) => void
   handleCreateSnapshot: (id: string) => void
   handleScreenRecordings: (id: string) => void

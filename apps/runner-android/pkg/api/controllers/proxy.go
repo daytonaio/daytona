@@ -149,9 +149,11 @@ func ProxyToPort(ctx *gin.Context) {
 // proxyWebRTC handles proxying to the Cuttlefish WebRTC operator for display streaming
 func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefish.InstanceInfo, path string) {
 	// Cuttlefish WebRTC operator runs on port 1443 (HTTPS)
-	// The device URL pattern is: /devices/cvd_1-{instanceNum}-1/files/client.html
+	// The device URL pattern is: /devices/cvd_1-{instanceNum}-{instanceNum}/files/client.html
+	// CVD uses pattern: cvd_{groupNum}-{instanceNum}-{instanceNum}
+	// Since we always use group cvd_1, the pattern is cvd_1-{N}-{N}
 	operatorPort := 1443
-	deviceId := fmt.Sprintf("cvd_1-%d-1", instance.InstanceNum)
+	deviceId := fmt.Sprintf("cvd_1-%d-%d", instance.InstanceNum, instance.InstanceNum)
 	deviceFilesPath := fmt.Sprintf("/devices/%s/files", deviceId)
 
 	// Handle VNC-style URLs by redirecting to the correct Cuttlefish path structure

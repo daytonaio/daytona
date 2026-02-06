@@ -2016,12 +2016,25 @@ export class SandboxService {
 
     await this.sshAccessRepository.save(sshAccess)
 
-    const region = await this.regionService.findOne(sandbox.region, true)
-    if (region && region.sshGatewayUrl) {
-      return SshAccessDto.fromSshAccess(sshAccess, region.sshGatewayUrl)
+    // Get the runner class from the sandbox's snapshot
+    let runnerClass: RunnerClass | undefined
+    if (sandbox.snapshot) {
+      try {
+        const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        if (snapshot) {
+          runnerClass = snapshot.runnerClass
+        }
+      } catch {
+        // Snapshot not found, use default runner class
+      }
     }
 
-    return SshAccessDto.fromSshAccess(sshAccess, this.configService.getOrThrow('sshGateway.url'))
+    const region = await this.regionService.findOne(sandbox.region, true)
+    if (region && region.sshGatewayUrl) {
+      return SshAccessDto.fromSshAccess(sshAccess, region.sshGatewayUrl, runnerClass)
+    }
+
+    return SshAccessDto.fromSshAccess(sshAccess, this.configService.getOrThrow('sshGateway.url'), runnerClass)
   }
 
   async revokeSshAccess(sandboxIdOrName: string, token?: string, organizationId?: string): Promise<Sandbox> {

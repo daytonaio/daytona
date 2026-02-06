@@ -42,13 +42,13 @@ func (s *Service) GetPort() int {
 
 // Start starts the SSH gateway server
 // The SSH gateway enables users to create SSH tunnels to access ADB ports
-// Example: ssh -L 5555:localhost:6520 -p 2220 sandbox-id@runner-host
+// Handles connections from the main ssh-gateway for ADB port forwarding
+// Main gateway connects with: User=sandboxId, Auth=PublicKey
 func (s *Service) Start(ctx context.Context) error {
-	// Get the public key from configuration
+	// Get the public key from configuration (used to authenticate main gateway)
 	publicKeyString, err := GetSSHPublicKey()
 	if err != nil {
 		log.Warnf("SSH Gateway: No public key configured, SSH gateway disabled: %v", err)
-		// Keep running but do nothing - ADB is still available via other means
 		<-ctx.Done()
 		return nil
 	}
@@ -66,21 +66,29 @@ func (s *Service) Start(ctx context.Context) error {
 	}
 
 	serverConfig := &ssh.ServerConfig{
+		// Public key authentication - main gateway connects with sandboxId as username
 		PublicKeyCallback: func(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
-			// The username should be the sandbox ID
 			sandboxId := conn.User()
 
-			// Check if the provided key matches the configured public key
-			if key.Type() == configPublicKey.Type() && bytes.Equal(key.Marshal(), configPublicKey.Marshal()) {
-				return &ssh.Permissions{
-					Extensions: map[string]string{
-						"sandbox-id": sandboxId,
-					},
-				}, nil
+			// Validate the public key matches the configured key
+			if key.Type() != configPublicKey.Type() || !bytes.Equal(key.Marshal(), configPublicKey.Marshal()) {
+				log.Warnf("SSH Gateway: Public key authentication failed for %s", sandboxId)
+				return nil, fmt.Errorf("authentication failed")
 			}
 
-			log.Warnf("Public key authentication failed for sandbox %s", sandboxId)
-			return nil, fmt.Errorf("authentication failed")
+			// Verify the sandbox exists
+			if _, exists := s.cvdClient.GetInstance(sandboxId); !exists {
+				log.Warnf("SSH Gateway: Sandbox %s not found", sandboxId)
+				return nil, fmt.Errorf("sandbox not found")
+			}
+
+			log.Infof("SSH Gateway: Authenticated connection for sandbox %s", sandboxId)
+
+			return &ssh.Permissions{
+				Extensions: map[string]string{
+					"sandbox-id": sandboxId,
+				},
+			}, nil
 		},
 		NoClientAuth: false,
 	}

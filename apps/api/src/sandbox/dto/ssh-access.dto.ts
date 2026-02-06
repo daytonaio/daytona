@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SshAccess } from '../entities/ssh-access.entity'
+import { RunnerClass } from '../enums/runner-class'
 
 export class SshAccessDto {
   @ApiProperty({
@@ -49,7 +50,19 @@ export class SshAccessDto {
   })
   sshCommand: string
 
-  static fromSshAccess(sshAccess: SshAccess, sshGatewayUrl: string): SshAccessDto {
+  @ApiPropertyOptional({
+    description: 'ADB connect command (only for Android sandboxes)',
+    example: 'adb connect localhost:5555',
+  })
+  adbCommand?: string
+
+  @ApiPropertyOptional({
+    description: 'Whether this is an Android sandbox (uses ADB tunneling instead of shell)',
+    example: false,
+  })
+  isAndroid?: boolean
+
+  static fromSshAccess(sshAccess: SshAccess, sshGatewayUrl: string, runnerClass?: RunnerClass): SshAccessDto {
     const dto = new SshAccessDto()
     dto.id = sshAccess.id
     dto.sandboxId = sshAccess.sandboxId
@@ -57,6 +70,7 @@ export class SshAccessDto {
     dto.expiresAt = sshAccess.expiresAt
     dto.createdAt = sshAccess.createdAt
     dto.updatedAt = sshAccess.updatedAt
+
     // Robustly extract host and port from sshGatewayUrl
     let host: string
     let port: string
@@ -78,10 +92,30 @@ export class SshAccessDto {
       port = '22'
     }
 
-    if (port === '22') {
-      dto.sshCommand = `ssh ${sshAccess.token}@${host}`
+    const isAndroid = runnerClass === RunnerClass.ANDROID_EXPERIMENTAL
+    dto.isAndroid = isAndroid
+
+    if (isAndroid) {
+      // For Android sandboxes, generate ADB tunnel command
+      // Username format: adb-<sandboxId>-<token> to identify ADB connections
+      // The SSH gateway will forward port 6520 (ADB) from the sandbox
+      const localAdbPort = '5555'
+      const remoteAdbPort = '6520'
+      const adbUsername = `adb-${sshAccess.sandboxId}-${sshAccess.token}`
+
+      if (port === '22') {
+        dto.sshCommand = `ssh -L ${localAdbPort}:localhost:${remoteAdbPort} ${adbUsername}@${host} -N`
+      } else {
+        dto.sshCommand = `ssh -L ${localAdbPort}:localhost:${remoteAdbPort} -p ${port} ${adbUsername}@${host} -N`
+      }
+      dto.adbCommand = `adb connect localhost:${localAdbPort}`
     } else {
-      dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${host}`
+      // Standard SSH shell access
+      if (port === '22') {
+        dto.sshCommand = `ssh ${sshAccess.token}@${host}`
+      } else {
+        dto.sshCommand = `ssh -p ${port} ${sshAccess.token}@${host}`
+      }
     }
 
     return dto

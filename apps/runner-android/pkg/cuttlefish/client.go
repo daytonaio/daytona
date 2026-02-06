@@ -30,9 +30,18 @@ type Client struct {
 	// ADB client for interacting with Android devices
 	adbClient *ADBClient
 
+	// Health monitor for detecting CVD crashes (optional)
+	healthMonitor HealthMonitorInterface
+
 	// Exported for proxy access
 	SSHHost    string
 	SSHKeyPath string
+}
+
+// HealthMonitorInterface defines the interface for the health monitor
+type HealthMonitorInterface interface {
+	ClearSandbox(sandboxId string)
+	ResetSandboxState(sandboxId string)
 }
 
 // NewClient creates a new Cuttlefish client
@@ -102,6 +111,11 @@ func NewClient(config ClientConfig) (*Client, error) {
 	}
 
 	return c, nil
+}
+
+// SetHealthMonitor sets the health monitor for crash detection
+func (c *Client) SetHealthMonitor(monitor HealthMonitorInterface) {
+	c.healthMonitor = monitor
 }
 
 // ensureDirectories creates required directories
