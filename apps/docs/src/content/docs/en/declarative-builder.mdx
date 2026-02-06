@@ -60,6 +60,7 @@ const sandbox = await daytona.create(
 </TabItem>
 
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Define a simple declarative image with Python packages
 declarative_image = Daytona::Image
@@ -74,16 +75,39 @@ sandbox = daytona.create(
   on_snapshot_create_logs: proc { |chunk| puts chunk }
 )
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Define a declarative image with python packages
+declarativeImage := daytona.DebianSlim("3.12").
+  PipInstall([]string{"requests", "pytest"}).
+  Workdir("/home/daytona")
+
+// Create a new sandbox with the declarative image and stream the build logs
+sandbox, err := client.Create(&types.CreateSandboxFromImageParams{
+  Image: declarativeImage,
+}, &types.CreateOptions{
+  Timeout: 0,
+  OnSnapshotCreateLogs: func(chunk string) {
+    fmt.Print(chunk)
+  },
+})
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**CreateSandboxFromImageParams (Python SDK)**](/docs/python-sdk/sync/daytona#createsandboxfromimageparams)
 >
 > [**CreateSandboxFromImageParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
 >
 > [**CreateSandboxFromImageParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromimageparams)
+>
+> [**Create (Go SDK)**](/docs/go-sdk/daytona#Client.Create)
 
 :::note
 Use the following best practices when working with the declarative builder:
@@ -131,7 +155,6 @@ on_logs=print,
 sandbox = daytona.create(
 CreateSandboxFromSnapshotParams(snapshot=snapshot_name)
 )
-
 ```
 
 </TabItem>
@@ -163,8 +186,8 @@ const sandbox = await daytona.create({
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Create a simple Python data science image
 snapshot_name = 'data-science-snapshot'
@@ -188,22 +211,52 @@ sandbox = daytona.create(
   Daytona::CreateSandboxFromSnapshotParams.new(snapshot: snapshot_name)
 )
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create a python data science image
+snapshotName := "data-science-snapshot"
+
+image := daytona.DebianSlim("3.12").
+  PipInstall([]string{"pandas", "numpy"}).
+  Workdir("/home/daytona")
+
+// Create the snapshot and stream the build logs
+client.Snapshot.Create(&types.CreateSnapshotParams{
+  Name:  snapshotName,
+  Image: image,
+}, &types.CreateSnapshotOptions{
+  OnLogs: func(chunk string) {
+    fmt.Print(chunk)
+  },
+})
+
+// Create a new sandbox using the pre-built snapshot
+sandbox, err := client.Create(&types.CreateSandboxFromSnapshotParams{
+  Snapshot: snapshotName,
+})
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
 >
 > [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#createsnapshotparams)
 >
 > [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#createsnapshotparams)
+>
+> [**Create (Go SDK)**](/docs/go-sdk/daytona#SnapshotService.Create)
 
 ## Image configuration
 
 Daytona provides an option to define images programmatically using the Daytona SDK. You can specify base images, install packages, add files, set environment variables, and more.
 
-For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image) and [TypeScript](/docs/typescript-sdk/image) SDK references.
+For a complete API reference and method signatures, see the [Python](/docs/python-sdk/common/image), [TypeScript](/docs/typescript-sdk/image), [Ruby](/docs/ruby-sdk/image), and [Go](/docs/go-sdk/daytona#type-DockerImage) SDK references.
 
 ### Base image selection
 
@@ -233,8 +286,8 @@ const image = Image.debianSlim('3.12')
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Create an image from a base
 image = Daytona::Image.base('python:3.12-slim-bookworm')
@@ -242,18 +295,34 @@ image = Daytona::Image.base('python:3.12-slim-bookworm')
 # Use a Debian slim image with Python 3.12
 image = Daytona::Image.debian_slim('3.12')
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create an image from a base
+image := daytona.Base("python:3.12-slim-bookworm")
+
+// Use a Debian slim image with Python 3.12
+image := daytona.DebianSlim("3.12")
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**base (Python SDK)**](/docs/python-sdk/common/image#imagebase)
 >
 > [**base (TypeScript SDK)**](/docs/typescript-sdk/image#base)
 >
+> [**Base (Go SDK)**](/docs/go-sdk/daytona#Base)
+>
 > [**debian_slim (Python SDK)**](/docs/python-sdk/common/image#imagedebian_slim)
 >
 > [**debianSlim (TypeScript SDK)**](/docs/typescript-sdk/image#debianslim)
+>
+> [**DebianSlim (Go SDK)**](/docs/go-sdk/daytona#DebianSlim)
 
 ### Package management
 
@@ -265,14 +334,13 @@ The following snippets demonstrate how to install packages and dependencies to y
 
 ```python
 # Add pip packages
-image = Image.debian_slim("3.12").pip_install("requests", "pandas")
+image = Image.debian_slim("3.12").pip_install(["requests", "pandas"])
 
 # Install from requirements.txt
 image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.txt")
 
 # Install from pyproject.toml (with optional dependencies)
 image = Image.debian_slim("3.12").pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
-
 ```
 
 </TabItem>
@@ -292,7 +360,6 @@ const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml',
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 # Add pip packages
@@ -302,26 +369,53 @@ image = Daytona::Image.debian_slim('3.12').pip_install(['requests', 'pandas'])
 image = Daytona::Image.debian_slim('3.12').pip_install_from_requirements('requirements.txt')
 
 # Install from pyproject.toml (with optional dependencies)
-image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject.toml', 
+image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject.toml',
   optional_dependencies: ['dev']
 )
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Add pip packages
+image := daytona.DebianSlim("3.12").PipInstall([]string{"requests", "pandas"})
+
+// Install from requirements.txt
+image := daytona.DebianSlim("3.12").
+  AddLocalFile("requirements.txt", "/tmp/requirements.txt").
+  Run("pip install -r /tmp/requirements.txt")
+
+// Install from pyproject.toml (with optional dependencies)
+image := daytona.DebianSlim("3.12").
+  AddLocalFile("pyproject.toml", "/tmp/pyproject.toml").
+  Run("pip install /tmp[dev]")
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**pip_install (Python SDK)**](/docs/python-sdk/common/image#imagepip_install)
 >
 > [**pipInstall (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstall)
 >
+> [**pip_install (Ruby SDK)**](/docs/ruby-sdk/image#pip_install)
+>
+> [**PipInstall (Go SDK)**](/docs/go-sdk/daytona#DockerImage.PipInstall)
+>
 > [**pip_install_from_requirements (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_requirements)
 >
 > [**pipInstallFromRequirements (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfromrequirements)
 >
+> [**pip_install_from_requirements (Ruby SDK)**](/docs/ruby-sdk/image#pip_install_from_requirements)
+>
 > [**pip_install_from_pyproject (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_pyproject)
 >
 > [**pipInstallFromPyproject (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfrompyproject)
+>
+> [**pip_install_from_pyproject (Ruby SDK)**](/docs/ruby-sdk/image#pip_install_from_pyproject)
 
 ### File system operations
 
@@ -351,8 +445,8 @@ const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Add a local file
 image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home/daytona/package.json')
@@ -360,10 +454,22 @@ image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home
 # Add a local directory
 image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/src')
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Add a local file
+image := daytona.DebianSlim("3.12").AddLocalFile("package.json", "/home/daytona/package.json")
+
+// Add a local directory
+image := daytona.DebianSlim("3.12").AddLocalDir("src", "/home/daytona/src")
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**add_local_file (Python SDK)**](/docs/python-sdk/common/image#imageadd_local_file)
 >
@@ -372,6 +478,14 @@ For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript
 > [**addLocalFile (TypeScript SDK)**](/docs/typescript-sdk/image#addlocalfile)
 >
 > [**addLocalDir (TypeScript SDK)**](/docs/typescript-sdk/image#addlocaldir)
+>
+> [**add_local_file (Ruby SDK)**](/docs/ruby-sdk/image#add_local_file)
+>
+> [**add_local_dir (Ruby SDK)**](/docs/ruby-sdk/image#add_local_dir)
+>
+> [**AddLocalFile (Go SDK)**](/docs/go-sdk/daytona#DockerImage.AddLocalFile)
+>
+> [**AddLocalDir (Go SDK)**](/docs/go-sdk/daytona#DockerImage.AddLocalDir)
 
 ### Environment configuration
 
@@ -401,8 +515,8 @@ const image = Image.debianSlim('3.12').workdir('/home/daytona')
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Set environment variables
 image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
@@ -410,10 +524,22 @@ image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
 # Set working directory
 image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Set environment variables
+image := daytona.DebianSlim("3.12").Env("PROJECT_ROOT", "/home/daytona")
+
+// Set working directory
+image := daytona.DebianSlim("3.12").Workdir("/home/daytona")
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**env (Python SDK)**](/docs/python-sdk/common/image#imageenv)
 >
@@ -422,6 +548,14 @@ For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript
 > [**env (TypeScript SDK)**](/docs/typescript-sdk/image#env)
 >
 > [**workdir (TypeScript SDK)**](/docs/typescript-sdk/image#workdir)
+>
+> [**env (Ruby SDK)**](/docs/ruby-sdk/image#env)
+>
+> [**workdir (Ruby SDK)**](/docs/ruby-sdk/image#workdir)
+>
+> [**Env (Go SDK)**](/docs/go-sdk/daytona#DockerImage.Env)
+>
+> [**Workdir (Go SDK)**](/docs/go-sdk/daytona#DockerImage.Workdir)
 
 ### Commands and entrypoints
 
@@ -465,8 +599,8 @@ const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
+
 ```ruby
 # Run shell commands during build
 image = Daytona::Image.debian_slim('3.12').run_commands(
@@ -481,10 +615,28 @@ image = Daytona::Image.debian_slim('3.12').entrypoint(['/bin/bash'])
 # Set default command
 image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
 ```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Run shell commands during build
+image := daytona.DebianSlim("3.12").
+  Run("apt-get update && apt-get install -y git").
+  Run("groupadd -r daytona && useradd -r -g daytona -m daytona").
+  Run("mkdir -p /home/daytona/workspace")
+
+// Set entrypoint
+image := daytona.DebianSlim("3.12").Entrypoint([]string{"/bin/bash"})
+
+// Set default command
+image := daytona.DebianSlim("3.12").Cmd([]string{"/bin/bash"})
+```
+
 </TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**run_commands (Python SDK)**](/docs/python-sdk/common/image#imagerun_commands)
 >
@@ -497,6 +649,18 @@ For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript
 > [**entrypoint (TypeScript SDK)**](/docs/typescript-sdk/image#entrypoint)
 >
 > [**cmd (TypeScript SDK)**](/docs/typescript-sdk/image#cmd)
+>
+> [**run_commands (Ruby SDK)**](/docs/ruby-sdk/image#run_commands)
+>
+> [**entrypoint (Ruby SDK)**](/docs/ruby-sdk/image#entrypoint)
+>
+> [**cmd (Ruby SDK)**](/docs/ruby-sdk/image#cmd)
+>
+> [**Run (Go SDK)**](/docs/go-sdk/daytona#DockerImage.Run)
+>
+> [**Entrypoint (Go SDK)**](/docs/go-sdk/daytona#DockerImage.Entrypoint)
+>
+> [**Cmd (Go SDK)**](/docs/go-sdk/daytona#DockerImage.Cmd)
 
 ### Dockerfile integration
 
@@ -532,9 +696,38 @@ const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
 ```
 
 </TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Add custom Dockerfile commands
+image = Daytona::Image.debian_slim('3.12').dockerfile_commands(['RUN echo "Hello, world!"'])
+
+# Use an existing Dockerfile
+image = Daytona::Image.from_dockerfile('Dockerfile')
+
+# Extend an existing Dockerfile
+image = Daytona::Image.from_dockerfile('app/Dockerfile').pip_install(['numpy'])
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Note: The Go SDK does not support arbitrary Dockerfile commands
+// Use the Run() method for shell commands instead
+
+// Use an existing Dockerfile
+image := daytona.FromDockerfile("Dockerfile")
+
+// Extend an existing Dockerfile with additional commands
+image := daytona.FromDockerfile("app/Dockerfile").
+  PipInstall([]string{"numpy"})
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript SDK](/docs/en/typescript-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
 
 > [**dockerfile_commands (Python SDK)**](/docs/python-sdk/common/image#imagedockerfile_commands)
 >
@@ -543,3 +736,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/) and [TypeScript
 > [**dockerfileCommands (TypeScript SDK)**](/docs/typescript-sdk/image#dockerfilecommands)
 >
 > [**fromDockerfile (TypeScript SDK)**](/docs/typescript-sdk/image#fromdockerfile)
+>
+> [**dockerfile_commands (Ruby SDK)**](/docs/ruby-sdk/image#dockerfile_commands)
+>
+> [**FromDockerfile (Go SDK)**](/docs/go-sdk/daytona#FromDockerfile)
