@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
-RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
+RUN python3 -m pip install --no-cache-dir pipx==1.8.0 && pipx ensurepath && pipx install uv==0.9.26
 
 # Install the Python Language Server
 RUN python3 -m pip install --no-cache-dir python-lsp-server==1.14.0
@@ -74,7 +74,7 @@ RUN python3 -m pip install --no-cache-dir \
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona
 
 # Install latest Node.js using nvm
-RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use node" \
+RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install 25 && nvm use 25 && nvm alias default 25" \
   && chown -R daytona:daytona /usr/local/share/nvm
 
 RUN npm install -g ts-node@10.9.2 typescript@5.9.3 typescript-language-server@5.1.3 bun@1.3.6 @anthropic-ai/claude-code@2.1.19 openclaw@2026.2.1 opencode-ai@1.1.35

@@ -16,7 +16,7 @@ RUN chsh -s /bin/bash
 SHELL ["/bin/bash", "-c"]
 
 # Install pipx and uv
-RUN python3 -m pip install --no-cache-dir pipx && pipx ensurepath && pipx install uv
+RUN python3 -m pip install --no-cache-dir pipx==1.8.0 && pipx ensurepath && pipx install uv==0.9.26
 
 # Install Python LSP, daytona and essential pip packages
 RUN python3 -m pip install --no-cache-dir \

@@ -38,3 +38,6 @@ The default sandbox image contains Python, Node and their most popular dependenc
 - typescript
 - typescript-language-server
 - bun
+- @anthropic-ai/claude-code
+- openclaw
+- opencode-ai
