@@ -29,6 +29,7 @@ import { Plus } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { ScrollArea } from '../ui/scroll-area'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
@@ -161,7 +162,7 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
             Register a new snapshot to be used for spinning up sandboxes in your organization.
           </DialogDescription>
         </DialogHeader>
-        <div className="overflow-y-auto px-1">
+        <ScrollArea fade="mask" className="px-5 h-[500px] overflow-auto -mx-5">
           <form
             id="create-snapshot-form"
             className="gap-6 flex flex-col"
@@ -330,7 +331,7 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
               )}
             </form.Field>
           </form>
-        </div>
+        </ScrollArea>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="secondary">
