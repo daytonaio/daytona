@@ -164,7 +164,7 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
         <div className="overflow-y-auto px-1">
           <form
             id="create-snapshot-form"
-            className="space-y-6"
+            className="gap-6 flex flex-col"
             onSubmit={(e) => {
               e.preventDefault()
               e.stopPropagation()
@@ -247,9 +247,9 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
               )}
             </form.Field>
 
-            <div className="space-y-4">
+            <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium">Resources</Label>
-              <div className="space-y-4 px-4 py-2">
+              <div className="flex flex-col gap-2">
                 <form.Field name="cpu">
                   {(field) => (
                     <div className="flex items-center gap-4">
