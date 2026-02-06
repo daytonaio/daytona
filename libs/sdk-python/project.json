@@ -14,13 +14,6 @@
     },
     "add-api-clients": {
       "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": [
-        "{projectRoot}/scripts/add-api-clients.sh",
-        { "env": "PYPI_PKG_VERSION" },
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
-      ],
-      "outputs": ["{projectRoot}/pyproject.toml"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "./scripts/add-api-clients.sh"
