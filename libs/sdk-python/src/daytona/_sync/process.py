@@ -24,6 +24,7 @@ from websockets.sync.client import connect
 
 from .._utils.errors import intercept_errors
 from .._utils.stream import std_demux_stream
+from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
 from ..common.process import (
     CodeRunParams,
@@ -353,7 +354,7 @@ class Process:
         response = self._api_client.session_execute_command(
             session_id=session_id,
             request=req,
-            _request_timeout=timeout or None,
+            _request_timeout=http_timeout(timeout),
         )
 
         stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")
