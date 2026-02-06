@@ -16,6 +16,8 @@ This allows the database and API to be updated independently while maintaining c
 - `pre-deploy/` - Migrations that run **before** the API is deployed
 - `post-deploy/` - Migrations that run **after** the API is deployed
 
+Note: Root folder migrations (not in pre-deploy or post-deploy) are legacy migrations created before the expand-and-contract pattern was introduced. These run during `migration:run:init` only.
+
 ## Developer Workflow
 
 ### 1. Make Changes to Database Entities
