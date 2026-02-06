@@ -15,9 +15,11 @@
         "production": {}
       },
       "dependsOn": ["build-amd64"],
-      "inputs": ["goProduction", "^goProduction"],
-      "outputs": ["{workspaceRoot}/dist/libs/computer-use"],
-      "cache": true
+      "inputs": [
+        "goProduction",
+        "^goProduction",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ]
     },
     "build-amd64": {
       "executor": "nx:run-commands",

@@ -11,7 +11,7 @@
         "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
       },
       "cache": true,
-      "inputs": [{ "dependentTasksOutputFiles": "**/*" }],
+      "inputs": [{ "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{projectRoot}/pkg/daemon/static/daemon-amd64"],
       "dependsOn": [
         {
@@ -27,7 +27,10 @@
         "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
       },
       "cache": true,
-      "inputs": ["{workspaceRoot}/dist/libs/computer-use-amd64"],
+      "inputs": [
+        "{workspaceRoot}/dist/libs/computer-use-amd64",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/pkg/daemon/static/daytona-computer-use"],
       "dependsOn": [
         {
@@ -44,7 +47,12 @@
         "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
       "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"],
-      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
+      "inputs": [
+        "goProduction",
+        "^goProduction",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ]
     },
     "build-amd64": {
       "executor": "@nx-go/nx-go:build",
@@ -58,7 +66,12 @@
         "flags": ["-ldflags \"-X 'github.com/daytonaio/runner/internal.Version=$VERSION'\""]
       },
       "dependsOn": ["copy-daemon-bin", "copy-computeruse-plugin", "check-version-env"],
-      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
+      "inputs": [
+        "goProduction",
+        "^goProduction",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -120,6 +133,13 @@
     },
     "package-deb": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/packaging/**/*",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{workspaceRoot}/dist/apps/runner-deb/**/*"],
       "options": {
         "commands": [
           "mkdir -p dist/apps/runner-deb/deb/opt/daytona",
