@@ -162,34 +162,50 @@ func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefi
 	}
 	deviceFilesPath := fmt.Sprintf("/devices/%s/files", deviceId)
 
-	// Handle VNC-style URLs by redirecting to the correct Cuttlefish path structure
-	// The WebRTC client JS parses location.pathname to extract device ID, so the
-	// URL must be in the format /devices/{deviceId}/files/client.html
-	if path == "" || path == "/" || path == "/vnc.html" || path == "vnc.html" {
-		// Redirect to the correct path structure (browser will make new request)
-		redirectPath := fmt.Sprintf("%s/client.html", deviceFilesPath)
-		log.Infof("WebRTC proxy: redirecting to %s", redirectPath)
-		ctx.Redirect(http.StatusFound, redirectPath)
-		return
-	}
+	// Track if this is a root request - we'll serve client.html without redirect
+	isRootRequest := path == "" || path == "/" || path == "/vnc.html" || path == "vnc.html"
+
+	// Track if this is the server_connector.js request - needs modification
+	// With <base> tag, browser may request it at various paths like /devices/.../js/server_connector.js
+	isServerConnector := strings.HasSuffix(path, "server_connector.js")
 
 	// Check if path is an operator API endpoint (pass through directly)
-	// Known operator endpoints: /devices/, /infra_config, /connect, /forward, /poll_messages, /polled_connections
-	isOperatorPath := strings.HasPrefix(path, "/devices/") ||
-		strings.HasPrefix(path, "/infra_config") ||
+	// Known operator endpoints: /infra_config, /connect, /forward, /poll_messages, /polled_connections
+	// Note: /devices/ paths for files are handled separately (not passed through directly)
+	isOperatorAPIPath := strings.HasPrefix(path, "/infra_config") ||
 		strings.HasPrefix(path, "/connect") ||
 		strings.HasPrefix(path, "/forward") ||
 		strings.HasPrefix(path, "/poll_messages") ||
 		strings.HasPrefix(path, "/polled_connections")
 
-	if !isOperatorPath {
-		// Map relative asset requests (css, js, etc.) to the device's files directory
-		if strings.HasPrefix(path, "/") {
-			path = deviceFilesPath + path
-		} else {
-			path = deviceFilesPath + "/" + path
+	// Map the path to the correct backend path
+	backendPath := path
+	if isRootRequest {
+		// For root request, fetch client.html directly (no redirect)
+		backendPath = deviceFilesPath + "/client.html"
+		log.Infof("WebRTC proxy: serving client.html for root request (device: %s)", deviceId)
+	} else if isServerConnector {
+		// server_connector.js might be requested at /devices/.../js/server_connector.js due to <base> tag
+		// Use the path as-is if it's already a full path, otherwise map it
+		if !strings.HasPrefix(path, "/devices/") {
+			if strings.HasPrefix(path, "/") {
+				backendPath = deviceFilesPath + path
+			} else {
+				backendPath = deviceFilesPath + "/" + path
+			}
 		}
-		log.Debugf("WebRTC proxy: mapping asset request to %s", path)
+		log.Debugf("WebRTC proxy: intercepting server_connector.js at %s", backendPath)
+	} else if !isOperatorAPIPath {
+		// Map relative asset requests (css, js, etc.) to the device's files directory
+		// But only if not already a full /devices/ path
+		if !strings.HasPrefix(path, "/devices/") {
+			if strings.HasPrefix(path, "/") {
+				backendPath = deviceFilesPath + path
+			} else {
+				backendPath = deviceFilesPath + "/" + path
+			}
+			log.Debugf("WebRTC proxy: mapping asset request to %s", backendPath)
+		}
 	}
 
 	// Build target URL
@@ -212,11 +228,25 @@ func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefi
 		return
 	}
 
-	log.Debugf("WebRTC proxy: forwarding %s to %s%s", ctx.Request.URL.Path, targetURL, path)
+	log.Debugf("WebRTC proxy: forwarding %s to %s%s", ctx.Request.URL.Path, targetURL, backendPath)
 
 	// Check if this is a WebSocket upgrade request
 	if isWebSocketRequest(ctx.Request) {
-		proxyWebSocket(ctx, target, path)
+		proxyWebSocket(ctx, target, backendPath)
+		return
+	}
+
+	// For root requests, we need to fetch and modify the HTML to inject device info
+	// This allows the URL to stay clean (/) while the page works correctly
+	if isRootRequest {
+		serveWebRTCClientWithInjection(ctx, target, backendPath, deviceId, deviceFilesPath)
+		return
+	}
+
+	// For server_connector.js, we need to modify the deviceId() function
+	// to use our injected global variable instead of parsing location.pathname
+	if isServerConnector {
+		serveModifiedServerConnector(ctx, target, backendPath, deviceId)
 		return
 	}
 
@@ -238,7 +268,7 @@ func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefi
 	proxy.Director = func(req *http.Request) {
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
-		req.URL.Path = path
+		req.URL.Path = backendPath
 		req.Host = target.Host
 
 		// Forward original query string
@@ -254,6 +284,159 @@ func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefi
 	}
 
 	proxy.ServeHTTP(ctx.Writer, ctx.Request)
+}
+
+// serveWebRTCClientWithInjection fetches client.html and injects device info
+// This allows the browser URL to stay as "/" while the WebRTC client works correctly
+func serveWebRTCClientWithInjection(ctx *gin.Context, target *url.URL, backendPath, deviceId, deviceFilesPath string) {
+	fullURL := fmt.Sprintf("%s://%s%s", target.Scheme, target.Host, backendPath)
+
+	httpClient := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := httpClient.Get(fullURL)
+	if err != nil {
+		log.Errorf("WebRTC proxy: failed to fetch client.html: %v", err)
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": fmt.Sprintf("Failed to fetch WebRTC client: %v", err)})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Errorf("WebRTC proxy: operator returned %d for client.html", resp.StatusCode)
+		ctx.Status(resp.StatusCode)
+		io.Copy(ctx.Writer, resp.Body)
+		return
+	}
+
+	htmlBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Errorf("WebRTC proxy: failed to read client.html: %v", err)
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": "Failed to read WebRTC client"})
+		return
+	}
+
+	html := string(htmlBytes)
+
+	// Inject <base> tag and a global device ID variable
+	// We'll also inject a custom server_connector module that uses this variable
+	injectedCode := fmt.Sprintf(`<base href="%s/">
+<script>
+// Injected by Daytona - provides device info for WebRTC client
+window.__DAYTONA_DEVICE_ID = "%s";
+window.__DAYTONA_DEVICE_PATH = "%s";
+</script>
+`, deviceFilesPath, deviceId, deviceFilesPath)
+
+	// Insert after <head> tag
+	if idx := strings.Index(html, "<head>"); idx != -1 {
+		html = html[:idx+6] + "\n" + injectedCode + html[idx+6:]
+	} else if idx := strings.Index(html, "<HEAD>"); idx != -1 {
+		html = html[:idx+6] + "\n" + injectedCode + html[idx+6:]
+	} else {
+		html = injectedCode + html
+	}
+
+	// Copy headers except Content-Length (changed due to injection)
+	for key, values := range resp.Header {
+		if key == "Content-Length" {
+			continue
+		}
+		for _, v := range values {
+			ctx.Writer.Header().Add(key, v)
+		}
+	}
+
+	ctx.Writer.Header().Set("Content-Type", "text/html; charset=utf-8")
+	ctx.Writer.WriteHeader(http.StatusOK)
+	ctx.Writer.WriteString(html)
+}
+
+// serveModifiedServerConnector intercepts server_connector.js and modifies it
+// to use the injected device ID instead of parsing from location.pathname
+func serveModifiedServerConnector(ctx *gin.Context, target *url.URL, backendPath, deviceId string) {
+	fullURL := fmt.Sprintf("%s://%s%s", target.Scheme, target.Host, backendPath)
+
+	httpClient := &http.Client{
+		Timeout: 10 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := httpClient.Get(fullURL)
+	if err != nil {
+		log.Errorf("WebRTC proxy: failed to fetch server_connector.js: %v", err)
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": "Failed to fetch server_connector.js"})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		ctx.Status(resp.StatusCode)
+		io.Copy(ctx.Writer, resp.Body)
+		return
+	}
+
+	jsBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Errorf("WebRTC proxy: failed to read server_connector.js: %v", err)
+		ctx.JSON(http.StatusBadGateway, gin.H{"error": "Failed to read server_connector.js"})
+		return
+	}
+
+	js := string(jsBytes)
+
+	// Replace the deviceId() function to use the injected global variable
+	// Original function parses location.pathname, which doesn't work with our clean URLs
+	oldDeviceIdFunc := `export function deviceId() {
+  // The server connector is loaded from the client.html file, which is loaded
+  // with a path like "/vX/devices/{deviceId}/files/"
+  let pathElements = location.pathname.split('/');
+  let devIdx = pathElements.indexOf("devices");
+  if (devIdx < 0 || devIdx + 2 >= pathElements.length ||
+      pathElements[devIdx + 2] != 'files') {
+    // The path doesn't match our expectations
+    throw 'server connector is incompatible with this server';
+  }
+  return pathElements[devIdx + 1];
+}`
+
+	newDeviceIdFunc := `export function deviceId() {
+  // Modified by Daytona proxy - use injected device ID for clean URLs
+  if (window.__DAYTONA_DEVICE_ID) {
+    return window.__DAYTONA_DEVICE_ID;
+  }
+  // Fallback to original logic
+  let pathElements = location.pathname.split('/');
+  let devIdx = pathElements.indexOf("devices");
+  if (devIdx < 0 || devIdx + 2 >= pathElements.length ||
+      pathElements[devIdx + 2] != 'files') {
+    throw 'server connector is incompatible with this server';
+  }
+  return pathElements[devIdx + 1];
+}`
+
+	js = strings.Replace(js, oldDeviceIdFunc, newDeviceIdFunc, 1)
+
+	// Copy headers except Content-Length (changed due to modification)
+	for key, values := range resp.Header {
+		if key == "Content-Length" {
+			continue
+		}
+		for _, v := range values {
+			ctx.Writer.Header().Add(key, v)
+		}
+	}
+
+	ctx.Writer.Header().Set("Content-Type", "application/javascript; charset=utf-8")
+	ctx.Writer.Header().Set("Content-Length", fmt.Sprintf("%d", len(js)))
+	ctx.Writer.WriteHeader(http.StatusOK)
+	ctx.Writer.WriteString(js)
 }
 
 // isWebSocketRequest checks if the request is a WebSocket upgrade request
