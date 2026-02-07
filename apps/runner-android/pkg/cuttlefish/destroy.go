@@ -35,6 +35,23 @@ func (c *Client) Destroy(ctx context.Context, sandboxId string) error {
 		}
 	}
 
+	// Remove from CVD using cvd rm (syntax: cvd -group_name GROUP rm)
+	groupName := fmt.Sprintf("cvd_%d", instanceNum)
+	rmCmd := fmt.Sprintf("echo y | HOME=%s %s -group_name %s rm 2>&1",
+		c.config.CVDHome,
+		c.config.CVDPath,
+		groupName,
+	)
+	output, err := c.runShellScript(ctx, rmCmd)
+	if err != nil {
+		log.Warnf("cvd rm returned error (may be OK if already removed): %v (output: %s)", err, output)
+	} else {
+		log.Infof("CVD group %s removed successfully", groupName)
+	}
+
+	// Also clean up cuttlefish-operator registration
+	_ = c.EnsureOperatorDeviceClean(ctx, instanceNum)
+
 	// Kill any remaining processes
 	killCmd := fmt.Sprintf("pkill -9 -f 'cuttlefish.*instance_nums.*%d' || true", instanceNum)
 	_, _ = c.runShellScript(ctx, killCmd)
