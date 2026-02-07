@@ -131,26 +131,48 @@ func (m *HealthMonitor) checkHealth(ctx context.Context) {
 	}
 }
 
-// checkSandboxHealth checks a single sandbox's health
+// checkSandboxHealth checks a single sandbox's health using multi-layered detection.
+// CVD fleet status alone is unreliable — it can show "Cancelled" after a cvd_server
+// restart even though the actual VM (crosvm) is still running fine. We use ADB and
+// process checks as ground truth before declaring a VM crashed.
 func (m *HealthMonitor) checkSandboxHealth(ctx context.Context, sandboxId string, info *InstanceInfo, cvdStatuses map[int]string) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	// Get CVD status for this instance
-	cvdStatus, exists := cvdStatuses[info.InstanceNum]
+	// Get CVD fleet status for this instance
+	cvdStatus, cvdExists := cvdStatuses[info.InstanceNum]
 
-	// Determine current state
+	// Determine current state using multi-layered approach
 	var currentState InstanceState
-	if !exists {
-		// Instance not in CVD fleet at all - it's crashed/removed
-		currentState = InstanceStateStopped
-	} else if cvdStatus == "Running" {
+
+	if cvdExists && cvdStatus == "Running" {
+		// CVD says running — trust it, no further checks needed
 		currentState = InstanceStateRunning
-		// Reset crash count on successful running state
 		delete(m.crashCounts, sandboxId)
-	} else {
-		// CVD reports stopped/other status
+	} else if cvdExists && cvdStatus == "Stopped" {
+		// CVD says cleanly stopped — trust it
 		currentState = InstanceStateStopped
+	} else {
+		// CVD says "Cancelled", or instance not found, or other status.
+		// Don't trust CVD alone — check if the VM is actually alive.
+		if m.client.checkADBAlive(ctx, info.InstanceNum) {
+			// ADB responds! VM is alive despite stale CVD metadata.
+			if cvdStatus == "Cancelled" {
+				log.Debugf("Health monitor: sandbox %s (instance %d) CVD='Cancelled' but ADB alive — treating as running",
+					sandboxId, info.InstanceNum)
+			}
+			currentState = InstanceStateRunning
+			delete(m.crashCounts, sandboxId)
+		} else if m.client.isCrosvmRunning(ctx, info.InstanceNum) {
+			// crosvm process is alive — VM may be booting or ADB temporarily down
+			log.Debugf("Health monitor: sandbox %s (instance %d) crosvm alive, ADB unresponsive — treating as running",
+				sandboxId, info.InstanceNum)
+			currentState = InstanceStateRunning
+			// Don't reset crash count — if this persists, we want to eventually flag it
+		} else {
+			// Nothing is alive — truly stopped/crashed
+			currentState = InstanceStateStopped
+		}
 	}
 
 	// Get last known state
@@ -162,13 +184,13 @@ func (m *HealthMonitor) checkSandboxHealth(ctx context.Context, sandboxId string
 		m.crashCounts[sandboxId]++
 		crashCount := m.crashCounts[sandboxId]
 
-		log.Warnf("Health monitor: sandbox %s (instance %d) may have crashed (count: %d/%d)",
-			sandboxId, info.InstanceNum, crashCount, m.maxRetries)
+		log.Warnf("Health monitor: sandbox %s (instance %d) may have crashed — CVD=%q, ADB=dead, crosvm=dead (count: %d/%d)",
+			sandboxId, info.InstanceNum, cvdStatus, crashCount, m.maxRetries)
 
 		if crashCount >= m.maxRetries {
-			// Confirmed crash - report to API
-			log.Errorf("Health monitor: sandbox %s confirmed crashed, reporting to API", sandboxId)
-			m.reportCrash(ctx, sandboxId, "CVD instance stopped unexpectedly")
+			// Confirmed crash — all layers agree the VM is dead
+			log.Errorf("Health monitor: sandbox %s confirmed crashed (CVD=%q), reporting to API", sandboxId, cvdStatus)
+			m.reportCrash(ctx, sandboxId, fmt.Sprintf("CVD instance stopped unexpectedly (CVD status: %s)", cvdStatus))
 			delete(m.crashCounts, sandboxId)
 		}
 	} else if !hasLastState && info.State == InstanceStateRunning && currentState == InstanceStateStopped {
@@ -176,12 +198,12 @@ func (m *HealthMonitor) checkSandboxHealth(ctx context.Context, sandboxId string
 		m.crashCounts[sandboxId]++
 		crashCount := m.crashCounts[sandboxId]
 
-		log.Warnf("Health monitor: sandbox %s (instance %d) not running as expected (count: %d/%d)",
-			sandboxId, info.InstanceNum, crashCount, m.maxRetries)
+		log.Warnf("Health monitor: sandbox %s (instance %d) not running as expected — CVD=%q (count: %d/%d)",
+			sandboxId, info.InstanceNum, cvdStatus, crashCount, m.maxRetries)
 
 		if crashCount >= m.maxRetries {
 			log.Errorf("Health monitor: sandbox %s not running, reporting to API", sandboxId)
-			m.reportCrash(ctx, sandboxId, "CVD instance not running")
+			m.reportCrash(ctx, sandboxId, fmt.Sprintf("CVD instance not running (CVD status: %s)", cvdStatus))
 			delete(m.crashCounts, sandboxId)
 		}
 	}

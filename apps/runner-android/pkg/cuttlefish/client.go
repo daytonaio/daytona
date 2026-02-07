@@ -428,11 +428,56 @@ func (c *Client) ListWithInfo(ctx context.Context) ([]*SandboxInfo, error) {
 	return sandboxes, nil
 }
 
-// getInstanceState checks the current state of an instance using cvd fleet
+// getInstanceState checks the current state of an instance using multiple methods.
+// It uses a layered approach:
+//  1. CVD fleet status (fastest, but can be stale after restarts - may show "Cancelled")
+//  2. ADB liveness check (ground truth - if ADB responds, the VM is alive)
+//  3. crosvm process check (if ADB is slow, check if the hypervisor process exists)
+//
+// This avoids false-positive crash reports when CVD metadata is stale but the VM is fine.
 func (c *Client) getInstanceState(ctx context.Context, instanceNum int) InstanceState {
 	groupName := fmt.Sprintf("cvd_%d", instanceNum)
 
-	// Use cvd fleet --json to get accurate state
+	// Layer 1: CVD fleet status
+	cvdStatus := c.getCVDFleetStatus(ctx, groupName)
+	if cvdStatus == "Running" {
+		return InstanceStateRunning
+	}
+
+	// If CVD says it's cleanly stopped (and not "Cancelled"), trust it
+	if cvdStatus == "Stopped" {
+		return InstanceStateStopped
+	}
+
+	// Layer 2: CVD says "Cancelled", unknown, or instance not found.
+	// This often happens after runner/cvd_server restarts - the VM may actually be alive.
+	// Check ADB as ground truth.
+	if c.checkADBAlive(ctx, instanceNum) {
+		if cvdStatus == "Cancelled" {
+			log.Infof("Instance %d shows 'Cancelled' in CVD fleet but ADB is alive - VM is actually running", instanceNum)
+		} else {
+			log.Debugf("Instance %d not in CVD fleet but ADB responds - VM is running", instanceNum)
+		}
+		return InstanceStateRunning
+	}
+
+	// Layer 3: ADB didn't respond. Check if crosvm process is alive.
+	// The VM might be booting or ADB might be temporarily unresponsive.
+	if c.isCrosvmRunning(ctx, instanceNum) {
+		log.Debugf("Instance %d: ADB not responding but crosvm is running - VM may be booting", instanceNum)
+		return InstanceStateRunning
+	}
+
+	// Nothing is alive - instance is truly stopped
+	if cvdStatus != "" {
+		log.Debugf("Instance %d: CVD status=%s, ADB dead, crosvm dead → Stopped", instanceNum, cvdStatus)
+	}
+	return InstanceStateStopped
+}
+
+// getCVDFleetStatus returns the raw CVD fleet status string for a group.
+// Returns "" if the group is not found, or the status string ("Running", "Stopped", "Cancelled", etc.)
+func (c *Client) getCVDFleetStatus(ctx context.Context, groupName string) string {
 	fleetCmd := fmt.Sprintf("HOME=%s %s fleet --json 2>&1 || %s fleet 2>&1",
 		c.config.CVDHome,
 		c.config.CVDPath,
@@ -441,31 +486,70 @@ func (c *Client) getInstanceState(ctx context.Context, instanceNum int) Instance
 	output, err := c.runShellScript(ctx, fleetCmd)
 	if err != nil {
 		log.Debugf("Failed to get CVD fleet status: %v", err)
-		return InstanceStateUnknown
+		return ""
 	}
 
 	// Parse JSON output to find the group status
-	// Look for "group_name" : "cvd_N" and its "status" field
 	if strings.Contains(output, fmt.Sprintf(`"group_name" : "%s"`, groupName)) {
-		// Find status after group_name match
 		groupIdx := strings.Index(output, fmt.Sprintf(`"group_name" : "%s"`, groupName))
 		if groupIdx >= 0 {
-			// Look for status in the next ~500 chars after group_name
 			searchArea := output[groupIdx:]
 			if len(searchArea) > 500 {
 				searchArea = searchArea[:500]
 			}
-			if strings.Contains(searchArea, `"status" : "Running"`) {
-				return InstanceStateRunning
-			}
-			if strings.Contains(searchArea, `"status" : "Stopped"`) {
-				return InstanceStateStopped
+			// Extract the status value
+			statusIdx := strings.Index(searchArea, `"status" : "`)
+			if statusIdx >= 0 {
+				statusStart := statusIdx + len(`"status" : "`)
+				statusEnd := strings.Index(searchArea[statusStart:], `"`)
+				if statusEnd >= 0 {
+					return searchArea[statusStart : statusStart+statusEnd]
+				}
 			}
 		}
 	}
 
-	// Group not found - might not exist yet
-	return InstanceStateUnknown
+	return ""
+}
+
+// checkADBAlive checks if a VM is reachable via ADB.
+// This is the ground-truth liveness check - if ADB responds, the VM is definitely alive,
+// regardless of what CVD fleet metadata says.
+func (c *Client) checkADBAlive(ctx context.Context, instanceNum int) bool {
+	adbSerial := fmt.Sprintf("0.0.0.0:%d", c.config.ADBBasePort+(instanceNum-1))
+
+	// Use a short timeout - we just want a quick liveness check
+	checkCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	checkCmd := fmt.Sprintf("%s -s %s shell getprop sys.boot_completed 2>/dev/null", c.config.ADBPath, adbSerial)
+	output, err := c.runShellScript(checkCtx, checkCmd)
+	if err != nil {
+		return false
+	}
+
+	// sys.boot_completed = "1" means Android has fully booted
+	return strings.TrimSpace(output) == "1"
+}
+
+// isCrosvmRunning checks if the crosvm hypervisor process is alive for an instance.
+// This is a fallback check when ADB is unresponsive (e.g., during boot).
+func (c *Client) isCrosvmRunning(ctx context.Context, instanceNum int) bool {
+	// Look for crosvm processes that reference this instance's socket or directory
+	checkCmd := fmt.Sprintf(
+		"pgrep -f 'crosvm.*cvd-%d/' >/dev/null 2>&1 && echo alive || echo dead",
+		instanceNum,
+	)
+
+	checkCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	output, err := c.runShellScript(checkCtx, checkCmd)
+	if err != nil {
+		return false
+	}
+
+	return strings.TrimSpace(output) == "alive"
 }
 
 // GetSandboxInfo returns information about a sandbox
