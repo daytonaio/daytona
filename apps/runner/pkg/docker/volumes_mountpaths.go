@@ -5,14 +5,11 @@ package docker
 
 import (
 	"context"
-	"crypto/md5"
-	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
@@ -34,101 +31,98 @@ func getVolumeMountBasePath() string {
 func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
 	volumeMountPathBinds := make([]string, 0)
 
+	// Tracks volumes with FUSE mounts already ensured in this call,
+	// preventing duplicate mount attempts and mutex deadlocks when
+	// multiple subpaths reference the same volume.
+	fuseMountedVolumes := make(map[string]bool)
+
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("%s%s", volumeMountPrefix, vol.VolumeId)
-		runnerVolumeMountPath := d.getRunnerVolumeMountPath(volumeIdPrefixed, vol.Subpath)
-
-		// Create unique key for this volume+subpath combination for mutex
-		volumeKey := d.getVolumeKey(volumeIdPrefixed, vol.Subpath)
-
-		// Get or create mutex for this volume+subpath
-		d.volumeMutexesMutex.Lock()
-		volumeMutex, exists := d.volumeMutexes[volumeKey]
-		if !exists {
-			volumeMutex = &sync.Mutex{}
-			d.volumeMutexes[volumeKey] = volumeMutex
-		}
-		d.volumeMutexesMutex.Unlock()
-
-		// Lock this specific volume's mutex
-		volumeMutex.Lock()
-		defer volumeMutex.Unlock()
+		baseMountPath := filepath.Join(getVolumeMountBasePath(), volumeIdPrefixed)
 
 		subpathStr := ""
 		if vol.Subpath != nil {
 			subpathStr = *vol.Subpath
 		}
 
-		if d.isDirectoryMounted(runnerVolumeMountPath) {
-			log.Infof("volume %s (subpath: %s) is already mounted to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
-			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
-			continue
-		}
-
-		// Track if directory existed before we create it
-		_, statErr := os.Stat(runnerVolumeMountPath)
-		dirExisted := statErr == nil
-
-		err := os.MkdirAll(runnerVolumeMountPath, 0755)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
-		}
-
-		log.Infof("mounting S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
-
-		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
-		err = cmd.Run()
-		if err != nil {
-			if !dirExisted {
-				os.Remove(runnerVolumeMountPath)
+		if !fuseMountedVolumes[volumeIdPrefixed] {
+			err := d.ensureVolumeFuseMounted(ctx, volumeIdPrefixed, baseMountPath)
+			if err != nil {
+				return nil, err
 			}
-			return nil, fmt.Errorf("failed to mount S3 volume %s (subpath: %s) to %s: %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath, err)
+			fuseMountedVolumes[volumeIdPrefixed] = true
 		}
 
-		// Wait for FUSE mount to be fully ready before proceeding
-		err = d.waitForMountReady(ctx, runnerVolumeMountPath)
-		if err != nil {
-			if !dirExisted {
-				umountErr := exec.Command("umount", runnerVolumeMountPath).Run()
-				if umountErr != nil {
-					log.Warnf("Failed to unmount %s during cleanup: %v", runnerVolumeMountPath, umountErr)
-				}
-				removeErr := os.Remove(runnerVolumeMountPath)
-				if removeErr != nil {
-					log.Warnf("Failed to remove mount directory %s during cleanup: %v", runnerVolumeMountPath, removeErr)
-				}
+		bindSource := baseMountPath
+		if vol.Subpath != nil && *vol.Subpath != "" {
+			bindSource = filepath.Join(baseMountPath, *vol.Subpath)
+			err := os.MkdirAll(bindSource, 0755)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create subpath directory %s: %s", bindSource, err)
 			}
-			return nil, fmt.Errorf("mount %s not ready after mounting: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
-
-		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
+		log.Debugf("binding volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, vol.MountPath)
+		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", bindSource, vol.MountPath))
 	}
 
 	return volumeMountPathBinds, nil
 }
 
-func (d *DockerClient) getRunnerVolumeMountPath(volumeId string, subpath *string) string {
-	// If subpath is provided, create a unique mount point for this volume+subpath combination
-	mountDirName := volumeId
-	if subpath != nil && *subpath != "" {
-		// Create a short hash of the subpath to keep the path reasonable
-		hash := md5.Sum([]byte(*subpath))
-		hashStr := hex.EncodeToString(hash[:])[:8]
-		mountDirName = fmt.Sprintf("%s-%s", volumeId, hashStr)
+func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId string, mountPath string) error {
+	d.volumeMutexesMutex.Lock()
+	volumeMutex, exists := d.volumeMutexes[volumeId]
+	if !exists {
+		volumeMutex = &sync.Mutex{}
+		d.volumeMutexes[volumeId] = volumeMutex
+	}
+	d.volumeMutexesMutex.Unlock()
+
+	volumeMutex.Lock()
+	defer volumeMutex.Unlock()
+
+	if d.isDirectoryMounted(mountPath) {
+		log.Debugf("volume %s already mounted at %s", volumeId, mountPath)
+		return nil
 	}
 
-	volumePath := filepath.Join(getVolumeMountBasePath(), mountDirName)
+	// Track if directory existed before we create it
+	_, statErr := os.Stat(mountPath)
+	dirExisted := statErr == nil
 
-	return volumePath
-}
-
-func (d *DockerClient) getVolumeKey(volumeId string, subpath *string) string {
-	if subpath == nil || *subpath == "" {
-		return volumeId
+	err := os.MkdirAll(mountPath, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create mount directory %s: %s", mountPath, err)
 	}
-	return fmt.Sprintf("%s:%s", volumeId, *subpath)
+
+	log.Infof("mounting S3 volume %s to %s", volumeId, mountPath)
+
+	cmd := d.getMountCmd(ctx, volumeId, mountPath)
+	err = cmd.Run()
+	if err != nil {
+		if !dirExisted {
+			os.Remove(mountPath)
+		}
+		return fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeId, mountPath, err)
+	}
+
+	err = d.waitForMountReady(ctx, mountPath)
+	if err != nil {
+		if !dirExisted {
+			umountErr := exec.Command("umount", mountPath).Run()
+			if umountErr != nil {
+				log.Warnf("failed to unmount %s during cleanup: %v", mountPath, umountErr)
+			}
+			removeErr := os.Remove(mountPath)
+			if removeErr != nil {
+				log.Warnf("failed to remove mount directory %s during cleanup: %v", mountPath, removeErr)
+			}
+		}
+		return fmt.Errorf("mount %s not ready after mounting: %s", mountPath, err)
+	}
+
+	log.Infof("mounted S3 volume %s to %s", volumeId, mountPath)
+	return nil
 }
 
 func (d *DockerClient) isDirectoryMounted(path string) bool {
@@ -175,17 +169,8 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 	return fmt.Errorf("mount did not become ready within timeout")
 }
 
-func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
+func (d *DockerClient) getMountCmd(ctx context.Context, volume string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
-
-	if subpath != nil && *subpath != "" {
-		// Ensure subpath ends with /
-		prefix := *subpath
-		if !strings.HasSuffix(prefix, "/") {
-			prefix = prefix + "/"
-		}
-		args = append(args, "--prefix", prefix)
-	}
 
 	args = append(args, volume, path)
 
