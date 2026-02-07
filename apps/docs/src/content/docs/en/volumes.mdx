@@ -63,9 +63,22 @@ daytona volume create my-awesome-volume
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/volumes' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "my-awesome-volume"
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**volume.create (Python SDK)**](/docs/python-sdk/sync/volume/#volumeservicecreate)
 >
@@ -74,6 +87,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**volume.create (Ruby SDK)**](/docs/ruby-sdk/volume-service/#create)
 >
 > [**Volume.Create (Go SDK)**](/docs/go-sdk/daytona/#VolumeService.Create)
+>
+> [**create volume (API)**](/docs/en/tools/api/#daytona/tag/volumes/POST/volumes)
 
 ## Mount Volumes
 
@@ -240,9 +255,27 @@ daytona create --volume my-volume:/home/daytona/volume
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "volumes": [
+    {
+      "volumeId": "<VOLUME_ID>",
+      "mountPath": "/home/daytona/volume"
+    }
+  ]
+}'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
 >
@@ -251,6 +284,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**CreateSandboxFromSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
 >
 > [**CreateSandboxFromSnapshotParams (Go SDK)**](/docs/go-sdk/daytona)
+>
+> [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
 ## Work with Volumes
 
@@ -383,9 +418,17 @@ daytona volume get my-awesome-volume
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/volumes/by-name/my-awesome-volume' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**volume.get (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeserviceget)
 >
@@ -394,6 +437,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**volume.get (Ruby SDK)**](/docs/ruby-sdk/volume-service#get)
 >
 > [**Volume.Get (Go SDK)**](/docs/go-sdk/daytona/#VolumeService.Get)
+>
+> [**get volume by name (API)**](/docs/en/tools/api/#daytona/tag/volumes/GET/volumes/by-name/{name})
 
 ## List Volumes
 
@@ -461,9 +506,17 @@ daytona volume list
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/volumes' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**volume.list (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeservicelist)
 >
@@ -472,6 +525,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**volume.list (Ruby SDK)**](/docs/ruby-sdk/volume-service#list)
 >
 > [**Volume.List (Go SDK)**](/docs/go-sdk/daytona/#VolumeService.List)
+>
+> [**list volumes (API)**](/docs/en/tools/api/#daytona/tag/volumes/GET/volumes)
 
 ## Delete Volumes
 
@@ -533,9 +588,18 @@ daytona volume delete <VOLUME_ID>
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/volumes/<VOLUME_ID>' \
+  --request DELETE \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**volume.delete (Python SDK)**](/docs/python-sdk/sync/volume/#volumeservicedelete)
 >
@@ -544,6 +608,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**volume.delete (Ruby SDK)**](/docs/ruby-sdk/volume-service/#delete)
 >
 > [**Volume.Delete (Go SDK)**](/docs/go-sdk/daytona/#VolumeService.Delete)
+>
+> [**delete volume (API)**](/docs/en/tools/api/#daytona/tag/volumes/DELETE/volumes/{volumeId})
 
 ## Limitations
 
