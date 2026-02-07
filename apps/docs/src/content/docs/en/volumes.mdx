@@ -56,6 +56,13 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona volume create my-awesome-volume
+```
+
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
@@ -225,6 +232,14 @@ if err != nil {
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona volume create my-volume
+daytona create --volume my-volume:/home/daytona/volume
+```
+
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
@@ -361,6 +376,13 @@ fmt.Printf("Volume %s is in state %s\n", volume.Name, volume.State)
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona volume get my-awesome-volume
+```
+
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
@@ -432,6 +454,13 @@ for _, vol := range volumes {
 ```
 
 </TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona volume list
+```
+
+</TabItem>
 </Tabs>
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references:
@@ -476,6 +505,7 @@ daytona.volume.delete(volume)
 
 </TabItem>
 <TabItem label="Go" icon="seti:go">
+
 ```go
 import (
     "context"
@@ -493,6 +523,13 @@ err = client.Volume.Delete(context.Background(), volume)
 if err != nil {
     log.Fatal(err)
 }
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```shell
+daytona volume delete <VOLUME_ID>
 ```
 
 </TabItem>
