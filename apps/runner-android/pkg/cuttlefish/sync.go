@@ -5,13 +5,26 @@ package cuttlefish
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
+
+// OperatorDevice represents a device registered with the cuttlefish-operator
+type OperatorDevice struct {
+	DeviceId  string `json:"device_id"`
+	GroupName string `json:"group_name"`
+	Owner     string `json:"owner"`
+	Name      string `json:"name"`
+	ADBPort   int    `json:"adb_port"`
+}
 
 // CVDFleetInstance represents an instance in the CVD fleet output
 type CVDFleetInstance struct {
@@ -198,6 +211,98 @@ func (c *Client) EnsureInstanceAvailable(ctx context.Context, instanceNum int) e
 				return fmt.Errorf("failed to remove stale CVD instance %d: %w", instanceNum, err)
 			}
 			log.Infof("Successfully removed stale CVD instance %d", instanceNum)
+		}
+	}
+
+	// Also check if the device is registered in the operator (stale WebRTC registration)
+	if err := c.EnsureOperatorDeviceClean(ctx, instanceNum); err != nil {
+		log.Warnf("Failed to clean operator device registration: %v", err)
+		// Don't fail - the create might still work
+	}
+
+	return nil
+}
+
+// GetOperatorDevices queries the cuttlefish-operator for all registered devices
+func (c *Client) GetOperatorDevices(ctx context.Context) ([]OperatorDevice, error) {
+	// Operator runs on port 1443 (HTTPS)
+	operatorPort := 1443
+
+	// Build target host
+	var targetHost string
+	if c.IsRemote() {
+		targetHost = c.SSHHost
+		if idx := strings.Index(targetHost, "@"); idx != -1 {
+			targetHost = targetHost[idx+1:]
+		}
+	} else {
+		targetHost = "localhost"
+	}
+
+	devicesURL := fmt.Sprintf("https://%s:%d/devices", targetHost, operatorPort)
+
+	httpClient := &http.Client{
+		Timeout: 5 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	resp, err := httpClient.Get(devicesURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query operator: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("operator returned status %d", resp.StatusCode)
+	}
+
+	var devices []OperatorDevice
+	if err := json.NewDecoder(resp.Body).Decode(&devices); err != nil {
+		return nil, fmt.Errorf("failed to decode devices: %w", err)
+	}
+
+	return devices, nil
+}
+
+// EnsureOperatorDeviceClean checks if a device with the given instance number
+// is registered with the cuttlefish-operator and removes stale registrations
+func (c *Client) EnsureOperatorDeviceClean(ctx context.Context, instanceNum int) error {
+	devices, err := c.GetOperatorDevices(ctx)
+	if err != nil {
+		log.Debugf("Could not query operator devices: %v (continuing anyway)", err)
+		return nil
+	}
+
+	// Device IDs follow the pattern: cvd_{group}-{instance}-{instance}
+	// We need to check if any device with our instance number exists
+	instanceStr := fmt.Sprintf("-%d-", instanceNum)
+
+	for _, dev := range devices {
+		// Check if this device ID contains our instance number
+		if strings.Contains(dev.DeviceId, instanceStr) || dev.Name == fmt.Sprintf("%d", instanceNum) {
+			// Check if runner knows about this instance
+			c.mutex.RLock()
+			_, runnerKnows := c.instanceNums[instanceNum]
+			c.mutex.RUnlock()
+
+			if !runnerKnows {
+				log.Warnf("Device %s (instance %d) is registered in operator but runner doesn't know about it - cleaning up",
+					dev.DeviceId, instanceNum)
+
+				// The operator doesn't have a direct unregister API
+				// We need to either restart the operator or let cvd rm handle it
+				// For now, try cvd rm for the group
+				if dev.GroupName != "" {
+					rmCmd := fmt.Sprintf(
+						"HOME=%s %s rm --group_name=%s 2>/dev/null || true",
+						c.config.CVDHome, c.config.CVDPath, dev.GroupName,
+					)
+					_, _ = c.runShellScript(ctx, rmCmd)
+					log.Infof("Attempted to remove stale CVD group %s", dev.GroupName)
+				}
+			}
 		}
 	}
 

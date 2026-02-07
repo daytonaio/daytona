@@ -451,8 +451,20 @@ func TagImage(ctx *gin.Context) {
 //	@Success		200	{object}	bool
 //	@Router			/snapshots/exists [get]
 func SnapshotExists(ctx *gin.Context) {
-	// Cuttlefish uses Android system images, not snapshots
-	ctx.JSON(http.StatusOK, false)
+	name := ctx.Query("name")
+	if name == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "name parameter is required"})
+		return
+	}
+
+	exists, err := Runner.CVDClient.SnapshotExists(ctx.Request.Context(), name)
+	if err != nil {
+		log.Errorf("Failed to check snapshot %s: %v", name, err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, exists)
 }
 
 // GetSnapshotInfo returns snapshot information

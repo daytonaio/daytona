@@ -428,19 +428,44 @@ func (c *Client) ListWithInfo(ctx context.Context) ([]*SandboxInfo, error) {
 	return sandboxes, nil
 }
 
-// getInstanceState checks the current state of an instance
+// getInstanceState checks the current state of an instance using cvd fleet
 func (c *Client) getInstanceState(ctx context.Context, instanceNum int) InstanceState {
-	// Check if the instance process is running
-	checkCmd := fmt.Sprintf("pgrep -f 'cuttlefish.*instance_nums.*%d' > /dev/null 2>&1 && echo running || echo stopped", instanceNum)
-	output, err := c.runShellScript(ctx, checkCmd)
+	groupName := fmt.Sprintf("cvd_%d", instanceNum)
+
+	// Use cvd fleet --json to get accurate state
+	fleetCmd := fmt.Sprintf("HOME=%s %s fleet --json 2>&1 || %s fleet 2>&1",
+		c.config.CVDHome,
+		c.config.CVDPath,
+		c.config.CVDPath,
+	)
+	output, err := c.runShellScript(ctx, fleetCmd)
 	if err != nil {
+		log.Debugf("Failed to get CVD fleet status: %v", err)
 		return InstanceStateUnknown
 	}
 
-	if strings.TrimSpace(output) == "running" {
-		return InstanceStateRunning
+	// Parse JSON output to find the group status
+	// Look for "group_name" : "cvd_N" and its "status" field
+	if strings.Contains(output, fmt.Sprintf(`"group_name" : "%s"`, groupName)) {
+		// Find status after group_name match
+		groupIdx := strings.Index(output, fmt.Sprintf(`"group_name" : "%s"`, groupName))
+		if groupIdx >= 0 {
+			// Look for status in the next ~500 chars after group_name
+			searchArea := output[groupIdx:]
+			if len(searchArea) > 500 {
+				searchArea = searchArea[:500]
+			}
+			if strings.Contains(searchArea, `"status" : "Running"`) {
+				return InstanceStateRunning
+			}
+			if strings.Contains(searchArea, `"status" : "Stopped"`) {
+				return InstanceStateStopped
+			}
+		}
 	}
-	return InstanceStateStopped
+
+	// Group not found - might not exist yet
+	return InstanceStateUnknown
 }
 
 // GetSandboxInfo returns information about a sandbox

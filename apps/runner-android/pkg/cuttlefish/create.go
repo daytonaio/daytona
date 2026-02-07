@@ -310,28 +310,51 @@ func (c *Client) forceCleanupInstance(ctx context.Context, instanceNum int) {
 
 	// Try to remove from CVD fleet (in case it was partially registered)
 	// The group name follows the pattern cvd_N where N is instance_num
+	groupName := fmt.Sprintf("cvd_%d", instanceNum)
 	rmCmd := fmt.Sprintf(
-		"HOME=%s %s rm --group_name=cvd_%d 2>/dev/null || true",
-		c.config.CVDHome, c.config.CVDPath, instanceNum,
+		"HOME=%s %s -group_name %s stop 2>/dev/null || true; HOME=%s %s rm -group_name %s 2>/dev/null || true",
+		c.config.CVDHome, c.config.CVDPath, groupName,
+		c.config.CVDHome, c.config.CVDPath, groupName,
 	)
 	_, _ = c.runShellScript(ctx, rmCmd)
+
+	// Also try to clean up stale operator registrations
+	// Query operator and remove any device with this instance number
+	if err := c.EnsureOperatorDeviceClean(ctx, instanceNum); err != nil {
+		log.Debugf("Could not clean operator registration: %v", err)
+	}
 }
 
 // stopInstance stops a Cuttlefish instance
 func (c *Client) stopInstance(ctx context.Context, instanceNum int) error {
 	log.Infof("Stopping Cuttlefish instance %d", instanceNum)
 
-	// Use 'cvd stop' instead of stop_cvd
+	// Modern CVD uses group_name to select which group to stop
+	// Group names follow the pattern cvd_N where N is the instance number
+	groupName := fmt.Sprintf("cvd_%d", instanceNum)
+
+	// Use 'cvd -group_name <name> stop' to stop a specific group
 	stopCmd := fmt.Sprintf(
-		"HOME=%s %s stop --instance_nums=%d 2>&1 || true",
+		"HOME=%s %s -group_name %s stop 2>&1",
 		c.config.CVDHome,
 		c.config.CVDPath,
-		instanceNum,
+		groupName,
 	)
 
 	output, err := c.runShellScript(ctx, stopCmd)
 	if err != nil {
 		log.Warnf("cvd stop returned error (may be OK if instance wasn't running): %v (output: %s)", err, output)
+	} else {
+		log.Infof("CVD group %s stopped successfully", groupName)
+	}
+
+	// Verify the instance actually stopped
+	state := c.getInstanceState(ctx, instanceNum)
+	if state == InstanceStateRunning {
+		log.Warnf("Instance %d still running after stop command, attempting force kill", instanceNum)
+		// Force kill as fallback
+		killCmd := fmt.Sprintf("pkill -9 -f 'instance_nums.*%d|cvd-%d' 2>/dev/null || true", instanceNum, instanceNum)
+		_, _ = c.runShellScript(ctx, killCmd)
 	}
 
 	return nil

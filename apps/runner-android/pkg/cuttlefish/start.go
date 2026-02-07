@@ -32,14 +32,28 @@ func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 		return nil
 	}
 
+	// Try to start the existing CVD group first (faster than re-creating)
+	if state == InstanceStateStopped {
+		if err := c.startExistingInstance(ctx, info.InstanceNum); err != nil {
+			log.Warnf("Failed to start existing instance, will try re-creating: %v", err)
+		} else {
+			// Successfully started existing instance
+			goto waitForADB
+		}
+	}
+
 	// Re-launch the instance (use snapshot from metadata if available)
-	snapshot := ""
-	if info.Metadata != nil {
-		snapshot = info.Metadata["snapshot"]
+	{
+		snapshot := ""
+		if info.Metadata != nil {
+			snapshot = info.Metadata["snapshot"]
+		}
+		if err := c.launchInstance(ctx, info, snapshot); err != nil {
+			return fmt.Errorf("failed to start instance: %w", err)
+		}
 	}
-	if err := c.launchInstance(ctx, info, snapshot); err != nil {
-		return fmt.Errorf("failed to start instance: %w", err)
-	}
+
+waitForADB:
 
 	// Wait for ADB to be ready
 	if err := c.waitForADB(ctx, info.InstanceNum, 120*time.Second); err != nil {
@@ -57,6 +71,29 @@ func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 	}
 
 	log.Infof("Sandbox %s started successfully", sandboxId)
+	return nil
+}
+
+// startExistingInstance starts a stopped CVD group using cvd start
+func (c *Client) startExistingInstance(ctx context.Context, instanceNum int) error {
+	groupName := fmt.Sprintf("cvd_%d", instanceNum)
+	log.Infof("Starting existing CVD group %s", groupName)
+
+	// Use cvd -group_name <group> start to restart a stopped instance
+	startCmd := fmt.Sprintf("HOME=%s %s -group_name %s start 2>&1",
+		c.config.CVDHome,
+		c.config.CVDPath,
+		groupName,
+	)
+
+	log.Debugf("Running start command: %s", startCmd)
+
+	output, err := c.runShellScript(ctx, startCmd)
+	if err != nil {
+		return fmt.Errorf("cvd start failed: %w (output: %s)", err, output)
+	}
+
+	log.Infof("CVD group %s started successfully", groupName)
 	return nil
 }
 
