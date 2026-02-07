@@ -24,13 +24,13 @@ func normalizePath(path string) string {
 }
 
 // CleanupOrphanedVolumeMounts removes volume mount directories that are no longer used by any container.
-// Throttled to run at most once per volumeCleanupIntervalSec (default 30s).
+// Throttled to run at most once per volumeCleanupInterval (default 30s).
 // Skips directories within exclusion period to avoid race conditions during sandbox creation.
 func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 	d.volumeCleanupMutex.Lock()
 	defer d.volumeCleanupMutex.Unlock()
 
-	if d.volumeCleanupIntervalSec > 0 && time.Since(d.lastVolumeCleanup) < time.Duration(d.volumeCleanupIntervalSec)*time.Second {
+	if d.volumeCleanupInterval > 0 && time.Since(d.lastVolumeCleanup) < d.volumeCleanupInterval {
 		return
 	}
 	d.lastVolumeCleanup = time.Now()
@@ -38,8 +38,8 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 	dryRun := d.volumeCleanupDryRun
 	log.Infof("Volume cleanup dry-run: %v", dryRun)
 
-	basePath := getVolumeMountBasePath()
-	mountDirs, err := filepath.Glob(filepath.Join(basePath, volumeMountPrefix+"*"))
+	volumeMountBasePath := getVolumeMountBasePath()
+	mountDirs, err := filepath.Glob(filepath.Join(volumeMountBasePath, volumeMountPrefix+"*"))
 	if err != nil || len(mountDirs) == 0 {
 		return
 	}
@@ -50,7 +50,7 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 		return
 	}
 
-	exclusionPeriod := time.Duration(d.volumeCleanupExclusionPeriodSec) * time.Second
+	exclusionPeriod := d.volumeCleanupExclusionPeriod
 
 	for _, dir := range mountDirs {
 		if inUse[normalizePath(dir)] {
@@ -91,10 +91,10 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) (map[string]boo
 }
 
 func (d *DockerClient) unmountAndRemoveDir(path string) {
-	basePath := getVolumeMountBasePath()
-	base := filepath.Join(basePath, volumeMountPrefix)
+	mountBasePath := getVolumeMountBasePath()
+	volumeMountPath := filepath.Join(mountBasePath, volumeMountPrefix)
 	cleanPath := filepath.Clean(path)
-	if !strings.HasPrefix(cleanPath, base) {
+	if !strings.HasPrefix(cleanPath, volumeMountPath) {
 		return
 	}
 
@@ -112,19 +112,17 @@ func (d *DockerClient) unmountAndRemoveDir(path string) {
 
 	// Not mounted - might have unsynced local data
 	if isDirEmpty(cleanPath) {
-		err := os.Remove(cleanPath)
-		if err != nil {
+		if err := os.Remove(cleanPath); err != nil {
 			log.Errorf("Failed to remove %s: %v", cleanPath, err)
 		}
+		return
+	}
 
-	} else {
-		timestamp := time.Now().Unix()
-		garbagePath := filepath.Join(basePath, fmt.Sprintf("garbage-%d-%s", timestamp, strings.TrimPrefix(filepath.Base(cleanPath), volumeMountPrefix)))
-		log.Debugf("Renaming non-empty volume directory: %s", garbagePath)
-		err := os.Rename(cleanPath, garbagePath)
-		if err != nil {
-			log.Errorf("Failed to rename %s: %v", cleanPath, err)
-		}
+	timestamp := time.Now().Unix()
+	garbagePath := filepath.Join(mountBasePath, fmt.Sprintf("garbage-%d-%s", timestamp, strings.TrimPrefix(filepath.Base(cleanPath), volumeMountPrefix)))
+	log.Debugf("Renaming non-empty volume directory: %s", garbagePath)
+	if err := os.Rename(cleanPath, garbagePath); err != nil {
+		log.Errorf("Failed to rename %s: %v", cleanPath, err)
 	}
 }
 
