@@ -10,7 +10,7 @@ Volumes are FUSE-based mounts that provide shared file access across Daytona San
 - multiple volumes can be mounted to a single sandbox
 - a single volume can be mounted to multiple sandboxes
 
-## Create Volumes
+## Create volumes
 
 Daytona provides volumes as a shared storage solution for sandboxes. To create a volume:
 
@@ -90,7 +90,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**create volume (API)**](/docs/en/tools/api/#daytona/tag/volumes/POST/volumes)
 
-## Mount Volumes
+## Mount volumes
 
 Daytona provides an option to mount a volume to a sandbox. Once a volume is created, it can be mounted to a sandbox by specifying it in the `CreateSandboxFromSnapshotParams` object. Volume mount paths must meet the following requirements:
 
@@ -287,7 +287,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
-## Work with Volumes
+## Work with volumes
 
 Daytona provides an option to read from and write to the volume just like any other directory in the sandbox file system. Files written to the volume persist beyond the lifecycle of any individual sandbox.
 
@@ -359,7 +359,7 @@ if err != nil {
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), and [Go SDK](/docs/en/go-sdk/) references.
 
-## Get a Volume by name
+## Get a volume by name
 
 Daytona provides an option to get a volume by its name.
 
@@ -440,7 +440,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**get volume by name (API)**](/docs/en/tools/api/#daytona/tag/volumes/GET/volumes/by-name/{name})
 
-## List Volumes
+## List volumes
 
 Daytona provides an option to list all volumes.
 
@@ -528,7 +528,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**list volumes (API)**](/docs/en/tools/api/#daytona/tag/volumes/GET/volumes)
 
-## Delete Volumes
+## Delete volumes
 
 Daytona provides an option to delete a volume. Deleted volumes cannot be recovered.
 
