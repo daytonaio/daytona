@@ -1,0 +1,20 @@
+{
+  "name": "daytonaclaw",
+  "version": "1.0.0",
+  "description": "OpenClaw AI assistant running in a Daytona sandbox.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "serve": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.139.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.0.0"
+  }
+}
