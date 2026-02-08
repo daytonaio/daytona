@@ -98,17 +98,17 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
       parametersState: screenshotOptions,
       onChangeParamsValidationDisabled: true,
     },
-    {
-      methodName: ScreenshotActions.TAKE_COMPRESSED_REGION,
-      label: 'takeCompressedRegion()',
-      description: 'Takes a compressed screenshot of a specific region',
-      parametersFormItems: [...screenshotOptionsFormData, ...screenshotRegionNumberParametersFormData],
-      parametersState: {
-        ...screenshotOptions,
-        ...screenshotRegion,
-      },
-      onChangeParamsValidationDisabled: true,
-    },
+    // {
+    //   methodName: ScreenshotActions.TAKE_COMPRESSED_REGION,
+    //   label: 'takeCompressedRegion()',
+    //   description: 'Takes a compressed screenshot of a specific region',
+    //   parametersFormItems: [...screenshotOptionsFormData, ...screenshotRegionNumberParametersFormData],
+    //   parametersState: {
+    //     ...screenshotOptions,
+    //     ...screenshotRegion,
+    //   },
+    //   onChangeParamsValidationDisabled: true,
+    // },
     {
       methodName: ScreenshotActions.TAKE_FULL_SCREEN,
       label: 'takeFullScreen()',
@@ -117,17 +117,17 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
       parametersState: screenshotOptions,
       onChangeParamsValidationDisabled: true,
     },
-    {
-      methodName: ScreenshotActions.TAKE_REGION,
-      label: 'takeRegion()',
-      description: 'Takes a screenshot of a specific region',
-      parametersFormItems: [...screenshotRegionNumberParametersFormData, screenshotShowCursorFormData],
-      parametersState: {
-        ...screenshotRegion,
-        ...screenshotOptions,
-      },
-      onChangeParamsValidationDisabled: true,
-    },
+    // {
+    //   methodName: ScreenshotActions.TAKE_REGION,
+    //   label: 'takeRegion()',
+    //   description: 'Takes a screenshot of a specific region',
+    //   parametersFormItems: [...screenshotRegionNumberParametersFormData, screenshotShowCursorFormData],
+    //   parametersState: {
+    //     ...screenshotRegion,
+    //     ...screenshotOptions,
+    //   },
+    //   onChangeParamsValidationDisabled: true,
+    // },
   ]
 
   // Disable logic ensures that this method is called when ComputerUseClient exists -> we use as ComputerUse to silence TS compiler

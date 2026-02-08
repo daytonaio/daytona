@@ -149,14 +149,14 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
       parametersState: mouseMoveParams,
       onChangeParamsValidationDisabled: true,
     },
-    {
-      methodName: MouseActions.SCROLL,
-      label: 'scroll()',
-      description: 'Scrolls the mouse wheel at the specified coordinates',
-      parametersFormItems: mouseScrollParamsFormData,
-      parametersState: mouseScrollParams,
-      onChangeParamsValidationDisabled: true,
-    },
+    // {
+    //   methodName: MouseActions.SCROLL,
+    //   label: 'scroll()',
+    //   description: 'Scrolls the mouse wheel at the specified coordinates',
+    //   parametersFormItems: mouseScrollParamsFormData,
+    //   parametersState: mouseScrollParams,
+    //   onChangeParamsValidationDisabled: true,
+    // },
   ]
 
   const mouseActionsWithoutParamsFormData: PlaygroundActionFormDataBasic<MouseActions>[] = [
