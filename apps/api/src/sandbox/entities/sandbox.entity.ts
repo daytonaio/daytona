@@ -207,6 +207,9 @@ export class Sandbox {
   @Column({ default: () => 'MD5(random()::text)' })
   authToken: string
 
+  @Column({ default: false })
+  cleanupCompleted: boolean
+
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
   })
