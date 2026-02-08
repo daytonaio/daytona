@@ -35,6 +35,8 @@ type AuditLog struct {
 	UserAgent *string `json:"userAgent,omitempty"`
 	Source *string `json:"source,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	// Duration of the request in milliseconds
+	Duration *float32 `json:"duration,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	AdditionalProperties map[string]interface{}
 }
@@ -447,6 +449,38 @@ func (o *AuditLog) SetMetadata(v map[string]interface{}) {
 	o.Metadata = v
 }
 
+// GetDuration returns the Duration field value if set, zero value otherwise.
+func (o *AuditLog) GetDuration() float32 {
+	if o == nil || IsNil(o.Duration) {
+		var ret float32
+		return ret
+	}
+	return *o.Duration
+}
+
+// GetDurationOk returns a tuple with the Duration field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AuditLog) GetDurationOk() (*float32, bool) {
+	if o == nil || IsNil(o.Duration) {
+		return nil, false
+	}
+	return o.Duration, true
+}
+
+// HasDuration returns a boolean if a field has been set.
+func (o *AuditLog) HasDuration() bool {
+	if o != nil && !IsNil(o.Duration) {
+		return true
+	}
+
+	return false
+}
+
+// SetDuration gets a reference to the given float32 and assigns it to the Duration field.
+func (o *AuditLog) SetDuration(v float32) {
+	o.Duration = &v
+}
+
 // GetCreatedAt returns the CreatedAt field value
 func (o *AuditLog) GetCreatedAt() time.Time {
 	if o == nil {
@@ -512,6 +546,9 @@ func (o AuditLog) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}
+	if !IsNil(o.Duration) {
+		toSerialize["duration"] = o.Duration
+	}
 	toSerialize["createdAt"] = o.CreatedAt
 
 	for key, value := range o.AdditionalProperties {
@@ -573,6 +610,7 @@ func (o *AuditLog) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "userAgent")
 		delete(additionalProperties, "source")
 		delete(additionalProperties, "metadata")
+		delete(additionalProperties, "duration")
 		delete(additionalProperties, "createdAt")
 		o.AdditionalProperties = additionalProperties
 	}

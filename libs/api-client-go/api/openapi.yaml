@@ -14302,6 +14302,7 @@ components:
         userAgent: userAgent
         source: source
         organizationId: organizationId
+        duration: 6.027456183070403
         createdAt: 2000-01-23T04:56:07.000+00:00
         actorId: actorId
         action: action
@@ -14335,6 +14336,9 @@ components:
         metadata:
           additionalProperties: true
           type: object
+        duration:
+          description: Duration of the request in milliseconds
+          type: number
         createdAt:
           format: date-time
           type: string
@@ -14347,10 +14351,10 @@ components:
       type: object
     PaginatedAuditLogs:
       example:
-        total: 6.027456183070403
+        total: 1.4658129805029452
         nextToken: nextToken
-        totalPages: 5.962133916683182
-        page: 1.4658129805029452
+        totalPages: 5.637376656633329
+        page: 5.962133916683182
         items:
         - metadata:
             key: ""
@@ -14362,6 +14366,7 @@ components:
           userAgent: userAgent
           source: source
           organizationId: organizationId
+          duration: 6.027456183070403
           createdAt: 2000-01-23T04:56:07.000+00:00
           actorId: actorId
           action: action
@@ -14377,6 +14382,7 @@ components:
           userAgent: userAgent
           source: source
           organizationId: organizationId
+          duration: 6.027456183070403
           createdAt: 2000-01-23T04:56:07.000+00:00
           actorId: actorId
           action: action
