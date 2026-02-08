@@ -18,6 +18,7 @@ export interface AuditContext {
   targetIdFromRequest?: (req: Request) => string | null | undefined
   targetIdFromResult?: (result: any) => string | null | undefined
   requestMetadata?: Record<string, (req: Request) => any>
+  resultMetadata?: Record<string, (result: any) => any>
 }
 
 export const AUDIT_CONTEXT_KEY = 'audit_context'

@@ -276,6 +276,9 @@ export class SandboxController {
         networkAllowList: req.body?.networkAllowList,
       }),
     },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async createSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -404,6 +407,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async deleteSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -438,6 +444,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async recoverSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -478,6 +487,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async startSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -518,6 +530,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async stopSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -561,6 +576,9 @@ export class SandboxController {
         disk: req.body?.disk,
       }),
     },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async resizeSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -598,6 +616,9 @@ export class SandboxController {
       body: (req: TypedRequest<SandboxLabelsDto>) => ({
         labels: req.body?.labels,
       }),
+    },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
     },
   })
   async replaceLabels(
@@ -664,6 +685,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async createBackup(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -704,6 +728,9 @@ export class SandboxController {
       params: (req) => ({
         isPublic: req.params.isPublic,
       }),
+    },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
     },
   })
   async updatePublicStatus(
@@ -766,6 +793,9 @@ export class SandboxController {
         interval: req.params.interval,
       }),
     },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async setAutostopInterval(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -807,6 +837,9 @@ export class SandboxController {
       params: (req) => ({
         interval: req.params.interval,
       }),
+    },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
     },
   })
   async setAutoArchiveInterval(
@@ -854,6 +887,9 @@ export class SandboxController {
       params: (req) => ({
         interval: req.params.interval,
       }),
+    },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
     },
   })
   async setAutoDeleteInterval(
@@ -933,6 +969,9 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
+    },
   })
   async archiveSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -1208,6 +1247,9 @@ export class SandboxController {
       query: (req) => ({
         token: req.query.token,
       }),
+    },
+    resultMetadata: {
+      runnerId: (result: SandboxDto) => result?.runnerId,
     },
   })
   async revokeSshAccess(
