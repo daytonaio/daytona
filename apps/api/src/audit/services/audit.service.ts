@@ -99,6 +99,10 @@ export class AuditService implements OnApplicationBootstrap {
       auditLog.organizationId = updateDto.organizationId
     }
 
+    if (updateDto.duration !== undefined) {
+      auditLog.duration = updateDto.duration
+    }
+
     if (this.configService.get('audit.consoleLogEnabled')) {
       this.logger.log(`AUDIT_ENTRY: ${JSON.stringify(auditLog)}`)
     }

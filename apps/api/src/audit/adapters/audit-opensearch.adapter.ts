@@ -168,6 +168,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
               action: { type: 'keyword' },
               targetType: { type: 'keyword' },
               statusCode: { type: 'integer' },
+              duration: { type: 'integer' },
               createdAt: { type: 'date' },
             },
           },
@@ -191,6 +192,7 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
     auditLog.userAgent = source.userAgent
     auditLog.source = source.source
     auditLog.metadata = source.metadata
+    auditLog.duration = source.duration
     auditLog.createdAt = new Date(source.createdAt)
     return auditLog
   }

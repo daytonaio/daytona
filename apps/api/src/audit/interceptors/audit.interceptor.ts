@@ -88,21 +88,25 @@ export class AuditInterceptor implements NestInterceptor {
         metadata: this.resolveRequestMetadata(auditContext, request),
       })
 
+      const startTime = Date.now()
+
       try {
         const result = await firstValueFrom(next.handle())
 
+        const duration = Date.now() - startTime
         const organizationId = this.resolveOrganizationId(request, result)
         const targetId = this.resolveTargetId(auditContext, request, result)
         const statusCode = response.statusCode || HttpStatus.NO_CONTENT
-        await this.recordHandlerSuccess(auditLog, organizationId, targetId, statusCode)
+        await this.recordHandlerSuccess(auditLog, organizationId, targetId, statusCode, duration)
 
         observer.next(result)
         observer.complete()
       } catch (handlerError) {
+        const duration = Date.now() - startTime
         const errorMessage =
           handlerError instanceof HttpException ? handlerError.message : 'An unexpected error occurred.'
         const statusCode = this.resolveErrorStatusCode(handlerError)
-        await this.recordHandlerError(auditLog, errorMessage, statusCode)
+        await this.recordHandlerError(auditLog, errorMessage, statusCode, duration)
 
         observer.error(handlerError)
       }
@@ -167,23 +171,31 @@ export class AuditInterceptor implements NestInterceptor {
     organizationId: string | null,
     targetId: string | null,
     statusCode: number,
+    duration: number,
   ): Promise<void> {
     try {
       await this.auditService.updateLog(auditLog.id, {
         organizationId,
         targetId,
         statusCode,
+        duration,
       })
     } catch (error) {
       this.logger.error('Failed to record handler result:', error)
     }
   }
 
-  private async recordHandlerError(auditLog: AuditLog, errorMessage: string, statusCode: number): Promise<void> {
+  private async recordHandlerError(
+    auditLog: AuditLog,
+    errorMessage: string,
+    statusCode: number,
+    duration: number,
+  ): Promise<void> {
     try {
       await this.auditService.updateLog(auditLog.id, {
         errorMessage,
         statusCode,
+        duration,
       })
     } catch (error) {
       this.logger.error('Failed to record handler error:', error)
