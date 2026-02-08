@@ -8,4 +8,5 @@ export class UpdateAuditLogInternalDto {
   errorMessage?: string
   targetId?: string
   organizationId?: string
+  duration?: number
 }
