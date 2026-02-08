@@ -48,7 +48,10 @@ volume = daytona.volume.create("my-awesome-volume")
 <TabItem label="Go" icon="seti:go">
 
 ```go
-client := daytona.NewClient()
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
 volume, err := client.Volume.Create(context.Background(), "my-awesome-volume")
 if err != nil {
     log.Fatal(err)
@@ -203,11 +206,14 @@ import (
 	"context"
 	"log"
 
-	"github.com/daytonaio/sdk/go/daytona"
-	"github.com/daytonaio/sdk/go/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
-client := daytona.NewClient()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
 
 // Create a new volume or get an existing one
 volume, err := client.Volume.Get(context.Background(), "my-volume")
@@ -222,12 +228,14 @@ if err != nil {
 // Mount the volume to the sandbox
 mountDir := "/home/daytona/volume"
 
-sandbox1, err := client.Create(context.Background(), &types.SnapshotParams{
-	Language: types.CodeLanguagePython,
-	Volumes: []types.VolumeMount{
-		{VolumeID: volume.ID, MountPath: mountDir},
+sandbox1, err := client.Create(context.Background(), types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		Language: types.CodeLanguagePython,
+		Volumes: []types.VolumeMount{
+			{VolumeID: volume.ID, MountPath: mountDir},
+		},
 	},
-}, nil)
+})
 if err != nil {
 	log.Fatal(err)
 }
@@ -235,12 +243,14 @@ if err != nil {
 // Mount a specific subpath within the volume
 // This is useful for isolating data or implementing multi-tenancy
 subpath := "users/alice"
-sandbox2, err := client.Create(context.Background(), &types.SnapshotParams{
-	Language: types.CodeLanguagePython,
-	Volumes: []types.VolumeMount{
-		{VolumeID: volume.ID, MountPath: mountDir, Subpath: &subpath},
+sandbox2, err := client.Create(context.Background(), types.SnapshotParams{
+	SandboxBaseParams: types.SandboxBaseParams{
+		Language: types.CodeLanguagePython,
+		Volumes: []types.VolumeMount{
+			{VolumeID: volume.ID, MountPath: mountDir, Subpath: &subpath},
+		},
 	},
-}, nil)
+})
 if err != nil {
 	log.Fatal(err)
 }
@@ -341,14 +351,14 @@ import (
 )
 
 // Write to a file in the mounted volume
-err := sandbox1.Fs.UploadFile(context.Background(), []byte("Hello from Daytona volume!"), "/home/daytona/volume/example.txt")
+err := sandbox1.FileSystem.UploadFile(context.Background(), []byte("Hello from Daytona volume!"), "/home/daytona/volume/example.txt")
 if err != nil {
     log.Fatal(err)
 }
 
 // When you're done with the sandbox, you can remove it
 // The volume will persist even after the sandbox is removed
-err = client.Delete(context.Background(), sandbox1, 60)
+err = sandbox1.Delete(context.Background())
 if err != nil {
     log.Fatal(err)
 }
@@ -399,10 +409,13 @@ import (
     "fmt"
     "log"
 
-    "github.com/daytonaio/sdk/go/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
-client := daytona.NewClient()
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
 volume, err := client.Volume.Get(context.Background(), "my-awesome-volume")
 if err != nil {
     log.Fatal(err)
@@ -484,10 +497,13 @@ import (
     "fmt"
     "log"
 
-    "github.com/daytonaio/sdk/go/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
-client := daytona.NewClient()
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
 volumes, err := client.Volume.List(context.Background())
 if err != nil {
     log.Fatal(err)
@@ -566,10 +582,13 @@ import (
     "context"
     "log"
 
-    "github.com/daytonaio/sdk/go/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
 )
 
-client := daytona.NewClient()
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
 volume, err := client.Volume.Get(context.Background(), "my-volume")
 if err != nil {
     log.Fatal(err)
