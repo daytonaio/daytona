@@ -49,6 +49,13 @@ func (h *RecordingController) StartRecording(ctx *gin.Context) {
 			})
 			return
 		}
+		if errors.Is(err, recordingservice.ErrInvalidLabel) {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error":   "invalid_label",
+				"message": err.Error(),
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

@@ -589,7 +589,7 @@ export class RecordingService {
  * @property {Keyboard} keyboard - Keyboard operations interface
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
- * @property {Recording} recording - Screen recording operations interface
+ * @property {RecordingService} recording - Screen recording operations interface
  *
  * @class
  */

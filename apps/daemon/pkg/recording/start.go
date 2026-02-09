@@ -8,11 +8,50 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
+
+// validateLabel validates a user-provided label to prevent path injection
+// and ensure it's safe for use in a filename. Returns error if invalid.
+func validateLabel(label string) error {
+	const maxLabelLength = 100
+
+	// Trim whitespace for validation
+	trimmed := strings.TrimSpace(label)
+
+	// Check if label is empty after trimming
+	if trimmed == "" {
+		return ErrInvalidLabel
+	}
+
+	// Check length
+	if len(label) > maxLabelLength {
+		return ErrInvalidLabel
+	}
+
+	// Check for path separators (directory traversal)
+	if strings.Contains(label, "/") || strings.Contains(label, "\\") {
+		return ErrInvalidLabel
+	}
+
+	// Check for leading dots (hidden files)
+	if strings.HasPrefix(trimmed, ".") {
+		return ErrInvalidLabel
+	}
+
+	// Only allow safe characters: alphanumeric, spaces, dots, underscores, and hyphens
+	safePattern := regexp.MustCompile(`^[A-Za-z0-9.\s_-]+$`)
+	if !safePattern.MatchString(label) {
+		return ErrInvalidLabel
+	}
+
+	return nil
+}
 
 // StartRecording starts a new screen recording session
 func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
@@ -30,7 +69,7 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	// Check for DISPLAY environment variable (required for X11)
 	display := os.Getenv("DISPLAY")
 	if display == "" {
-		display = ":0" // Default to :0 if not set
+		return nil, ErrNoDisplay
 	}
 
 	// Generate recording ID and filename
@@ -38,6 +77,13 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	id := uuid.New().String()
 	now := time.Now()
 	timestamp := now.Format("20060102_150405")
+
+	// Validate label if provided (reject invalid labels without modification)
+	if label != nil && *label != "" {
+		if err := validateLabel(*label); err != nil {
+			return nil, err
+		}
+	}
 
 	var fileName string
 	if label != nil && *label != "" {
@@ -91,21 +137,26 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 
 	log.Debugf("Started recording %s to %s (DISPLAY=%s)", id, filePath, display)
 
+	// Create a done channel to receive the Wait() result exactly once
+	done := make(chan error, 1)
+
 	// Store active recording
 	s.activeRecordings.Set(id, &activeRecording{
 		recording: recording,
 		cmd:       cmd,
 		stdinPipe: stdinPipe,
+		done:      done,
 	})
 
 	// Start a goroutine to wait for the process and handle unexpected exits
 	go func() {
 		err := cmd.Wait()
+		done <- err // Signal the done channel with the result
 
 		// Atomically remove from active recordings if still there
 		if active, exists := s.activeRecordings.Pop(id); exists {
 			if err != nil {
-				log.Warnf("Recording %s ffmpeg process exited with error: %v", id, err)
+				log.Warnf("Recording %s ffmpeg process exited unexpectedly with error: %v", id, err)
 				active.recording.Status = "failed"
 			}
 		}

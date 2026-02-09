@@ -463,7 +463,7 @@ class AsyncRecordingService:
             label (str | None): Optional custom label for the recording.
 
         Returns:
-            Recording: Recording start response with ID and file path.
+            Recording: Recording start response.
 
         Example:
             ```python
@@ -484,7 +484,7 @@ class AsyncRecordingService:
             recording_id (str): The ID of the recording to stop.
 
         Returns:
-            Recording: Recording stop response with duration and file info.
+            Recording: Recording stop response.
 
         Example:
             ```python

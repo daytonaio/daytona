@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"sync"
 	"syscall"
@@ -59,7 +58,7 @@ func main() {
 		panic(fmt.Errorf("failed to get user home directory: %w", err))
 	}
 
-	configDir := path.Join(homeDir, ".daytona")
+	configDir := filepath.Join(homeDir, ".daytona")
 	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
 		panic(fmt.Errorf("failed to create config directory: %w", err))

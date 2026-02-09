@@ -462,7 +462,7 @@ class RecordingService:
             label (str | None): Optional custom label for the recording.
 
         Returns:
-            StartRecordingResponse: Recording start response with ID and file path.
+            Recording: Recording start response.
 
         Example:
             ```python
@@ -483,7 +483,7 @@ class RecordingService:
             recording_id (str): The ID of the recording to stop.
 
         Returns:
-            StopRecordingResponse: Recording stop response with duration and file info.
+            Recording: Recording stop response.
 
         Example:
             ```python
@@ -520,7 +520,7 @@ class RecordingService:
             recording_id (str): The ID of the recording to retrieve.
 
         Returns:
-            GetRecordingResponse: Recording details.
+            Recording: Recording details.
 
         Example:
             ```python

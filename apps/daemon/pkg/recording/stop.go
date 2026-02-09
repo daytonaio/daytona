@@ -27,14 +27,9 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		active.stdinPipe.Close()
 	}
 
-	// Wait for ffmpeg to finish (with timeout)
-	done := make(chan error, 1)
-	go func() {
-		done <- active.cmd.Wait()
-	}()
-
+	// Wait for ffmpeg to finish by waiting on the done channel
 	select {
-	case <-done:
+	case <-active.done:
 		// Process exited normally
 	case <-time.After(10 * time.Second):
 		// Force kill if it doesn't exit gracefully
@@ -45,6 +40,8 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 				log.Errorf("Failed to force kill recording %s: %v", id, err)
 			}
 		}
+		// Still wait for the done channel to avoid goroutine leak
+		<-active.done
 	}
 
 	// Update recording metadata
