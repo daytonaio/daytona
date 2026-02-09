@@ -184,7 +184,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Reset error if exists
     setActionRuntimeError((prev) => ({
       ...prev,
-      [actionFormData.methodName]: null,
+      [actionFormData.methodName]: undefined,
     }))
     try {
       await invokeApi(actionFormData)
@@ -233,7 +233,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       else
         setActionRuntimeError((prev) => ({
           ...prev,
-          [actionFormData.methodName]: null,
+          [actionFormData.methodName]: undefined,
         }))
     },
     [validatePlaygroundActionRequiredParams],
