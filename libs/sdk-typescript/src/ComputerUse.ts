@@ -568,7 +568,7 @@ export class RecordingService {
     const stream = await dynamicImport('stream', importErrPrefix)
     const util = await dynamicImport('util', importErrPrefix)
     const pipeline = util.promisify(stream.pipeline)
-    console.log('pipeline', pipeline)
+
     // Create parent directory if it doesn't exist
     const parentDir = pathe.dirname(localPath)
     if (parentDir) {
