@@ -317,7 +317,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
       const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
       python.push(
         `${sectionStartNewLines}# Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
-        `sandbox.fs.delete_file("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', true' : ''})`,
+        `sandbox.fs.delete_file("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', True' : ''})`,
       )
       typeScript.push(
         `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
