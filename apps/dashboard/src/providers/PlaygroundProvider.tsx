@@ -181,11 +181,21 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const runPlaygroundAction: RunPlaygroundActionBasic = useCallback(async (actionFormData, invokeApi) => {
     setRunningActionMethod(actionFormData.methodName)
+    // Reset error if exists
+    setActionRuntimeError((prev) => ({
+      ...prev,
+      [actionFormData.methodName]: null,
+    }))
     try {
       await invokeApi(actionFormData)
-      setRunningActionMethod(null)
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('API call error', error)
+      setActionRuntimeError((prev) => ({
+        ...prev,
+        [actionFormData.methodName]: error instanceof Error ? error.message : String(error),
+      }))
+    } finally {
+      setRunningActionMethod(null)
     }
   }, [])
 
@@ -203,11 +213,6 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setRunningActionMethod(null)
         return
       }
-      // Reset error
-      setActionRuntimeError((prev) => ({
-        ...prev,
-        [actionFormData.methodName]: null,
-      }))
       return await runPlaygroundAction(actionFormData, invokeApi)
     },
     [runPlaygroundAction, validatePlaygroundActionRequiredParams],
