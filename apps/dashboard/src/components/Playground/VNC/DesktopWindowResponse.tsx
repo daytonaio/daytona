@@ -137,7 +137,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
   const setupVNCComputerUse = useCallback(
     async (sandbox: Sandbox) => {
       setLoadingVNCUrl(true)
-      await getVNCComputerUseUrl(sandbox) // if (VNCSandboxData.sandbox) guarantes that value isn't null so we put as Sandbox to silence TS compiler
+      await getVNCComputerUseUrl(sandbox) // if (VNCSandboxData.sandbox) guarantees that value isn't null so we put as Sandbox to silence TS compiler
       setLoadingVNCUrl(false)
     },
     [getVNCComputerUseUrl],
