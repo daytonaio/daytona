@@ -18,7 +18,7 @@ const FormTextInput: React.FC<FormTextInputProps> = ({ textValue, formItem, onCh
       id={formItem.key}
       className="w-full"
       placeholder={formItem.placeholder}
-      value={textValue}
+      value={textValue ?? ''}
       onChange={(e) => onChangeHandler(e.target.value)}
     />
   )
