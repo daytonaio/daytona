@@ -99,23 +99,23 @@ export class Organization {
   @Column({
     type: 'int',
     nullable: true,
-    name: 'authenticated_rate_limit_ttl',
+    name: 'authenticated_rate_limit_ttl_seconds',
   })
-  authenticatedRateLimitTtl: number | null
+  authenticatedRateLimitTtlSeconds: number | null
 
   @Column({
     type: 'int',
     nullable: true,
-    name: 'sandbox_create_rate_limit_ttl',
+    name: 'sandbox_create_rate_limit_ttl_seconds',
   })
-  sandboxCreateRateLimitTtl: number | null
+  sandboxCreateRateLimitTtlSeconds: number | null
 
   @Column({
     type: 'int',
     nullable: true,
-    name: 'sandbox_lifecycle_rate_limit_ttl',
+    name: 'sandbox_lifecycle_rate_limit_ttl_seconds',
   })
-  sandboxLifecycleRateLimitTtl: number | null
+  sandboxLifecycleRateLimitTtlSeconds: number | null
 
   @OneToMany(() => RegionQuota, (quota) => quota.organization, {
     cascade: true,

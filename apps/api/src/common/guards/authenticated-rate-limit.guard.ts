@@ -106,20 +106,20 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
                     ? orgLimits.sandboxLifecycle
                     : undefined
 
-            const customTtl =
+            const customTtlSeconds =
               throttler.name === 'authenticated'
-                ? orgLimits.authenticatedTtl
+                ? orgLimits.authenticatedTtlSeconds
                 : throttler.name === 'sandbox-create'
-                  ? orgLimits.sandboxCreateTtl
+                  ? orgLimits.sandboxCreateTtlSeconds
                   : throttler.name === 'sandbox-lifecycle'
-                    ? orgLimits.sandboxLifecycleTtl
+                    ? orgLimits.sandboxLifecycleTtlSeconds
                     : undefined
 
-            if (customLimit || customTtl) {
+            if (customLimit || customTtlSeconds) {
               const modifiedProps = {
                 ...requestProps,
                 ...(customLimit && { limit: customLimit }),
-                ...(customTtl && { ttl: customTtl * 1000, blockDuration: customTtl * 1000 }),
+                ...(customTtlSeconds && { ttl: customTtlSeconds * 1000, blockDuration: customTtlSeconds * 1000 }),
               }
               return super.handleRequest(modifiedProps)
             }
@@ -150,9 +150,9 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     authenticated: number | null
     sandboxCreate: number | null
     sandboxLifecycle: number | null
-    authenticatedTtl: number | null
-    sandboxCreateTtl: number | null
-    sandboxLifecycleTtl: number | null
+    authenticatedTtlSeconds: number | null
+    sandboxCreateTtlSeconds: number | null
+    sandboxLifecycleTtlSeconds: number | null
   } | null> {
     // If OrganizationService is not available (e.g., in UserModule), use default rate limits
     if (!this.organizationService) {
@@ -173,9 +173,9 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
           authenticated: organization.authenticatedRateLimit,
           sandboxCreate: organization.sandboxCreateRateLimit,
           sandboxLifecycle: organization.sandboxLifecycleRateLimit,
-          authenticatedTtl: organization.authenticatedRateLimitTtl,
-          sandboxCreateTtl: organization.sandboxCreateRateLimitTtl,
-          sandboxLifecycleTtl: organization.sandboxLifecycleRateLimitTtl,
+          authenticatedTtlSeconds: organization.authenticatedRateLimitTtlSeconds,
+          sandboxCreateTtlSeconds: organization.sandboxCreateRateLimitTtlSeconds,
+          sandboxLifecycleTtlSeconds: organization.sandboxLifecycleRateLimitTtlSeconds,
         }
         await this.redis.set(cacheKey, JSON.stringify(limits), 'EX', 60)
         return limits
