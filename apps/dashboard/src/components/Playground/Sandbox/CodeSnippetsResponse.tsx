@@ -58,21 +58,20 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
     createSandboxFromSnapshot,
   } = getSandboxParametersInfo()
 
-  // useRef prevents new object reference creation on every render which would triger useEffect calls on every render
+  // useRef prevents new object reference creation on every render which would trigger useEffect calls on every render
   const codeSnippetsSectionStartNewLinesData = useRef<CodeSnippetsSectionStartNewLinesData>({
     isFileSystemOperationsFirstSectionSnippet: false,
     isGitOperationsFirstSectionSnippet: false,
   })
-  // Reset values to false on every render beacuse of possible sections layout change
+  // Reset values to false on every render because of possible section layout changes
   for (const property in codeSnippetsSectionStartNewLinesData.current)
     codeSnippetsSectionStartNewLinesData.current[property as CodeSnippetsSectionFlagKey] = false
-
-  // Helper method do determine number of new line characters on the beginning of each code snippets sections to ensure consistent spacing
+  // Helper method to determine number of new line characters at the beginning of each code snippets section to ensure consistent spacing
   const getCodeSnippetsSectionStartNewLines = useCallback((sectionPropertyName: CodeSnippetsSectionFlagKey) => {
-    // For first section we need double new line character, for others just one
+    // For the first section we need a double new line character, for others just one
     let sectionStartNewLines = '\n'
     if (!codeSnippetsSectionStartNewLinesData.current[sectionPropertyName]) {
-      // Signalize that first snippet section is encountered so that subsequent sections use single new line character
+      // Indicate that the first snippet section is encountered so that subsequent sections use a single new line character
       codeSnippetsSectionStartNewLinesData.current[sectionPropertyName] = true
       sectionStartNewLines = '\n\n'
     }
