@@ -199,7 +199,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
       python = [
         `\n\nparams = ${createSandboxFromSnapshot ? 'CreateSandboxFromSnapshotParams' : 'CreateSandboxFromImageParams'}(`,
         useCustomSandboxSnapshotName ? `${pythonIndentation}snapshot="${sandboxParametersState['snapshotName']}",` : '',
-        createSandboxFromImage ? `${pythonIndentation}image=Image.debian_slim("3.12"),` : '',
+        createSandboxFromImage ? `${pythonIndentation}image=Image.debian_slim("3.13"),` : '',
         useResources ? `${pythonIndentation}resources=resources,` : '',
         useLanguageParam ? `${pythonIndentation}language="${sandboxParametersState['language']}"` : '',
         ...(createSandboxParamsExist
