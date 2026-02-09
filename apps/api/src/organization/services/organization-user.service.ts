@@ -234,10 +234,6 @@ export class OrganizationUserService {
     }
   }
 
-  async countByUserId(userId: string): Promise<number> {
-    return this.organizationUserRepository.count({ where: { userId } })
-  }
-
   @OnAsyncEvent({
     event: OrganizationEvents.DELETED,
   })
