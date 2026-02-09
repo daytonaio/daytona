@@ -29,7 +29,7 @@ const FormNumberInput: React.FC<FormNumberInputProps> = ({
       max={numberFormItem.max}
       placeholder={numberFormItem.placeholder}
       step={numberFormItem.step}
-      value={numberValue}
+      value={numberValue ?? ''}
       onChange={(e) => {
         const newValue = e.target.value ? Number(e.target.value) : undefined
         onChangeHandler(newValue)
