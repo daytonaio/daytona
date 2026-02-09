@@ -127,7 +127,7 @@ def get_pending():
     if max_items < 1:
         max_items = 1
     try:
-        lease_seconds = float(request.args.get("lease_seconds", "30"))
+        lease_seconds = float(request.args.get("lease_seconds", "60"))
     except ValueError:
         lease_seconds = 30.0
     if lease_seconds < 1:
@@ -249,7 +249,7 @@ class DaytonaInterpreter:
         output_fields: list[dict] | None = None,
         sandbox_params: dict[str, Any] | None = None,
         max_concurrent_tool_calls: int = 32,
-        tool_claim_lease_seconds: float = 30.0,
+        tool_claim_lease_seconds: float = 60.0,
     ) -> None:
         """
         Args:
