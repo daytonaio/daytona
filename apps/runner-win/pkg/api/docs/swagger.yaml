@@ -24,6 +24,24 @@ definitions:
       - dockerfile
       - organizationId
     type: object
+  CloneSandboxDTO:
+    properties:
+      newSandboxId:
+        type: string
+    required:
+      - newSandboxId
+    type: object
+  CloneSandboxResponseDTO:
+    properties:
+      daemonVersion:
+        type: string
+      id:
+        type: string
+      sourceSandboxId:
+        type: string
+      state:
+        type: string
+    type: object
   CreateBackupDTO:
     properties:
       registry:
@@ -595,6 +613,52 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Create sandbox backup
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/clone:
+    post:
+      description: Create an independent copy of a sandbox with flattened filesystem
+      operationId: Clone
+      parameters:
+        - description: Source Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Clone configuration
+          in: body
+          name: clone
+          required: true
+          schema:
+            $ref: '#/definitions/CloneSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CloneSandboxResponseDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Clone a sandbox
       tags:
         - sandbox
   /sandboxes/{sandboxId}/destroy:

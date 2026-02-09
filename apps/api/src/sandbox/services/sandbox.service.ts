@@ -809,6 +809,13 @@ export class SandboxService {
       throw new NotFoundException(`Runner for sandbox not found`)
     }
 
+    // Android sandboxes don't support snapshot creation
+    if (runner.class === RunnerClass.ANDROID_EXPERIMENTAL) {
+      throw new BadRequestException(
+        'Snapshot creation is not supported for Android sandboxes. Android VMs cannot preserve full disk state due to Cuttlefish limitations.',
+      )
+    }
+
     // Get internal registry for pushing the snapshot (only needed for linux runners)
     let internalRegistry = undefined
     if (runner.class === RunnerClass.LINUX) {
@@ -850,6 +857,12 @@ export class SandboxService {
       throw new BadRequestException(
         `Sandbox must be in STARTED or STOPPED state to fork. Current state: ${sourceSandbox.state}`,
       )
+    }
+
+    // Android sandboxes don't support fork
+    const sourceRunner = await this.runnerService.findOne(sourceSandbox.runnerId)
+    if (sourceRunner?.class === RunnerClass.ANDROID_EXPERIMENTAL) {
+      throw new BadRequestException('Fork is not supported for Android sandboxes.')
     }
 
     // Validate the snapshot's runner class is LINUX_EXPERIMENTAL
@@ -1008,6 +1021,14 @@ export class SandboxService {
       throw new BadRequestException(
         `Sandbox must be in STARTED or STOPPED state to clone. Current state: ${sourceSandbox.state}`,
       )
+    }
+
+    // Android sandboxes don't support clone
+    {
+      const sourceRunner = await this.runnerService.findOne(sourceSandbox.runnerId)
+      if (sourceRunner?.class === RunnerClass.ANDROID_EXPERIMENTAL) {
+        throw new BadRequestException('Clone is not supported for Android sandboxes.')
+      }
     }
 
     // Get the runner and validate availability score

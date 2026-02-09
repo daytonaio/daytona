@@ -214,6 +214,12 @@ func (c *Client) EnsureInstanceAvailable(ctx context.Context, instanceNum int) e
 		}
 	}
 
+	// Also clean stale sockets/env dirs for this instance (prevents run_cvd crash)
+	cleanSocketCmd := fmt.Sprintf(
+		"rm -rf /tmp/cf_avd_*/cvd-%d /tmp/cf_env_*/env-%d 2>/dev/null || true",
+		instanceNum, instanceNum)
+	_, _ = c.runShellScript(ctx, cleanSocketCmd)
+
 	// Also check if the device is registered in the operator (stale WebRTC registration)
 	if err := c.EnsureOperatorDeviceClean(ctx, instanceNum); err != nil {
 		log.Warnf("Failed to clean operator device registration: %v", err)

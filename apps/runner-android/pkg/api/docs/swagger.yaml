@@ -28,6 +28,22 @@ definitions:
       - path
       - ref
     type: object
+  CloneSandboxDTO:
+    properties:
+      newSandboxId:
+        type: string
+    required:
+      - newSandboxId
+    type: object
+  CloneSandboxResponseDTO:
+    properties:
+      id:
+        type: string
+      sourceSandboxId:
+        type: string
+      state:
+        type: string
+    type: object
   CreateSandboxDTO:
     properties:
       cpuQuota:
@@ -126,13 +142,17 @@ definitions:
     type: object
   PullSnapshotRequestDTO:
     properties:
-      ref:
+      destinationRef:
         type: string
+      destinationRegistry:
+        $ref: '#/definitions/RegistryDTO'
+      registry:
+        $ref: '#/definitions/RegistryDTO'
       snapshot:
-        description: Snapshot name for the pulled image
+        description: Snapshot ref in format {orgId}/{snapshotName}
         type: string
     required:
-      - ref
+      - snapshot
     type: object
   PushSnapshotRequestDTO:
     properties:
@@ -222,24 +242,20 @@ definitions:
       target:
         type: string
     type: object
-  cloudhypervisor.MemoryStatsRecord:
+  controllers.ADBInfoResponse:
     properties:
-      available_kib:
+      adbPort:
         type: integer
-      balloon_active:
-        type: boolean
-      balloon_size_kib:
-        type: integer
-      id:
-        type: integer
-      max_memory_kib:
-        type: integer
-      sandbox_id:
+      adbSerial:
         type: string
-      timestamp:
-        type: string
-      used_kib:
+      instanceNum:
         type: integer
+      sandboxId:
+        type: string
+      sshGatewayPort:
+        type: integer
+      sshTunnelCommand:
+        type: string
     type: object
   controllers.BackupState:
     enum:
@@ -253,6 +269,42 @@ definitions:
       - BackupStateInProgress
       - BackupStateCompleted
       - BackupStateFailed
+  controllers.ForceStopRequest:
+    properties:
+      packageName:
+        type: string
+    required:
+      - packageName
+    type: object
+  controllers.InstallAPKRequest:
+    properties:
+      apkContent:
+        description: base64 encoded APK
+        type: string
+      apkPath:
+        description: path to APK on device
+        type: string
+      flags:
+        description: install flags like -r, -t
+        items:
+          type: string
+        type: array
+    type: object
+  controllers.LaunchRequest:
+    properties:
+      activity:
+        description: optional, will use main activity if not specified
+        type: string
+      extras:
+        description: intent extras
+        items:
+          type: string
+        type: array
+      packageName:
+        type: string
+    required:
+      - packageName
+    type: object
   controllers.MemoryStatsResponse:
     properties:
       count:
@@ -264,8 +316,7 @@ definitions:
           type: string
         type: array
       stats:
-        items:
-          $ref: '#/definitions/cloudhypervisor.MemoryStatsRecord'
+        items: {}
         type: array
       to_time:
         type: string
@@ -284,6 +335,13 @@ definitions:
       - SandboxStateError
       - SandboxStateCreating
       - SandboxStateUnknown
+  controllers.UninstallRequest:
+    properties:
+      packageName:
+        type: string
+    required:
+      - packageName
+    type: object
 info:
   contact: {}
   description: Daytona Runner API - Cloud Hypervisor
@@ -391,6 +449,301 @@ paths:
       summary: Get sandbox info
       tags:
         - sandboxes
+  /sandboxes/{sandboxId}/adb/info:
+    get:
+      description: Returns ADB port and connection details for the sandbox
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.ADBInfoResponse'
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get ADB connection info
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/device:
+    get:
+      description: Gets information about the Android device (model, version, etc.)
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Device information
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get device info
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/install:
+    post:
+      description: Installs an APK on the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Install request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/controllers.InstallAPKRequest'
+      responses:
+        '200':
+          description: Installation result
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Install APK
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/launch:
+    post:
+      description: Launches an app on the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Launch request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/controllers.LaunchRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Launch app
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/logcat:
+    get:
+      description: Streams logcat output as Server-Sent Events
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Filter by tag
+          in: query
+          name: tag
+          type: string
+        - description: Minimum log level (V, D, I, W, E, F)
+          in: query
+          name: level
+          type: string
+      responses:
+        '200':
+          description: SSE stream of logcat output
+          schema:
+            type: string
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Stream logcat
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/packages:
+    get:
+      description: Lists installed packages on the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: 'Filter: -3 (third-party), -s (system), -d (disabled), -e (enabled)'
+          in: query
+          name: filter
+          type: string
+      responses:
+        '200':
+          description: List of package names
+          schema:
+            items:
+              type: string
+            type: array
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: List packages
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/props:
+    get:
+      description: Gets system properties from the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Specific property to get (returns all if not specified)
+          in: query
+          name: prop
+          type: string
+      responses:
+        '200':
+          description: System properties
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Get system properties
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/stop:
+    post:
+      description: Force stops an app on the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Force stop request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/controllers.ForceStopRequest'
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Force stop app
+      tags:
+        - android
+  /sandboxes/{sandboxId}/android/uninstall:
+    post:
+      description: Uninstalls an app from the Android device
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Uninstall request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/controllers.UninstallRequest'
+      responses:
+        '200':
+          description: Uninstallation result
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '404':
+          description: Sandbox not found
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Uninstall app
+      tags:
+        - android
   /sandboxes/{sandboxId}/backup:
     post:
       description: Create a backup (snapshot) of a running sandbox
@@ -409,6 +762,39 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Create backup
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/clone:
+    post:
+      consumes:
+        - application/json
+      description: Create an independent copy of a sandbox (not supported for Cuttlefish)
+      parameters:
+        - description: Source Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Clone configuration
+          in: body
+          name: clone
+          required: true
+          schema:
+            $ref: '#/definitions/CloneSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CloneSandboxResponseDTO'
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Clone a sandbox
       tags:
         - sandboxes
   /sandboxes/{sandboxId}/destroy:
@@ -436,6 +822,7 @@ paths:
       consumes:
         - application/json
       description: Create a CoW fork of a running/paused sandbox with memory state
+        (not supported for Cuttlefish)
       parameters:
         - description: Source Sandbox ID
           in: path
@@ -626,7 +1013,8 @@ paths:
     post:
       consumes:
         - application/json
-      description: Resize CPU, memory, or GPU allocation for a sandbox
+      description: Resize CPU, memory, or GPU allocation for a sandbox (not supported
+        for Cuttlefish)
       parameters:
         - description: Sandbox ID
           in: path
@@ -959,7 +1347,8 @@ paths:
         - snapshots
   /stats/memory:
     get:
-      description: Returns memory statistics for sandboxes over a time range
+      description: Returns memory statistics for sandboxes over a time range (not
+        supported for Cuttlefish)
       operationId: GetMemoryStatsJSON
       parameters:
         - description: Filter by sandbox ID
@@ -986,7 +1375,8 @@ paths:
         - stats
   /stats/memory/view:
     get:
-      description: Returns an interactive HTML page with memory usage charts
+      description: Returns an interactive HTML page with memory usage charts (not
+        supported for Cuttlefish)
       operationId: GetMemoryStatsViewHTML
       parameters:
         - description: 'Lookback hours (default: 24)'

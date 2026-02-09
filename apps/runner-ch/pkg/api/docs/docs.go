@@ -196,6 +196,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/sandboxes/{sandboxId}/clone": {
+            "post": {
+                "description": "Create an independent copy of a sandbox with flattened filesystem (no disk dependency)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandboxes"
+                ],
+                "summary": "Clone a sandbox",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Clone configuration",
+                        "name": "clone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
         "/sandboxes/{sandboxId}/destroy": {
             "post": {
                 "description": "Destroy a sandbox and all its resources",
@@ -1125,6 +1174,31 @@ const docTemplate = `{
                 }
             }
         },
+        "CloneSandboxDTO": {
+            "type": "object",
+            "required": [
+                "newSandboxId"
+            ],
+            "properties": {
+                "newSandboxId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CloneSandboxResponseDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "sourceSandboxId": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "CreateSandboxDTO": {
             "type": "object",
             "required": [
@@ -1265,14 +1339,20 @@ const docTemplate = `{
         "PullSnapshotRequestDTO": {
             "type": "object",
             "required": [
-                "ref"
+                "snapshot"
             ],
             "properties": {
-                "ref": {
+                "destinationRef": {
                     "type": "string"
                 },
+                "destinationRegistry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
-                    "description": "Snapshot name for the pulled image",
+                    "description": "Snapshot ref in format {orgId}/{snapshotName}",
                     "type": "string"
                 }
             }

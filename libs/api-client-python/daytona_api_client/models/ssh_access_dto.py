@@ -19,8 +19,8 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -35,8 +35,10 @@ class SshAccessDto(BaseModel):
     created_at: datetime = Field(description="When the SSH access was created", alias="createdAt")
     updated_at: datetime = Field(description="When the SSH access was last updated", alias="updatedAt")
     ssh_command: StrictStr = Field(description="SSH command to connect to the sandbox", alias="sshCommand")
+    adb_command: Optional[StrictStr] = Field(default=None, description="ADB connect command (only for Android sandboxes)", alias="adbCommand")
+    is_android: Optional[StrictBool] = Field(default=None, description="Whether this is an Android sandbox (uses ADB tunneling instead of shell)", alias="isAndroid")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "sandboxId", "token", "expiresAt", "createdAt", "updatedAt", "sshCommand"]
+    __properties: ClassVar[List[str]] = ["id", "sandboxId", "token", "expiresAt", "createdAt", "updatedAt", "sshCommand", "adbCommand", "isAndroid"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,7 +104,9 @@ class SshAccessDto(BaseModel):
             "expiresAt": obj.get("expiresAt"),
             "createdAt": obj.get("createdAt"),
             "updatedAt": obj.get("updatedAt"),
-            "sshCommand": obj.get("sshCommand")
+            "sshCommand": obj.get("sshCommand"),
+            "adbCommand": obj.get("adbCommand"),
+            "isAndroid": obj.get("isAndroid")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

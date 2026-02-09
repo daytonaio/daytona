@@ -166,6 +166,453 @@ const docTemplate = `{
                 }
             }
         },
+        "/sandboxes/{sandboxId}/adb/info": {
+            "get": {
+                "description": "Returns ADB port and connection details for the sandbox",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Get ADB connection info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ADBInfoResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/device": {
+            "get": {
+                "description": "Gets information about the Android device (model, version, etc.)",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Get device info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Device information",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/install": {
+            "post": {
+                "description": "Installs an APK on the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Install APK",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Install request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.InstallAPKRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Installation result",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/launch": {
+            "post": {
+                "description": "Launches an app on the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Launch app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Launch request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.LaunchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/logcat": {
+            "get": {
+                "description": "Streams logcat output as Server-Sent Events",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Stream logcat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by tag",
+                        "name": "tag",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Minimum log level (V, D, I, W, E, F)",
+                        "name": "level",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SSE stream of logcat output",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/packages": {
+            "get": {
+                "description": "Lists installed packages on the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "List packages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter: -3 (third-party), -s (system), -d (disabled), -e (enabled)",
+                        "name": "filter",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of package names",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/props": {
+            "get": {
+                "description": "Gets system properties from the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Get system properties",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Specific property to get (returns all if not specified)",
+                        "name": "prop",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "System properties",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/stop": {
+            "post": {
+                "description": "Force stops an app on the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Force stop app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Force stop request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.ForceStopRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/android/uninstall": {
+            "post": {
+                "description": "Uninstalls an app from the Android device",
+                "tags": [
+                    "android"
+                ],
+                "summary": "Uninstall app",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Uninstall request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controllers.UninstallRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Uninstallation result",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Sandbox not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/sandboxes/{sandboxId}/backup": {
             "post": {
                 "description": "Create a backup (snapshot) of a running sandbox",
@@ -188,6 +635,55 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/clone": {
+            "post": {
+                "description": "Create an independent copy of a sandbox (not supported for Cuttlefish)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandboxes"
+                ],
+                "summary": "Clone a sandbox",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Clone configuration",
+                        "name": "clone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {}
                     },
                     "500": {
                         "description": "Internal Server Error",
@@ -228,7 +724,7 @@ const docTemplate = `{
         },
         "/sandboxes/{sandboxId}/fork": {
             "post": {
-                "description": "Create a CoW fork of a running/paused sandbox with memory state",
+                "description": "Create a CoW fork of a running/paused sandbox with memory state (not supported for Cuttlefish)",
                 "consumes": [
                     "application/json"
                 ],
@@ -505,7 +1001,7 @@ const docTemplate = `{
         },
         "/sandboxes/{sandboxId}/resize": {
             "post": {
-                "description": "Resize CPU, memory, or GPU allocation for a sandbox",
+                "description": "Resize CPU, memory, or GPU allocation for a sandbox (not supported for Cuttlefish)",
                 "consumes": [
                     "application/json"
                 ],
@@ -1012,7 +1508,7 @@ const docTemplate = `{
         },
         "/stats/memory": {
             "get": {
-                "description": "Returns memory statistics for sandboxes over a time range",
+                "description": "Returns memory statistics for sandboxes over a time range (not supported for Cuttlefish)",
                 "produces": [
                     "application/json"
                 ],
@@ -1053,7 +1549,7 @@ const docTemplate = `{
         },
         "/stats/memory/view": {
             "get": {
-                "description": "Returns an interactive HTML page with memory usage charts",
+                "description": "Returns an interactive HTML page with memory usage charts (not supported for Cuttlefish)",
                 "produces": [
                     "text/html"
                 ],
@@ -1122,6 +1618,31 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                }
+            }
+        },
+        "CloneSandboxDTO": {
+            "type": "object",
+            "required": [
+                "newSandboxId"
+            ],
+            "properties": {
+                "newSandboxId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CloneSandboxResponseDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "sourceSandboxId": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
                 }
             }
         },
@@ -1265,14 +1786,20 @@ const docTemplate = `{
         "PullSnapshotRequestDTO": {
             "type": "object",
             "required": [
-                "ref"
+                "snapshot"
             ],
             "properties": {
-                "ref": {
+                "destinationRef": {
                     "type": "string"
                 },
+                "destinationRegistry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
-                    "description": "Snapshot name for the pulled image",
+                    "description": "Snapshot ref in format {orgId}/{snapshotName}",
                     "type": "string"
                 }
             }
@@ -1412,32 +1939,26 @@ const docTemplate = `{
                 }
             }
         },
-        "cuttlefish.MemoryStatsRecord": {
+        "controllers.ADBInfoResponse": {
             "type": "object",
             "properties": {
-                "available_kib": {
+                "adbPort": {
                     "type": "integer"
                 },
-                "balloon_active": {
-                    "type": "boolean"
-                },
-                "balloon_size_kib": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "max_memory_kib": {
-                    "type": "integer"
-                },
-                "sandbox_id": {
+                "adbSerial": {
                     "type": "string"
                 },
-                "timestamp": {
+                "instanceNum": {
+                    "type": "integer"
+                },
+                "sandboxId": {
                     "type": "string"
                 },
-                "used_kib": {
+                "sshGatewayPort": {
                     "type": "integer"
+                },
+                "sshTunnelCommand": {
+                    "type": "string"
                 }
             }
         },
@@ -1456,6 +1977,59 @@ const docTemplate = `{
                 "BackupStateFailed"
             ]
         },
+        "controllers.ForceStopRequest": {
+            "type": "object",
+            "required": [
+                "packageName"
+            ],
+            "properties": {
+                "packageName": {
+                    "type": "string"
+                }
+            }
+        },
+        "controllers.InstallAPKRequest": {
+            "type": "object",
+            "properties": {
+                "apkContent": {
+                    "description": "base64 encoded APK",
+                    "type": "string"
+                },
+                "apkPath": {
+                    "description": "path to APK on device",
+                    "type": "string"
+                },
+                "flags": {
+                    "description": "install flags like -r, -t",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "controllers.LaunchRequest": {
+            "type": "object",
+            "required": [
+                "packageName"
+            ],
+            "properties": {
+                "activity": {
+                    "description": "optional, will use main activity if not specified",
+                    "type": "string"
+                },
+                "extras": {
+                    "description": "intent extras",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "packageName": {
+                    "type": "string"
+                }
+            }
+        },
         "controllers.MemoryStatsResponse": {
             "type": "object",
             "properties": {
@@ -1473,9 +2047,7 @@ const docTemplate = `{
                 },
                 "stats": {
                     "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/cuttlefish.MemoryStatsRecord"
-                    }
+                    "items": {}
                 },
                 "to_time": {
                     "type": "string"
@@ -1498,6 +2070,17 @@ const docTemplate = `{
                 "SandboxStateCreating",
                 "SandboxStateUnknown"
             ]
+        },
+        "controllers.UninstallRequest": {
+            "type": "object",
+            "required": [
+                "packageName"
+            ],
+            "properties": {
+                "packageName": {
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

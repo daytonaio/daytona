@@ -331,6 +331,108 @@ SSH_PUBLIC_KEY=<base64_encoded_public_key>
 DOMAIN=localhost  # or runner's accessible domain
 ```
 
+## Android Snapshots (System Images)
+
+Cuttlefish supports multiple Android versions and form factors. Each snapshot is a directory of system images that CVD uses to boot a virtual device.
+
+### Naming Convention
+
+```
+android_{version}_{formfactor}
+```
+
+### Available Snapshots
+
+| Snapshot Name | Android | Form Factor | AOSP Branch |
+|---------------|---------|-------------|-------------|
+| `android_15_phone` | 15 (Baklava) | Phone 720×1280 | `aosp-main` |
+| `android_14_phone` | 14 (UpsideDownCake) | Phone 720×1280 | `aosp-android14-gsi` |
+| `android_13_phone` | 13 (Tiramisu) | Phone 720×1280 | `aosp-android13-gsi` |
+
+Legacy aliases: `cf_vm` and `android_baklava` both point to `android_15_phone`.
+
+**Note:** Only phone form factor is available through the public Android Build API.
+Tablet, TV, and Wear OS targets require Google-internal API access or building from AOSP source.
+
+### Fetching Snapshots
+
+Each snapshot is ~2-3 GB. Use `cvd fetch` to download from Google's CI:
+
+```bash
+#!/bin/bash
+# Run as root on the Cuttlefish host
+
+ARTIFACTS="/var/lib/cuttlefish/artifacts"
+CVD_HOME="/home/vsoc-01"
+
+# Android 15 (latest) — uses the default phone target from aosp-main
+echo "=== Fetching android_15_phone ==="
+if [ ! -d "$ARTIFACTS/android-LATEST" ] || [ ! -f "$ARTIFACTS/android-LATEST/super.img" ]; then
+  mkdir -p "$ARTIFACTS/android-LATEST"
+  chown vsoc-01:vsoc-01 "$ARTIFACTS/android-LATEST"
+  su - vsoc-01 -c "cvd fetch --default_build=aosp-main --target_directory=$ARTIFACTS/android-LATEST"
+fi
+ln -sf "$ARTIFACTS/android-LATEST" "$ARTIFACTS/android_15_phone"
+ln -sf "$ARTIFACTS/android_15_phone" "$CVD_HOME/android_15_phone"
+ln -sf "$ARTIFACTS/android_15_phone" "$CVD_HOME/cf_vm"
+echo "DONE: android_15_phone"
+
+# Android 14
+echo "=== Fetching android_14_phone ==="
+if [ ! -f "$ARTIFACTS/android_14_phone/super.img" ]; then
+  mkdir -p "$ARTIFACTS/android_14_phone"
+  chown vsoc-01:vsoc-01 "$ARTIFACTS/android_14_phone"
+  su - vsoc-01 -c "cvd fetch --default_build=aosp-android14-gsi --target_directory=$ARTIFACTS/android_14_phone"
+fi
+ln -sf "$ARTIFACTS/android_14_phone" "$CVD_HOME/android_14_phone"
+echo "DONE: android_14_phone"
+
+# Android 13
+echo "=== Fetching android_13_phone ==="
+if [ ! -f "$ARTIFACTS/android_13_phone/super.img" ]; then
+  mkdir -p "$ARTIFACTS/android_13_phone"
+  chown vsoc-01:vsoc-01 "$ARTIFACTS/android_13_phone"
+  su - vsoc-01 -c "cvd fetch --default_build=aosp-android13-gsi --target_directory=$ARTIFACTS/android_13_phone"
+fi
+ln -sf "$ARTIFACTS/android_13_phone" "$CVD_HOME/android_13_phone"
+echo "DONE: android_13_phone"
+
+# Fix ownership on all symlinks
+chown -h vsoc-01:vsoc-01 $CVD_HOME/android_* $CVD_HOME/cf_vm 2>/dev/null
+
+echo ""
+echo "=== All snapshots ==="
+ls -la $CVD_HOME/android_* $CVD_HOME/cf_vm 2>/dev/null
+```
+
+### Verifying Snapshots
+
+```bash
+# Check which snapshots the runner can see
+curl -s -H "Authorization: Bearer <token>" http://localhost:3107/snapshots/exists?name=android_15_phone
+
+# List all symlinks
+ls -la /home/vsoc-01/android_*
+```
+
+### Disk Space Requirements
+
+| Snapshot | Size |
+|----------|------|
+| `android_15_phone` | ~3.2 GB |
+| `android_14_phone` | ~2.4 GB |
+| `android_13_phone` | ~14 GB (includes host tools) |
+| Per-VM runtime | ~570 MB |
+| **Total** | **~20 GB** |
+
+### Notes
+
+- Each `cvd fetch` downloads from `ci.android.com` and takes 5-15 minutes
+- The `--target_directory` must be writable by `vsoc-01`
+- Snapshots are pure AOSP (no Google Play Services)
+- Only the phone form factor is available publicly; other form factors (tablet, TV, wear) require Google-internal API access
+- To verify a snapshot works: `cvd create --product_path=/path/to/snapshot --instance_nums=99`
+
 ## Security Notes
 
 1. **SSH Key Authentication**: The main SSH gateway authenticates to the runner's SSH gateway using public key authentication. Keys must match.

@@ -24,6 +24,22 @@ definitions:
       - dockerfile
       - organizationId
     type: object
+  CloneSandboxDTO:
+    properties:
+      newSandboxId:
+        type: string
+    required:
+      - newSandboxId
+    type: object
+  CloneSandboxResponseDTO:
+    properties:
+      id:
+        type: string
+      sourceSandboxId:
+        type: string
+      state:
+        type: string
+    type: object
   CreateBackupDTO:
     properties:
       registry:
@@ -85,6 +101,44 @@ definitions:
       - osUser
       - snapshot
       - userId
+    type: object
+  CreateSnapshotDTO:
+    properties:
+      live:
+        description: If true, use optimistic mode (no pause)
+        type: boolean
+      name:
+        type: string
+      organizationId:
+        type: string
+      registry:
+        allOf:
+          - $ref: '#/definitions/RegistryDTO'
+        description: Registry to push the snapshot to
+      sandboxId:
+        type: string
+    required:
+      - name
+      - organizationId
+      - sandboxId
+    type: object
+  CreateSnapshotResponseDTO:
+    properties:
+      hash:
+        example: a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff
+        type: string
+      name:
+        example: my-snapshot
+        type: string
+      sizeBytes:
+        example: 536870912
+        type: integer
+      sizeGB:
+        example: 0.5
+        type: number
+      snapshotPath:
+        example: registry:5000/daytona/org-123/my-snapshot:latest
+        type: string
     type: object
   ErrorResponse:
     description: Error response
@@ -495,6 +549,52 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Create sandbox backup
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/clone:
+    post:
+      description: Create an independent copy of a sandbox with flattened filesystem
+      operationId: Clone
+      parameters:
+        - description: Source Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Clone configuration
+          in: body
+          name: clone
+          required: true
+          schema:
+            $ref: '#/definitions/CloneSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CloneSandboxResponseDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Clone a sandbox
       tags:
         - sandbox
   /sandboxes/{sandboxId}/destroy:
@@ -1039,6 +1139,46 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Build a snapshot
+      tags:
+        - snapshots
+  /snapshots/create:
+    post:
+      consumes:
+        - application/json
+      description: Create a snapshot by committing a running sandbox container to
+        a local image
+      operationId: CreateSnapshot
+      parameters:
+        - description: Create snapshot request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSnapshotDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CreateSnapshotResponseDTO'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a snapshot from a sandbox
       tags:
         - snapshots
   /snapshots/exists:

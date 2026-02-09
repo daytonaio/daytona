@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -156,7 +157,11 @@ func proxyWebRTC(ctx *gin.Context, client *cuttlefish.Client, instance *cuttlefi
 	// Device ID format varies based on CVD group assignment: {group}-{instance}-{instance}
 	deviceId := getDeviceIdForInstance(client, instance, operatorPort)
 	if deviceId == "" {
-		// Fallback to default pattern if lookup fails
+		// Fallback: try to get device ID from CVD fleet (more reliable than operator)
+		deviceId = getDeviceIdFromCVDFleet(ctx.Request.Context(), client, instance)
+	}
+	if deviceId == "" {
+		// Last resort fallback
 		deviceId = fmt.Sprintf("cvd_1-%d-%d", instance.InstanceNum, instance.InstanceNum)
 		log.Warnf("WebRTC proxy: could not look up device ID, using fallback: %s", deviceId)
 	}
@@ -629,5 +634,39 @@ func getDeviceIdForInstance(client *cuttlefish.Client, instance *cuttlefish.Inst
 	}
 
 	log.Debugf("WebRTC proxy: no device found for instance %d (ADB port %d)", instance.InstanceNum, instance.ADBPort)
+	return ""
+}
+
+// getDeviceIdFromCVDFleet queries the CVD fleet directly to find the device ID
+// This is more reliable than the operator which often has incomplete device info
+func getDeviceIdFromCVDFleet(ctx context.Context, client *cuttlefish.Client, instance *cuttlefish.InstanceInfo) string {
+	fleet, err := client.GetCVDFleet(ctx)
+	if err != nil {
+		log.Debugf("WebRTC proxy: failed to get CVD fleet: %v", err)
+		return ""
+	}
+
+	// Search by ADB port first (most reliable)
+	for _, group := range fleet.Groups {
+		for _, inst := range group.Instances {
+			if inst.ADBPort == instance.ADBPort {
+				log.Debugf("WebRTC proxy: found device %s for instance %d by ADB port from CVD fleet", inst.WebRTCDeviceID, instance.InstanceNum)
+				return inst.WebRTCDeviceID
+			}
+		}
+	}
+
+	// Fallback: search by instance name
+	instanceName := fmt.Sprintf("%d", instance.InstanceNum)
+	for _, group := range fleet.Groups {
+		for _, inst := range group.Instances {
+			if inst.InstanceName == instanceName {
+				log.Debugf("WebRTC proxy: found device %s for instance %d by name from CVD fleet", inst.WebRTCDeviceID, instance.InstanceNum)
+				return inst.WebRTCDeviceID
+			}
+		}
+	}
+
+	log.Debugf("WebRTC proxy: no device found in CVD fleet for instance %d (ADB port %d)", instance.InstanceNum, instance.ADBPort)
 	return ""
 }

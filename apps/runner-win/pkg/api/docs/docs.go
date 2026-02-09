@@ -303,6 +303,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/sandboxes/{sandboxId}/clone": {
+            "post": {
+                "description": "Create an independent copy of a sandbox with flattened filesystem",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Clone a sandbox",
+                "operationId": "Clone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Clone configuration",
+                        "name": "clone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/CloneSandboxResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/sandboxes/{sandboxId}/destroy": {
             "post": {
                 "description": "Destroy sandbox",
@@ -1681,6 +1750,34 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/RegistryDTO"
                     }
+                }
+            }
+        },
+        "CloneSandboxDTO": {
+            "type": "object",
+            "required": [
+                "newSandboxId"
+            ],
+            "properties": {
+                "newSandboxId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CloneSandboxResponseDTO": {
+            "type": "object",
+            "properties": {
+                "daemonVersion": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "sourceSandboxId": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
                 }
             }
         },

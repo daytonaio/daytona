@@ -275,6 +275,71 @@
         }
       }
     },
+    "/sandboxes/{sandboxId}/clone": {
+      "post": {
+        "description": "Create an independent copy of a sandbox with flattened filesystem",
+        "produces": ["application/json"],
+        "tags": ["sandbox"],
+        "summary": "Clone a sandbox",
+        "operationId": "Clone",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Source Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Clone configuration",
+            "name": "clone",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CloneSandboxDTO"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/CloneSandboxResponseDTO"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/sandboxes/{sandboxId}/destroy": {
       "post": {
         "description": "Destroy sandbox",
@@ -1041,6 +1106,59 @@
         }
       }
     },
+    "/snapshots/create": {
+      "post": {
+        "description": "Create a snapshot by committing a running sandbox container to a local image",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "tags": ["snapshots"],
+        "summary": "Create a snapshot from a sandbox",
+        "operationId": "CreateSnapshot",
+        "parameters": [
+          {
+            "description": "Create snapshot request",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSnapshotDTO"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/CreateSnapshotResponseDTO"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/snapshots/exists": {
       "get": {
         "description": "Check if a specified snapshot exists locally",
@@ -1408,6 +1526,29 @@
         }
       }
     },
+    "CloneSandboxDTO": {
+      "type": "object",
+      "required": ["newSandboxId"],
+      "properties": {
+        "newSandboxId": {
+          "type": "string"
+        }
+      }
+    },
+    "CloneSandboxResponseDTO": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "sourceSandboxId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
     "CreateBackupDTO": {
       "type": "object",
       "required": ["registry", "snapshot"],
@@ -1487,6 +1628,58 @@
           "items": {
             "$ref": "#/definitions/dto.VolumeDTO"
           }
+        }
+      }
+    },
+    "CreateSnapshotDTO": {
+      "type": "object",
+      "required": ["name", "organizationId", "sandboxId"],
+      "properties": {
+        "live": {
+          "description": "If true, use optimistic mode (no pause)",
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "organizationId": {
+          "type": "string"
+        },
+        "registry": {
+          "description": "Registry to push the snapshot to",
+          "allOf": [
+            {
+              "$ref": "#/definitions/RegistryDTO"
+            }
+          ]
+        },
+        "sandboxId": {
+          "type": "string"
+        }
+      }
+    },
+    "CreateSnapshotResponseDTO": {
+      "type": "object",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "example": "a7be6198544f09a75b26e6376459b47c5b9972e7351d440e092c4faa9ea064ff"
+        },
+        "name": {
+          "type": "string",
+          "example": "my-snapshot"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "example": 536870912
+        },
+        "sizeGB": {
+          "type": "number",
+          "example": 0.5
+        },
+        "snapshotPath": {
+          "type": "string",
+          "example": "registry:5000/daytona/org-123/my-snapshot:latest"
         }
       }
     },

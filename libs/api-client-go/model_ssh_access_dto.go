@@ -35,7 +35,11 @@ type SshAccessDto struct {
 	// When the SSH access was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 	// SSH command to connect to the sandbox
-	SshCommand           string `json:"sshCommand"`
+	SshCommand string `json:"sshCommand"`
+	// ADB connect command (only for Android sandboxes)
+	AdbCommand *string `json:"adbCommand,omitempty"`
+	// Whether this is an Android sandbox (uses ADB tunneling instead of shell)
+	IsAndroid            *bool `json:"isAndroid,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -233,6 +237,70 @@ func (o *SshAccessDto) SetSshCommand(v string) {
 	o.SshCommand = v
 }
 
+// GetAdbCommand returns the AdbCommand field value if set, zero value otherwise.
+func (o *SshAccessDto) GetAdbCommand() string {
+	if o == nil || IsNil(o.AdbCommand) {
+		var ret string
+		return ret
+	}
+	return *o.AdbCommand
+}
+
+// GetAdbCommandOk returns a tuple with the AdbCommand field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SshAccessDto) GetAdbCommandOk() (*string, bool) {
+	if o == nil || IsNil(o.AdbCommand) {
+		return nil, false
+	}
+	return o.AdbCommand, true
+}
+
+// HasAdbCommand returns a boolean if a field has been set.
+func (o *SshAccessDto) HasAdbCommand() bool {
+	if o != nil && !IsNil(o.AdbCommand) {
+		return true
+	}
+
+	return false
+}
+
+// SetAdbCommand gets a reference to the given string and assigns it to the AdbCommand field.
+func (o *SshAccessDto) SetAdbCommand(v string) {
+	o.AdbCommand = &v
+}
+
+// GetIsAndroid returns the IsAndroid field value if set, zero value otherwise.
+func (o *SshAccessDto) GetIsAndroid() bool {
+	if o == nil || IsNil(o.IsAndroid) {
+		var ret bool
+		return ret
+	}
+	return *o.IsAndroid
+}
+
+// GetIsAndroidOk returns a tuple with the IsAndroid field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SshAccessDto) GetIsAndroidOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsAndroid) {
+		return nil, false
+	}
+	return o.IsAndroid, true
+}
+
+// HasIsAndroid returns a boolean if a field has been set.
+func (o *SshAccessDto) HasIsAndroid() bool {
+	if o != nil && !IsNil(o.IsAndroid) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsAndroid gets a reference to the given bool and assigns it to the IsAndroid field.
+func (o *SshAccessDto) SetIsAndroid(v bool) {
+	o.IsAndroid = &v
+}
+
 func (o SshAccessDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -250,6 +318,12 @@ func (o SshAccessDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["sshCommand"] = o.SshCommand
+	if !IsNil(o.AdbCommand) {
+		toSerialize["adbCommand"] = o.AdbCommand
+	}
+	if !IsNil(o.IsAndroid) {
+		toSerialize["isAndroid"] = o.IsAndroid
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -306,6 +380,8 @@ func (o *SshAccessDto) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "createdAt")
 		delete(additionalProperties, "updatedAt")
 		delete(additionalProperties, "sshCommand")
+		delete(additionalProperties, "adbCommand")
+		delete(additionalProperties, "isAndroid")
 		o.AdditionalProperties = additionalProperties
 	}
 

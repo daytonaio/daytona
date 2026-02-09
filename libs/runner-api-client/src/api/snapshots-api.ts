@@ -34,6 +34,10 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { BuildSnapshotRequestDTO } from '../models'
 // @ts-ignore
+import type { CreateSnapshotDTO } from '../models'
+// @ts-ignore
+import type { CreateSnapshotResponseDTO } from '../models'
+// @ts-ignore
 import type { ErrorResponse } from '../models'
 // @ts-ignore
 import type { PullSnapshotRequestDTO } from '../models'
@@ -63,6 +67,43 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
       // verify required parameter 'request' is not null or undefined
       assertParamExists('buildSnapshot', 'request', request)
       const localVarPath = `/snapshots/build`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication Bearer required
+      await setApiKeyToObject(localVarHeaderParameter, 'Authorization', configuration)
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Create a snapshot by committing a running sandbox container to a local image
+     * @summary Create a snapshot from a sandbox
+     * @param {CreateSnapshotDTO} request Create snapshot request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSnapshot: async (request: CreateSnapshotDTO, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('createSnapshot', 'request', request)
+      const localVarPath = `/snapshots/create`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -361,6 +402,29 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Create a snapshot by committing a running sandbox container to a local image
+     * @summary Create a snapshot from a sandbox
+     * @param {CreateSnapshotDTO} request Create snapshot request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async createSnapshot(
+      request: CreateSnapshotDTO,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateSnapshotResponseDTO>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createSnapshot(request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['SnapshotsApi.createSnapshot']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Stream build logs
      * @summary Get build logs
      * @param {string} snapshotRef Snapshot ref
@@ -521,6 +585,19 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
       return localVarFp.buildSnapshot(request, options).then((request) => request(axios, basePath))
     },
     /**
+     * Create a snapshot by committing a running sandbox container to a local image
+     * @summary Create a snapshot from a sandbox
+     * @param {CreateSnapshotDTO} request Create snapshot request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    createSnapshot(
+      request: CreateSnapshotDTO,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<CreateSnapshotResponseDTO> {
+      return localVarFp.createSnapshot(request, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Stream build logs
      * @summary Get build logs
      * @param {string} snapshotRef Snapshot ref
@@ -602,6 +679,20 @@ export class SnapshotsApi extends BaseAPI {
   public buildSnapshot(request: BuildSnapshotRequestDTO, options?: RawAxiosRequestConfig) {
     return SnapshotsApiFp(this.configuration)
       .buildSnapshot(request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Create a snapshot by committing a running sandbox container to a local image
+   * @summary Create a snapshot from a sandbox
+   * @param {CreateSnapshotDTO} request Create snapshot request
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof SnapshotsApi
+   */
+  public createSnapshot(request: CreateSnapshotDTO, options?: RawAxiosRequestConfig) {
+    return SnapshotsApiFp(this.configuration)
+      .createSnapshot(request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

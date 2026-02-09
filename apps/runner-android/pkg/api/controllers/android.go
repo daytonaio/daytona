@@ -430,9 +430,9 @@ func GetSystemProps(ctx *gin.Context) {
 //	@Tags			android
 //	@Summary		Stream logcat
 //	@Description	Streams logcat output as Server-Sent Events
-//	@Param			sandboxId	path	string	true	"Sandbox ID"
-//	@Param			tag			query	string	false	"Filter by tag"
-//	@Param			level		query	string	false	"Minimum log level (V, D, I, W, E, F)"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
+//	@Param			tag			query		string	false	"Filter by tag"
+//	@Param			level		query		string	false	"Minimum log level (V, D, I, W, E, F)"
 //	@Success		200			{string}	string	"SSE stream of logcat output"
 //	@Failure		404			{object}	string	"Sandbox not found"
 //	@Failure		500			{object}	string	"Internal server error"

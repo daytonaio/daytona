@@ -48,6 +48,13 @@ func (c *Client) StartVM(ctx context.Context, sandboxId string) error {
 		if info.Metadata != nil {
 			snapshot = info.Metadata["snapshot"]
 		}
+		// Ensure we have valid resource values (may be 0 if loaded from old mappings)
+		if info.Cpus == 0 {
+			info.Cpus = c.config.DefaultCpus
+		}
+		if info.MemoryMB == 0 {
+			info.MemoryMB = uint64(c.config.DefaultMemoryMB)
+		}
 		if err := c.launchInstance(ctx, info, snapshot); err != nil {
 			return fmt.Errorf("failed to start instance: %w", err)
 		}

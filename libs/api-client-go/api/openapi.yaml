@@ -10353,6 +10353,8 @@ components:
         sshCommand: ssh -p 2222 token@localhost
         sandboxId: 123e4567-e89b-12d3-a456-426614174000
         id: 123e4567-e89b-12d3-a456-426614174000
+        adbCommand: adb connect localhost:5555
+        isAndroid: false
         expiresAt: 2025-01-01T12:00:00Z
         token: abc123def456ghi789jkl012mno345pqr678stu901vwx234yz
         updatedAt: 2025-01-01T11:00:00Z
@@ -10388,6 +10390,15 @@ components:
           description: SSH command to connect to the sandbox
           example: ssh -p 2222 token@localhost
           type: string
+        adbCommand:
+          description: ADB connect command (only for Android sandboxes)
+          example: adb connect localhost:5555
+          type: string
+        isAndroid:
+          description: Whether this is an Android sandbox (uses ADB tunneling instead
+            of shell)
+          example: false
+          type: boolean
       required:
         - createdAt
         - expiresAt
@@ -10596,6 +10607,7 @@ components:
         - linux
         - linux-exp
         - windows-exp
+        - android-exp
       type: string
     RunnerState:
       description: The state of the runner

@@ -28,6 +28,22 @@ definitions:
       - path
       - ref
     type: object
+  CloneSandboxDTO:
+    properties:
+      newSandboxId:
+        type: string
+    required:
+      - newSandboxId
+    type: object
+  CloneSandboxResponseDTO:
+    properties:
+      id:
+        type: string
+      sourceSandboxId:
+        type: string
+      state:
+        type: string
+    type: object
   CreateSandboxDTO:
     properties:
       cpuQuota:
@@ -126,13 +142,17 @@ definitions:
     type: object
   PullSnapshotRequestDTO:
     properties:
-      ref:
+      destinationRef:
         type: string
+      destinationRegistry:
+        $ref: '#/definitions/RegistryDTO'
+      registry:
+        $ref: '#/definitions/RegistryDTO'
       snapshot:
-        description: Snapshot name for the pulled image
+        description: Snapshot ref in format {orgId}/{snapshotName}
         type: string
     required:
-      - ref
+      - snapshot
     type: object
   PushSnapshotRequestDTO:
     properties:
@@ -409,6 +429,40 @@ paths:
           description: Internal Server Error
           schema: {}
       summary: Create backup
+      tags:
+        - sandboxes
+  /sandboxes/{sandboxId}/clone:
+    post:
+      consumes:
+        - application/json
+      description: Create an independent copy of a sandbox with flattened filesystem
+        (no disk dependency)
+      parameters:
+        - description: Source Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Clone configuration
+          in: body
+          name: clone
+          required: true
+          schema:
+            $ref: '#/definitions/CloneSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/CloneSandboxResponseDTO'
+        '400':
+          description: Bad Request
+          schema: {}
+        '500':
+          description: Internal Server Error
+          schema: {}
+      summary: Clone a sandbox
       tags:
         - sandboxes
   /sandboxes/{sandboxId}/destroy:

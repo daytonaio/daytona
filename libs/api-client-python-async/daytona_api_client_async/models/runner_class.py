@@ -30,6 +30,7 @@ class RunnerClass(str, Enum):
     LINUX = 'linux'
     LINUX_MINUS_EXP = 'linux-exp'
     WINDOWS_MINUS_EXP = 'windows-exp'
+    ANDROID_MINUS_EXP = 'android-exp'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

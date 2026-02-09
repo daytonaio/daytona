@@ -318,8 +318,24 @@ func (c *Client) forceCleanupInstance(ctx context.Context, instanceNum int) {
 	)
 	_, _ = c.runShellScript(ctx, rmCmd)
 
+	// Force-clean CVD instance database to remove stale entries
+	// This prevents "New instance conflicts with existing instance" errors on next create
+	cleanDBCmd := fmt.Sprintf(
+		"rm -f /var/tmp/cvd/*/instance_database.binpb 2>/dev/null || true",
+	)
+	_, _ = c.runShellScript(ctx, cleanDBCmd)
+
+	// Clean stale runtime dirs that have no running processes
+	cleanStaleCmd := fmt.Sprintf(
+		`for dir in /var/tmp/cvd/1001/*/; do
+			if [ -d "$dir" ] && ! pgrep -f "$dir" > /dev/null 2>&1; then
+				rm -rf "$dir"
+			fi
+		done 2>/dev/null || true`,
+	)
+	_, _ = c.runShellScript(ctx, cleanStaleCmd)
+
 	// Also try to clean up stale operator registrations
-	// Query operator and remove any device with this instance number
 	if err := c.EnsureOperatorDeviceClean(ctx, instanceNum); err != nil {
 		log.Debugf("Could not clean operator registration: %v", err)
 	}

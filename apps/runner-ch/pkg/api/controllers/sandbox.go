@@ -378,8 +378,8 @@ func Fork(ctx *gin.Context) {
 //	@Tags			sandboxes
 //	@Accept			json
 //	@Produce		json
-//	@Param			sandboxId	path		string					true	"Source Sandbox ID"
-//	@Param			clone		body		dto.CloneSandboxDTO		true	"Clone configuration"
+//	@Param			sandboxId	path		string				true	"Source Sandbox ID"
+//	@Param			clone		body		dto.CloneSandboxDTO	true	"Clone configuration"
 //	@Success		201			{object}	dto.CloneSandboxResponseDTO
 //	@Failure		400			{object}	error
 //	@Failure		500			{object}	error

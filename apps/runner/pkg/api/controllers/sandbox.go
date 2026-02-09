@@ -397,15 +397,15 @@ func RemoveDestroyed(ctx *gin.Context) {
 //	@Tags			sandbox
 //	@Summary		Clone a sandbox
 //	@Description	Create an independent copy of a sandbox with flattened filesystem
-//	@Param			sandboxId	path		string					true	"Source Sandbox ID"
-//	@Param			clone		body		dto.CloneSandboxDTO		true	"Clone configuration"
+//	@Param			sandboxId	path	string				true	"Source Sandbox ID"
+//	@Param			clone		body	dto.CloneSandboxDTO	true	"Clone configuration"
 //	@Produce		json
-//	@Success		201			{object}	dto.CloneSandboxResponseDTO
-//	@Failure		400			{object}	common_errors.ErrorResponse
-//	@Failure		401			{object}	common_errors.ErrorResponse
-//	@Failure		404			{object}	common_errors.ErrorResponse
-//	@Failure		409			{object}	common_errors.ErrorResponse
-//	@Failure		500			{object}	common_errors.ErrorResponse
+//	@Success		201	{object}	dto.CloneSandboxResponseDTO
+//	@Failure		400	{object}	common_errors.ErrorResponse
+//	@Failure		401	{object}	common_errors.ErrorResponse
+//	@Failure		404	{object}	common_errors.ErrorResponse
+//	@Failure		409	{object}	common_errors.ErrorResponse
+//	@Failure		500	{object}	common_errors.ErrorResponse
 //	@Router			/sandboxes/{sandboxId}/clone [post]
 //
 //	@id				Clone

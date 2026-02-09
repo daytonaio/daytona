@@ -48,13 +48,15 @@ export function SandboxTableActions({
         disabled: isLoading || sandbox.state !== SandboxState.STARTED,
       })
 
-      // Screen Recordings - always visible, disabled when not started
-      items.push({
-        key: 'screen-recordings',
-        label: 'Screen Recordings',
-        onClick: () => onScreenRecordings(sandbox.id),
-        disabled: isLoading || sandbox.state !== SandboxState.STARTED,
-      })
+      // Screen Recordings - hidden for Android sandboxes
+      if (runnerClass !== 'android-exp') {
+        items.push({
+          key: 'screen-recordings',
+          label: 'Screen Recordings',
+          onClick: () => onScreenRecordings(sandbox.id),
+          disabled: isLoading || sandbox.state !== SandboxState.STARTED,
+        })
+      }
 
       if (sandbox.state === SandboxState.STARTED) {
         items.push({
@@ -81,8 +83,11 @@ export function SandboxTableActions({
         })
       }
 
-      // Add Create Snapshot option (only for STARTED or STOPPED)
-      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+      // Add Create Snapshot option (only for STARTED or STOPPED, hidden for Android)
+      if (
+        (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) &&
+        runnerClass !== 'android-exp'
+      ) {
         items.push({
           key: 'create-snapshot',
           label: 'Create Snapshot',
@@ -91,8 +96,11 @@ export function SandboxTableActions({
         })
       }
 
-      // Add Fork option (only for STARTED or STOPPED with linux-exp runner class)
-      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+      // Add Fork option (only for STARTED or STOPPED with linux-exp runner class, hidden for Android)
+      if (
+        (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) &&
+        runnerClass !== 'android-exp'
+      ) {
         items.push({
           key: 'fork',
           label: 'Fork',
@@ -101,8 +109,11 @@ export function SandboxTableActions({
         })
       }
 
-      // Add Clone option (for STARTED or STOPPED sandboxes on all runner classes)
-      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) {
+      // Add Clone option (for STARTED or STOPPED sandboxes, hidden for Android)
+      if (
+        (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED) &&
+        runnerClass !== 'android-exp'
+      ) {
         items.push({
           key: 'clone',
           label: 'Clone',
