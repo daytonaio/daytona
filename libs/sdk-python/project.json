@@ -6,16 +6,10 @@
   "targets": {
     "docs": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/python-sdk/**/*"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "npm run docs"
-      }
-    },
-    "generate-sync": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "python scripts/sync_generator.py"
       }
     },
     "add-api-clients": {
@@ -37,6 +31,10 @@
       ]
     },
     "deps-check": {
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "dependsOn": ["add-api-clients"]
     },
     "build": {
@@ -46,12 +44,17 @@
         "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
         "parallel": false
       },
-      "cache": true,
       "inputs": ["pythonLib"],
       "outputs": ["{projectRoot}/dist/**"]
     },
     "build:_publish": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{projectRoot}/dist/**"],
       "options": {
         "command": "yarn nx run sdk-python:build"
       },

@@ -7,11 +7,7 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": [
-        "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
-        "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
-        "{workspaceRoot}/hack/python-client/postprocess.sh"
-      ],
+      "inputs": ["pythonApiClient"],
       "outputs": ["{projectRoot}/daytona_toolbox_api_client"],
       "options": {
         "commands": [
@@ -31,6 +27,11 @@
     "deps-check": {},
     "build-py-lib": {},
     "build": {
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{projectRoot}/dist/**"],
       "dependsOn": ["build-py-lib"]
     },
     "publish": {

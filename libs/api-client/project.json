@@ -6,8 +6,6 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "inputs": ["default", "{projectRoot}/package.json"],
-      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/api-client",
         "tsConfig": "{projectRoot}/tsconfig.lib.json",
@@ -19,8 +17,7 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": ["{workspaceRoot}/dist/apps/api/openapi.json"],
+      "inputs": ["apiClient"],
       "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [

@@ -6,6 +6,9 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["goProduction", "^goProduction"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "commands": ["go mod download", "go build -v ./..."],
@@ -37,16 +40,12 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "inputs": ["apiClient"],
       "outputs": [
-        "{projectRoot}/api",
-        "{projectRoot}/docs",
-        "{projectRoot}/model_*.go",
-        "{projectRoot}/api_*.go",
-        "{projectRoot}/client.go",
-        "{projectRoot}/configuration.go",
-        "{projectRoot}/response.go",
-        "{projectRoot}/utils.go"
+        "{projectRoot}/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{projectRoot}/api/openapi.yaml"
       ],
       "options": {
         "cwd": "{projectRoot}",
@@ -66,6 +65,13 @@
     "check-version-env": {},
     "set-version": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/libs/sdk-go/go.mod",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{workspaceRoot}/libs/sdk-go/go.mod"],
       "options": {
         "cwd": "{workspaceRoot}",
         "command": "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/toolbox-api-client-go@$VERSION"

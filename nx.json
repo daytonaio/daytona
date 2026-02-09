@@ -1,22 +1,24 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "namedInputs": {
-    "default": ["{projectRoot}/**/*", "!{projectRoot}/**/*.gem", "sharedGlobals"],
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/**/*.gem",
+      "!{projectRoot}/dist/**",
+      "!{projectRoot}/node_modules/**",
+      "!{projectRoot}/.venv/**",
+      "!{projectRoot}/build/**",
+      "!{projectRoot}/*.egg-info/**",
+      "!{projectRoot}/coverage/**",
+      "!{projectRoot}/.nx/**",
+      "!{projectRoot}/**/*_test.go",
+      "sharedGlobals"
+    ],
     "pythonLib": [
       "default",
-      "!{projectRoot}/dist/**",
-      "!{projectRoot}/*.egg-info/**",
-      "!{projectRoot}/build/**",
+      "{workspaceRoot}/pyproject.toml",
       { "env": "PYPI_PKG_VERSION" },
       { "env": "DEFAULT_PACKAGE_VERSION" }
-    ],
-    "pythonDepsCheck": [
-      "{projectRoot}/pyproject.toml",
-      "{projectRoot}/**/*.py",
-      "!{projectRoot}/.venv/**",
-      "!{projectRoot}/dist/**",
-      "!{projectRoot}/*.egg-info/**",
-      "!{projectRoot}/build/**"
     ],
     "production": [
       "default",
@@ -28,17 +30,18 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "goProduction": [
-      "{projectRoot}/**/*.go",
-      "{projectRoot}/go.mod",
-      "{projectRoot}/go.sum",
-      "!{projectRoot}/**/*_test.go",
-      "sharedGlobals"
+    "goProduction": ["default", "{workspaceRoot}/go.work", "{workspaceRoot}/go.work.sum", "sharedGlobals"],
+    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"],
+    "apiClient": [
+      "{workspaceRoot}/dist/apps/api/openapi.json",
+      "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
+      { "env": "DEFAULT_PACKAGE_VERSION" },
+      { "dependentTasksOutputFiles": "**/*", "transitive": true }
     ],
-    "sharedGlobals": [
-      "{workspaceRoot}/.github/workflows/ci.yml",
-      "{workspaceRoot}/go.work",
-      "{workspaceRoot}/go.work.sum"
+    "pythonApiClient": [
+      "apiClient",
+      "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
+      "{workspaceRoot}/hack/python-client/postprocess.sh"
     ]
   },
   "neverConnectToCloud": true,
@@ -111,30 +114,37 @@
   },
   "targetDefaults": {
     "@nx/webpack:webpack": {
-      "cache": true
+      "cache": true,
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{options.outputPath}"]
     },
     "@nx/js:swc": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
     },
     "@nx/js:tsc": {
       "cache": true,
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
     },
     "@nx-go/nx-go:build": {
       "cache": true,
-      "inputs": ["goProduction", "^goProduction"],
-      "outputs": ["{options.outputPath}"]
+      "outputs": ["{options.outputPath}"],
+      "inputs": ["goProduction", "^goProduction", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
     },
     "@nx-go/nx-go:test": {
       "cache": true,
-      "inputs": ["default", "^goProduction"]
+      "inputs": ["default", "^goProduction", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
     },
     "@nx-go/nx-go:lint": {
       "cache": true,
       "inputs": ["default", "^goProduction"]
+    },
+    "@nx-go/nx-go:tidy": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"]
     },
     "check-version-env": {
       "executor": "nx:run-commands",
@@ -189,7 +199,7 @@
         "parallel": false
       },
       "cache": true,
-      "inputs": ["pythonDepsCheck"],
+      "inputs": ["pythonLib"],
       "outputs": ["{projectRoot}/poetry.lock"]
     },
     "build-py-lib": {
@@ -204,8 +214,40 @@
       },
       "dependsOn": ["deps-check"],
       "cache": true,
-      "inputs": ["pythonLib"],
+      "inputs": ["pythonLib", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{projectRoot}/dist/**"]
+    },
+    "format": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": []
+    },
+    "lint": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": []
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "outputs": []
+    },
+    "generate:api-client": {
+      "cache": true
+    },
+    "docs": {
+      "cache": true,
+      "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "tidy": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"]
+    },
+    "build": {
+      "cache": true,
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{options.outputPath}"]
     }
   },
   "release": {

@@ -13,8 +13,6 @@
         "parallel": false
       },
       "dependsOn": ["set-version"],
-      "cache": true,
-      "inputs": ["default"],
       "outputs": ["{projectRoot}/**/*.gem"]
     },
     "set-version": {
@@ -36,6 +34,7 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/lib"],
       "options": {
         "commands": [
           "rm -rf libs/toolbox-api-client-ruby/lib",
@@ -47,8 +46,10 @@
         "parallel": false
       },
       "cache": true,
-      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
-      "outputs": ["{projectRoot}/**/*", "!{projectRoot}/**/*.gem"],
+      "inputs": [
+        "apiClient",
+        { "env": "DEFAULT_GEM_VERSION" }
+      ],
       "dependsOn": [
         {
           "target": "openapi",

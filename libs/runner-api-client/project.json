@@ -6,7 +6,6 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/runner-api-client",
         "tsConfig": "libs/runner-api-client/tsconfig.lib.json",
@@ -17,9 +16,11 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": ["{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json"],
       "outputs": ["{projectRoot}/src"],
+      "inputs": [
+        "{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src",
