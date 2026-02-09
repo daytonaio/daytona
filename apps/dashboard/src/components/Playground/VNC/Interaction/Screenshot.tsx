@@ -26,7 +26,7 @@ import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
 
-const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
+const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentProps> = ({
   disableActions,
   ComputerUseClient,
   wrapVNCInvokeApi,
@@ -282,4 +282,4 @@ const VNCScreenshootOperations: React.FC<VNCInteractionOptionsSectionComponentPr
   )
 }
 
-export default VNCScreenshootOperations
+export default VNCScreenshotOperations
