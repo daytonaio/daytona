@@ -126,6 +126,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
             description: computerUseMissingErrorMessage,
           })
           setVNCLoadingError(computerUseMissingErrorMessage)
+          return
         }
         handleApiError(error, 'Failed to check VNC status')
       }
