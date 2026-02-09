@@ -220,12 +220,12 @@
     "format": {
       "cache": true,
       "inputs": ["default"],
-      "outputs": ["{projectRoot}/**/*"]
+      "outputs": []
     },
     "lint": {
       "cache": true,
       "inputs": ["default"],
-      "outputs": ["{projectRoot}/**/*"]
+      "outputs": []
     },
     "test": {
       "cache": true,
@@ -233,19 +233,7 @@
       "outputs": []
     },
     "generate:api-client": {
-      "cache": true,
-      "outputs": [
-        "{projectRoot}/**/*",
-        "!{projectRoot}/**/*.gem",
-        "!{projectRoot}/dist/**",
-        "!{projectRoot}/node_modules/**",
-        "!{projectRoot}/.venv/**",
-        "!{projectRoot}/build/**",
-        "!{projectRoot}/*.egg-info/**",
-        "!{projectRoot}/coverage/**",
-        "!{projectRoot}/.nx/**",
-        "!{projectRoot}/**/*_test.go"
-      ]
+      "cache": true
     },
     "docs": {
       "cache": true,

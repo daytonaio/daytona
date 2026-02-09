@@ -16,6 +16,7 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/src"],
       "inputs": [
         "{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json",
         { "dependentTasksOutputFiles": "**/*", "transitive": true }

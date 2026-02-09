@@ -18,6 +18,7 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "inputs": ["apiClient"],
+      "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src",

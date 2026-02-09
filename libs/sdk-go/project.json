@@ -52,7 +52,7 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["default"],
-      "outputs": ["{projectRoot}/**/*"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "command": "go fmt ./..."

@@ -23,6 +23,12 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["apiClient"],
+      "outputs": [
+        "{projectRoot}/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{projectRoot}/api/openapi.yaml"
+      ],
       "options": {
         "commands": [
           "rm -f {projectRoot}/*.go",

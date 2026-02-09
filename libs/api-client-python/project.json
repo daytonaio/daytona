@@ -8,6 +8,7 @@
       "executor": "nx:run-commands",
       "cache": true,
       "inputs": ["pythonApiClient"],
+      "outputs": ["{projectRoot}/daytona_api_client"],
       "options": {
         "commands": [
           "rm -rf {projectRoot}/daytona_api_client",

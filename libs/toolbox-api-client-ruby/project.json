@@ -34,6 +34,7 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/lib"],
       "options": {
         "commands": [
           "rm -rf libs/toolbox-api-client-ruby/lib",
