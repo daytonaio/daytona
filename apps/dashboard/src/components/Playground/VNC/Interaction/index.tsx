@@ -19,7 +19,7 @@ import { useCallback, useEffect, useState } from 'react'
 import VNCDisplayOperations from './Display'
 import VNCKeyboardOperations from './Keyboard'
 import VNCMouseOperations from './Mouse'
-import VNCScreenshootOperations from './Screenshot'
+import VNCScreenshotOperations from './Screenshot'
 
 const sectionIcons = {
   [VNCInteractionOptionsSections.DISPLAY]: <MonitorIcon strokeWidth={1.5} />,
@@ -121,7 +121,7 @@ const VNCInteractionOptions: React.FC = () => {
                       <VNCMouseOperations {...interactionOptionsSectionComponentProps} />
                     )}
                     {section.value === VNCInteractionOptionsSections.SCREENSHOT && (
-                      <VNCScreenshootOperations {...interactionOptionsSectionComponentProps} />
+                      <VNCScreenshotOperations {...interactionOptionsSectionComponentProps} />
                     )}
                   </div>
                 )}
