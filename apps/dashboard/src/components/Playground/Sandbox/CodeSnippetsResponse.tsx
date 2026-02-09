@@ -672,8 +672,7 @@ main().catch(console.error)`,
                 className="ml-auto"
                 onClick={() => {
                   runCodeSnippet()
-
-                  if (resultPanelRef.current?.isCollapsed) {
+                  if (resultPanelRef.current?.isCollapsed()) {
                     resultPanelRef.current.resize(100)
                   }
                 }}
