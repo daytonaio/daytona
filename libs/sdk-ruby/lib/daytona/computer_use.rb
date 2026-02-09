@@ -457,8 +457,8 @@ module Daytona
       #   puts "Recording stopped: #{result.duration_seconds} seconds"
       #   puts "Saved to: #{result.file_path}"
       def stop(id:)
-        request = DaytonaToolboxApiClient::StopRecordingRequest.new(id:)
-        toolbox_api.stop_recording(request: request)
+        request = DaytonaToolboxApiClient::StopRecordingRequest.new(id: id)
+        toolbox_api.stop_recording(request)
       rescue StandardError => e
         raise Sdk::Error, "Failed to stop recording: #{e.message}"
       end
