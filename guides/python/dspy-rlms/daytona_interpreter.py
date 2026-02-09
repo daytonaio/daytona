@@ -55,13 +55,14 @@ _BROKER_SERVER_CODE = '''
 import json
 import threading
 import time
+import uuid
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
 # Thread-safe storage for pending requests and results
 _lock = threading.Lock()
-_pending_requests = {}  # id -> {tool_name, args, kwargs, claimed}
+_pending_requests = {}  # id -> {tool_name, args, kwargs, claimed, claimed_at, lease_token}
 _results = {}  # id -> result
 
 @app.route("/health", methods=["GET"])
@@ -88,6 +89,8 @@ def tool_call():
             "args": args,
             "kwargs": kwargs,
             "claimed": False,
+            "claimed_at": None,
+            "lease_token": None,
         }
 
     # Poll for result (50ms interval, 2 minute timeout)
@@ -114,8 +117,8 @@ def tool_call():
 def get_pending():
     """Host polls this to get pending tool requests.
 
-    Returns up to `max` unclaimed requests and marks them claimed so multiple
-    host workers can process calls concurrently without duplicates.
+    Returns up to `max` requests. Claims use short leases so abandoned claims
+    can be recovered if a worker crashes before posting a result.
     """
     try:
         max_items = int(request.args.get("max", "1"))
@@ -123,34 +126,56 @@ def get_pending():
         max_items = 1
     if max_items < 1:
         max_items = 1
+    try:
+        lease_seconds = float(request.args.get("lease_seconds", "30"))
+    except ValueError:
+        lease_seconds = 30.0
+    if lease_seconds < 1:
+        lease_seconds = 1.0
 
     requests_out = []
     with _lock:
+        now = time.time()
         # Return up to `max` pending requests that don't have a result yet.
         for call_id, req in _pending_requests.items():
             if len(requests_out) >= max_items:
                 break
             if call_id in _results:
                 continue
-            if req.get("claimed"):
-                continue
+            claimed_at = req.get("claimed_at")
+            if req.get("claimed") and isinstance(claimed_at, (int, float)):
+                if now - claimed_at < lease_seconds:
+                    continue
+            claim_token = str(uuid.uuid4())
             req["claimed"] = True
+            req["claimed_at"] = now
+            req["lease_token"] = claim_token
             requests_out.append({
                 "id": call_id,
                 "tool_name": req["tool_name"],
                 "args": req["args"],
                 "kwargs": req["kwargs"],
+                "claim_token": claim_token,
             })
     return jsonify({"requests": requests_out})
 
 @app.route("/result/<call_id>", methods=["POST"])
 def post_result(call_id):
-    """Host calls this to provide tool execution result."""
+    """Host calls this to provide tool execution result for a valid claim."""
     data = request.json
     result = data.get("result")
+    claim_token = data.get("claim_token")
 
     with _lock:
+        req = _pending_requests.get(call_id)
+        if req is None:
+            return jsonify({"error": "Unknown or expired call_id"}), 404
+        expected_token = req.get("lease_token")
+        if not expected_token or claim_token != expected_token:
+            return jsonify({"error": "Stale or invalid claim token"}), 409
         _results[call_id] = result
+        # Invalidate the lease token so a late duplicate post is rejected.
+        req["lease_token"] = None
 
     return jsonify({"status": "ok"})
 
@@ -224,19 +249,25 @@ class DaytonaInterpreter:
         output_fields: list[dict] | None = None,
         sandbox_params: dict[str, Any] | None = None,
         max_concurrent_tool_calls: int = 32,
+        tool_claim_lease_seconds: float = 30.0,
     ) -> None:
         """
         Args:
             tools: Dictionary mapping tool names to callable functions.
             output_fields: List of output field definitions for typed SUBMIT signature.
             sandbox_params: Optional parameters to pass to Daytona sandbox creation.
+            max_concurrent_tool_calls: Maximum host-side parallel tool workers.
+            tool_claim_lease_seconds: Claim lease duration used by broker recovery.
         """
         self.tools = dict(tools) if tools else {}
         self.output_fields = output_fields
         self.sandbox_params = sandbox_params or {}
         if max_concurrent_tool_calls < 1:
             raise ValueError("max_concurrent_tool_calls must be >= 1")
+        if tool_claim_lease_seconds < 1:
+            raise ValueError("tool_claim_lease_seconds must be >= 1")
         self.max_concurrent_tool_calls = max_concurrent_tool_calls
+        self.tool_claim_lease_seconds = float(tool_claim_lease_seconds)
 
         self._daytona = None
         self._sandbox = None
@@ -468,9 +499,10 @@ print("Broker server code written")
     def _poll_and_execute_tools(self, code_done_event: threading.Event) -> None:
         """Poll for pending tool requests and execute them on the host."""
         headers = {"x-daytona-preview-token": self._broker_token}
+        lease_seconds = self.tool_claim_lease_seconds
 
         def fetch_pending(max_items: int) -> list[dict[str, Any]]:
-            url_pending = f"{self._broker_url}/pending?max={max_items}"
+            url_pending = f"{self._broker_url}/pending?max={max_items}&lease_seconds={lease_seconds}"
             req = urllib.request.Request(url_pending, headers=headers, method="GET")
             with urllib.request.urlopen(req, timeout=5) as resp:
                 data = json.loads(resp.read().decode("utf-8"))
@@ -485,6 +517,7 @@ print("Broker server code written")
             tool_name = pending["tool_name"]
             args = pending.get("args", [])
             kwargs = pending.get("kwargs", {})
+            claim_token = pending.get("claim_token")
 
             logger.info("Executing tool on host: %s(%s, %s)", tool_name, args, kwargs)
 
@@ -502,15 +535,22 @@ print("Broker server code written")
             logger.info("Tool result for %s: %.500s", tool_name, result)
 
             url_result = f"{self._broker_url}/result/{call_id}"
-            payload = json.dumps({"result": result}).encode("utf-8")
+            payload = json.dumps({"result": result, "claim_token": claim_token}).encode("utf-8")
             req = urllib.request.Request(
                 url_result,
                 data=payload,
                 headers={**headers, "Content-Type": "application/json"},
                 method="POST",
             )
-            with urllib.request.urlopen(req, timeout=5):
-                pass
+            try:
+                with urllib.request.urlopen(req, timeout=5):
+                    pass
+            except urllib.error.HTTPError as e:
+                # Expected when this worker's lease expired and another worker took over.
+                if e.code in (404, 409):
+                    logger.info("Discarded stale tool result for call %s (HTTP %s)", call_id, e.code)
+                    return
+                raise
 
             logger.info("Tool result posted for call %s", call_id)
 
