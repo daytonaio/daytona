@@ -54,7 +54,7 @@ function ScrollArea({
       data-slot="scroll-area"
       style={
         {
-          '--fade-offset': fadeOffset ? `${fadeOffset}px` : '30px',
+          '--fade-offset': fadeOffset !== undefined ? `${fadeOffset}px` : '30px',
           ...props.style,
         } as React.CSSProperties
       }
