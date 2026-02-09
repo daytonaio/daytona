@@ -25,6 +25,8 @@ import {
   ProcessRestartResponse,
   ProcessLogsResponse,
   ProcessErrorsResponse,
+  Recording,
+  ListRecordingsResponse,
 } from '@daytonaio/toolbox-api-client'
 
 /**
@@ -451,15 +453,143 @@ export class Display {
 }
 
 /**
+ * Recording operations for computer use functionality.
+ */
+export class RecordingService {
+  constructor(private readonly apiClient: ComputerUseApi) {}
+
+  /**
+   * Starts a new screen recording session
+   *
+   * @param {string} [label] - Optional custom label for the recording
+   * @returns {Promise<Recording>} Started recording details
+   *
+   * @example
+   * ```typescript
+   * // Start a recording with a label
+   * const recording = await sandbox.computerUse.recording.start('my-test-recording');
+   * console.log(`Recording started: ${recording.id}`);
+   * console.log(`File: ${recording.filePath}`);
+   * ```
+   */
+  public async start(label?: string): Promise<Recording> {
+    return (await this.apiClient.startRecording({ label })).data
+  }
+
+  /**
+   * Stops an active screen recording session
+   *
+   * @param {string} id - The ID of the recording to stop
+   * @returns {Promise<Recording>} Stopped recording details
+   *
+   * @example
+   * ```typescript
+   * const result = await sandbox.computerUse.recording.stop(recording.id);
+   * console.log(`Recording stopped: ${result.durationSeconds} seconds`);
+   * console.log(`Saved to: ${result.filePath}`);
+   * ```
+   */
+  public async stop(id: string): Promise<Recording> {
+    return (await this.apiClient.stopRecording({ id })).data
+  }
+
+  /**
+   * Lists all recordings (active and completed)
+   *
+   * @returns {Promise<ListRecordingsResponse>} List of all recordings
+   *
+   * @example
+   * ```typescript
+   * const recordings = await sandbox.computerUse.recording.list();
+   * console.log(`Found ${recordings.recordings.length} recordings`);
+   * recordings.recordings.forEach(rec => {
+   *   console.log(`- ${rec.fileName}: ${rec.status}`);
+   * });
+   * ```
+   */
+  public async list(): Promise<ListRecordingsResponse> {
+    return (await this.apiClient.listRecordings()).data
+  }
+
+  /**
+   * Gets details of a specific recording by ID
+   *
+   * @param {string} id - The ID of the recording to retrieve
+   * @returns {Promise<Recording>} Recording details
+   *
+   * @example
+   * ```typescript
+   * const recording = await sandbox.computerUse.recording.get(recordingId);
+   * console.log(`Recording: ${recording.fileName}`);
+   * console.log(`Status: ${recording.status}`);
+   * console.log(`Duration: ${recording.durationSeconds} seconds`);
+   * ```
+   */
+  public async get(id: string): Promise<Recording> {
+    return (await this.apiClient.getRecording(id)).data
+  }
+
+  /**
+   * Deletes a recording by ID
+   *
+   * @param {string} id - The ID of the recording to delete
+   *
+   * @example
+   * ```typescript
+   * await sandbox.computerUse.recording.delete(recordingId);
+   * console.log('Recording deleted');
+   * ```
+   */
+  public async delete(id: string): Promise<void> {
+    await this.apiClient.deleteRecording(id)
+  }
+
+  /**
+   * Downloads a recording file and saves it to a local path
+   *
+   * The file is streamed directly to disk without loading the entire content into memory.
+   *
+   * @param {string} id - The ID of the recording to download
+   * @param {string} localPath - Path to save the recording file locally
+   *
+   * @example
+   * ```typescript
+   * // Download recording to file
+   * await sandbox.computerUse.recording.download(recordingId, 'local_recording.mp4');
+   * console.log('Recording downloaded');
+   * ```
+   */
+  public async download(id: string, localPath: string): Promise<void> {
+    const response = await this.apiClient.downloadRecording(id, { responseType: 'stream' })
+    const fs = await import('fs')
+    const path = await import('path')
+    const stream = await import('stream')
+    const { promisify } = await import('util')
+    const pipeline = promisify(stream.pipeline)
+
+    // Create parent directory if it doesn't exist
+    const parentDir = path.dirname(localPath)
+    if (parentDir) {
+      await fs.promises.mkdir(parentDir, { recursive: true })
+    }
+
+    // Stream the download directly to file
+    const writer = fs.createWriteStream(localPath)
+    await pipeline(response.data as any, writer)
+  }
+}
+
+/**
  * Computer Use functionality for interacting with the desktop environment.
  *
- * Provides access to mouse, keyboard, screenshot, and display operations
+ * Provides access to mouse, keyboard, screenshot, display, and recording operations
  * for automating desktop interactions within a sandbox.
  *
  * @property {Mouse} mouse - Mouse operations interface
  * @property {Keyboard} keyboard - Keyboard operations interface
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
+ * @property {Recording} recording - Screen recording operations interface
  *
  * @class
  */
@@ -468,12 +598,14 @@ export class ComputerUse {
   public readonly keyboard: Keyboard
   public readonly screenshot: Screenshot
   public readonly display: Display
+  public readonly recording: RecordingService
 
   constructor(private readonly apiClient: ComputerUseApi) {
     this.mouse = new Mouse(apiClient)
     this.keyboard = new Keyboard(apiClient)
     this.screenshot = new Screenshot(apiClient)
     this.display = new Display(apiClient)
+    this.recording = new RecordingService(apiClient)
   }
 
   /**

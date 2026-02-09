@@ -49,6 +49,7 @@ models/keyboard-press-request.ts
 models/keyboard-type-request.ts
 models/list-branch-response.ts
 models/list-contexts-response.ts
+models/list-recordings-response.ts
 models/lsp-completion-params.ts
 models/lsp-document-request.ts
 models/lsp-location.ts
@@ -76,6 +77,7 @@ models/pty-create-response.ts
 models/pty-list-response.ts
 models/pty-resize-request.ts
 models/pty-session-info.ts
+models/recording.ts
 models/replace-request.ts
 models/replace-result.ts
 models/screenshot-response.ts
@@ -85,7 +87,9 @@ models/session-execute-request.ts
 models/session-execute-response.ts
 models/session-send-input-request.ts
 models/session.ts
+models/start-recording-request.ts
 models/status.ts
+models/stop-recording-request.ts
 models/user-home-dir-response.ts
 models/window-info.ts
 models/windows-response.ts

@@ -5,6 +5,10 @@ package daytona
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
@@ -14,7 +18,7 @@ import (
 // ComputerUseService provides desktop automation operations for a sandbox.
 //
 // ComputerUseService enables GUI automation including mouse control, keyboard input,
-// screenshots, and display management. The desktop environment must be started
+// screenshots, display management, and screen recording. The desktop environment must be started
 // before using these features. Access through [Sandbox.ComputerUse].
 //
 // Example:
@@ -45,6 +49,7 @@ type ComputerUseService struct {
 	keyboard   *KeyboardService
 	screenshot *ScreenshotService
 	display    *DisplayService
+	recording  *RecordingService
 }
 
 // NewComputerUseService creates a new ComputerUseService.
@@ -96,6 +101,16 @@ func (c *ComputerUseService) Display() *DisplayService {
 		c.display = NewDisplayService(c.toolboxClient)
 	}
 	return c.display
+}
+
+// Recording returns the [RecordingService] for screen recording operations.
+//
+// The service is lazily initialized on first access.
+func (c *ComputerUseService) Recording() *RecordingService {
+	if c.recording == nil {
+		c.recording = NewRecordingService(c.toolboxClient)
+	}
+	return c.recording
 }
 
 // Start initializes and starts the desktop environment.
@@ -623,4 +638,194 @@ func (d *DisplayService) GetWindows(ctx context.Context) (map[string]any, error)
 	return map[string]any{
 		"windows": windows.GetWindows(),
 	}, nil
+}
+
+// RecordingService provides screen recording operations.
+//
+// RecordingService enables starting, stopping, and managing screen recordings.
+// Access through [ComputerUseService.Recording].
+type RecordingService struct {
+	toolboxClient *toolbox.APIClient
+}
+
+// NewRecordingService creates a new RecordingService.
+func NewRecordingService(toolboxClient *toolbox.APIClient) *RecordingService {
+	return &RecordingService{
+		toolboxClient: toolboxClient,
+	}
+}
+
+// Start starts a new screen recording session.
+//
+// Parameters:
+//   - label: Optional custom label for the recording
+//
+// Example:
+//
+//	// Start a recording with a label
+//	recording, err := cu.Recording().Start(ctx, stringPtr("my-test-recording"))
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Recording started: %s\n", recording.GetId())
+//	fmt.Printf("File: %s\n", recording.GetFilePath())
+//
+// Returns [toolbox.Recording] with recording details.
+func (r *RecordingService) Start(ctx context.Context, label *string) (*toolbox.Recording, error) {
+	req := toolbox.NewStartRecordingRequest()
+	if label != nil {
+		req.SetLabel(*label)
+	}
+
+	result, httpResp, err := r.toolboxClient.ComputerUseAPI.StartRecording(ctx).Request(*req).Execute()
+	if err != nil {
+		return nil, errors.ConvertToolboxError(err, httpResp)
+	}
+
+	return result, nil
+}
+
+// Stop stops an active screen recording session.
+//
+// Parameters:
+//   - id: The ID of the recording to stop
+//
+// Example:
+//
+//	result, err := cu.Recording().Stop(ctx, recordingID)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Recording stopped: %v seconds\n", result.GetDurationSeconds())
+//	fmt.Printf("Saved to: %s\n", result.GetFilePath())
+//
+// Returns [toolbox.Recording] with recording details.
+func (r *RecordingService) Stop(ctx context.Context, id string) (*toolbox.Recording, error) {
+	req := toolbox.NewStopRecordingRequest(id)
+
+	result, httpResp, err := r.toolboxClient.ComputerUseAPI.StopRecording(ctx).Request(*req).Execute()
+	if err != nil {
+		return nil, errors.ConvertToolboxError(err, httpResp)
+	}
+
+	return result, nil
+}
+
+// List lists all recordings (active and completed).
+//
+// Example:
+//
+//	recordings, err := cu.Recording().List(ctx)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Found %d recordings\n", len(recordings.GetRecordings()))
+//	for _, rec := range recordings.GetRecordings() {
+//	    fmt.Printf("- %s: %s\n", rec.GetFileName(), rec.GetStatus())
+//	}
+//
+// Returns [toolbox.ListRecordingsResponse] with all recordings.
+func (r *RecordingService) List(ctx context.Context) (*toolbox.ListRecordingsResponse, error) {
+	result, httpResp, err := r.toolboxClient.ComputerUseAPI.ListRecordings(ctx).Execute()
+	if err != nil {
+		return nil, errors.ConvertToolboxError(err, httpResp)
+	}
+
+	return result, nil
+}
+
+// Get gets details of a specific recording by ID.
+//
+// Parameters:
+//   - id: The ID of the recording to retrieve
+//
+// Example:
+//
+//	recording, err := cu.Recording().Get(ctx, recordingID)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Recording: %s\n", recording.GetFileName())
+//	fmt.Printf("Status: %s\n", recording.GetStatus())
+//	fmt.Printf("Duration: %v seconds\n", recording.GetDurationSeconds())
+//
+// Returns [toolbox.Recording] with recording details.
+func (r *RecordingService) Get(ctx context.Context, id string) (*toolbox.Recording, error) {
+	result, httpResp, err := r.toolboxClient.ComputerUseAPI.GetRecording(ctx, id).Execute()
+	if err != nil {
+		return nil, errors.ConvertToolboxError(err, httpResp)
+	}
+
+	return result, nil
+}
+
+// Delete deletes a recording by ID.
+//
+// Parameters:
+//   - id: The ID of the recording to delete
+//
+// Example:
+//
+//	err := cu.Recording().Delete(ctx, recordingID)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Println("Recording deleted")
+//
+// Returns an error if the deletion fails.
+func (r *RecordingService) Delete(ctx context.Context, id string) error {
+	httpResp, err := r.toolboxClient.ComputerUseAPI.DeleteRecording(ctx, id).Execute()
+	if err != nil {
+		return errors.ConvertToolboxError(err, httpResp)
+	}
+
+	return nil
+}
+
+// Download downloads a recording file and saves it to a local path.
+//
+// The file is streamed directly to disk without loading the entire content into memory.
+//
+// Parameters:
+//   - id: The ID of the recording to download
+//   - localPath: Path to save the recording file locally
+//
+// Example:
+//
+//	err := cu.Recording().Download(ctx, recordingID, "local_recording.mp4")
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Println("Recording downloaded")
+//
+// Returns an error if the download fails.
+func (r *RecordingService) Download(ctx context.Context, id string, localPath string) error {
+	// Call the download API
+	sourceFile, httpResp, err := r.toolboxClient.ComputerUseAPI.DownloadRecording(ctx, id).Execute()
+	if err != nil {
+		return errors.ConvertToolboxError(err, httpResp)
+	}
+	defer sourceFile.Close()
+
+	// Create parent directory if it doesn't exist
+	parentDir := filepath.Dir(localPath)
+	if parentDir != "" && parentDir != "." {
+		if err := os.MkdirAll(parentDir, 0755); err != nil {
+			return fmt.Errorf("failed to create parent directory: %w", err)
+		}
+	}
+
+	// Create the destination file
+	destFile, err := os.Create(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	// Copy the data from source to destination
+	if _, err := io.Copy(destFile, sourceFile); err != nil {
+		return fmt.Errorf("failed to copy recording data: %w", err)
+	}
+
+	return nil
 }

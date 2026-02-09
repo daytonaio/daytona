@@ -124,7 +124,7 @@ class Sandbox(SandboxDto):
         self._fs = FileSystem(FileSystemApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._git = Git(GitApi(self._toolbox_api))
         self._process = Process(code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
-        self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api))
+        self._computer_use = ComputerUse(ComputerUseApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url)
         self._code_interpreter = CodeInterpreter(
             InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
         )

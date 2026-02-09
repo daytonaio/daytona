@@ -54,6 +54,7 @@ export interface SandboxTableProps {
   filters: SandboxFilters
   onFiltersChange: (filters: SandboxFilters) => void
   handleRecover: (id: string) => void
+  handleScreenRecordings: (id: string) => void
 }
 
 export interface SandboxTableActionsProps {
@@ -70,6 +71,7 @@ export interface SandboxTableActionsProps {
   onCreateSshAccess: (id: string) => void
   onRevokeSshAccess: (id: string) => void
   onRecover: (id: string) => void
+  onScreenRecordings: (id: string) => void
 }
 
 export interface SandboxTableHeaderProps {

@@ -46,6 +46,8 @@ import type { KeyboardPressRequest } from '../models'
 // @ts-ignore
 import type { KeyboardTypeRequest } from '../models'
 // @ts-ignore
+import type { ListRecordingsResponse } from '../models'
+// @ts-ignore
 import type { MouseClickRequest } from '../models'
 // @ts-ignore
 import type { MouseClickResponse } from '../models'
@@ -68,9 +70,15 @@ import type { ProcessRestartResponse } from '../models'
 // @ts-ignore
 import type { ProcessStatusResponse } from '../models'
 // @ts-ignore
+import type { Recording } from '../models'
+// @ts-ignore
 import type { ScreenshotResponse } from '../models'
 // @ts-ignore
 import type { ScrollResponse } from '../models'
+// @ts-ignore
+import type { StartRecordingRequest } from '../models'
+// @ts-ignore
+import type { StopRecordingRequest } from '../models'
 // @ts-ignore
 import type { WindowsResponse } from '../models'
 /**
@@ -107,6 +115,68 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Delete a recording file by ID
+     * @summary Delete a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteRecording: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('deleteRecording', 'id', id)
+      const localVarPath = `/computeruse/recordings/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Download a recording by providing its ID
+     * @summary Download a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    downloadRecording: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('downloadRecording', 'id', id)
+      const localVarPath = `/computeruse/recordings/{id}/download`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
       return {
         url: toPathString(localVarUrlObj),
@@ -362,6 +432,37 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
       }
     },
     /**
+     * Get details of a specific recording by ID
+     * @summary Get recording details
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRecording: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('getRecording', 'id', id)
+      const localVarPath = `/computeruse/recordings/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Get information about all open windows
      * @summary Get windows information
      * @param {*} [options] Override http request option.
@@ -369,6 +470,34 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
      */
     getWindows: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       const localVarPath = `/computeruse/display/windows`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Get a list of all recordings (active and completed)
+     * @summary List all recordings
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listRecordings: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/computeruse/recordings`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -588,6 +717,41 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
       }
     },
     /**
+     * Start a new screen recording session
+     * @summary Start a new recording
+     * @param {StartRecordingRequest} [request] Recording options
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    startRecording: async (
+      request?: StartRecordingRequest,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/computeruse/recordings/start`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
      * Stop all computer use processes and return their status
      * @summary Stop computer use processes
      * @param {*} [options] Override http request option.
@@ -609,6 +773,40 @@ export const ComputerUseApiAxiosParamCreator = function (configuration?: Configu
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Stop an active screen recording session
+     * @summary Stop a recording
+     * @param {StopRecordingRequest} request Recording ID to stop
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    stopRecording: async (request: StopRecordingRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'request' is not null or undefined
+      assertParamExists('stopRecording', 'request', request)
+      const localVarPath = `/computeruse/recordings/stop`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -924,6 +1122,52 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Delete a recording file by ID
+     * @summary Delete a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async deleteRecording(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRecording(id, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.deleteRecording']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Download a recording by providing its ID
+     * @summary Download a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async downloadRecording(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.downloadRecording(id, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.downloadRecording']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Drag the mouse from start to end coordinates
      * @summary Drag mouse
      * @param {MouseDragRequest} request Mouse drag request
@@ -1100,6 +1344,29 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Get details of a specific recording by ID
+     * @summary Get recording details
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getRecording(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Recording>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRecording(id, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.getRecording']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get information about all open windows
      * @summary Get windows information
      * @param {*} [options] Override http request option.
@@ -1112,6 +1379,27 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ComputerUseApi.getWindows']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Get a list of all recordings (active and completed)
+     * @summary List all recordings
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async listRecordings(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListRecordingsResponse>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listRecordings(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.listRecordings']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1257,6 +1545,29 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Start a new screen recording session
+     * @summary Start a new recording
+     * @param {StartRecordingRequest} [request] Recording options
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async startRecording(
+      request?: StartRecordingRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Recording>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.startRecording(request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.startRecording']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Stop all computer use processes and return their status
      * @summary Stop computer use processes
      * @param {*} [options] Override http request option.
@@ -1269,6 +1580,29 @@ export const ComputerUseApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ComputerUseApi.stopComputerUse']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Stop an active screen recording session
+     * @summary Stop a recording
+     * @param {StopRecordingRequest} request Recording ID to stop
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async stopRecording(
+      request: StopRecordingRequest,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Recording>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stopRecording(request, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ComputerUseApi.stopRecording']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1468,6 +1802,26 @@ export const ComputerUseApiFactory = function (
       return localVarFp.click(request, options).then((request) => request(axios, basePath))
     },
     /**
+     * Delete a recording file by ID
+     * @summary Delete a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    deleteRecording(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.deleteRecording(id, options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Download a recording by providing its ID
+     * @summary Download a recording
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    downloadRecording(id: string, options?: RawAxiosRequestConfig): AxiosPromise<File> {
+      return localVarFp.downloadRecording(id, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Drag the mouse from start to end coordinates
      * @summary Drag mouse
      * @param {MouseDragRequest} request Mouse drag request
@@ -1544,6 +1898,16 @@ export const ComputerUseApiFactory = function (
       return localVarFp.getProcessStatus(processName, options).then((request) => request(axios, basePath))
     },
     /**
+     * Get details of a specific recording by ID
+     * @summary Get recording details
+     * @param {string} id Recording ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRecording(id: string, options?: RawAxiosRequestConfig): AxiosPromise<Recording> {
+      return localVarFp.getRecording(id, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Get information about all open windows
      * @summary Get windows information
      * @param {*} [options] Override http request option.
@@ -1551,6 +1915,15 @@ export const ComputerUseApiFactory = function (
      */
     getWindows(options?: RawAxiosRequestConfig): AxiosPromise<WindowsResponse> {
       return localVarFp.getWindows(options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Get a list of all recordings (active and completed)
+     * @summary List all recordings
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    listRecordings(options?: RawAxiosRequestConfig): AxiosPromise<ListRecordingsResponse> {
+      return localVarFp.listRecordings(options).then((request) => request(axios, basePath))
     },
     /**
      * Move the mouse cursor to the specified coordinates
@@ -1612,6 +1985,16 @@ export const ComputerUseApiFactory = function (
       return localVarFp.startComputerUse(options).then((request) => request(axios, basePath))
     },
     /**
+     * Start a new screen recording session
+     * @summary Start a new recording
+     * @param {StartRecordingRequest} [request] Recording options
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    startRecording(request?: StartRecordingRequest, options?: RawAxiosRequestConfig): AxiosPromise<Recording> {
+      return localVarFp.startRecording(request, options).then((request) => request(axios, basePath))
+    },
+    /**
      * Stop all computer use processes and return their status
      * @summary Stop computer use processes
      * @param {*} [options] Override http request option.
@@ -1619,6 +2002,16 @@ export const ComputerUseApiFactory = function (
      */
     stopComputerUse(options?: RawAxiosRequestConfig): AxiosPromise<ComputerUseStopResponse> {
       return localVarFp.stopComputerUse(options).then((request) => request(axios, basePath))
+    },
+    /**
+     * Stop an active screen recording session
+     * @summary Stop a recording
+     * @param {StopRecordingRequest} request Recording ID to stop
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    stopRecording(request: StopRecordingRequest, options?: RawAxiosRequestConfig): AxiosPromise<Recording> {
+      return localVarFp.stopRecording(request, options).then((request) => request(axios, basePath))
     },
     /**
      * Take a compressed screenshot of a specific region of the screen
@@ -1738,6 +2131,34 @@ export class ComputerUseApi extends BaseAPI {
   }
 
   /**
+   * Delete a recording file by ID
+   * @summary Delete a recording
+   * @param {string} id Recording ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public deleteRecording(id: string, options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .deleteRecording(id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Download a recording by providing its ID
+   * @summary Download a recording
+   * @param {string} id Recording ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public downloadRecording(id: string, options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .downloadRecording(id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Drag the mouse from start to end coordinates
    * @summary Drag mouse
    * @param {MouseDragRequest} request Mouse drag request
@@ -1846,6 +2267,20 @@ export class ComputerUseApi extends BaseAPI {
   }
 
   /**
+   * Get details of a specific recording by ID
+   * @summary Get recording details
+   * @param {string} id Recording ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public getRecording(id: string, options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .getRecording(id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Get information about all open windows
    * @summary Get windows information
    * @param {*} [options] Override http request option.
@@ -1855,6 +2290,19 @@ export class ComputerUseApi extends BaseAPI {
   public getWindows(options?: RawAxiosRequestConfig) {
     return ComputerUseApiFp(this.configuration)
       .getWindows(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Get a list of all recordings (active and completed)
+   * @summary List all recordings
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public listRecordings(options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .listRecordings(options)
       .then((request) => request(this.axios, this.basePath))
   }
 
@@ -1942,6 +2390,20 @@ export class ComputerUseApi extends BaseAPI {
   }
 
   /**
+   * Start a new screen recording session
+   * @summary Start a new recording
+   * @param {StartRecordingRequest} [request] Recording options
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public startRecording(request?: StartRecordingRequest, options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .startRecording(request, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
    * Stop all computer use processes and return their status
    * @summary Stop computer use processes
    * @param {*} [options] Override http request option.
@@ -1951,6 +2413,20 @@ export class ComputerUseApi extends BaseAPI {
   public stopComputerUse(options?: RawAxiosRequestConfig) {
     return ComputerUseApiFp(this.configuration)
       .stopComputerUse(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Stop an active screen recording session
+   * @summary Stop a recording
+   * @param {StopRecordingRequest} request Recording ID to stop
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ComputerUseApi
+   */
+  public stopRecording(request: StopRecordingRequest, options?: RawAxiosRequestConfig) {
+    return ComputerUseApiFp(this.configuration)
+      .stopRecording(request, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

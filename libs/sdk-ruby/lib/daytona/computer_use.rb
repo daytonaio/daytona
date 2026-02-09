@@ -413,6 +413,163 @@ module Daytona
       end
     end
 
+    # Recording operations for computer use functionality.
+    class Recording
+      # @return [String] The ID of the sandbox
+      attr_reader :sandbox_id
+
+      # @return [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
+      attr_reader :toolbox_api
+
+      # @param sandbox_id [String] The ID of the sandbox
+      # @param toolbox_api [DaytonaToolboxApiClient::ComputerUseApi] API client for sandbox operations
+      def initialize(sandbox_id:, toolbox_api:)
+        @sandbox_id = sandbox_id
+        @toolbox_api = toolbox_api
+      end
+
+      # Starts a new screen recording session.
+      #
+      # @param label [String, nil] Optional custom label for the recording
+      # @return [DaytonaToolboxApiClient::Recording] Started recording details
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   # Start a recording with a label
+      #   recording = sandbox.computer_use.recording.start(label: "my-test-recording")
+      #   puts "Recording started: #{recording.id}"
+      #   puts "File: #{recording.file_path}"
+      def start(label: nil)
+        request = DaytonaToolboxApiClient::StartRecordingRequest.new(label:)
+        toolbox_api.start_recording(request: request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to start recording: #{e.message}"
+      end
+
+      # Stops an active screen recording session.
+      #
+      # @param id [String] The ID of the recording to stop
+      # @return [DaytonaToolboxApiClient::Recording] Stopped recording details
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   result = sandbox.computer_use.recording.stop(id: recording.id)
+      #   puts "Recording stopped: #{result.duration_seconds} seconds"
+      #   puts "Saved to: #{result.file_path}"
+      def stop(id:)
+        request = DaytonaToolboxApiClient::StopRecordingRequest.new(id:)
+        toolbox_api.stop_recording(request)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to stop recording: #{e.message}"
+      end
+
+      # Lists all recordings (active and completed).
+      #
+      # @return [DaytonaToolboxApiClient::ListRecordingsResponse] List of all recordings
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   recordings = sandbox.computer_use.recording.list
+      #   puts "Found #{recordings.recordings.length} recordings"
+      #   recordings.recordings.each do |rec|
+      #     puts "- #{rec.file_name}: #{rec.status}"
+      #   end
+      def list
+        toolbox_api.list_recordings
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to list recordings: #{e.message}"
+      end
+
+      # Gets details of a specific recording by ID.
+      #
+      # @param id [String] The ID of the recording to retrieve
+      # @return [DaytonaToolboxApiClient::Recording] Recording details
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   recording = sandbox.computer_use.recording.get(id: recording_id)
+      #   puts "Recording: #{recording.file_name}"
+      #   puts "Status: #{recording.status}"
+      #   puts "Duration: #{recording.duration_seconds} seconds"
+      def get(id:)
+        toolbox_api.get_recording(id)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to get recording: #{e.message}"
+      end
+
+      # Deletes a recording by ID.
+      #
+      # @param id [String] The ID of the recording to delete
+      # @return [void]
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   sandbox.computer_use.recording.delete(id: recording_id)
+      #   puts "Recording deleted"
+      def delete(id:)
+        toolbox_api.delete_recording(id)
+      rescue StandardError => e
+        raise Sdk::Error, "Failed to delete recording: #{e.message}"
+      end
+
+      # Downloads a recording file and saves it to a local path.
+      #
+      # The file is streamed directly to disk without loading the entire content into memory.
+      #
+      # @param id [String] The ID of the recording to download
+      # @param local_path [String] Path to save the recording file locally
+      # @return [void]
+      # @raise [Daytona::Sdk::Error] If the operation fails
+      #
+      # @example
+      #   sandbox.computer_use.recording.download(id: recording_id, local_path: "local_recording.mp4")
+      #   puts "Recording downloaded"
+      def download(id:, local_path:)
+        require 'fileutils'
+        require 'typhoeus'
+
+        # Get the API configuration and build the download URL
+        api_client = toolbox_api.api_client
+        config = api_client.config
+        base_url = config.base_url
+        download_url = "#{base_url}/computeruse/recordings/#{id}/download"
+
+        # Create parent directory if it doesn't exist
+        parent_dir = File.dirname(local_path)
+        FileUtils.mkdir_p(parent_dir) unless parent_dir.empty?
+
+        # Stream the download directly to file
+        file = File.open(local_path, 'wb')
+        request = Typhoeus::Request.new(
+          download_url,
+          method: :get,
+          headers: api_client.default_headers,
+          timeout: config.timeout,
+          ssl_verifypeer: config.verify_ssl,
+          ssl_verifyhost: config.verify_ssl_host ? 2 : 0
+        )
+
+        # Stream chunks directly to file
+        request.on_body do |chunk|
+          file.write(chunk)
+        end
+
+        request.on_complete do |response|
+          file.close
+          unless response.success?
+            File.delete(local_path) if File.exist?(local_path)
+            raise Sdk::Error, "Failed to download recording: HTTP #{response.code}"
+          end
+        end
+
+        request.run
+      rescue StandardError => e
+        file&.close
+        File.delete(local_path) if File.exist?(local_path)
+        raise Sdk::Error, "Failed to download recording: #{e.message}"
+      end
+    end
+
     # @return [String] The ID of the sandbox
     attr_reader :sandbox_id
 
@@ -431,6 +588,9 @@ module Daytona
     # @return [Display] Display operations interface
     attr_reader :display
 
+    # @return [Recording] Screen recording operations interface
+    attr_reader :recording
+
     # Initialize a new ComputerUse instance.
     #
     # @param sandbox_id [String] The ID of the sandbox
@@ -442,6 +602,7 @@ module Daytona
       @keyboard = Keyboard.new(sandbox_id:, toolbox_api:)
       @screenshot = Screenshot.new(sandbox_id:, toolbox_api:)
       @display = Display.new(sandbox_id:, toolbox_api:)
+      @recording = Recording.new(sandbox_id:, toolbox_api:)
     end
 
     # Starts all computer use processes (Xvfb, xfce4, x11vnc, novnc).

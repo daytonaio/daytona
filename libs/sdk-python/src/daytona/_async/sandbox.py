@@ -125,7 +125,9 @@ class AsyncSandbox(SandboxDto):
         self._process = AsyncProcess(
             code_toolbox, ProcessApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
         )
-        self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
+        self._computer_use = AsyncComputerUse(
+            ComputerUseApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
+        )
         self._code_interpreter = AsyncCodeInterpreter(
             InterpreterApi(self._toolbox_api), self._toolbox_api.load_toolbox_base_url
         )

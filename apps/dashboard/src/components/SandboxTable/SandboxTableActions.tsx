@@ -30,6 +30,7 @@ export function SandboxTableActions({
   onCreateSshAccess,
   onRevokeSshAccess,
   onRecover,
+  onScreenRecordings,
 }: SandboxTableActionsProps) {
   const menuItems = useMemo(() => {
     const items = []
@@ -40,6 +41,12 @@ export function SandboxTableActions({
           key: 'vnc',
           label: 'VNC',
           onClick: () => onVnc(sandbox.id),
+          disabled: isLoading,
+        })
+        items.push({
+          key: 'screen-recordings',
+          label: 'Screen Recordings',
+          onClick: () => onScreenRecordings(sandbox.id),
           disabled: isLoading,
         })
         items.push({
@@ -109,6 +116,7 @@ export function SandboxTableActions({
     sandbox.state,
     sandbox.id,
     isLoading,
+    sandbox.recoverable,
     onStart,
     onStop,
     onDelete,
@@ -117,6 +125,7 @@ export function SandboxTableActions({
     onCreateSshAccess,
     onRevokeSshAccess,
     onRecover,
+    onScreenRecordings,
   ])
 
   if (!writePermitted && !deletePermitted) {
