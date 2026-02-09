@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import json
+import logging
 import re
 import urllib.request
 from collections import defaultdict
@@ -14,6 +15,8 @@ from daytona_interpreter import DaytonaInterpreter
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+
+logging.basicConfig(level=logging.INFO)
 
 # ── Fetch and split the novel ────────────────────────────────────────────────
 
