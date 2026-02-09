@@ -98,24 +98,6 @@ sandbox = daytona.create
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-"context"
-"log"
-
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-client, err := daytona.NewClient()
-if err != nil {
-    log.Fatal(err)
-}
-
-ctx := context.Background()
-
 // Create a sandbox
 params := types.SnapshotParams{
     SandboxBaseParams: types.SandboxBaseParams{
@@ -123,12 +105,6 @@ params := types.SnapshotParams{
     },
 }
 sandbox, err := client.Create(ctx, params)
-if err != nil {
-    log.Fatal(err)
-}
-
-log.Printf("Created sandbox: %s\n", sandbox.ID)
-}
 ```
 
 </TabItem>
@@ -246,46 +222,22 @@ sandbox = daytona.create(
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create a sandbox with custom resources
-	sandbox, err := client.Create(ctx, types.ImageParams{
-		Image: "python:3.11",
-		Resources: &types.Resources{
-			CPU:    2,    // 2 CPU cores
-			Memory: 4096, // 4GB RAM
-			Disk:   8192, // 8GB disk space
-		},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created sandbox: %s\n", sandbox.ID)
-}
+// Create a sandbox with custom resources
+sandbox, err := client.Create(ctx, types.ImageParams{
+    Image: "python:3.11",
+    Resources: &types.Resources{
+        CPU:    2,    // 2 CPU cores
+        Memory: 4096, // 4GB RAM
+        Disk:   8192, // 8GB disk space
+    },
+})
 ```
 
 </TabItem>
 <TabItem label="CLI" icon="seti:shell">
 
 ```bash
-daytona create [flags]
+daytona create --cpu 2 --memory 4096 --disk 8
 ```
 
 </TabItem>
@@ -296,7 +248,11 @@ curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
-  --data '{}'
+  --data '{
+  "cpu": 2,
+  "memory": 4,
+  "disk": 8
+}'
 ```
 
 </TabItem>
@@ -373,40 +329,16 @@ sandbox = daytona.create(params)
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create an ephemeral sandbox
-	autoStopInterval := int32(5)
-	params := types.SnapshotParams{
-		SandboxBaseParams: types.SandboxBaseParams{
-			Language: types.CodeLanguagePython,
-			Ephemeral: types.Ptr(true),
-			AutoStopInterval: &autoStopInterval,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created ephemeral sandbox: %s\n", sandbox.ID)
+// Create an ephemeral sandbox
+autoStopInterval := int32(5)
+params := types.SnapshotParams{
+    SandboxBaseParams: types.SandboxBaseParams{
+        Language: types.CodeLanguagePython,
+        Ephemeral: types.Ptr(true),
+        AutoStopInterval: &autoStopInterval,
+    },
 }
+sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
@@ -463,37 +395,8 @@ sandbox.start
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Get a sandbox by ID
-	sandbox, err := client.Get(ctx, "my-sandbox-id")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Start sandbox
-	err = sandbox.Start(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Sandbox started successfully")
-}
+// Start sandbox
+err = sandbox.Start(ctx)
 ```
 
 </TabItem>
@@ -585,34 +488,12 @@ result = daytona.list({ 'env' => 'dev' })
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
+// List all sandboxes
+result, err := client.List(ctx, nil, nil, nil)
 
-import (
-	"context"
-	"fmt"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// List all sandboxes
-	result, err := client.List(ctx, nil, nil, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Iterate through results
-	for _, sandbox := range result.Items {
-		fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
-	}
+// Iterate through results
+for _, sandbox := range result.Items {
+    fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
 }
 ```
 
@@ -715,55 +596,16 @@ sandbox.start
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
+// Stop sandbox
+err = sandbox.Stop(ctx)
 
-import (
-	"context"
-	"log"
+fmt.Println(sandbox.ID) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
+// The sandbox ID can later be used to find the sandbox and start it
+sandbox, err = client.Get(ctx, sandbox.ID)
 
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create a sandbox
-	params := types.SnapshotParams{
-		SandboxBaseParams: types.SandboxBaseParams{
-			Language: types.CodeLanguagePython,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Stop sandbox
-	err = sandbox.Stop(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Stopped sandbox: %s\n", sandbox.ID)
-
-	// The sandbox ID can later be used to find the sandbox and start it
-	sandbox, err = client.Get(ctx, sandbox.ID)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Start sandbox
-	err = sandbox.Start(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+// Start sandbox
+err = sandbox.Start(ctx)
 ```
 
 </TabItem>
@@ -844,37 +686,8 @@ sandbox.archive
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Find a sandbox by ID
-	sandbox, err := client.Get(ctx, "sandbox-id")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Archive sandbox
-	err = sandbox.Archive(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Archived sandbox: %s\n", sandbox.ID)
-}
+// Archive sandbox
+err = sandbox.Archive(ctx)
 ```
 
 </TabItem>
@@ -1061,37 +874,8 @@ sandbox.delete
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Find a sandbox by ID
-	sandbox, err := client.Get(ctx, "sandbox-id")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Delete sandbox
-	err = sandbox.Delete(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("Sandbox deleted successfully")
-}
+// Delete sandbox
+err = sandbox.Delete(ctx)
 ```
 
 </TabItem>
@@ -1182,39 +966,15 @@ sandbox = daytona.create(
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create a sandbox with auto-stop disabled
-	autoStopInterval := int32(0)
-	params := types.SnapshotParams{
-		Snapshot: types.Ptr("my-snapshot-name"),
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoStopInterval: &autoStopInterval,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created sandbox: %s\n", sandbox.ID)
+// Create a sandbox with auto-stop disabled
+autoStopInterval := int32(0)
+params := types.SnapshotParams{
+    Snapshot: types.Ptr("my-snapshot-name"),
+    SandboxBaseParams: types.SandboxBaseParams{
+        AutoStopInterval: &autoStopInterval,
+    },
 }
+sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
@@ -1310,39 +1070,15 @@ sandbox = daytona.create(
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create a sandbox with auto-archive after 1 hour
-	autoArchiveInterval := int32(60)
-	params := types.SnapshotParams{
-		Snapshot: types.Ptr("my-snapshot-name"),
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoArchiveInterval: &autoArchiveInterval,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created sandbox: %s\n", sandbox.ID)
+// Create a sandbox with auto-archive after 1 hour
+autoArchiveInterval := int32(60)
+params := types.SnapshotParams{
+    Snapshot: types.Ptr("my-snapshot-name"),
+    SandboxBaseParams: types.SandboxBaseParams{
+        AutoArchiveInterval: &autoArchiveInterval,
+    },
 }
+sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
@@ -1440,51 +1176,21 @@ sandbox.auto_delete_interval = -1
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Create a sandbox with auto-delete after 1 hour
-	autoDeleteInterval := int32(60)
-	params := types.SnapshotParams{
-		Snapshot: types.Ptr("my-snapshot-name"),
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoDeleteInterval: &autoDeleteInterval,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created sandbox: %s\n", sandbox.ID)
-
-	// Delete the sandbox immediately after it has been stopped
-	err = sandbox.SetAutoDeleteInterval(ctx, 0)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Disable auto-deletion
-	err = sandbox.SetAutoDeleteInterval(ctx, -1)
-	if err != nil {
-		log.Fatal(err)
-	}
+// Create a sandbox with auto-delete after 1 hour
+autoDeleteInterval := int32(60)
+params := types.SnapshotParams{
+    Snapshot: types.Ptr("my-snapshot-name"),
+    SandboxBaseParams: types.SandboxBaseParams{
+        AutoDeleteInterval: &autoDeleteInterval,
+    },
 }
+sandbox, err := client.Create(ctx, params)
+
+// Delete the sandbox immediately after it has been stopped
+err = sandbox.SetAutoDeleteInterval(ctx, 0)
+
+// Disable auto-deletion
+err = sandbox.SetAutoDeleteInterval(ctx, -1)
 ```
 
 </TabItem>
@@ -1556,39 +1262,15 @@ sandbox = daytona.create(
 <TabItem label="Go" icon="seti:go">
 
 ```go
-package main
-
-import (
-	"context"
-	"log"
-
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
-)
-
-func main() {
-	client, err := daytona.NewClient()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	ctx := context.Background()
-
-	// Disables the auto-stop feature - default is 15 minutes
-	autoStopInterval := int32(0)
-	params := types.SnapshotParams{
-		Snapshot: types.Ptr("my_awesome_snapshot"),
-		SandboxBaseParams: types.SandboxBaseParams{
-			AutoStopInterval: &autoStopInterval,
-		},
-	}
-	sandbox, err := client.Create(ctx, params)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("Created sandbox: %s\n", sandbox.ID)
+// Disables the auto-stop feature - default is 15 minutes
+autoStopInterval := int32(0)
+params := types.SnapshotParams{
+    Snapshot: types.Ptr("my_awesome_snapshot"),
+    SandboxBaseParams: types.SandboxBaseParams{
+        AutoStopInterval: &autoStopInterval,
+    },
 }
+sandbox, err := client.Create(ctx, params)
 ```
 
 </TabItem>
