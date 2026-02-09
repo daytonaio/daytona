@@ -61,7 +61,11 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, 
         )}
       </Highlight>
       {showCopy && (
-        <CopyButton value={code} variant="ghost" className="absolute text-muted-foreground right-2 top-2.5 p-2" />
+        <CopyButton
+          value={code.trim()}
+          variant="ghost"
+          className="absolute text-muted-foreground right-2 top-2.5 p-2"
+        />
       )}
     </div>
   )
