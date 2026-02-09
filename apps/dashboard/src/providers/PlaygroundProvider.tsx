@@ -294,7 +294,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     // Snapshot parameter has precedence over resources and createSandboxFromImage
     const createSandboxFromImage = !useDefaultResourceValues && !createSandboxFromSnapshot
 
-    // We specifiy resources for sandbox creation if there is any specificed resource value which has value different from the default one and createSandboxFromSnapshot is false
+    // We specify resources for sandbox creation if there is any specified resource value which has value different from the default one and createSandboxFromSnapshot is false
     const useResources = !createSandboxFromSnapshot && resourceValuesExist && !useDefaultResourceValues
     const useSandboxCreateParams =
       useLanguageParam ||
