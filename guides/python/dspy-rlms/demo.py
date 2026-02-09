@@ -93,6 +93,9 @@ try:
     wealth_data = result.wealth_data
     WEALTH_DATA_PATH.write_text(json.dumps(wealth_data, indent=2), encoding="utf-8")
     print(f"Saved {len(wealth_data)} entries to {WEALTH_DATA_PATH}")
+except Exception:
+    logging.exception("RLM analysis failed")
+    raise
 finally:
     interpreter.shutdown()
 
