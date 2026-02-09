@@ -327,7 +327,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       createSandboxParams.autoDeleteInterval = sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']
     createSandboxParams.labels = { 'daytona-playground': 'true' }
     if (useLanguageParam)
-      createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language'] as string // useLanguageParam guarantes that value isn't undefined so we put as string to silence TS compiler
+      createSandboxParams.labels['daytona-playground-language'] = sandboxParametersState['language'] as string // useLanguageParam guarantees that value isn't undefined so we put as string to silence TS compiler
     return {
       useLanguageParam,
       useResources,

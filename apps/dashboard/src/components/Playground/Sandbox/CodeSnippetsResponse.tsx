@@ -205,7 +205,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
         ...(createSandboxParamsExist
           ? [
               useAutoStopInterval
-                ? `${pythonIndentation}auto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantes that value isn't undefined so we put as number to silence TS compiler
+                ? `${pythonIndentation}auto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantees that value isn't undefined so we put as number to silence TS compiler
                 : '',
               useAutoArchiveInterval
                 ? `${pythonIndentation}auto_archive_interval=${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, # Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
@@ -230,7 +230,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
         ...(createSandboxParamsExist
           ? [
               useAutoStopInterval
-                ? `${typeScriptIndentation}autoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantes that value isn't undefined so we put as number to silence TS compiler
+                ? `${typeScriptIndentation}autoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantees that value isn't undefined so we put as number to silence TS compiler
                 : '',
               useAutoArchiveInterval
                 ? `${typeScriptIndentation}autoArchiveInterval: ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, // Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
@@ -538,14 +538,14 @@ main().catch(console.error)`,
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning code...')
         const codeRunResponse = await sandbox.process.codeRun(
           sandboxParametersState['codeRunParams'].languageCode as string,
-        ) // codeToRunExists guarantes that value isn't undefined so we put as string to silence TS compiler
+        ) // codeToRunExists guarantees that value isn't undefined so we put as string to silence TS compiler
         codeSnippetOutput += `\nCode run result: ${codeRunResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
       }
       if (shellCommandExists) {
         setCodeSnippetOutput(codeSnippetOutput + '\nRunning shell command...')
         const shellCommandResponse = await sandbox.process.executeCommand(
-          sandboxParametersState['shellCommandRunParams'].shellCommand as string, // shellCommandExists guarantes that value isn't undefined so we put as string to silence TS compiler
+          sandboxParametersState['shellCommandRunParams'].shellCommand as string, // shellCommandExists guarantees that value isn't undefined so we put as string to silence TS compiler
         )
         codeSnippetOutput += `\nShell command result: ${shellCommandResponse.result}`
         setCodeSnippetOutput(codeSnippetOutput)
