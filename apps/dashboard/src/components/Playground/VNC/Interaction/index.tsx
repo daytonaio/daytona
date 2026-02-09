@@ -44,7 +44,7 @@ const VNCInteractionOptions: React.FC = () => {
   useEffect(() => {
     // Sync VNCDesktopWindowResponse with sandbox creation data
     setVNCInteractionOptionsParamValue('VNCSandboxData', VNCSandboxData)
-    if (VNCSandboxData.error) setDisableOnSandboxError(true) // In case of sandbox creation error we disable VNC actions run
+    setDisableOnSandboxError(!!VNCSandboxData.error) // In case of sandbox creation error we disable VNC actions run
   }, [setVNCInteractionOptionsParamValue, VNCSandboxData])
 
   useEffect(() => {
