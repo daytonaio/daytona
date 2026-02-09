@@ -1,4 +1,4 @@
-// Copyright 2025 Daytona Platforms Inc.
+// Copyright Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
 package recording
@@ -95,9 +95,4 @@ func (s *RecordingService) ListRecordings() ([]Recording, error) {
 	}
 
 	return recordings, nil
-}
-
-// ListRecordingsInterface returns recordings as interface{} (for dashboard interface compatibility)
-func (s *RecordingService) ListRecordingsInterface() (interface{}, error) {
-	return s.ListRecordings()
 }
