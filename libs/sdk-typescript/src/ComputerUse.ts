@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as pathe from 'pathe'
 import {
   ComputerUseApi,
   MousePositionResponse,
@@ -28,6 +29,7 @@ import {
   Recording,
   ListRecordingsResponse,
 } from '@daytonaio/toolbox-api-client'
+import { dynamicImport } from './utils/Import'
 
 /**
  * Interface for region coordinates used in screenshot operations
@@ -561,14 +563,14 @@ export class RecordingService {
    */
   public async download(id: string, localPath: string): Promise<void> {
     const response = await this.apiClient.downloadRecording(id, { responseType: 'stream' })
-    const fs = await import('fs')
-    const path = await import('path')
-    const stream = await import('stream')
-    const { promisify } = await import('util')
-    const pipeline = promisify(stream.pipeline)
-
+    const importErrPrefix = 'Recording download failed: '
+    const fs = await dynamicImport('fs', importErrPrefix)
+    const stream = await dynamicImport('stream', importErrPrefix)
+    const util = await dynamicImport('util', importErrPrefix)
+    const pipeline = util.promisify(stream.pipeline)
+    console.log('pipeline', pipeline)
     // Create parent directory if it doesn't exist
-    const parentDir = path.dirname(localPath)
+    const parentDir = pathe.dirname(localPath)
     if (parentDir) {
       await fs.promises.mkdir(parentDir, { recursive: true })
     }
