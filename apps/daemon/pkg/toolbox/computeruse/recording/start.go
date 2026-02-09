@@ -42,13 +42,6 @@ func (h *RecordingController) StartRecording(ctx *gin.Context) {
 			})
 			return
 		}
-		if errors.Is(err, recordingservice.ErrNoDisplay) {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error":   "no_display",
-				"message": "DISPLAY environment variable not set - X11 display required for screen recording",
-			})
-			return
-		}
 		if errors.Is(err, recordingservice.ErrInvalidLabel) {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error":   "invalid_label",

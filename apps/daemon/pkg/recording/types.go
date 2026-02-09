@@ -15,7 +15,6 @@ var (
 	ErrRecordingNotActive   = errors.New("recording is not active")
 	ErrRecordingStillActive = errors.New("cannot delete an active recording")
 	ErrFFmpegNotFound       = errors.New("ffmpeg not found in PATH")
-	ErrNoDisplay            = errors.New("DISPLAY environment variable not set")
 	ErrInvalidLabel         = errors.New("invalid label: must be 1-100 characters, cannot start with dot, cannot contain path separators (/ or \\), and can only contain letters, numbers, spaces, dots, underscores, and hyphens")
 )
 

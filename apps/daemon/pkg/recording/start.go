@@ -69,7 +69,7 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 	// Check for DISPLAY environment variable (required for X11)
 	display := os.Getenv("DISPLAY")
 	if display == "" {
-		return nil, ErrNoDisplay
+		display = ":0" // Default to :0 if not set
 	}
 
 	// Generate recording ID and filename
