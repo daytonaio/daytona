@@ -39,7 +39,7 @@ export type {
 } from './types/Charts'
 
 export { SandboxState, WakeOnRequest } from '@daytonaio/api-client'
-export type { ForkSandboxResponse } from '@daytonaio/api-client'
+export type { ForkSandboxResponse, SshAccessDto, SshAccessValidationDto } from '@daytonaio/api-client'
 export type {
   FileInfo,
   GitStatus,
