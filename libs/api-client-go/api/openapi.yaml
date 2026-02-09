@@ -9521,14 +9521,14 @@ components:
     UpdateOrganizationQuota:
       example:
         snapshotQuota: 5.962133916683182
+        sandboxLifecycleRateLimitTtlSeconds: 7.386281948385884
         maxCpuPerSandbox: 0.8008281904610115
         maxDiskPerSandbox: 1.4658129805029452
+        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
         sandboxLifecycleRateLimit: 3.616076749251911
         maxMemoryPerSandbox: 6.027456183070403
-        sandboxLifecycleRateLimitTtl: 7.386281948385884
         volumeQuota: 2.3021358869347655
-        sandboxCreateRateLimitTtl: 4.145608029883936
-        authenticatedRateLimitTtl: 2.027123023002322
+        authenticatedRateLimitTtlSeconds: 2.027123023002322
         maxSnapshotSize: 5.637376656633329
         authenticatedRateLimit: 7.061401241503109
         sandboxCreateRateLimit: 9.301444243932576
@@ -9560,26 +9560,26 @@ components:
         sandboxLifecycleRateLimit:
           nullable: true
           type: number
-        authenticatedRateLimitTtl:
+        authenticatedRateLimitTtlSeconds:
           nullable: true
           type: number
-        sandboxCreateRateLimitTtl:
+        sandboxCreateRateLimitTtlSeconds:
           nullable: true
           type: number
-        sandboxLifecycleRateLimitTtl:
+        sandboxLifecycleRateLimitTtlSeconds:
           nullable: true
           type: number
       required:
         - authenticatedRateLimit
-        - authenticatedRateLimitTtl
+        - authenticatedRateLimitTtlSeconds
         - maxCpuPerSandbox
         - maxDiskPerSandbox
         - maxMemoryPerSandbox
         - maxSnapshotSize
         - sandboxCreateRateLimit
-        - sandboxCreateRateLimitTtl
+        - sandboxCreateRateLimitTtlSeconds
         - sandboxLifecycleRateLimit
-        - sandboxLifecycleRateLimitTtl
+        - sandboxLifecycleRateLimitTtlSeconds
         - snapshotQuota
         - volumeQuota
       type: object

@@ -77,17 +77,17 @@ export interface UpdateOrganizationQuota {
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  authenticatedRateLimitTtl: number | null
+  authenticatedRateLimitTtlSeconds: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  sandboxCreateRateLimitTtl: number | null
+  sandboxCreateRateLimitTtlSeconds: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  sandboxLifecycleRateLimitTtl: number | null
+  sandboxLifecycleRateLimitTtlSeconds: number | null
 }
