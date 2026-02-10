@@ -43,6 +43,7 @@ const SKIP_LAST_ACTIVITY_UPDATE_HEADER = "X-Daytona-Skip-Last-Activity-Update"
 const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
+const RECORDING_DASHBOARD_PORT = "33333"
 
 // stopActivityPoll retrieves and calls the activity poll stop function from the gin context.
 // This ensures the polling goroutine is stopped when the request (including WebSocket) finishes.

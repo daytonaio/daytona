@@ -4,3 +4,4 @@
 package config
 
 const TOOLBOX_API_PORT = 2280
+const RECORDING_DASHBOARD_PORT = 33333

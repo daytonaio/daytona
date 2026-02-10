@@ -48,6 +48,7 @@ lib/daytona_toolbox_api_client/models/keyboard_press_request.rb
 lib/daytona_toolbox_api_client/models/keyboard_type_request.rb
 lib/daytona_toolbox_api_client/models/list_branch_response.rb
 lib/daytona_toolbox_api_client/models/list_contexts_response.rb
+lib/daytona_toolbox_api_client/models/list_recordings_response.rb
 lib/daytona_toolbox_api_client/models/lsp_completion_params.rb
 lib/daytona_toolbox_api_client/models/lsp_document_request.rb
 lib/daytona_toolbox_api_client/models/lsp_location.rb
@@ -75,6 +76,7 @@ lib/daytona_toolbox_api_client/models/pty_create_response.rb
 lib/daytona_toolbox_api_client/models/pty_list_response.rb
 lib/daytona_toolbox_api_client/models/pty_resize_request.rb
 lib/daytona_toolbox_api_client/models/pty_session_info.rb
+lib/daytona_toolbox_api_client/models/recording.rb
 lib/daytona_toolbox_api_client/models/replace_request.rb
 lib/daytona_toolbox_api_client/models/replace_result.rb
 lib/daytona_toolbox_api_client/models/screenshot_response.rb
@@ -84,7 +86,9 @@ lib/daytona_toolbox_api_client/models/session.rb
 lib/daytona_toolbox_api_client/models/session_execute_request.rb
 lib/daytona_toolbox_api_client/models/session_execute_response.rb
 lib/daytona_toolbox_api_client/models/session_send_input_request.rb
+lib/daytona_toolbox_api_client/models/start_recording_request.rb
 lib/daytona_toolbox_api_client/models/status.rb
+lib/daytona_toolbox_api_client/models/stop_recording_request.rb
 lib/daytona_toolbox_api_client/models/user_home_dir_response.rb
 lib/daytona_toolbox_api_client/models/window_info.rb
 lib/daytona_toolbox_api_client/models/windows_response.rb

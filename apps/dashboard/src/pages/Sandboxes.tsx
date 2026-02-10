@@ -809,6 +809,26 @@ const Sandboxes: React.FC = () => {
     [getPortPreviewUrl],
   )
 
+  const handleScreenRecordings = async (id: string) => {
+    // Check if sandbox is started
+    const sandbox = sandboxesData?.items?.find((s) => s.id === id)
+    if (!sandbox || sandbox.state !== SandboxState.STARTED) {
+      toast.error('Sandbox must be started to access Screen Recordings')
+      return
+    }
+
+    setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
+    try {
+      const portPreviewUrl = await getPortPreviewUrl(id, 33333)
+      window.open(portPreviewUrl, '_blank')
+      toast.success('Opening Screen Recordings dashboard...')
+    } catch (error) {
+      handleApiError(error, 'Failed to open Screen Recordings')
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   const handleCreateSshAccess = async (id: string) => {
     setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
     try {
@@ -959,6 +979,7 @@ const Sandboxes: React.FC = () => {
           onFiltersChange={handleFiltersChange}
           handleRecover={handleRecover}
           getRegionName={getRegionName}
+          handleScreenRecordings={handleScreenRecordings}
         />
 
         {sandboxToDelete && (

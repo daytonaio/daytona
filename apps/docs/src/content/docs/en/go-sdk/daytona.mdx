@@ -96,6 +96,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*ComputerUseService\) GetStatus\(ctx context.Context\) \(map\[string\]any, error\)](<#ComputerUseService.GetStatus>)
   - [func \(c \*ComputerUseService\) Keyboard\(\) \*KeyboardService](<#ComputerUseService.Keyboard>)
   - [func \(c \*ComputerUseService\) Mouse\(\) \*MouseService](<#ComputerUseService.Mouse>)
+  - [func \(c \*ComputerUseService\) Recording\(\) \*RecordingService](<#ComputerUseService.Recording>)
   - [func \(c \*ComputerUseService\) Screenshot\(\) \*ScreenshotService](<#ComputerUseService.Screenshot>)
   - [func \(c \*ComputerUseService\) Start\(ctx context.Context\) error](<#ComputerUseService.Start>)
   - [func \(c \*ComputerUseService\) Stop\(ctx context.Context\) error](<#ComputerUseService.Stop>)
@@ -207,6 +208,14 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(h \*PtyHandle\) WaitForConnection\(ctx context.Context\) error](<#PtyHandle.WaitForConnection>)
   - [func \(h \*PtyHandle\) Write\(p \[\]byte\) \(n int, err error\)](<#PtyHandle.Write>)
 - [type PushAccessCredentials](<#PushAccessCredentials>)
+- [type RecordingService](<#RecordingService>)
+  - [func NewRecordingService\(toolboxClient \*toolbox.APIClient\) \*RecordingService](<#NewRecordingService>)
+  - [func \(r \*RecordingService\) Delete\(ctx context.Context, id string\) error](<#RecordingService.Delete>)
+  - [func \(r \*RecordingService\) Download\(ctx context.Context, id string, localPath string\) error](<#RecordingService.Download>)
+  - [func \(r \*RecordingService\) Get\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Get>)
+  - [func \(r \*RecordingService\) List\(ctx context.Context\) \(\*toolbox.ListRecordingsResponse, error\)](<#RecordingService.List>)
+  - [func \(r \*RecordingService\) Start\(ctx context.Context, label \*string\) \(\*toolbox.Recording, error\)](<#RecordingService.Start>)
+  - [func \(r \*RecordingService\) Stop\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Stop>)
 - [type Sandbox](<#Sandbox>)
   - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList \*string\) \*Sandbox](<#NewSandbox>)
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
@@ -643,7 +652,7 @@ Returns [OutputChannels](<#OutputChannels>) for receiving streamed output, or an
 
 ComputerUseService provides desktop automation operations for a sandbox.
 
-ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, and display management. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
+ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, and screen recording. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
 
 Example:
 
@@ -737,6 +746,17 @@ func (c *ComputerUseService) Mouse() *MouseService
 ```
 
 Mouse returns the [MouseService](<#MouseService>) for mouse operations.
+
+The service is lazily initialized on first access.
+
+<a name="ComputerUseService.Recording"></a>
+### func \(\*ComputerUseService\) Recording
+
+```go
+func (c *ComputerUseService) Recording() *RecordingService
+```
+
+Recording returns the [RecordingService](<#RecordingService>) for screen recording operations.
 
 The service is lazily initialized on first access.
 
@@ -3365,6 +3385,185 @@ type PushAccessCredentials struct {
     OrganizationID string `json:"organizationId"`
 }
 ```
+
+<a name="RecordingService"></a>
+## type RecordingService
+
+RecordingService provides screen recording operations.
+
+RecordingService enables starting, stopping, and managing screen recordings. Access through [ComputerUseService.Recording](<#ComputerUseService.Recording>).
+
+```go
+type RecordingService struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewRecordingService"></a>
+### func NewRecordingService
+
+```go
+func NewRecordingService(toolboxClient *toolbox.APIClient) *RecordingService
+```
+
+NewRecordingService creates a new RecordingService.
+
+<a name="RecordingService.Delete"></a>
+### func \(\*RecordingService\) Delete
+
+```go
+func (r *RecordingService) Delete(ctx context.Context, id string) error
+```
+
+Delete deletes a recording by ID.
+
+Parameters:
+
+- id: The ID of the recording to delete
+
+Example:
+
+```
+err := cu.Recording().Delete(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Println("Recording deleted")
+```
+
+Returns an error if the deletion fails.
+
+<a name="RecordingService.Download"></a>
+### func \(\*RecordingService\) Download
+
+```go
+func (r *RecordingService) Download(ctx context.Context, id string, localPath string) error
+```
+
+Download downloads a recording file and saves it to a local path.
+
+The file is streamed directly to disk without loading the entire content into memory.
+
+Parameters:
+
+- id: The ID of the recording to download
+- localPath: Path to save the recording file locally
+
+Example:
+
+```
+err := cu.Recording().Download(ctx, recordingID, "local_recording.mp4")
+if err != nil {
+    return err
+}
+fmt.Println("Recording downloaded")
+```
+
+Returns an error if the download fails.
+
+<a name="RecordingService.Get"></a>
+### func \(\*RecordingService\) Get
+
+```go
+func (r *RecordingService) Get(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Get gets details of a specific recording by ID.
+
+Parameters:
+
+- id: The ID of the recording to retrieve
+
+Example:
+
+```
+recording, err := cu.Recording().Get(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording: %s\n", recording.GetFileName())
+fmt.Printf("Status: %s\n", recording.GetStatus())
+fmt.Printf("Duration: %v seconds\n", recording.GetDurationSeconds())
+```
+
+Returns \[toolbox.Recording\] with recording details.
+
+<a name="RecordingService.List"></a>
+### func \(\*RecordingService\) List
+
+```go
+func (r *RecordingService) List(ctx context.Context) (*toolbox.ListRecordingsResponse, error)
+```
+
+List lists all recordings \(active and completed\).
+
+Example:
+
+```
+recordings, err := cu.Recording().List(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Found %d recordings\n", len(recordings.GetRecordings()))
+for _, rec := range recordings.GetRecordings() {
+    fmt.Printf("- %s: %s\n", rec.GetFileName(), rec.GetStatus())
+}
+```
+
+Returns \[toolbox.ListRecordingsResponse\] with all recordings.
+
+<a name="RecordingService.Start"></a>
+### func \(\*RecordingService\) Start
+
+```go
+func (r *RecordingService) Start(ctx context.Context, label *string) (*toolbox.Recording, error)
+```
+
+Start starts a new screen recording session.
+
+Parameters:
+
+- label: Optional custom label for the recording
+
+Example:
+
+```
+// Start a recording with a label
+recording, err := cu.Recording().Start(ctx, stringPtr("my-test-recording"))
+if err != nil {
+    return err
+}
+fmt.Printf("Recording started: %s\n", recording.GetId())
+fmt.Printf("File: %s\n", recording.GetFilePath())
+```
+
+Returns \[toolbox.Recording\] with recording details.
+
+<a name="RecordingService.Stop"></a>
+### func \(\*RecordingService\) Stop
+
+```go
+func (r *RecordingService) Stop(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Stop stops an active screen recording session.
+
+Parameters:
+
+- id: The ID of the recording to stop
+
+Example:
+
+```
+result, err := cu.Recording().Stop(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording stopped: %v seconds\n", result.GetDurationSeconds())
+fmt.Printf("Saved to: %s\n", result.GetFilePath())
+```
+
+Returns \[toolbox.Recording\] with recording details.
 
 <a name="Sandbox"></a>
 ## type Sandbox

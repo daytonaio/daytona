@@ -3,6 +3,11 @@
 
 from __future__ import annotations
 
+import os
+from collections.abc import Awaitable, Callable
+
+import aiofiles
+import httpx
 from daytona_toolbox_api_client_async import (
     ComputerUseApi,
     ComputerUseStartResponse,
@@ -12,6 +17,7 @@ from daytona_toolbox_api_client_async import (
     KeyboardHotkeyRequest,
     KeyboardPressRequest,
     KeyboardTypeRequest,
+    ListRecordingsResponse,
     MouseClickRequest,
     MouseClickResponse,
     MouseDragRequest,
@@ -23,7 +29,10 @@ from daytona_toolbox_api_client_async import (
     ProcessLogsResponse,
     ProcessRestartResponse,
     ProcessStatusResponse,
+    Recording,
     ScreenshotResponse,
+    StartRecordingRequest,
+    StopRecordingRequest,
     WindowsResponse,
 )
 
@@ -435,10 +444,158 @@ class AsyncDisplay:
         return response
 
 
+class AsyncRecordingService:
+    """Recording operations for computer use functionality."""
+
+    def __init__(
+        self,
+        api_client: ComputerUseApi,
+        ensure_toolbox_url: Callable[[], Awaitable[None]],
+    ):
+        self._api_client: ComputerUseApi = api_client
+        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
+
+    @intercept_errors(message_prefix="Failed to start recording: ")
+    async def start(self, label: str | None = None) -> Recording:
+        """Starts a new screen recording session.
+
+        Args:
+            label (str | None): Optional custom label for the recording.
+
+        Returns:
+            Recording: Recording start response.
+
+        Example:
+            ```python
+            # Start a recording with a label
+            recording = await sandbox.computer_use.recording.start("my-test-recording")
+            print(f"Recording started: {recording.id}")
+            print(f"File: {recording.file_path}")
+            ```
+        """
+        request = StartRecordingRequest(label=label)
+        return await self._api_client.start_recording(request=request)
+
+    @intercept_errors(message_prefix="Failed to stop recording: ")
+    async def stop(self, recording_id: str) -> Recording:
+        """Stops an active screen recording session.
+
+        Args:
+            recording_id (str): The ID of the recording to stop.
+
+        Returns:
+            Recording: Recording stop response.
+
+        Example:
+            ```python
+            result = await sandbox.computer_use.recording.stop(recording.id)
+            print(f"Recording stopped: {result.duration_seconds} seconds")
+            print(f"Saved to: {result.file_path}")
+            ```
+        """
+        request = StopRecordingRequest(id=recording_id)
+        return await self._api_client.stop_recording(request=request)
+
+    @intercept_errors(message_prefix="Failed to list recordings: ")
+    async def list(self) -> ListRecordingsResponse:
+        """Lists all recordings (active and completed).
+
+        Returns:
+            ListRecordingsResponse: List of all recordings.
+
+        Example:
+            ```python
+            recordings = await sandbox.computer_use.recording.list()
+            print(f"Found {len(recordings.recordings)} recordings")
+            for rec in recordings.recordings:
+                print(f"- {rec.file_name}: {rec.status}")
+            ```
+        """
+        return await self._api_client.list_recordings()
+
+    @intercept_errors(message_prefix="Failed to get recording: ")
+    async def get(self, recording_id: str) -> Recording:
+        """Gets details of a specific recording by ID.
+
+        Args:
+            recording_id (str): The ID of the recording to retrieve.
+
+        Returns:
+            Recording: Recording details.
+
+        Example:
+            ```python
+            recording = await sandbox.computer_use.recording.get(recording_id)
+            print(f"Recording: {recording.file_name}")
+            print(f"Status: {recording.status}")
+            print(f"Duration: {recording.duration_seconds} seconds")
+            ```
+        """
+        return await self._api_client.get_recording(id=recording_id)
+
+    @intercept_errors(message_prefix="Failed to delete recording: ")
+    async def delete(self, recording_id: str) -> None:
+        """Deletes a recording by ID.
+
+        Args:
+            recording_id (str): The ID of the recording to delete.
+
+        Example:
+            ```python
+            await sandbox.computer_use.recording.delete(recording_id)
+            print("Recording deleted")
+            ```
+        """
+        await self._api_client.delete_recording(id=recording_id)
+
+    @intercept_errors(message_prefix="Failed to download recording: ")
+    async def download(self, recording_id: str, local_path: str) -> None:
+        """Downloads a recording file from the Sandbox and saves it to a local file.
+
+        The file is streamed directly to disk without loading the entire content into memory.
+
+        Args:
+            recording_id (str): The ID of the recording to download.
+            local_path (str): Path to save the recording file locally.
+
+        Example:
+            ```python
+            # Download recording to file
+            await sandbox.computer_use.recording.download(recording_id, "local_recording.mp4")
+            print("Recording downloaded")
+            ```
+        """
+        # Ensure the toolbox URL is loaded before making the request
+        await self._ensure_toolbox_url()
+
+        # Serialize the request to get the URL and headers
+        method, url, headers, *_ = self._api_client._download_recording_serialize(
+            id=recording_id,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
+        )
+
+        # Create parent directory if it doesn't exist
+        parent_dir = os.path.dirname(os.path.abspath(local_path))
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+
+        # Stream the download directly to file
+        async with httpx.AsyncClient(timeout=30 * 60) as client:
+            async with client.stream(method, url, headers=headers) as response:
+                _ = response.raise_for_status()
+
+                async with aiofiles.open(local_path, "wb") as f:
+                    async for chunk in response.aiter_bytes(64 * 1024):
+                        _ = await f.write(chunk)
+
+
 class AsyncComputerUse:
     """Computer Use functionality for interacting with the desktop environment.
 
-    Provides access to mouse, keyboard, screenshot, and display operations
+    Provides access to mouse, keyboard, screenshot, display, and recording operations
     for automating desktop interactions within a sandbox.
 
     Attributes:
@@ -446,15 +603,21 @@ class AsyncComputerUse:
         keyboard (AsyncKeyboard): Keyboard operations interface.
         screenshot (AsyncScreenshot): Screenshot operations interface.
         display (AsyncDisplay): Display operations interface.
+        recording (AsyncRecordingService): Screen recording operations interface.
     """
 
-    def __init__(self, api_client: ComputerUseApi):
+    def __init__(
+        self,
+        api_client: ComputerUseApi,
+        ensure_toolbox_url: Callable[[], Awaitable[None]],
+    ):
         self._api_client: ComputerUseApi = api_client
 
         self.mouse: AsyncMouse = AsyncMouse(api_client)
         self.keyboard: AsyncKeyboard = AsyncKeyboard(api_client)
         self.screenshot: AsyncScreenshot = AsyncScreenshot(api_client)
         self.display: AsyncDisplay = AsyncDisplay(api_client)
+        self.recording: AsyncRecordingService = AsyncRecordingService(api_client, ensure_toolbox_url)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     async def start(self) -> ComputerUseStartResponse:

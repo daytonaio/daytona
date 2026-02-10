@@ -87,6 +87,132 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Delete a recording
+    # Delete a recording file by ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def delete_recording(id, opts = {})
+      delete_recording_with_http_info(id, opts)
+      nil
+    end
+
+    # Delete a recording
+    # Delete a recording file by ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def delete_recording_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.delete_recording ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling ComputerUseApi.delete_recording"
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings/{id}'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['*/*']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.delete_recording",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#delete_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Download a recording
+    # Download a recording by providing its ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [File]
+    def download_recording(id, opts = {})
+      data, _status_code, _headers = download_recording_with_http_info(id, opts)
+      data
+    end
+
+    # Download a recording
+    # Download a recording by providing its ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(File, Integer, Hash)>] File data, response status code and response headers
+    def download_recording_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.download_recording ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling ComputerUseApi.download_recording"
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings/{id}/download'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/octet-stream']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'File'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.download_recording",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#download_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Drag mouse
     # Drag the mouse from start to end coordinates
     # @param request [MouseDragRequest] Mouse drag request
@@ -572,6 +698,69 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Get recording details
+    # Get details of a specific recording by ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [Recording]
+    def get_recording(id, opts = {})
+      data, _status_code, _headers = get_recording_with_http_info(id, opts)
+      data
+    end
+
+    # Get recording details
+    # Get details of a specific recording by ID
+    # @param id [String] Recording ID
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Recording, Integer, Hash)>] Recording data, response status code and response headers
+    def get_recording_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.get_recording ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling ComputerUseApi.get_recording"
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings/{id}'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Recording'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.get_recording",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#get_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get windows information
     # Get information about all open windows
     # @param [Hash] opts the optional parameters
@@ -625,6 +814,63 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ComputerUseApi#get_windows\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # List all recordings
+    # Get a list of all recordings (active and completed)
+    # @param [Hash] opts the optional parameters
+    # @return [ListRecordingsResponse]
+    def list_recordings(opts = {})
+      data, _status_code, _headers = list_recordings_with_http_info(opts)
+      data
+    end
+
+    # List all recordings
+    # Get a list of all recordings (active and completed)
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(ListRecordingsResponse, Integer, Hash)>] ListRecordingsResponse data, response status code and response headers
+    def list_recordings_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.list_recordings ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'ListRecordingsResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.list_recordings",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#list_recordings\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -1021,6 +1267,70 @@ module DaytonaToolboxApiClient
       return data, status_code, headers
     end
 
+    # Start a new recording
+    # Start a new screen recording session
+    # @param [Hash] opts the optional parameters
+    # @option opts [StartRecordingRequest] :request Recording options
+    # @return [Recording]
+    def start_recording(opts = {})
+      data, _status_code, _headers = start_recording_with_http_info(opts)
+      data
+    end
+
+    # Start a new recording
+    # Start a new screen recording session
+    # @param [Hash] opts the optional parameters
+    # @option opts [StartRecordingRequest] :request Recording options
+    # @return [Array<(Recording, Integer, Hash)>] Recording data, response status code and response headers
+    def start_recording_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.start_recording ...'
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings/start'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+        header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(opts[:'request'])
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Recording'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.start_recording",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#start_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Stop computer use processes
     # Stop all computer use processes and return their status
     # @param [Hash] opts the optional parameters
@@ -1074,6 +1384,74 @@ module DaytonaToolboxApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: ComputerUseApi#stop_computer_use\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Stop a recording
+    # Stop an active screen recording session
+    # @param request [StopRecordingRequest] Recording ID to stop
+    # @param [Hash] opts the optional parameters
+    # @return [Recording]
+    def stop_recording(request, opts = {})
+      data, _status_code, _headers = stop_recording_with_http_info(request, opts)
+      data
+    end
+
+    # Stop a recording
+    # Stop an active screen recording session
+    # @param request [StopRecordingRequest] Recording ID to stop
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Recording, Integer, Hash)>] Recording data, response status code and response headers
+    def stop_recording_with_http_info(request, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: ComputerUseApi.stop_recording ...'
+      end
+      # verify the required parameter 'request' is set
+      if @api_client.config.client_side_validation && request.nil?
+        fail ArgumentError, "Missing the required parameter 'request' when calling ComputerUseApi.stop_recording"
+      end
+      # resource path
+      local_var_path = '/computeruse/recordings/stop'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+        header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(request)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Recording'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || []
+
+      new_options = opts.merge(
+        :operation => :"ComputerUseApi.stop_recording",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: ComputerUseApi#stop_recording\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

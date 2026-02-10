@@ -1302,6 +1302,554 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**Take compressed screenshot region (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/screenshot/region/compressed)
 
+## Screen Recording
+
+Computer Use supports screen recording capabilities, allowing you to capture desktop sessions for debugging, documentation, or automation workflows.
+
+### Configure Recording Directory
+
+By default, recordings are saved to `~/.daytona/recordings`. You can specify a custom directory by passing the `DAYTONA_RECORDINGS_DIR` environment variable when creating a sandbox:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="daytonaio/sandbox:0.6.0",
+        name="my-sandbox",
+        env_vars={"DAYTONA_RECORDINGS_DIR": "/home/daytona/my-recordings"}
+    )
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+  snapshot: 'daytonaio/sandbox:0.6.0',
+  name: 'my-sandbox',
+  envVars: { DAYTONA_RECORDINGS_DIR: '/home/daytona/my-recordings' }
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+daytona = Daytona::Client.new
+sandbox = daytona.create(
+  snapshot: 'daytonaio/sandbox:0.6.0',
+  name: 'my-sandbox',
+  env_vars: { DAYTONA_RECORDINGS_DIR: '/home/daytona/my-recordings' }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+import (
+	"github.com/daytonaio/daytona/pkg/client"
+	"github.com/daytonaio/daytona/pkg/types"
+)
+
+daytona := client.New()
+envVars := map[string]string{
+	"DAYTONA_RECORDINGS_DIR": "/home/daytona/my-recordings",
+}
+
+sandbox, err := daytona.Create(ctx, &types.CreateSandboxParams{
+	Snapshot: "daytonaio/sandbox:0.6.0",
+	Name:     "my-sandbox",
+	EnvVars:  envVars,
+})
+if err != nil {
+	log.Fatal(err)
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Start Recording
+
+Start a new screen recording session with an optional name identifier:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Start recording with a custom name
+recording = sandbox.computer_use.recording.start("test-1")
+print(f"Recording started: {recording.id}")
+print(f"File path: {recording.file_path}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Start recording with a custom name
+const recording = await sandbox.computerUse.recording.start('test-1');
+console.log(`Recording started: ${recording.id}`);
+console.log(`File path: ${recording.file_path}`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Start recording with a custom label
+recording = sandbox.computer_use.recording.start(label: 'test-1')
+puts "Recording started: #{recording.id}"
+puts "File path: #{recording.file_path}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Start recording with a custom name
+name := "test-1"
+recording, err := sandbox.ComputerUse.Recording().Start(ctx, &name)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Recording started: %s\n", *recording.Id)
+fmt.Printf("File path: %s\n", *recording.FilePath)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/start' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "name": "test-1"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**start (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingstart)
+>
+> [**start (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#start-1)
+>
+> [**start (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#start-1)
+>
+> [**Start (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Start)
+>
+> [**Start Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recording/start)
+
+### Stop Recording
+
+Stop an active recording session by providing the recording ID:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Stop the recording
+stopped_recording = sandbox.computer_use.recording.stop(recording.id)
+print(f"Recording stopped: {stopped_recording.duration_seconds} seconds")
+print(f"Saved to: {stopped_recording.file_path}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Stop the recording
+const stoppedRecording = await sandbox.computerUse.recording.stop(recording.id);
+console.log(`Recording stopped: ${stoppedRecording.duration_seconds} seconds`);
+console.log(`Saved to: ${stoppedRecording.file_path}`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Stop the recording
+stopped_recording = sandbox.computer_use.recording.stop(id: recording.id)
+puts "Recording stopped: #{stopped_recording.duration_seconds} seconds"
+puts "Saved to: #{stopped_recording.file_path}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Stop the recording
+stoppedRecording, err := sandbox.ComputerUse.Recording().Stop(ctx, *recording.Id)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Recording stopped: %f seconds\n", *stoppedRecording.DurationSeconds)
+fmt.Printf("Saved to: %s\n", *stoppedRecording.FilePath)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/stop' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "id": "recording-id"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**stop (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingstop)
+>
+> [**stop (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#stop-1)
+>
+> [**stop (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#stop-1)
+>
+> [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Stop)
+>
+> [**Stop Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recording/stop)
+
+### List Recordings
+
+Get a list of all recordings in the sandbox:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+recordings_list = sandbox.computer_use.recording.list()
+print(f"Total recordings: {len(recordings_list.recordings)}")
+for rec in recordings_list.recordings:
+    print(f"- {rec.name}: {rec.duration_seconds}s ({rec.file_size_bytes} bytes)")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const recordingsList = await sandbox.computerUse.recording.list();
+console.log(`Total recordings: ${recordingsList.recordings.length}`);
+recordingsList.recordings.forEach(rec => {
+  console.log(`- ${rec.name}: ${rec.duration_seconds}s (${rec.file_size_bytes} bytes)`);
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+recordings_list = sandbox.computer_use.recording.list
+puts "Total recordings: #{recordings_list.recordings.length}"
+recordings_list.recordings.each do |rec|
+  puts "- #{rec.name}: #{rec.duration_seconds}s (#{rec.file_size_bytes} bytes)"
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+recordingsList, err := sandbox.ComputerUse.Recording().List(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Total recordings: %d\n", len(recordingsList.Recordings))
+for _, rec := range recordingsList.Recordings {
+	fmt.Printf("- %s: %.2fs (%d bytes)\n", *rec.Name, *rec.DurationSeconds, *rec.FileSizeBytes)
+}
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/list'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**list (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordinglist)
+>
+> [**list (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#list)
+>
+> [**list (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#list)
+>
+> [**List (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.List)
+>
+> [**List Recordings (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recording/list)
+
+### Get Recording
+
+Get details about a specific recording:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+recording_detail = sandbox.computer_use.recording.get("recording-id")
+print(f"Recording: {recording_detail.name}")
+print(f"Status: {recording_detail.status}")
+print(f"Duration: {recording_detail.duration_seconds}s")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const recordingDetail = await sandbox.computerUse.recording.get('recording-id');
+console.log(`Recording: ${recordingDetail.name}`);
+console.log(`Status: ${recordingDetail.status}`);
+console.log(`Duration: ${recordingDetail.duration_seconds}s`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+recording_detail = sandbox.computer_use.recording.get(id: 'recording-id')
+puts "Recording: #{recording_detail.name}"
+puts "Status: #{recording_detail.status}"
+puts "Duration: #{recording_detail.duration_seconds}s"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+recordingDetail, err := sandbox.ComputerUse.Recording().Get(ctx, "recording-id")
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("Recording: %s\n", *recordingDetail.Name)
+fmt.Printf("Status: %s\n", *recordingDetail.Status)
+fmt.Printf("Duration: %.2fs\n", *recordingDetail.DurationSeconds)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/{recordingId}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**get (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingget)
+>
+> [**get (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#get)
+>
+> [**get (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#get)
+>
+> [**Get (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Get)
+>
+> [**Get Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recording/{recordingId})
+
+### Delete Recording
+
+Delete a recording by ID:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+sandbox.computer_use.recording.delete("recording-id")
+print("Recording deleted successfully")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await sandbox.computerUse.recording.delete('recording-id');
+console.log('Recording deleted successfully');
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+sandbox.computer_use.recording.delete(id: 'recording-id')
+puts 'Recording deleted successfully'
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+err := sandbox.ComputerUse.Recording().Delete(ctx, "recording-id")
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println("Recording deleted successfully")
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/{recordingId}' \
+  --request DELETE
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**delete (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingdelete)
+>
+> [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#delete)
+>
+> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#delete)
+>
+> [**Delete (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Delete)
+>
+> [**Delete Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/DELETE/computeruse/recording/{recordingId})
+
+### Download Recording
+
+Download a recording file from the sandbox to your local machine. The file is streamed efficiently without loading the entire content into memory, making it suitable for large recordings.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Download recording to local file
+sandbox.computer_use.recording.download(recording.id, "local_recording.mp4")
+print("Recording downloaded successfully")
+
+# Or with custom path
+import os
+download_path = os.path.join("recordings", f"recording_{recording.id}.mp4")
+sandbox.computer_use.recording.download(recording.id, download_path)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Download recording to local file
+await sandbox.computerUse.recording.download(recording.id, 'local_recording.mp4');
+console.log('Recording downloaded successfully');
+
+// Or with custom path
+const downloadPath = `recordings/recording_${recording.id}.mp4`;
+await sandbox.computerUse.recording.download(recording.id, downloadPath);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Download recording to local file
+sandbox.computer_use.recording.download(id: recording.id, local_path: 'local_recording.mp4')
+puts 'Recording downloaded successfully'
+
+# Or with custom path
+download_path = "recordings/recording_#{recording.id}.mp4"
+sandbox.computer_use.recording.download(id: recording.id, local_path: download_path)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Download recording to local file
+err := sandbox.ComputerUse.Recording().Download(ctx, recording.GetId(), "local_recording.mp4")
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println("Recording downloaded successfully")
+
+// Or with custom path
+downloadPath := fmt.Sprintf("recordings/recording_%s.mp4", recording.GetId())
+err = sandbox.ComputerUse.Recording().Download(ctx, recording.GetId(), downloadPath)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/{recordingId}/download' \
+  --output local_recording.mp4
+```
+
+</TabItem>
+</Tabs>
+
+:::tip[Streaming Downloads]
+All SDK implementations stream the recording file directly to disk without loading the entire content into memory. This allows you to download large recordings (hundreds of MB or even GB) efficiently without running out of memory.
+
+- **Python**: Streams in 64KB chunks using `httpx`
+- **TypeScript**: Uses Node.js `pipeline()` with backpressure handling
+- **Ruby**: Uses Typhoeus streaming with `on_body` callbacks
+- **Go**: Uses `io.Copy()` with 32KB internal buffer
+:::
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use), [TypeScript SDK](/docs/en/typescript-sdk/computer-use), [Ruby SDK](/docs/en/ruby-sdk/computer-use), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api#daytona-toolbox/tag/computer-use) references:
+
+> [**download (Python SDK)**](/docs/en/python-sdk/sync/computer-use#recordingdownload)
+>
+> [**download (TypeScript SDK)**](/docs/en/typescript-sdk/computer-use#download)
+>
+> [**download (Ruby SDK)**](/docs/en/ruby-sdk/computer-use#download)
+>
+> [**Download (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Download)
+>
+> [**Download Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings/{recordingId}/download)
+
+### Recording Dashboard
+
+Every sandbox includes a built-in recording dashboard for managing screen recordings through a web interface. The dashboard allows you to view, download, and delete recordings without writing code.
+
+To access the recording dashboard:
+
+1. Navigate to your sandboxes in the Daytona Dashboard
+2. Click the action menu (three dots) for your sandbox
+3. Select **Screen Recordings** from the dropdown menu
+
+The recording dashboard provides:
+- List of all recordings with metadata (name, duration, file size, creation time)
+- Playback controls for reviewing recordings
+- Download functionality to save recordings locally
+- Delete options for managing storage
+
+:::tip
+The recording dashboard runs on a private port and is automatically secured. No additional authentication is required once you access it through the Daytona Dashboard.
+:::
+
 ## Display operations
 
 ### Get info
