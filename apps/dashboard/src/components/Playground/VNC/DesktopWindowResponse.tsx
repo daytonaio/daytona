@@ -12,6 +12,7 @@ import { usePlayground } from '@/hooks/usePlayground'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { Sandbox } from '@daytonaio/sdk'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronUpIcon, RefreshCcw, XIcon } from 'lucide-react'
 import { ReactNode, useCallback, useEffect, useState } from 'react'
@@ -63,18 +64,21 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
   const VNCSandboxData = VNCInteractionOptionsParamsState.VNCSandboxData
   const VNCUrl = VNCInteractionOptionsParamsState.VNCUrl
 
-  const getVNCUrl = useCallback(
-    async (sandbox: Sandbox): Promise<string | null> => {
+  const { refetch: fetchVNCUrl } = useQuery({
+    queryKey: ['vncUrl', VNCSandboxData?.sandbox?.id],
+    queryFn: async () => {
       try {
-        const url = await getPortPreviewUrl(sandbox.id, 6080)
+        if (!VNCSandboxData?.sandbox) return null
+        const url = await getPortPreviewUrl(VNCSandboxData.sandbox.id, 6080)
         return url + '/vnc.html'
       } catch (error) {
         handleApiError(error, 'Failed to construct VNC URL')
         return null
       }
     },
-    [getPortPreviewUrl],
-  )
+    enabled: false,
+    retry: false,
+  })
 
   const getVNCComputerUseUrl = useCallback(
     async (sandbox: Sandbox) => {
@@ -87,7 +91,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
 
         // Check if computer use is active (all processes running)
         if (status === 'active') {
-          const vncUrl = await getVNCUrl(sandbox)
+          const { data: vncUrl } = await fetchVNCUrl()
           if (vncUrl) setVNCInteractionOptionsParamValue('VNCUrl', vncUrl)
         } else {
           // Computer use is not active, try to start it
@@ -106,7 +110,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
               const newStatus = newStatusResponse.data.status
 
               if (newStatus === 'active') {
-                const vncUrl = await getVNCUrl(sandbox)
+                const { data: vncUrl } = await fetchVNCUrl()
                 if (vncUrl) setVNCInteractionOptionsParamValue('VNCUrl', vncUrl)
               } else {
                 toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
@@ -131,7 +135,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
         handleApiError(error, 'Failed to check VNC status')
       }
     },
-    [getVNCUrl, selectedOrganization, toolboxApi, setVNCInteractionOptionsParamValue],
+    [fetchVNCUrl, selectedOrganization, toolboxApi, setVNCInteractionOptionsParamValue],
   )
 
   const setupVNCComputerUse = useCallback(
