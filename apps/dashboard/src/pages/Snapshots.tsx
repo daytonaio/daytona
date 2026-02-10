@@ -4,6 +4,7 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { CreateSnapshotDialog } from '@/components/snapshots/CreateSnapshotDialog'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,11 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
@@ -33,33 +30,21 @@ import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
-import { getRegionFullDisplayName, pluralize } from '@/lib/utils'
+import { pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
 import { useQueryClient } from '@tanstack/react-query'
-import { Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
   const queryClient = useQueryClient()
 
   const { snapshotApi } = useApi()
-  const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
+  const { getRegionName } = useRegions()
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [newSnapshotName, setNewSnapshotName] = useState('')
-  const [newImageName, setNewImageName] = useState('')
-  const [newEntrypoint, setNewEntrypoint] = useState('')
-  const [loadingCreate, setLoadingCreate] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [cpu, setCpu] = useState<number | undefined>(undefined)
-  const [memory, setMemory] = useState<number | undefined>(undefined)
-  const [disk, setDisk] = useState<number | undefined>(undefined)
-  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -170,102 +155,6 @@ const Snapshots: React.FC = () => {
       }))
     }
   }, [snapshotsData?.items.length, paginationParams.pageIndex])
-
-  const validateSnapshotName = (name: string): string | null => {
-    if (name.includes(' ')) {
-      return 'Spaces are not allowed in snapshot names'
-    }
-
-    if (!IMAGE_NAME_REGEX.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, slashes and dashes'
-    }
-
-    return null
-  }
-
-  const validateImageName = (name: string): string | null => {
-    if (name.includes(' ')) {
-      return 'Spaces are not allowed in image names'
-    }
-
-    // Check for digest format (@sha256:hash)
-    if (name.includes('@sha256:')) {
-      const [imageName, digest] = name.split('@sha256:')
-      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) {
-        return 'Invalid digest format. Must be image@sha256:64_hex_characters'
-      }
-      if (imageName.includes(':')) {
-        return 'Image name cannot contain both a tag and a digest'
-      }
-      return null
-    }
-
-    // Handle tag format (only check if no digest is present)
-    if (!name.includes('@') && (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name))) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)'
-    }
-
-    if (name.endsWith(':latest')) {
-      return 'Images with tag ":latest" are not allowed'
-    }
-
-    if (!IMAGE_NAME_REGEX.test(name)) {
-      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
-    }
-
-    return null
-  }
-
-  const handleCreate = async () => {
-    const trimmedName = newSnapshotName.trim()
-    const trimmedImageName = newImageName.trim()
-    const trimmedEntrypoint = newEntrypoint.trim()
-
-    const nameValidationError = validateSnapshotName(trimmedName)
-    if (nameValidationError) {
-      toast.warning(nameValidationError)
-      return
-    }
-
-    const imageValidationError = validateImageName(trimmedImageName)
-    if (imageValidationError) {
-      toast.warning(imageValidationError)
-      return
-    }
-
-    setLoadingCreate(true)
-    try {
-      await snapshotApi.createSnapshot(
-        {
-          name: trimmedName,
-          imageName: trimmedImageName,
-          entrypoint: trimmedEntrypoint ? trimmedEntrypoint.split(' ') : undefined,
-          cpu,
-          memory,
-          disk,
-          regionId: selectedRegionId ?? undefined,
-        },
-        selectedOrganization?.id,
-      )
-      setShowCreateDialog(false)
-      setNewSnapshotName('')
-      setNewImageName('')
-      setNewEntrypoint('')
-      setSelectedRegionId(undefined)
-      toast.success(`Creating snapshot ${trimmedName}`)
-
-      if (paginationParams.pageIndex !== 0) {
-        setPaginationParams((prev) => ({
-          ...prev,
-          pageIndex: 0,
-        }))
-      }
-    } catch (error) {
-      handleApiError(error, 'Failed to create snapshot')
-    } finally {
-      setLoadingCreate(false)
-    }
-  }
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
@@ -432,187 +321,17 @@ const Snapshots: React.FC = () => {
       },
     })
 
+  const dialogRef = useRef<{ open: () => void }>(null)
+
+  const handleCreateSnapshot = () => {
+    dialogRef.current?.open()
+  }
+
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
-        <Dialog
-          open={showCreateDialog}
-          onOpenChange={(isOpen) => {
-            setShowCreateDialog(isOpen)
-            if (isOpen) {
-              return
-            }
-            setNewSnapshotName('')
-            setNewImageName('')
-            setNewEntrypoint('')
-            setCpu(undefined)
-            setMemory(undefined)
-            setDisk(undefined)
-            setSelectedRegionId(undefined)
-          }}
-        >
-          {writePermitted && (
-            <DialogTrigger asChild>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={snapshotsDataIsLoading}
-                className="ml-auto"
-                title="Create Snapshot"
-              >
-                <Plus className="w-4 h-4" />
-                Create Snapshot
-              </Button>
-            </DialogTrigger>
-          )}
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Snapshot</DialogTitle>
-              <DialogDescription>
-                Register a new snapshot to be used for spinning up sandboxes in your organization.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              id="create-snapshot-form"
-              className="space-y-6 overflow-y-auto px-1 pb-1"
-              onSubmit={async (e) => {
-                e.preventDefault()
-                await handleCreate()
-              }}
-            >
-              <div className="space-y-3">
-                <Label htmlFor="name">Snapshot Name</Label>
-                <Input
-                  id="name"
-                  value={newSnapshotName}
-                  onChange={(e) => setNewSnapshotName(e.target.value)}
-                  placeholder="ubuntu-4vcpu-8ram-100gb"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  The name you will use in your client app (SDK, CLI) to reference the snapshot.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="name">Image</Label>
-                <Input
-                  id="name"
-                  value={newImageName}
-                  onChange={(e) => setNewImageName(e.target.value)}
-                  placeholder="ubuntu:22.04"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Must include either a tag (e.g., ubuntu:22.04) or a digest. The tag "latest" is not allowed.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="region-select">Region</Label>
-                <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
-                  <SelectTrigger className="h-8" id="region-select" disabled={loadingRegions} loading={loadingRegions}>
-                    <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regions.map((region) => (
-                      <SelectItem key={region.id} value={region.id}>
-                        {getRegionFullDisplayName(region)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  The region where the snapshot will be available. If not specified, your organization's default region
-                  will be used.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Resources</h3>
-                <div className="space-y-4 px-4 py-2">
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="cpu" className="w-32 flex-shrink-0">
-                      Compute (vCPU):
-                    </Label>
-                    <Input
-                      id="cpu"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="1"
-                      onChange={(e) => setCpu(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="memory" className="w-32 flex-shrink-0">
-                      Memory (GiB):
-                    </Label>
-                    <Input
-                      id="memory"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="1"
-                      onChange={(e) => setMemory(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="disk" className="w-32 flex-shrink-0">
-                      Storage (GiB):
-                    </Label>
-                    <Input
-                      id="disk"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="3"
-                      onChange={(e) => setDisk(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
-                <Input
-                  id="entrypoint"
-                  value={newEntrypoint}
-                  onChange={(e) => setNewEntrypoint(e.target.value)}
-                  placeholder="sleep infinity"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
-                  have an entrypoint, 'sleep infinity' will be used as the default.
-                </p>
-              </div>
-            </form>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
-              {loadingCreate ? (
-                <Button type="button" variant="default" disabled>
-                  Creating...
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  form="create-snapshot-form"
-                  variant="default"
-                  disabled={
-                    !newSnapshotName.trim() ||
-                    !newImageName.trim() ||
-                    validateSnapshotName(newSnapshotName.trim()) !== null ||
-                    validateImageName(newImageName.trim()) !== null
-                  }
-                >
-                  Create
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {writePermitted && <CreateSnapshotDialog className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
       <PageContent size="full">
@@ -630,7 +349,7 @@ const Snapshots: React.FC = () => {
           onBulkActivate={handleBulkActivate}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
-          onCreateSnapshot={() => setShowCreateDialog(true)}
+          onCreateSnapshot={handleCreateSnapshot}
           pageCount={snapshotsData?.totalPages ?? 0}
           totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}
