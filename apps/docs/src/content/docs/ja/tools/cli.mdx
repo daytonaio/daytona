@@ -1,360 +1,387 @@
 ---
 title: CLI
-description: Daytona（デイトナ）CLI で利用可能な操作のリファレンス。
+description: Daytona CLI で利用可能な操作のリファレンス。
 sidebar:
   label: Daytona CLI リファレンス
 ---
 
-import Aside from '@components/Aside.astro'
-import Label from '@components/Label.astro'
+import Aside from "@components/Aside.astro";
+import Label from "@components/Label.astro";
 
-`daytona` コマンドラインツールは、Daytona（デイトナ）のコア機能へのアクセスを提供し、スナップショットの管理や Daytona サンドボックスのライフサイクル管理を行えます。インストール手順は[こちら](/docs/ja/getting-started#setting-up-the-daytona-cli)をご覧ください。
+`daytona` コマンドラインツールは、スナップショットの管理や Daytona サンドボックスのライフサイクル管理など、Daytona の中核機能にアクセスするための手段を提供します。インストール手順は[こちら](/docs/getting-started#cli)をご覧ください。
 
-本リファレンスでは、`daytona` コマンドラインツールでサポートされているすべてのコマンドを、その動作の説明および対応フラグとともに一覧しています。`daytona` 実行時に `--help` または `-h` フラグを付けることで、各コマンドごとのドキュメントを参照できます。
+本リファレンスでは、`daytona` コマンドラインツールでサポートされているすべてのコマンドを、その挙動の説明や対応フラグとともに一覧しています。
+`daytona` 実行時に `--help` / `-h` フラグを付与すると、各コマンドのドキュメントを参照できます。
 
-## daytona
+## daytona \{#daytona\}
 
-Daytona CLI
+Daytona CLI（コマンドラインインターフェイス）
 
 ```shell
 daytona [flags]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示します |
+
+| ロング         | ショート | 説明                   |
+| :---------- | :--- | :------------------- |
+| `--help`    |      | Daytona のヘルプを表示します   |
 | `--version` | `-v` | Daytona のバージョンを表示します |
 
-## daytona autocomplete
+## daytona archive \{#daytona-archive\}
+
+サンドボックスをアーカイブします
+
+```shell
+daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
+
+## daytona autocomplete \{#daytona-autocomplete\}
 
 シェル環境に補完スクリプトを追加します
 
 ```shell
-daytona autocomplete [bash|zsh|fish|powershell] [flags]
+daytona autocomplete [bash|zsh|fish|powershell] [フラグ]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
+
+| ロング      | ショート | 説明           |
+| :------- | :--- | :----------- |
+| `--help` |      | Daytona のヘルプ |
 
 <Aside type="note">
-  bash シェルを使用している場合、オートコンプリート機能をフルに利用するには bash-completion がインストールされていることを確認してください。Linux のインストール: `sudo
-          apt-get install bash-completion` macOS のインストール: `brew install
-          bash-completion`
+  bash シェル環境を使用している場合、オートコンプリート機能をフルに利用するには bash-completion がインストールされていることを確認してください。
+  Linux でのインストール: `sudo apt-get install bash-completion`
+  macOS でのインストール: `brew install bash-completion`
 </Aside>
 
-## daytona docs
+## daytona create \{#daytona-create\}
 
-既定のブラウザでDaytona（デイトナ）のドキュメントを開きます。
+新規サンドボックスを作成する
+
+```shell
+daytona create [flags]
+```
+
+**フラグ**
+
+| ロング                    | ショート | 説明                                              |
+| :--------------------- | :--- | :---------------------------------------------- |
+| `--auto-archive`       |      | 自動アーカイブ間隔（分）。0 は最大間隔を使用                         |
+| `--auto-delete`        |      | 自動削除間隔（分）。負の値は無効、0 は停止時に即時削除                    |
+| `--auto-stop`          |      | 自動停止間隔（分）。0 は無効                                 |
+| `--class`              |      | サンドボックスのクラス（small、medium、large）                 |
+| `--context`            | `-c` | ビルドコンテキストに含めるファイルまたはディレクトリ（複数指定可）               |
+| `--cpu`                |      | サンドボックスに割り当てる CPU コア数                           |
+| `--disk`               |      | サンドボックスに割り当てるディスク容量（GB）                         |
+| `--dockerfile`         | `-f` | サンドボックス用スナップショットの Dockerfile パス                 |
+| `--env`                | `-e` | 環境変数（形式: KEY=VALUE）                             |
+| `--gpu`                |      | サンドボックスに割り当てる GPU ユニット数                         |
+| `--label`              | `-l` | ラベル（形式: KEY=VALUE）                              |
+| `--memory`             |      | サンドボックスに割り当てるメモリ（MB）                            |
+| `--name`               |      | サンドボックス名                                        |
+| `--network-allow-list` |      | サンドボックスで許可する CIDR ネットワークアドレスのカンマ区切りリスト          |
+| `--network-block-all`  |      | サンドボックスの全ネットワークアクセスをブロックするか                     |
+| `--public`             |      | サンドボックスを公開アクセス可能にする                             |
+| `--snapshot`           |      | サンドボックスで使用するスナップショット                            |
+| `--target`             |      | ターゲットリージョン（eu、us）                               |
+| `--user`               |      | サンドボックスに関連付けるユーザー                               |
+| `--volume`             | `-v` | マウントするボリューム（形式: VOLUME&#95;NAME:MOUNT&#95;PATH） |
+| `--help`               |      | Daytona のヘルプ                                    |
+
+## daytona delete \{#daytona-delete\}
+
+サンドボックスを削除します
+
+```shell
+daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| Long     | Short | 説明               |
+| :------- | :---- | :--------------- |
+| `--all`  | `-a`  | すべてのサンドボックスを削除する |
+| `--help` |       | Daytona のヘルプを表示  |
+
+## daytona docs \{#daytona-docs\}
+
+既定のブラウザーで Daytona のドキュメントを開きます。
 
 ```shell
 daytona docs [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona login
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | Daytona のヘルプを表示 |
 
-Daytona（デイトナ）にログイン
+## daytona exec \{#daytona-exec\}
+
+サンドボックス内でコマンドを実行します
+
+```shell
+daytona exec [SANDBOX_ID | SANDBOX_NAME] -- [COMMAND] [ARGS...] [flags]
+```
+
+**フラグ**
+
+| ロング         | ショート | 説明                                |
+| :---------- | :--- | :-------------------------------- |
+| `--cwd`     |      | コマンド実行時の作業ディレクトリ                  |
+| `--timeout` |      | コマンドのタイムアウト時間（秒）。0 を指定するとタイムアウトなし |
+| `--help`    |      | Daytona のヘルプを表示                   |
+
+## daytona info \{#daytona-info\}
+
+サンドボックスの情報を取得する
+
+```shell
+daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| ロング        | ショート | 説明                       |
+| :--------- | :--- | :----------------------- |
+| `--format` | `-f` | 出力形式。yaml または json のいずれか |
+| `--help`   |      | Daytona のヘルプ             |
+
+## daytona list \{#daytona-list\}
+
+サンドボックスを一覧表示
+
+```shell
+daytona list [flags]
+```
+
+**フラグ**
+
+| Long       | Short | 説明                     |
+| :--------- | :---- | :--------------------- |
+| `--format` | `-f`  | 出力形式。yaml か json のいずれか |
+| `--limit`  | `-l`  | 1ページあたりの最大件数           |
+| `--page`   | `-p`  | ページ番号（1から）             |
+| `--help`   |       | Daytona のヘルプ           |
+
+## daytona login \{#daytona-login\}
+
+Daytona にログイン
 
 ```shell
 daytona login [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--api-key` | | 認証に使用するAPIキー |
-| `--help` | | daytonaのヘルプ |
 
-## daytona logout
+| ロング         | ショート | 説明           |
+| :---------- | :--- | :----------- |
+| `--api-key` |      | 認証に使用するAPIキー |
+| `--help`    |      | Daytonaのヘルプ  |
 
-Daytona（デイトナ）からログアウトします
+## daytona logout \{#daytona-logout\}
+
+Daytona からログアウトします
 
 ```shell
 daytona logout [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | daytona のヘルプを表示 |
 
-Daytona MCPサーバー（Model Context Protocol）を管理する
+## daytona mcp \{#daytona-mcp\}
+
+Daytona MCP サーバーの管理
 
 ```shell
 daytona mcp [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp config
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | Daytona のヘルプを表示 |
 
-Daytona MCPサーバー用のJSON設定を出力します
+## daytona mcp config \{#daytona-mcp-config\}
+
+Daytona MCP Server の JSON 設定を出力します
 
 ```shell
 daytona mcp config [AGENT_NAME] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp init
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
 
-エージェントを指定して Daytona MCPサーバー を初期化します（現在サポート: claude、windsurf、cursor）
+## daytona mcp init \{#daytona-mcp-init\}
+
+エージェントとともに Daytona MCP Server を初期化します（現在の対応エージェント: Claude、Windsurf、Cursor）
 
 ```shell
 daytona mcp init [AGENT_NAME] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona mcp start
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | Daytona のヘルプを表示 |
 
-Daytona MCPサーバーを起動します
+## daytona mcp start \{#daytona-mcp-start\}
+
+Daytona MCP サーバーを起動する
 
 ```shell
-daytona mcp start [flags]
+daytona mcp start [フラグ]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona organization
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | Daytona のヘルプを表示 |
 
-Daytona（デイトナ）の組織を管理する
+## daytona organization \{#daytona-organization\}
+
+Daytona の組織を管理する
 
 ```shell
 daytona organization [flags]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona organization create
+| Long     | Short | 説明           |
+| :------- | :---- | :----------- |
+| `--help` |       | Daytona のヘルプ |
 
-新しい組織を作成し、アクティブとして設定します
+## daytona organization create \{#daytona-organization-create\}
+
+新しい組織を作成し、アクティブ組織として設定します
 
 ```shell
-daytona organization create [ORGANIZATION_NAME] [flags]
+daytona organization create [組織名] [フラグ]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona organization delete
+| Long     | Short | 説明           |
+| :------- | :---- | :----------- |
+| `--help` |       | Daytona のヘルプ |
 
-組織を削除する
+## daytona organization delete \{#daytona-organization-delete\}
+
+組織を削除します
 
 ```shell
 daytona organization delete [ORGANIZATION] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona organization list
+| Long     | Short | 説明              |
+| :------- | :---- | :-------------- |
+| `--help` |       | Daytona のヘルプを表示 |
 
-すべての組織を一覧表示します
+## daytona organization list \{#daytona-organization-list\}
+
+すべての組織を一覧表示する
 
 ```shell
 daytona organization list [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona organization use
+| Long       | Short | 説明                       |
+| :--------- | :---- | :----------------------- |
+| `--format` | `-f`  | 出力形式。yaml または json のいずれか |
+| `--help`   |       | Daytona のヘルプ             |
 
-アクティブな組織を設定する
+## daytona organization use \{#daytona-organization-use\}
+
+アクティブな組織を設定します
 
 ```shell
 daytona organization use [ORGANIZATION] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox
+| ロング      | ショート | 説明           |
+| :------- | :--- | :----------- |
+| `--help` |      | Daytona のヘルプ |
 
-Daytona（デイトナ）のサンドボックスを管理します
+## daytona preview-url \{#daytona-preview-url\}
+
+サンドボックスのポートに対する署名付きプレビュー URL を取得します
 
 ```shell
-daytona sandbox [flags]
+daytona preview-url [SANDBOX_ID | SANDBOX_NAME] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona sandbox create
+| Long        | Short | 説明                       |
+| :---------- | :---- | :----------------------- |
+| `--expires` |       | URL の有効期限（秒）             |
+| `--port`    | `-p`  | プレビュー URL を取得するポート番号（必須） |
+| `--help`    |       | Daytona のヘルプを表示          |
 
-新しいサンドボックスを作成
+## daytona snapshot \{#daytona-snapshot\}
 
-```shell
-daytona sandbox create [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--auto-archive` | | 自動アーカイブの間隔（分）（0 は最大の間隔が使用されます） |
-| `--auto-delete` | | 自動削除の間隔（分）（負の値で無効、0 は停止後に即時削除） |
-| `--auto-stop` | | 自動停止の間隔（分）（0 は無効） |
-| `--class` | | サンドボックスのクラス種別（small、medium、large） |
-| `--context` | `-c` | ビルドコンテキストに含めるファイルまたはディレクトリ（複数回指定可） |
-| `--cpu` | | サンドボックスに割り当てる CPU コア数 |
-| `--disk` | | サンドボックスに割り当てるディスク容量（GB） |
-| `--dockerfile` | `-f` | サンドボックスのスナップショット用 Dockerfile のパス |
-| `--env` | `-e` | 環境変数（形式: KEY=VALUE） |
-| `--gpu` | | サンドボックスに割り当てる GPU ユニット |
-| `--label` | `-l` | ラベル（形式: KEY=VALUE） |
-| `--memory` | | サンドボックスに割り当てるメモリ（MB） |
-| `--public` | | サンドボックスを公開アクセス可能にする |
-| `--snapshot` | | サンドボックスに使用するスナップショット |
-| `--target` | | ターゲット（リージョン）（eu, us） |
-| `--user` | | サンドボックスに関連付けるユーザー |
-| `--volume` | `-v` | マウントするボリューム（形式: VOLUME\_NAME:MOUNT\_PATH） |
-| `--help` | | daytona のヘルプ |
-
-## daytona sandbox delete
-
-サンドボックスを削除
-
-```shell
-daytona sandbox delete [SANDBOX_ID] [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--all` | `-a` | すべてのサンドボックスを削除 |
-| `--force` | `-f` | 強制的に削除 |
-| `--help` | | daytona のヘルプを表示 |
-
-## daytona sandbox info
-
-サンドボックス情報を取得する
-
-```shell
-daytona sandbox info [SANDBOX_ID] [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれかを指定します |
-| `--verbose` | `-v` | 詳細な出力を含める |
-| `--help` | | daytona のヘルプを表示 |
-
-## daytona sandbox list
-
-サンドボックスを一覧表示します
-
-```shell
-daytona sandbox list [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--limit` | `-l` | 1ページあたりの最大件数 |
-| `--page` | `-p` | ページ番号（1から開始） |
-| `--verbose` | `-v` | 冗長な出力を含める |
-| `--help` | | daytona のヘルプを表示 |
-
-## daytona sandbox start
-
-サンドボックスを起動する
-
-```shell
-daytona sandbox start [SANDBOX_ID] [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--all` | `-a` | すべてのサンドボックスを起動する |
-| `--help` | | daytona のヘルプ |
-
-## daytona sandbox stop
-
-サンドボックスを停止する
-
-```shell
-daytona sandbox stop [SANDBOX_ID] [flags]
-```
-
-**フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--all` | `-a` | すべてのサンドボックスを停止 |
-| `--help` | | daytona のヘルプを表示 |
-
-## daytona snapshot
-
-Daytona（デイトナ）のスナップショットを管理する
+Daytona のスナップショットを管理する
 
 ```shell
 daytona snapshot [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona snapshot create
+| Long     | Short | 説明           |
+| :------- | :---- | :----------- |
+| `--help` |       | Daytona のヘルプ |
 
-スナップショットを作成
+## daytona snapshot create \{#daytona-snapshot-create\}
+
+スナップショットを作成します
 
 ```shell
 daytona snapshot create [SNAPSHOT] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--context` | `-c` | ビルドコンテキストに含めるファイルまたはディレクトリ（複数回指定可） |
-| `--cpu` | | サンドボックスに割り当てる CPU コア数（既定: 1） |
-| `--disk` | | サンドボックスに割り当てるディスク容量（GB）（既定: 3） |
-| `--dockerfile` | `-f` | ビルド対象の Dockerfile のパス |
-| `--entrypoint` | `-e` | スナップショットのエントリーポイントコマンド |
-| `--image` | `-i` | スナップショットのイメージ名 |
-| `--memory` | | サンドボックスに割り当てるメモリ容量（GB）（既定: 1） |
-| `--help` | | daytona のヘルプ |
 
-## daytona snapshot delete
+| Long           | Short | 説明                                                                               |
+| :------------- | :---- | :------------------------------------------------------------------------------- |
+| `--context`    | `-c`  | ビルドコンテキストに含めるファイルまたはディレクトリ（複数回指定可）。指定しない場合は、Dockerfile の COPY/ADD コマンドから自動検出されます |
+| `--cpu`        |       | サンドボックスに割り当てる CPU コア数（デフォルト: 1）                                                  |
+| `--disk`       |       | サンドボックスに割り当てるディスク容量（GB）（デフォルト: 3）                                                |
+| `--dockerfile` | `-f`  | ビルドする Dockerfile のパス                                                             |
+| `--entrypoint` | `-e`  | スナップショットのエントリーポイントコマンド                                                           |
+| `--image`      | `-i`  | スナップショットのイメージ名                                                                   |
+| `--memory`     |       | サンドボックスに割り当てるメモリ（GB）（デフォルト: 1）                                                   |
+| `--region`     |       | スナップショットを利用可能にするリージョンの ID（指定がない場合は組織のデフォルトリージョンが使用されます）                          |
+| `--help`       |       | Daytona のヘルプ                                                                     |
+
+## daytona snapshot delete \{#daytona-snapshot-delete\}
 
 スナップショットを削除します
 
@@ -363,28 +390,30 @@ daytona snapshot delete [SNAPSHOT_ID] [flags]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--all` | `-a` | すべてのスナップショットを削除します |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona snapshot list
+| Long     | Short | 説明                 |
+| :------- | :---- | :----------------- |
+| `--all`  | `-a`  | すべてのスナップショットを削除します |
+| `--help` |       | Daytona のヘルプを表示します |
 
-すべてのスナップショットを一覧表示します
+## daytona snapshot list \{#daytona-snapshot-list\}
+
+すべてのスナップショットを一覧表示する
 
 ```shell
 daytona snapshot list [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--limit` | `-l` | 1ページあたりの最大件数 |
-| `--page` | `-p` | ページネーション用のページ番号（1から） |
-| `--help` | | daytona のヘルプ |
 
-## daytona snapshot push
+| Long       | Short | Description                    |
+| :--------- | :---- | :----------------------------- |
+| `--format` | `-f`  | 出力形式。次のいずれかを指定します (yaml, json) |
+| `--limit`  | `-l`  | 1ページあたりの最大件数                   |
+| `--page`   | `-p`  | ページ番号（1から）                     |
+| `--help`   |       | Daytona のヘルプ                   |
+
+## daytona snapshot push \{#daytona-snapshot-push\}
 
 ローカルのスナップショットをプッシュします
 
@@ -393,16 +422,61 @@ daytona snapshot push [SNAPSHOT] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--cpu` | | サンドボックスに割り当てるCPUコア数（デフォルト: 1） |
-| `--disk` | | サンドボックスに割り当てるディスク容量（GB、デフォルト: 3） |
-| `--entrypoint` | `-e` | イメージのエントリポイントコマンド |
-| `--memory` | | サンドボックスに割り当てるメモリ容量（GB、デフォルト: 1） |
-| `--name` | `-n` | スナップショット名を指定 |
-| `--help` | | daytonaのヘルプ |
 
-## daytona version
+| Long           | Short | Description                                 |
+| :------------- | :---- | :------------------------------------------ |
+| `--cpu`        |       | サンドボックスに割り当てるCPUコア数（既定値: 1）                 |
+| `--disk`       |       | サンドボックスに割り当てるディスク容量（GB、既定値: 3）              |
+| `--entrypoint` | `-e`  | イメージのエントリーポイントコマンド                          |
+| `--memory`     |       | サンドボックスに割り当てるメモリ（GB、既定値: 1）                 |
+| `--name`       | `-n`  | スナップショット名を指定                                |
+| `--region`     |       | スナップショットを利用可能にするリージョン ID（既定値は組織のデフォルトリージョン） |
+| `--help`       |       | Daytona のヘルプ                                |
+
+## daytona ssh \{#daytona-ssh\}
+
+サンドボックスに SSH 接続します
+
+```shell
+daytona ssh [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| Long        | Short | 説明                                  |
+| :---------- | :---- | :---------------------------------- |
+| `--expires` |       | SSH アクセストークンの有効期限（分単位。デフォルトは 24 時間） |
+| `--help`    |       | Daytona のヘルプを表示                     |
+
+## daytona start \{#daytona-start\}
+
+サンドボックスを開始する
+
+```shell
+daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
+
+## daytona stop \{#daytona-stop\}
+
+サンドボックスを停止します
+
+```shell
+daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+**フラグ**
+
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
+
+## daytona version \{#daytona-version\}
 
 バージョン番号を表示します
 
@@ -411,24 +485,26 @@ daytona version [flags]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona volume
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
 
-Daytona（デイトナ）のボリュームを管理します
+## daytona volume \{#daytona-volume\}
+
+Daytona のボリュームを管理する
 
 ```shell
 daytona volume [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona volume create
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
+
+## daytona volume create \{#daytona-volume-create\}
 
 ボリュームを作成します
 
@@ -437,12 +513,13 @@ daytona volume create [NAME] [flags]
 ```
 
 **フラグ**
-| ロング | ショート | 説明 |
-| :--- | :---- | :---------- |
-| `--size` | `-s` | ボリュームのサイズ（GB） |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona volume delete
+| Long     | Short | 説明            |
+| :------- | :---- | :------------ |
+| `--size` | `-s`  | ボリュームのサイズ（GB） |
+| `--help` |       | Daytona のヘルプ  |
+
+## daytona volume delete \{#daytona-volume-delete\}
 
 ボリュームを削除します
 
@@ -451,11 +528,12 @@ daytona volume delete [VOLUME_ID] [flags]
 ```
 
 **フラグ**
-| Long | Short | Description |
-| :--- | :---- | :---------- |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona volume get
+| ロング      | ショート | 説明              |
+| :------- | :--- | :-------------- |
+| `--help` |      | Daytona のヘルプを表示 |
+
+## daytona volume get \{#daytona-volume-get\}
 
 ボリュームの詳細を取得する
 
@@ -464,12 +542,13 @@ daytona volume get [VOLUME_ID] [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
 
-## daytona volume list
+| ロング        | ショート | 説明                       |
+| :--------- | :--- | :----------------------- |
+| `--format` | `-f` | 出力形式。yaml または json のいずれか |
+| `--help`   |      | Daytona のヘルプ             |
+
+## daytona volume list \{#daytona-volume-list\}
 
 すべてのボリュームを一覧表示します
 
@@ -478,7 +557,8 @@ daytona volume list [flags]
 ```
 
 **フラグ**
-| Long | Short | 説明 |
-| :--- | :---- | :---------- |
-| `--format` | `-f` | 出力形式。yaml または json のいずれか |
-| `--help` | | daytona のヘルプを表示 |
+
+| Long       | Short | 説明                          |
+| :--------- | :---- | :-------------------------- |
+| `--format` | `-f`  | 出力形式。yaml または json のいずれかを指定 |
+| `--help`   |       | Daytona のヘルプ                |
