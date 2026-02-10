@@ -5,22 +5,23 @@ package services
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/models/enums"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type SandboxService struct {
 	statesCache *cache.StatesCache
 	docker      *docker.DockerClient
+	log         *slog.Logger
 }
 
-func NewSandboxService(statesCache *cache.StatesCache, docker *docker.DockerClient) *SandboxService {
+func NewSandboxService(logger *slog.Logger, statesCache *cache.StatesCache, docker *docker.DockerClient) *SandboxService {
 	return &SandboxService{
+		log:         logger.With(slog.String("component", "sandbox_service")),
 		statesCache: statesCache,
 		docker:      docker,
 	}
@@ -29,7 +30,7 @@ func NewSandboxService(statesCache *cache.StatesCache, docker *docker.DockerClie
 func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId string) *models.CachedStates {
 	sandboxState, err := s.docker.DeduceSandboxState(ctx, sandboxId)
 	if err != nil {
-		log.Warnf("Failed to deduce sandbox %s state: %v", sandboxId, err)
+		s.log.Warn("Failed to deduce sandbox state", "sandboxId", sandboxId, "error", err)
 	}
 
 	s.statesCache.SetSandboxState(ctx, sandboxId, sandboxState)

@@ -13,6 +13,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
@@ -78,7 +79,7 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 		)
 	}
 
-	jobLog.Info("Executing job")
+	jobLog.InfoContext(ctx, "Executing job")
 
 	// Execute the job based on type
 	resultMetadata, err := e.executeJob(ctx, job)
@@ -90,14 +91,14 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 		status = apiclient.JOBSTATUS_FAILED
 		errMsg := err.Error()
 		errorMessage = &errMsg
-		jobLog.Error("Job failed", slog.Any("error", err))
+		jobLog.ErrorContext(ctx, "Job failed", "error", err)
 	} else {
-		jobLog.Info("Job completed successfully")
+		jobLog.InfoContext(ctx, "Job completed successfully")
 	}
 
 	// Report status to API
 	if err := e.updateJobStatus(ctx, job.GetId(), status, resultMetadata, errorMessage); err != nil {
-		jobLog.Error("Failed to update job status", slog.Any("error", err))
+		jobLog.ErrorContext(ctx, "Failed to update job status", "error", err)
 	}
 }
 
@@ -158,6 +159,7 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, err
 	if err != nil {
 		span.RecordError(err)
 		span.SetAttributes(attribute.Bool("error", true))
+		span.SetStatus(codes.Error, "job execution failed")
 	}
 
 	return resultMetadata, err
@@ -199,6 +201,7 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status api
 	if err != nil {
 		span.RecordError(err)
 		span.SetAttributes(attribute.Bool("error", true))
+		span.SetStatus(codes.Error, "update job status failed")
 	}
 
 	return err
@@ -222,7 +225,7 @@ func (e *Executor) parsePayload(payload *string, target interface{}) error {
 func (e *Executor) extractTraceContext(ctx context.Context, job *apiclient.Job) context.Context {
 	traceContext := job.GetTraceContext()
 	if len(traceContext) == 0 {
-		e.log.Debug("no trace context in job", slog.String("job_id", job.GetId()))
+		e.log.DebugContext(ctx, "no trace context in job", "job_id", job.GetId())
 		return ctx
 	}
 
@@ -240,14 +243,14 @@ func (e *Executor) extractTraceContext(ctx context.Context, job *apiclient.Job) 
 
 	// Log trace information if extracted successfully
 	if spanCtx := trace.SpanContextFromContext(ctx); spanCtx.IsValid() {
-		e.log.Debug("extracted trace context from job",
+		e.log.DebugContext(ctx, "extracted trace context from job",
 			slog.String("job_id", job.GetId()),
 			slog.String("trace_id", spanCtx.TraceID().String()),
 			slog.String("span_id", spanCtx.SpanID().String()),
 			slog.Bool("sampled", spanCtx.IsSampled()),
 		)
 	} else {
-		e.log.Warn("trace context present but invalid",
+		e.log.WarnContext(ctx, "trace context present but invalid",
 			slog.String("job_id", job.GetId()),
 			slog.Any("trace_context", traceContext),
 		)
