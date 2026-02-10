@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/session"
 	"github.com/gin-gonic/gin"
@@ -31,6 +32,11 @@ import (
 //	@id				SessionExecuteCommand
 func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 	sessionId := c.Param("sessionId")
+
+	if sessionId == util.EntrypointSessionID {
+		c.Error(common_errors.NewBadRequestError(errors.New("can't execute command in entrypoint session")))
+		return
+	}
 
 	var request SessionExecuteRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -58,7 +64,7 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 
 	isCombinedOutput := session.IsCombinedOutput(sdkVersion, versionComparison, c.Request.Header)
 
-	executeResult, err := s.sessionService.Execute(sessionId, request.Command, request.RunAsync, isCombinedOutput)
+	executeResult, err := s.sessionService.Execute(sessionId, util.EmptyCommandID, request.Command, request.RunAsync, isCombinedOutput)
 	if err != nil {
 		c.Error(fmt.Errorf("failed to execute command: %w", err))
 		return

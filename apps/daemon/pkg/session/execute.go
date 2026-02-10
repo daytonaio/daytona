@@ -19,13 +19,19 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	cmdId := uuid.NewString()
+	if cmdId == util.EmptyCommandID {
+		cmdId = uuid.NewString()
+	}
+
+	if _, ok := session.commands.Get(cmdId); ok {
+		return nil, common_errors.NewConflictError(errors.New("command with the given ID already exists"))
+	}
 
 	command := &Command{
 		Id:      cmdId,
@@ -154,7 +160,7 @@ var cmdWrapperFormat string = `
 
 	# Run your command
 	{ %s; } < "$ip" > "$sp" 2> "$ep"
-	echo "$?" >> %s
+	echo "$?" >> %q
 
 	# drain labelers (cleanup via trap)
 	wait "$r1" "$r2"

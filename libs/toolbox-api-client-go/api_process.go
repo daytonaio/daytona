@@ -106,6 +106,34 @@ type ProcessAPI interface {
 	ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error)
 
 	/*
+		GetEntrypointLogs Get entrypoint logs
+
+		Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ProcessAPIGetEntrypointLogsRequest
+	*/
+	GetEntrypointLogs(ctx context.Context) ProcessAPIGetEntrypointLogsRequest
+
+	// GetEntrypointLogsExecute executes the request
+	//  @return string
+	GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (string, *http.Response, error)
+
+	/*
+		GetEntrypointSession Get entrypoint session details
+
+		Get details of an entrypoint session including its commands
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ProcessAPIGetEntrypointSessionRequest
+	*/
+	GetEntrypointSession(ctx context.Context) ProcessAPIGetEntrypointSessionRequest
+
+	// GetEntrypointSessionExecute executes the request
+	//  @return Session
+	GetEntrypointSessionExecute(r ProcessAPIGetEntrypointSessionRequest) (*Session, *http.Response, error)
+
+	/*
 		GetPtySession Get PTY session information
 
 		Get detailed information about a specific pseudo-terminal session
@@ -819,6 +847,216 @@ func (a *ProcessAPIService) ExecuteCommandExecute(r ProcessAPIExecuteCommandRequ
 	}
 	// body params
 	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ProcessAPIGetEntrypointLogsRequest struct {
+	ctx        context.Context
+	ApiService ProcessAPI
+	follow     *bool
+}
+
+// Follow logs in real-time (WebSocket only)
+func (r ProcessAPIGetEntrypointLogsRequest) Follow(follow bool) ProcessAPIGetEntrypointLogsRequest {
+	r.follow = &follow
+	return r
+}
+
+func (r ProcessAPIGetEntrypointLogsRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.GetEntrypointLogsExecute(r)
+}
+
+/*
+GetEntrypointLogs Get entrypoint logs
+
+Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIGetEntrypointLogsRequest
+*/
+func (a *ProcessAPIService) GetEntrypointLogs(ctx context.Context) ProcessAPIGetEntrypointLogsRequest {
+	return ProcessAPIGetEntrypointLogsRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return string
+func (a *ProcessAPIService) GetEntrypointLogsExecute(r ProcessAPIGetEntrypointLogsRequest) (string, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetEntrypointLogs")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/session/entrypoint/logs"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.follow != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "follow", r.follow, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"text/plain"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ProcessAPIGetEntrypointSessionRequest struct {
+	ctx        context.Context
+	ApiService ProcessAPI
+}
+
+func (r ProcessAPIGetEntrypointSessionRequest) Execute() (*Session, *http.Response, error) {
+	return r.ApiService.GetEntrypointSessionExecute(r)
+}
+
+/*
+GetEntrypointSession Get entrypoint session details
+
+Get details of an entrypoint session including its commands
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIGetEntrypointSessionRequest
+*/
+func (a *ProcessAPIService) GetEntrypointSession(ctx context.Context) ProcessAPIGetEntrypointSessionRequest {
+	return ProcessAPIGetEntrypointSessionRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Session
+func (a *ProcessAPIService) GetEntrypointSessionExecute(r ProcessAPIGetEntrypointSessionRequest) (*Session, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Session
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetEntrypointSession")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/process/session/entrypoint"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

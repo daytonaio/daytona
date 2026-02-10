@@ -4,11 +4,13 @@
 package session
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/daemon/internal/util"
 )
 
 // SendInput godoc
@@ -27,6 +29,11 @@ import (
 func (s *SessionController) SendInput(c *gin.Context) {
 	sessionId := c.Param("sessionId")
 	commandId := c.Param("commandId")
+
+	if sessionId == util.EntrypointSessionID {
+		c.Error(common_errors.NewBadRequestError(errors.New("can't send input to entrypoint session")))
+		return
+	}
 
 	var request SessionSendInputRequest
 	if err := c.ShouldBindJSON(&request); err != nil {

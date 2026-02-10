@@ -1526,6 +1526,41 @@ paths:
       tags:
         - process
       x-codegen-request-body-name: request
+  /process/session/entrypoint:
+    get:
+      description: Get details of an entrypoint session including its commands
+      operationId: GetEntrypointSession
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: OK
+      summary: Get entrypoint session details
+      tags:
+        - process
+  /process/session/entrypoint/logs:
+    get:
+      description: Get logs for a sandbox entrypoint session. Supports both HTTP and
+        WebSocket streaming.
+      operationId: GetEntrypointLogs
+      parameters:
+        - description: Follow logs in real-time (WebSocket only)
+          in: query
+          name: follow
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Entrypoint log content
+      summary: Get entrypoint logs
+      tags:
+        - process
   /process/session/{sessionId}:
     delete:
       description: Delete an existing shell session
