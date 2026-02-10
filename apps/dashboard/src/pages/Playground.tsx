@@ -18,7 +18,7 @@ import VNCInteractionOptions from '@/components/Playground/VNC/Interaction'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { PlaygroundCategories, playgroundCategoriesData } from '@/enums/Playground'
+import { PlaygroundCategories } from '@/enums/Playground'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { PlaygroundProvider } from '@/providers/PlaygroundProvider'
@@ -26,6 +26,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { SettingsIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useResizeObserver } from 'usehooks-ts'
+
+const playgroundCategoriesData = [
+  { value: PlaygroundCategories.SANDBOX, label: 'Sandbox' },
+  { value: PlaygroundCategories.TERMINAL, label: 'Terminal' },
+  { value: PlaygroundCategories.VNC, label: 'VNC' },
+]
 
 const SlideLeftRight = ({ children, direction }: { children: React.ReactNode; direction: 'left' | 'right' }) => {
   return (

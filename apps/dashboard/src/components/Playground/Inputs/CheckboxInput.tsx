@@ -4,7 +4,7 @@
  */
 
 import { Checkbox } from '@/components/ui/checkbox'
-import { ParameterFormItem } from '@/enums/Playground'
+import { ParameterFormItem } from '@/contexts/PlaygroundContext'
 
 type FormCheckboxInputProps = {
   checkedValue: boolean | undefined

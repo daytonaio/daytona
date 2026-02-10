@@ -7,11 +7,11 @@ import {
   GitBranchesParams,
   GitCloneParams,
   GitOperationsActionFormData,
-  GitOperationsActions,
   GitStatusParams,
   ParameterFormData,
   ParameterFormItem,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { GitOperationsActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'

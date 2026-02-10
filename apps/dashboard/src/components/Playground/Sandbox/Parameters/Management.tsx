@@ -6,7 +6,7 @@
 import { Tooltip } from '@/components/Tooltip'
 import { Label } from '@/components/ui/label'
 import { SANDBOX_SNAPSHOT_DEFAULT_VALUE } from '@/constants/Playground'
-import { NumberParameterFormItem, ParameterFormItem } from '@/enums/Playground'
+import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import { SnapshotDto } from '@daytonaio/api-client'
 import { CodeLanguage, CreateSandboxBaseParams, Resources } from '@daytonaio/sdk'

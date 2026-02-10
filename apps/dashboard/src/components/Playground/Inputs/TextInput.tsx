@@ -4,7 +4,7 @@
  */
 
 import { Input } from '@/components/ui/input'
-import { ParameterFormItem } from '@/enums/Playground'
+import { ParameterFormItem } from '@/contexts/PlaygroundContext'
 
 type FormTextInputProps = {
   textValue: string | undefined

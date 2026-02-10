@@ -4,12 +4,8 @@
  */
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import {
-  VNCInteractionOptionsSectionComponentProps,
-  VNCInteractionOptionsSections,
-  VNCInteractionOptionsSectionsData,
-  WrapVNCInvokeApiType,
-} from '@/enums/Playground'
+import { VNCInteractionOptionsSectionComponentProps, WrapVNCInvokeApiType } from '@/contexts/PlaygroundContext'
+import { VNCInteractionOptionsSections } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
 import { createErrorMessageOutput } from '@/lib/playground'
@@ -20,6 +16,13 @@ import VNCDisplayOperations from './Display'
 import VNCKeyboardOperations from './Keyboard'
 import VNCMouseOperations from './Mouse'
 import VNCScreenshotOperations from './Screenshot'
+
+const VNCInteractionOptionsSectionsData = [
+  { value: VNCInteractionOptionsSections.DISPLAY, label: 'Display' },
+  { value: VNCInteractionOptionsSections.KEYBOARD, label: 'Keyboard' },
+  { value: VNCInteractionOptionsSections.MOUSE, label: 'Mouse' },
+  { value: VNCInteractionOptionsSections.SCREENSHOT, label: 'Screenshot' },
+]
 
 const sectionIcons = {
   [VNCInteractionOptionsSections.DISPLAY]: <MonitorIcon strokeWidth={1.5} />,

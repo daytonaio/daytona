@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
-  DisplayActions,
   PlaygroundActionFormDataBasic,
+  PlaygroundActionInvokeApi,
   VNCInteractionOptionsSectionComponentProps,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { DisplayActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { DisplayInfoResponse, WindowsResponse } from '@daytonaio/api-client'
 import { ComputerUse } from '@daytonaio/sdk'

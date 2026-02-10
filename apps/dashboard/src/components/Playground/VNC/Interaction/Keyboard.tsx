@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
   KeyboardActionFormData,
-  KeyboardActions,
   KeyboardHotKey,
   KeyboardPress,
   KeyboardType,
   NumberParameterFormItem,
   ParameterFormData,
+  PlaygroundActionInvokeApi,
   VNCInteractionOptionsSectionComponentProps,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { KeyboardActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
 import { useState } from 'react'

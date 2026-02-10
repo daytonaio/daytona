@@ -4,7 +4,7 @@
  */
 
 import { Label } from '@/components/ui/label'
-import { ParameterFormItem } from '@/enums/Playground'
+import { ParameterFormItem } from '@/contexts/PlaygroundContext'
 
 type InputLabelProps = {
   formItem: ParameterFormItem

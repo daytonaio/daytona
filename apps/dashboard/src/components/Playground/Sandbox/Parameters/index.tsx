@@ -4,7 +4,7 @@
  */
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { SandboxParametersSections, sandboxParametersSectionsData } from '@/enums/Playground'
+import { SandboxParametersSections } from '@/enums/Playground'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
@@ -15,6 +15,13 @@ import SandboxFileSystem from './FileSystem'
 import SandboxGitOperations from './GitOperations'
 import SandboxManagementParameters from './Management'
 import SandboxProcessCodeExecution from './ProcessCodeExecution'
+
+const sandboxParametersSectionsData = [
+  { value: SandboxParametersSections.SANDBOX_MANAGEMENT, label: 'Management' },
+  { value: SandboxParametersSections.FILE_SYSTEM, label: 'File System' },
+  { value: SandboxParametersSections.GIT_OPERATIONS, label: 'Git Operations' },
+  { value: SandboxParametersSections.PROCESS_CODE_EXECUTION, label: 'Process & Code Execution' },
+]
 
 const sectionIcons = {
   [SandboxParametersSections.SANDBOX_MANAGEMENT]: <BoltIcon strokeWidth={1.5} />,

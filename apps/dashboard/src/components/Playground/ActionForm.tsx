@@ -4,7 +4,8 @@
  */
 
 import { Label } from '@/components/ui/label'
-import { PlaygroundActionFormDataBasic, PlaygroundActions } from '@/enums/Playground'
+import { PlaygroundActionFormDataBasic } from '@/contexts/PlaygroundContext'
+import { PlaygroundActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import PlaygroundActionRunButton from './ActionRunButton'
 
