@@ -7424,6 +7424,8 @@ paths:
       responses:
         '200':
           description: Volume has been marked for deletion
+        '409':
+          description: Volume is in use by one or more sandboxes
       security:
         - bearer: []
         - oauth2:
