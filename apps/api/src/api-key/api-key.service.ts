@@ -15,6 +15,8 @@ import { OrganizationResourcePermissionsUnassignedEvent } from '../organization/
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { generateApiKeyHash, generateApiKeyValue } from '../common/utils/api-key'
+import { OrganizationDeletedEvent } from '../organization/events/organization-deleted.event'
+import { getApiKeyValidationCacheKey, getApiKeyUserCacheKey } from './constants/api-key-cache-keys.constant'
 
 @Injectable()
 export class ApiKeyService {
@@ -149,7 +151,7 @@ export class ApiKeyService {
 
   private async invalidateApiKeyCache(keyHash: string): Promise<void> {
     try {
-      const cacheKey = `api-key:validation:${keyHash}`
+      const cacheKey = getApiKeyValidationCacheKey(keyHash)
       await this.redis.del(cacheKey)
       this.logger.debug(`Invalidated cache for API key: ${cacheKey}`)
     } catch (error) {
@@ -172,5 +174,31 @@ export class ApiKeyService {
     })
 
     await Promise.all(apiKeysToRevoke.map((apiKey) => this.deleteWithEntityManager(payload.entityManager, apiKey)))
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    // Get API keys before deletion to invalidate caches
+    const apiKeys = await entityManager.find(ApiKey, {
+      where: { organizationId },
+      select: ['keyHash', 'userId'],
+    })
+
+    await entityManager.delete(ApiKey, { organizationId })
+
+    // Invalidate caches
+    try {
+      const validationCacheKeys = apiKeys.map((apiKey) => getApiKeyValidationCacheKey(apiKey.keyHash))
+      const userCacheKeys = apiKeys.map((apiKey) => getApiKeyUserCacheKey(apiKey.userId))
+      if (validationCacheKeys.length > 0 || userCacheKeys.length > 0) {
+        await this.redis.del(...validationCacheKeys, ...userCacheKeys)
+      }
+    } catch (error) {
+      this.logger.error(`Failed to invalidate API key caches for organization ${organizationId}:`, error)
+    }
   }
 }

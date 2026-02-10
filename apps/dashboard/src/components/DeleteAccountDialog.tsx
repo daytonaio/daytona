@@ -18,27 +18,24 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-interface DeleteOrganizationDialogProps {
-  organizationName: string
-  onDeleteOrganization: () => Promise<{ success: boolean; reasons: string[] }>
+interface DeleteAccountDialogProps {
+  onDeleteAccount: () => Promise<{ success: boolean; reasons: string[] }>
   loading: boolean
 }
 
-export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> = ({
-  organizationName,
-  onDeleteOrganization,
-  loading,
-}) => {
+const CONFIRM_TEXT = 'DELETE'
+
+export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onDeleteAccount, loading }) => {
   const [open, setOpen] = useState(false)
-  const [confirmName, setConfirmName] = useState('')
+  const [confirmText, setConfirmText] = useState('')
   const [errorReasons, setErrorReasons] = useState<string[]>([])
 
-  const handleDeleteOrganization = async () => {
+  const handleDeleteAccount = async () => {
     setErrorReasons([])
-    const result = await onDeleteOrganization()
+    const result = await onDeleteAccount()
     if (result.success) {
       setOpen(false)
-      setConfirmName('')
+      setConfirmText('')
       setErrorReasons([])
     } else {
       setErrorReasons(result.reasons)
@@ -51,21 +48,22 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
       onOpenChange={(isOpen) => {
         setOpen(isOpen)
         if (!isOpen) {
-          setConfirmName('')
+          setConfirmText('')
           setErrorReasons([])
         }
       }}
     >
       <DialogTrigger asChild>
         <Button variant="destructive" className="w-auto px-4">
-          Delete Organization
+          Delete Account
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Organization</DialogTitle>
+          <DialogTitle>Delete Account</DialogTitle>
           <DialogDescription>
-            This will permanently delete all associated data. This action cannot be undone.
+            This will permanently delete your account and all associated data including sandboxes, snapshots, and
+            organizations you created. This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         {errorReasons.length > 0 && (
@@ -78,23 +76,23 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
           </div>
         )}
         <form
-          id="delete-organization-form"
+          id="delete-account-form"
           className="space-y-6 overflow-y-auto px-1 pb-1"
           onSubmit={async (e) => {
             e.preventDefault()
-            await handleDeleteOrganization()
+            await handleDeleteAccount()
           }}
         >
           <div className="space-y-6">
             <div className="space-y-3">
               <Label htmlFor="confirm-action">
-                Please type <span className="font-bold cursor-text select-all">{organizationName}</span> to confirm
+                Please type <span className="font-bold cursor-text select-all">{CONFIRM_TEXT}</span> to confirm
               </Label>
               <Input
                 id="confirm-action"
-                value={confirmName}
-                onChange={(e) => setConfirmName(e.target.value)}
-                placeholder={organizationName}
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder={CONFIRM_TEXT}
               />
             </div>
           </div>
@@ -112,11 +110,11 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
           ) : (
             <Button
               type="submit"
-              form="delete-organization-form"
+              form="delete-account-form"
               variant="destructive"
-              disabled={confirmName !== organizationName}
+              disabled={confirmText !== CONFIRM_TEXT}
             >
-              Delete
+              Delete Account
             </Button>
           )}
         </DialogFooter>
