@@ -3,22 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
   MouseActionFormData,
-  MouseActions,
-  MouseButton,
   MouseClick,
   MouseDrag,
   MouseMove,
   MouseScroll,
-  MouseScrollDirection,
   NumberParameterFormItem,
   ParameterFormData,
   ParameterFormItem,
   PlaygroundActionFormDataBasic,
+  PlaygroundActionInvokeApi,
   VNCInteractionOptionsSectionComponentProps,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { MouseActions, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
 import React, { useState } from 'react'

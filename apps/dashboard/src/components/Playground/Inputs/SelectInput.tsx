@@ -4,7 +4,7 @@
  */
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ParameterFormItem } from '@/enums/Playground'
+import { ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { Loader2 } from 'lucide-react'
 
 type SelectOption = {

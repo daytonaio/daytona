@@ -4,7 +4,7 @@
  */
 
 import { Input } from '@/components/ui/input'
-import { NumberParameterFormItem } from '@/enums/Playground'
+import { NumberParameterFormItem } from '@/contexts/PlaygroundContext'
 import React from 'react'
 
 type FormNumberInputProps = {

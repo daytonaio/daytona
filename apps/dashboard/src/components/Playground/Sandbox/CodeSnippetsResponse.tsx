@@ -9,12 +9,9 @@ import TooltipButton from '@/components/TooltipButton'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  codeSnippetSupportedLanguages,
-  FileSystemActions,
-  GitOperationsActions,
-  ProcessCodeExecutionActions,
-} from '@/enums/Playground'
+import PythonIcon from '@/assets/python.svg'
+import TypescriptIcon from '@/assets/typescript.svg'
+import { FileSystemActions, GitOperationsActions, ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
 import { createErrorMessageOutput } from '@/lib/playground'
@@ -25,7 +22,12 @@ import { ReactNode, useMemo, useState } from 'react'
 import { Group, Panel, usePanelRef } from 'react-resizable-panels'
 import ResponseCard from '../ResponseCard'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
-import { codeSnippetGenerators, CodeSnippetParams } from './code-snippets'
+import { codeSnippetGenerators, CodeSnippetParams } from './CodeSnippets'
+
+const codeSnippetSupportedLanguages = [
+  { value: CodeLanguage.PYTHON, label: 'Python', icon: PythonIcon },
+  { value: CodeLanguage.TYPESCRIPT, label: 'TypeScript', icon: TypescriptIcon },
+]
 
 const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)

@@ -12,32 +12,178 @@ import {
   Sandbox,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
+  ScreenshotOptions,
+  ComputerUse,
 } from '@daytonaio/sdk'
 import {
-  KeyboardHotKey,
-  KeyboardPress,
-  KeyboardType,
-  MouseClick,
-  MouseDrag,
-  MouseMove,
-  MouseScroll,
-  CustomizedScreenshotOptions,
+  FileSystemActions,
+  GitOperationsActions,
+  KeyboardActions,
+  MouseActions,
+  MouseButton,
+  MouseScrollDirection,
   PlaygroundActions,
-  ParameterFormData,
-  PlaygroundActionFormDataBasic,
-  PlaygroundActionWithParamsFormData,
-  GitCloneParams,
-  GitStatusParams,
-  GitBranchesParams,
-  CodeRunParams,
-  ShellCommandRunParams,
-  ParameterFormItem,
-  ListFilesParams,
-  CreateFolderParams,
-  DeleteFileParams,
+  ProcessCodeExecutionActions,
+  ScreenshotActions,
+  ScreenshotFormatOption,
 } from '@/enums/Playground'
 import { UsePlaygroundSandboxResult } from '@/hooks/usePlaygroundSandbox'
 import { createContext, ReactNode } from 'react'
+
+export interface ParameterFormItem {
+  label: string
+  placeholder: string
+  key: string
+  required?: boolean
+}
+
+export interface NumberParameterFormItem extends ParameterFormItem {
+  min: number
+  max: number
+  step?: number
+}
+
+// keyof (A | B | C) gives intersections of types i.e. type = common properties to A,B,C
+// KeysOf gives us keyof A | keyof B | keyof C behaviour
+export type KeysOf<T> = T extends any ? keyof T : never
+
+export type ParameterFormData<T> = ((ParameterFormItem | NumberParameterFormItem) & { key: KeysOf<T> })[]
+
+// Form data structure for actions which don't require any parameters for their execution
+export interface PlaygroundActionFormDataBasic<A> {
+  label: string
+  description: string
+  methodName: A
+  onChangeParamsValidationDisabled?: boolean
+}
+
+// Form data structure for actions which use certain parameters for their execution
+export type PlaygroundActionWithParamsFormData<A, T> = PlaygroundActionFormDataBasic<A> & {
+  parametersFormItems: ParameterFormData<T>
+  parametersState: T
+}
+
+// --- VNC param types ---
+
+export type KeyboardHotKey = {
+  keys: string
+}
+
+export type KeyboardPress = {
+  key: string
+  modifiers?: string
+}
+
+export type KeyboardType = {
+  text: string
+  delay?: number
+}
+
+export type MouseClick = {
+  x: number
+  y: number
+  button?: MouseButton
+  double?: boolean
+}
+
+export type MouseDrag = {
+  startX: number
+  startY: number
+  endX: number
+  endY: number
+  button?: MouseButton
+}
+
+export type MouseMove = {
+  x: number
+  y: number
+}
+
+export type MouseScroll = {
+  x: number
+  y: number
+  direction: MouseScrollDirection
+  amount?: number
+}
+
+export interface CustomizedScreenshotOptions extends Omit<ScreenshotOptions, 'format'> {
+  format?: ScreenshotFormatOption
+}
+
+// --- VNC component types ---
+
+export type WrapVNCInvokeApiType = (
+  invokeApi: PlaygroundActionInvokeApi,
+) => <A, T>(
+  actionFormData: PlaygroundActionFormDataBasic<A> | PlaygroundActionWithParamsFormData<A, T>,
+) => Promise<void>
+
+export type VNCInteractionOptionsSectionComponentProps = {
+  disableActions: boolean
+  ComputerUseClient: ComputerUse | null
+  wrapVNCInvokeApi: WrapVNCInvokeApiType
+}
+
+// --- Action-specific form data types ---
+
+export type KeyboardActionFormData<T extends KeyboardHotKey | KeyboardPress | KeyboardType> =
+  PlaygroundActionWithParamsFormData<KeyboardActions, T>
+
+export type MouseActionFormData<T extends MouseClick | MouseDrag | MouseMove | MouseScroll> =
+  PlaygroundActionWithParamsFormData<MouseActions, T>
+
+export type ScreenshotActionFormData<T extends ScreenshotRegion | CustomizedScreenshotOptions> =
+  PlaygroundActionWithParamsFormData<ScreenshotActions, T>
+
+// --- Sandbox param types ---
+
+export type ListFilesParams = {
+  directoryPath: string
+}
+
+export type CreateFolderParams = {
+  folderDestinationPath: string
+  permissions: string
+}
+
+export type DeleteFileParams = {
+  filePath: string
+  recursive?: boolean
+}
+
+export type GitCloneParams = {
+  repositoryURL: string
+  cloneDestinationPath: string
+  branchToClone?: string
+  commitToClone?: string
+  authUsername?: string
+  authPassword?: string
+}
+
+export type GitStatusParams = {
+  repositoryPath: string
+}
+
+export type GitBranchesParams = {
+  repositoryPath: string
+}
+
+export type CodeRunParams = {
+  languageCode?: string
+}
+
+export type ShellCommandRunParams = {
+  shellCommand?: string
+}
+
+export type FileSystemActionFormData<T extends ListFilesParams | CreateFolderParams | DeleteFileParams> =
+  PlaygroundActionWithParamsFormData<FileSystemActions, T>
+
+export type GitOperationsActionFormData<T extends GitCloneParams | GitStatusParams | GitBranchesParams> =
+  PlaygroundActionWithParamsFormData<GitOperationsActions, T>
+
+export type ProcessCodeExecutionOperationsActionFormData<T extends CodeRunParams | ShellCommandRunParams> =
+  PlaygroundActionWithParamsFormData<ProcessCodeExecutionActions, T>
 
 export interface SandboxParams {
   language?: CodeLanguage

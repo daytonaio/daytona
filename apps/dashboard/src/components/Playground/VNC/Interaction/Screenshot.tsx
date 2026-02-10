@@ -4,17 +4,16 @@
  */
 
 import { Label } from '@/components/ui/label'
-import { PlaygroundActionInvokeApi } from '@/contexts/PlaygroundContext'
 import {
   CustomizedScreenshotOptions,
   NumberParameterFormItem,
   ParameterFormData,
   ParameterFormItem,
+  PlaygroundActionInvokeApi,
   ScreenshotActionFormData,
-  ScreenshotActions,
-  ScreenshotFormatOption,
   VNCInteractionOptionsSectionComponentProps,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { ScreenshotActions, ScreenshotFormatOption } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { CompressedScreenshotResponse, RegionScreenshotResponse } from '@daytonaio/api-client'
 import { ScreenshotResponse } from '@daytonaio/toolbox-api-client'

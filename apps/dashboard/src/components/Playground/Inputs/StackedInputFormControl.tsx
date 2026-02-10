@@ -4,7 +4,7 @@
  */
 
 import React, { ReactNode } from 'react'
-import { ParameterFormItem } from '@/enums/Playground'
+import { ParameterFormItem } from '@/contexts/PlaygroundContext'
 import InputLabel from './Label'
 
 type StackedInputFormControlProps = {

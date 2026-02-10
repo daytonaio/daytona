@@ -7,10 +7,10 @@ import CodeBlock from '@/components/CodeBlock'
 import {
   CodeRunParams,
   ParameterFormItem,
-  ProcessCodeExecutionActions,
   ProcessCodeExecutionOperationsActionFormData,
   ShellCommandRunParams,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { getLanguageCodeToRun } from '@/lib/playground'
 import { CodeLanguage } from '@daytonaio/sdk'

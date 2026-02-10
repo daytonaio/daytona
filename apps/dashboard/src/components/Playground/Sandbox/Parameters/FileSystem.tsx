@@ -7,11 +7,11 @@ import {
   CreateFolderParams,
   DeleteFileParams,
   FileSystemActionFormData,
-  FileSystemActions,
   ListFilesParams,
   ParameterFormData,
   ParameterFormItem,
-} from '@/enums/Playground'
+} from '@/contexts/PlaygroundContext'
+import { FileSystemActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
