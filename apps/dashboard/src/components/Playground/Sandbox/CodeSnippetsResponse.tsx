@@ -21,18 +21,11 @@ import { createErrorMessageOutput } from '@/lib/playground'
 import { cn } from '@/lib/utils'
 import { CodeLanguage, Sandbox } from '@daytonaio/sdk'
 import { ChevronUpIcon, Loader2, PanelBottom, Play, XIcon } from 'lucide-react'
-import { ReactNode, useCallback, useMemo, useRef, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { Group, Panel, usePanelRef } from 'react-resizable-panels'
 import ResponseCard from '../ResponseCard'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
-
-type CodeSnippetsSectionStartNewLinesData = {
-  isFileSystemOperationsFirstSectionSnippet: boolean
-  isGitOperationsFirstSectionSnippet: boolean
-}
-
-// Type for the keys
-type CodeSnippetsSectionFlagKey = keyof CodeSnippetsSectionStartNewLinesData
+import { codeSnippetGenerators, CodeSnippetParams } from './code-snippets'
 
 const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
@@ -42,485 +35,73 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const { sandboxParametersState, actionRuntimeError, getSandboxParametersInfo } = usePlayground()
   const { updateSandbox, createSandboxFromParams } = usePlaygroundSandbox(true)
 
-  const {
-    useLanguageParam,
-    useResources,
-    useResourcesCPU,
-    useResourcesMemory,
-    useResourcesDisk,
-    createSandboxParamsExist,
-    useAutoStopInterval,
-    useAutoArchiveInterval,
-    useAutoDeleteInterval,
-    useSandboxCreateParams,
-    useCustomSandboxSnapshotName,
-    createSandboxFromImage,
-    createSandboxFromSnapshot,
-  } = getSandboxParametersInfo()
-
-  // useRef prevents new object reference creation on every render which would trigger useEffect calls on every render
-  const codeSnippetsSectionStartNewLinesData = useRef<CodeSnippetsSectionStartNewLinesData>({
-    isFileSystemOperationsFirstSectionSnippet: false,
-    isGitOperationsFirstSectionSnippet: false,
-  })
-  // Reset values to false on every render because of possible section layout changes
-  for (const property in codeSnippetsSectionStartNewLinesData.current)
-    codeSnippetsSectionStartNewLinesData.current[property as CodeSnippetsSectionFlagKey] = false
-  // Helper method to determine number of new line characters at the beginning of each code snippets section to ensure consistent spacing
-  const getCodeSnippetsSectionStartNewLines = useCallback((sectionPropertyName: CodeSnippetsSectionFlagKey) => {
-    // For the first section we need a double new line character, for others just one
-    let sectionStartNewLines = '\n'
-    if (!codeSnippetsSectionStartNewLinesData.current[sectionPropertyName]) {
-      // Indicate that the first snippet section is encountered so that subsequent sections use a single new line character
-      codeSnippetsSectionStartNewLinesData.current[sectionPropertyName] = true
-      sectionStartNewLines = '\n\n'
-    }
-    return sectionStartNewLines
-  }, [])
-
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
   const fileSystemListFilesLocationSet = !actionRuntimeError[FileSystemActions.LIST_FILES]
-
-  // All parameters are required
   const fileSystemCreateFolderParamsSet = !actionRuntimeError[FileSystemActions.CREATE_FOLDER]
-
   const fileSystemDeleteFileRequiredParamsSet = !actionRuntimeError[FileSystemActions.DELETE_FILE]
   const useFileSystemDeleteFileRecursive =
     fileSystemDeleteFileRequiredParamsSet && sandboxParametersState['deleteFileParams'].recursive === true
-
   const shellCommandExists = !actionRuntimeError[ProcessCodeExecutionActions.SHELL_COMMANDS_RUN]
-
   const codeToRunExists = !actionRuntimeError[ProcessCodeExecutionActions.CODE_RUN]
-
   const gitCloneOperationRequiredParamsSet = !actionRuntimeError[GitOperationsActions.GIT_CLONE]
-  const useGitCloneBranch = sandboxParametersState['gitCloneParams'].branchToClone
-  const useGitCloneCommitId = sandboxParametersState['gitCloneParams'].commitToClone
-  const useGitCloneUsername = sandboxParametersState['gitCloneParams'].authUsername
-  const useGitClonePassword = sandboxParametersState['gitCloneParams'].authPassword
-
+  const useGitCloneBranch = !!sandboxParametersState['gitCloneParams'].branchToClone
+  const useGitCloneCommitId = !!sandboxParametersState['gitCloneParams'].commitToClone
+  const useGitCloneUsername = !!sandboxParametersState['gitCloneParams'].authUsername
+  const useGitClonePassword = !!sandboxParametersState['gitCloneParams'].authPassword
   const gitStatusOperationLocationSet = !actionRuntimeError[GitOperationsActions.GIT_STATUS]
-
   const gitBranchesOperationLocationSet = !actionRuntimeError[GitOperationsActions.GIT_BRANCHES_LIST]
 
-  const getImportsCodeSnippet = useCallback(() => {
-    const python =
-      [
-        'from daytona import Daytona',
-        useConfigObject ? 'DaytonaConfig' : '',
-        useSandboxCreateParams
-          ? createSandboxFromSnapshot
-            ? 'CreateSandboxFromSnapshotParams'
-            : 'CreateSandboxFromImageParams'
-          : '',
-        useResources ? 'Resources' : '',
-        createSandboxFromImage ? 'Image' : '',
-      ]
-        .filter(Boolean)
-        .join(', ') + '\n'
-    const typeScript =
-      ['import { Daytona', useConfigObject ? 'DaytonaConfig' : '', createSandboxFromImage ? 'Image' : '']
-        .filter(Boolean)
-        .join(', ') + " } from '@daytonaio/sdk'\n"
-    return { python, typeScript }
-  }, [useConfigObject, useSandboxCreateParams, createSandboxFromSnapshot, createSandboxFromImage, useResources])
-
-  const getDaytonaConfigCodeSnippet = useCallback(() => {
-    let python = '',
-      typeScript = ''
-    if (useConfigObject) {
-      python = ['\n# Define the configuration', 'config = DaytonaConfig()'].filter(Boolean).join('\n') + '\n'
-      typeScript =
-        ['\n// Define the configuration', 'const config: DaytonaConfig = { }'].filter(Boolean).join('\n') + '\n'
-    }
-    return { python, typeScript }
-  }, [useConfigObject])
-
-  const getDaytonaClientCodeSnippet = useCallback(() => {
-    const python = ['# Initialize the Daytona client', `daytona = Daytona(${useConfigObject ? 'config' : ''})`]
-      .filter(Boolean)
-      .join('\n')
-    const typeScript = [
-      '\t// Initialize the Daytona client',
-      `\tconst daytona = new Daytona(${useConfigObject ? 'config' : ''})`,
-    ]
-      .filter(Boolean)
-      .join('\n')
-    return { python, typeScript }
-  }, [useConfigObject])
-
-  const getResourcesCodeSnippet = useCallback(() => {
-    let python = '',
-      typeScript = ''
-    if (useResources) {
-      const pythonResourcesIndentation = '\t'
-      const typeScriptResourcesIndentation = '\t\t\t\t'
-      python = [
-        '\n\n# Create a Sandbox with custom resources\nresources = Resources(',
-        useResourcesCPU
-          ? `${pythonResourcesIndentation}cpu=${sandboxParametersState['resources']['cpu']}, # ${sandboxParametersState['resources']['cpu']} CPU cores`
-          : '',
-        useResourcesMemory
-          ? `${pythonResourcesIndentation}memory=${sandboxParametersState['resources']['memory']}, # ${sandboxParametersState['resources']['memory']}GB RAM`
-          : '',
-        useResourcesDisk
-          ? `${pythonResourcesIndentation}disk=${sandboxParametersState['resources']['disk']}, # ${sandboxParametersState['resources']['disk']}GB disk space`
-          : '',
-        ')',
-      ]
-        .filter(Boolean)
-        .join('\n')
-      typeScript = [
-        `${typeScriptResourcesIndentation.slice(0, -1)}resources: {`,
-        useResourcesCPU
-          ? `${typeScriptResourcesIndentation}cpu: ${sandboxParametersState['resources']['cpu']}, // ${sandboxParametersState['resources']['cpu']} CPU cores`
-          : '',
-        useResourcesMemory
-          ? `${typeScriptResourcesIndentation}memory: ${sandboxParametersState['resources']['memory']}, // ${sandboxParametersState['resources']['memory']}GB RAM`
-          : '',
-        useResourcesDisk
-          ? `${typeScriptResourcesIndentation}disk: ${sandboxParametersState['resources']['disk']}, // ${sandboxParametersState['resources']['disk']}GB disk space`
-          : '',
-        `${typeScriptResourcesIndentation.slice(0, -1)}}`,
-      ]
-        .filter(Boolean)
-        .join('\n')
-    }
-    return { python, typeScript }
-  }, [useResources, useResourcesCPU, useResourcesMemory, useResourcesDisk, sandboxParametersState])
-
-  const getSandboxParamsSnippet = useCallback(() => {
-    let python = '',
-      typeScript = ''
-    if (useSandboxCreateParams) {
-      const pythonIndentation = '\t'
-      const typeScriptIndentation = '\t\t\t'
-      python = [
-        `\n\nparams = ${createSandboxFromSnapshot ? 'CreateSandboxFromSnapshotParams' : 'CreateSandboxFromImageParams'}(`,
-        useCustomSandboxSnapshotName ? `${pythonIndentation}snapshot="${sandboxParametersState['snapshotName']}",` : '',
-        createSandboxFromImage ? `${pythonIndentation}image=Image.debian_slim("3.13"),` : '',
-        useResources ? `${pythonIndentation}resources=resources,` : '',
-        useLanguageParam ? `${pythonIndentation}language="${sandboxParametersState['language']}"` : '',
-        ...(createSandboxParamsExist
-          ? [
-              useAutoStopInterval
-                ? `${pythonIndentation}auto_stop_interval=${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantees that value isn't undefined so we put as number to silence TS compiler
-                : '',
-              useAutoArchiveInterval
-                ? `${pythonIndentation}auto_archive_interval=${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, # Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
-                : '',
-              useAutoDeleteInterval
-                ? `${pythonIndentation}auto_delete_interval=${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']}, # ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == 0 ? 'Sandbox will be deleted immediately after stopping' : sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == -1 ? 'Auto-delete functionality disabled' : `Auto-delete after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']} minutes`}`
-                : '',
-            ]
-          : []),
-        ')',
-      ]
-        .filter(Boolean)
-        .join('\n')
-      typeScript = [
-        `{`,
-        useCustomSandboxSnapshotName
-          ? `${typeScriptIndentation}snapshot: '${sandboxParametersState['snapshotName']}',`
-          : '',
-        createSandboxFromImage ? `${typeScriptIndentation}image: Image.debianSlim("3.13"),` : '',
-        getResourcesCodeSnippet().typeScript,
-        useLanguageParam ? `${typeScriptIndentation}language: '${sandboxParametersState['language']}',` : '',
-        ...(createSandboxParamsExist
-          ? [
-              useAutoStopInterval
-                ? `${typeScriptIndentation}autoStopInterval: ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] == 0 ? 'Disables the auto-stop feature' : `Sandbox will be stopped after ${sandboxParametersState['createSandboxBaseParams']['autoStopInterval']} minute${(sandboxParametersState['createSandboxBaseParams']['autoStopInterval'] as number) > 1 ? 's' : ''}`}` // useAutoStopInterval guarantees that value isn't undefined so we put as number to silence TS compiler
-                : '',
-              useAutoArchiveInterval
-                ? `${typeScriptIndentation}autoArchiveInterval: ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']}, // Auto-archive after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval'] == 0 ? '30 days' : `${sandboxParametersState['createSandboxBaseParams']['autoArchiveInterval']} minutes`}`
-                : '',
-              useAutoDeleteInterval
-                ? `${typeScriptIndentation}autoDeleteInterval: ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']}, // ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == 0 ? 'Sandbox will be deleted immediately after stopping' : sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval'] == -1 ? 'Auto-delete functionality disabled' : `Auto-delete after a Sandbox has been stopped for ${sandboxParametersState['createSandboxBaseParams']['autoDeleteInterval']} minutes`}`
-                : '',
-            ]
-          : []),
-        `${typeScriptIndentation.slice(0, -1)}}`,
-      ]
-        .filter(Boolean)
-        .join('\n')
-    }
-    return { python, typeScript }
-  }, [
-    useSandboxCreateParams,
-    useResources,
-    useLanguageParam,
-    createSandboxParamsExist,
-    useAutoStopInterval,
-    getResourcesCodeSnippet,
-    useAutoArchiveInterval,
-    useAutoDeleteInterval,
-    useCustomSandboxSnapshotName,
-    sandboxParametersState,
-    createSandboxFromImage,
-    createSandboxFromSnapshot,
-  ])
-
-  const getDaytonaCreateSnippet = useCallback(() => {
-    const python = [
-      '\n# Create the Sandbox instance',
-      `sandbox = daytona.create(${useSandboxCreateParams ? 'params' : ''})`,
-      'print(f"Sandbox created:{sandbox.id}")',
-    ].join('\n')
-    const typeScript = [
-      '\t\t// Create the Sandbox instance',
-      `\t\tconst sandbox = await daytona.create(${useSandboxCreateParams ? getSandboxParamsSnippet().typeScript : ''})`,
-    ].join('\n')
-    return { python, typeScript }
-  }, [useSandboxCreateParams, getSandboxParamsSnippet])
-
-  const getFileSystemOperationsSnippet = useCallback(() => {
-    const python = [],
-      typeScript = []
-    const pythonIndentation = '\t'
-    const typeScriptIndentation = '\t\t\t'
-    if (fileSystemCreateFolderParamsSet) {
-      // First section always has double new line characters -> we don't need getCodeSnippetsSectionStartNewLines return value, just signalize that first section is found
-      getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
-      python.push(
-        '\n\n# Create folder with specific permissions',
-        `sandbox.fs.create_folder("${sandboxParametersState['createFolderParams'].folderDestinationPath}", "${sandboxParametersState['createFolderParams'].permissions}")`,
-      )
-      typeScript.push(
-        `\n\n${typeScriptIndentation.slice(0, -1)}// Create folder with specific permissions`,
-        `${typeScriptIndentation.slice(0, -1)}await sandbox.fs.createFolder("${sandboxParametersState['createFolderParams'].folderDestinationPath}", "${sandboxParametersState['createFolderParams'].permissions}")`,
-      )
-    }
-    if (fileSystemListFilesLocationSet) {
-      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
-      python.push(
-        `${sectionStartNewLines}# List files in a directory`,
-        `files = sandbox.fs.list_files("${sandboxParametersState['listFilesParams'].directoryPath}")`,
-        'for file in files:',
-        `${pythonIndentation}print(f"Name: {file.name}")`,
-        `${pythonIndentation}print(f"Is directory: {file.is_dir}")`,
-        `${pythonIndentation}print(f"Size: {file.size}")`,
-        `${pythonIndentation}print(f"Modified: {file.mod_time}")`,
-      )
-      typeScript.push(
-        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// List files in a directory`,
-        `${typeScriptIndentation.slice(0, -1)}const files = await sandbox.fs.listFiles("${sandboxParametersState['listFilesParams'].directoryPath}")`,
-        `${typeScriptIndentation.slice(0, -1)}files.forEach(file => {`,
-        `${typeScriptIndentation}console.log(\`Name: \${file.name}\`)`,
-        `${typeScriptIndentation}console.log(\`Is directory: \${file.isDir}\`)`,
-        `${typeScriptIndentation}console.log(\`Size: \${file.size}\`)`,
-        `${typeScriptIndentation}console.log(\`Modified: \${file.modTime}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}})`,
-      )
-    }
-    if (fileSystemDeleteFileRequiredParamsSet) {
-      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isFileSystemOperationsFirstSectionSnippet')
-      python.push(
-        `${sectionStartNewLines}# Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
-        `sandbox.fs.delete_file("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', True' : ''})`,
-      )
-      typeScript.push(
-        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// Delete ${useFileSystemDeleteFileRecursive ? 'directory' : 'file'}`,
-        `${typeScriptIndentation.slice(0, -1)}await sandbox.fs.deleteFile("${sandboxParametersState['deleteFileParams'].filePath}"${useFileSystemDeleteFileRecursive ? ', true' : ''})`,
-      )
-    }
-    return { python: python.join('\n'), typeScript: typeScript.join('\n') }
-  }, [
-    sandboxParametersState,
-    getCodeSnippetsSectionStartNewLines,
-    fileSystemListFilesLocationSet,
-    fileSystemCreateFolderParamsSet,
-    fileSystemDeleteFileRequiredParamsSet,
-    useFileSystemDeleteFileRecursive,
-  ])
-
-  const getLanguageCodeToRunSnippet = useCallback(() => {
-    let python = '',
-      typeScript = ''
-    if (codeToRunExists) {
-      const pythonIndentation = '\t'
-      const typeScriptIndentation = '\t\t'
-      python = [
-        '\n\n# Run code securely inside the Sandbox',
-        'response = sandbox.process.code_run(',
-        `'''${sandboxParametersState['codeRunParams'].languageCode}'''`,
-        ')',
-        'if response.exit_code != 0:',
-        `${pythonIndentation}print(f"Error: {response.exit_code} {response.result}")`,
-        'else:',
-        `${pythonIndentation}print(response.result)`,
-      ].join('\n')
-      typeScript = [
-        `\n\n${typeScriptIndentation}// Run code securely inside the Sandbox`,
-        `${typeScriptIndentation}const response = await sandbox.process.codeRun(\``,
-        `${sandboxParametersState['codeRunParams'].languageCode}`,
-        `${typeScriptIndentation}\`)`,
-        `${typeScriptIndentation}if (response.exitCode !== 0) {`,
-        `${typeScriptIndentation + '\t'}console.error("Error running code:", response.exitCode, response.result)`,
-        `${typeScriptIndentation}} else {`,
-        `${typeScriptIndentation + '\t'}console.log(response.result)`,
-        `${typeScriptIndentation}}`,
-      ].join('\n')
-    }
-    return { python, typeScript }
-  }, [codeToRunExists, sandboxParametersState])
-
-  const getShellCodeToRunSnippet = useCallback(() => {
-    let python = '',
-      typeScript = ''
-    if (shellCommandExists) {
-      python = [
-        '\n\n# Execute shell commands',
-        `response = sandbox.process.exec("${sandboxParametersState['shellCommandRunParams'].shellCommand}")`,
-        'print(response.result)',
-      ].join('\n')
-      const typeScriptIndentation = '\t\t'
-      typeScript = [
-        `\n\n${typeScriptIndentation}// Execute shell commands`,
-        `${typeScriptIndentation}const response = await sandbox.process.executeCommand('${sandboxParametersState['shellCommandRunParams'].shellCommand}')`,
-        `${typeScriptIndentation}console.log(response.result)`,
-      ].join('\n')
-    }
-    return { python, typeScript }
-  }, [shellCommandExists, sandboxParametersState])
-
-  const getGitOperationsSnippet = useCallback(() => {
-    const python = [],
-      typeScript = []
-    const pythonIndentation = '\t'
-    const typeScriptIndentation = '\t\t\t'
-    if (gitCloneOperationRequiredParamsSet) {
-      // First section always has double new line characters -> we don't need getCodeSnippetsSectionStartNewLines return value, just signalize that first section is found
-      getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
-      python.push(
-        '\n\n# Clone git repository',
-        'sandbox.git.clone(',
-        `${pythonIndentation}url="${sandboxParametersState['gitCloneParams'].repositoryURL}",`,
-        `${pythonIndentation}path="${sandboxParametersState['gitCloneParams'].cloneDestinationPath}",`,
-        useGitCloneBranch
-          ? `${pythonIndentation}branch="${sandboxParametersState['gitCloneParams'].branchToClone}",`
-          : '',
-        useGitCloneCommitId
-          ? `${pythonIndentation}commit_id="${sandboxParametersState['gitCloneParams'].commitToClone}",`
-          : '',
-        useGitCloneUsername
-          ? `${pythonIndentation}username="${sandboxParametersState['gitCloneParams'].authUsername}",`
-          : '',
-        useGitClonePassword
-          ? `${pythonIndentation}password="${sandboxParametersState['gitCloneParams'].authPassword}"`
-          : '',
-        ')',
-      )
-      typeScript.push(
-        `\n\n${typeScriptIndentation.slice(0, -1)}// Clone git repository`,
-        `${typeScriptIndentation.slice(0, -1)}await sandbox.git.clone(`,
-        `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].repositoryURL}",`,
-        `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].cloneDestinationPath}",`,
-        useGitCloneBranch ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].branchToClone}",` : '',
-        useGitCloneCommitId
-          ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].commitToClone}",`
-          : '',
-        useGitCloneUsername
-          ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].authUsername}",`
-          : '',
-        useGitClonePassword ? `${typeScriptIndentation}"${sandboxParametersState['gitCloneParams'].authPassword}"` : '',
-        `${typeScriptIndentation.slice(0, -1)})`,
-      )
-    }
-    if (gitStatusOperationLocationSet) {
-      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
-      python.push(
-        `${sectionStartNewLines}# Get repository status`,
-        `status = sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
-        'print(f"Current branch: {status.current_branch}")',
-        'print(f"Commits ahead: {status.ahead}")',
-        'print(f"Commits behind: {status.behind}")',
-        'for file in status.file_status:',
-        '\tprint(f"File: {file.name}")',
-      )
-      typeScript.push(
-        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// Get repository status`,
-        `${typeScriptIndentation.slice(0, -1)}const status = await sandbox.git.status("${sandboxParametersState['gitStatusParams'].repositoryPath}")`,
-        `${typeScriptIndentation.slice(0, -1)}console.log(\`Current branch: \${status.currentBranch}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}console.log(\`Commits ahead: \${status.ahead}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}console.log(\`Commits behind: \${status.behind}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}status.fileStatus.forEach(file => {`,
-        `${typeScriptIndentation}console.log(\`File: \${file.name}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}})`,
-      )
-    }
-    if (gitBranchesOperationLocationSet) {
-      const sectionStartNewLines = getCodeSnippetsSectionStartNewLines('isGitOperationsFirstSectionSnippet')
-      python.push(
-        `${sectionStartNewLines}# List branches`,
-        `response = sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
-        'for branch in response.branches:',
-        '\tprint(f"Branch: {branch}")',
-      )
-      typeScript.push(
-        `${sectionStartNewLines}${typeScriptIndentation.slice(0, -1)}// List branches`,
-        `${typeScriptIndentation.slice(0, -1)}const response = await sandbox.git.branches("${sandboxParametersState['gitBranchesParams'].repositoryPath}")`,
-        `${typeScriptIndentation.slice(0, -1)}response.branches.forEach(branch => {`,
-        `${typeScriptIndentation}console.log(\`Branch: \${branch}\`)`,
-        `${typeScriptIndentation.slice(0, -1)}})`,
-      )
-    }
-    return { python: python.filter(Boolean).join('\n'), typeScript: typeScript.filter(Boolean).join('\n') }
-  }, [
-    sandboxParametersState,
-    getCodeSnippetsSectionStartNewLines,
-    gitCloneOperationRequiredParamsSet,
-    useGitCloneBranch,
-    useGitCloneCommitId,
-    useGitCloneUsername,
-    useGitClonePassword,
-    gitStatusOperationLocationSet,
-    gitBranchesOperationLocationSet,
-  ])
-
-  const sandboxCodeSnippetsData = useMemo(() => {
-    const { python: pythonImport, typeScript: typeScriptImport } = getImportsCodeSnippet()
-    const { python: pythonDaytonaConfig, typeScript: typeScriptDaytonaConfig } = getDaytonaConfigCodeSnippet()
-    const { python: pythonDaytonaClient, typeScript: typeScriptDaytonaClient } = getDaytonaClientCodeSnippet()
-    const { python: pythonResources } = getResourcesCodeSnippet()
-    const { python: pythonSandboxParams } = getSandboxParamsSnippet()
-    const { python: pythonDaytonaCreate, typeScript: typeScriptDaytonaCreate } = getDaytonaCreateSnippet()
-    const { python: pythonLanguageCodeToRun, typeScript: typeScriptLanguageCodeToRun } = getLanguageCodeToRunSnippet()
-    const { python: pythonShellCodeToRun, typeScript: typeScriptShellCodeToRun } = getShellCodeToRunSnippet()
-    const { python: pythonGitOperations, typeScript: typeScriptGitOperations } = getGitOperationsSnippet()
-    const { python: pythonFileSystemOperations, typeScript: typeScriptFileSystemOperations } =
-      getFileSystemOperationsSnippet()
-    return {
-      [CodeLanguage.PYTHON]: {
-        code: `${pythonImport}${pythonDaytonaConfig}
-${pythonDaytonaClient}${pythonResources}${pythonSandboxParams}
-${pythonDaytonaCreate}${pythonLanguageCodeToRun}${pythonShellCodeToRun}${pythonFileSystemOperations}${pythonGitOperations}`,
+  const codeSnippetParams = useMemo<CodeSnippetParams>(
+    () => ({
+      state: sandboxParametersState,
+      config: getSandboxParametersInfo(),
+      actions: {
+        useConfigObject,
+        fileSystemListFilesLocationSet,
+        fileSystemCreateFolderParamsSet,
+        fileSystemDeleteFileRequiredParamsSet,
+        useFileSystemDeleteFileRecursive,
+        shellCommandExists,
+        codeToRunExists,
+        gitCloneOperationRequiredParamsSet,
+        useGitCloneBranch,
+        useGitCloneCommitId,
+        useGitCloneUsername,
+        useGitClonePassword,
+        gitStatusOperationLocationSet,
+        gitBranchesOperationLocationSet,
       },
+    }),
+    [
+      sandboxParametersState,
+      getSandboxParametersInfo,
+      useConfigObject,
+      fileSystemListFilesLocationSet,
+      fileSystemCreateFolderParamsSet,
+      fileSystemDeleteFileRequiredParamsSet,
+      useFileSystemDeleteFileRecursive,
+      shellCommandExists,
+      codeToRunExists,
+      gitCloneOperationRequiredParamsSet,
+      useGitCloneBranch,
+      useGitCloneCommitId,
+      useGitCloneUsername,
+      useGitClonePassword,
+      gitStatusOperationLocationSet,
+      gitBranchesOperationLocationSet,
+    ],
+  )
+
+  const sandboxCodeSnippetsData = useMemo(
+    () => ({
+      [CodeLanguage.PYTHON]: { code: codeSnippetGenerators[CodeLanguage.PYTHON].buildFullSnippet(codeSnippetParams) },
       [CodeLanguage.TYPESCRIPT]: {
-        code: `${typeScriptImport}${typeScriptDaytonaConfig}
-async function main() {
-${typeScriptDaytonaClient}
-\ttry {
-${typeScriptDaytonaCreate}${typeScriptLanguageCodeToRun}${typeScriptShellCodeToRun}${typeScriptFileSystemOperations}${typeScriptGitOperations}
-\t} catch (error) {
-\t\tconsole.error("Sandbox flow error:", error)
-\t}
-}
-main().catch(console.error)`,
+        code: codeSnippetGenerators[CodeLanguage.TYPESCRIPT].buildFullSnippet(codeSnippetParams),
       },
-      [CodeLanguage.JAVASCRIPT]: { code: '' }, // Currently to prevent ts error when indexing
-    }
-  }, [
-    getImportsCodeSnippet,
-    getDaytonaConfigCodeSnippet,
-    getDaytonaClientCodeSnippet,
-    getResourcesCodeSnippet,
-    getSandboxParamsSnippet,
-    getDaytonaCreateSnippet,
-    getLanguageCodeToRunSnippet,
-    getShellCodeToRunSnippet,
-    getGitOperationsSnippet,
-    getFileSystemOperationsSnippet,
-  ])
+    }),
+    [codeSnippetParams],
+  )
 
   const runCodeSnippet = async () => {
     setIsCodeSnippetRunning(true)
