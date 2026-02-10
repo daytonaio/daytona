@@ -6,7 +6,7 @@ on:
       version:
         description: Version to release (start with "v")
         required: true
-        default: "v0.0.0-dev"
+        default: 'v0.0.0-dev'
 
 env:
   VERSION: ${{ inputs.version }}
@@ -37,13 +37,13 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: 'temurin'
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: '3.2'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -125,13 +125,13 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: 'temurin'
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: '3.2'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -218,10 +218,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
-            arch: arm64
           - runner: [self-hosted, Linux, X64, github-actions-runner-amd64]
             arch: amd64
+          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
+            arch: arm64
 
     steps:
       - name: Checkout code
@@ -252,10 +252,10 @@ jobs:
           go-version-file: go.work
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: '3.2'
       - uses: actions/setup-node@v4
         with:
           node-version: 22

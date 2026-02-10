@@ -6,19 +6,19 @@ on:
       version:
         description: Version to release (start with "v")
         required: true
-        default: "v0.0.0-dev"
+        default: 'v0.0.0-dev'
       pypi_pkg_version:
-        description: "PyPI package version (default: version)"
+        description: 'PyPI package version (default: version)'
         required: false
       npm_pkg_version:
-        description: "NPM package version (default: version)"
+        description: 'NPM package version (default: version)'
         required: false
       npm_tag:
-        description: "NPM tag (default: latest)"
+        description: 'NPM tag (default: latest)'
         required: false
-        default: "latest"
+        default: 'latest'
       rubygems_pkg_version:
-        description: "RubyGems package version (default: version)"
+        description: 'RubyGems package version (default: version)'
         required: false
 
 env:
@@ -49,16 +49,16 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: 'temurin'
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2"
+          ruby-version: '3.2'
           bundler-cache: true
       - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
 
