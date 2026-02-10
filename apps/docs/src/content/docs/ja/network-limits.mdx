@@ -1,0 +1,216 @@
+---
+title: ネットワーク制限（Firewall）
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona は、サンドボックスのインターネットアクセスを制御するためのネットワーク送信（egress）制限を提供します。この機能は、組織の課金ティアに応じて自動適用することも、特定のサンドボックスごとに手動で設定することもできます。
+
+## ティアベースのネットワーク制限 \{#tier-based-network-restrictions\}
+
+ネットワーク制限は、組織の課金ティアに基づいてサンドボックスに自動適用されます。これにより、開発環境に対して安全で管理されたインターネットアクセスが提供されます。
+
+* **ティア 1・ティア 2**: ネットワークアクセスは制限され、サンドボックス単位での上書きはできません
+* **ティア 3・ティア 4**: 既定でフルのインターネットアクセスが有効で、カスタムのネットワーク設定を構成できます
+
+:::note
+**ティア 1・2**: 組織レベルのネットワーク制限がサンドボックスレベルの設定より優先されます。サンドボックス作成時に `networkAllowList` を指定しても、組織のネットワーク制限は引き続き適用されます。
+:::
+
+組織のティアと制限の詳細は、[制限に関するドキュメント](/docs/limits/)を参照してください。
+
+## ネットワークアクセスの管理 \{#managing-network-access\}
+
+### ネットワーク制限付きでサンドボックスを作成する \{#creating-sandboxes-with-network-restrictions\}
+
+`networkAllowList` と `networkBlockAll` パラメータを使用して、サンドボックス作成時のネットワークアクセスを制御できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import CreateSandboxFromSnapshotParams, Daytona
+
+    daytona = Daytona()
+
+    # 特定の IP アドレスへのアクセスを許可（Wikipedia、X/Twitter、プライベートネットワーク）
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        network_allow_list='208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+    ))
+
+    # または、すべてのネットワークアクセスをブロック
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        network_block_all=True
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    const daytona = new Daytona()
+
+    // 特定の IP アドレスへのアクセスを許可（Wikipedia、X/Twitter、プライベートネットワーク）
+    const sandbox = await daytona.create({
+      networkAllowList: '208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+    })
+
+    // または、すべてのネットワークアクセスをブロック
+    const sandbox = await daytona.create({
+      networkBlockAll: true
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # 特定の IP アドレスへのアクセスを許可（Wikipedia、X/Twitter、プライベートネットワーク）
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        network_allow_list: '208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+      )
+    )
+
+    # または、すべてのネットワークアクセスをブロック
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        network_block_all: true
+      )
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+`networkBlockAll` と `networkAllowList` の両方が指定された場合は、`networkBlockAll` が優先され、許可リストは無視されてすべてのネットワークアクセスがブロックされます。
+:::
+
+### ネットワーク許可リストの形式 \{#network-allow-list-format\}
+
+`networkAllowList` には、カンマ区切りで最大5つのCIDRネットワークブロックを指定できます:
+
+* **単一IP**: `208.80.154.232/32`（Wikipedia）
+* **サブネット**: `192.168.1.0/24`（プライベートネットワーク）
+* **複数ネットワーク**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
+
+:::note
+**Essential Services**: 開発に不可欠なサービス（パッケージレジストリ、コンテナレジストリ、Gitリポジトリ、CDNサービス、プラットフォームサービス、システムパッケージマネージャー等）は、すべてのティアでアクセス可能です。\
+これらの必須開発サービスで問題が発生した場合は、すべてのティアで利用可能であるべきため、[support@daytona.io](mailto:support@daytona.io) までご連絡ください。
+
+許可対象サービスの完全な一覧は、以下の [Essential Services](#essential-services) を参照してください。
+:::
+
+## 組織の構成 \{#organization-configuration\}
+
+組織のネットワークアクセスポリシーは、組織の制限ティアに応じて自動的に設定され、組織の管理者が変更することはできません。これらのポリシーは、組織内のすべてのサンドボックスにおけるデフォルトのネットワーク動作を決定します。
+
+## ネットワークアクセスのテスト \{#testing-network-access\}
+
+サンドボックスからのネットワーク接続をテストするには:
+
+```bash
+# 許可されたアドレスへの HTTP 接続をテスト
+curl -I https://208.80.154.232
+
+# パッケージマネージャーへのアクセスをテスト（全ティアで許可）
+apt update  # Ubuntu/Debian の場合
+npm ping    # Node.js の場合
+pip install --dry-run requests  # Python の場合
+```
+
+## セキュリティ上の利点 \{#security-benefits\}
+
+ネットワーク制限には次のようなセキュリティ上のメリットがあります：
+
+* サンドボックスからの**データ流出を防止**します
+* 外部接続を制限することで**攻撃対象領域を縮小**します
+* 開発環境に関する**セキュリティポリシーに準拠**できます
+* ネットワークアクセスを**きめ細かく制御**できます
+
+:::caution
+信頼されていないコードを実行する場合、無制限のネットワークアクセスを有効化するとセキュリティリスクが生じる可能性があります。`networkAllowList` を使用して特定のネットワークアドレスのみを許可するか、`networkBlockAll` を使用してすべてのネットワークアクセスをブロックすることを推奨します。
+
+重要な開発作業を開始する前にネットワーク接続性をテストし、多数の外部サービスへのアクセスが必要な場合はティアのアップグレードを検討してください。
+:::
+
+## 重要サービス \{#essential-services\}
+
+以下のサービスは許可リストに登録され、すべてのティアでアクセス可能です:
+
+### npm レジストリとパッケージマネージャ \{#npm-registry-and-package-managers\}
+
+* **npm レジストリ**: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
+* **Yarn パッケージレジストリ**: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+
+### Git ホスティングとバージョン管理 \{#git-hosting-and-version-control\}
+
+* **GitHub**: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
+* **GitLab**: `gitlab.com`, `registry.gitlab.com`
+* **Bitbucket**: `bitbucket.org`
+
+### Python パッケージマネージャ \{#python-package-managers\}
+
+* **PyPI**: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+
+### Ubuntu/Debian パッケージリポジトリ \{#ubuntudebian-package-repositories\}
+
+* **Ubuntu リポジトリ**: `archive.ubuntu.com`, `security.ubuntu.com`
+* **Debian リポジトリ**: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+
+### CDN とコンテンツ配信 \{#cdn-and-content-delivery\}
+
+* **CDN サービス**: `fastly.com`, `cloudflare.com`
+* **JavaScript CDN**: `unpkg.com`, `jsdelivr.net`
+
+### AI/ML サービス \{#aiml-services\}
+
+* **Anthropic**: `api.anthropic.com`
+* **OpenAI**: `api.openai.com`
+* **Perplexity**: `api.perplexity.ai`
+* **DeepSeek**: `api.deepseek.com`
+* **Groq**: `api.groq.com`
+* **Expo**: `api.expo.dev`
+* **OpenRouter**: `openrouter.ai`
+
+### Docker レジストリおよびコンテナサービス \{#docker-registries-and-container-services\}
+
+* **Docker レジストリ**: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+* **Microsoft コンテナレジストリ**: `mcr.microsoft.com`
+* **Kubernetes レジストリ**: `registry.k8s.io`
+* **Google コンテナレジストリ**: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+* **Quay**: `quay.io`, `quay-registry.s3.amazonaws.com`
+
+### Maven リポジトリ \{#maven-repositories\}
+
+* **Maven リポジトリ**: `repo1.maven.org`, `repo.maven.apache.org`
+
+### Google フォント \{#google-fonts\}
+
+* **Google フォント**: `fonts.googleapis.com`, `fonts.gstatic.com`
+
+### AWS S3 エンドポイント \{#aws-s3-endpoints\}
+
+* **米国東部**: `s3.us-east-1.amazonaws.com`, `s3.us-east-2.amazonaws.com`
+* **米国西部**: `s3.us-west-1.amazonaws.com`, `s3.us-west-2.amazonaws.com`
+* **EU（欧州）**: `s3.eu-central-1.amazonaws.com`, `s3.eu-west-1.amazonaws.com`, `s3.eu-west-2.amazonaws.com`
+
+### Daytona プラットフォーム \{#daytona-platform\}
+
+* **Daytona**: `app.daytona.io`
+
+:::note
+この一覧は随時更新されます。追加の重要な開発サービスへのアクセスが必要な場合は、[sandbox-network-whitelist](https://github.com/daytonaio/sandbox-network-whitelist) リポジトリを通じてリクエストを送信するか、[support@daytona.io](mailto:support@daytona.io) までお問い合わせください。
+:::
+
+## サポートを受ける \{#getting-help\}
+
+ネットワークアクセスに問題がある、または制限のないネットワークアクセスが必要な場合
+
+1. [Dashboard](https://app.daytona.io/dashboard/limits) で**組織のティア**を確認する
+2. 必要な認証手続きを完了して**組織のティア**をアップグレードし、より高い制限ティアを自動的に有効化する
+3. **ネットワーク許可リスト**の設定を確認する
+4. 支援が必要な場合は [support@daytona.io](mailto:support@daytona.io) までお問い合わせください
