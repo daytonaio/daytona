@@ -34,7 +34,7 @@ env:
 
 jobs:
   publish:
-    runs-on: release-runner
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
 
     steps:
       - name: Checkout code
@@ -99,7 +99,7 @@ jobs:
   update-homebrew-tap:
     if: ${{ inputs.npm_tag == 'latest' }}
     needs: publish
-    runs-on: release-runner
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
     name: Update Homebrew CLI tap
     steps:
       - name: Update version
