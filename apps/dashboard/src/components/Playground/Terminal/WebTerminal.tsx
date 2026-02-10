@@ -6,11 +6,9 @@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
-import { handleApiError } from '@/lib/error-handling'
-import { Sandbox } from '@daytonaio/sdk'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCcw } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
 
 const motionLoadingProps = {
@@ -26,38 +24,33 @@ type WebTerminalProps = {
 }
 
 const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className }) => {
-  const [loadingTerminalUrl, setLoadingTerminalUrl] = useState(true)
-  const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
-
   const { sandbox: terminalSandbox, error: terminalSandboxError } = usePlaygroundSandbox()
 
-  const getWebTerminalUrl = useCallback(
-    async (sandbox: Sandbox) => {
+  const {
+    data: terminalUrl,
+    isLoading,
+    refetch: refetchTerminalUrl,
+  } = useQuery({
+    queryKey: ['webTerminalUrl', terminalSandbox?.id],
+    queryFn: async () => {
       try {
-        const url = await getPortPreviewUrl(sandbox.id, 22222)
-        setTerminalUrl(url)
+        if (!terminalSandbox) return null
+        return await getPortPreviewUrl(terminalSandbox.id, 22222)
       } catch (error) {
         handleApiError(error, 'Failed to construct web terminal URL')
-        setTerminalUrl(null)
+        return null
       }
     },
-    [getPortPreviewUrl],
-  )
+    enabled: !!terminalSandbox,
+    retry: false,
+  })
 
-  const setupWebTerminal = useCallback(
-    async (terminalSandbox: Sandbox) => {
-      setLoadingTerminalUrl(true)
-      await getWebTerminalUrl(terminalSandbox)
-      setLoadingTerminalUrl(false)
-    },
-    [getWebTerminalUrl],
-  )
-
-  useEffect(() => {
-    if (terminalSandbox) {
-      setupWebTerminal(terminalSandbox)
-    } else if (terminalSandboxError) setLoadingTerminalUrl(false)
-  }, [terminalSandbox, terminalSandboxError, getWebTerminalUrl, setupWebTerminal])
+  // Loading terminal URL conditions:
+  // - No sandbox yet, no error → true (waiting for sandbox)
+  // - Sandbox arrived, query fetching → true (isLoading)
+  // - Sandbox arrived, query done → false
+  // - Sandbox errored → false
+  const loadingTerminalUrl = isLoading || (!terminalSandbox && !terminalSandboxError)
 
   return (
     <Window className={className}>
@@ -79,13 +72,7 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
                   >
                     There was an error loading the terminal.
                     {terminalSandbox && (
-                      <Button
-                        variant="outline"
-                        className="ml-2"
-                        onClick={() => {
-                          setupWebTerminal(terminalSandbox)
-                        }}
-                      >
+                      <Button variant="outline" className="ml-2" onClick={() => refetchTerminalUrl()}>
                         <RefreshCcw className="size-4" />
                         Retry
                       </Button>

@@ -7,11 +7,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { SandboxParametersSections, sandboxParametersSectionsData } from '@/enums/Playground'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { handleApiError } from '@/lib/error-handling'
 import { cn } from '@/lib/utils'
-import { SnapshotDto } from '@daytonaio/api-client'
+import { useQuery } from '@tanstack/react-query'
 import { BoltIcon, FolderIcon, GitBranchIcon, SquareTerminalIcon } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import SandboxFileSystem from './FileSystem'
 import SandboxGitOperations from './GitOperations'
 import SandboxManagementParameters from './Management'
@@ -29,28 +28,18 @@ const SandboxParameters = ({ className }: { className?: string }) => {
     SandboxParametersSections.SANDBOX_MANAGEMENT,
   ])
 
-  const [snapshotsData, setSnapshotsData] = useState<Array<SnapshotDto>>([])
-  const [snapshotsLoading, setSnapshotsLoading] = useState<boolean>(true)
-
   const { snapshotApi } = useApi()
   const { selectedOrganization } = useSelectedOrganization()
 
-  const fetchSnapshots = useCallback(async () => {
-    if (!selectedOrganization) return
-    setSnapshotsLoading(true)
-    try {
-      const response = (await snapshotApi.getAllSnapshots(selectedOrganization.id)).data
-      setSnapshotsData(response.items)
-    } catch (error) {
-      handleApiError(error, 'Failed to fetch snapshots')
-    } finally {
-      setSnapshotsLoading(false)
-    }
-  }, [snapshotApi, selectedOrganization])
-
-  useEffect(() => {
-    fetchSnapshots()
-  }, [fetchSnapshots])
+  const { data: snapshotsData = [], isLoading: snapshotsLoading } = useQuery({
+    queryKey: ['snapshots', selectedOrganization?.id, 'all'],
+    queryFn: async () => {
+      if (!selectedOrganization) return []
+      const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
+      return response.data.items
+    },
+    enabled: !!selectedOrganization,
+  })
 
   return (
     <div className={cn('flex flex-col gap-6', className)}>
