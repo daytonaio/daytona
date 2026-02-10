@@ -26,7 +26,6 @@ import { RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
-import { UserProfileIdentity } from './LinkedAccounts'
 
 export default function Limits() {
   const { user } = useAuth()
@@ -69,15 +68,6 @@ export default function Limits() {
       setSelectedRegionId(regionId)
     }
   }, [usageOverview, selectedOrganization?.defaultRegionId, selectedRegionId])
-
-  const githubConnected = useMemo(() => {
-    if (!user?.profile?.identities) {
-      return false
-    }
-    return (user.profile.identities as UserProfileIdentity[]).some(
-      (identity: UserProfileIdentity) => identity.provider === 'github',
-    )
-  }, [user])
 
   const currentRegionUsageOverview = useMemo<RegionUsageOverview | null>(() => {
     if (!usageOverview || !selectedRegionId) {
@@ -221,8 +211,6 @@ export default function Limits() {
                   requirementsState={{
                     emailVerified: !!user?.profile?.email_verified,
                     creditCardLinked: !!wallet?.creditCardConnected,
-                    githubConnected: githubConnected,
-                    businessEmailVerified: !!organizationTier?.hasVerifiedBusinessEmail,
                   }}
                 />
 
