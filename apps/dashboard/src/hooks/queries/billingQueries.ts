@@ -8,7 +8,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { UseQueryOptions } from '@tanstack/react-query'
 import { useOrganizationBillingPortalUrlQuery } from './useOrganizationBillingPortalUrlQuery'
-import { useOrganizationEmailsQuery } from './useOrganizationEmailsQuery'
 import { useOrganizationInvoicesQuery } from './useOrganizationInvoicesQuery'
 import { useOrganizationTierQuery } from './useOrganizationTierQuery'
 import { useOrganizationWalletQuery } from './useOrganizationWalletQuery'
@@ -36,11 +35,6 @@ export function useOwnerWalletQuery(
 export function useOwnerTierQuery() {
   const scope = useSelectedOrgBillingScope()
   return useOrganizationTierQuery(scope)
-}
-
-export function useOwnerOrganizationEmailsQuery() {
-  const scope = useSelectedOrgBillingScope()
-  return useOrganizationEmailsQuery(scope)
 }
 
 export function useOwnerBillingPortalUrlQuery() {
