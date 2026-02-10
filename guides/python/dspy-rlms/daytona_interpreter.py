@@ -467,23 +467,46 @@ print("Broker server code written")
         sig_parts = []
         args_list = []
         kwargs_dict = []
+        last_positional_only_idx = max(
+            (i for i, param in enumerate(params) if param.kind == inspect.Parameter.POSITIONAL_ONLY),
+            default=-1,
+        )
+        added_kw_only_separator = False
 
-        for param in params:
-            if param.kind == inspect.Parameter.VAR_POSITIONAL:
+        def format_param(param: inspect.Parameter) -> str:
+            if param.default is inspect.Parameter.empty:
+                return param.name
+            return f"{param.name}={repr(param.default)}"
+
+        for i, param in enumerate(params):
+            if param.kind == inspect.Parameter.POSITIONAL_ONLY:
+                sig_parts.append(format_param(param))
+                args_list.append(param.name)
+                if i == last_positional_only_idx:
+                    sig_parts.append("/")
+            elif param.kind == inspect.Parameter.POSITIONAL_OR_KEYWORD:
+                sig_parts.append(format_param(param))
+                if param.default is inspect.Parameter.empty:
+                    args_list.append(param.name)
+                else:
+                    kwargs_dict.append(f'"{param.name}": {param.name}')
+            elif param.kind == inspect.Parameter.VAR_POSITIONAL:
                 sig_parts.append(f"*{param.name}")
                 # *args gets passed as args list
                 args_list.append(f"*{param.name}")
+                added_kw_only_separator = True
+            elif param.kind == inspect.Parameter.KEYWORD_ONLY:
+                if not added_kw_only_separator:
+                    sig_parts.append("*")
+                    added_kw_only_separator = True
+                sig_parts.append(format_param(param))
+                kwargs_dict.append(f'"{param.name}": {param.name}')
             elif param.kind == inspect.Parameter.VAR_KEYWORD:
                 sig_parts.append(f"**{param.name}")
                 # **kwargs gets merged
                 kwargs_dict.append(f"**{param.name}")
-            elif param.default is inspect.Parameter.empty:
-                sig_parts.append(param.name)
-                args_list.append(param.name)
             else:
-                default_repr = repr(param.default)
-                sig_parts.append(f"{param.name}={default_repr}")
-                kwargs_dict.append(f'"{param.name}": {param.name}')
+                raise CodeInterpreterError(f"Unsupported parameter kind for tool '{tool_name}': {param.kind}")
 
         signature = ", ".join(sig_parts)
         args_str = ", ".join(args_list)
