@@ -80,3 +80,5 @@ examples/**/*.png
 !/poetry.lock
 .astro
 .github/instructions/nx.instructions.md
+
+go.work.sum
