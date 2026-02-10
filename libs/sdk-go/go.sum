@@ -25,8 +25,8 @@ github.com/aws/smithy-go v1.24.0/go.mod h1:LEj2LM3rBRQJxPZTB4KuzZkaZYnZPnvgIhb4p
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/daytonaio/daytona/libs/api-client-go v0.139.0 h1:3N2syKXa5yH78GqXPLKVFm3eA9z2eQ2PRUXp+oLVTyY=
-github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.139.0 h1:lQRrjFqoA3WF4/O+yRfT0V4E9tCfphdxpdBIZFPC8Lw=
+github.com/daytonaio/daytona/libs/api-client-go v0.140.0 h1:QHlGKdaipUYv9nWfQPNcSjClJJK2Lf7yS44YTooCY8k=
+github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.140.0 h1:BAUIYOyRXUOMGvFsXS+uQkOKylBqmdc7mS7WClCvr4w=
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
