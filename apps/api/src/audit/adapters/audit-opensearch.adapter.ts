@@ -165,6 +165,8 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
             properties: {
               id: { type: 'keyword' },
               actorEmail: { type: 'keyword' },
+              actorApiKeyPrefix: { type: 'keyword' },
+              actorApiKeySuffix: { type: 'keyword' },
               action: { type: 'keyword' },
               targetType: { type: 'keyword' },
               statusCode: { type: 'integer' },
@@ -181,6 +183,8 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
       id: source.id,
       actorId: source.actorId,
       actorEmail: source.actorEmail,
+      actorApiKeyPrefix: source.actorApiKeyPrefix,
+      actorApiKeySuffix: source.actorApiKeySuffix,
       organizationId: source.organizationId,
       action: source.action,
       targetType: source.targetType,

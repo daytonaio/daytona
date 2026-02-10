@@ -69,6 +69,16 @@ public class AuditLog {
   @javax.annotation.Nonnull
   private String actorEmail;
 
+  public static final String SERIALIZED_NAME_ACTOR_API_KEY_PREFIX = "actorApiKeyPrefix";
+  @SerializedName(SERIALIZED_NAME_ACTOR_API_KEY_PREFIX)
+  @javax.annotation.Nullable
+  private String actorApiKeyPrefix;
+
+  public static final String SERIALIZED_NAME_ACTOR_API_KEY_SUFFIX = "actorApiKeySuffix";
+  @SerializedName(SERIALIZED_NAME_ACTOR_API_KEY_SUFFIX)
+  @javax.annotation.Nullable
+  private String actorApiKeySuffix;
+
   public static final String SERIALIZED_NAME_ORGANIZATION_ID = "organizationId";
   @SerializedName(SERIALIZED_NAME_ORGANIZATION_ID)
   @javax.annotation.Nullable
@@ -181,6 +191,44 @@ public class AuditLog {
 
   public void setActorEmail(@javax.annotation.Nonnull String actorEmail) {
     this.actorEmail = actorEmail;
+  }
+
+
+  public AuditLog actorApiKeyPrefix(@javax.annotation.Nullable String actorApiKeyPrefix) {
+    this.actorApiKeyPrefix = actorApiKeyPrefix;
+    return this;
+  }
+
+  /**
+   * Get actorApiKeyPrefix
+   * @return actorApiKeyPrefix
+   */
+  @javax.annotation.Nullable
+  public String getActorApiKeyPrefix() {
+    return actorApiKeyPrefix;
+  }
+
+  public void setActorApiKeyPrefix(@javax.annotation.Nullable String actorApiKeyPrefix) {
+    this.actorApiKeyPrefix = actorApiKeyPrefix;
+  }
+
+
+  public AuditLog actorApiKeySuffix(@javax.annotation.Nullable String actorApiKeySuffix) {
+    this.actorApiKeySuffix = actorApiKeySuffix;
+    return this;
+  }
+
+  /**
+   * Get actorApiKeySuffix
+   * @return actorApiKeySuffix
+   */
+  @javax.annotation.Nullable
+  public String getActorApiKeySuffix() {
+    return actorApiKeySuffix;
+  }
+
+  public void setActorApiKeySuffix(@javax.annotation.Nullable String actorApiKeySuffix) {
+    this.actorApiKeySuffix = actorApiKeySuffix;
   }
 
 
@@ -458,6 +506,8 @@ public class AuditLog {
     return Objects.equals(this.id, auditLog.id) &&
         Objects.equals(this.actorId, auditLog.actorId) &&
         Objects.equals(this.actorEmail, auditLog.actorEmail) &&
+        Objects.equals(this.actorApiKeyPrefix, auditLog.actorApiKeyPrefix) &&
+        Objects.equals(this.actorApiKeySuffix, auditLog.actorApiKeySuffix) &&
         Objects.equals(this.organizationId, auditLog.organizationId) &&
         Objects.equals(this.action, auditLog.action) &&
         Objects.equals(this.targetType, auditLog.targetType) &&
@@ -474,7 +524,7 @@ public class AuditLog {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, actorId, actorEmail, organizationId, action, targetType, targetId, statusCode, errorMessage, ipAddress, userAgent, source, metadata, createdAt, additionalProperties);
+    return Objects.hash(id, actorId, actorEmail, actorApiKeyPrefix, actorApiKeySuffix, organizationId, action, targetType, targetId, statusCode, errorMessage, ipAddress, userAgent, source, metadata, createdAt, additionalProperties);
   }
 
   @Override
@@ -484,6 +534,8 @@ public class AuditLog {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    actorId: ").append(toIndentedString(actorId)).append("\n");
     sb.append("    actorEmail: ").append(toIndentedString(actorEmail)).append("\n");
+    sb.append("    actorApiKeyPrefix: ").append(toIndentedString(actorApiKeyPrefix)).append("\n");
+    sb.append("    actorApiKeySuffix: ").append(toIndentedString(actorApiKeySuffix)).append("\n");
     sb.append("    organizationId: ").append(toIndentedString(organizationId)).append("\n");
     sb.append("    action: ").append(toIndentedString(action)).append("\n");
     sb.append("    targetType: ").append(toIndentedString(targetType)).append("\n");
@@ -521,6 +573,8 @@ public class AuditLog {
     openapiFields.add("id");
     openapiFields.add("actorId");
     openapiFields.add("actorEmail");
+    openapiFields.add("actorApiKeyPrefix");
+    openapiFields.add("actorApiKeySuffix");
     openapiFields.add("organizationId");
     openapiFields.add("action");
     openapiFields.add("targetType");
@@ -570,6 +624,12 @@ public class AuditLog {
       }
       if (!jsonObj.get("actorEmail").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `actorEmail` to be a primitive type in the JSON string but got `%s`", jsonObj.get("actorEmail").toString()));
+      }
+      if ((jsonObj.get("actorApiKeyPrefix") != null && !jsonObj.get("actorApiKeyPrefix").isJsonNull()) && !jsonObj.get("actorApiKeyPrefix").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `actorApiKeyPrefix` to be a primitive type in the JSON string but got `%s`", jsonObj.get("actorApiKeyPrefix").toString()));
+      }
+      if ((jsonObj.get("actorApiKeySuffix") != null && !jsonObj.get("actorApiKeySuffix").isJsonNull()) && !jsonObj.get("actorApiKeySuffix").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format("Expected the field `actorApiKeySuffix` to be a primitive type in the JSON string but got `%s`", jsonObj.get("actorApiKeySuffix").toString()));
       }
       if ((jsonObj.get("organizationId") != null && !jsonObj.get("organizationId").isJsonNull()) && !jsonObj.get("organizationId").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format("Expected the field `organizationId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("organizationId").toString()));
