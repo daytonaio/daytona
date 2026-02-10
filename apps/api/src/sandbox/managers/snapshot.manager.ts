@@ -708,14 +708,11 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       return DONT_SYNC_AGAIN
     }
 
-    let sourceRegistry = await this.dockerRegistryService.findSourceRegistryBySnapshotImageName(
+    const sourceRegistry = await this.dockerRegistryService.findRegistryByImageName(
       snapshot.imageName,
       runner.region,
       snapshot.organizationId,
     )
-    if (!sourceRegistry) {
-      sourceRegistry = await this.dockerRegistryService.getDefaultDockerHubRegistry()
-    }
     const destinationRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(runner.region)
 
     // Using image name for pull instead of the ref
