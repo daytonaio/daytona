@@ -63,17 +63,17 @@ export class Snapshot {
   @Column({ type: 'float', nullable: true })
   size?: number
 
-  @Column({ type: 'int', default: 1 })
-  cpu = 1
+  @Column({ type: 'int', default: 2 })
+  cpu = 2
 
   @Column({ type: 'int', default: 0 })
   gpu = 0
 
-  @Column({ type: 'int', default: 1 })
-  mem = 1
+  @Column({ type: 'int', default: 4 })
+  mem = 4
 
-  @Column({ type: 'int', default: 3 })
-  disk = 3
+  @Column({ type: 'int', default: 8 })
+  disk = 8
 
   @Column({ type: 'boolean', default: false })
   hideFromUsers = false
