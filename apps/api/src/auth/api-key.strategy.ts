@@ -69,6 +69,13 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       }
     }
 
+    const healthCheckApiKey = this.configService.get('healthCheck.apiKey')
+    if (healthCheckApiKey && healthCheckApiKey === token) {
+      return {
+        role: 'health-check',
+      }
+    }
+
     try {
       let apiKey = await this.getApiKeyCache(token)
       if (!apiKey) {
