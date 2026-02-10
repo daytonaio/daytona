@@ -97,6 +97,11 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
+	// Skip starting the container if explicitly requested
+	if sandboxDto.SkipStart != nil && *sandboxDto.SkipStart {
+		return c.ID, "", nil
+	}
+
 	daemonVersion, err := d.Start(ctx, sandboxDto.Id, sandboxDto.AuthToken, sandboxDto.Metadata)
 	if err != nil {
 		return "", "", err

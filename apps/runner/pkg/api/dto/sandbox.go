@@ -22,6 +22,7 @@ type CreateSandboxDTO struct {
 	Metadata         map[string]string `json:"metadata,omitempty"`
 	AuthToken        *string           `json:"authToken,omitempty"`
 	OtelEndpoint     *string           `json:"otelEndpoint,omitempty"`
+	SkipStart        *bool             `json:"skipStart,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {
