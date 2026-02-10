@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SnapshotQueryParams } from './useSnapshotsQuery'
+
 export const queryKeys = {
   config: {
     all: ['config'] as const,
@@ -42,5 +44,21 @@ export const queryKeys = {
         'invoices',
         ...(page !== undefined && perPage !== undefined ? [{ page, perPage }] : []),
       ] as const,
+  },
+  snapshots: {
+    all: ['snapshots'] as const,
+    list: (organizationId: string, params?: SnapshotQueryParams) => {
+      const base = [...queryKeys.snapshots.all, organizationId, 'list'] as const
+      if (!params) return base
+      return [
+        ...base,
+        {
+          page: params.page,
+          pageSize: params.pageSize,
+          ...(params.filters && { filters: params.filters }),
+          ...(params.sorting && { sorting: params.sorting }),
+        },
+      ] as const
+    },
   },
 } as const
