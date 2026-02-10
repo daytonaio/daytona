@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Repository, DataSource, FindOptionsWhere } from 'typeorm'
+import { Repository, DataSource, EntityManager, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
@@ -14,7 +14,11 @@ export class SandboxRepository extends Repository<Sandbox> {
     super(Sandbox, dataSource.createEntityManager(), dataSource.createQueryRunner())
   }
 
-  async saveWhere(sandbox: Sandbox, whereCondition: FindOptionsWhere<Sandbox>): Promise<Sandbox | null> {
+  async saveWhere(
+    sandbox: Sandbox,
+    whereCondition: FindOptionsWhere<Sandbox>,
+    afterSave?: (em: EntityManager) => Promise<void>,
+  ): Promise<Sandbox | null> {
     return this.manager.transaction(async (entityManager) => {
       const whereClause = {
         ...whereCondition,
@@ -34,6 +38,10 @@ export class SandboxRepository extends Repository<Sandbox> {
 
       const mergedEntity = entityManager.merge(Sandbox, existingSandbox, sandbox)
       const savedEntity = await entityManager.save(mergedEntity)
+
+      if (afterSave) {
+        await afterSave(entityManager)
+      }
 
       return savedEntity
     })

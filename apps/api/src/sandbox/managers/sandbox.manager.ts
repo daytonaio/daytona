@@ -40,6 +40,8 @@ import { getStateChangeLockKey } from '../utils/lock-key.util'
 import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
+import { EventEmitter2 } from '@nestjs/event-emitter'
+import { SandboxAutoActionEvent } from '../events/sandbox-auto-action.event'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -55,6 +57,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async onApplicationShutdown() {
@@ -115,7 +118,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   sandbox.pending = true
                   sandbox.desiredState = SandboxDesiredState.STOPPED
                 }
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+                const event = sandbox.autoDeleteInterval === 0 ? SandboxEvents.AUTO_DELETED : SandboxEvents.AUTO_STOPPED
+                await this.sandboxRepository.saveWhere(
+                  sandbox,
+                  { pending: false, state: sandbox.state },
+                  async (em) => {
+                    await this.eventEmitter.emitAsync(event, new SandboxAutoActionEvent(sandbox, em))
+                  },
+                )
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
@@ -168,7 +179,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           try {
             sandbox.desiredState = SandboxDesiredState.ARCHIVED
-            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state }, async (em) => {
+              await this.eventEmitter.emitAsync(SandboxEvents.AUTO_ARCHIVED, new SandboxAutoActionEvent(sandbox, em))
+            })
+
             this.syncInstanceState(sandbox.id).catch(this.logger.error)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -225,7 +239,16 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
               try {
                 sandbox.applyDesiredDestroyedState()
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.saveWhere(
+                  sandbox,
+                  { pending: false, state: sandbox.state },
+                  async (em) => {
+                    await this.eventEmitter.emitAsync(
+                      SandboxEvents.AUTO_DELETED,
+                      new SandboxAutoActionEvent(sandbox, em),
+                    )
+                  },
+                )
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {

@@ -6,7 +6,7 @@
 import { Inject, Injectable, Logger, NotFoundException, OnApplicationBootstrap, Optional } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
-import { LessThan, Repository, IsNull, Not } from 'typeorm'
+import { EntityManager, LessThan, Repository, IsNull, Not } from 'typeorm'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
 import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
 import { AuditLog } from '../entities/audit-log.entity'
@@ -20,6 +20,12 @@ import { AuditLogFilter } from '../interfaces/audit-filter.interface'
 import { DistributedLock } from '../../common/decorators/distributed-lock.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
+import { SandboxAutoActionEvent } from '../../sandbox/events/sandbox-auto-action.event'
+import { AuditAction } from '../enums/audit-action.enum'
+import { AUDIT_LOG_SYSTEM_ACTOR_ID } from '../constants/audit-log-system-actor.constant'
+import { AuditTarget } from '../enums/audit-target.enum'
 
 @Injectable()
 export class AuditService implements OnApplicationBootstrap {
@@ -59,7 +65,7 @@ export class AuditService implements OnApplicationBootstrap {
     }
   }
 
-  async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
+  async createLog(createDto: CreateAuditLogInternalDto, entityManager?: EntityManager): Promise<AuditLog> {
     const auditLog = new AuditLog()
     auditLog.actorId = createDto.actorId
     auditLog.actorEmail = createDto.actorEmail
@@ -74,7 +80,8 @@ export class AuditService implements OnApplicationBootstrap {
     auditLog.source = createDto.source
     auditLog.metadata = createDto.metadata
 
-    return this.auditLogRepository.save(auditLog)
+    const repo = entityManager?.getRepository(AuditLog) ?? this.auditLogRepository
+    return repo.save(auditLog)
   }
 
   async updateLog(id: string, updateDto: UpdateAuditLogInternalDto): Promise<AuditLog> {
@@ -212,5 +219,35 @@ export class AuditService implements OnApplicationBootstrap {
 
     await this.auditLogPublisher.write(auditLogs)
     await this.auditLogRepository.delete(auditLogs.map((log) => log.id))
+  }
+
+  @OnAsyncEvent({ event: SandboxEvents.AUTO_STOPPED })
+  async handleAutoStopped(event: SandboxAutoActionEvent): Promise<void> {
+    await this.createSystemActionSandboxAuditLog(AuditAction.AUTO_STOP, event)
+  }
+
+  @OnAsyncEvent({ event: SandboxEvents.AUTO_ARCHIVED })
+  async handleAutoArchived(event: SandboxAutoActionEvent): Promise<void> {
+    await this.createSystemActionSandboxAuditLog(AuditAction.AUTO_ARCHIVE, event)
+  }
+
+  @OnAsyncEvent({ event: SandboxEvents.AUTO_DELETED })
+  async handleAutoDeleted(event: SandboxAutoActionEvent): Promise<void> {
+    await this.createSystemActionSandboxAuditLog(AuditAction.AUTO_DELETE, event)
+  }
+
+  private async createSystemActionSandboxAuditLog(action: AuditAction, event: SandboxAutoActionEvent): Promise<void> {
+    await this.createLog(
+      {
+        actorId: AUDIT_LOG_SYSTEM_ACTOR_ID,
+        actorEmail: '',
+        organizationId: event.sandbox.organizationId,
+        action,
+        targetType: AuditTarget.SANDBOX,
+        targetId: event.sandbox.id,
+        statusCode: 200,
+      },
+      event.entityManager,
+    )
   }
 }
