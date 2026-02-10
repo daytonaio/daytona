@@ -23,6 +23,12 @@ export class AuditLog {
   actorEmail: string
 
   @Column({ nullable: true })
+  actorApiKeyPrefix?: string
+
+  @Column({ nullable: true })
+  actorApiKeySuffix?: string
+
+  @Column({ nullable: true })
   organizationId?: string
 
   @Column()

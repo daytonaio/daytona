@@ -78,6 +78,8 @@ export class AuditInterceptor implements NestInterceptor {
       const auditLog = await this.auditService.createLog({
         actorId: request.user.userId,
         actorEmail: request.user.email,
+        actorApiKeyPrefix: request.user.apiKey?.keyPrefix,
+        actorApiKeySuffix: request.user.apiKey?.keySuffix,
         organizationId: request.user.organizationId,
         action: auditContext.action,
         targetType: auditContext.targetType,

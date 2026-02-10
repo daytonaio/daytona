@@ -7,7 +7,7 @@ import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getRelativeTimeString } from '@/lib/utils'
+import { getMaskedTokenFromParts, getRelativeTimeString } from '@/lib/utils'
 import { AuditLog } from '@daytonaio/api-client'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
@@ -139,16 +139,32 @@ const getColumns = (): ColumnDef<AuditLog>[] => {
         const actorEmail = row.original.actorEmail
         const actorId = row.original.actorId
         const label = actorEmail || actorId
+        const apiKeyPrefix = row.original.actorApiKeyPrefix
+        const apiKeySuffix = row.original.actorApiKeySuffix
+        const maskedApiKey =
+          apiKeyPrefix && apiKeySuffix ? getMaskedTokenFromParts(apiKeyPrefix, apiKeySuffix) : undefined
 
         return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="font-medium truncate w-fit max-w-full">{label}</div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{label}</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="space-y-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="font-medium truncate w-fit max-w-full">{label}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{label}</p>
+              </TooltipContent>
+            </Tooltip>
+            {maskedApiKey && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-sm text-muted-foreground truncate w-fit max-w-full">{maskedApiKey}</div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{maskedApiKey}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
         )
       },
     },
