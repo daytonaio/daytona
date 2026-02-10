@@ -33,11 +33,11 @@ module DaytonaApiClient
 
     attr_accessor :sandbox_lifecycle_rate_limit
 
-    attr_accessor :authenticated_rate_limit_ttl
+    attr_accessor :authenticated_rate_limit_ttl_seconds
 
-    attr_accessor :sandbox_create_rate_limit_ttl
+    attr_accessor :sandbox_create_rate_limit_ttl_seconds
 
-    attr_accessor :sandbox_lifecycle_rate_limit_ttl
+    attr_accessor :sandbox_lifecycle_rate_limit_ttl_seconds
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -51,9 +51,9 @@ module DaytonaApiClient
         :'authenticated_rate_limit' => :'authenticatedRateLimit',
         :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
         :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit',
-        :'authenticated_rate_limit_ttl' => :'authenticatedRateLimitTtl',
-        :'sandbox_create_rate_limit_ttl' => :'sandboxCreateRateLimitTtl',
-        :'sandbox_lifecycle_rate_limit_ttl' => :'sandboxLifecycleRateLimitTtl'
+        :'authenticated_rate_limit_ttl_seconds' => :'authenticatedRateLimitTtlSeconds',
+        :'sandbox_create_rate_limit_ttl_seconds' => :'sandboxCreateRateLimitTtlSeconds',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'sandboxLifecycleRateLimitTtlSeconds'
       }
     end
 
@@ -79,9 +79,9 @@ module DaytonaApiClient
         :'authenticated_rate_limit' => :'Float',
         :'sandbox_create_rate_limit' => :'Float',
         :'sandbox_lifecycle_rate_limit' => :'Float',
-        :'authenticated_rate_limit_ttl' => :'Float',
-        :'sandbox_create_rate_limit_ttl' => :'Float',
-        :'sandbox_lifecycle_rate_limit_ttl' => :'Float'
+        :'authenticated_rate_limit_ttl_seconds' => :'Float',
+        :'sandbox_create_rate_limit_ttl_seconds' => :'Float',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'Float'
       }
     end
 
@@ -97,9 +97,9 @@ module DaytonaApiClient
         :'authenticated_rate_limit',
         :'sandbox_create_rate_limit',
         :'sandbox_lifecycle_rate_limit',
-        :'authenticated_rate_limit_ttl',
-        :'sandbox_create_rate_limit_ttl',
-        :'sandbox_lifecycle_rate_limit_ttl'
+        :'authenticated_rate_limit_ttl_seconds',
+        :'sandbox_create_rate_limit_ttl_seconds',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds'
       ])
     end
 
@@ -173,22 +173,22 @@ module DaytonaApiClient
         self.sandbox_lifecycle_rate_limit = nil
       end
 
-      if attributes.key?(:'authenticated_rate_limit_ttl')
-        self.authenticated_rate_limit_ttl = attributes[:'authenticated_rate_limit_ttl']
+      if attributes.key?(:'authenticated_rate_limit_ttl_seconds')
+        self.authenticated_rate_limit_ttl_seconds = attributes[:'authenticated_rate_limit_ttl_seconds']
       else
-        self.authenticated_rate_limit_ttl = nil
+        self.authenticated_rate_limit_ttl_seconds = nil
       end
 
-      if attributes.key?(:'sandbox_create_rate_limit_ttl')
-        self.sandbox_create_rate_limit_ttl = attributes[:'sandbox_create_rate_limit_ttl']
+      if attributes.key?(:'sandbox_create_rate_limit_ttl_seconds')
+        self.sandbox_create_rate_limit_ttl_seconds = attributes[:'sandbox_create_rate_limit_ttl_seconds']
       else
-        self.sandbox_create_rate_limit_ttl = nil
+        self.sandbox_create_rate_limit_ttl_seconds = nil
       end
 
-      if attributes.key?(:'sandbox_lifecycle_rate_limit_ttl')
-        self.sandbox_lifecycle_rate_limit_ttl = attributes[:'sandbox_lifecycle_rate_limit_ttl']
+      if attributes.key?(:'sandbox_lifecycle_rate_limit_ttl_seconds')
+        self.sandbox_lifecycle_rate_limit_ttl_seconds = attributes[:'sandbox_lifecycle_rate_limit_ttl_seconds']
       else
-        self.sandbox_lifecycle_rate_limit_ttl = nil
+        self.sandbox_lifecycle_rate_limit_ttl_seconds = nil
       end
     end
 
@@ -221,9 +221,9 @@ module DaytonaApiClient
           authenticated_rate_limit == o.authenticated_rate_limit &&
           sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
           sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit &&
-          authenticated_rate_limit_ttl == o.authenticated_rate_limit_ttl &&
-          sandbox_create_rate_limit_ttl == o.sandbox_create_rate_limit_ttl &&
-          sandbox_lifecycle_rate_limit_ttl == o.sandbox_lifecycle_rate_limit_ttl
+          authenticated_rate_limit_ttl_seconds == o.authenticated_rate_limit_ttl_seconds &&
+          sandbox_create_rate_limit_ttl_seconds == o.sandbox_create_rate_limit_ttl_seconds &&
+          sandbox_lifecycle_rate_limit_ttl_seconds == o.sandbox_lifecycle_rate_limit_ttl_seconds
     end
 
     # @see the `==` method
@@ -235,7 +235,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, authenticated_rate_limit_ttl, sandbox_create_rate_limit_ttl, sandbox_lifecycle_rate_limit_ttl].hash
+      [max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
     end
 
     # Builds the object from hash

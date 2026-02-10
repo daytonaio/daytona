@@ -75,6 +75,15 @@ module DaytonaApiClient
     # Experimental configuration
     attr_accessor :experimental_config
 
+    # Authenticated rate limit TTL in seconds
+    attr_accessor :authenticated_rate_limit_ttl_seconds
+
+    # Sandbox create rate limit TTL in seconds
+    attr_accessor :sandbox_create_rate_limit_ttl_seconds
+
+    # Sandbox lifecycle rate limit TTL in seconds
+    attr_accessor :sandbox_lifecycle_rate_limit_ttl_seconds
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
@@ -97,7 +106,10 @@ module DaytonaApiClient
         :'authenticated_rate_limit' => :'authenticatedRateLimit',
         :'sandbox_create_rate_limit' => :'sandboxCreateRateLimit',
         :'sandbox_lifecycle_rate_limit' => :'sandboxLifecycleRateLimit',
-        :'experimental_config' => :'experimentalConfig'
+        :'experimental_config' => :'experimentalConfig',
+        :'authenticated_rate_limit_ttl_seconds' => :'authenticatedRateLimitTtlSeconds',
+        :'sandbox_create_rate_limit_ttl_seconds' => :'sandboxCreateRateLimitTtlSeconds',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'sandboxLifecycleRateLimitTtlSeconds'
       }
     end
 
@@ -133,7 +145,10 @@ module DaytonaApiClient
         :'authenticated_rate_limit' => :'Float',
         :'sandbox_create_rate_limit' => :'Float',
         :'sandbox_lifecycle_rate_limit' => :'Float',
-        :'experimental_config' => :'Object'
+        :'experimental_config' => :'Object',
+        :'authenticated_rate_limit_ttl_seconds' => :'Float',
+        :'sandbox_create_rate_limit_ttl_seconds' => :'Float',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'Float'
       }
     end
 
@@ -142,7 +157,10 @@ module DaytonaApiClient
       Set.new([
         :'authenticated_rate_limit',
         :'sandbox_create_rate_limit',
-        :'sandbox_lifecycle_rate_limit',
+        :'sandbox_lifecycle_rate_limit',,
+        :'authenticated_rate_limit_ttl_seconds',
+        :'sandbox_create_rate_limit_ttl_seconds',
+        :'sandbox_lifecycle_rate_limit_ttl_seconds'
       ])
     end
 
@@ -278,6 +296,24 @@ module DaytonaApiClient
         self.experimental_config = attributes[:'experimental_config']
       else
         self.experimental_config = nil
+      end
+
+      if attributes.key?(:'authenticated_rate_limit_ttl_seconds')
+        self.authenticated_rate_limit_ttl_seconds = attributes[:'authenticated_rate_limit_ttl_seconds']
+      else
+        self.authenticated_rate_limit_ttl_seconds = nil
+      end
+
+      if attributes.key?(:'sandbox_create_rate_limit_ttl_seconds')
+        self.sandbox_create_rate_limit_ttl_seconds = attributes[:'sandbox_create_rate_limit_ttl_seconds']
+      else
+        self.sandbox_create_rate_limit_ttl_seconds = nil
+      end
+
+      if attributes.key?(:'sandbox_lifecycle_rate_limit_ttl_seconds')
+        self.sandbox_lifecycle_rate_limit_ttl_seconds = attributes[:'sandbox_lifecycle_rate_limit_ttl_seconds']
+      else
+        self.sandbox_lifecycle_rate_limit_ttl_seconds = nil
       end
     end
 
@@ -560,7 +596,10 @@ module DaytonaApiClient
           authenticated_rate_limit == o.authenticated_rate_limit &&
           sandbox_create_rate_limit == o.sandbox_create_rate_limit &&
           sandbox_lifecycle_rate_limit == o.sandbox_lifecycle_rate_limit &&
-          experimental_config == o.experimental_config
+          experimental_config == o.experimental_config &&
+          authenticated_rate_limit_ttl_seconds == o.authenticated_rate_limit_ttl_seconds &&
+          sandbox_create_rate_limit_ttl_seconds == o.sandbox_create_rate_limit_ttl_seconds &&
+          sandbox_lifecycle_rate_limit_ttl_seconds == o.sandbox_lifecycle_rate_limit_ttl_seconds
     end
 
     # @see the `==` method
@@ -572,7 +611,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config].hash
+      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
     end
 
     # Builds the object from hash

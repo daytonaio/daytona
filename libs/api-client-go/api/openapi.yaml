@@ -9325,6 +9325,7 @@ components:
     Organization:
       example:
         defaultRegionId: defaultRegionId
+        sandboxCreateRateLimitTtlSeconds: 3.616076749251911
         suspensionReason: suspensionReason
         sandboxLifecycleRateLimit: 7.061401241503109
         suspendedAt: 2000-01-23T04:56:07.000+00:00
@@ -9333,6 +9334,7 @@ components:
         authenticatedRateLimit: 5.637376656633329
         suspended: true
         sandboxCreateRateLimit: 2.3021358869347655
+        sandboxLifecycleRateLimitTtlSeconds: 2.027123023002322
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 6.027456183070403
         sandboxLimitedNetworkEgress: true
@@ -9341,6 +9343,7 @@ components:
         createdBy: createdBy
         name: name
         maxMemoryPerSandbox: 1.4658129805029452
+        authenticatedRateLimitTtlSeconds: 9.301444243932576
         id: id
         experimentalConfig: '{}'
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9412,8 +9415,21 @@ components:
         experimentalConfig:
           description: Experimental configuration
           type: object
+        authenticatedRateLimitTtlSeconds:
+          description: Authenticated rate limit TTL in seconds
+          nullable: true
+          type: number
+        sandboxCreateRateLimitTtlSeconds:
+          description: Sandbox create rate limit TTL in seconds
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimitTtlSeconds:
+          description: Sandbox lifecycle rate limit TTL in seconds
+          nullable: true
+          type: number
       required:
         - authenticatedRateLimit
+        - authenticatedRateLimitTtlSeconds
         - createdAt
         - createdBy
         - experimentalConfig
@@ -9424,7 +9440,9 @@ components:
         - name
         - personal
         - sandboxCreateRateLimit
+        - sandboxCreateRateLimitTtlSeconds
         - sandboxLifecycleRateLimit
+        - sandboxLifecycleRateLimitTtlSeconds
         - sandboxLimitedNetworkEgress
         - suspended
         - suspendedAt
