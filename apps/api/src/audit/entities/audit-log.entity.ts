@@ -23,6 +23,9 @@ export class AuditLog {
   actorEmail: string
 
   @Column({ nullable: true })
+  apiKeyName?: string
+
+  @Column({ nullable: true })
   organizationId?: string
 
   @Column()

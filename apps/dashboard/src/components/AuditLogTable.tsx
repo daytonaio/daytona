@@ -138,17 +138,21 @@ const getColumns = (): ColumnDef<AuditLog>[] => {
       cell: ({ row }) => {
         const actorEmail = row.original.actorEmail
         const actorId = row.original.actorId
+        const apiKeyName = row.original.apiKeyName
         const label = actorEmail || actorId
 
         return (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="font-medium truncate w-fit max-w-full">{label}</div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{label}</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="space-y-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="font-medium truncate w-fit max-w-full">{label}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{label}</p>
+              </TooltipContent>
+            </Tooltip>
+            {apiKeyName && <div className="text-sm text-muted-foreground truncate">API Key: {apiKeyName}</div>}
+          </div>
         )
       },
     },

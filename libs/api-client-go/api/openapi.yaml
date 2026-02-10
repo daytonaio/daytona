@@ -13814,6 +13814,7 @@ components:
         errorMessage: errorMessage
         ipAddress: ipAddress
         actorEmail: actorEmail
+        apiKeyName: apiKeyName
         targetType: targetType
         userAgent: userAgent
         source: source
@@ -13829,6 +13830,8 @@ components:
         actorId:
           type: string
         actorEmail:
+          type: string
+        apiKeyName:
           type: string
         organizationId:
           type: string
@@ -13874,6 +13877,7 @@ components:
             errorMessage: errorMessage
             ipAddress: ipAddress
             actorEmail: actorEmail
+            apiKeyName: apiKeyName
             targetType: targetType
             userAgent: userAgent
             source: source
@@ -13889,6 +13893,7 @@ components:
             errorMessage: errorMessage
             ipAddress: ipAddress
             actorEmail: actorEmail
+            apiKeyName: apiKeyName
             targetType: targetType
             userAgent: userAgent
             source: source

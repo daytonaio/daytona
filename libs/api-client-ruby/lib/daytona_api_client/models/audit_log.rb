@@ -21,6 +21,8 @@ module DaytonaApiClient
 
     attr_accessor :actor_email
 
+    attr_accessor :api_key_name
+
     attr_accessor :organization_id
 
     attr_accessor :action
@@ -49,6 +51,7 @@ module DaytonaApiClient
         :'id' => :'id',
         :'actor_id' => :'actorId',
         :'actor_email' => :'actorEmail',
+        :'api_key_name' => :'apiKeyName',
         :'organization_id' => :'organizationId',
         :'action' => :'action',
         :'target_type' => :'targetType',
@@ -79,6 +82,7 @@ module DaytonaApiClient
         :'id' => :'String',
         :'actor_id' => :'String',
         :'actor_email' => :'String',
+        :'api_key_name' => :'String',
         :'organization_id' => :'String',
         :'action' => :'String',
         :'target_type' => :'String',
@@ -131,6 +135,10 @@ module DaytonaApiClient
         self.actor_email = attributes[:'actor_email']
       else
         self.actor_email = nil
+      end
+
+      if attributes.key?(:'api_key_name')
+        self.api_key_name = attributes[:'api_key_name']
       end
 
       if attributes.key?(:'organization_id')
@@ -282,6 +290,7 @@ module DaytonaApiClient
           id == o.id &&
           actor_id == o.actor_id &&
           actor_email == o.actor_email &&
+          api_key_name == o.api_key_name &&
           organization_id == o.organization_id &&
           action == o.action &&
           target_type == o.target_type &&
@@ -304,7 +313,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, actor_id, actor_email, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, created_at].hash
+      [id, actor_id, actor_email, api_key_name, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, created_at].hash
     end
 
     # Builds the object from hash

@@ -63,6 +63,7 @@ export class AuditService implements OnApplicationBootstrap {
     const auditLog = new AuditLog()
     auditLog.actorId = createDto.actorId
     auditLog.actorEmail = createDto.actorEmail
+    auditLog.apiKeyName = createDto.apiKeyName
     auditLog.organizationId = createDto.organizationId
     auditLog.action = createDto.action
     auditLog.targetType = createDto.targetType

@@ -25,6 +25,7 @@ type AuditLog struct {
 	Id                   string                 `json:"id"`
 	ActorId              string                 `json:"actorId"`
 	ActorEmail           string                 `json:"actorEmail"`
+	ApiKeyName           *string                `json:"apiKeyName,omitempty"`
 	OrganizationId       *string                `json:"organizationId,omitempty"`
 	Action               string                 `json:"action"`
 	TargetType           *string                `json:"targetType,omitempty"`
@@ -133,6 +134,38 @@ func (o *AuditLog) GetActorEmailOk() (*string, bool) {
 // SetActorEmail sets field value
 func (o *AuditLog) SetActorEmail(v string) {
 	o.ActorEmail = v
+}
+
+// GetApiKeyName returns the ApiKeyName field value if set, zero value otherwise.
+func (o *AuditLog) GetApiKeyName() string {
+	if o == nil || IsNil(o.ApiKeyName) {
+		var ret string
+		return ret
+	}
+	return *o.ApiKeyName
+}
+
+// GetApiKeyNameOk returns a tuple with the ApiKeyName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AuditLog) GetApiKeyNameOk() (*string, bool) {
+	if o == nil || IsNil(o.ApiKeyName) {
+		return nil, false
+	}
+	return o.ApiKeyName, true
+}
+
+// HasApiKeyName returns a boolean if a field has been set.
+func (o *AuditLog) HasApiKeyName() bool {
+	if o != nil && !IsNil(o.ApiKeyName) {
+		return true
+	}
+
+	return false
+}
+
+// SetApiKeyName gets a reference to the given string and assigns it to the ApiKeyName field.
+func (o *AuditLog) SetApiKeyName(v string) {
+	o.ApiKeyName = &v
 }
 
 // GetOrganizationId returns the OrganizationId field value if set, zero value otherwise.
@@ -484,6 +517,9 @@ func (o AuditLog) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["actorId"] = o.ActorId
 	toSerialize["actorEmail"] = o.ActorEmail
+	if !IsNil(o.ApiKeyName) {
+		toSerialize["apiKeyName"] = o.ApiKeyName
+	}
 	if !IsNil(o.OrganizationId) {
 		toSerialize["organizationId"] = o.OrganizationId
 	}
@@ -563,6 +599,7 @@ func (o *AuditLog) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "actorId")
 		delete(additionalProperties, "actorEmail")
+		delete(additionalProperties, "apiKeyName")
 		delete(additionalProperties, "organizationId")
 		delete(additionalProperties, "action")
 		delete(additionalProperties, "targetType")

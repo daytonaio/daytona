@@ -18,6 +18,9 @@ export class AuditLogDto {
   actorEmail: string
 
   @ApiPropertyOptional()
+  apiKeyName?: string
+
+  @ApiPropertyOptional()
   organizationId?: string
 
   @ApiProperty()
@@ -58,6 +61,7 @@ export class AuditLogDto {
       id: auditLog.id,
       actorId: auditLog.actorId,
       actorEmail: auditLog.actorEmail,
+      apiKeyName: auditLog.apiKeyName,
       organizationId: auditLog.organizationId,
       action: auditLog.action,
       targetType: auditLog.targetType,

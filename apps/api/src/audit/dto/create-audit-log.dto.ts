@@ -18,6 +18,10 @@ export class CreateAuditLogDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  apiKeyName?: string
+
+  @ApiPropertyOptional()
+  @IsOptional()
   organizationId?: string
 
   @ApiProperty({
