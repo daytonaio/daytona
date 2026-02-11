@@ -18,7 +18,6 @@ import { usePlayground } from '@/hooks/usePlayground'
 import { CompressedScreenshotResponse, RegionScreenshotResponse } from '@daytonaio/api-client'
 import { ScreenshotResponse } from '@daytonaio/toolbox-api-client'
 import { ComputerUse, ScreenshotRegion } from '@daytonaio/sdk'
-import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
@@ -36,12 +35,8 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
     playgroundActionParamValueSetter,
     runPlaygroundActionWithParams,
   } = usePlayground()
-  const [screenshotOptions, setScreenshotOptions] = useState<CustomizedScreenshotOptions>(
-    VNCInteractionOptionsParamsState['screenshotOptionsConfig'],
-  )
-  const [screenshotRegion, setScreenshotRegion] = useState<ScreenshotRegion>(
-    VNCInteractionOptionsParamsState['screenshotRegionConfig'],
-  )
+  const screenshotOptions = VNCInteractionOptionsParamsState['screenshotOptionsConfig']
+  const screenshotRegion = VNCInteractionOptionsParamsState['screenshotRegionConfig']
 
   const screenshotOptionsNumberParametersFormData: (NumberParameterFormItem & { key: 'quality' | 'scale' })[] = [
     { label: 'Scale', key: 'scale', min: 0.1, max: 1, placeholder: '0.5', step: 0.1 },
@@ -194,7 +189,6 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
                 playgroundActionParamValueSetter(
                   screenshotActionsFormData[0],
                   screenshotFormatFormData,
-                  setScreenshotOptions,
                   'screenshotOptionsConfig',
                   value,
                 )
@@ -211,7 +205,6 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
                   playgroundActionParamValueSetter(
                     screenshotActionsFormData[0],
                     screenshotOptionParamFormItem,
-                    setScreenshotOptions,
                     'screenshotOptionsConfig',
                     value,
                   )
@@ -228,7 +221,6 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
                 playgroundActionParamValueSetter(
                   screenshotActionsFormData[0],
                   screenshotShowCursorFormData,
-                  setScreenshotOptions,
                   'screenshotOptionsConfig',
                   checked,
                 )
@@ -254,7 +246,6 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
                   playgroundActionParamValueSetter(
                     screenshotActionsFormData[0],
                     screenshotRegionParamFormItem,
-                    setScreenshotRegion,
                     'screenshotRegionConfig',
                     value,
                   )

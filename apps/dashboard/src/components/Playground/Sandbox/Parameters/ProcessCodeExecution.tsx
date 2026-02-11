@@ -14,16 +14,14 @@ import { ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { getLanguageCodeToRun } from '@/lib/playground'
 import { CodeLanguage } from '@daytonaio/sdk'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 
 const SandboxProcessCodeExecution: React.FC = () => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
-  const [codeRunParams, setCodeRunParams] = useState<CodeRunParams>(sandboxParametersState['codeRunParams'])
-  const [shellCommandRunParams, setShellCommandRunParams] = useState<ShellCommandRunParams>(
-    sandboxParametersState['shellCommandRunParams'],
-  )
+  const codeRunParams = sandboxParametersState['codeRunParams']
+  const shellCommandRunParams = sandboxParametersState['shellCommandRunParams']
 
   const codeRunLanguageCodeFormData: ParameterFormItem & { key: 'languageCode' } = {
     label: 'Code to execute',
@@ -60,10 +58,8 @@ const SandboxProcessCodeExecution: React.FC = () => {
 
   // Change code to run based on selected sandbox language
   useEffect(() => {
-    setCodeRunParams((prev) => {
-      const codeRunParamsNew = { ...prev, languageCode: getLanguageCodeToRun(sandboxParametersState.language) }
-      setSandboxParameterValue('codeRunParams', codeRunParamsNew)
-      return codeRunParamsNew
+    setSandboxParameterValue('codeRunParams', {
+      languageCode: getLanguageCodeToRun(sandboxParametersState.language),
     })
   }, [sandboxParametersState.language, setSandboxParameterValue])
 

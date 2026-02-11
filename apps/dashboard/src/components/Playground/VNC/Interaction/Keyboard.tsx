@@ -16,7 +16,6 @@ import {
 import { KeyboardActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
-import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
@@ -33,11 +32,9 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
     playgroundActionParamValueSetter,
     runPlaygroundActionWithParams,
   } = usePlayground()
-  const [hotKeyParams, setHotKeyParams] = useState<KeyboardHotKey>(
-    VNCInteractionOptionsParamsState['keyboardHotKeyParams'],
-  )
-  const [pressParams, setPressParams] = useState<KeyboardPress>(VNCInteractionOptionsParamsState['keyboardPressParams'])
-  const [typeParams, setTypeParams] = useState<KeyboardType>(VNCInteractionOptionsParamsState['keyboardTypeParams'])
+  const hotKeyParams = VNCInteractionOptionsParamsState['keyboardHotKeyParams']
+  const pressParams = VNCInteractionOptionsParamsState['keyboardPressParams']
+  const typeParams = VNCInteractionOptionsParamsState['keyboardTypeParams']
 
   const hotKeyParamsFormData: ParameterFormData<KeyboardHotKey> = [
     { label: 'Keys', key: 'keys', placeholder: 'ctrl+c, alt+tab', required: true },
@@ -127,7 +124,6 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                     playgroundActionParamValueSetter(
                       keyboardAction,
                       hotKeyParamsFormData[0],
-                      setHotKeyParams,
                       'keyboardHotKeyParams',
                       value,
                     )
@@ -146,7 +142,6 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                         playgroundActionParamValueSetter(
                           keyboardAction,
                           pressParamFormItem,
-                          setPressParams,
                           'keyboardPressParams',
                           value,
                         )
@@ -166,7 +161,6 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                       playgroundActionParamValueSetter(
                         keyboardAction,
                         typeParamsFormData[0],
-                        setTypeParams,
                         'keyboardTypeParams',
                         value,
                       )
@@ -181,7 +175,6 @@ const VNCKeyboardOperations: React.FC<VNCInteractionOptionsSectionComponentProps
                       playgroundActionParamValueSetter(
                         keyboardAction,
                         typeParamsFormData[1],
-                        setTypeParams,
                         'keyboardTypeParams',
                         value,
                       )

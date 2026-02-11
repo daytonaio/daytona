@@ -240,17 +240,21 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   )
 
   const playgroundActionParamValueSetter: PlaygroundActionParamValueSetter = useCallback(
-    (actionFormData, paramFormData, setState, actionParamsKey, value) => {
-      setState((prev) => {
-        const newState = { ...prev, [paramFormData.key]: value }
-        setPlaygroundActionParamValue(actionParamsKey, newState)
-        // Validate action params
-        if (!actionFormData.onChangeParamsValidationDisabled)
-          validatePlaygroundActionWithParams(actionFormData, newState)
-        return newState
-      })
+    (actionFormData, paramFormData, actionParamsKey, value) => {
+      const prev =
+        actionParamsKey in sandboxParametersState
+          ? sandboxParametersState[actionParamsKey as keyof SandboxParams]
+          : VNCInteractionOptionsParamsState[actionParamsKey as keyof VNCInteractionOptionsParams]
+      const newState = { ...prev, [paramFormData.key]: value }
+      setPlaygroundActionParamValue(actionParamsKey, newState)
+      if (!actionFormData.onChangeParamsValidationDisabled) validatePlaygroundActionWithParams(actionFormData, newState)
     },
-    [setPlaygroundActionParamValue, validatePlaygroundActionWithParams],
+    [
+      setPlaygroundActionParamValue,
+      validatePlaygroundActionWithParams,
+      sandboxParametersState,
+      VNCInteractionOptionsParamsState,
+    ],
   )
 
   const DaytonaClient = useMemo(() => {

@@ -265,10 +265,9 @@ export type ValidatePlaygroundActionWithParams = <A extends PlaygroundActions, T
   parametersState: T,
 ) => void
 
-export type PlaygroundActionParamValueSetter = <A extends PlaygroundActions, T, S extends T>( // S type is one of types contained inside T union
+export type PlaygroundActionParamValueSetter = <A extends PlaygroundActions, T>(
   actionFormData: PlaygroundActionWithParamsFormData<A, T>,
   paramFormData: ParameterFormItem,
-  setState: React.Dispatch<React.SetStateAction<S>>,
   actionParamsKey: keyof PlaygroundActionParams,
   value: any,
 ) => void
