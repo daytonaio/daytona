@@ -379,6 +379,16 @@ export class SnapshotService {
       take: limitNum,
     })
 
+    // Filter out snapshot regions that are not available to the organization
+    const availableRegions = await this.organizationService.listAvailableRegions(organizationId)
+    const availableRegionIds = new Set(availableRegions.map((r) => r.id))
+
+    for (const snapshot of items) {
+      if (snapshot.snapshotRegions) {
+        snapshot.snapshotRegions = snapshot.snapshotRegions.filter((sr) => availableRegionIds.has(sr.regionId))
+      }
+    }
+
     return {
       items,
       total,
