@@ -112,6 +112,24 @@ export class OrganizationDto {
   })
   experimentalConfig: Record<string, any> | null
 
+  @ApiProperty({
+    description: 'Authenticated rate limit TTL in seconds',
+    nullable: true,
+  })
+  authenticatedRateLimitTtlSeconds: number | null
+
+  @ApiProperty({
+    description: 'Sandbox create rate limit TTL in seconds',
+    nullable: true,
+  })
+  sandboxCreateRateLimitTtlSeconds: number | null
+
+  @ApiProperty({
+    description: 'Sandbox lifecycle rate limit TTL in seconds',
+    nullable: true,
+  })
+  sandboxLifecycleRateLimitTtlSeconds: number | null
+
   static fromOrganization(organization: Organization): OrganizationDto {
     const experimentalConfig = organization._experimentalConfig
     if (experimentalConfig && experimentalConfig.otel && experimentalConfig.otel.headers) {
@@ -145,6 +163,9 @@ export class OrganizationDto {
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,
       experimentalConfig,
+      authenticatedRateLimitTtlSeconds: organization.authenticatedRateLimitTtlSeconds,
+      sandboxCreateRateLimitTtlSeconds: organization.sandboxCreateRateLimitTtlSeconds,
+      sandboxLifecycleRateLimitTtlSeconds: organization.sandboxLifecycleRateLimitTtlSeconds,
     }
 
     return dto

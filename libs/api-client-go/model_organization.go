@@ -61,8 +61,14 @@ type Organization struct {
 	// Sandbox lifecycle rate limit per minute
 	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
 	// Experimental configuration
-	ExperimentalConfig   map[string]interface{} `json:"experimentalConfig"`
-	AdditionalProperties map[string]interface{}
+	ExperimentalConfig map[string]interface{} `json:"experimentalConfig"`
+	// Authenticated rate limit TTL in seconds
+	AuthenticatedRateLimitTtlSeconds NullableFloat32 `json:"authenticatedRateLimitTtlSeconds"`
+	// Sandbox create rate limit TTL in seconds
+	SandboxCreateRateLimitTtlSeconds NullableFloat32 `json:"sandboxCreateRateLimitTtlSeconds"`
+	// Sandbox lifecycle rate limit TTL in seconds
+	SandboxLifecycleRateLimitTtlSeconds NullableFloat32 `json:"sandboxLifecycleRateLimitTtlSeconds"`
+	AdditionalProperties                map[string]interface{}
 }
 
 type _Organization Organization
@@ -71,7 +77,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -92,6 +98,9 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
 	this.SandboxLifecycleRateLimit = sandboxLifecycleRateLimit
 	this.ExperimentalConfig = experimentalConfig
+	this.AuthenticatedRateLimitTtlSeconds = authenticatedRateLimitTtlSeconds
+	this.SandboxCreateRateLimitTtlSeconds = sandboxCreateRateLimitTtlSeconds
+	this.SandboxLifecycleRateLimitTtlSeconds = sandboxLifecycleRateLimitTtlSeconds
 	return &this
 }
 
@@ -597,6 +606,84 @@ func (o *Organization) SetExperimentalConfig(v map[string]interface{}) {
 	o.ExperimentalConfig = v
 }
 
+// GetAuthenticatedRateLimitTtlSeconds returns the AuthenticatedRateLimitTtlSeconds field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *Organization) GetAuthenticatedRateLimitTtlSeconds() float32 {
+	if o == nil || o.AuthenticatedRateLimitTtlSeconds.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.AuthenticatedRateLimitTtlSeconds.Get()
+}
+
+// GetAuthenticatedRateLimitTtlSecondsOk returns a tuple with the AuthenticatedRateLimitTtlSeconds field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Organization) GetAuthenticatedRateLimitTtlSecondsOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.AuthenticatedRateLimitTtlSeconds.Get(), o.AuthenticatedRateLimitTtlSeconds.IsSet()
+}
+
+// SetAuthenticatedRateLimitTtlSeconds sets field value
+func (o *Organization) SetAuthenticatedRateLimitTtlSeconds(v float32) {
+	o.AuthenticatedRateLimitTtlSeconds.Set(&v)
+}
+
+// GetSandboxCreateRateLimitTtlSeconds returns the SandboxCreateRateLimitTtlSeconds field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *Organization) GetSandboxCreateRateLimitTtlSeconds() float32 {
+	if o == nil || o.SandboxCreateRateLimitTtlSeconds.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxCreateRateLimitTtlSeconds.Get()
+}
+
+// GetSandboxCreateRateLimitTtlSecondsOk returns a tuple with the SandboxCreateRateLimitTtlSeconds field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Organization) GetSandboxCreateRateLimitTtlSecondsOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxCreateRateLimitTtlSeconds.Get(), o.SandboxCreateRateLimitTtlSeconds.IsSet()
+}
+
+// SetSandboxCreateRateLimitTtlSeconds sets field value
+func (o *Organization) SetSandboxCreateRateLimitTtlSeconds(v float32) {
+	o.SandboxCreateRateLimitTtlSeconds.Set(&v)
+}
+
+// GetSandboxLifecycleRateLimitTtlSeconds returns the SandboxLifecycleRateLimitTtlSeconds field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *Organization) GetSandboxLifecycleRateLimitTtlSeconds() float32 {
+	if o == nil || o.SandboxLifecycleRateLimitTtlSeconds.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.SandboxLifecycleRateLimitTtlSeconds.Get()
+}
+
+// GetSandboxLifecycleRateLimitTtlSecondsOk returns a tuple with the SandboxLifecycleRateLimitTtlSeconds field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *Organization) GetSandboxLifecycleRateLimitTtlSecondsOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SandboxLifecycleRateLimitTtlSeconds.Get(), o.SandboxLifecycleRateLimitTtlSeconds.IsSet()
+}
+
+// SetSandboxLifecycleRateLimitTtlSeconds sets field value
+func (o *Organization) SetSandboxLifecycleRateLimitTtlSeconds(v float32) {
+	o.SandboxLifecycleRateLimitTtlSeconds.Set(&v)
+}
+
 func (o Organization) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -629,6 +716,9 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["sandboxCreateRateLimit"] = o.SandboxCreateRateLimit.Get()
 	toSerialize["sandboxLifecycleRateLimit"] = o.SandboxLifecycleRateLimit.Get()
 	toSerialize["experimentalConfig"] = o.ExperimentalConfig
+	toSerialize["authenticatedRateLimitTtlSeconds"] = o.AuthenticatedRateLimitTtlSeconds.Get()
+	toSerialize["sandboxCreateRateLimitTtlSeconds"] = o.SandboxCreateRateLimitTtlSeconds.Get()
+	toSerialize["sandboxLifecycleRateLimitTtlSeconds"] = o.SandboxLifecycleRateLimitTtlSeconds.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -661,6 +751,9 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"sandboxCreateRateLimit",
 		"sandboxLifecycleRateLimit",
 		"experimentalConfig",
+		"authenticatedRateLimitTtlSeconds",
+		"sandboxCreateRateLimitTtlSeconds",
+		"sandboxLifecycleRateLimitTtlSeconds",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -710,6 +803,9 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "sandboxCreateRateLimit")
 		delete(additionalProperties, "sandboxLifecycleRateLimit")
 		delete(additionalProperties, "experimentalConfig")
+		delete(additionalProperties, "authenticatedRateLimitTtlSeconds")
+		delete(additionalProperties, "sandboxCreateRateLimitTtlSeconds")
+		delete(additionalProperties, "sandboxLifecycleRateLimitTtlSeconds")
 		o.AdditionalProperties = additionalProperties
 	}
 
