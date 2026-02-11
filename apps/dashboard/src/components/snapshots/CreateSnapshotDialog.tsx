@@ -32,36 +32,22 @@ import { z } from 'zod'
 import { ScrollArea } from '../ui/scroll-area'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
+const IMAGE_TAG_OR_DIGEST_REGEX = /^[^@]+@sha256:[a-f0-9]{64}$|^(?!.*@sha256:).*:.+$/
 
 const snapshotNameSchema = z
   .string()
   .min(1, 'Snapshot name is required')
-  .refine((name) => !name.includes(' '), 'Spaces are not allowed in snapshot names')
-  .refine(
-    (name) => IMAGE_NAME_REGEX.test(name),
-    'Invalid snapshot name format. May contain letters, digits, dots, colons, slashes and dashes',
-  )
+  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
 
 const imageNameSchema = z
   .string()
   .min(1, 'Image name is required')
-  .refine((name) => !name.includes(' '), 'Spaces are not allowed in image names')
-  .refine((name) => {
-    if (name.includes('@sha256:')) {
-      const [imageName, digest] = name.split('@sha256:')
-      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) return false
-      if (imageName.includes(':')) return false
-      return true
-    }
-    return true
-  }, 'Invalid digest format. Must be image@sha256:64_hex_characters')
-  .refine((name) => {
-    if (name.includes('@sha256:')) return true
-    if (!name.includes('@') && (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name))) return false
-    return true
-  }, 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)')
+  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
+  .refine(
+    (name) => IMAGE_TAG_OR_DIGEST_REGEX.test(name),
+    'Image must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)',
+  )
   .refine((name) => !name.endsWith(':latest'), 'Images with tag ":latest" are not allowed')
-  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Invalid image name format')
 
 const formSchema = z.object({
   name: snapshotNameSchema,
