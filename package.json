@@ -113,7 +113,7 @@
     "algoliasearch": "^5.30.0",
     "astro": "5.15.9",
     "astro-expressive-code": "^0.41.2",
-    "axios": "^1.11.0",
+    "axios": "^1.13.5",
     "axios-debug-log": "^1.0.0",
     "axios-retry": "^4.5.0",
     "busboy": "^1.0.0",
