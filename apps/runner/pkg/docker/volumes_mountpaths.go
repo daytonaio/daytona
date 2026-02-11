@@ -100,8 +100,9 @@ func (d *DockerClient) ensureVolumeFuseMounted(ctx context.Context, volumeId str
 	cmd := d.getMountCmd(ctx, volumeId, mountPath)
 	err = cmd.Run()
 	if err != nil {
-		if !dirExisted {
-			os.Remove(mountPath)
+		removeErr := os.Remove(mountPath)
+		if removeErr != nil {
+			log.Warnf("failed to remove mount directory %s: %v", mountPath, removeErr)
 		}
 		return fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeId, mountPath, err)
 	}
