@@ -43,6 +43,7 @@ import { BuildInfo } from './build-info.entity'
 @Index('sandbox_pending_idx', ['id'], {
   where: `"pending" = true`,
 })
+@Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
   @PrimaryGeneratedColumn('uuid')
