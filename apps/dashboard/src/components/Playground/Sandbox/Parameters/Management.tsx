@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { SANDBOX_SNAPSHOT_DEFAULT_VALUE } from '@/constants/Playground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
+import { getLanguageCodeToRun } from '@/lib/playground'
 import { SnapshotDto } from '@daytonaio/api-client'
 import { CodeLanguage, Resources } from '@daytonaio/sdk'
 import { HelpCircleIcon } from 'lucide-react'
@@ -15,6 +16,7 @@ import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
+import { useEffect } from 'react'
 
 // TODO - Currently, snapshot selection is not supported in the Playground, so props are hardcoded to an empty array and false for loading. We keep snapshot parts commented to enable it in future if requested by users. Also, sandbox creation and code snippet generation suppoort snapshot selection, so they will work when snapshot selection is enabled in the UI without requiring any additional changes. Currently, the snapshot value is fixed to 'Default'
 type SandboxManagementParametersProps = {
@@ -72,6 +74,13 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
     { label: 'Archive (min)', key: 'autoArchiveInterval', min: 0, max: Infinity, placeholder: '7' },
     { label: 'Delete (min)', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
   ]
+
+  // Change code to run based on selected sandbox language
+  useEffect(() => {
+    setSandboxParameterValue('codeRunParams', {
+      languageCode: getLanguageCodeToRun(sandboxParametersState.language),
+    })
+  }, [sandboxParametersState.language, setSandboxParameterValue])
 
   const nonDefaultSnapshotSelected = sandboxSnapshotName && sandboxSnapshotName !== SANDBOX_SNAPSHOT_DEFAULT_VALUE
 
