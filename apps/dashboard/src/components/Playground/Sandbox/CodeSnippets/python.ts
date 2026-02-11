@@ -64,7 +64,7 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
       p.config.useCustomSandboxSnapshotName ? `${ind}snapshot="${p.state['snapshotName']}",` : '',
       p.config.createSandboxFromImage ? `${ind}image=Image.debian_slim("3.13"),` : '',
       p.config.useResources ? `${ind}resources=resources,` : '',
-      p.config.useLanguageParam ? `${ind}language="${p.state['language']}"` : '',
+      p.config.useLanguageParam ? `${ind}language="${p.state['language']}",` : '',
       ...(p.config.createSandboxParamsExist
         ? [
             p.config.useAutoStopInterval
@@ -97,13 +97,13 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
     const ind = '\t'
     return [
       '\n\n# Run code securely inside the Sandbox',
-      'response = sandbox.process.code_run(',
+      'codeRunResponse = sandbox.process.code_run(',
       `'''${p.state['codeRunParams'].languageCode}'''`,
       ')',
-      'if response.exit_code != 0:',
-      `${ind}print(f"Error: {response.exit_code} {response.result}")`,
+      'if codeRunResponse.exit_code != 0:',
+      `${ind}print(f"Error: {codeRunResponse.exit_code} {codeRunResponse.result}")`,
       'else:',
-      `${ind}print(response.result)`,
+      `${ind}print(codeRunResponse.result)`,
     ].join('\n')
   },
 
@@ -111,8 +111,8 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
     if (!p.actions.shellCommandExists) return ''
     return [
       '\n\n# Execute shell commands',
-      `response = sandbox.process.exec("${p.state['shellCommandRunParams'].shellCommand}")`,
-      'print(response.result)',
+      `shellRunResponse = sandbox.process.exec("${p.state['shellCommandRunParams'].shellCommand}")`,
+      'print(shellRunResponse.result)',
     ].join('\n')
   },
 
@@ -185,8 +185,8 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
           'print(f"Current branch: {status.current_branch}")',
           'print(f"Commits ahead: {status.ahead}")',
           'print(f"Commits behind: {status.behind}")',
-          'for file in status.file_status:',
-          '\tprint(f"File: {file.name}")',
+          'for file_status in status.file_status:',
+          '\tprint(f"File: {file_status.name}")',
         ].join('\n'),
       )
     }
@@ -195,8 +195,8 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
       sections.push(
         [
           '# List branches',
-          `response = sandbox.git.branches("${p.state['gitBranchesParams'].repositoryPath}")`,
-          'for branch in response.branches:',
+          `branchesResponse = sandbox.git.branches("${p.state['gitBranchesParams'].repositoryPath}")`,
+          'for branch in branchesResponse.branches:',
           '\tprint(f"Branch: {branch}")',
         ].join('\n'),
       )
