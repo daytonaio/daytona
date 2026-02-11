@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -32,6 +32,7 @@ import { EditEndpointDialog } from '@/components/Webhooks/EditEndpointDialog'
 import { EndpointEventsTable } from '@/components/Webhooks/EndpointEventsTable'
 import { RoutePath } from '@/enums/RoutePath'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
+import { useReplayWebhookEventMutation } from '@/hooks/mutations/useReplayWebhookEventMutation'
 import { useRotateWebhookSecretMutation } from '@/hooks/mutations/useRotateWebhookSecretMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
@@ -53,11 +54,12 @@ const WebhookEndpointDetails: React.FC = () => {
 
   const endpoint = useEndpoint(endpointId || '')
   const secret = useEndpointSecret(endpointId || '')
-  const messages = useAttemptedMessages(endpointId || '')
+  const messages = useAttemptedMessages(endpointId || '', {})
 
   const updateMutation = useUpdateWebhookEndpointMutation()
   const deleteMutation = useDeleteWebhookEndpointMutation()
   const rotateSecretMutation = useRotateWebhookSecretMutation()
+  const replayMutation = useReplayWebhookEventMutation()
 
   const isMutating = updateMutation.isPending || deleteMutation.isPending || rotateSecretMutation.isPending
 
@@ -103,6 +105,17 @@ const WebhookEndpointDetails: React.FC = () => {
       setRotateSecretDialogOpen(false)
     } catch (error) {
       handleApiError(error, 'Failed to rotate secret')
+    }
+  }
+
+  const handleReplay = async (msgId: string) => {
+    if (!endpointId) return
+    try {
+      await replayMutation.mutateAsync({ endpointId, msgId })
+      toast.success('Event replayed')
+      messages.reload()
+    } catch (error) {
+      handleApiError(error, 'Failed to replay event')
     }
   }
 
@@ -204,7 +217,7 @@ const WebhookEndpointDetails: React.FC = () => {
                 <CardTitle>Event History</CardTitle>
               </CardHeader>
               <CardContent>
-                <EndpointEventsTable data={[]} loading={true} />
+                <EndpointEventsTable data={[]} loading={true} onReplay={handleReplay} />
               </CardContent>
             </Card>
           </>
@@ -233,7 +246,7 @@ const WebhookEndpointDetails: React.FC = () => {
                     <div className="text-muted-foreground text-xs mb-1">URL</div>
                     <InputGroup className="pr-1">
                       <InputGroupInput value={endpointData.url} readOnly className="font-mono text-sm" />
-                      <CopyButton value={endpointData.url} size="icon-xs" />
+                      <CopyButton value={endpointData.url} size="icon-xs" tooltipText="Copy URL" />
                     </InputGroup>
                   </div>
                   <div className="flex flex-col">
@@ -257,7 +270,7 @@ const WebhookEndpointDetails: React.FC = () => {
                         >
                           {isSecretRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </InputGroupButton>
-                        <CopyButton value={secret.data.key} size="icon-xs" />
+                        <CopyButton value={secret.data.key} size="icon-xs" tooltipText="Copy Signing Secret" />
                       </InputGroup>
                     ) : null}
                   </div>
@@ -281,7 +294,7 @@ const WebhookEndpointDetails: React.FC = () => {
                 <CardTitle>Event History</CardTitle>
               </CardHeader>
               <CardContent>
-                <EndpointEventsTable data={messages.data || []} loading={messages.loading} />
+                <EndpointEventsTable data={messages.data || []} loading={messages.loading} onReplay={handleReplay} />
               </CardContent>
             </Card>
           </>
