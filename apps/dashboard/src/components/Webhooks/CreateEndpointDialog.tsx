@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
@@ -132,6 +132,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                   <FieldLabel htmlFor={field.name}>Endpoint Name</FieldLabel>
                   <Input
                     aria-invalid={isInvalid}
+                    autoComplete="off"
                     id={field.name}
                     name={field.name}
                     value={field.state.value}
@@ -154,6 +155,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor={field.name}>Endpoint URL</FieldLabel>
                   <Input
+                    autoComplete="off"
                     aria-invalid={isInvalid}
                     id={field.name}
                     name={field.name}
@@ -200,7 +202,7 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                             ))
                           )}
                         </div>
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
