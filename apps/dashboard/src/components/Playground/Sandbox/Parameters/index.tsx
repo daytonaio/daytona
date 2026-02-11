@@ -5,10 +5,7 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { SandboxParametersSections } from '@/enums/Playground'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
-import { useQuery } from '@tanstack/react-query'
 import { BoltIcon, FolderIcon, GitBranchIcon, SquareTerminalIcon } from 'lucide-react'
 import { useState } from 'react'
 import SandboxFileSystem from './FileSystem'
@@ -35,18 +32,19 @@ const SandboxParameters = ({ className }: { className?: string }) => {
     SandboxParametersSections.SANDBOX_MANAGEMENT,
   ])
 
-  const { snapshotApi } = useApi()
-  const { selectedOrganization } = useSelectedOrganization()
+  // TODO - Currently, snapshot selection is not supported in the Playground, so we are using empty array and false for loading. We keep to code commented to enable it in future if requested by users.
+  // const { snapshotApi } = useApi()
+  // const { selectedOrganization } = useSelectedOrganization()
 
-  const { data: snapshotsData = [], isLoading: snapshotsLoading } = useQuery({
-    queryKey: ['snapshots', selectedOrganization?.id, 'all'],
-    queryFn: async () => {
-      if (!selectedOrganization) return []
-      const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
-      return response.data.items
-    },
-    enabled: !!selectedOrganization,
-  })
+  // const { data: snapshotsData = [], isLoading: snapshotsLoading } = useQuery({
+  //   queryKey: ['snapshots', selectedOrganization?.id, 'all'],
+  //   queryFn: async () => {
+  //     if (!selectedOrganization) return []
+  //     const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
+  //     return response.data.items
+  //   },
+  //   enabled: !!selectedOrganization,
+  // })
 
   return (
     <div className={cn('flex flex-col gap-6', className)}>
@@ -80,7 +78,7 @@ const SandboxParameters = ({ className }: { className?: string }) => {
                     {section.value === SandboxParametersSections.FILE_SYSTEM && <SandboxFileSystem />}
                     {section.value === SandboxParametersSections.GIT_OPERATIONS && <SandboxGitOperations />}
                     {section.value === SandboxParametersSections.SANDBOX_MANAGEMENT && (
-                      <SandboxManagementParameters snapshotsData={snapshotsData} snapshotsLoading={snapshotsLoading} />
+                      <SandboxManagementParameters snapshotsData={[]} snapshotsLoading={false} />
                     )}
                     {section.value === SandboxParametersSections.PROCESS_CODE_EXECUTION && (
                       <SandboxProcessCodeExecution />

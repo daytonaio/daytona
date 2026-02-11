@@ -16,6 +16,7 @@ import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 
+// TODO - Currently, snapshot selection is not supported in the Playground, so props are hardcoded to an empty array and false for loading. We keep snapshot parts commented to enable it in future if requested by users. Also, sandbox creation and code snippet generation suppoort snapshot selection, so they will work when snapshot selection is enabled in the UI without requiring any additional changes. Currently, the snapshot value is fixed to 'Default'
 type SandboxManagementParametersProps = {
   snapshotsData: Array<SnapshotDto>
   snapshotsLoading: boolean
@@ -37,11 +38,11 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
     placeholder: 'Select sandbox language',
   }
 
-  const sandboxSnapshotFormData: ParameterFormItem = {
-    label: 'Snapshot',
-    key: 'snapshotName',
-    placeholder: 'Select sandbox snapshot',
-  }
+  // const sandboxSnapshotFormData: ParameterFormItem = {
+  //   label: 'Snapshot',
+  //   key: 'snapshotName',
+  //   placeholder: 'Select sandbox snapshot',
+  // }
 
   // Available languages
   const languageOptions = [
@@ -86,7 +87,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
           }}
         />
       </StackedInputFormControl>
-      <StackedInputFormControl formItem={sandboxSnapshotFormData}>
+      {/* <StackedInputFormControl formItem={sandboxSnapshotFormData}>
         <FormSelectInput
           selectOptions={[
             { value: SANDBOX_SNAPSHOT_DEFAULT_VALUE, label: 'Default' },
@@ -102,7 +103,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
             setSandboxParameterValue(sandboxSnapshotFormData.key as 'snapshotName', snapshotName)
           }}
         />
-      </StackedInputFormControl>
+      </StackedInputFormControl> */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="resources" className="text-sm text-muted-foreground">
