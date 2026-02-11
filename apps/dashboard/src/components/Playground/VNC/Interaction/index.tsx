@@ -5,7 +5,7 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { VNCInteractionOptionsSectionComponentProps, WrapVNCInvokeApiType } from '@/contexts/PlaygroundContext'
-import { VNCInteractionOptionsSections } from '@/enums/Playground'
+import { VNCInteractionOptionsSections, PlaygroundCategories } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
 import { createErrorMessageOutput } from '@/lib/playground'
@@ -35,19 +35,17 @@ const VNCInteractionOptions: React.FC = () => {
   const [openedInteractionOptionsSections, setOpenedInteractionOptionsSections] = useState<
     VNCInteractionOptionsSections[]
   >([VNCInteractionOptionsSections.DISPLAY])
-  const [disableOnSandboxError, setDisableOnSandboxError] = useState(false)
   const [ComputerUseClient, setComputerUseClient] = useState<ComputerUse | null>(null)
 
   const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
   const VNCUrl = VNCInteractionOptionsParamsState.VNCUrl
 
   // Get sandbox which will be used for VNC actions
-  const VNCSandboxData = usePlaygroundSandbox()
+  const VNCSandboxData = usePlaygroundSandbox(PlaygroundCategories.VNC)
 
   useEffect(() => {
-    // Sync VNCDesktopWindowResponse with sandbox creation data
+    // Share the hook result with VNCDesktopWindowResponse via context so it can read sandbox/loading/error state without invoking a second usePlaygroundSandbox instance -> 1 hook call per playground tab is preferred
     setVNCInteractionOptionsParamValue('VNCSandboxData', VNCSandboxData)
-    setDisableOnSandboxError(!!VNCSandboxData.error) // In case of sandbox creation error we disable VNC actions run
   }, [setVNCInteractionOptionsParamValue, VNCSandboxData])
 
   useEffect(() => {
@@ -75,7 +73,7 @@ const VNCInteractionOptions: React.FC = () => {
   )
 
   // Disable actions run if there was an error during sandbox creation or during VNC ComputerUse initialization
-  const VNCActionsDisabled = disableOnSandboxError || !ComputerUseClient
+  const VNCActionsDisabled = !!VNCSandboxData.sandboxError || !!VNCSandboxData.vncUrlError || !ComputerUseClient
 
   const interactionOptionsSectionComponentProps: VNCInteractionOptionsSectionComponentProps = {
     disableActions: VNCActionsDisabled,

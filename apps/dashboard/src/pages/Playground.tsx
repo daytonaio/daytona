@@ -19,12 +19,10 @@ import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PlaygroundCategories } from '@/enums/Playground'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { PlaygroundProvider } from '@/providers/PlaygroundProvider'
 import { AnimatePresence, motion } from 'framer-motion'
 import { SettingsIcon } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useResizeObserver } from 'usehooks-ts'
 
 const playgroundCategoriesData = [
@@ -48,17 +46,6 @@ const SlideLeftRight = ({ children, direction }: { children: React.ReactNode; di
 
 const Playground: React.FC = () => {
   const [playgroundCategory, setPlaygroundCategory] = useState<PlaygroundCategories>(PlaygroundCategories.SANDBOX)
-
-  const { sandboxApi } = useApi()
-
-  const { selectedOrganization } = useSelectedOrganization()
-
-  const getPortPreviewUrl = useCallback(
-    async (sandboxId: string, port: number): Promise<string> => {
-      return (await sandboxApi.getSignedPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url
-    },
-    [sandboxApi, selectedOrganization],
-  )
 
   const [drawerOpen, setDrawerOpen] = useState<PlaygroundCategories | null>(null)
   const handleDrawerOpenChange = (open: boolean) => {
@@ -154,12 +141,8 @@ const Playground: React.FC = () => {
                 </Drawer>
                 <PlaygroundLayoutContent className="[&>*]:w-full [&>*]:max-w-[min(90%,1024px)]">
                   {playgroundCategory === PlaygroundCategories.SANDBOX && <SandboxCodeSnippetsResponse />}
-                  {playgroundCategory === PlaygroundCategories.TERMINAL && (
-                    <WebTerminal getPortPreviewUrl={getPortPreviewUrl} />
-                  )}
-                  {playgroundCategory === PlaygroundCategories.VNC && (
-                    <VNCDesktopWindowResponse getPortPreviewUrl={getPortPreviewUrl} />
-                  )}
+                  {playgroundCategory === PlaygroundCategories.TERMINAL && <WebTerminal />}
+                  {playgroundCategory === PlaygroundCategories.VNC && <VNCDesktopWindowResponse />}
                 </PlaygroundLayoutContent>
               </PlaygroundLayout>
             </TabsContent>

@@ -4,16 +4,27 @@
  */
 
 import { usePlayground } from '@/hooks/usePlayground'
+import { PlaygroundCategories } from '@/enums/Playground'
+import { useApi } from '@/hooks/useApi'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { handleApiError } from '@/lib/error-handling'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { Sandbox } from '@daytonaio/sdk'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 export type UsePlaygroundSandboxResult = {
   sandbox: Sandbox | null
-  isLoading: boolean
-  error: string | null
+  sandboxLoading: boolean
+  sandboxError: string | null
   updateSandbox: (sandbox: Sandbox) => Promise<void>
   createSandboxFromParams: () => Promise<Sandbox>
+  terminalUrlLoading: boolean
+  terminalUrlError: string | null
+  refetchTerminalUrl: () => void
+  vncUrlLoading: boolean
+  vncUrlError: string | ReactNode
+  refetchVNCUrl: () => void
 }
 
 /**
@@ -33,18 +44,135 @@ export type UsePlaygroundSandboxResult = {
  * creation there is triggered manually via the "Run" button which executes the auto-generated
  * code snippet.
  */
-export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePlaygroundSandboxResult {
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const creatingRef = useRef(false)
+export function usePlaygroundSandbox(
+  playgroundCategory: PlaygroundCategories,
+  disableSandboxAutoCreate?: boolean,
+): UsePlaygroundSandboxResult {
+  const [sandboxLoading, setSandboxLoading] = useState(false)
+  const [sandboxError, setSandboxError] = useState<string | null>(null)
+  const sandboxCreatingRef = useRef(false)
 
-  const { DaytonaClient, sandbox, setSandbox, getSandboxParametersInfo } = usePlayground()
+  const [terminalUrlLoading, setTerminalUrlLoading] = useState(false)
+  const [terminalUrlError, setTerminalUrlError] = useState<string | null>(null)
+  const [vncUrlLoading, setVncUrlLoading] = useState(false)
+  const [vncUrlError, setVncUrlError] = useState<string | ReactNode>(null)
+
+  const {
+    DaytonaClient,
+    sandbox,
+    setSandbox,
+    getSandboxParametersInfo,
+    setTerminalUrl,
+    setVNCInteractionOptionsParamValue,
+    terminalUrl,
+    VNCInteractionOptionsParamsState,
+  } = usePlayground()
+  const VNCUrl = VNCInteractionOptionsParamsState.VNCUrl
+
+  const { sandboxApi, toolboxApi } = useApi()
+  const { selectedOrganization } = useSelectedOrganization()
+
+  const getPortPreviewUrl = useCallback(
+    async (sandboxId: string, port: number) =>
+      (await sandboxApi.getSignedPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url,
+    [sandboxApi, selectedOrganization],
+  )
+
+  const fetchTerminalUrl = useCallback(
+    async (sandboxId: string) => {
+      setTerminalUrl(null)
+      setTerminalUrlLoading(true)
+      setTerminalUrlError(null)
+      try {
+        setTerminalUrl(await getPortPreviewUrl(sandboxId, 22222))
+      } catch (error) {
+        handleApiError(error, 'Failed to construct web terminal URL')
+        setTerminalUrlError(error instanceof Error ? error.message : String(error))
+      } finally {
+        setTerminalUrlLoading(false)
+      }
+    },
+    [getPortPreviewUrl, setTerminalUrl],
+  )
+
+  const fetchVNCUrl = useCallback(
+    async (fetchSandbox: Sandbox) => {
+      const showToast = playgroundCategory === PlaygroundCategories.VNC
+      setVNCInteractionOptionsParamValue('VNCUrl', null)
+      setVncUrlLoading(true)
+      setVncUrlError(null)
+      try {
+        if (showToast) toast.info('Checking VNC desktop status...')
+        const {
+          data: { status },
+        } = await toolboxApi.getComputerUseStatusDeprecated(fetchSandbox.id, selectedOrganization?.id)
+        if (status === 'active') {
+          const url = await getPortPreviewUrl(fetchSandbox.id, 6080)
+          setVNCInteractionOptionsParamValue('VNCUrl', url + '/vnc.html')
+        } else {
+          await toolboxApi.startComputerUseDeprecated(fetchSandbox.id, selectedOrganization?.id)
+          if (showToast) toast.success('Starting VNC desktop...')
+          await new Promise((resolve) => setTimeout(resolve, 5000))
+          const newStatusResponse = await toolboxApi.getComputerUseStatusDeprecated(
+            fetchSandbox.id,
+            selectedOrganization?.id,
+          )
+          if (newStatusResponse.data.status === 'active') {
+            const url = await getPortPreviewUrl(fetchSandbox.id, 6080)
+            setVNCInteractionOptionsParamValue('VNCUrl', url + '/vnc.html')
+          } else {
+            if (showToast) toast.error(`VNC desktop failed to start. Status: ${newStatusResponse.data.status}`)
+            setVncUrlError(`VNC desktop failed to start. Status: ${newStatusResponse.data.status}`)
+          }
+        }
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error)
+        if (message === 'Computer-use functionality is not available') {
+          const errorContent = (
+            <div>
+              <div>Computer-use dependencies are missing in the runtime environment.</div>
+              <div className="mt-2">
+                <a
+                  href={`${DAYTONA_DOCS_URL}/en/vnc-access/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  See documentation on how to configure the runtime for computer-use
+                </a>
+              </div>
+            </div>
+          )
+          if (showToast)
+            toast.error('Computer-use functionality is not available', {
+              description: errorContent,
+            })
+          setVncUrlError(errorContent)
+        } else {
+          handleApiError(error, 'Failed to check VNC status')
+        }
+      } finally {
+        setVncUrlLoading(false)
+      }
+    },
+    [toolboxApi, selectedOrganization, getPortPreviewUrl, setVNCInteractionOptionsParamValue],
+  )
+
+  const refetchTerminalUrl = useCallback(() => {
+    if (sandbox) fetchTerminalUrl(sandbox.id)
+  }, [sandbox, fetchTerminalUrl])
+
+  const refetchVNCUrl = useCallback(() => {
+    if (sandbox) fetchVNCUrl(sandbox)
+  }, [sandbox, fetchVNCUrl])
 
   const updateSandbox = useCallback(
     async (newSandbox: Sandbox) => {
       setSandbox(newSandbox)
+      fetchTerminalUrl(newSandbox.id)
+      fetchVNCUrl(newSandbox)
     },
-    [setSandbox],
+    [setSandbox, fetchTerminalUrl, fetchVNCUrl],
   )
 
   const createSandboxFromParams = useCallback(async (): Promise<Sandbox> => {
@@ -54,20 +182,24 @@ export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePla
   }, [DaytonaClient, getSandboxParametersInfo])
 
   const createSandbox = useCallback(async () => {
-    // Sandbox already created and stored in context -> skip creation
+    // Sandbox already created and stored in context -> retry any missing URLs
     if (sandbox) {
+      if (playgroundCategory === PlaygroundCategories.TERMINAL && !terminalUrl) fetchTerminalUrl(sandbox.id)
+      if (playgroundCategory === PlaygroundCategories.VNC && !VNCUrl) fetchVNCUrl(sandbox)
       return
     }
     // Prevent concurrent creation attempts
-    if (creatingRef.current) {
+    if (sandboxCreatingRef.current) {
       return
     }
     try {
-      creatingRef.current = true
-      setIsLoading(true)
-      setError(null)
+      sandboxCreatingRef.current = true
+      setSandboxLoading(true)
+      setSandboxError(null)
       const newSandbox = await createSandboxFromParams()
       setSandbox(newSandbox)
+      fetchTerminalUrl(newSandbox.id)
+      fetchVNCUrl(newSandbox)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
       toast.error('Failed to create sandbox', {
@@ -83,12 +215,12 @@ export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePla
           },
         },
       })
-      setError(errorMessage)
+      setSandboxError(errorMessage)
     } finally {
-      setIsLoading(false)
-      creatingRef.current = false
+      setSandboxLoading(false)
+      sandboxCreatingRef.current = false
     }
-  }, [sandbox, setSandbox, createSandboxFromParams])
+  }, [sandbox, setSandbox, createSandboxFromParams, fetchTerminalUrl, fetchVNCUrl, terminalUrl, VNCUrl])
 
   useEffect(() => {
     if (!disableSandboxAutoCreate) createSandbox()
@@ -97,11 +229,29 @@ export function usePlaygroundSandbox(disableSandboxAutoCreate?: boolean): UsePla
   return useMemo(
     () => ({
       sandbox,
-      isLoading,
-      error,
+      sandboxLoading,
+      sandboxError,
       updateSandbox,
       createSandboxFromParams,
+      terminalUrlLoading,
+      terminalUrlError,
+      refetchTerminalUrl,
+      vncUrlLoading,
+      vncUrlError,
+      refetchVNCUrl,
     }),
-    [sandbox, isLoading, error, updateSandbox, createSandboxFromParams],
+    [
+      sandbox,
+      sandboxLoading,
+      sandboxError,
+      updateSandbox,
+      createSandboxFromParams,
+      terminalUrlLoading,
+      terminalUrlError,
+      refetchTerminalUrl,
+      vncUrlLoading,
+      vncUrlError,
+      refetchVNCUrl,
+    ],
   )
 }

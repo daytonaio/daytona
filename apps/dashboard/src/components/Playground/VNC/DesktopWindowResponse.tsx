@@ -6,25 +6,13 @@
 import TooltipButton from '@/components/TooltipButton'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { useApi } from '@/hooks/useApi'
 import { usePlayground } from '@/hooks/usePlayground'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { handleApiError } from '@/lib/error-handling'
-import { Sandbox } from '@daytonaio/sdk'
-import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronUpIcon, RefreshCcw, XIcon } from 'lucide-react'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Group, Panel, usePanelRef } from 'react-resizable-panels'
-import { toast } from 'sonner'
 import ResponseCard from '../ResponseCard'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
-
-type VNCDesktopWindowResponseProps = {
-  getPortPreviewUrl: (sandboxId: string, port: number) => Promise<string>
-  className?: string
-}
 
 const motionLoadingProps = {
   initial: { opacity: 0, y: 10 },
@@ -33,128 +21,13 @@ const motionLoadingProps = {
   transition: { duration: 0.175 },
 }
 
-function isComputerUseUnavailableError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message : String(error)
-  return message === 'Computer-use functionality is not available'
-}
-
-const computerUseMissingErrorMessage = (
-  <div>
-    <div>Computer-use dependencies are missing in the runtime environment.</div>
-    <div className="mt-2">
-      <a
-        href={`${DAYTONA_DOCS_URL}/en/vnc-access/`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary hover:underline"
-      >
-        See documentation on how to configure the runtime for computer-use
-      </a>
-    </div>
-  </div>
-)
-
-const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ getPortPreviewUrl, className }) => {
-  const [loadingVNCUrl, setLoadingVNCUrl] = useState(true)
-  const [VNCLoadingError, setVNCLoadingError] = useState<string | ReactNode>('')
-
-  const { selectedOrganization } = useSelectedOrganization()
-  const { toolboxApi } = useApi()
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
-  const VNCSandboxData = VNCInteractionOptionsParamsState.VNCSandboxData
+const VNCDesktopWindowResponse: React.FC<{ className?: string }> = ({ className }) => {
+  const { VNCInteractionOptionsParamsState } = usePlayground()
   const VNCUrl = VNCInteractionOptionsParamsState.VNCUrl
+  const { sandbox, sandboxError, vncUrlLoading, vncUrlError, refetchVNCUrl } =
+    VNCInteractionOptionsParamsState.VNCSandboxData ?? {}
 
-  const { refetch: fetchVNCUrl } = useQuery({
-    queryKey: ['vncUrl', VNCSandboxData?.sandbox?.id],
-    queryFn: async () => {
-      try {
-        if (!VNCSandboxData?.sandbox) return null
-        const url = await getPortPreviewUrl(VNCSandboxData.sandbox.id, 6080)
-        return url + '/vnc.html'
-      } catch (error) {
-        handleApiError(error, 'Failed to construct VNC URL')
-        return null
-      }
-    },
-    enabled: false,
-    retry: false,
-  })
-
-  const getVNCComputerUseUrl = useCallback(
-    async (sandbox: Sandbox) => {
-      // Notify user immediately that we're checking VNC status
-      toast.info('Checking VNC desktop status...')
-      try {
-        // First, check if computer use is already started
-        const statusResponse = await toolboxApi.getComputerUseStatusDeprecated(sandbox.id, selectedOrganization?.id)
-        const status = statusResponse.data.status
-
-        // Check if computer use is active (all processes running)
-        if (status === 'active') {
-          const { data: vncUrl } = await fetchVNCUrl()
-          if (vncUrl) setVNCInteractionOptionsParamValue('VNCUrl', vncUrl)
-        } else {
-          // Computer use is not active, try to start it
-          try {
-            await toolboxApi.startComputerUseDeprecated(sandbox.id, selectedOrganization?.id)
-            toast.success('Starting VNC desktop...')
-
-            // Wait a moment for processes to start, then open VNC
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-
-            try {
-              const newStatusResponse = await toolboxApi.getComputerUseStatusDeprecated(
-                sandbox.id,
-                selectedOrganization?.id,
-              )
-              const newStatus = newStatusResponse.data.status
-
-              if (newStatus === 'active') {
-                const { data: vncUrl } = await fetchVNCUrl()
-                if (vncUrl) setVNCInteractionOptionsParamValue('VNCUrl', vncUrl)
-              } else {
-                toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
-                setVNCLoadingError(`VNC desktop failed to start. Status: ${newStatus}`)
-              }
-            } catch (error) {
-              handleApiError(error, 'Failed to check VNC status after start')
-            }
-          } catch (startError: any) {
-            handleApiError(startError, 'Failed to start VNC desktop')
-          }
-        }
-      } catch (error) {
-        const isComputerUseError = isComputerUseUnavailableError(error)
-        if (isComputerUseError) {
-          toast.error('Computer-use functionality is not available', {
-            description: computerUseMissingErrorMessage,
-          })
-          setVNCLoadingError(computerUseMissingErrorMessage)
-          return
-        }
-        handleApiError(error, 'Failed to check VNC status')
-      }
-    },
-    [fetchVNCUrl, selectedOrganization, toolboxApi, setVNCInteractionOptionsParamValue],
-  )
-
-  const setupVNCComputerUse = useCallback(
-    async (sandbox: Sandbox) => {
-      setLoadingVNCUrl(true)
-      await getVNCComputerUseUrl(sandbox) // if (VNCSandboxData.sandbox) guarantees that value isn't null so we put as Sandbox to silence TS compiler
-      setLoadingVNCUrl(false)
-    },
-    [getVNCComputerUseUrl],
-  )
-
-  useEffect(() => {
-    setVNCInteractionOptionsParamValue('VNCUrl', null) // Reset VNCurl value
-    if (!VNCSandboxData) return
-    if (VNCSandboxData.sandbox) {
-      // Sandbox created -> setup VNC
-      setupVNCComputerUse(VNCSandboxData.sandbox)
-    } else if (VNCSandboxData.error) setLoadingVNCUrl(false)
-  }, [setVNCInteractionOptionsParamValue, VNCSandboxData, getVNCComputerUseUrl, setupVNCComputerUse])
+  const loadingVNCUrl = vncUrlLoading || (!sandbox && !sandboxError)
 
   const resultPanelRef = usePanelRef()
 
@@ -171,7 +44,7 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
         <Group orientation="vertical" className="aspect-[4/3] md:aspect-[16/9] border-border rounded-b-md">
           <Panel minSize={'20%'} className="overflow-auto">
             <div className="aspect-[4/3] md:aspect-[16/9] bg-muted/40 dark:bg-muted/10 rounded-lg">
-              {loadingVNCUrl || VNCLoadingError || !VNCUrl ? (
+              {loadingVNCUrl || vncUrlError || !VNCUrl ? (
                 <div className="h-full flex items-center justify-center rounded-lg">
                   <AnimatePresence mode="wait">
                     {loadingVNCUrl ? (
@@ -184,19 +57,14 @@ const VNCDesktopWindowResponse: React.FC<VNCDesktopWindowResponseProps> = ({ get
                         className="flex flex-col items-center justify-center gap-2"
                         {...motionLoadingProps}
                       >
-                        {VNCLoadingError || 'There was an error loading VNC.'}
-                        {VNCSandboxData?.sandbox && (
-                          <Button
-                            variant="outline"
-                            className="ml-2"
-                            onClick={() => {
-                              setVNCLoadingError('')
-                              setupVNCComputerUse(VNCSandboxData.sandbox!)
-                            }}
-                          >
+                        {vncUrlError || 'There was an error loading VNC.'}
+                        {sandbox ? (
+                          <Button variant="outline" className="ml-2" onClick={() => refetchVNCUrl?.()}>
                             <RefreshCcw className="size-4" />
                             Retry
                           </Button>
+                        ) : (
+                          sandboxError && <span className="text-sm text-muted-foreground">{sandboxError}</span>
                         )}
                       </motion.p>
                     )}
