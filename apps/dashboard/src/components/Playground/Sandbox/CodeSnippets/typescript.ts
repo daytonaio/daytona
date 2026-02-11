@@ -93,13 +93,13 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
     const ind = '\t\t'
     return [
       `\n\n${ind}// Run code securely inside the Sandbox`,
-      `${ind}const response = await sandbox.process.codeRun(\``,
-      `${p.state['codeRunParams'].languageCode}`,
+      `${ind}const codeRunResponse = await sandbox.process.codeRun(\``,
+      `${(p.state['codeRunParams'].languageCode ?? '').replace(/`/g, '\\`').replace(/\$\{/g, '\\${')}`, // Escape backticks and ${ to prevent breaking the template literal
       `${ind}\`)`,
-      `${ind}if (response.exitCode !== 0) {`,
-      `${ind + '\t'}console.error("Error running code:", response.exitCode, response.result)`,
+      `${ind}if (codeRunResponse.exitCode !== 0) {`,
+      `${ind + '\t'}console.error("Error running code:", codeRunResponse.exitCode, codeRunResponse.result)`,
       `${ind}} else {`,
-      `${ind + '\t'}console.log(response.result)`,
+      `${ind + '\t'}console.log(codeRunResponse.result)`,
       `${ind}}`,
     ].join('\n')
   },
@@ -109,8 +109,8 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
     const ind = '\t\t'
     return [
       `\n\n${ind}// Execute shell commands`,
-      `${ind}const response = await sandbox.process.executeCommand('${p.state['shellCommandRunParams'].shellCommand}')`,
-      `${ind}console.log(response.result)`,
+      `${ind}const shellRunResponse = await sandbox.process.executeCommand('${p.state['shellCommandRunParams'].shellCommand}')`,
+      `${ind}console.log(shellRunResponse.result)`,
     ].join('\n')
   },
 
@@ -197,8 +197,8 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
       sections.push(
         [
           `${base}// List branches`,
-          `${base}const response = await sandbox.git.branches("${p.state['gitBranchesParams'].repositoryPath}")`,
-          `${base}response.branches.forEach(branch => {`,
+          `${base}const branchesResponse = await sandbox.git.branches("${p.state['gitBranchesParams'].repositoryPath}")`,
+          `${base}branchesResponse.branches.forEach(branch => {`,
           `${ind}console.log(\`Branch: \${branch}\`)`,
           `${base}})`,
         ].join('\n'),
