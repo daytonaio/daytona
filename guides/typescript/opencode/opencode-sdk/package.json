@@ -1,0 +1,29 @@
+{
+  "name": "opencode-sdk",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "A coding agent powered by the OpenCode SDK and Daytona sandboxes.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "opencode",
+    "sandbox",
+    "typescript",
+    "daytona"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@daytonaio/sdk": "^0.125.0",
+    "@opencode-ai/sdk": "^1.0.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.2"
+  }
+}
