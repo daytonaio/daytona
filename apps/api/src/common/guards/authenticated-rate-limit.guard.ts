@@ -115,11 +115,14 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
                     ? orgLimits.sandboxLifecycleTtlSeconds
                     : undefined
 
-            if (customLimit || customTtlSeconds) {
+            if (customLimit != null || customTtlSeconds != null) {
               const modifiedProps = {
                 ...requestProps,
-                ...(customLimit && { limit: customLimit }),
-                ...(customTtlSeconds && { ttl: customTtlSeconds * 1000, blockDuration: customTtlSeconds * 1000 }),
+                ...(customLimit != null && { limit: customLimit }),
+                ...(customTtlSeconds != null && {
+                  ttl: customTtlSeconds * 1000,
+                  blockDuration: customTtlSeconds * 1000,
+                }),
               }
               return super.handleRequest(modifiedProps)
             }

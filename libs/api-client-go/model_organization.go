@@ -61,14 +61,14 @@ type Organization struct {
 	// Sandbox lifecycle rate limit per minute
 	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
 	// Experimental configuration
-	ExperimentalConfig   map[string]interface{} `json:"experimentalConfig"`
+	ExperimentalConfig map[string]interface{} `json:"experimentalConfig"`
 	// Authenticated rate limit TTL in seconds
 	AuthenticatedRateLimitTtlSeconds NullableFloat32 `json:"authenticatedRateLimitTtlSeconds"`
 	// Sandbox create rate limit TTL in seconds
 	SandboxCreateRateLimitTtlSeconds NullableFloat32 `json:"sandboxCreateRateLimitTtlSeconds"`
 	// Sandbox lifecycle rate limit TTL in seconds
 	SandboxLifecycleRateLimitTtlSeconds NullableFloat32 `json:"sandboxLifecycleRateLimitTtlSeconds"`
-	AdditionalProperties           map[string]interface{}
+	AdditionalProperties                map[string]interface{}
 }
 
 type _Organization Organization

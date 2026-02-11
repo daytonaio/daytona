@@ -157,7 +157,7 @@ module DaytonaApiClient
       Set.new([
         :'authenticated_rate_limit',
         :'sandbox_create_rate_limit',
-        :'sandbox_lifecycle_rate_limit',,
+        :'sandbox_lifecycle_rate_limit',
         :'authenticated_rate_limit_ttl_seconds',
         :'sandbox_create_rate_limit_ttl_seconds',
         :'sandbox_lifecycle_rate_limit_ttl_seconds'
