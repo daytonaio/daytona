@@ -12,9 +12,7 @@ import {
 } from '@/contexts/PlaygroundContext'
 import { ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { getLanguageCodeToRun } from '@/lib/playground'
 import { CodeLanguage } from '@daytonaio/sdk'
-import { useEffect } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
 
@@ -55,13 +53,6 @@ const SandboxProcessCodeExecution: React.FC = () => {
       parametersState: shellCommandRunParams,
     },
   ]
-
-  // Change code to run based on selected sandbox language
-  useEffect(() => {
-    setSandboxParameterValue('codeRunParams', {
-      languageCode: getLanguageCodeToRun(sandboxParametersState.language),
-    })
-  }, [sandboxParametersState.language, setSandboxParameterValue])
 
   //TODO -> Currently codeRun and executeCommand values are fixed -> when we enable user to define them implement onChange handlers with validatePlaygroundActionWithParams logic
   return (
