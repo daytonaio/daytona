@@ -2,10 +2,10 @@
 title: Playground
 ---
 
-Daytona provides an interactive environment ("Playground") in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/playground) for creating sandboxes, running SDK operations, and exploring Daytona features directly from your browser.
+Daytona provides an interactive environment ("Playground") for creating sandboxes, running SDK operations, and exploring Daytona features directly from your browser.
 
 - **Interactive sandbox creation**: configure and create sandboxes with custom resources
-- **Code snippet generation**: automatically generate SDK code samples for every operation
+- **Code snippet generation**: automatically generate SDK code samples for operations
 - [Web terminal](/docs/en/web-terminal): run commands directly in your sandbox through a built-in web terminal
 - [VNC access](/docs/en/vnc-access): interact with GUI applications using [Computer Use](/docs/en/computer-use) features
 
@@ -15,109 +15,70 @@ Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/playground)
 
 Playground consists of three tabs: [Sandbox](#sandbox-tab), [Terminal](#terminal-tab), and [VNC](#vnc-tab). All three tabs operate on the same active sandbox.
 
-## Sandbox tab
+## Sandbox
 
-The sandbox tab lets you create and configure sandboxes and perform SDK operations through an interactive interface. The left panel contains configurable parameters organized into collapsible sections. The right panel displays auto-generated code snippets that you can inspect and copy.
+The sandbox tab provides an interactive interface to configure sandboxes and perform SDK operations. The left panel contains configurable parameters organized into collapsible sections. The right panel displays auto-generated code snippets that you can inspect, copy, and run.
 
-### Create a Sandbox
+### Management
 
-1. Open the **Management** section in the left panel
-2. Select a [programming language runtime](/docs/en/sandboxes#multiple-runtime-support) for code snippet generation
-3. Select a [snapshot](/docs/en/snapshots) or use the default image
-4. Configure [resources](/docs/en/sandboxes#resources)
-5. Set [sandbox lifecycle](/docs/en/sandboxes#sandbox-lifecycle) policies
-6. Click **Run** to create the sandbox
+The management section contains the parameters used to configure a sandbox. You can edit these parameters to customize your sandbox and its resources.
+
+- [sandbox language](/docs/en/sandboxes#multiple-runtime-support): select a programming language runtime for the sandbox
+- [sandbox resources](/docs/en/sandboxes#resources): configure resources allocated to the sandbox
+- [sandbox lifecycle](/docs/en/sandboxes#sandbox-lifecycle): set the sandbox lifecycle policies
 
 :::note
 If there are no active sandboxes, the playground automatically creates one using the configured parameters. Clicking **Run** always creates a new sandbox, replacing any existing playground sandbox.
 :::
 
-### Run file system operations
+### File system
 
-1. Open the **File System** section in the left panel
-2. Select an operation:
-   - [List files](/docs/en/file-system-operations#list-files-and-directories): browse files and directories in the sandbox
-   - [Create folder](/docs/en/file-system-operations#create-directories): create new directories
-   - [Delete file](/docs/en/file-system-operations#delete-files): remove files or directories
-3. Fill in the required parameters
-4. Click **Run** to execute the operation
+The file system section provides operations to manage files and directories in the sandbox. You can modify files and directories in the sandbox using the following operations:
+
+- **Create a new directory**: set the directory location and its permissions
+- **List files and directories**: set the directory location
+- **Delete files**: set the file location and delete directory checkbox
 
 For more information, see [file system operations](/docs/en/file-system-operations).
 
-### Run Git operations
+### Git operations
 
-1. Open the **Git Operations** section in the left panel
-2. Select an operation:
-   - [Clone](/docs/en/git-operations#clone-repositories): clone a repository from a remote URL
-   - [Status](/docs/en/git-operations#get-repository-status): check the current repository status
-   - [List Branches](/docs/en/git-operations#branch-operations): view available branches
-3. Fill in the required parameters
-4. Click **Run** to execute the operation
+The Git operations section provides operations to manage Git repositories in the sandbox. You can clone, get repository status, and list branches using the following operations:
+
+- **Clone a Git repository**: set the repository URL, destination, branch, commit ID, and credentials
+- **Get repository status**: retrieve the repository status
+- **List branches**: retrieve the list of branches in the repository
 
 For more information, see [Git operations](/docs/en/git-operations).
 
-### Run process and code execution
+### Process and code execution
 
-1. Open the **Process & Code Execution** section in the left panel
-2. Select an operation:
-   - [Run Code](/docs/en/process-code-execution#code-execution): execute code snippets directly in the sandbox
-   - [Execute Command](/docs/en/process-code-execution#execute-commands): run shell commands in the sandbox environment
-3. Fill in the required parameters
-4. Click **Run** to execute the operation
+The process and code execution section provides operations to run code snippets and shell commands directly in the sandbox.
 
 For more information, see [process and code execution](/docs/en/process-code-execution).
 
-### Code snippet generation
+## Terminal
 
-Playground automatically generates SDK code for every operation based on your selected language. The generated code appears in the right panel and can be copied directly into your projects.
-
-## Terminal tab
-
-The terminal tab provides a web-based terminal connected to your playground sandbox. This gives you direct command-line access to the sandbox environment for running commands, viewing files, and debugging.
-
-1. Navigate to the **Terminal** tab
-2. The terminal connects automatically to the active playground sandbox
+The terminal tab provides a web-based terminal connected to the sandbox. This gives you direct command-line access to the sandbox environment for running commands, viewing files, and debugging.
 
 The terminal runs on port `22222` and remains active as long as the sandbox is running. If the sandbox stops due to inactivity, start it again to restore terminal access.
 
 :::note
-Terminal access is restricted to authenticated members of your [Organization](/docs/en/organizations).
+Terminal access is restricted to authenticated members of your [organization](/docs/en/organizations).
 :::
 
-For more information, see [Web Terminal](/docs/en/web-terminal).
+For more information, see [web terminal](/docs/en/web-terminal).
 
-## VNC tab
+## VNC
 
-The VNC tab provides graphical desktop access to your sandbox, enabling you to interact with GUI applications and test [Computer Use](/docs/en/computer-use) features. The left panel contains interaction controls organized into sections. The right panel displays the desktop view.
+The VNC tab provides graphical desktop access to the sandbox, enabling you to interact with GUI applications and test [Computer Use](/docs/en/computer-use) features. The left panel contains interaction controls organized into sections. The right panel displays the desktop view.
 
-1. Navigate to the **VNC** tab
-2. The desktop environment loads in the right panel
+Interact with the desktop environment using the following options:
 
-### Display operations
-
-- [Get display info](/docs/en/computer-use#get-info): retrieve display dimensions and configuration
-- [List windows](/docs/en/computer-use#get-windows): view all open windows and their properties
-
-### Keyboard operations
-
-- [Hotkey](/docs/en/computer-use#hotkey): execute key combinations (e.g., Ctrl+C, Ctrl+V)
-- [Press](/docs/en/computer-use#press): press individual keys
-- [Type](/docs/en/computer-use#type): type text strings
-
-### Mouse operations
-
-- [Click](/docs/en/computer-use#click): perform left, right, or middle clicks at specific coordinates
-- [Drag](/docs/en/computer-use#drag): drag between two points
-- [Move](/docs/en/computer-use#move): move the cursor to specific coordinates
-- [Scroll](/docs/en/computer-use#scroll): scroll up or down
-- [Get position](/docs/en/computer-use#get-position): retrieve the current cursor coordinates
-
-### Screenshot operations
-
-- [Take full screen](/docs/en/computer-use#take-full-screen): capture the entire screen
-- [Take region](/docs/en/computer-use#take-region): capture a specific rectangular area
-- [Take compressed](/docs/en/computer-use#take-compressed): capture and compress the full screen
-- [Take compressed region](/docs/en/computer-use#take-compressed-region): capture and compress a specific area
+- **Display**: get information about the displays and list open windows
+- **Keyboard**: press a hotkey combination, press a key with optional modifiers, and type text
+- **Mouse**: click, drag, move, and get cursor position
+- **Screenshot**: select format, scale, and quality, show cursor, and take screenshots of the entire screen or specific regions
 
 For more information, see [VNC access](/docs/en/vnc-access) and [computer use](/docs/en/computer-use).
 
