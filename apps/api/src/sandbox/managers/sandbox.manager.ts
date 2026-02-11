@@ -310,7 +310,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                     where: {
                       snapshotRef: sandbox.backupSnapshot,
                       state: SnapshotRunnerState.READY,
+                      runnerId: Not(runner.id),
                     },
+                    take: 100,
                   })
 
                   if (snapshotRunners.length === 0) {
@@ -326,11 +328,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                   // Find a runner that's not the current draining runner and meets all criteria
                   let targetSnapshotRunner: SnapshotRunner | undefined = undefined
                   for (const sr of snapshotRunners) {
-                    // Skip the current draining runner
-                    if (sr.runnerId === runner.id) {
-                      continue
-                    }
-
                     // Fetch the actual runner entity to check its state, unschedulable status, and score
                     const targetRunner = await this.runnerService.findOne(sr.runnerId)
                     if (!targetRunner) {
