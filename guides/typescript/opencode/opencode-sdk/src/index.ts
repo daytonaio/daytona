@@ -21,6 +21,8 @@ async function main(): Promise<void> {
 
   const daytona = new Daytona({ apiKey })
   let sandbox: Sandbox | undefined
+  
+  // Delete sandbox and exit on Ctrl+C or error.
   const cleanup = async () => {
     try {
       console.log('\nCleaning up...')
@@ -40,11 +42,13 @@ async function main(): Promise<void> {
     console.log('Installing OpenCode in sandbox...')
     await sandbox.process.executeCommand('npm i -g opencode-ai@1.1.1')
 
+    // Start OpenCode server and wait until it is listening.
     const { baseUrl, ready } = await Server.start(sandbox)
     await ready
     console.log('Preview:', baseUrl)
     console.log('Press Ctrl+C at any time to exit.')
 
+    // Create OpenCode session and run interactive prompt loop.
     const session = await Session.create(baseUrl)
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
     rl.once('SIGINT', cleanup)

@@ -9,12 +9,15 @@ const PORT = 4096
 const HOSTNAME = '0.0.0.0'
 const SERVER_READY_LINE = 'opencode server listening'
 
+// Inject an environment variable into a command string.
 function injectEnvVar(name: string, content: string): string {
   const base64 = Buffer.from(content).toString('base64')
   return `${name}=$(echo '${base64}' | base64 -d)`
 }
 
 export class Server {
+
+  // Start an OpenCode server in the sandbox with Daytona-aware agent config
   static async start(sandbox: Sandbox): Promise<{ baseUrl: string; ready: Promise<void> }> {
     const previewLink = await sandbox.getPreviewLink(PORT)
     const baseUrl = previewLink.url.replace(/\/$/, '')
@@ -47,6 +50,8 @@ export class Server {
       runAsync: true,
     })
     if (!command.cmdId) throw new Error('Failed to start OpenCode server in sandbox')
+
+    // Resolve ready when stdout contains the server listening line.
     sandbox.process.getSessionCommandLogs(
       sessionId,
       command.cmdId,
