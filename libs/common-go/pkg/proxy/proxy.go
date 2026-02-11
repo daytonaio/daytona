@@ -4,6 +4,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -16,6 +17,7 @@ import (
 var proxyTransport = &http.Transport{
 	MaxIdleConns:        100,
 	MaxIdleConnsPerHost: 100,
+	IdleConnTimeout:     90 * time.Second,
 	DialContext: (&net.Dialer{
 		KeepAlive: 30 * time.Second,
 	}).DialContext,
@@ -65,6 +67,15 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 			},
 			Transport:      proxyTransport,
 			ModifyResponse: modifyResponse,
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, proxyErr error) {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadGateway)
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"statusCode": http.StatusBadGateway,
+					"message":    "bad gateway: " + proxyErr.Error(),
+					"code":       "BAD_GATEWAY",
+				})
+			},
 		}
 
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)

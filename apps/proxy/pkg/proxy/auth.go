@@ -67,8 +67,10 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 		err = p.secureCookie.Decode(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, cookieSandboxId, &decodedValue)
 		if err != nil {
 			authErrors = append(authErrors, fmt.Sprintf("Cookie decoding error: %v", err))
-		} else if decodedValue == sandboxIdOrSignedToken {
-			return sandboxIdOrSignedToken, false, nil
+		} else if decodedValue != "" {
+			// For regular sandbox IDs: decodedValue is the sandbox ID itself
+			// For signed tokens: decodedValue is the resolved sandbox ID
+			return decodedValue, false, nil
 		}
 	}
 
@@ -106,12 +108,15 @@ func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxI
 		return "", fmt.Errorf("failed to get sandbox ID: %w. Is the token expired?", err)
 	}
 
-	encoded, err := p.secureCookie.Encode(SANDBOX_AUTH_COOKIE_NAME+sandboxId, sandboxId)
+	// Use the token (sandboxIdOrSignedToken) as the cookie name key so that
+	// subsequent requests with the same signed URL find this cookie.
+	// The cookie value stores the resolved sandbox ID.
+	encoded, err := p.secureCookie.Encode(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, sandboxId)
 	if err != nil {
 		return "", fmt.Errorf("failed to encode cookie: %w", err)
 	}
 
-	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxId, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
+	ctx.SetCookie(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, encoded, 3600, "/", cookieDomain, p.config.EnableTLS, true)
 
 	return sandboxId, nil
 }
