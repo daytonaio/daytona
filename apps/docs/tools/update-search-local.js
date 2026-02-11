@@ -167,9 +167,7 @@ function extractHeadings(content, tag, slug) {
     // Restore code blocks
     currentTextBelow = currentTextBelow.replace(
       /___CODE_BLOCK_(\d+)___/g,
-      (match, index) => {
-        return codeBlocks[parseInt(index)]
-      }
+      (match, index) => codeBlocks[parseInt(index)]
     )
 
     currentTextBelow = currentTextBelow.trim()
@@ -234,7 +232,6 @@ function parseOpenAPISpec(specPath, apiName, baseUrl) {
     const spec = JSON.parse(specContent)
 
     // Handle both OpenAPI 3.x and Swagger 2.0
-    const isSwagger2 = spec.swagger === '2.0'
     const paths = spec.paths || {}
     const urlPrefix = baseUrl || '/docs/tools/api'
 
@@ -371,7 +368,7 @@ function searchDocs() {
       } else if (
         stat.isFile() &&
         (file.endsWith('.md') || file.endsWith('.mdx')) &&
-        ![...EXCLUDE_FILES, path.basename(CLI_FILE_PATH)].includes(file) //CLI file is handled separately -> exclude it from directory traversals
+        ![...EXCLUDE_FILES, path.basename(CLI_FILE_PATH)].includes(file) // CLI file is handled separately -> exclude it from directory traversals
       ) {
         parseMarkdownFile(fullPath, tag).forEach(data =>
           recordsData.push({
@@ -396,11 +393,7 @@ function searchDocs() {
     })
   )
 
-  const mainApiRecords = parseOpenAPISpec(
-    MAIN_API_PATH,
-    'daytona',
-    '/docs/tools/api'
-  )
+  const mainApiRecords = parseOpenAPISpec(MAIN_API_PATH, 'daytona', '/docs/tools/api')
   const toolboxApiRecords = parseOpenAPISpec(
     TOOLBOX_API_PATH,
     'toolbox',
@@ -418,15 +411,17 @@ function searchDocs() {
   return { docsRecords, cliRecords, sdkRecords, apiRecords }
 }
 
-function main() {
+export function buildSearchFileRecords() {
   const { docsRecords, cliRecords, sdkRecords, apiRecords } = searchDocs()
-  const fileRecords = [
+  return [
     { fileName: 'docs', records: docsRecords },
     { fileName: 'cli', records: cliRecords },
     { fileName: 'sdk', records: sdkRecords },
     { fileName: 'api', records: apiRecords },
   ]
+}
 
+export function writeSearchFilesToDist(fileRecords) {
   const outputDir = path.join(__dirname, '../../../dist/apps/docs/client')
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true })
@@ -439,9 +434,17 @@ function main() {
       'utf8'
     )
   )
-  console.log('search index updated')
+
+  return outputDir
+}
+
+export function main() {
+  const fileRecords = buildSearchFileRecords()
+  writeSearchFilesToDist(fileRecords)
+  console.log('search index updated (dist only)')
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   main()
 }
+
