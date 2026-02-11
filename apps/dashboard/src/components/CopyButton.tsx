@@ -40,6 +40,7 @@ function CopyButton({
       onClick={(e) => {
         copy(value)
         onClick?.(e)
+        e.stopPropagation()
       }}
       className={cn(
         'font-sans text-muted-foreground hover:text-foreground',
