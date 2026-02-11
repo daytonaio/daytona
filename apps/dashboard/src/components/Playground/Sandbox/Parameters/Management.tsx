@@ -9,9 +9,8 @@ import { SANDBOX_SNAPSHOT_DEFAULT_VALUE } from '@/constants/Playground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
 import { SnapshotDto } from '@daytonaio/api-client'
-import { CodeLanguage, CreateSandboxBaseParams, Resources } from '@daytonaio/sdk'
+import { CodeLanguage, Resources } from '@daytonaio/sdk'
 import { HelpCircleIcon } from 'lucide-react'
-import { useState } from 'react'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
@@ -27,14 +26,10 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
   snapshotsLoading,
 }) => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
-  const [sandboxLanguage, setSandboxLanguage] = useState<CodeLanguage | undefined>(sandboxParametersState['language'])
-  const [sandboxSnapshotName, setSandboxSnapshotName] = useState<string | undefined>(
-    sandboxParametersState['snapshotName'],
-  )
-  const [resources, setResources] = useState<Resources>(sandboxParametersState['resources'])
-  const [sandboxFromImageParams, setSandboxFromImageParams] = useState<CreateSandboxBaseParams>(
-    sandboxParametersState['createSandboxBaseParams'],
-  )
+  const sandboxLanguage = sandboxParametersState['language']
+  const sandboxSnapshotName = sandboxParametersState['snapshotName']
+  const resources = sandboxParametersState['resources']
+  const sandboxFromImageParams = sandboxParametersState['createSandboxBaseParams']
 
   const languageFormData: ParameterFormItem = {
     label: 'Language',
@@ -87,7 +82,6 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
           selectValue={sandboxLanguage}
           formItem={languageFormData}
           onChangeHandler={(value) => {
-            setSandboxLanguage(value as CodeLanguage)
             setSandboxParameterValue(languageFormData.key as 'language', value as CodeLanguage)
           }}
         />
@@ -105,7 +99,6 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
           selectValue={sandboxSnapshotName}
           formItem={sandboxSnapshotFormData}
           onChangeHandler={(snapshotName) => {
-            setSandboxSnapshotName(snapshotName)
             setSandboxParameterValue(sandboxSnapshotFormData.key as 'snapshotName', snapshotName)
           }}
         />
@@ -138,9 +131,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
                 numberValue={resources[resourceParamFormItem.key]}
                 numberFormItem={resourceParamFormItem}
                 onChangeHandler={(value) => {
-                  const resourcesNew = { ...resources, [resourceParamFormItem.key]: value }
-                  setResources(resourcesNew)
-                  setSandboxParameterValue('resources', resourcesNew)
+                  setSandboxParameterValue('resources', { ...resources, [resourceParamFormItem.key]: value })
                 }}
               />
             </InlineInputFormControl>
@@ -158,9 +149,10 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
                 numberValue={sandboxFromImageParams[lifecycleParamFormItem.key]}
                 numberFormItem={lifecycleParamFormItem}
                 onChangeHandler={(value) => {
-                  const sandboxFromImageParamsNew = { ...sandboxFromImageParams, [lifecycleParamFormItem.key]: value }
-                  setSandboxFromImageParams(sandboxFromImageParamsNew)
-                  setSandboxParameterValue('createSandboxBaseParams', sandboxFromImageParamsNew)
+                  setSandboxParameterValue('createSandboxBaseParams', {
+                    ...sandboxFromImageParams,
+                    [lifecycleParamFormItem.key]: value,
+                  })
                 }}
               />
             </InlineInputFormControl>

@@ -13,7 +13,6 @@ import {
 } from '@/contexts/PlaygroundContext'
 import { FileSystemActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
@@ -21,11 +20,9 @@ import FormTextInput from '../../Inputs/TextInput'
 
 const SandboxFileSystem: React.FC = () => {
   const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
-  const [createFolderParams, setCreateFolderParams] = useState<CreateFolderParams>(
-    sandboxParametersState['createFolderParams'],
-  )
-  const [listFilesParams, setListFilesParams] = useState<ListFilesParams>(sandboxParametersState['listFilesParams'])
-  const [deleteFileParams, setDeleteFileParams] = useState<DeleteFileParams>(sandboxParametersState['deleteFileParams'])
+  const createFolderParams = sandboxParametersState['createFolderParams']
+  const listFilesParams = sandboxParametersState['listFilesParams']
+  const deleteFileParams = sandboxParametersState['deleteFileParams']
 
   const listFilesDirectoryFormData: ParameterFormItem & { key: 'directoryPath' } = {
     label: 'Directory location',
@@ -101,7 +98,6 @@ const SandboxFileSystem: React.FC = () => {
                     playgroundActionParamValueSetter(
                       fileSystemAction,
                       listFilesDirectoryFormData,
-                      setListFilesParams,
                       'listFilesParams',
                       value,
                     )
@@ -120,7 +116,6 @@ const SandboxFileSystem: React.FC = () => {
                         playgroundActionParamValueSetter(
                           fileSystemAction,
                           createFolderParamFormItem,
-                          setCreateFolderParams,
                           'createFolderParams',
                           value,
                         )
@@ -140,7 +135,6 @@ const SandboxFileSystem: React.FC = () => {
                       playgroundActionParamValueSetter(
                         fileSystemAction,
                         deleteFileLocationFormData,
-                        setDeleteFileParams,
                         'deleteFileParams',
                         value,
                       )
@@ -155,7 +149,6 @@ const SandboxFileSystem: React.FC = () => {
                       playgroundActionParamValueSetter(
                         fileSystemAction,
                         deleteFileRecursiveFormData,
-                        setDeleteFileParams,
                         'deleteFileParams',
                         checked,
                       )

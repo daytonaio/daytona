@@ -19,7 +19,7 @@ import {
 import { MouseActions, MouseButton, MouseScrollDirection } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { ComputerUse } from '@daytonaio/sdk'
-import React, { useState } from 'react'
+import React from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
@@ -46,14 +46,10 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
     runPlaygroundActionWithParams,
     runPlaygroundActionWithoutParams,
   } = usePlayground()
-  const [mouseClickParams, setMouseClickParams] = useState<MouseClick>(
-    VNCInteractionOptionsParamsState['mouseClickParams'],
-  )
-  const [mouseDragParams, setMouseDragParams] = useState<MouseDrag>(VNCInteractionOptionsParamsState['mouseDragParams'])
-  const [mouseMoveParams, setMouseMoveParams] = useState<MouseMove>(VNCInteractionOptionsParamsState['mouseMoveParams'])
-  const [mouseScrollParams, setMouseScrollParams] = useState<MouseScroll>(
-    VNCInteractionOptionsParamsState['mouseScrollParams'],
-  )
+  const mouseClickParams = VNCInteractionOptionsParamsState['mouseClickParams']
+  const mouseDragParams = VNCInteractionOptionsParamsState['mouseDragParams']
+  const mouseMoveParams = VNCInteractionOptionsParamsState['mouseMoveParams']
+  const mouseScrollParams = VNCInteractionOptionsParamsState['mouseScrollParams']
 
   const mouseClickNumberParamsFormData: (NumberParameterFormItem & { key: 'x' | 'y' })[] = [
     { label: 'Coord X', key: 'x', min: 0, max: Infinity, placeholder: '100', required: true },
@@ -244,7 +240,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                         playgroundActionParamValueSetter(
                           mouseActionFormData,
                           mouseClickNumberParamFormItem,
-                          setMouseClickParams,
                           'mouseClickParams',
                           value,
                         )
@@ -255,7 +250,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                 <MouseButtonSelect<MouseClick>
                   mouseActionFormData={mouseActionFormData}
                   paramsStateObject={mouseClickParams}
-                  paramsStateSetter={setMouseClickParams}
                   contextParamsPropertyName="mouseClickParams"
                 />
                 <InlineInputFormControl formItem={mouseDoubleClickFormData}>
@@ -266,7 +260,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                       playgroundActionParamValueSetter(
                         mouseActionFormData,
                         mouseDoubleClickFormData,
-                        setMouseClickParams,
                         'mouseClickParams',
                         checked,
                       )
@@ -289,7 +282,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                         playgroundActionParamValueSetter(
                           mouseActionFormData,
                           mouseDragNumberParamFormItem,
-                          setMouseDragParams,
                           'mouseDragParams',
                           value,
                         )
@@ -300,7 +292,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                 <MouseButtonSelect<MouseDrag>
                   mouseActionFormData={mouseActionFormData}
                   paramsStateObject={mouseDragParams}
-                  paramsStateSetter={setMouseDragParams}
                   contextParamsPropertyName="mouseDragParams"
                 />
               </>
@@ -319,7 +310,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                         playgroundActionParamValueSetter(
                           mouseActionFormData,
                           mouseMoveNumberParamFormItem,
-                          setMouseMoveParams,
                           'mouseMoveParams',
                           value,
                         )
@@ -343,7 +333,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                         playgroundActionParamValueSetter(
                           mouseActionFormData,
                           mouseScrollNumberParamFormItem,
-                          setMouseScrollParams,
                           'mouseScrollParams',
                           value,
                         )
@@ -360,7 +349,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                       playgroundActionParamValueSetter(
                         mouseActionFormData,
                         mouseScrollDirectionFormData,
-                        setMouseScrollParams,
                         'mouseScrollParams',
                         value,
                       )
@@ -375,7 +363,6 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
                       playgroundActionParamValueSetter(
                         mouseActionFormData,
                         mouseScrollAmountFormData,
-                        setMouseScrollParams,
                         'mouseScrollParams',
                         value,
                       )
@@ -405,14 +392,12 @@ const VNCMouseOperations: React.FC<VNCInteractionOptionsSectionComponentProps> =
 type MouseButtonSelectProps<T> = {
   mouseActionFormData: MouseActionWithParamsFormData
   paramsStateObject: T
-  paramsStateSetter: React.Dispatch<React.SetStateAction<T>>
   contextParamsPropertyName: 'mouseClickParams' | 'mouseDragParams'
 }
 
 const MouseButtonSelect = <T extends MouseClick | MouseDrag>({
   mouseActionFormData,
   paramsStateObject,
-  paramsStateSetter,
   contextParamsPropertyName,
 }: MouseButtonSelectProps<T>) => {
   const { playgroundActionParamValueSetter } = usePlayground()
@@ -439,13 +424,7 @@ const MouseButtonSelect = <T extends MouseClick | MouseDrag>({
         selectValue={paramsStateObject[mouseButtonFormData.key as 'button']}
         formItem={mouseButtonFormData}
         onChangeHandler={(value) =>
-          playgroundActionParamValueSetter(
-            mouseActionFormData,
-            mouseButtonFormData,
-            paramsStateSetter,
-            contextParamsPropertyName,
-            value,
-          )
+          playgroundActionParamValueSetter(mouseActionFormData, mouseButtonFormData, contextParamsPropertyName, value)
         }
       />
     </InlineInputFormControl>

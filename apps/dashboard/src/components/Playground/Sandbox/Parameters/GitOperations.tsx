@@ -13,18 +13,15 @@ import {
 } from '@/contexts/PlaygroundContext'
 import { GitOperationsActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
-import { useState } from 'react'
 import PlaygroundActionForm from '../../ActionForm'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormTextInput from '../../Inputs/TextInput'
 
 const SandboxGitOperations: React.FC = () => {
   const { sandboxParametersState, playgroundActionParamValueSetter } = usePlayground()
-  const [gitCloneParams, setGitCloneParams] = useState<GitCloneParams>(sandboxParametersState['gitCloneParams'])
-  const [gitStatusParams, setGitStatusParams] = useState<GitStatusParams>(sandboxParametersState['gitStatusParams'])
-  const [gitBranchesParams, setGitBranchesParams] = useState<GitBranchesParams>(
-    sandboxParametersState['gitBranchesParams'],
-  )
+  const gitCloneParams = sandboxParametersState['gitCloneParams']
+  const gitStatusParams = sandboxParametersState['gitStatusParams']
+  const gitBranchesParams = sandboxParametersState['gitBranchesParams']
 
   const gitCloneParamsFormData: ParameterFormData<GitCloneParams> = [
     { label: 'URL', key: 'repositoryURL', placeholder: 'Repository URL to clone from', required: true },
@@ -90,7 +87,6 @@ const SandboxGitOperations: React.FC = () => {
                         playgroundActionParamValueSetter(
                           gitOperationsAction,
                           gitCloneParamFormItem,
-                          setGitCloneParams,
                           'gitCloneParams',
                           value,
                         )
@@ -109,7 +105,6 @@ const SandboxGitOperations: React.FC = () => {
                     playgroundActionParamValueSetter(
                       gitOperationsAction,
                       gitRepoLocationFormData,
-                      setGitStatusParams,
                       'gitStatusParams',
                       value,
                     )
@@ -126,7 +121,6 @@ const SandboxGitOperations: React.FC = () => {
                     playgroundActionParamValueSetter(
                       gitOperationsAction,
                       gitRepoLocationFormData,
-                      setGitBranchesParams,
                       'gitBranchesParams',
                       value,
                     )
