@@ -304,6 +304,8 @@ export interface IPlaygroundContext {
   sandbox: Sandbox | null
   setSandbox: React.Dispatch<React.SetStateAction<Sandbox | null>>
   getSandboxParametersInfo: () => SandboxParametersInfo
+  terminalUrl: string | null
+  setTerminalUrl: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export const PlaygroundContext = createContext<IPlaygroundContext | null>(null)

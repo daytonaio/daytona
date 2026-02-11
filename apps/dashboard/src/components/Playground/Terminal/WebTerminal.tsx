@@ -5,8 +5,9 @@
 
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { usePlayground } from '@/hooks/usePlayground'
+import { PlaygroundCategories } from '@/enums/Playground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
-import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { RefreshCcw } from 'lucide-react'
 import { Window, WindowContent, WindowTitleBar } from '../Window'
@@ -18,39 +19,21 @@ const motionLoadingProps = {
   transition: { duration: 0.175 },
 }
 
-type WebTerminalProps = {
-  getPortPreviewUrl: (sandboxId: string, port: number) => Promise<string>
-  className?: string
-}
-
-const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className }) => {
-  const { sandbox: terminalSandbox, error: terminalSandboxError } = usePlaygroundSandbox()
-
+const WebTerminal: React.FC<{ className?: string }> = ({ className }) => {
   const {
-    data: terminalUrl,
-    isLoading,
-    refetch: refetchTerminalUrl,
-  } = useQuery({
-    queryKey: ['webTerminalUrl', terminalSandbox?.id],
-    queryFn: async () => {
-      try {
-        if (!terminalSandbox) return null
-        return await getPortPreviewUrl(terminalSandbox.id, 22222)
-      } catch (error) {
-        handleApiError(error, 'Failed to construct web terminal URL')
-        return null
-      }
-    },
-    enabled: !!terminalSandbox,
-    retry: false,
-  })
+    sandbox: terminalSandbox,
+    sandboxError: terminalSandboxError,
+    terminalUrlLoading,
+    refetchTerminalUrl,
+  } = usePlaygroundSandbox(PlaygroundCategories.TERMINAL)
+  const { terminalUrl } = usePlayground()
 
   // Loading terminal URL conditions:
   // - No sandbox yet, no error → true (waiting for sandbox)
-  // - Sandbox arrived, query fetching → true (isLoading)
-  // - Sandbox arrived, query done → false
+  // - Sandbox arrived, URL fetching → true (terminalUrlLoading)
+  // - Sandbox arrived, URL done → false
   // - Sandbox errored → false
-  const loadingTerminalUrl = isLoading || (!terminalSandbox && !terminalSandboxError)
+  const loadingTerminalUrl = terminalUrlLoading || (!terminalSandbox && !terminalSandboxError)
 
   return (
     <Window className={className}>
@@ -71,11 +54,15 @@ const WebTerminal: React.FC<WebTerminalProps> = ({ getPortPreviewUrl, className 
                     {...motionLoadingProps}
                   >
                     There was an error loading the terminal.
-                    {terminalSandbox && (
+                    {terminalSandbox ? (
                       <Button variant="outline" className="ml-2" onClick={() => refetchTerminalUrl()}>
                         <RefreshCcw className="size-4" />
                         Retry
                       </Button>
+                    ) : (
+                      terminalSandboxError && (
+                        <span className="text-sm text-muted-foreground">{terminalSandboxError}</span>
+                      )
                     )}
                   </motion.p>
                 )}

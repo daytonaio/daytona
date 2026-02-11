@@ -158,6 +158,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [runningActionMethod, setRunningActionMethod] = useState<RunningActionMethodName>(null)
   const [actionRuntimeError, setActionRuntimeError] = useState<ActionRuntimeError>({})
   const [sandbox, setSandbox] = useState<Sandbox | null>(null)
+  const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
 
   const validatePlaygroundActionRequiredParams: ValidatePlaygroundActionRequiredParams = useCallback(
     (actionParamsFormData, actionParamsState) => {
@@ -367,6 +368,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         sandbox,
         setSandbox,
         getSandboxParametersInfo,
+        terminalUrl,
+        setTerminalUrl,
       }}
     >
       {children}
