@@ -163,9 +163,17 @@ export function WebhooksEndpointTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`${isLoading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:bg-muted/50'}`}
+                    className={`${isLoading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none'}`}
+                    tabIndex={isLoading ? undefined : 0}
+                    role={isLoading ? undefined : 'link'}
                     onClick={() => {
                       if (!isLoading) {
+                        handleRowClick(row.original)
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (!isLoading && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault()
                         handleRowClick(row.original)
                       }
                     }}

@@ -36,7 +36,9 @@ const columns: ColumnDef<EndpointOut>[] = [
     size: 200,
     cell: ({ row }) => (
       <div className="w-full truncate flex items-center gap-2">
-        <span className="truncate block">{row.original.description || 'Unnamed Endpoint'}</span>
+        <span className="truncate block hover:underline focus:underline cursor-pointer">
+          {row.original.description || 'Unnamed Endpoint'}
+        </span>
       </div>
     ),
   },
