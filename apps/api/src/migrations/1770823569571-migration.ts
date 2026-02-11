@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class Migration1770823569571 implements MigrationInterface {
