@@ -89,6 +89,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             where: {
               runnerId: runner.id,
               organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+              unassigned: false,
               state: SandboxState.STARTED,
               backupState: In([BackupState.NONE, BackupState.COMPLETED]),
               lastBackupAt: Or(IsNull(), LessThan(new Date(Date.now() - 1 * 60 * 60 * 1000))),

@@ -91,6 +91,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     usagePeriod.disk = event.sandbox.disk
     usagePeriod.organizationId = event.sandbox.organizationId
     usagePeriod.region = event.sandbox.region
+    usagePeriod.unassigned = event.sandbox.unassigned
 
     await this.sandboxUsagePeriodRepository.save(usagePeriod)
   }

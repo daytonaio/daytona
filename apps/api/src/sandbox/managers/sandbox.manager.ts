@@ -87,6 +87,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             where: {
               runnerId: runner.id,
               organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+              unassigned: false,
               state: SandboxState.STARTED,
               desiredState: SandboxDesiredState.STARTED,
               pending: Not(true),
@@ -147,6 +148,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       const sandboxes = await this.sandboxRepository.find({
         where: {
           organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+          unassigned: false,
           state: SandboxState.STOPPED,
           desiredState: SandboxDesiredState.STOPPED,
           pending: Not(true),
@@ -203,6 +205,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             where: {
               runnerId: runner.id,
               organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
+              unassigned: false,
               state: SandboxState.STOPPED,
               desiredState: SandboxDesiredState.STOPPED,
               pending: Not(true),

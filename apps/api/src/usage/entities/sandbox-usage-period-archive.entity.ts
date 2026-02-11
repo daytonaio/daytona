@@ -42,6 +42,10 @@ export class SandboxUsagePeriodArchive {
   @Column()
   region: string
 
+  // Indicates if the usage period is for an unassigned sandbox (e.g. warm pool)
+  @Column({ default: false })
+  unassigned: boolean
+
   public static fromUsagePeriod(usagePeriod: SandboxUsagePeriod) {
     const usagePeriodEntity = new SandboxUsagePeriodArchive()
     usagePeriodEntity.sandboxId = usagePeriod.sandboxId
@@ -53,6 +57,7 @@ export class SandboxUsagePeriodArchive {
     usagePeriodEntity.mem = usagePeriod.mem
     usagePeriodEntity.disk = usagePeriod.disk
     usagePeriodEntity.region = usagePeriod.region
+    usagePeriodEntity.unassigned = usagePeriod.unassigned
     return usagePeriodEntity
   }
 }

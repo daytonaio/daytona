@@ -327,6 +327,7 @@ export class SandboxService {
     const sandbox = new Sandbox(warmPoolItem.target)
 
     sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
+    sandbox.unassigned = true
 
     sandbox.class = warmPoolItem.class
     sandbox.snapshot = warmPoolItem.snapshot
@@ -567,6 +568,7 @@ export class SandboxService {
     warmPoolSandbox.public = createSandboxDto.public || false
     warmPoolSandbox.labels = createSandboxDto.labels || {}
     warmPoolSandbox.organizationId = organization.id
+    warmPoolSandbox.unassigned = false
     warmPoolSandbox.createdAt = new Date()
 
     if (createSandboxDto.autoStopInterval !== undefined) {
@@ -789,6 +791,7 @@ export class SandboxService {
   ): Promise<Sandbox[]> {
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
+      unassigned: false,
       ...(labels ? { labels: JsonContains(labels) } : {}),
     }
 
@@ -859,6 +862,7 @@ export class SandboxService {
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
+      unassigned: false,
       ...(id ? { id: ILike(`${id}%`) } : {}),
       ...(name ? { name: ILike(`${name}%`) } : {}),
       ...(labels ? { labels: JsonContains(labels) } : {}),
@@ -975,6 +979,7 @@ export class SandboxService {
       where: {
         id: sandboxIdOrName,
         organizationId,
+        unassigned: false,
         ...stateFilter,
       },
       relations,
@@ -990,6 +995,7 @@ export class SandboxService {
         where: {
           name: sandboxIdOrName,
           organizationId,
+          unassigned: false,
           ...stateFilter,
         },
         relations,
@@ -1016,6 +1022,7 @@ export class SandboxService {
     const sandbox = await this.sandboxRepository.findOne({
       where: {
         id: sandboxId,
+        unassigned: false,
         ...(returnDestroyed ? {} : { state: Not(SandboxState.DESTROYED) }),
       },
     })
@@ -1036,6 +1043,7 @@ export class SandboxService {
     let sandbox = await this.sandboxRepository.findOne({
       where: {
         id: sandboxIdOrName,
+        unassigned: false,
         ...(organizationId ? { organizationId: organizationId } : {}),
       },
       select: ['organizationId'],
@@ -1047,6 +1055,7 @@ export class SandboxService {
         where: {
           name: sandboxIdOrName,
           organizationId: organizationId,
+          unassigned: false,
         },
         select: ['organizationId'],
         loadEagerRelations: false,
@@ -1102,6 +1111,7 @@ export class SandboxService {
 
     const where: FindOptionsWhere<Sandbox> = {
       organizationId: organizationId,
+      unassigned: false,
       state: Not(SandboxState.DESTROYED),
     }
 
@@ -1160,6 +1170,7 @@ export class SandboxService {
 
     const where: FindOptionsWhere<Sandbox> = {
       organizationId: organizationId,
+      unassigned: false,
       state: Not(SandboxState.DESTROYED),
     }
 
@@ -1863,7 +1874,7 @@ export class SandboxService {
 
   async isSandboxPublic(sandboxId: string): Promise<boolean> {
     const sandbox = await this.sandboxRepository.findOne({
-      where: { id: sandboxId },
+      where: { id: sandboxId, unassigned: false },
     })
 
     if (!sandbox) {

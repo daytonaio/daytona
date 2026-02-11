@@ -6,7 +6,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, Not, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
@@ -93,20 +93,26 @@ export class SandboxWarmPoolService {
     }
 
     //  check if sandbox is warm pool
-    const warmPoolItem = await this.warmPoolRepository.findOne({
-      where: {
-        snapshot: snapshot.name,
-        target: params.target,
-        class: params.class,
-        cpu: params.cpu,
-        mem: params.mem,
-        disk: params.disk,
-        gpu: params.gpu,
-        osUser: params.osUser,
-        env: params.env,
-        pool: MoreThan(0),
-      },
-    })
+    //  Query for org-specific or global warm pool, prioritizing org-specific
+    const warmPoolItem = await this.warmPoolRepository
+      .createQueryBuilder('wp')
+      .where('wp.snapshot = :snapshot', { snapshot: snapshot.name })
+      .andWhere('wp.target = :target', { target: params.target })
+      .andWhere('wp.class = :class', { class: params.class })
+      .andWhere('wp.cpu = :cpu', { cpu: params.cpu })
+      .andWhere('wp.mem = :mem', { mem: params.mem })
+      .andWhere('wp.disk = :disk', { disk: params.disk })
+      .andWhere('wp.gpu = :gpu', { gpu: params.gpu })
+      .andWhere('wp.osUser = :osUser', { osUser: params.osUser })
+      .andWhere('wp.env = :env', { env: params.env })
+      .andWhere('wp.pool > 0')
+      .andWhere('wp.organizationId IN (:...orgIds)', {
+        orgIds: [params.organizationId, SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION],
+      })
+      //  Prioritize org-specific (0) over global (1)
+      .orderBy(`CASE WHEN wp."organizationId" = :callerOrgId THEN 0 ELSE 1 END`, 'ASC')
+      .setParameter('callerOrgId', params.organizationId)
+      .getOne()
     if (warmPoolItem) {
       const availabilityScoreThreshold = this.configService.getOrThrow<number>('runnerScore.thresholds.availability')
 
@@ -214,19 +220,25 @@ export class SandboxWarmPoolService {
     if (event.newOrganizationId === SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION) {
       return
     }
-    const warmPoolItem = await this.warmPoolRepository.findOne({
-      where: {
-        snapshot: event.sandbox.snapshot,
-        class: event.sandbox.class,
-        cpu: event.sandbox.cpu,
-        mem: event.sandbox.mem,
-        disk: event.sandbox.disk,
-        target: event.sandbox.region,
-        env: event.sandbox.env,
-        gpu: event.sandbox.gpu,
-        osUser: event.sandbox.osUser,
-      },
-    })
+    //  Find a matching warm pool item (organization-specific first, then global)
+    const warmPoolItem = await this.warmPoolRepository
+      .createQueryBuilder('wp')
+      .where('wp.snapshot = :snapshot', { snapshot: event.sandbox.snapshot })
+      .andWhere('wp.target = :target', { target: event.sandbox.region })
+      .andWhere('wp.class = :class', { class: event.sandbox.class })
+      .andWhere('wp.cpu = :cpu', { cpu: event.sandbox.cpu })
+      .andWhere('wp.mem = :mem', { mem: event.sandbox.mem })
+      .andWhere('wp.disk = :disk', { disk: event.sandbox.disk })
+      .andWhere('wp.gpu = :gpu', { gpu: event.sandbox.gpu })
+      .andWhere('wp.osUser = :osUser', { osUser: event.sandbox.osUser })
+      .andWhere('wp.env = :env', { env: event.sandbox.env })
+      .andWhere('wp.organizationId IN (:...orgIds)', {
+        orgIds: [event.newOrganizationId, SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION],
+      })
+      //  Prioritize org-specific (0) over global (1)
+      .orderBy(`CASE WHEN wp."organizationId" = :callerOrgId THEN 0 ELSE 1 END`, 'ASC')
+      .setParameter('callerOrgId', event.newOrganizationId)
+      .getOne()
 
     if (!warmPoolItem) {
       return
