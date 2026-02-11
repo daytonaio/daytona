@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
+	log "github.com/sirupsen/logrus"
 )
 
 type ImageInfo struct {
@@ -57,8 +58,14 @@ func (d *DockerClient) InspectImageInRegistry(ctx context.Context, imageName str
 		return nil, err
 	}
 
+	totalSize, err := getImageSizeFromRegistry(ctx, imageName, registry)
+	if err != nil {
+		log.Warnf("Failed to get image size from registry manifest for %s, falling back to descriptor size: %v", imageName, err)
+		totalSize = digest.Descriptor.Size
+	}
+
 	return &ImageDigest{
 		Digest: digest.Descriptor.Digest.String(),
-		Size:   digest.Descriptor.Size,
+		Size:   totalSize,
 	}, nil
 }
