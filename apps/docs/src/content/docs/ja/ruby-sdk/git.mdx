@@ -1,0 +1,418 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+## Git \{#git\}
+
+新しい Git ハンドラー インスタンスのメインクラスです。
+
+### コンストラクタ \{#constructors\}
+
+#### new Git() \{#new-git\}
+
+```ruby
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
+
+```
+
+新しい Git ハンドラーのインスタンスを初期化します。
+
+**パラメーター**:
+
+* `sandbox_id` *String* - サンドボックス ID。
+* `toolbox_api` *DaytonaToolboxApiClient:GitApi* - サンドボックス操作用の API クライアント。
+* `otel_state` *Daytona:OtelState, nil* - Otel の状態、または nil。
+
+**戻り値**:
+
+* `Git` - 新しい Git のインスタンス
+
+### メソッド \{#methods\}
+
+#### sandbox_id() \{#sandbox_id\}
+
+```ruby
+def sandbox_id()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスのID
+
+#### toolbox_api() \{#toolbox_api\}
+
+```ruby
+def toolbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaToolboxApiClient:GitApi` - サンドボックス操作用 API クライアント
+
+#### add() \{#add\}
+
+```ruby
+def add(path, files)
+
+```
+
+次回のコミットに向けて指定されたファイルをステージします。これは、コマンドラインで
+&#39;git add&#39; を実行するのと同様の操作です。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスは、サンドボックスの作業ディレクトリを基準として解決されます。
+* `files` *Array&lt;String&gt;* - リポジトリルートからの相対パスで指定された、ステージするファイルまたはディレクトリのリスト。
+
+**戻り値**:
+
+* `void`
+
+**例外**:
+
+* `Daytona:Sdk:Error` - ファイルの追加に失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+# Stage a single file
+sandbox.git.add("workspace/repo", ["file.txt"])
+
+# 複数ファイルをステージング
+sandbox.git.add("workspace/repo", [
+  "src/main.rb",
+  "spec/main_spec.rb",
+  "README.md"
+])
+
+```
+
+#### branches() \{#branches\}
+
+```ruby
+def branches(path)
+
+```
+
+リポジトリ内のブランチを一覧表示します。
+
+**パラメータ**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準として解決されます。
+
+**戻り値**:
+
+* `DaytonaApiClient:ListBranchResponse` - リポジトリ内のブランチの一覧。
+
+**例外**:
+
+* `Daytona:Sdk:Error` - ブランチの一覧取得に失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+response = sandbox.git.branches("workspace/repo")
+puts "Branches: #{response.branches}"
+
+```
+
+#### clone() \{#clone\}
+
+```ruby
+def clone(url:, path:, branch:, commit_id:, username:, password:)
+
+```
+
+指定されたパスに Git リポジトリをクローンします。特定のブランチまたはコミットの
+クローンに対応しており、認証情報が指定されている場合はリモートリポジトリに対して
+認証を行うことができます。
+
+**パラメーター**:
+
+* `url` *String* - クローン元のリポジトリ URL。
+* `path` *String* - リポジトリをクローンするパス。相対パスは、
+  サンドボックスの作業ディレクトリを基準に解決されます。
+* `branch` *String, nil* - クローンする特定のブランチ。指定されていない場合は
+  デフォルトブランチをクローンします。
+* `commit_id` *String, nil* - クローンする特定のコミット。指定された場合、
+  リポジトリはこのコミットの detached HEAD 状態のままになります。
+* `username` *String, nil* - 認証に使用する Git のユーザー名。
+* `password` *String, nil* - 認証に使用する Git のパスワードまたはトークン。
+
+**戻り値**:
+
+* `void`
+
+**例外**:
+
+* `Daytona:Sdk:Error` - リポジトリのクローンに失敗した場合
+
+**使用例:**
+
+```ruby
+# Clone the default branch
+sandbox.git.clone(
+  url: "https://github.com/user/repo.git",
+  path: "workspace/repo"
+)
+
+# 認証を使用して特定のブランチをクローンする
+sandbox.git.clone(
+  url: "https://github.com/user/private-repo.git",
+  path: "workspace/private",
+  branch: "develop",
+  username: "user",
+  password: "token"
+)
+
+# Clone a specific commit
+sandbox.git.clone(
+  url: "https://github.com/user/repo.git",
+  path: "workspace/repo-old",
+  commit_id: "abc123"
+)
+
+```
+
+#### commit() \{#commit\}
+
+```ruby
+def commit(path:, message:, author:, email:, allow_empty:)
+
+```
+
+ステージされた変更で新しいコミットを作成します。コミットする前に、必ず add() メソッドを使って変更をステージしてください。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `message` *String* - 変更内容を説明するコミットメッセージ。
+* `author` *String* - コミットの作成者名。
+* `email` *String* - コミット作成者のメールアドレス。
+* `allow_empty` *Boolean* - 変更がステージされていない場合でも空のコミットを作成することを許可します。デフォルトは false です。
+
+**戻り値**:
+
+* `GitCommitResponse` - コミットの SHA を含むレスポンス。
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` - コミット処理に失敗した場合
+
+**使用例:**
+
+```ruby
+# 変更をステージングしてコミット
+sandbox.git.add("workspace/repo", ["README.md"])
+commit_response = sandbox.git.commit(
+  path: "workspace/repo",
+  message: "Update documentation",
+  author: "John Doe",
+  email: "john@example.com",
+  allow_empty: true
+)
+puts "Commit SHA: #{commit_response.sha}"
+
+```
+
+#### push() \{#push\}
+
+```ruby
+def push(path:, username:, password:)
+
+```
+
+現在のブランチ上のすべてのローカルコミットをリモートリポジトリにプッシュします。リモートリポジトリで認証が必要な場合は、ユーザー名とパスワード／トークンを指定します。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `username` *String, nil* - 認証用の Git ユーザー名。
+* `password` *String, nil* - 認証用の Git パスワードまたはトークン。
+
+**戻り値**:
+
+* `void`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` - 変更のプッシュに失敗した場合
+
+**例:**
+
+```ruby
+# 認証なしでプッシュ（公開リポジトリまたはSSH用）
+sandbox.git.push("workspace/repo")
+
+# Push with authentication
+sandbox.git.push(
+  path: "workspace/repo",
+  username: "user",
+  password: "github_token"
+)
+
+```
+
+#### pull() \{#pull\}
+
+```ruby
+def pull(path:, username:, password:)
+
+```
+
+リモートリポジトリから変更を pull します。リモートリポジトリが認証を必要とする場合は、
+ユーザー名とパスワード／トークンを指定してください。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `username` *String, nil* - 認証用の Git ユーザー名。
+* `password` *String, nil* - 認証用の Git パスワードまたはトークン。
+
+**返り値**:
+
+* `void`
+
+**発生し得る例外**:
+
+* `Daytona:Sdk:Error` - 変更の pull に失敗した場合
+
+**使用例:**
+
+```ruby
+# 認証なしでプル
+sandbox.git.pull("workspace/repo")
+
+# Pull with authentication
+sandbox.git.pull(
+  path: "workspace/repo",
+  username: "user",
+  password: "github_token"
+)
+
+```
+
+#### status() \{#status\}
+
+```ruby
+def status(path)
+
+```
+
+現在の Git リポジトリの状態を取得します。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートディレクトリへのパス。相対パスは
+  サンドボックスの作業ディレクトリを基準に解決されます。
+
+**戻り値**:
+
+* `DaytonaToolboxApiClient:GitStatus` - 次の情報を含むリポジトリの状態情報:
+
+**送出される例外**:
+
+* `Daytona:Sdk:Error` - 状態の取得に失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+status = sandbox.git.status("workspace/repo")
+puts "On branch: #{status.current_branch}"
+puts "Commits ahead: #{status.ahead}"
+puts "Commits behind: #{status.behind}"
+
+```
+
+#### checkout_branch() \{#checkout_branch\}
+
+```ruby
+def checkout_branch(path, branch)
+
+```
+
+リポジトリ内のブランチをチェックアウトします。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `branch` *String* - チェックアウトするブランチ名
+
+**戻り値**:
+
+* `void`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` - ブランチのチェックアウトに失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+# ブランチをチェックアウトする
+sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+
+```
+
+#### create_branch() \{#create_branch\}
+
+```ruby
+def create_branch(path, name)
+
+```
+
+リポジトリにブランチを作成します。
+
+**パラメーター**:
+
+* `path` *String* - Git リポジトリのルートへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `name` *String* - 作成する新しいブランチの名前
+
+**戻り値**:
+
+* `void`
+
+**例外**:
+
+* `Daytona:Sdk:Error` - ブランチの作成に失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+# 新しいブランチを作成する
+sandbox.git.create_branch("workspace/repo", "new-feature")
+
+```
+
+#### delete_branch() \{#delete_branch\}
+
+```ruby
+def delete_branch(path, name)
+
+```
+
+リポジトリ内のブランチを削除します。
+
+**パラメータ**:
+
+* `path` *String* - Git リポジトリのルートディレクトリへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `name` *String* - 削除するブランチ名
+
+**戻り値**:
+
+* `void`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` - ブランチの削除に失敗した場合にスローされます
+
+**使用例:**
+
+```ruby
+# ブランチを削除する
+sandbox.git.delete_branch("workspace/repo", "old-feature")
+
+```

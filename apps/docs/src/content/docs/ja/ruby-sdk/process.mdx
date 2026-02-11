@@ -1,0 +1,592 @@
+---
+title: "プロセス"
+hideTitleOnPage: true
+---
+
+## プロセス \{#process\}
+
+新しい `Process` インスタンスを生成します
+
+### コンストラクタ \{#constructors\}
+
+#### new Process() \{#new-process\}
+
+```ruby
+def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:, otel_state:)
+
+```
+
+新しい Process インスタンスを初期化します
+
+**パラメータ**:
+
+* `code_toolbox` *Daytona:SandboxPythonCodeToolbox, Daytona:SandboxTsCodeToolbox* -
+* `sandbox_id` *String* - サンドボックスの ID
+* `toolbox_api` *DaytonaToolboxApiClient:ProcessApi* - サンドボックス操作用の API クライアント
+* `get_preview_link` *Proc* - ポートに対するプレビューリンクを取得する関数
+* `otel_state` *Daytona:OtelState, nil* -
+
+**戻り値**:
+
+* `Process` - 新しい Process インスタンスを返します
+
+### メソッド \{#methods\}
+
+#### code_toolbox() \{#code_toolbox\}
+
+```ruby
+def code_toolbox()
+
+```
+
+**戻り値**:
+
+* `Daytona:SandboxPythonCodeToolbox, ` - Daytona::SandboxPythonCodeToolbox を返します。
+
+#### sandbox_id() \{#sandbox_id\}
+
+```ruby
+def sandbox_id()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスのID
+
+#### toolbox_api() \{#toolbox_api\}
+
+```ruby
+def toolbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaToolboxApiClient:ProcessApi` - サンドボックス操作用のAPIクライアント
+
+#### get_preview_link() \{#get_preview_link\}
+
+```ruby
+def get_preview_link()
+
+```
+
+**戻り値**:
+
+* `Proc` - ポート用のプレビューリンクを取得する関数
+
+#### exec() \{#exec\}
+
+```ruby
+def exec(command:, cwd:, env:, timeout:)
+
+```
+
+サンドボックス内でシェルコマンドを実行します
+
+**パラメーター**:
+
+* `command` *String* - 実行するシェルコマンド
+* `cwd` *String, nil* - コマンド実行時の作業ディレクトリ。指定しない場合は、サンドボックスの作業ディレクトリが使用されます
+* `env` *Hash&lt;String, String&gt;, nil* - コマンドに設定する環境変数
+* `timeout` *Integer, nil* - コマンドの完了を待機する最大時間（秒）。0 の場合は無制限に待機します
+
+**戻り値**:
+
+* `ExecuteResponse` - `exit_code`、`result`、`artifacts` を含むコマンド実行結果
+
+**例:**
+
+```ruby
+# Simple command
+response = sandbox.process.exec("echo 'Hello'")
+puts response.artifacts.stdout
+=> "Hello\n"
+
+# Command with working directory
+result = sandbox.process.exec("ls", cwd: "workspace/src")
+
+# Command with timeout
+result = sandbox.process.exec("sleep 10", timeout: 5)
+
+```
+
+#### code_run() \{#code_run\}
+
+```ruby
+def code_run(code:, params:, timeout:)
+
+```
+
+適切な言語ランタイムを使用してサンドボックス内でコードを実行します
+
+**パラメーター**:
+
+* `code` *String* - 実行するコード
+* `params` *CodeRunParams, nil* - コード実行のパラメーター
+* `timeout` *Integer, nil* - コードの完了を待機する最大時間（秒）。0 の場合は無期限に待機します
+
+**戻り値**:
+
+* `ExecuteResponse` - `exit_code`、`result`、`artifacts` を含むコード実行結果
+
+**使用例:**
+
+```ruby
+# Run Python code
+response = sandbox.process.code_run(<<~CODE)
+  x = 10
+  y = 20
+  print(f"Sum: {x + y}")
+CODE
+puts response.artifacts.stdout  # 出力: Sum: 30
+
+```
+
+#### create_session() \{#create_session\}
+
+```ruby
+def create_session(session_id)
+
+```
+
+サンドボックス内に新しい長時間動作するバックグラウンドセッションを作成します。
+
+セッションは、コマンド間で状態を保持するバックグラウンドプロセスであり、複数の関連コマンドや永続的な環境のセットアップが必要なシナリオに最適です。
+
+**パラメータ**:
+
+* `session_id` *String* - 新しいセッションの一意の識別子
+
+**戻り値**:
+
+* `void`
+
+**例:**
+
+```ruby
+# 新しいセッションを作成
+session_id = "my-session"
+sandbox.process.create_session(session_id)
+session = sandbox.process.get_session(session_id)
+# Do work...
+sandbox.process.delete_session(session_id)
+
+```
+
+#### get_session() \{#get_session\}
+
+```ruby
+def get_session(session_id)
+
+```
+
+サンドボックス内のセッションを取得します
+
+**パラメーター**:
+
+* `session_id` *String* - 取得するセッションを一意に識別する ID
+
+**戻り値**:
+
+* `DaytonaApiClient:Session` - session&#95;id とコマンドを含むセッション情報
+
+**使用例:**
+
+```ruby
+session = sandbox.process.get_session("my-session")
+session.commands.each do |cmd|
+  puts "Command: #{cmd.command}"
+end
+
+```
+
+#### get_session_command() \{#get_session_command\}
+
+```ruby
+def get_session_command(session_id:, command_id:)
+
+```
+
+セッション内で実行された特定のコマンドの情報を取得します。
+
+**パラメーター**:
+
+* `session_id` *String* - セッションの一意な ID
+* `command_id` *String* - コマンドの一意な ID
+
+**戻り値**:
+
+* `DaytonaApiClient:Command` - id、command、exit&#95;code を含むコマンド情報
+
+**例:**
+
+```ruby
+cmd = sandbox.process.get_session_command(session_id: "my-session", command_id: "cmd-123")
+if cmd.exit_code == 0
+  puts "Command #{cmd.command} completed successfully"
+end
+
+```
+
+#### execute_session_command() \{#execute_session_command\}
+
+```ruby
+def execute_session_command(session_id:, req:)
+
+```
+
+セッションでコマンドを実行します
+
+**パラメータ**:
+
+* `session_id` *String* - 使用するセッションの一意の識別子
+* `req` *Daytona:SessionExecuteRequest* - 実行するコマンドと `run_async` を含むコマンド実行リクエスト
+
+**戻り値**:
+
+* `Daytona:SessionExecuteResponse` - `cmd_id`、`output`、`stdout`、`stderr`、`exit_code` を含むコマンド実行結果
+
+**使用例:**
+
+```ruby
+# 状態を維持しながらコマンドを順次実行
+session_id = "my-session"
+
+# Change directory
+req = Daytona::SessionExecuteRequest.new(command: "cd /workspace")
+sandbox.process.execute_session_command(session_id:, req:)
+
+# Create a file
+req = Daytona::SessionExecuteRequest.new(command: "echo 'Hello' > test.txt")
+sandbox.process.execute_session_command(session_id:, req:)
+
+# Read the file
+req = Daytona::SessionExecuteRequest.new(command: "cat test.txt")
+result = sandbox.process.execute_session_command(session_id:, req:)
+puts "Command stdout: #{result.stdout}"
+puts "Command stderr: #{result.stderr}"
+
+```
+
+#### get_session_command_logs() \{#get_session_command_logs\}
+
+```ruby
+def get_session_command_logs(session_id:, command_id:)
+
+```
+
+セッション内で実行されたコマンドのログを取得します。
+
+**パラメーター**:
+
+* `session_id` *String* - セッションの一意の識別子
+* `command_id` *String* - コマンドの一意の識別子
+
+**戻り値**:
+
+* `Daytona:SessionCommandLogsResponse` - 出力、stdout、stderr を含むコマンドのログ
+
+**例:**
+
+```ruby
+logs = sandbox.process.get_session_command_logs(session_id: "my-session", command_id: "cmd-123")
+puts "Command stdout: #{logs.stdout}"
+puts "Command stderr: #{logs.stderr}"
+
+```
+
+#### get_session_command_logs_async() \{#get_session_command_logs_async\}
+
+```ruby
+def get_session_command_logs_async(session_id:, command_id:, on_stdout:, on_stderr:)
+
+```
+
+セッション内で実行されたコマンドのログを、利用可能になり次第、非同期的に取得して処理します
+
+**パラメーター**:
+
+* `session_id` *String* - セッションの一意の識別子
+* `command_id` *String* - コマンドの一意の識別子
+* `on_stdout` *Proc* - 受信した stdout のログチャンクを処理するためのコールバック関数
+* `on_stderr` *Proc* - 受信した stderr のログチャンクを処理するためのコールバック関数
+
+**戻り値**:
+
+* `WebSocket:Client:Simple:Client`
+
+**使用例:**
+
+```ruby
+sandbox.process.get_session_command_logs_async(
+  session_id: "my-session",
+  command_id: "cmd-123",
+  on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+  on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+)
+
+```
+
+#### send_session_command_input() \{#send_session_command_input\}
+
+```ruby
+def send_session_command_input(session_id:, command_id:, data:)
+
+```
+
+セッション内で実行中のコマンドに入力データを送信します
+
+このメソッドを使用すると、セッション内で実行中の対話的なコマンドに対して、
+プロンプトへの応答や標準入力 (stdin) へのデータ提供などの入力を送信できます。
+
+**パラメータ**:
+
+* `session_id` *String* - セッションの一意の識別子
+* `command_id` *String* - コマンドの一意の識別子
+* `data` *String* - コマンドに送信する入力データ
+
+**戻り値**:
+
+* `void`
+
+#### list_sessions() \{#list_sessions\}
+
+```ruby
+def list_sessions()
+
+```
+
+**戻り値**:
+
+* `Array\<DaytonaApiClient:Session\>` - サンドボックス内のすべてのセッションを含むリスト
+
+**使用例:**
+
+```ruby
+sessions = sandbox.process.list_sessions
+sessions.each do |session|
+  puts "Session #{session.session_id}:"
+  puts "  Commands: #{session.commands.length}"
+end
+
+```
+
+#### delete_session() \{#delete_session\}
+
+```ruby
+def delete_session(session_id)
+
+```
+
+サンドボックスからセッションを終了して削除し、そのセッションに関連付けられたすべてのリソースをクリーンアップします
+
+**パラメーター**:
+
+* `session_id` *String* - 削除するセッションの一意の識別子
+
+**使用例:**
+
+```ruby
+# セッションを作成して使用する
+sandbox.process.create_session("temp-session")
+# ... セッションを使用する ...
+
+# 完了後にクリーンアップする
+sandbox.process.delete_session("temp-session")
+
+```
+
+#### create_pty_session() \{#create_pty_session\}
+
+```ruby
+def create_pty_session(id:, cwd:, envs:, pty_size:)
+
+```
+
+サンドボックス内に新しい PTY（疑似端末）セッションを作成します。
+
+コマンドの実行およびユーザー入力の処理が可能な対話型ターミナルセッションを作成します。
+PTY セッションは実際のターミナルと同様に動作し、コマンド履歴などの機能を利用できます。
+
+**Parameters**:
+
+* `id` *String* - PTY セッションの一意の識別子。サンドボックス内で一意である必要があります。
+* `cwd` *String, nil* - PTY セッションの作業ディレクトリ。指定しない場合はサンドボックスの作業ディレクトリがデフォルトになります。
+* `envs` *Hash&lt;String, String&gt;, nil* - PTY セッション内で設定する環境変数。サンドボックスの既定の環境変数とマージされます。
+* `pty_size` *PtySize, nil* - ターミナルサイズの設定。指定しない場合、デフォルトは 80x24 です。
+
+**Returns**:
+
+* `PtyHandle` - 作成された PTY セッションを管理するためのハンドル。これを使用して入力の送信、
+  出力の受信、ターミナルのリサイズ、およびセッションライフサイクルの管理を行います。
+
+**Raises**:
+
+* `Daytona:Sdk:Error` - PTY セッションの作成に失敗した場合、またはセッション ID がすでに使用されている場合に発生します。
+
+**Examples:**
+
+```ruby
+# 基本的なPTYセッションを作成する
+pty_handle = sandbox.process.create_pty_session(id: "my-pty")
+
+# 特定のサイズと環境でPTYセッションを作成する
+pty_size = Daytona::PtySize.new(rows: 30, cols: 120)
+pty_handle = sandbox.process.create_pty_session(
+  id: "my-pty",
+  cwd: "/workspace",
+  envs: {"NODE_ENV" => "development"},
+  pty_size: pty_size
+)
+
+# PTYセッションを使用する
+pty_handle.wait_for_connection
+pty_handle.send_input("ls -la\n")
+result = pty_handle.wait
+pty_handle.disconnect
+
+```
+
+#### connect_pty_session() \{#connect_pty_session\}
+
+```ruby
+def connect_pty_session(session_id)
+
+```
+
+サンドボックス内の既存の PTY セッションに接続します。
+
+既存の PTY セッションに対して WebSocket 接続を確立し、以前に作成されたターミナルセッションと
+対話できるようにします。
+
+**パラメータ**:
+
+* `session_id` *String* - 接続する PTY セッションの一意の識別子。
+
+**戻り値**:
+
+* `PtyHandle` - 接続された PTY セッションを管理するためのハンドル。
+
+**例外**:
+
+* `Daytona:Sdk:Error` - PTY セッションが存在しない場合、または接続に失敗した場合に発生します。
+
+**使用例:**
+
+```ruby
+# 既存のPTYセッションに接続
+pty_handle = sandbox.process.connect_pty_session("my-pty-session")
+pty_handle.wait_for_connection
+pty_handle.send_input("echo 'Hello World'\n")
+result = pty_handle.wait
+pty_handle.disconnect
+
+```
+
+#### resize_pty_session() \{#resize_pty_session\}
+
+```ruby
+def resize_pty_session(session_id, pty_size)
+
+```
+
+PTY セッションのサイズを指定されたサイズに変更します
+
+**パラメーター**:
+
+* `session_id` *String* - PTY セッションの一意の識別子
+* `pty_size` *PtySize* - 新しいターミナルサイズ
+
+**戻り値**:
+
+* `DaytonaApiClient:PtySessionInfo` - 更新された PTY セッション情報
+
+**例:**
+
+```ruby
+pty_size = Daytona::PtySize.new(rows: 30, cols: 120)
+session_info = sandbox.process.resize_pty_session("my-pty", pty_size)
+puts "PTY resized to #{session_info.cols}x#{session_info.rows}"
+
+```
+
+#### delete_pty_session() \{#delete_pty_session\}
+
+```ruby
+def delete_pty_session(session_id)
+
+```
+
+PTY セッションを削除し、関連するプロセスを終了します。
+
+**パラメーター**:
+
+* `session_id` *String* - 削除する PTY セッションの一意の識別子
+
+**戻り値**:
+
+* `void`
+
+**使用例:**
+
+```ruby
+sandbox.process.delete_pty_session("my-pty")
+
+```
+
+#### list_pty_sessions() \{#list_pty_sessions\}
+
+```ruby
+def list_pty_sessions()
+
+```
+
+サンドボックス内のすべての PTY セッションを一覧表示します
+
+**戻り値**:
+
+* `Array\<DaytonaApiClient:PtySessionInfo\>` - PTY セッション情報のリスト
+
+**使用例:**
+
+```ruby
+sessions = sandbox.process.list_pty_sessions
+sessions.each do |session|
+  puts "PTY Session #{session.id}: #{session.cols}x#{session.rows}"
+end
+
+```
+
+#### get_pty_session_info() \{#get_pty_session_info\}
+
+```ruby
+def get_pty_session_info(session_id)
+
+```
+
+特定の PTY セッションの詳細情報を取得します
+
+PTY セッションの現在の状態、構成、およびメタデータを含む詳細な情報を取得します。
+
+**Parameters**:
+
+* `session_id` *String* - 情報を取得する対象の PTY セッションを一意に識別する ID
+
+**Returns**:
+
+* `DaytonaApiClient:PtySessionInfo` - ID、状態、作成時刻、作業ディレクトリ、環境変数などを含む、
+  PTY セッションに関する詳細情報
+
+**Examples:**
+
+```ruby
+# 特定のPTYセッションに関する詳細を取得
+session_info = sandbox.process.get_pty_session_info("my-session")
+puts "Session ID: #{session_info.id}"
+puts "Active: #{session_info.active}"
+puts "Working Directory: #{session_info.cwd}"
+puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
+
+```
