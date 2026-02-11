@@ -32,21 +32,36 @@ const getMeta = (table: Table<EndpointMessageOut>) => {
 const columns: ColumnDef<EndpointMessageOut>[] = [
   {
     accessorKey: 'id',
-    header: 'Attempt ID',
+    header: 'Message ID',
     size: 300,
     cell: ({ row }) => {
-      const attemptId = row.original.id
+      const msgId = row.original.id
       return (
-        <div
-          className="w-full truncate flex items-center gap-2 group/copy-button"
-          onClick={(e) => {
-            e.stopPropagation()
-          }}
-        >
-          <span className="truncate block font-mono text-sm">{attemptId ?? '-'}</span>
-          {attemptId && <CopyButton value={attemptId} size="icon-xs" autoHide tooltipText="Copy Attempt ID" />}
+        <div className="w-full truncate flex items-center gap-2 group/copy-button">
+          <span className="truncate block font-mono text-sm hover:underline focus:underline cursor-pointer">
+            {msgId ?? '-'}
+          </span>
+          {msgId && (
+            <span onClick={(e) => e.stopPropagation()}>
+              <CopyButton value={msgId} size="icon-xs" autoHide tooltipText="Copy Message ID" />
+            </span>
+          )}
         </div>
       )
+    },
+  },
+  {
+    id: 'status',
+    accessorFn: (row) => row.statusText || 'unknown',
+    header: 'Status',
+    size: 150,
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+    cell: ({ row }) => {
+      const status = row.original.status
+      const variant = status === 0 ? 'success' : status === 1 ? 'secondary' : 'destructive'
+      return <Badge variant={variant}>{status === 0 ? 'Success' : status === 1 ? 'Pending' : 'Failed'}</Badge>
     },
   },
   {
@@ -66,27 +81,8 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
     },
   },
   {
-    id: 'status',
-    accessorFn: (row) => row.statusText || 'unknown',
-    header: 'Status',
-    size: 150,
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
-    cell: ({ row }) => {
-      const status = row.original.status
-      const statusText = row.original.statusText || 'unknown'
-      const variant = status === 0 ? 'success' : status === 1 ? 'secondary' : 'destructive'
-      return (
-        <Badge variant={variant} className="capitalize">
-          {statusText}
-        </Badge>
-      )
-    },
-  },
-  {
     accessorKey: 'timestamp',
-    header: 'Timestamp',
+    header: 'Sent',
     size: 200,
     cell: ({ row }) => {
       const timestamp = row.original.timestamp
@@ -136,7 +132,7 @@ const eventTypeOptions: FacetedFilterOption[] = WEBHOOK_EVENTS.map((event) => ({
 const statusOptions: FacetedFilterOption[] = [
   { label: 'Success', value: 'success', icon: CheckCircle },
   { label: 'Pending', value: 'pending', icon: Clock },
-  { label: 'Fail', value: 'fail', icon: XCircle },
+  { label: 'Failed', value: 'fail', icon: XCircle },
 ]
 
 export { columns, eventTypeOptions, statusOptions }
