@@ -502,15 +502,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     const organization = await this.organizationService.findOne(sandbox.organizationId)
 
-    let metadata: { [key: string]: string } | undefined = undefined
-
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      }
+    const metadata = {
+      ...organization?.sandboxMetadata,
+      sandboxName: sandbox.name,
     }
 
     const newRunner = await this.runnerService.findOne(newRunnerId)
