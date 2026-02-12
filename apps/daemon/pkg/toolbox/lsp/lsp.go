@@ -6,11 +6,10 @@ package lsp
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Start godoc
@@ -35,7 +34,7 @@ func Start(c *gin.Context) {
 	service := GetLSPService()
 	err := service.Start(req.LanguageId, req.PathToProject)
 	if err != nil {
-		log.Error(err)
+		slog.Error("error starting LSP server", "error", err)
 		c.AbortWithError(http.StatusInternalServerError, errors.New("error starting LSP server"))
 		return
 	}
@@ -65,7 +64,7 @@ func Stop(c *gin.Context) {
 	service := GetLSPService()
 	err := service.Shutdown(req.LanguageId, req.PathToProject)
 	if err != nil {
-		log.Error(err)
+		slog.Error("error stopping LSP server", "error", err)
 		c.AbortWithError(http.StatusInternalServerError, errors.New("error stopping LSP server"))
 		return
 	}

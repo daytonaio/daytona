@@ -4,12 +4,11 @@
 package config
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -39,7 +38,7 @@ func GetConfig() (*Config, error) {
 
 	err := envconfig.Process("", config)
 	if err != nil {
-		log.Error(err)
+		slog.Error("Error processing config", "error", err)
 		os.Exit(2)
 	}
 

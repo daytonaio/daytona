@@ -6,11 +6,11 @@ package session
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // SendInput sends data to the session's stdin for a specific running command
@@ -58,14 +58,14 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 	logFilePath, _ := command.LogFilePath(session.Dir(s.configDir))
 	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Debugf("failed to open log file to echo input: %v", err)
+		slog.Debug("failed to open log file to echo input", "error", err)
 	} else {
 		defer logFile.Close()
 		// Write with STDOUT prefix to maintain log format consistency
 		dataWithPrefix := append(STDOUT_PREFIX, []byte(data)...)
 		_, err = logFile.Write(dataWithPrefix)
 		if err != nil {
-			log.Errorf("failed to echo input to log file: %v", err)
+			slog.Error("failed to echo input to log file", "error", err)
 		}
 	}
 

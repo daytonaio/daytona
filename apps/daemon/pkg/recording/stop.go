@@ -4,10 +4,9 @@
 package recording
 
 import (
+	"log/slog"
 	"os"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // StopRecording stops an active recording session
@@ -22,7 +21,7 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 	if active.stdinPipe != nil {
 		_, err := active.stdinPipe.Write([]byte("q"))
 		if err != nil {
-			log.Warnf("Failed to send quit signal to ffmpeg: %v", err)
+			slog.Warn("Failed to send quit signal to ffmpeg", "error", err)
 		}
 		active.stdinPipe.Close()
 	}
@@ -33,11 +32,11 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		// Process exited normally
 	case <-time.After(10 * time.Second):
 		// Force kill if it doesn't exit gracefully
-		log.Warnf("Recording %s did not stop gracefully, force killing", id)
+		slog.Warn("Recording did not stop gracefully, force killing", "id", id)
 		if active.cmd.Process != nil {
 			err := active.cmd.Process.Kill()
 			if err != nil {
-				log.Errorf("Failed to force kill recording %s: %v", id, err)
+				slog.Error("Failed to force kill recording", "id", id, "error", err)
 			}
 		}
 		// Still wait for the done channel to avoid goroutine leak
@@ -58,7 +57,7 @@ func (s *RecordingService) StopRecording(id string) (*Recording, error) {
 		active.recording.SizeBytes = &size
 	}
 
-	log.Debugf("Stopped recording %s, duration: %.2f seconds", id, duration)
+	slog.Debug("Stopped recording", "id", id, "durationSeconds", duration)
 
 	return active.recording, nil
 }

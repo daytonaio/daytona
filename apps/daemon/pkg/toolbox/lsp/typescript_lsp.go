@@ -6,12 +6,11 @@ package lsp
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 
 	"github.com/sourcegraph/jsonrpc2"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type TypescriptLSPServer struct {
@@ -33,9 +32,9 @@ func (s *TypescriptLSPServer) Initialize(pathToProject string) error {
 	}
 
 	handler := jsonrpc2.HandlerWithError(func(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) (interface{}, error) {
-		log.Debugf("Received request: %s", req.Method)
+		slog.Debug("Received request", "method", req.Method)
 		if req.Params != nil {
-			log.Debugf("Params: %+v", req.Params)
+			slog.Debug("Request params", "params", req.Params)
 		}
 		return nil, nil
 	})

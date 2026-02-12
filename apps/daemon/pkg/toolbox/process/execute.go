@@ -6,11 +6,10 @@ package process
 import (
 	"bytes"
 	"errors"
+	"log/slog"
 	"net/http"
 	"os/exec"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,7 +57,7 @@ func ExecuteCommand(c *gin.Context) {
 			// kill the process group
 			err := cmd.Process.Kill()
 			if err != nil {
-				log.Error(err)
+				slog.Error("failed to kill process", "error", err)
 				return
 			}
 		}

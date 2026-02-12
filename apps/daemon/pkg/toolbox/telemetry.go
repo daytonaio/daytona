@@ -6,15 +6,15 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/daemon/internal"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 	if s.otelEndpoint == nil {
-		log.Info("Otel endpoint not provided, skipping telemetry initialization")
+		slog.InfoContext(ctx, "Otel endpoint not provided, skipping telemetry initialization")
 		return nil
 	}
 
@@ -58,7 +58,7 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 	mp, err := telemetry.InitMetrics(ctx, config, "daytona.sandbox")
 	if err != nil {
 		if shutDownErr := lp.Shutdown(telemetryContext); shutDownErr != nil {
-			log.Errorf("failed to shutdown logger after metrics initialization failure: %v", shutDownErr)
+			slog.ErrorContext(ctx, "Failed to shutdown logger after metrics initialization failure", "shutdownErr", shutDownErr)
 		}
 		return fmt.Errorf("failed to initialize metrics: %w", err)
 	}
@@ -67,10 +67,10 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 	tp, err := telemetry.InitTracer(ctx, config)
 	if err != nil {
 		if shutDownErr := lp.Shutdown(telemetryContext); shutDownErr != nil {
-			log.Errorf("failed to shutdown logger after tracer initialization failure: %v", shutDownErr)
+			slog.ErrorContext(ctx, "Failed to shutdown logger after tracer initialization failure", "shutdownErr", shutDownErr)
 		}
 		if shutDownErr := mp.Shutdown(telemetryContext); shutDownErr != nil {
-			log.Errorf("failed to shutdown meter provider after tracer initialization failure: %v", shutDownErr)
+			slog.ErrorContext(ctx, "Failed to shutdown meter provider after tracer initialization failure", "shutdownErr", shutDownErr)
 		}
 		return fmt.Errorf("failed to initialize tracer: %w", err)
 	}
@@ -79,6 +79,6 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 	s.telemetry.MeterProvider = mp
 	s.telemetry.Logger = lp
 
-	log.Info("Telemetry initialized successfully")
+	slog.InfoContext(ctx, "Telemetry initialized successfully")
 	return nil
 }

@@ -10,6 +10,7 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -43,8 +44,6 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type ServerConfig struct {
@@ -244,8 +243,8 @@ func (s *server) Start() error {
 	var err error
 	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
 	if err != nil {
-		log.Errorf("Failed to initialize computer-use plugin: %v", err)
-		log.Info("Continuing without computer-use functionality...")
+		slog.Error("Failed to initialize computer-use plugin", "error", err)
+		slog.Info("Continuing without computer-use functionality...")
 	}
 
 	// Always register computer-use endpoints, but handle the case when plugin is nil

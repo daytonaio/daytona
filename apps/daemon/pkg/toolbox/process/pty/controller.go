@@ -6,6 +6,7 @@ package pty
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	cmap "github.com/orcaman/concurrent-map/v2"
-	log "github.com/sirupsen/logrus"
 )
 
 // NewPTYController creates a new PTY controller
@@ -100,7 +100,7 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 		if err := session.start(); err != nil {
 			// If start fails, remove from manager
 			ptyManager.Delete(req.ID)
-			log.WithError(err).Error("failed to start PTY at create")
+			slog.Error("failed to start PTY at create", "error", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to start PTY session"})
 			return
 		}
@@ -168,7 +168,7 @@ func (p *PTYController) DeletePTYSession(c *gin.Context) {
 
 	if s, ok := ptyManager.Delete(id); ok {
 		s.kill()
-		log.Debugf("Deleted PTY session %s", id)
+		slog.Debug("Deleted PTY session", "sessionId", id)
 		c.JSON(http.StatusOK, gin.H{"message": "PTY session deleted"})
 		return
 	}
@@ -195,13 +195,13 @@ func (p *PTYController) ConnectPTYSession(c *gin.Context) {
 	// Upgrade to WebSocket
 	ws, err := util.UpgradeToWebSocket(c.Writer, c.Request)
 	if err != nil {
-		log.WithError(err).Error("ws upgrade failed")
+		slog.Error("ws upgrade failed", "error", err)
 		return
 	}
 
 	session, err := ptyManager.VerifyPTYSessionReady(id)
 	if err != nil {
-		log.Debugf("failed to connect to PTY session: %v", err)
+		slog.Debug("failed to connect to PTY session", "sessionId", id, "error", err)
 		// Send error control message
 		errorMsg := map[string]interface{}{
 			"type":   "control",
@@ -264,7 +264,7 @@ func (p *PTYController) ResizePTYSession(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	log.Debugf("Resized PTY session %s to %dx%d", id, req.Cols, req.Rows)
+	slog.Debug("Resized PTY session", "sessionId", id, "cols", req.Cols, "rows", req.Rows)
 
 	// Return updated session info
 	updatedInfo := session.Info()

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 )
 
 func NewInterpreterController(workDir string) *Controller {
@@ -23,7 +23,7 @@ func NewInterpreterController(workDir string) *Controller {
 	go func() {
 		_, err := GetOrCreateDefaultContext()
 		if err != nil {
-			log.Debugf("Failed to pre-create default interpreter context: %v", err)
+			slog.Debug("Failed to pre-create default interpreter context", "error", err)
 		}
 	}()
 	return &Controller{workDir: workDir}
