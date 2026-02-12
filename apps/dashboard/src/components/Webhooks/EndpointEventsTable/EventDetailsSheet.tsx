@@ -66,7 +66,7 @@ export function EventDetailsSheet({
         <Separator />
 
         <div className="flex flex-col px-5 py-4 gap-3">
-          <span className="text-lg font-medium">Overview</span>
+          <span className="text-base font-medium">Overview</span>
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Message ID</span>
             <div className="flex items-center gap-1 group/copy-button">
@@ -102,7 +102,7 @@ export function EventDetailsSheet({
 
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center justify-between px-5 py-3">
-            <span className="text-lg font-medium">Payload</span>
+            <span className="text-base font-medium">Payload</span>
             {hasPayload && <CopyButton value={payload} size="icon-xs" tooltipText="Copy Payload" />}
           </div>
           <div className="flex-1 min-h-0 overflow-auto px-5 pb-5">
