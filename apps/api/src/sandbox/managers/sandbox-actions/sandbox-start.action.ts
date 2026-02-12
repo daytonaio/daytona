@@ -9,6 +9,7 @@ import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
+import { SANDBOX_BUILD_INFO_CACHE_TTL_MS } from '../../utils/sandbox-lookup-cache.util'
 import { SnapshotRunnerState } from '../../enums/snapshot-runner-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
@@ -49,6 +50,12 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+    // Load buildInfo only for states that need it — avoids a JOIN+DISTINCT in the
+    // shared syncInstanceState query that stop/destroy/archive paths never use.
+    if ([SandboxState.PENDING_BUILD, SandboxState.BUILDING_SNAPSHOT, SandboxState.UNKNOWN].includes(sandbox.state)) {
+      await this.loadBuildInfo(sandbox)
+    }
+
     switch (sandbox.state) {
       case SandboxState.PULLING_SNAPSHOT: {
         if (!sandbox.runnerId) {
@@ -86,6 +93,22 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return DONT_SYNC_AGAIN
+  }
+
+  /**
+   * Loads the buildInfo relation for a sandbox.
+   * Uses QueryBuilder with getMany() to avoid the SELECT DISTINCT subquery
+   * that TypeORM generates when combining relations with findOne/LIMIT.
+   * Since sandbox.id is a PK and BuildInfo is @ManyToOne, at most one row is returned.
+   */
+  private async loadBuildInfo(sandbox: Sandbox): Promise<void> {
+    const [result] = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .leftJoinAndSelect('sandbox.buildInfo', 'buildInfo')
+      .where('sandbox.id = :id', { id: sandbox.id })
+      .cache(`sandbox:buildInfo:${sandbox.id}`, SANDBOX_BUILD_INFO_CACHE_TTL_MS)
+      .getMany()
+    sandbox.buildInfo = result?.buildInfo ?? null
   }
 
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
