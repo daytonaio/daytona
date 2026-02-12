@@ -102,6 +102,8 @@
   "sidebarconfig.vpnConnection": "VPN Connections",
   "sidebarconfig.vpnConnectionDescription": "Connect Daytona Sandboxes to VPN networks.",
   "sidebarconfig.sshAccessDescription": "SSH access to Daytona Sandboxes.",
+  "sidebarconfig.playground": "Playground",
+  "sidebarconfig.playgroundDescription": "Playground for Daytona Sandboxes.",
   "sidebarconfig.preview": "Preview",
   "sidebarconfig.previewDescription": "Preview URLs and authentication tokens.",
   "sidebarconfig.customDomainAuthentication": "Custom Domain Authentication",
