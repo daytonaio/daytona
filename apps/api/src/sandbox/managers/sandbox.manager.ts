@@ -262,15 +262,24 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @WithInstrumentation()
   async drainingRunnerSandboxesCheck(): Promise<void> {
     const lockKey = 'draining-runner-sandboxes-check'
-    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
-    if (!hasLock) {
+    const lockTtl = 10 * 60 // seconds (10 min)
+    if (!(await this.redisLockProvider.lock(lockKey, lockTtl))) {
       return
     }
 
     try {
-      const drainingRunners = await this.runnerService.findAllDraining()
+      const skip = (await this.redis.get('draining-runner-sandboxes-skip')) || 0
 
-      this.logger.debug(`Checking ${drainingRunners.length} draining runners for sandbox migration`)
+      const drainingRunners = await this.runnerService.findDrainingPaginated(Number(skip), 10)
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners for sandbox migration (offset: ${skip})`)
+
+      if (drainingRunners.length === 0) {
+        await this.redis.set('draining-runner-sandboxes-skip', 0)
+        return
+      }
+
+      await this.redis.set('draining-runner-sandboxes-skip', Number(skip) + drainingRunners.length)
 
       await Promise.allSettled(
         drainingRunners.map(async (runner) => {
