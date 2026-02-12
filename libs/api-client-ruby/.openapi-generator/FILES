@@ -60,6 +60,7 @@ lib/daytona_api_client/models/create_user.rb
 lib/daytona_api_client/models/create_volume.rb
 lib/daytona_api_client/models/create_workspace.rb
 lib/daytona_api_client/models/daytona_configuration.rb
+lib/daytona_api_client/models/deprecated_paginated_sandboxes.rb
 lib/daytona_api_client/models/display_info_response.rb
 lib/daytona_api_client/models/docker_registry.rb
 lib/daytona_api_client/models/download_files.rb

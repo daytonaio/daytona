@@ -84,6 +84,7 @@ from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
+from daytona_api_client_async.models.deprecated_paginated_sandboxes import DeprecatedPaginatedSandboxes
 from daytona_api_client_async.models.display_info_response import DisplayInfoResponse
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.download_files import DownloadFiles
@@ -291,6 +292,7 @@ __all__ = [
     "CreateVolume",
     "CreateWorkspace",
     "DaytonaConfiguration",
+    "DeprecatedPaginatedSandboxes",
     "DisplayInfoResponse",
     "DockerRegistry",
     "DownloadFiles",

@@ -22,6 +22,7 @@ from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr, field
 from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_sandbox import CreateSandbox
+from daytona_api_client_async.models.deprecated_paginated_sandboxes import DeprecatedPaginatedSandboxes
 from daytona_api_client_async.models.metrics_response import MetricsResponse
 from daytona_api_client_async.models.paginated_logs import PaginatedLogs
 from daytona_api_client_async.models.paginated_sandboxes import PaginatedSandboxes
@@ -5174,9 +5175,10 @@ class SandboxApi:
     async def list_sandboxes(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
-        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -5189,18 +5191,21 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Sandbox]:
-        """List all sandboxes
+    ) -> PaginatedSandboxes:
+        """List sandboxes
 
+        Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
-        :param labels: JSON encoded labels to filter by
-        :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param cursor: Pagination cursor from a previous response
+        :type cursor: str
+        :param limit: Number of results per page
+        :type limit: float
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by. Can not be combined with \"name\"
+        :type states: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -5225,9 +5230,10 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
-            labels=labels,
+            cursor=cursor,
+            limit=limit,
             include_errored_deleted=include_errored_deleted,
+            states=states,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5235,7 +5241,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5252,9 +5258,10 @@ class SandboxApi:
     async def list_sandboxes_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
-        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -5267,18 +5274,21 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Sandbox]]:
-        """List all sandboxes
+    ) -> ApiResponse[PaginatedSandboxes]:
+        """List sandboxes
 
+        Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
-        :param labels: JSON encoded labels to filter by
-        :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param cursor: Pagination cursor from a previous response
+        :type cursor: str
+        :param limit: Number of results per page
+        :type limit: float
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by. Can not be combined with \"name\"
+        :type states: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -5303,9 +5313,10 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
-            labels=labels,
+            cursor=cursor,
+            limit=limit,
             include_errored_deleted=include_errored_deleted,
+            states=states,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5313,7 +5324,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5330,9 +5341,10 @@ class SandboxApi:
     async def list_sandboxes_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        verbose: Annotated[Optional[StrictBool], Field(description="Include verbose output")] = None,
-        labels: Annotated[Optional[StrictStr], Field(description="JSON encoded labels to filter by")] = None,
-        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include errored and deleted sandboxes")] = None,
+        cursor: Annotated[Optional[StrictStr], Field(description="Pagination cursor from a previous response")] = None,
+        limit: Annotated[Optional[Union[Annotated[float, Field(le=200, strict=True, ge=1)], Annotated[int, Field(le=200, strict=True, ge=1)]]], Field(description="Number of results per page")] = None,
+        include_errored_deleted: Annotated[Optional[StrictBool], Field(description="Include results with errored state and deleted desired state")] = None,
+        states: Annotated[Optional[List[StrictStr]], Field(description="List of states to filter by. Can not be combined with \"name\"")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -5346,17 +5358,20 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List all sandboxes
+        """List sandboxes
 
+        Basic filtering with cursor-based pagination. Newest first. Strongly consistent.
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
-        :param verbose: Include verbose output
-        :type verbose: bool
-        :param labels: JSON encoded labels to filter by
-        :type labels: str
-        :param include_errored_deleted: Include errored and deleted sandboxes
+        :param cursor: Pagination cursor from a previous response
+        :type cursor: str
+        :param limit: Number of results per page
+        :type limit: float
+        :param include_errored_deleted: Include results with errored state and deleted desired state
         :type include_errored_deleted: bool
+        :param states: List of states to filter by. Can not be combined with \"name\"
+        :type states: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -5381,9 +5396,10 @@ class SandboxApi:
 
         _param = self._list_sandboxes_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
-            verbose=verbose,
-            labels=labels,
+            cursor=cursor,
+            limit=limit,
             include_errored_deleted=include_errored_deleted,
+            states=states,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -5391,7 +5407,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "PaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5403,9 +5419,10 @@ class SandboxApi:
     def _list_sandboxes_serialize(
         self,
         x_daytona_organization_id,
-        verbose,
-        labels,
+        cursor,
+        limit,
         include_errored_deleted,
+        states,
         _request_auth,
         _content_type,
         _headers,
@@ -5415,6 +5432,7 @@ class SandboxApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
+            'states': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -5428,17 +5446,21 @@ class SandboxApi:
 
         # process the path parameters
         # process the query parameters
-        if verbose is not None:
+        if cursor is not None:
             
-            _query_params.append(('verbose', verbose))
+            _query_params.append(('cursor', cursor))
             
-        if labels is not None:
+        if limit is not None:
             
-            _query_params.append(('labels', labels))
+            _query_params.append(('limit', limit))
             
         if include_errored_deleted is not None:
             
             _query_params.append(('includeErroredDeleted', include_errored_deleted))
+            
+        if states is not None:
+            
+            _query_params.append(('states', states))
             
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -5481,7 +5503,7 @@ class SandboxApi:
 
 
     @validate_call
-    async def list_sandboxes_paginated(
+    async def list_sandboxes_paginated_deprecated(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
@@ -5515,8 +5537,8 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> PaginatedSandboxes:
-        """List all sandboxes paginated
+    ) -> DeprecatedPaginatedSandboxes:
+        """(Deprecated) [DEPRECATED] List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5580,8 +5602,9 @@ class SandboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /sandbox/paginated is deprecated.", DeprecationWarning)
 
-        _param = self._list_sandboxes_paginated_serialize(
+        _param = self._list_sandboxes_paginated_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -5609,7 +5632,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSandboxes",
+            '200': "DeprecatedPaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5623,7 +5646,7 @@ class SandboxApi:
 
 
     @validate_call
-    async def list_sandboxes_paginated_with_http_info(
+    async def list_sandboxes_paginated_deprecated_with_http_info(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
@@ -5657,8 +5680,8 @@ class SandboxApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[PaginatedSandboxes]:
-        """List all sandboxes paginated
+    ) -> ApiResponse[DeprecatedPaginatedSandboxes]:
+        """(Deprecated) [DEPRECATED] List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5722,8 +5745,9 @@ class SandboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /sandbox/paginated is deprecated.", DeprecationWarning)
 
-        _param = self._list_sandboxes_paginated_serialize(
+        _param = self._list_sandboxes_paginated_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -5751,7 +5775,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSandboxes",
+            '200': "DeprecatedPaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5765,7 +5789,7 @@ class SandboxApi:
 
 
     @validate_call
-    async def list_sandboxes_paginated_without_preload_content(
+    async def list_sandboxes_paginated_deprecated_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         page: Annotated[Optional[Union[Annotated[float, Field(strict=True, ge=1)], Annotated[int, Field(strict=True, ge=1)]]], Field(description="Page number of the results")] = None,
@@ -5800,7 +5824,7 @@ class SandboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List all sandboxes paginated
+        """(Deprecated) [DEPRECATED] List all sandboxes paginated
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5864,8 +5888,9 @@ class SandboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """ # noqa: E501
+        warnings.warn("GET /sandbox/paginated is deprecated.", DeprecationWarning)
 
-        _param = self._list_sandboxes_paginated_serialize(
+        _param = self._list_sandboxes_paginated_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             page=page,
             limit=limit,
@@ -5893,7 +5918,7 @@ class SandboxApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PaginatedSandboxes",
+            '200': "DeprecatedPaginatedSandboxes",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5902,7 +5927,7 @@ class SandboxApi:
         return response_data.response
 
 
-    def _list_sandboxes_paginated_serialize(
+    def _list_sandboxes_paginated_deprecated_serialize(
         self,
         x_daytona_organization_id,
         page,

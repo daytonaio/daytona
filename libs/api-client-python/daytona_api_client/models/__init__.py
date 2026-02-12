@@ -49,6 +49,7 @@ from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
 from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
+from daytona_api_client.models.deprecated_paginated_sandboxes import DeprecatedPaginatedSandboxes
 from daytona_api_client.models.display_info_response import DisplayInfoResponse
 from daytona_api_client.models.docker_registry import DockerRegistry
 from daytona_api_client.models.download_files import DownloadFiles
