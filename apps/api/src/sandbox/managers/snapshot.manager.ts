@@ -412,6 +412,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
   // Pulls stopped sandboxes' backup snapshots to another runner to prepare for reassignment during draining
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
+  @TrackJobExecution()
   @LogExecution('migrate-draining-runner-snapshots')
   @WithInstrumentation()
   private async handleMigrateDrainingRunnerSnapshots() {
@@ -471,11 +472,19 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
                     sandbox.backupSnapshot,
                   )
                   if (existingEntry) {
-                    this.logger.debug(
-                      `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot}`,
-                    )
-                    // Do not unlock to avoid duplicates
-                    return
+                    if (existingEntry.state === SnapshotRunnerState.ERROR) {
+                      // Clean up the failed entry so we can retry
+                      this.logger.warn(
+                        `Removing ERROR snapshot runner entry ${existingEntry.id} for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot} to allow retry`,
+                      )
+                      await this.snapshotRunnerRepository.delete(existingEntry.id)
+                    } else {
+                      this.logger.debug(
+                        `Snapshot runner entry already exists for runner ${targetRunner.id} and snapshot ${sandbox.backupSnapshot} (state: ${existingEntry.state})`,
+                      )
+                      // Do not unlock to avoid duplicates
+                      return
+                    }
                   }
 
                   // Find the backup registry to use as source for the pull

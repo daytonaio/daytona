@@ -4,9 +4,8 @@
  */
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, MoreThanOrEqual, Not, Raw, Repository } from 'typeorm'
+import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -42,9 +41,6 @@ import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { Sandbox } from '../entities/sandbox.entity'
-import { SnapshotRunner } from '../entities/snapshot-runner.entity'
-import { RunnerState } from '../enums/runner-state.enum'
-import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -67,8 +63,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly sandboxStopAction: SandboxStopAction,
     private readonly sandboxDestroyAction: SandboxDestroyAction,
     private readonly sandboxArchiveAction: SandboxArchiveAction,
-    @InjectRepository(SnapshotRunner)
-    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly configService: TypedConfigService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly organizationService: OrganizationService,
@@ -305,56 +299,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 }
 
                 try {
-                  // Check if the backupSnapshot exists in snapshot_runner table with state = READY
-                  const snapshotRunners = await this.snapshotRunnerRepository.find({
-                    where: {
-                      snapshotRef: sandbox.backupSnapshot,
-                      state: SnapshotRunnerState.READY,
-                      runnerId: Not(runner.id),
-                    },
-                    take: 100,
+                  const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
+                  const targetRunner = await this.runnerService.getRandomAvailableRunner({
+                    snapshotRef: sandbox.backupSnapshot,
+                    excludedRunnerIds: [runner.id],
+                    availabilityScoreThreshold: startScoreThreshold,
                   })
 
-                  if (snapshotRunners.length === 0) {
-                    this.logger.debug(
-                      `No ready snapshot runners found for sandbox ${sandbox.id} with backup snapshot ${sandbox.backupSnapshot}`,
-                    )
-                    return
-                  }
-
-                  // Get the start score threshold from config
-                  const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
-
-                  // Find a runner that's not the current draining runner and meets all criteria
-                  let targetSnapshotRunner: SnapshotRunner | undefined = undefined
-                  for (const sr of snapshotRunners) {
-                    // Fetch the actual runner entity to check its state, unschedulable status, and score
-                    const targetRunner = await this.runnerService.findOne(sr.runnerId)
-                    if (!targetRunner) {
-                      this.logger.debug(`Runner ${sr.runnerId} not found, skipping`)
-                      continue
-                    }
-
-                    // Check if runner meets all criteria: READY state, not unschedulable, not draining, and has enough score
-                    if (
-                      targetRunner.state === RunnerState.READY &&
-                      !targetRunner.unschedulable &&
-                      !targetRunner.draining &&
-                      targetRunner.availabilityScore >= startScoreThreshold
-                    ) {
-                      targetSnapshotRunner = sr
-                      break
-                    }
-                  }
-
-                  if (!targetSnapshotRunner) {
-                    this.logger.debug(
-                      `No suitable alternative runner found for sandbox ${sandbox.id} with backup snapshot ${sandbox.backupSnapshot}`,
-                    )
-                    return
-                  }
-
-                  await this.reassignSandbox(sandbox, runner.id, targetSnapshotRunner.runnerId)
+                  await this.reassignSandbox(sandbox, runner.id, targetRunner.id)
                 } catch (e) {
                   this.logger.error(`Error migrating sandbox ${sandbox.id} from draining runner ${runner.id}`, e)
                 } finally {
