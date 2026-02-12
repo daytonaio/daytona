@@ -78,7 +78,7 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
           password: configService.getOrThrow('database.password'),
           database: configService.getOrThrow('database.database'),
           autoLoadEntities: true,
-          migrations: [join(__dirname, 'migrations/**/*{.ts,.js}')],
+          migrations: [join(__dirname, 'migrations/**/*-migration.{ts,js}')],
           migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
