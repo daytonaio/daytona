@@ -1,0 +1,195 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+## LspServer \{#lspserver\}
+
+Daytona SDK の LspServer クラスです。
+
+### コンストラクタ \{#constructors\}
+
+#### new LspServer() \{#new-lspserver\}
+
+```ruby
+def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:, otel_state:)
+
+```
+
+**パラメーター**:
+
+* `language_id` *Symbol* -
+* `path_to_project` *String* -
+* `toolbox_api` *DaytonaToolboxApiClient:LspApi* -
+* `sandbox_id` *String* -
+* `otel_state` *Daytona:OtelState, nil* -
+
+**戻り値**:
+
+* `LspServer` - 新しい `LspServer` インスタンスを返します
+
+### メソッド \{#methods\}
+
+#### language_id() \{#language_id\}
+
+```ruby
+def language_id()
+
+```
+
+**戻り値**:
+
+* `Symbol`
+
+#### path_to_project() \{#path_to_project\}
+
+```ruby
+def path_to_project()
+
+```
+
+**戻り値**:
+
+* `String`
+
+#### toolbox_api() \{#toolbox_api\}
+
+```ruby
+def toolbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaToolboxApiClient:LspApi`
+
+#### sandbox_id() \{#sandbox_id\}
+
+```ruby
+def sandbox_id()
+
+```
+
+**戻り値**:
+
+* `String`
+
+#### completions() \{#completions\}
+
+```ruby
+def completions(path:, position:)
+
+```
+
+ファイル内の特定の位置における補完候補を取得します
+
+**パラメーター**:
+
+* `path` *String* -
+* `position` *Daytona:LspServer:Position* -
+
+**戻り値**:
+
+* `DaytonaApiClient:CompletionList`
+
+#### did_close() \{#did_close\}
+
+```ruby
+def did_close(path)
+
+```
+
+ファイルが閉じられたことを言語サーバーに通知します。
+エディターでファイルが閉じられたとき、そのファイルに関連付けられたリソースを言語サーバーがクリーンアップできるように、このメソッドを呼び出す必要があります。
+
+**パラメーター**:
+
+* `path` *String* -
+
+**戻り値**:
+
+* `void`
+
+#### did_open() \{#did_open\}
+
+```ruby
+def did_open(path)
+
+```
+
+ファイルが開かれたことを言語サーバーに通知します。
+エディターでファイルを開いたときにこのメソッドを呼び出すことで、そのファイルに対する診断や補完などの
+言語機能が有効になります。サーバーはファイルの内容の追跡を開始し、言語機能を提供します。
+
+**パラメータ**:
+
+* `path` *String* -
+
+**戻り値**:
+
+* `void`
+
+#### document_symbols() \{#document_symbols\}
+
+```ruby
+def document_symbols(path)
+
+```
+
+ドキュメントからシンボル情報（関数、クラス、変数など）を取得します。
+
+**パラメータ**:
+
+* `path` *String 型* -
+
+**戻り値**:
+
+* `Array\<DaytonaToolboxApiClient:LspSymbol]`
+
+#### sandbox_symbols() \{#sandbox_symbols\}
+
+```ruby
+def sandbox_symbols(query)
+
+```
+
+サンドボックス内のすべてのファイルを対象に、
+クエリ文字列にマッチするシンボルを検索します。
+
+**パラメーター**:
+
+* `query` *String* -
+
+**戻り値**:
+
+* `Array\<DaytonaToolboxApiClient:LspSymbol]`
+
+#### start() \{#start\}
+
+```ruby
+def start()
+
+```
+
+言語サーバーを起動します。
+このメソッドは、ほかの LSP 機能を利用する前に必ず呼び出す必要があります。
+指定された言語およびプロジェクト用に言語サーバーを初期化します。
+
+**戻り値**:
+
+* `void`
+
+#### stop() \{#stop\}
+
+```ruby
+def stop()
+
+```
+
+言語サーバーを停止します。
+LSP サーバーが不要になったタイミングで呼び出して、
+システムリソースを解放します。
+
+**戻り値**:
+
+* `void`
