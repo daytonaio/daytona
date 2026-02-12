@@ -140,7 +140,7 @@ async def process_streaming_response(
 
 
 async def _invoke(handler: OutputHandler[str], text: str) -> None:
-    """Call an output handler and await the result if it is a coroutine."""
+    """Call an output handler and await the result if it is an awaitable."""
     result = handler(text)
     if inspect.isawaitable(result):
         await result
