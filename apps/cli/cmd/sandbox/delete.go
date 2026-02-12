@@ -6,13 +6,18 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"sync"
+	"sync/atomic"
 
 	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
+	views_util "github.com/daytonaio/daytona/cli/views/util"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/spf13/cobra"
 )
+
+const spinnerThreshold = 10
 
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [SANDBOX_ID] | [SANDBOX_NAME]",
@@ -53,18 +58,41 @@ var DeleteCmd = &cobra.Command{
 					return nil
 				}
 
-				var deletedCount int
+				var deletedCount int64
 
-				for _, sandbox := range allSandboxes {
-					_, res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandbox.Id).Execute()
-					if err != nil {
-						fmt.Printf("Failed to delete sandbox %s: %s\n", sandbox.Id, apiclient_cli.HandleErrorResponse(res, err))
-					} else {
-						deletedCount++
+				deleteFn := func() error {
+					var wg sync.WaitGroup
+					sem := make(chan struct{}, 10) // limit to 10 concurrent deletes
+
+					for _, sb := range allSandboxes {
+						wg.Add(1)
+						go func(sb apiclient.Sandbox) {
+							defer wg.Done()
+							sem <- struct{}{}
+							defer func() { <-sem }()
+
+							_, res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sb.Id).Execute()
+							if err != nil {
+								fmt.Printf("Failed to delete sandbox %s: %s\n", sb.Id, apiclient_cli.HandleErrorResponse(res, err))
+							} else {
+								atomic.AddInt64(&deletedCount, 1)
+							}
+						}(sb)
 					}
+					wg.Wait()
+					return nil
 				}
 
-				view_common.RenderInfoMessageBold(fmt.Sprintf("Deleted %d sandboxes", deletedCount))
+				if len(allSandboxes) > spinnerThreshold {
+					err = views_util.WithInlineSpinner("Deleting all sandboxes", deleteFn)
+				} else {
+					err = deleteFn()
+				}
+				if err != nil {
+					return err
+				}
+
+				view_common.RenderInfoMessageBold(fmt.Sprintf("Deleted %d sandboxes", atomic.LoadInt64(&deletedCount)))
 				return nil
 			}
 			return cmd.Help()
