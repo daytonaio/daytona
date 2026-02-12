@@ -10,9 +10,9 @@ import (
 	"io"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
 
@@ -59,7 +59,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 	defer responseBody.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&util.DebugLogWriter{}), 0, true, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&log.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
 		return err
 	}

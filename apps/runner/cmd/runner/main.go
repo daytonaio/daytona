@@ -11,9 +11,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/log"
+	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/runner/cmd/runner/config"
+	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/internal/metrics"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/daemon"
@@ -25,7 +27,7 @@ import (
 	"github.com/daytonaio/runner/pkg/runner/v2/poller"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
-	"github.com/daytonaio/runner/pkg/telemetry"
+	"github.com/daytonaio/runner/pkg/telemetry/filters"
 	"github.com/docker/docker/client"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -37,7 +39,7 @@ func main() {
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
 		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
 		TimeFormat: time.RFC3339,
-		Level:      util.ParseLogLevel(os.Getenv("LOG_LEVEL")),
+		Level:      log.ParseLogLevel(os.Getenv("LOG_LEVEL")),
 	}))
 
 	slog.SetDefault(logger)
@@ -48,28 +50,51 @@ func main() {
 		return
 	}
 
-	// Init telemetry
-	otelCfg := telemetry.OtelConfig{
-		TracingEnabled: cfg.OtelTracingEnabled,
-		LoggingEnabled: cfg.OtelLoggingEnabled,
-		Environment:    cfg.Environment,
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	if cfg.OtelLoggingEnabled && cfg.OtelEndpoint != "" {
+		logger.Info("OpenTelemetry logging is enabled")
+
+		telemetryConfig := telemetry.Config{
+			Endpoint:       cfg.OtelEndpoint,
+			ServiceName:    "daytona-runner",
+			ServiceVersion: internal.Version,
+			Environment:    cfg.Environment,
+		}
+
+		// Initialize OpenTelemetry logging
+		lp, err := telemetry.InitLogger(ctx, telemetryConfig)
+		if err != nil {
+			slog.ErrorContext(ctx, "Failed to initialize logger", "error", err)
+			return
+		}
+		defer lp.Shutdown(ctx)
 	}
 
-	shutdownTracing, err := telemetry.InitTracing(otelCfg)
-	if err != nil {
-		logger.Error("Failed to initialize tracing", "error", err)
-		return
-	}
-	defer shutdownTracing()
+	if cfg.OtelTracingEnabled && cfg.OtelEndpoint != "" {
+		logger.Info("OpenTelemetry tracing is enabled")
 
-	// Reassign logger to get the instrumented logger instance with OTEL support.
-	// so all subsequent code uses the instrumented logger instead of the original.
-	logger, shutdownLogging, err := telemetry.InitLogging(otelCfg, logger)
-	if err != nil {
-		logger.Error("Failed to initialize OTEL logging", "error", err)
-		return
+		telemetryConfig := telemetry.Config{
+			Endpoint:            cfg.OtelEndpoint,
+			ServiceName:         "daytona-runner",
+			ServiceVersion:      internal.Version,
+			Environment:         cfg.Environment,
+			TraceExporterFilter: filters.ApplyTraceExporter404Filter,
+		}
+
+		// Initialize OpenTelemetry tracing
+		tp, err := telemetry.InitTracer(ctx, telemetryConfig)
+		if err != nil {
+			slog.ErrorContext(ctx, "Failed to initialize tracer", "error", err)
+			return
+		}
+		defer tp.Shutdown(ctx)
 	}
-	defer shutdownLogging()
+
+	// Reassign logger again after OTEL initialization to ensure we have the final logger instance with OTEL support.
+	// This is necessary because the logger instance may have been wrapped with OTEL support in InitLogging, and we want to ensure that all subsequent code uses the OTEL-enabled logger.
+	logger = slog.Default()
 
 	cli, err := client.NewClientWithOpts(
 		client.FromEnv,
@@ -107,9 +132,6 @@ func main() {
 		logger.Error("Error writing plugin binary", "error", err)
 		return
 	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 

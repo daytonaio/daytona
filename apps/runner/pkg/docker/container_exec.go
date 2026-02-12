@@ -8,7 +8,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/daytonaio/runner/internal/util"
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 )
@@ -50,8 +50,8 @@ func (d *DockerClient) inspectExecResp(ctx context.Context, execID string, execS
 	errBuf := bytes.Buffer{}
 
 	go func() {
-		outMw := io.MultiWriter(&outBuf, &util.DebugLogWriter{})
-		errMw := io.MultiWriter(&errBuf, &util.DebugLogWriter{})
+		outMw := io.MultiWriter(&outBuf, &log.DebugLogWriter{})
+		errMw := io.MultiWriter(&errBuf, &log.DebugLogWriter{})
 
 		_, copyErr := stdcopy.StdCopy(outMw, errMw, resp.Reader)
 		outputDone <- copyErr

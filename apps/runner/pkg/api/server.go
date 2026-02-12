@@ -24,7 +24,6 @@ import (
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/controllers"
 	"github.com/daytonaio/runner/pkg/api/docs"
 	"github.com/daytonaio/runner/pkg/api/middlewares"
@@ -36,6 +35,7 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/log"
 	sloggin "github.com/samber/slog-gin"
 
 	swaggerfiles "github.com/swaggo/files"
@@ -86,8 +86,8 @@ func (a *ApiServer) Start() error {
 
 	binding.Validator = new(DefaultValidator)
 
-	gin.DefaultWriter = &util.InfoLogWriter{}
-	gin.DefaultErrorWriter = &util.ErrorLogWriter{}
+	gin.DefaultWriter = &log.InfoLogWriter{}
+	gin.DefaultErrorWriter = &log.ErrorLogWriter{}
 
 	a.router = gin.New()
 	a.router.Use(common_errors.Recovery())

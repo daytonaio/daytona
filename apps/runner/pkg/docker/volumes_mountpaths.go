@@ -16,8 +16,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/cmd/runner/config"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
@@ -189,8 +189,8 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *
 		cmd.Env = append(cmd.Env, "AWS_REGION="+d.awsRegion)
 	}
 
-	cmd.Stderr = io.Writer(&util.ErrorLogWriter{})
-	cmd.Stdout = io.Writer(&util.InfoLogWriter{})
+	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
+	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
 
 	return cmd
 }

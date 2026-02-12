@@ -26,6 +26,7 @@ type Config struct {
 	EnableTLS                          bool          `envconfig:"ENABLE_TLS"`
 	OtelLoggingEnabled                 bool          `envconfig:"OTEL_LOGGING_ENABLED"`
 	OtelTracingEnabled                 bool          `envconfig:"OTEL_TRACING_ENABLED"`
+	OtelEndpoint                       string        `envconfig:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	CacheRetentionDays                 int           `envconfig:"CACHE_RETENTION_DAYS"`
 	Environment                        string        `envconfig:"ENVIRONMENT"`
 	ContainerRuntime                   string        `envconfig:"CONTAINER_RUNTIME"`

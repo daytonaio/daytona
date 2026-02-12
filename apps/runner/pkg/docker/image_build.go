@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/cmd/runner/config"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/storage"
 
@@ -174,14 +174,14 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		return err
 	}
 
-	var writer io.Writer = &util.DebugLogWriter{}
+	var writer io.Writer = &log.DebugLogWriter{}
 
 	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		d.log.ErrorContext(ctx, "Failed to open log file", "error", err)
 	} else {
 		defer logFile.Close()
-		writer = io.MultiWriter(&util.DebugLogWriter{}, logFile)
+		writer = io.MultiWriter(&log.DebugLogWriter{}, logFile)
 	}
 
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, writer, 0, true, nil)

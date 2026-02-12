@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -17,6 +18,7 @@ import (
 
 	golog "log"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/recording"
@@ -24,7 +26,8 @@ import (
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
-	log "github.com/sirupsen/logrus"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
 
 func main() {
@@ -44,7 +47,7 @@ func main() {
 	if c.DaemonLogFilePath != "" {
 		logFile, err := os.OpenFile(c.DaemonLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Error("Failed to open log file at ", c.DaemonLogFilePath)
+			slog.Error("Failed to open log file", "path", c.DaemonLogFilePath, "error", err)
 		} else {
 			defer logFile.Close()
 			logWriter = logFile
@@ -68,7 +71,7 @@ func main() {
 	if c.UserHomeAsWorkDir {
 		err = os.Chdir(homeDir)
 		if err != nil {
-			log.Warnf("failed to change working directory to home directory: %v", err)
+			slog.Warn("failed to change working directory to home directory", "error", err)
 		}
 	}
 
@@ -83,7 +86,9 @@ func main() {
 		if c.EntrypointLogFilePath != "" {
 			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
-				log.Errorf("Failed to open log file at %s due to %v, fallback to STDOUT and STDERR", c.EntrypointLogFilePath, err)
+				slog.Error("Failed to open log file, fallback to STDOUT and STDERR",
+					"path", c.EntrypointLogFilePath,
+					"error", err)
 			} else {
 				defer entrypointLogFile.Close()
 				entrypointLogWriter = entrypointLogFile
@@ -177,23 +182,23 @@ func main() {
 	// Wait for either an error or shutdown signal
 	select {
 	case err := <-errChan:
-		log.Errorf("Error: %v", err)
+		slog.Error("Error", "error", err)
 	case sig := <-sigChan:
-		log.Infof("Received signal %v, shutting down gracefully...", sig)
+		slog.Info("Received signal, shutting down gracefully...", "signal", sig)
 	}
 
 	// Graceful shutdown
-	log.Info("Stopping computer use processes...")
+	slog.Info("Stopping computer use processes...")
 	if toolBoxServer.ComputerUse != nil {
 		_, err := toolBoxServer.ComputerUse.Stop()
 		if err != nil {
-			log.Errorf("Failed to stop computer use: %v", err)
+			slog.Error("Failed to stop computer use", "error", err)
 		}
 	}
 
 	// Handle entrypoint command shutdown
 	if entrypointCmd != nil && entrypointCmd.Process != nil {
-		log.Info("Waiting for entrypoint command to complete...")
+		slog.Info("Waiting for entrypoint command to complete...")
 
 		// Create a channel to signal when WaitGroup is done
 		done := make(chan struct{})
@@ -206,14 +211,14 @@ func main() {
 		timer := time.NewTimer(time.Duration(c.EntrypointShutdownTimeoutSec) * time.Second)
 		select {
 		case <-done:
-			log.Info("Entrypoint command completed")
+			slog.Info("Entrypoint command completed")
 			if !timer.Stop() {
 				<-timer.C
 			}
 		case <-timer.C:
-			log.Warn("Entrypoint command did not complete within timeout, sending SIGTERM...")
+			slog.Warn("Entrypoint command did not complete within timeout, sending SIGTERM...")
 			if err := entrypointCmd.Process.Signal(syscall.SIGTERM); err != nil {
-				log.Errorf("Failed to send SIGTERM to entrypoint command: %v", err)
+				slog.Error("Failed to send SIGTERM to entrypoint command", "error", err)
 			}
 
 			// Wait a bit more for SIGTERM to take effect
@@ -228,43 +233,44 @@ func main() {
 
 			select {
 			case <-gracefulDone:
-				log.Info("Entrypoint command terminated gracefully")
+				slog.Info("Entrypoint command terminated gracefully")
 			case <-ctx.Done():
-				log.Warn("Entrypoint command did not respond to SIGTERM, sending SIGKILL...")
+				slog.Warn("Entrypoint command did not respond to SIGTERM, sending SIGKILL...")
 				if err := entrypointCmd.Process.Kill(); err != nil {
-					log.Errorf("Failed to kill entrypoint command: %v", err)
+					slog.Error("Failed to kill entrypoint command", "error", err)
 				}
 				entrypointWg.Wait()
-				log.Info("Entrypoint command killed")
+				slog.Info("Entrypoint command killed")
 			}
 		}
 	}
 
-	log.Info("Shutdown complete")
+	slog.Info("Shutdown complete")
 }
 
 func initLogs(logWriter io.Writer) {
-	logLevel := log.WarnLevel
+	logLevel := log.ParseLogLevel(os.Getenv("LOG_LEVEL"))
 
-	logLevelEnv, logLevelSet := os.LookupEnv("LOG_LEVEL")
+	// Create the console handler with tint for colored output
+	consoleHandler := tint.NewHandler(os.Stdout, &tint.Options{
+		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
+		TimeFormat: time.RFC3339,
+		Level:      logLevel,
+	})
 
-	if logLevelSet {
-		var err error
-		logLevel, err = log.ParseLevel(logLevelEnv)
-		if err != nil {
-			logLevel = log.WarnLevel
-		}
+	var handler slog.Handler = consoleHandler
+
+	// If we have a log file writer, create a multi-handler
+	if logWriter != nil {
+		fileHandler := slog.NewTextHandler(logWriter, &slog.HandlerOptions{
+			Level: logLevel,
+		})
+		handler = log.NewMultiHandler([]slog.Handler{consoleHandler, fileHandler}...)
 	}
 
-	log.SetLevel(logLevel)
-	logFormatter := &config.LogFormatter{
-		TextFormatter: &log.TextFormatter{
-			ForceColors: true,
-		},
-		LogFileWriter: logWriter,
-	}
+	logger := slog.New(handler)
+	slog.SetDefault(logger)
 
-	log.SetFormatter(logFormatter)
-
-	golog.SetOutput(log.New().WriterLevel(log.DebugLevel))
+	// Redirect standard library log to slog
+	golog.SetOutput(&log.DebugLogWriter{})
 }
