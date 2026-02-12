@@ -1695,7 +1695,6 @@ const docTemplate = `{
             "required": [
                 "errorReason",
                 "osUser",
-                "snapshot",
                 "userId"
             ],
             "properties": {
