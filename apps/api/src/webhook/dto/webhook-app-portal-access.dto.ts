@@ -15,7 +15,7 @@ export class WebhookAppPortalAccessDto {
 
   @ApiProperty({
     description: 'The URL to the webhook app portal',
-    example: 'https://app.svix.com/login#key=...',
+    example: 'https://app.svix.com/app_1234567890',
   })
   url: string
 }
