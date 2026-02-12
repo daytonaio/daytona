@@ -2,12 +2,14 @@
 title: Customer Managed Compute
 ---
 
-Runners are machines that power Daytona's compute plane, providing the underlying infrastructure for running sandbox workloads. Each runner is responsible for:
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Customer Managed Compute is a feature that allows you to use your own runner machines to run sandbox workloads. Runners are machines that power Daytona's compute plane and provide the underlying infrastructure. Each runner is responsible for:
 
 - **Workload execution**: running sandbox workloads
 - **Resource management**: allocating and monitoring CPU, memory, and disk resources
-- **Health reporting**: continuously reporting metrics and health status to the Daytona control plane
-- **Network connectivity**: managing networking, proxy connections, and SSH access for sandboxes
+- **Health reporting**: providing metrics and health status to the Daytona control plane
+- **Network connectivity**: managing sandbox networking, proxy connections, and SSH access
 
 Runners in [shared](/docs/en/regions#shared-regions) and [dedicated](/docs/en/regions#dedicated-regions) regions are fully managed by Daytona — from provisioning and maintenance to monitoring and scaling. For custom regions, you bring your own runner machines and are responsible for their management and operation.
 
@@ -45,6 +47,45 @@ Additionally, custom regions have no limits applied for concurrent resource usag
 - The URL of the snapshot manager that handles storage and retrieval of snapshots in this region
 - Required if the runner machines in this region are deployed in a private network
 
+### Create a custom region
+
+Daytona provides an API to programmatically create a custom region.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-custom-region",
+    "proxyUrl": "https://proxy.example.com",
+    "sshGatewayUrl": "ssh://ssh-gateway.example.com",
+    "snapshotManagerUrl": "https://snapshot-manager.example.com"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+The response includes the region ID and credentials for any optional services you configured:
+
+```json
+{
+  "id": "region_12345",
+  "proxyApiKey": "proxy-api-key-xyz",
+  "sshGatewayApiKey": "ssh-gateway-api-key-abc",
+  "snapshotManagerUsername": "daytona",
+  "snapshotManagerPassword": "generated-password"
+}
+```
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**createRegion (API)**](/docs/en/tools/api#daytona/tag/organizations/POST/regions)
+
 ### Custom region credentials
 
 When you create a custom region, Daytona will provide credentials for any optional services you configure:
@@ -57,6 +98,143 @@ When you create a custom region, Daytona will provide credentials for any option
 If needed, these credentials can always be regenerated, but you will need to redeploy the corresponding services with the updated credentials.
 :::
 
+### List custom regions
+
+Daytona provides an API to list all available regions for your organization.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**listAvailableRegions (API)**](/docs/en/tools/api#daytona/tag/organizations/GET/regions)
+
+### Get a custom region
+
+Daytona provides an API to get the details of a specific region.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**getRegionById (API)**](/docs/en/tools/api#daytona/tag/organizations/GET/regions/{id})
+
+### Update a custom region
+
+Daytona provides an API to update the configuration of an existing custom region.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "proxyUrl": "https://new-proxy.example.com",
+    "sshGatewayUrl": "ssh://new-ssh-gateway.example.com",
+    "snapshotManagerUrl": "https://new-snapshot-manager.example.com"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**updateRegion (API)**](/docs/en/tools/api#daytona/tag/organizations/PATCH/regions/{id})
+
+### Delete a custom region
+
+Daytona provides an API to delete a custom region.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId} \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**deleteRegion (API)**](/docs/en/tools/api#daytona/tag/organizations/DELETE/regions/{id})
+
+#### Regenerate proxy API key
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId}/regenerate-proxy-api-key \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**regenerateProxyApiKey (API)**](/docs/en/tools/api#daytona/tag/organizations/POST/regions/{id}/regenerate-proxy-api-key)
+
+#### Regenerate SSH gateway API key
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId}/regenerate-ssh-gateway-api-key \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**regenerateSshGatewayApiKey (API)**](/docs/en/tools/api#daytona/tag/organizations/POST/regions/{id}/regenerate-ssh-gateway-api-key)
+
+#### Regenerate snapshot manager credentials
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/regions/{regionId}/regenerate-snapshot-manager-credentials \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations) reference:
+
+> [**regenerateSnapshotManagerCredentials (API)**](/docs/en/tools/api#daytona/tag/organizations/POST/regions/{id}/regenerate-snapshot-manager-credentials)
 
 ## Custom runners
 
@@ -76,13 +254,121 @@ Custom runners are created and managed by your organization, allowing you to use
 - Must be a custom region owned by your organization
 - All runners in a region share the region's proxy and SSH gateway configuration
 
-### Custom runner token
+### Create a custom runner
 
-When you create a custom runner, Daytona will provide you with a **token** that should be used by your runner to authenticate with Daytona.
+Daytona provides an API to create a custom runner.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/runners \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-custom-runner",
+    "regionId": "region_12345"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+The response includes the runner ID and an API key token:
+
+```json
+{
+  "id": "runner123",
+  "apiKey": "dtn_1234567890"
+}
+```
 
 :::note
 Save this token securely. You won't be able to see it again.
 :::
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) reference:
+
+> [**createRunner (API)**](/docs/en/tools/api#daytona/tag/runners/POST/runners)
+
+### List custom runners
+
+Daytona provides an API to list all runners in your organization.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/runners \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) reference:
+
+> [**listRunners (API)**](/docs/en/tools/api#daytona/tag/runners/GET/runners)
+
+### Get a custom runner
+
+Daytona provides an API to get the details of a specific runner.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/runners/{runnerId} \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) reference:
+
+> [**getRunnerById (API)**](/docs/en/tools/api#daytona/tag/runners/GET/runners/{id})
+
+### Update runner scheduling
+
+Daytona provides an API to update the scheduling status of a runner. This allows you to mark a runner as unschedulable, preventing new sandboxes from being assigned to it.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/runners/{runnerId}/scheduling \
+  --request PATCH \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) reference:
+
+> [**updateRunnerScheduling (API)**](/docs/en/tools/api#daytona/tag/runners/PATCH/runners/{id}/scheduling)
+
+### Delete a custom runner
+
+Daytona provides an API to delete a custom runner.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/runners/{runnerId} \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) reference:
+
+> [**deleteRunner (API)**](/docs/en/tools/api#daytona/tag/runners/DELETE/runners/{id})
 
 ### Installing the custom runner
 
