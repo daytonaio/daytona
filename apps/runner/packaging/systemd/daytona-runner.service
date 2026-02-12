@@ -25,7 +25,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/lib/daytona/runner /var/log/daytona /tmp
+ReadWritePaths=/var/lib/daytona/runner /var/log/daytona /etc/iptables /tmp
 
 # Resource limits
 LimitNOFILE=65536
