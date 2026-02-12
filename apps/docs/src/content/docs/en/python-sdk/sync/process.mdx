@@ -336,18 +336,22 @@ print(f"Command stderr: {logs.stderr}")
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
 async def get_session_command_logs_async(
-        session_id: str, command_id: str, on_stdout: Callable[[str], None],
-        on_stderr: Callable[[str], None]) -> None
+        session_id: str, command_id: str, on_stdout: OutputHandler[str],
+        on_stderr: OutputHandler[str]) -> None
 ```
 
 Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
+
+Accepts both sync and async callbacks. Async callbacks are awaited.
+Blocking synchronous operations inside callbacks may cause WebSocket
+disconnections — use async callbacks and async libraries to avoid this.
 
 **Arguments**:
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-- `on_stdout` _Callable[[str], None]_ - Callback function to handle stdout log chunks as they arrive.
-- `on_stderr` _Callable[[str], None]_ - Callback function to handle stderr log chunks as they arrive.
+- `on_stdout` _OutputHandler[str]_ - Callback function to handle stdout log chunks as they arrive.
+- `on_stderr` _OutputHandler[str]_ - Callback function to handle stderr log chunks as they arrive.
   
 
 **Example**:
@@ -764,4 +768,17 @@ Demultiplex combined stdout/stderr log data.
 **Returns**:
 
   Tuple of (stdout_bytes, stderr_bytes)
+
+##### OutputHandler
+
+```python
+OutputHandler = Union[
+    Callable[[T], None],
+    Callable[[T], Awaitable[None]],
+]
+```
+
+Callback type that accepts both sync and async handlers.
+
+Blocking synchronous operations inside handlers may cause WebSocket disconnections.
 

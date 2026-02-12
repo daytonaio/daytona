@@ -3,9 +3,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
-from typing import Any, TypeVar, Union
-
 from pydantic import BaseModel
 
 
@@ -45,11 +42,3 @@ class ExecutionResult(BaseModel):
     stdout: str = ""
     stderr: str = ""
     error: ExecutionError | None = None
-
-
-# Type aliases for callbacks
-T = TypeVar("T")
-OutputHandler = Union[
-    Callable[[T], Any],
-    Callable[[T], Awaitable[Any]],
-]

@@ -31,6 +31,7 @@ from ..common.process import (
     CodeRunParams,
     ExecuteResponse,
     ExecutionArtifacts,
+    OutputHandler,
     SessionCommandLogsResponse,
     SessionExecuteRequest,
     SessionExecuteResponse,
@@ -407,15 +408,19 @@ class Process:
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
-        self, session_id: str, command_id: str, on_stdout: Callable[[str], None], on_stderr: Callable[[str], None]
+        self, session_id: str, command_id: str, on_stdout: OutputHandler[str], on_stderr: OutputHandler[str]
     ) -> None:
         """Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
+
+        Accepts both sync and async callbacks. Async callbacks are awaited.
+        Blocking synchronous operations inside callbacks may cause WebSocket
+        disconnections — use async callbacks and async libraries to avoid this.
 
         Args:
             session_id (str): Unique identifier of the session.
             command_id (str): Unique identifier of the command.
-            on_stdout (Callable[[str], None]): Callback function to handle stdout log chunks as they arrive.
-            on_stderr (Callable[[str], None]): Callback function to handle stderr log chunks as they arrive.
+            on_stdout (OutputHandler[str]): Callback function to handle stdout log chunks as they arrive.
+            on_stderr (OutputHandler[str]): Callback function to handle stderr log chunks as they arrive.
 
         Example:
             ```python

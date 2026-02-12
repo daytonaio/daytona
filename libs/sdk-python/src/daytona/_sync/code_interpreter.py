@@ -12,8 +12,9 @@ from websockets.exceptions import ConnectionClosed, ConnectionClosedOK
 from websockets.sync.client import connect
 
 from .._utils.errors import intercept_errors
-from ..common.code_interpreter import ExecutionError, ExecutionResult, OutputHandler, OutputMessage
+from ..common.code_interpreter import ExecutionError, ExecutionResult, OutputMessage
 from ..common.errors import DaytonaError, DaytonaTimeoutError
+from ..common.process import OutputHandler
 
 WEBSOCKET_TIMEOUT_CODE = 4008
 
