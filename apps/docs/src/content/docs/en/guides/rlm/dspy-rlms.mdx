@@ -109,7 +109,34 @@ Each RLM call runs an iterative REPL loop. The LLM writes Python code, the code 
 3. **Execute** — The code runs inside a Daytona sandbox; any `llm_query()` calls are bridged back to the host LLM
 4. **Repeat** — Steps 1–3 repeat until the code calls `SUBMIT()` or the iteration limit is reached
 
-State persists across iterations — variables, imports, and function definitions all carry over. You can also pass host-side Python functions into the sandbox as custom tools via the `tools` dict, bridged through the same broker mechanism as `llm_query()`.
+#### How Bridging Works
+
+Step 3 above mentions that `llm_query()` calls are "bridged back to the host." Here's a diagram and an explanation of that process:
+
+```
+Host Process                                    Daytona Sandbox
+┌──────────────────────────────┐                ┌──────────────────────────────┐
+│      DaytonaInterpreter      │                │    Broker Server (Flask)     │
+│                              │                │                              │
+│  • polls the broker for      │   tool call,   │  • accepts requests from     │
+│    pending requests          │ e.g. llm_query │    the wrapper functions     │
+│                              │◄───────────────│                              │
+│  • calls the LLM API         │                │  • queues them for the host  │
+│    or runs tool functions    │    result      │  • returns results once the  │
+│  • posts results back        │───────────────►│    host replies              │
+│                              │                │                              │
+└──────────────────────────────┘                │      Generated Code          │
+               │                                │  • llm_query()               │
+               ▼                                │  • llm_query_batched()       │
+           LLM API                              │  • custom tool wrappers      │
+                                                └──────────────────────────────┘
+```
+
+When `DaytonaInterpreter` starts, it launches a small Flask broker server inside the sandbox and injects wrapper functions (`llm_query`, `llm_query_batched`, and any custom tools you provide). These wrappers POST requests to the broker and block until a result arrives. On the host side, a polling loop picks up pending requests, executes them (e.g. calls the LLM API or runs your tool function), and posts the results back to the broker. From the generated code's perspective, the wrappers look and behave like ordinary Python functions.
+
+Custom tools passed via the `tools` dict use the same mechanism, so that the host generates a matching wrapper inside the sandbox and bridges calls identically.
+
+State persists across iterations: variables, imports, and function definitions all carry over.
 
 #### Sub-LLM Calls
 
