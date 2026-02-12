@@ -23,6 +23,7 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
+import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
@@ -111,6 +112,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized } = useWebhooks()
+  const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
   const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
@@ -167,7 +169,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       arr.push({
         icon: <Mail size={16} strokeWidth={1.5} />,
         label: 'Webhooks',
-        path: RoutePath.WEBHOOKS,
+        path: '#webhooks' as any, // This will be handled by onClick
+        onClick: () => {
+          window.open(webhooksAccess.data?.url, '_blank', 'noopener,noreferrer')
+        },
       })
     }
 
@@ -191,7 +196,12 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     }
 
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized])
+  }, [
+    authenticatedUserOrganizationMember?.role,
+    selectedOrganization?.personal,
+    webhooksInitialized,
+    webhooksAccess.data?.url,
+  ])
 
   const experimentalItems = useMemo(() => {
     const arr: SidebarItem[] = []
