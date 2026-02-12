@@ -124,6 +124,7 @@ services:
 
   runner:
     image: daytonaio/daytona-runner
+    init: true
     environment:
       - ENVIRONMENT=development
       - API_PORT=3003
