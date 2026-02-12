@@ -48,11 +48,11 @@ const VNCDesktopWindowResponse: React.FC<{ className?: string }> = ({ className 
                 <div className="h-full flex items-center justify-center rounded-lg">
                   <AnimatePresence mode="wait">
                     {loadingVNCUrl ? (
-                      <motion.p className="flex items-center gap-2" key="loading" {...motionLoadingProps}>
+                      <motion.div className="flex items-center gap-2" key="loading" {...motionLoadingProps}>
                         <Spinner className="size-4 mr-2" /> Loading VNC...
-                      </motion.p>
+                      </motion.div>
                     ) : (
-                      <motion.p
+                      <motion.div
                         key="error"
                         className="flex flex-col items-center justify-center gap-2"
                         {...motionLoadingProps}
@@ -66,7 +66,7 @@ const VNCDesktopWindowResponse: React.FC<{ className?: string }> = ({ className 
                         ) : (
                           sandboxError && <span className="text-sm text-muted-foreground">{sandboxError}</span>
                         )}
-                      </motion.p>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
