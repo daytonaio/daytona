@@ -248,6 +248,43 @@ export class RunnerController {
     return RunnerDto.fromRunner(updatedRunner)
   }
 
+  @Patch(':id/draining')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Update runner draining status',
+    operationId: 'updateRunnerDraining',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerDto,
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Runner ID',
+    type: String,
+  })
+  @Audit({
+    action: AuditAction.UPDATE_DRAINING,
+    targetType: AuditTarget.RUNNER,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      body: (req: TypedRequest<{ draining: boolean }>) => ({
+        draining: req.body?.draining,
+      }),
+    },
+  })
+  @ApiHeader(CustomHeaders.ORGANIZATION_ID)
+  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  async updateDrainingStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('draining') draining: boolean,
+  ): Promise<RunnerDto> {
+    const updatedRunner = await this.runnerService.updateDrainingStatus(id, draining)
+    return RunnerDto.fromRunner(updatedRunner)
+  }
+
   @Delete(':id')
   @HttpCode(204)
   @ApiOperation({

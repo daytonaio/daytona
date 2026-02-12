@@ -135,6 +135,19 @@ type RunnersAPI interface {
 	RunnerHealthcheckExecute(r RunnersAPIRunnerHealthcheckRequest) (*http.Response, error)
 
 	/*
+		UpdateRunnerDraining Update runner draining status
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id Runner ID
+		@return RunnersAPIUpdateRunnerDrainingRequest
+	*/
+	UpdateRunnerDraining(ctx context.Context, id string) RunnersAPIUpdateRunnerDrainingRequest
+
+	// UpdateRunnerDrainingExecute executes the request
+	//  @return Runner
+	UpdateRunnerDrainingExecute(r RunnersAPIUpdateRunnerDrainingRequest) (*Runner, *http.Response, error)
+
+	/*
 		UpdateRunnerScheduling Update runner scheduling status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1098,6 +1111,118 @@ func (a *RunnersAPIService) RunnerHealthcheckExecute(r RunnersAPIRunnerHealthche
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type RunnersAPIUpdateRunnerDrainingRequest struct {
+	ctx                    context.Context
+	ApiService             RunnersAPI
+	id                     string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r RunnersAPIUpdateRunnerDrainingRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) RunnersAPIUpdateRunnerDrainingRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r RunnersAPIUpdateRunnerDrainingRequest) Execute() (*Runner, *http.Response, error) {
+	return r.ApiService.UpdateRunnerDrainingExecute(r)
+}
+
+/*
+UpdateRunnerDraining Update runner draining status
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Runner ID
+	@return RunnersAPIUpdateRunnerDrainingRequest
+*/
+func (a *RunnersAPIService) UpdateRunnerDraining(ctx context.Context, id string) RunnersAPIUpdateRunnerDrainingRequest {
+	return RunnersAPIUpdateRunnerDrainingRequest{
+		ApiService: a,
+		ctx:        ctx,
+		id:         id,
+	}
+}
+
+// Execute executes the request
+//
+//	@return Runner
+func (a *RunnersAPIService) UpdateRunnerDrainingExecute(r RunnersAPIUpdateRunnerDrainingRequest) (*Runner, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPatch
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *Runner
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.UpdateRunnerDraining")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runners/{id}/draining"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type RunnersAPIUpdateRunnerSchedulingRequest struct {

@@ -156,6 +156,11 @@ export class Runner {
   })
   unschedulable: boolean
 
+  @Column({
+    default: false,
+  })
+  draining: boolean
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

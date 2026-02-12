@@ -68,11 +68,13 @@ export interface RunnerAdapter {
     entrypoint?: string[],
     metadata?: { [key: string]: string },
     otelEndpoint?: string,
+    skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined>
   startSandbox(
     sandboxId: string,
     authToken: string,
     metadata?: { [key: string]: string },
+    skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
