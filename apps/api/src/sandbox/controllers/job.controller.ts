@@ -181,7 +181,7 @@ export class JobController {
     @Param('jobId') jobId: string,
     @Body() updateJobStatusDto: UpdateJobStatusDto,
   ): Promise<JobDto> {
-    this.logger.log(`Runner ${runnerContext.runnerId} updating job ${jobId} status to ${updateJobStatusDto.status}`)
+    this.logger.debug(`Runner ${runnerContext.runnerId} updating job ${jobId} status to ${updateJobStatusDto.status}`)
 
     const job = await this.jobService.updateJobStatus(
       jobId,

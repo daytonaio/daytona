@@ -256,7 +256,7 @@ export class JobStateHandlerService {
       }
 
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.log(
+        this.logger.debug(
           `PULL_SNAPSHOT job ${job.id} completed successfully, marking SnapshotRunner ${snapshotRunner.id} as READY`,
         )
         snapshotRunner.state = SnapshotRunnerState.READY
@@ -267,7 +267,7 @@ export class JobStateHandlerService {
           where: { initialRunnerId: runnerId, ref: snapshotRef },
         })
         if (snapshot && (snapshot.state === SnapshotState.PULLING || snapshot.state === SnapshotState.BUILDING)) {
-          this.logger.log(`Marking snapshot ${snapshot.id} as ACTIVE after initial pull completed`)
+          this.logger.debug(`Marking snapshot ${snapshot.id} as ACTIVE after initial pull completed`)
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
           await this.snapshotRepository.save(snapshot)
@@ -315,13 +315,13 @@ export class JobStateHandlerService {
       })
 
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.log(`BUILD_SNAPSHOT job ${job.id} completed successfully for snapshot ref ${snapshotRef}`)
+        this.logger.debug(`BUILD_SNAPSHOT job ${job.id} completed successfully for snapshot ref ${snapshotRef}`)
 
         if (snapshot?.state === SnapshotState.BUILDING) {
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
           await this.snapshotRepository.save(snapshot)
-          this.logger.log(`Marked snapshot ${snapshot.id} as ACTIVE after build completed`)
+          this.logger.debug(`Marked snapshot ${snapshot.id} as ACTIVE after build completed`)
         }
 
         if (snapshotRunner) {
@@ -356,12 +356,12 @@ export class JobStateHandlerService {
 
     try {
       if (job.status === JobStatus.COMPLETED) {
-        this.logger.log(
+        this.logger.debug(
           `REMOVE_SNAPSHOT job ${job.id} completed successfully for snapshot ${snapshotRef} on runner ${runnerId}`,
         )
         const affected = await this.snapshotRunnerRepository.delete({ snapshotRef, runnerId })
         if (affected.affected && affected.affected > 0) {
-          this.logger.log(
+          this.logger.debug(
             `Removed ${affected.affected} snapshot runners for snapshot ${snapshotRef} on runner ${runnerId}`,
           )
         }
