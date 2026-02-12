@@ -66,6 +66,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { DeprecatedListSandboxesQueryDto } from '../dto/deprecated-list-sandboxes-query.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
@@ -115,49 +116,31 @@ export class SandboxController {
 
   @Get()
   @ApiOperation({
-    summary: 'List all sandboxes',
+    summary: 'List sandboxes',
+    description: 'Basic filtering with cursor-based pagination. Newest first. Strongly consistent.',
     operationId: 'listSandboxes',
   })
   @ApiResponse({
     status: 200,
-    description: 'List of all sandboxes',
-    type: [SandboxDto],
-  })
-  @ApiQuery({
-    name: 'verbose',
-    required: false,
-    type: Boolean,
-    description: 'Include verbose output',
-  })
-  @ApiQuery({
-    name: 'labels',
-    type: String,
-    required: false,
-    example: '{"label1": "value1", "label2": "value2"}',
-    description: 'JSON encoded labels to filter by',
-  })
-  @ApiQuery({
-    name: 'includeErroredDeleted',
-    required: false,
-    type: Boolean,
-    description: 'Include errored and deleted sandboxes',
+    type: PaginatedSandboxesDto,
   })
   async listSandboxes(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query('verbose') verbose?: boolean,
-    @Query('labels') labelsQuery?: string,
-    @Query('includeErroredDeleted') includeErroredDeleted?: boolean,
-  ): Promise<SandboxDto[]> {
-    const labels = labelsQuery ? JSON.parse(labelsQuery) : undefined
-    const sandboxes = await this.sandboxService.findAllDeprecated(
-      authContext.organizationId,
-      labels,
-      includeErroredDeleted,
-    )
+    @Query() queryParams: ListSandboxesQueryDto,
+  ): Promise<PaginatedSandboxesDto> {
+    const { cursor, limit, includeErroredDeleted: includeErroredDestroyed, states } = queryParams
 
-    return sandboxes.map((sandbox) => {
-      return SandboxDto.fromSandbox(sandbox)
-    })
+    return this.sandboxService.list(
+      {
+        organizationId: authContext.organizationId,
+        includeErroredDestroyed,
+        states,
+      },
+      {
+        cursor,
+        limit,
+      },
+    )
   }
 
   @Get('paginated')

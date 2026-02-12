@@ -81,6 +81,7 @@ import {
   sandboxLookupCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
+import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -782,7 +783,7 @@ export class SandboxService {
     return sandbox
   }
 
-  async findAllDeprecated(
+  async list_deprecated_v1(
     organizationId: string,
     labels?: { [key: string]: string },
     includeErroredDestroyed?: boolean,
@@ -914,6 +915,97 @@ export class SandboxService {
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
+    }
+  }
+
+  /**
+   * List sandboxes with pagination (newest first)
+   * @param filters - The filters to apply to the list
+   * @param pagination - The pagination to apply to the list
+   * @returns The paginated list of sandboxes
+   * @throws BadRequestError if the cursor is invalid
+   */
+  async list(
+    filters: {
+      organizationId: string
+      includeErroredDestroyed?: boolean
+      states?: SandboxState[]
+    },
+    pagination: {
+      cursor?: string
+      limit: number
+    },
+  ): Promise<PaginatedSandboxesDto> {
+    const { organizationId, includeErroredDestroyed, states } = filters || {}
+    const { cursor, limit } = pagination || {}
+
+    let decodedCursor: Date | undefined
+    if (cursor) {
+      try {
+        const decodedString = Buffer.from(cursor, 'base64').toString('utf-8')
+        decodedCursor = new Date(decodedString)
+        if (isNaN(decodedCursor.getTime())) {
+          throw new BadRequestError('Invalid cursor')
+        }
+      } catch (error) {
+        throw new BadRequestError('Invalid cursor')
+      }
+    }
+
+    const baseFindOptions: FindOptionsWhere<Sandbox> = {
+      organizationId,
+      ...(decodedCursor
+        ? {
+            // newest first
+            createdAt: LessThan(decodedCursor),
+          }
+        : {}),
+    }
+
+    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+    const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
+
+    const nonErrorStatesToInclude = statesToInclude.filter((state) => !errorStates.includes(state))
+    const errorStatesToInclude = statesToInclude.filter((state) => errorStates.includes(state))
+
+    const where: FindOptionsWhere<Sandbox>[] = []
+
+    if (nonErrorStatesToInclude.length > 0) {
+      where.push({
+        ...baseFindOptions,
+        state: In(nonErrorStatesToInclude),
+      })
+    }
+
+    if (errorStatesToInclude.length > 0) {
+      where.push({
+        ...baseFindOptions,
+        state: In(errorStatesToInclude),
+        ...(includeErroredDestroyed ? {} : { desiredState: Not(SandboxDesiredState.DESTROYED) }),
+      })
+    }
+
+    const items = await this.sandboxRepository.find({
+      where,
+      order: { createdAt: 'DESC' },
+      // fetch one extra to determine if there are more items
+      take: limit + 1,
+      loadEagerRelations: false,
+    })
+
+    const hasMore = items.length > limit
+    const returnItems = hasMore ? items.slice(0, limit) : items
+
+    const nextCursor =
+      hasMore && returnItems.length > 0
+        ? Buffer.from(returnItems[returnItems.length - 1].createdAt.toISOString()).toString('base64')
+        : null
+
+    return {
+      items: returnItems.map((sandbox) => {
+        return SandboxDto.fromSandbox(sandbox)
+      }),
+      nextCursor,
     }
   }
 
