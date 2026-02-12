@@ -124,8 +124,8 @@ This plugin is part of the Daytona monorepo.
 First, clone the Daytona monorepo:
 
 ```bash
-git clone -b feat/opencode-plugin https://github.com/jamesmurdza/daytona.git
-git checkout feat/opencode-plugin
+git clone https://github.com/daytonaio/daytona
+cd daytona
 ```
 
 Install dependencies:
