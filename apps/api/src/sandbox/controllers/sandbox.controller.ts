@@ -79,6 +79,9 @@ import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
+import { CheckpointService } from '../services/checkpoint.service'
+import { CheckpointDto } from '../dto/checkpoint.dto'
+import { CreateCheckpointDto } from '../dto/create-checkpoint.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -93,6 +96,7 @@ export class SandboxController {
   constructor(
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
+    private readonly checkpointService: CheckpointService,
     @InjectRedis() private readonly redis: Redis,
   ) {
     this.redisSubscriber = this.redis.duplicate()
@@ -671,6 +675,118 @@ export class SandboxController {
   ): Promise<SandboxDto> {
     const sandbox = await this.sandboxService.createBackup(sandboxIdOrName, authContext.organizationId)
     return SandboxDto.fromSandbox(sandbox)
+  }
+
+  // ==================== Checkpoint Endpoints ====================
+
+  @Post(':sandboxIdOrName/checkpoint')
+  @ApiOperation({
+    summary: 'Create a checkpoint from a sandbox',
+    operationId: 'createCheckpoint',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Checkpoint creation has been initiated',
+    type: SandboxDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async createCheckpoint(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: CreateCheckpointDto,
+  ): Promise<SandboxDto> {
+    return this.sandboxService.createCheckpoint(sandboxIdOrName, authContext.organizationId, dto.name)
+  }
+
+  @Get(':sandboxIdOrName/checkpoints')
+  @ApiOperation({
+    summary: 'List checkpoints for a sandbox',
+    operationId: 'listCheckpoints',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of checkpoints',
+    type: [CheckpointDto],
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async listCheckpoints(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+  ): Promise<CheckpointDto[]> {
+    const sandbox = await this.sandboxService.findOneByIdOrName(sandboxIdOrName, authContext.organizationId)
+    const checkpoints = await this.checkpointService.listBySandbox(sandbox.id, authContext.organizationId)
+    return checkpoints.map((c) => CheckpointDto.fromCheckpoint(c))
+  }
+
+  @Get(':sandboxIdOrName/checkpoint/:checkpointId')
+  @ApiOperation({
+    summary: 'Get a specific checkpoint',
+    operationId: 'getCheckpoint',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'checkpointId',
+    description: 'ID of the checkpoint',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The checkpoint',
+    type: CheckpointDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async getCheckpoint(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('checkpointId') checkpointId: string,
+  ): Promise<CheckpointDto> {
+    const checkpoint = await this.checkpointService.getCheckpoint(checkpointId, authContext.organizationId)
+    return CheckpointDto.fromCheckpoint(checkpoint)
+  }
+
+  @Delete(':sandboxIdOrName/checkpoint/:checkpointId')
+  @ApiOperation({
+    summary: 'Delete a checkpoint',
+    operationId: 'deleteCheckpoint',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'checkpointId',
+    description: 'ID of the checkpoint',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Checkpoint has been deleted',
+  })
+  @HttpCode(204)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async deleteCheckpoint(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('checkpointId') checkpointId: string,
+  ): Promise<void> {
+    await this.checkpointService.deleteCheckpoint(checkpointId, authContext.organizationId)
   }
 
   @Post(':sandboxIdOrName/public/:isPublic')

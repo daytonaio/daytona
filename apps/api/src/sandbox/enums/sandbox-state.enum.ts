@@ -21,4 +21,5 @@ export enum SandboxState {
   ARCHIVED = 'archived',
   ARCHIVING = 'archiving',
   RESIZING = 'resizing',
+  SNAPSHOTTING = 'snapshotting',
 }

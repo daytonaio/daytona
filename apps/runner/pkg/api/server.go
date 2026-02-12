@@ -141,6 +141,7 @@ func (a *ApiServer) Start() error {
 		snapshotController.POST("/remove", controllers.RemoveSnapshot)
 		snapshotController.GET("/logs", controllers.GetBuildLogs)
 		snapshotController.POST("/inspect", controllers.InspectSnapshotInRegistry)
+		snapshotController.POST("/create", controllers.CreateSnapshot)
 	}
 
 	a.httpServer = &http.Server{

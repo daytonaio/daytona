@@ -107,6 +107,12 @@ export class Snapshot {
   @Column({ nullable: true })
   initialRunnerId?: string
 
+  @Column({ type: 'uuid', nullable: true })
+  originSandboxId?: string
+
+  @Column({ type: 'uuid', nullable: true })
+  originCheckpointId?: string
+
   @OneToMany(() => SnapshotRegion, (snapshotRegion) => snapshotRegion.snapshot, {
     cascade: true,
     onDelete: 'CASCADE',

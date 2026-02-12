@@ -81,6 +81,7 @@ import {
   sandboxLookupCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -114,6 +115,7 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   /**
@@ -780,6 +782,70 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
     return sandbox
+  }
+
+  /**
+   * Creates a checkpoint from a sandbox.
+   * Sets the sandbox into SNAPSHOTTING state and triggers the runner to commit + push
+   * the container image to the internal registry.
+   */
+  async createCheckpoint(
+    sandboxIdOrName: string,
+    organizationId: string,
+    checkpointName?: string,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
+      throw new SandboxError('Sandbox must be started or stopped to create a checkpoint')
+    }
+
+    if (!sandbox.runnerId) {
+      throw new SandboxError('Sandbox has no runner assigned')
+    }
+
+    // Generate checkpoint name if not provided
+    const name = checkpointName || `checkpoint-${Date.now()}`
+
+    const runner = await this.runnerRepository.findOne({
+      where: { id: sandbox.runnerId },
+    })
+
+    if (!runner) {
+      throw new SandboxError('Runner not found')
+    }
+
+    const previousState = sandbox.state
+    const live = previousState === SandboxState.STARTED
+
+    sandbox.state = SandboxState.SNAPSHOTTING
+    sandbox.pending = true
+
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: previousState })
+
+    try {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+      // Get internal docker registry for the runner's region
+      const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(runner.region)
+      if (!internalRegistry) {
+        throw new SandboxError('No internal registry available')
+      }
+
+      await runnerAdapter.createSnapshotFromSandbox(sandbox.id, name, organizationId, live, internalRegistry)
+
+      return SandboxDto.fromSandbox(sandbox)
+    } catch (error) {
+      // Rollback state on failure
+      sandbox.state = previousState
+      sandbox.pending = false
+      await this.sandboxRepository.save(sandbox)
+      throw error
+    }
   }
 
   async findAllDeprecated(

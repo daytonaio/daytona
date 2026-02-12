@@ -291,6 +291,7 @@ export class Sandbox {
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.RESIZING,
+            SandboxState.SNAPSHOTTING,
           ].includes(this.state)
         ) {
           break
@@ -305,6 +306,7 @@ export class Sandbox {
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.RESIZING,
+            SandboxState.SNAPSHOTTING,
           ].includes(this.state)
         ) {
           break

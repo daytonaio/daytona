@@ -527,4 +527,39 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
+
+  async createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    live?: boolean,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    const payload: any = {
+      sandboxId,
+      name: snapshotName,
+      organizationId,
+      live: live ?? false,
+    }
+
+    if (registry) {
+      payload.registry = {
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      }
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.CREATE_SANDBOX_SNAPSHOT,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created CREATE_SANDBOX_SNAPSHOT job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
 }

@@ -50,6 +50,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
   private toolboxApiClient: ToolboxApi
+  private axiosInstance: ReturnType<typeof axios.create>
 
   private convertSandboxState(state: EnumsSandboxState): SandboxState {
     switch (state) {
@@ -148,6 +149,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       axiosDebug.addLogger(axiosInstance)
     }
 
+    this.axiosInstance = axiosInstance
     this.sandboxApiClient = new SandboxApi(new Configuration(), '', axiosInstance)
     this.snapshotApiClient = new SnapshotsApi(new Configuration(), '', axiosInstance)
     this.runnerApiClient = new DefaultApi(new Configuration(), '', axiosInstance)
@@ -426,5 +428,32 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
     await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
+  }
+
+  async createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    live?: boolean,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    const request = {
+      sandboxId,
+      name: snapshotName,
+      organizationId,
+      live: live ?? false,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    // Call the runner's /snapshots/create endpoint directly
+    // (not yet part of the auto-generated API client)
+    await this.axiosInstance.post('/snapshots/create', request)
   }
 }

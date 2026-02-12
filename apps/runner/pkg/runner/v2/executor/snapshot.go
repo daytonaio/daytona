@@ -94,3 +94,18 @@ func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient
 		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
 	}, nil
 }
+
+func (e *Executor) createSandboxSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
+	var request dto.CreateSnapshotDTO
+	err := e.parsePayload(job.Payload, &request)
+	if err != nil {
+		return nil, err
+	}
+
+	// Override sandboxId from job resource if not set in payload
+	if request.SandboxId == "" {
+		request.SandboxId = job.ResourceId
+	}
+
+	return e.docker.CreateSnapshot(ctx, request)
+}

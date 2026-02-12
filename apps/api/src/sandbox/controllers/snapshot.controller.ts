@@ -62,6 +62,9 @@ import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UrlDto } from '../../common/dto/url.dto'
+import { CheckpointService } from '../services/checkpoint.service'
+import { SandboxService } from '../services/sandbox.service'
+import { CreateSnapshotFromSandboxDto } from '../dto/create-snapshot-from-sandbox.dto'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -75,6 +78,8 @@ export class SnapshotController {
   constructor(
     private readonly snapshotService: SnapshotService,
     private readonly runnerService: RunnerService,
+    private readonly checkpointService: CheckpointService,
+    private readonly sandboxService: SandboxService,
   ) {}
 
   @Post()
@@ -454,5 +459,45 @@ export class SnapshotController {
   })
   async deactivateSnapshot(@Param('id') snapshotId: string) {
     await this.snapshotService.deactivateSnapshot(snapshotId)
+  }
+
+  @Post('from-checkpoint/:checkpointId')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Promote a checkpoint to a snapshot',
+    operationId: 'promoteCheckpointToSnapshot',
+  })
+  @ApiParam({
+    name: 'checkpointId',
+    description: 'ID of the checkpoint to promote',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Snapshot created from checkpoint',
+    type: SnapshotDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromResult: (result: SnapshotDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateSnapshotFromSandboxDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
+  async promoteCheckpointToSnapshot(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('checkpointId') checkpointId: string,
+    @Body() dto: CreateSnapshotFromSandboxDto,
+  ): Promise<SnapshotDto> {
+    const checkpoint = await this.checkpointService.getCheckpoint(checkpointId, authContext.organizationId)
+    const sandbox = await this.sandboxService.findOne(checkpoint.sandboxId)
+
+    const snapshot = await this.snapshotService.createFromCheckpoint(checkpoint, sandbox, dto.name)
+
+    return SnapshotDto.fromSnapshot(snapshot)
   }
 }

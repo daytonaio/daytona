@@ -19,6 +19,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { CheckpointService } from './checkpoint.service'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -36,6 +37,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly checkpointService: CheckpointService,
   ) {}
 
   /**
@@ -81,6 +83,9 @@ export class JobStateHandlerService {
         break
       case JobType.RECOVER_SANDBOX:
         await this.handleRecoverSandboxJobCompletion(job)
+        break
+      case JobType.CREATE_SANDBOX_SNAPSHOT:
+        await this.handleCreateSandboxSnapshotJobCompletion(job)
         break
       default:
         break
@@ -516,6 +521,75 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleCreateSandboxSnapshotJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_SANDBOX_SNAPSHOT job ${job.id}`)
+        return
+      }
+
+      // Parse the job payload to get checkpoint name and organizationId
+      let checkpointName = `checkpoint-${Date.now()}`
+      let organizationId = sandbox.organizationId
+      if (job.payload) {
+        try {
+          const payload = typeof job.payload === 'string' ? JSON.parse(job.payload) : job.payload
+          if (payload.name) {
+            checkpointName = payload.name
+          }
+          if (payload.organizationId) {
+            organizationId = payload.organizationId
+          }
+        } catch {
+          // Use defaults
+        }
+      }
+
+      // Determine previous state from desiredState
+      const previousState =
+        sandbox.desiredState === SandboxDesiredState.STARTED ? SandboxState.STARTED : SandboxState.STOPPED
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(`CREATE_SANDBOX_SNAPSHOT job ${job.id} completed successfully for sandbox ${sandboxId}`)
+
+        // Parse result metadata from runner
+        const metadata = job.getResultMetadata()
+        const snapshotPath = metadata?.snapshotPath || metadata?.SnapshotPath
+        const sizeBytes = metadata?.sizeBytes || metadata?.SizeBytes
+        const hash = metadata?.hash || metadata?.Hash
+
+        // Create checkpoint entity
+        await this.checkpointService.createFromJobResult(
+          sandboxId,
+          organizationId,
+          sandbox.runnerId,
+          checkpointName,
+          snapshotPath,
+          sizeBytes ? Number(sizeBytes) : undefined,
+          hash,
+        )
+
+        // Restore sandbox state
+        sandbox.state = previousState
+        sandbox.pending = false
+        await this.sandboxRepository.save(sandbox)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`CREATE_SANDBOX_SNAPSHOT job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+
+        // Restore sandbox state on failure
+        sandbox.state = previousState
+        sandbox.pending = false
+        await this.sandboxRepository.save(sandbox)
+      }
+    } catch (error) {
+      this.logger.error(`Error handling CREATE_SANDBOX_SNAPSHOT job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

@@ -108,6 +108,14 @@ export interface RunnerAdapter {
   recoverSandbox(sandbox: Sandbox): Promise<void>
 
   resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
+
+  createSnapshotFromSandbox(
+    sandboxId: string,
+    snapshotName: string,
+    organizationId: string,
+    live?: boolean,
+    registry?: DockerRegistry,
+  ): Promise<void>
 }
 
 @Injectable()
