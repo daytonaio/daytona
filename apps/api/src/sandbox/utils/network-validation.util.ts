@@ -32,7 +32,7 @@ export function validateNetworkAllowList(networkAllowList: string): void {
     }
   }
 
-  if (networks.length > 5) {
-    throw new Error(`Network allow list cannot contain more than 5 networks`)
+  if (networks.length > 10) {
+    throw new Error(`Network allow list cannot contain more than 10 networks`)
   }
 }
