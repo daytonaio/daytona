@@ -4,6 +4,7 @@
  */
 
 export const SANDBOX_LOOKUP_CACHE_TTL_MS = 10_000
+export const SANDBOX_BUILD_INFO_CACHE_TTL_MS = 60_000
 
 type SandboxLookupCacheKeyArgs = {
   organizationId?: string | null
