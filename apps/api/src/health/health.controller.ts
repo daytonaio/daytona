@@ -7,9 +7,11 @@ import { Controller, Get, Logger, ServiceUnavailableException, UseGuards } from 
 import { HealthCheckService, HealthCheck, TypeOrmHealthIndicator } from '@nestjs/terminus'
 import { RedisHealthIndicator } from './redis.health'
 import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.guard'
+import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
+import { CombinedAuthGuard } from '../auth/combined-auth.guard'
+import { HealthCheckGuard } from '../auth/health-check.guard'
 
 @Controller('health')
-@UseGuards(AnonymousRateLimitGuard)
 export class HealthController {
   private readonly logger = new Logger(HealthController.name)
 
@@ -20,6 +22,13 @@ export class HealthController {
   ) {}
 
   @Get()
+  @UseGuards(AnonymousRateLimitGuard)
+  live() {
+    return { status: 'ok' }
+  }
+
+  @Get('ready')
+  @UseGuards(CombinedAuthGuard, HealthCheckGuard, AuthenticatedRateLimitGuard)
   @HealthCheck()
   async check() {
     try {

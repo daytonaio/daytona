@@ -13,6 +13,7 @@ import { SshGatewayContext } from './ssh-gateway-context.interface'
 import { RegionProxyContext } from './region-proxy.interface'
 import { RegionSSHGatewayContext } from './region-ssh-gateway.interface'
 import { OtelCollectorContext } from './otel-collector-context.interface'
+import { HealthCheckContext } from './health-check-context.interface'
 
 export interface BaseAuthContext {
   role: ApiRole
@@ -26,6 +27,7 @@ export type ApiRole =
   | 'region-proxy'
   | 'region-ssh-gateway'
   | 'otel-collector'
+  | 'health-check'
 
 export interface AuthContext extends BaseAuthContext {
   userId: string
@@ -58,3 +60,4 @@ export type AuthContextType =
   | RegionProxyContext
   | RegionSSHGatewayContext
   | OtelCollectorContext
+  | HealthCheckContext

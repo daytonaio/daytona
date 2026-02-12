@@ -8534,6 +8534,15 @@ paths:
         - audit
   /health:
     get:
+      operationId: HealthController_live
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Health
+  /health/ready:
+    get:
       operationId: HealthController_check
       parameters: []
       responses:

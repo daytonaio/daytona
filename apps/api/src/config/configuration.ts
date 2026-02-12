@@ -146,6 +146,9 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
+  healthCheck: {
+    apiKey: process.env.HEALTH_CHECK_API_KEY,
+  },
   sshGateway: {
     apiKey: process.env.SSH_GATEWAY_API_KEY,
     command: process.env.SSH_GATEWAY_COMMAND,

@@ -92,6 +92,7 @@ services:
       - SKIP_USER_EMAIL_VERIFICATION=true
       - RUN_MIGRATIONS=true
       - OTEL_COLLECTOR_API_KEY=otel_collector_api_key
+      - HEALTH_CHECK_API_KEY=supersecretkey
     networks:
       - daytona-network
     restart: always
