@@ -550,8 +550,8 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/recursive-language-models', locale),
-          label: t('sidebarconfig.recursiveLms'),
+          href: localizePath('/docs/guides/rlm', locale),
+          label: t('sidebarconfig.rlm'),
           disablePagination: true,
           attrs: {
             icon: 'recursive-lm.svg',
@@ -559,12 +559,20 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/dspy-rlms', locale),
-          label: t('sidebarconfig.dspyRlms'),
+          href: localizePath(
+            '/docs/guides/rlm/recursive-language-models',
+            locale
+          ),
+          label: t('sidebarconfig.rlm'),
           disablePagination: true,
-          attrs: {
-            icon: 'dspy.svg',
-          },
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/rlm/dspy-rlms', locale),
+          label: t('sidebarconfig.rlm'),
+          disablePagination: true,
+          hideInSidebar: true,
         },
       ],
     },
