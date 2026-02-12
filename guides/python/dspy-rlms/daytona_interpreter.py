@@ -250,6 +250,8 @@ class DaytonaInterpreter:
         sandbox_params: dict[str, Any] | None = None,
         max_concurrent_tool_calls: int = 32,
         tool_claim_lease_seconds: float = 60.0,
+        max_retries: int = 3,
+        retry_delay: float = 2.0,
     ) -> None:
         """
         Args:
@@ -258,6 +260,8 @@ class DaytonaInterpreter:
             sandbox_params: Optional parameters to pass to Daytona sandbox creation.
             max_concurrent_tool_calls: Maximum host-side parallel tool workers.
             tool_claim_lease_seconds: Claim lease duration used by broker recovery.
+            max_retries: Max attempts for transient errors (e.g. WebSocket drops).
+            retry_delay: Seconds to wait between retries.
         """
         self.tools = dict(tools) if tools else {}
         self.output_fields = output_fields
@@ -266,8 +270,12 @@ class DaytonaInterpreter:
             raise ValueError("max_concurrent_tool_calls must be >= 1")
         if tool_claim_lease_seconds < 1:
             raise ValueError("tool_claim_lease_seconds must be >= 1")
+        if max_retries < 1:
+            raise ValueError("max_retries must be >= 1")
         self.max_concurrent_tool_calls = max_concurrent_tool_calls
         self.tool_claim_lease_seconds = float(tool_claim_lease_seconds)
+        self._max_retries = max_retries
+        self._retry_delay = float(retry_delay)
 
         self._daytona = None
         self._sandbox = None
@@ -706,9 +714,44 @@ print("Broker server code written")
                 self._inject_tool_wrappers()
 
         # If we have tools, run with polling loop; otherwise run directly
-        if self.tools and self._broker_url:
-            return self._execute_with_tools(code)
-        return self._execute_direct(code)
+        last_error: Exception | None = None
+        for attempt in range(1, self._max_retries + 1):
+            try:
+                if self.tools and self._broker_url:
+                    return self._execute_with_tools(code)
+                return self._execute_direct(code)
+            except (CodeInterpreterError, SyntaxError):
+                raise
+            except Exception as e:
+                if attempt < self._max_retries and self._is_transient_error(e):
+                    logger.warning(
+                        "Transient error on attempt %d/%d, retrying in %.1fs: %s",
+                        attempt,
+                        self._max_retries,
+                        self._retry_delay,
+                        e,
+                    )
+                    last_error = e
+                    time.sleep(self._retry_delay)
+                    continue
+                raise
+
+        raise last_error  # type: ignore[misc]  # unreachable but keeps mypy happy
+
+    @staticmethod
+    def _is_transient_error(error: Exception) -> bool:
+        """Return True if the error looks like a transient connection issue."""
+        msg = str(error).lower()
+        return any(
+            phrase in msg
+            for phrase in [
+                "keepalive ping timeout",
+                "ping timeout",
+                "connection reset",
+                "broken pipe",
+                "close code 1011",
+            ]
+        )
 
     def _execute_direct(self, code: str) -> Any:
         """Execute code directly without tool support."""
