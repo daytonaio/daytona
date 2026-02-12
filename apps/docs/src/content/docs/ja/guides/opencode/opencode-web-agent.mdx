@@ -1,0 +1,179 @@
+---
+title: OpenCode Web と Daytona でコーディングエージェントを構築する
+description: オープンソースのコーディングエージェントである OpenCode の Web インターフェースを Daytona のサンドボックス内で実行する手順を説明するガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import opencodeResult from '../../../../../assets/docs/images/opencode-web-agent.gif'
+
+このガイドでは、Daytona のサンドボックス環境内で、OpenCode の使いやすい [Web インターフェース](https://opencode.ai/docs/web/) を利用して [OpenCode](https://opencode.ai/) のコーディングエージェントを実行する方法を説明します。
+
+このエージェントは、Web アプリケーションの開発、あらゆる言語でのコーディング、依存関係のインストールやスクリプトの実行が可能です。75 を超えるさまざまな LLM プロバイダーをサポートしており、稼働中のアプリケーション向けにプレビューリンク付きの開発サーバーを起動できます。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+メインスクリプトを起動すると、Daytona サンドボックスが作成され、その内部に OpenCode がインストールされます。OpenCode には、Daytona 対応のカスタムエージェントが設定されています。
+
+スクリプトは Web インターフェースにアクセスするためのプレビューリンクを提供し、そこでエージェントセッションの作成、設定、および対話を行うことができます。
+
+```
+$ npm run start
+Creating sandbox...
+Installing OpenCode...
+Starting OpenCode web server...
+Press Ctrl+C to stop.
+
+
+             ▄
+█▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+█░░█ █░░█ █▀▀▀ █░░█ █░░░ █░░█ █░░█ █▀▀▀
+▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+  Web interface:      https://3000-1e0f775c-c01b-40e7-8c64-062fd3dadd75.proxy.daytona.works/
+```
+
+エージェントは Web アプリケーションをホストし、[Daytona Preview Links](/docs/ja/preview-and-authentication/) 機能を使用してプレビューリンクを提供できます。タスクに Web アプリケーションの実行またはプレビューが含まれる場合、エージェントはその必要性を自動的に認識し、アプリをホストしたうえで、実行中の結果を確認するためのプレビューリンクを生成します。
+
+<Image src={opencodeResult} alt="OpenCode コーディングエージェントによって生成された Web アプリのデモ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+作業が完了するまで、エージェントとの対話を継続できます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytona の[リポジトリ](https://github.com/daytonaio/daytona.git)をクローンし、example ディレクトリへ移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/opencode
+```
+
+#### 環境設定 \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から API キーを取得します。
+
+`.env.example` を `.env` にコピーし、取得したキーを追加します。
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+```
+
+#### ローカル環境での利用 \{#local-usage\}
+
+:::note[Node.js バージョン]
+このサンプルを実行するには Node.js 18 以降が必要です。先に進む前に、お使いの環境がこの要件を満たしていることを確認してください。
+:::
+
+依存関係をインストールします:
+
+```bash
+npm install
+```
+
+サンプルを実行します:
+
+```bash
+npm run start
+```
+
+OpenCode の Web インターフェースが起動し、ブラウザからのアクセスを待ち受けます。
+
+### モデルと API プロバイダー \{#models-and-api-providers\}
+
+OpenCode は [75 を超える LLM プロバイダー](https://opencode.ai/docs/providers/) に対応しており、デフォルトでは無料のプロバイダーが選択されています。Web インターフェースのプロンプト入力欄の下にあるメニューを使って、いつでもモデルやプロバイダーを変更できます。選択したプロバイダーに API キーが必要な場合は、その入力を求められます。
+
+#### API キーの永続化 \{#persisting-api-keys\}
+
+スクリプトの実行間で API キーを保持するには、Daytona のサンドボックスを作成する際に、それらを環境変数として設定できます。
+
+たとえば、Anthropic の API キーを使用する場合は、`src/index.ts` の `daytona.create()` 呼び出しを修正して、使用したい API キーを指定します。
+
+```typescript
+sandbox = await daytona.create({
+  envVars: {
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  },
+})
+```
+
+### 3. スクリプトを理解する \{#3-understanding-the-script\}
+
+この例では、Daytona のサンドボックス内で OpenCode をインストール、設定、および実行する Node.js スクリプトを扱います。
+
+#### 初期化 \{#initialization\}
+
+初期化時にメインスクリプトは次の処理を実行します。
+
+1. 新しい [Daytona サンドボックス](/docs/ja/sandboxes) を作成します。
+2. [プロセス実行](/docs/ja/process-code-execution#process-execution) を用いて npm を実行し、サンドボックス内に OpenCode をグローバルインストールします。
+3. Daytona 固有のシステムプロンプトを含む [カスタムエージェント設定](https://opencode.ai/docs/agents/) を作成してアップロードします。
+4. サンドボックス内でポート 3000 で OpenCode の Web サーバーを起動します。
+5. Web インターフェース用に、OpenCode の出力内の URL を [Daytona プレビューリンク](/docs/ja/preview-and-authentication/) に置き換えます。
+
+#### メインスクリプトのコード \{#main-script-code\}
+
+このスクリプトはセッションを作成し、`OpenCode` を非同期コマンドとして実行します。これにより、プロセスを実行状態のまま維持しつつ、出力をストリーミングできます。
+
+```typescript
+const command = await sandbox.process.executeSessionCommand(sessionId, {
+  command: `${envVar} opencode web --port ${OPENCODE_PORT}`,
+  runAsync: true,
+})
+```
+
+OpenCode が Web サーバーを起動すると、`http://127.0.0.1:3000` のような localhost アドレスを使って Web UI へのリンクをコンソールに出力します。しかし、サンドボックスはリモートで動作しているため、この localhost リンクにはサンドボックス内部からしかアクセスできません。これを解決するために、このスクリプトは OpenCode の出力を解析し、その URL を対応する Daytona プレビューリンクに置き換えます。
+
+```typescript
+const opencodePreviewLink = await sandbox.getPreviewLink(OPENCODE_PORT)
+const replaceUrl = (text: string) =>
+  text.replace(
+    new RegExp(`http:\\/\\/127\\.0\\.0\\.1:${OPENCODE_PORT}`, 'g'),
+    opencodePreviewLink.url
+  )
+```
+
+#### OpenCode Agent 設定 \{#opencode-agent-configuration\}
+
+カスタムのシステムプロンプトを使用して、エージェントに Daytona のサンドボックスパスとプレビューリンクの使用方法を指示します。このプロンプトは JSON 形式の設定文字列としてパッケージ化され、`OPENCODE_CONFIG_CONTENT` 環境変数としてサンドボックスに渡されます。
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "daytona",
+  "agent": {
+    "daytona": {
+      "description": "Daytona sandbox-aware coding agent",
+      "mode": "primary",
+      "prompt": "Daytonaサンドボックス内で実行しています。ファイル操作には/workspaceではなく/home/daytonaディレクトリを使用してください。localhost上でサービスを実行する場合、次の形式でアクセス可能になります:<PREVIEW_URL_PATTERN>。サーバーを起動する際は、必ずユーザーにアクセス用のプレビューURLを提供してください。サーバーを起動する際は、以降の指示をブロックしないよう&を使用してバックグラウンドで起動してください。"
+    }
+  }
+}
+```
+
+エージェントのプロンプト内の `<PREVIEW_URL_PATTERN>` はテンプレート URL であり、`{PORT}` は Daytona のサンドボックスでアクセスするポート番号を表すプレースホルダーです。このテンプレート文字列は、特定のポート番号に対して[プレビューリンク](/docs/ja/preview-and-authentication/)を生成し、そのポート番号を `{PORT}` に置き換えることで作成されます。
+
+#### クリーンアップ \{#clean-up\}
+
+`Ctrl+C` を押すと、スクリプトがサンドボックスを削除して自動的にクリーンアップします。
+
+```typescript
+process.once('SIGINT', async () => {
+  console.log('\nクリーンアップしています...')
+  if (sandbox) await sandbox.delete()
+  process.exit(0)
+})
+```
+
+**主な利点:**
+
+* Daytona のサンドボックス内での安全かつ分離された実行
+* ブラウザからアクセス可能な OpenCode Web インターフェース
+* 75 以上の LLM プロバイダーに対応
+* すべてのエージェントコードの実行はサンドボックス内で実施
+* デプロイしたサービス向けのプレビューリンクを自動生成
+* Daytona 向けワークフローのためのカスタムエージェント設定
+* 自動サンドボックスクリーンアップによる効率的なリソース管理
