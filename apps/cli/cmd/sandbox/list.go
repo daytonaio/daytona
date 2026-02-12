@@ -42,7 +42,7 @@ var ListCmd = &cobra.Command{
 			limit = float32(limitFlag)
 		}
 
-		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxesPaginated(ctx).Page(page).Limit(limit).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxesPaginatedDeprecated(ctx).Page(page).Limit(limit).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

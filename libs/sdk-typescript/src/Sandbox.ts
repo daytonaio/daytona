@@ -17,6 +17,7 @@ import {
   SshAccessValidationDto,
   SignedPortPreviewUrl,
   ResizeSandbox,
+  DeprecatedPaginatedSandboxes,
 } from '@daytonaio/api-client'
 import { Resources } from './Daytona'
 import {
@@ -778,6 +779,6 @@ export class Sandbox implements SandboxDto {
   }
 }
 
-export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
+export interface PaginatedSandboxes extends Omit<DeprecatedPaginatedSandboxes, 'items'> {
   items: Sandbox[]
 }

@@ -753,7 +753,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 	}
 
 	authCtx := c.getAuthContext(ctx)
-	request := c.apiClient.SandboxAPI.ListSandboxesPaginated(authCtx)
+	request := c.apiClient.SandboxAPI.ListSandboxesPaginatedDeprecated(authCtx)
 
 	// Add optional parameters
 	if labels != nil {
