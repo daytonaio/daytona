@@ -10,7 +10,11 @@ function PlaygroundLayout({ children }: { children: React.ReactNode }) {
 }
 
 function PlaygroundLayoutSidebar({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-auto bg-sidebar/20 p-4 border-r border-border hidden lg:block">{children}</div>
+  return (
+    <div className="overflow-auto bg-sidebar/20 p-4 border-r border-border hidden lg:block scrollbar-sm">
+      {children}
+    </div>
+  )
 }
 
 function PlaygroundLayoutContent({ children, className }: { children: React.ReactNode; className?: string }) {

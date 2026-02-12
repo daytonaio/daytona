@@ -12,7 +12,7 @@ const Window = ({ children, className = '' }: ComponentProps<'div'>) => {
     <motion.div
       layoutId="window"
       className={cn(
-        'flex flex-col bg-card/80 backdrop-blur-xl border dark:border-border rounded-xl overflow-hidden ring-1 ring-ring/5 shadow-lg shadow-black/5 dark:shadow-black/20 border-transparent',
+        'flex flex-col bg-card/80 backdrop-blur-xl dark:border dark:border-border rounded-xl overflow-hidden ring-1 ring-ring/5 shadow-lg shadow-black/5 dark:shadow-black/20',
         className,
       )}
     >
