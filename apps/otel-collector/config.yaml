@@ -18,6 +18,9 @@ exporters:
     # Default timeout for OTLP export requests
     default_timeout: 30s
 
+    sending_queue:
+      queue_size: ${env:DAYTONA_EXPORTER_SENDING_QUEUE_SIZE:-1000}
+
     # Retry settings for failed exports
     retry_on_failure:
       enabled: true
@@ -34,12 +37,17 @@ exporters:
       host: '${env:REDIS_HOST:-redis}'
       port: '${env:REDIS_PORT:-6379}'
       password: '${env:REDIS_PASSWORD:-}'
+
   clickhouse:
     endpoint: ${env:CLICKHOUSE_ENDPOINT}
     database: otel
     ttl: ${env:CLICKHOUSE_TTL:-72h}
     username: default
     password: ${env:CLICKHOUSE_PASSWORD}
+
+    sending_queue:
+      queue_size: ${env:CLICKHOUSE_EXPORTER_SENDING_QUEUE_SIZE:-1000}
+
     retry_on_failure:
       enabled: true
       initial_interval: 5s

@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/cache"
 	"go.opentelemetry.io/collector/config/configretry"
+	"go.opentelemetry.io/collector/exporter/exporterhelper"
 )
 
 // Config defines the configuration for the custom exporter.
@@ -26,6 +27,9 @@ type Config struct {
 
 	// RetrySettings defines the retry behavior for failed exports.
 	RetrySettings configretry.BackOffConfig `mapstructure:"retry_on_failure"`
+
+	// SendingQueue configures the queueing and batching behavior for sending requests to Daytona API.
+	SendingQueue exporterhelper.QueueBatchConfig `mapstructure:"sending_queue"`
 
 	// Daytona API configuration.
 	ApiUrl string `mapstructure:"api_url"`
