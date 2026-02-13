@@ -21,6 +21,10 @@ module DaytonaApiClient
 
     attr_accessor :actor_email
 
+    attr_accessor :actor_api_key_prefix
+
+    attr_accessor :actor_api_key_suffix
+
     attr_accessor :organization_id
 
     attr_accessor :action
@@ -49,6 +53,8 @@ module DaytonaApiClient
         :'id' => :'id',
         :'actor_id' => :'actorId',
         :'actor_email' => :'actorEmail',
+        :'actor_api_key_prefix' => :'actorApiKeyPrefix',
+        :'actor_api_key_suffix' => :'actorApiKeySuffix',
         :'organization_id' => :'organizationId',
         :'action' => :'action',
         :'target_type' => :'targetType',
@@ -79,6 +85,8 @@ module DaytonaApiClient
         :'id' => :'String',
         :'actor_id' => :'String',
         :'actor_email' => :'String',
+        :'actor_api_key_prefix' => :'String',
+        :'actor_api_key_suffix' => :'String',
         :'organization_id' => :'String',
         :'action' => :'String',
         :'target_type' => :'String',
@@ -131,6 +139,14 @@ module DaytonaApiClient
         self.actor_email = attributes[:'actor_email']
       else
         self.actor_email = nil
+      end
+
+      if attributes.key?(:'actor_api_key_prefix')
+        self.actor_api_key_prefix = attributes[:'actor_api_key_prefix']
+      end
+
+      if attributes.key?(:'actor_api_key_suffix')
+        self.actor_api_key_suffix = attributes[:'actor_api_key_suffix']
       end
 
       if attributes.key?(:'organization_id')
@@ -282,6 +298,8 @@ module DaytonaApiClient
           id == o.id &&
           actor_id == o.actor_id &&
           actor_email == o.actor_email &&
+          actor_api_key_prefix == o.actor_api_key_prefix &&
+          actor_api_key_suffix == o.actor_api_key_suffix &&
           organization_id == o.organization_id &&
           action == o.action &&
           target_type == o.target_type &&
@@ -304,7 +322,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, actor_id, actor_email, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, created_at].hash
+      [id, actor_id, actor_email, actor_api_key_prefix, actor_api_key_suffix, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, created_at].hash
     end
 
     # Builds the object from hash

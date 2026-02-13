@@ -25,6 +25,8 @@ type AuditLog struct {
 	Id                   string                 `json:"id"`
 	ActorId              string                 `json:"actorId"`
 	ActorEmail           string                 `json:"actorEmail"`
+	ActorApiKeyPrefix    *string                `json:"actorApiKeyPrefix,omitempty"`
+	ActorApiKeySuffix    *string                `json:"actorApiKeySuffix,omitempty"`
 	OrganizationId       *string                `json:"organizationId,omitempty"`
 	Action               string                 `json:"action"`
 	TargetType           *string                `json:"targetType,omitempty"`
@@ -133,6 +135,70 @@ func (o *AuditLog) GetActorEmailOk() (*string, bool) {
 // SetActorEmail sets field value
 func (o *AuditLog) SetActorEmail(v string) {
 	o.ActorEmail = v
+}
+
+// GetActorApiKeyPrefix returns the ActorApiKeyPrefix field value if set, zero value otherwise.
+func (o *AuditLog) GetActorApiKeyPrefix() string {
+	if o == nil || IsNil(o.ActorApiKeyPrefix) {
+		var ret string
+		return ret
+	}
+	return *o.ActorApiKeyPrefix
+}
+
+// GetActorApiKeyPrefixOk returns a tuple with the ActorApiKeyPrefix field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AuditLog) GetActorApiKeyPrefixOk() (*string, bool) {
+	if o == nil || IsNil(o.ActorApiKeyPrefix) {
+		return nil, false
+	}
+	return o.ActorApiKeyPrefix, true
+}
+
+// HasActorApiKeyPrefix returns a boolean if a field has been set.
+func (o *AuditLog) HasActorApiKeyPrefix() bool {
+	if o != nil && !IsNil(o.ActorApiKeyPrefix) {
+		return true
+	}
+
+	return false
+}
+
+// SetActorApiKeyPrefix gets a reference to the given string and assigns it to the ActorApiKeyPrefix field.
+func (o *AuditLog) SetActorApiKeyPrefix(v string) {
+	o.ActorApiKeyPrefix = &v
+}
+
+// GetActorApiKeySuffix returns the ActorApiKeySuffix field value if set, zero value otherwise.
+func (o *AuditLog) GetActorApiKeySuffix() string {
+	if o == nil || IsNil(o.ActorApiKeySuffix) {
+		var ret string
+		return ret
+	}
+	return *o.ActorApiKeySuffix
+}
+
+// GetActorApiKeySuffixOk returns a tuple with the ActorApiKeySuffix field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *AuditLog) GetActorApiKeySuffixOk() (*string, bool) {
+	if o == nil || IsNil(o.ActorApiKeySuffix) {
+		return nil, false
+	}
+	return o.ActorApiKeySuffix, true
+}
+
+// HasActorApiKeySuffix returns a boolean if a field has been set.
+func (o *AuditLog) HasActorApiKeySuffix() bool {
+	if o != nil && !IsNil(o.ActorApiKeySuffix) {
+		return true
+	}
+
+	return false
+}
+
+// SetActorApiKeySuffix gets a reference to the given string and assigns it to the ActorApiKeySuffix field.
+func (o *AuditLog) SetActorApiKeySuffix(v string) {
+	o.ActorApiKeySuffix = &v
 }
 
 // GetOrganizationId returns the OrganizationId field value if set, zero value otherwise.
@@ -484,6 +550,12 @@ func (o AuditLog) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["actorId"] = o.ActorId
 	toSerialize["actorEmail"] = o.ActorEmail
+	if !IsNil(o.ActorApiKeyPrefix) {
+		toSerialize["actorApiKeyPrefix"] = o.ActorApiKeyPrefix
+	}
+	if !IsNil(o.ActorApiKeySuffix) {
+		toSerialize["actorApiKeySuffix"] = o.ActorApiKeySuffix
+	}
 	if !IsNil(o.OrganizationId) {
 		toSerialize["organizationId"] = o.OrganizationId
 	}
@@ -563,6 +635,8 @@ func (o *AuditLog) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "id")
 		delete(additionalProperties, "actorId")
 		delete(additionalProperties, "actorEmail")
+		delete(additionalProperties, "actorApiKeyPrefix")
+		delete(additionalProperties, "actorApiKeySuffix")
 		delete(additionalProperties, "organizationId")
 		delete(additionalProperties, "action")
 		delete(additionalProperties, "targetType")
