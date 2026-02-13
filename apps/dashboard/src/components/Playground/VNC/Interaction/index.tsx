@@ -5,13 +5,13 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { VNCInteractionOptionsSectionComponentProps, WrapVNCInvokeApiType } from '@/contexts/PlaygroundContext'
-import { VNCInteractionOptionsSections, PlaygroundCategories } from '@/enums/Playground'
+import { VNCInteractionOptionsSections } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
 import { createErrorMessageOutput } from '@/lib/playground'
-import { ComputerUse } from '@daytonaio/sdk'
+
 import { CameraIcon, KeyboardIcon, MonitorIcon, MousePointer2Icon } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import VNCDisplayOperations from './Display'
 import VNCKeyboardOperations from './Keyboard'
 import VNCMouseOperations from './Mouse'
@@ -35,24 +35,11 @@ const VNCInteractionOptions: React.FC = () => {
   const [openedInteractionOptionsSections, setOpenedInteractionOptionsSections] = useState<
     VNCInteractionOptionsSections[]
   >([VNCInteractionOptionsSections.DISPLAY])
-  const [ComputerUseClient, setComputerUseClient] = useState<ComputerUse | null>(null)
+  const { setVNCInteractionOptionsParamValue } = usePlayground()
 
-  const { VNCInteractionOptionsParamsState, setVNCInteractionOptionsParamValue } = usePlayground()
-  const VNCUrl = VNCInteractionOptionsParamsState.VNCUrl
+  const { sandbox, vnc } = usePlaygroundSandbox()
 
-  // Get sandbox which will be used for VNC actions
-  const VNCSandboxData = usePlaygroundSandbox(PlaygroundCategories.VNC)
-
-  useEffect(() => {
-    // Share the hook result with VNCDesktopWindowResponse via context so it can read sandbox/loading/error state without invoking a second usePlaygroundSandbox instance -> 1 hook call per playground tab is preferred
-    setVNCInteractionOptionsParamValue('VNCSandboxData', VNCSandboxData)
-  }, [setVNCInteractionOptionsParamValue, VNCSandboxData])
-
-  useEffect(() => {
-    // Create ComputerUse client when computer use is initialized for sandbox
-    if (!VNCUrl) setComputerUseClient(null)
-    else if (VNCSandboxData.sandbox) setComputerUseClient(VNCSandboxData.sandbox.computerUse)
-  }, [VNCUrl, VNCSandboxData])
+  const ComputerUseClient = vnc.url && sandbox.instance ? sandbox.instance.computerUse : null
 
   // Standardize VNC invokeAPI call flow with this method
   const wrapVNCInvokeApi = useCallback<WrapVNCInvokeApiType>(
@@ -73,7 +60,7 @@ const VNCInteractionOptions: React.FC = () => {
   )
 
   // Disable actions run if there was an error during sandbox creation or during VNC ComputerUse initialization
-  const VNCActionsDisabled = !!VNCSandboxData.sandboxError || !!VNCSandboxData.vncUrlError || !ComputerUseClient
+  const VNCActionsDisabled = !!sandbox.error || !!vnc.error || !ComputerUseClient
 
   const interactionOptionsSectionComponentProps: VNCInteractionOptionsSectionComponentProps = {
     disableActions: VNCActionsDisabled,

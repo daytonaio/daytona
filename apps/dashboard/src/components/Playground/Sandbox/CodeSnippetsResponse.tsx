@@ -11,12 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import PythonIcon from '@/assets/python.svg'
 import TypescriptIcon from '@/assets/typescript.svg'
-import {
-  FileSystemActions,
-  GitOperationsActions,
-  PlaygroundCategories,
-  ProcessCodeExecutionActions,
-} from '@/enums/Playground'
+import { FileSystemActions, GitOperationsActions, ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
 import { createErrorMessageOutput } from '@/lib/playground'
@@ -40,7 +35,9 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const [isCodeSnippetRunning, setIsCodeSnippetRunning] = useState<boolean>(false)
 
   const { sandboxParametersState, actionRuntimeError, getSandboxParametersInfo } = usePlayground()
-  const { updateSandbox, createSandboxFromParams } = usePlaygroundSandbox(PlaygroundCategories.SANDBOX, true)
+  const {
+    sandbox: { create: createSandbox },
+  } = usePlaygroundSandbox()
 
   const useConfigObject = false // Currently not needed, we use jwtToken for client config
 
@@ -117,8 +114,7 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
     let sandbox: Sandbox | undefined
 
     try {
-      sandbox = await createSandboxFromParams()
-      await updateSandbox(sandbox)
+      sandbox = await createSandbox()
       codeSnippetOutput = `Sandbox successfully created: ${sandbox.id}\n`
       setCodeSnippetOutput(codeSnippetOutput)
       if (codeToRunExists) {

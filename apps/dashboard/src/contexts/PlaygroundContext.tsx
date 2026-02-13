@@ -8,8 +8,6 @@ import {
   Resources,
   CreateSandboxBaseParams,
   ScreenshotRegion,
-  Daytona,
-  Sandbox,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
   ScreenshotOptions,
@@ -27,7 +25,6 @@ import {
   ScreenshotActions,
   ScreenshotFormatOption,
 } from '@/enums/Playground'
-import { UsePlaygroundSandboxResult } from '@/hooks/usePlaygroundSandbox'
 import { createContext, ReactNode } from 'react'
 
 export interface ParameterFormItem {
@@ -216,8 +213,6 @@ export interface VNCInteractionOptionsParams {
   screenshotOptionsConfig: CustomizedScreenshotOptions
   screenshotRegionConfig: ScreenshotRegion
   responseContent?: string | ReactNode
-  VNCSandboxData?: UsePlaygroundSandboxResult
-  VNCUrl: string | null
 }
 
 export type SetVNCInteractionOptionsParamValue = <K extends keyof VNCInteractionOptionsParams>(
@@ -300,12 +295,7 @@ export interface IPlaygroundContext {
   playgroundActionParamValueSetter: PlaygroundActionParamValueSetter
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
-  DaytonaClient: Daytona | null
-  sandbox: Sandbox | null
-  setSandbox: React.Dispatch<React.SetStateAction<Sandbox | null>>
   getSandboxParametersInfo: () => SandboxParametersInfo
-  terminalUrl: string | null
-  setTerminalUrl: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 export const PlaygroundContext = createContext<IPlaygroundContext | null>(null)

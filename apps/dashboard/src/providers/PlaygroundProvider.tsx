@@ -26,17 +26,13 @@ import {
   SANDBOX_SNAPSHOT_DEFAULT_VALUE,
 } from '@/constants/Playground'
 import {
-  Daytona,
-  Sandbox,
   CreateSandboxBaseParams,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
   Image,
 } from '@daytonaio/sdk'
-import { useAuth } from 'react-oidc-context'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getLanguageCodeToRun, objectHasAnyValue } from '@/lib/playground'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
@@ -119,12 +115,8 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         width: 300,
         height: 200,
       },
-      VNCUrl: null,
     },
   )
-
-  const { user } = useAuth()
-  const { selectedOrganization } = useSelectedOrganization()
 
   const setSandboxParameterValue: SetSandboxParamsValue = useCallback((key, value) => {
     setSandboxParametersState((prev) => ({ ...prev, [key]: value }))
@@ -157,8 +149,6 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const [runningActionMethod, setRunningActionMethod] = useState<RunningActionMethodName>(null)
   const [actionRuntimeError, setActionRuntimeError] = useState<ActionRuntimeError>({})
-  const [sandbox, setSandbox] = useState<Sandbox | null>(null)
-  const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
 
   const validatePlaygroundActionRequiredParams: ValidatePlaygroundActionRequiredParams = useCallback(
     (actionParamsFormData, actionParamsState) => {
@@ -258,15 +248,6 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     ],
   )
 
-  const DaytonaClient = useMemo(() => {
-    if (!user?.access_token || !selectedOrganization?.id) return null
-    return new Daytona({
-      jwtToken: user.access_token,
-      apiUrl: import.meta.env.VITE_API_URL,
-      organizationId: selectedOrganization?.id,
-    })
-  }, [user?.access_token, selectedOrganization?.id])
-
   const getSandboxParametersInfo = useCallback(() => {
     const useLanguageParam = !!sandboxParametersState['language']
     const resourceValuesExist = objectHasAnyValue(sandboxParametersState['resources'])
@@ -364,12 +345,7 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         playgroundActionParamValueSetter,
         runningActionMethod,
         actionRuntimeError,
-        DaytonaClient,
-        sandbox,
-        setSandbox,
         getSandboxParametersInfo,
-        terminalUrl,
-        setTerminalUrl,
       }}
     >
       {children}
