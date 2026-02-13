@@ -88,22 +88,18 @@ const Playground: React.FC = () => {
   }, [playgroundCategory])
 
   return (
-    <PageLayout>
+    <PageLayout className="max-h-[100vh] overflow-auto">
       <PageHeader>
         <PageTitle>Playground</PageTitle>
       </PageHeader>
 
-      <PageContent
-        size="full"
-        className="!p-0 h-full flex flex-col flex-1 max-h-[calc(100vh-111px)]"
-        ref={pageContentRef}
-      >
+      <PageContent size="full" className="!p-0 h-full flex flex-col flex-1 overflow-auto" ref={pageContentRef}>
         <PlaygroundProvider>
           <PlaygroundSandboxProvider>
             <Tabs
               value={playgroundCategory}
               onValueChange={(value) => setPlaygroundCategory(value as PlaygroundCategories)}
-              className="h-full"
+              className="h-full gap-0"
             >
               <div className="flex items-center justify-between shadow-[inset_0_-1px] shadow-border pr-4">
                 <TabsList className="px-2 shadow-none bg-transparent w-auto pb-0">
@@ -111,7 +107,7 @@ const Playground: React.FC = () => {
                     <TabsTrigger
                       value={category.value}
                       key={category.value}
-                      className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5"
+                      className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
                     >
                       {category.label}
                     </TabsTrigger>
@@ -132,7 +128,7 @@ const Playground: React.FC = () => {
                 className="mt-0 data-[state=inactive]:hidden"
                 asChild
               >
-                <PlaygroundLayout>
+                <PlaygroundLayout className="overflow-auto">
                   <PlaygroundLayoutSidebar>
                     <AnimatePresence mode="popLayout">
                       <SlideLeftRight direction={direction} key={playgroundCategory}>
