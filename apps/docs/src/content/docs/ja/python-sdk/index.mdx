@@ -8,7 +8,7 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona の Python SDK は、Daytona サンドボックスとプログラム的にやり取りするための堅牢なインターフェースを提供します。
 
-## インストール
+## インストール \{#installation\}
 
 pip で Daytona の Python SDK をインストールします:
 
@@ -22,11 +22,13 @@ pip install daytona
 poetry add daytona
 ```
 
-## はじめに
+## はじめに \{#getting-started\}
 
-Daytona の Python SDK を使い始めるためのシンプルな例を示します。
+### サンドボックスを作成する \{#create-a-sandbox\}
 
-<Tabs syncKey="language">
+分離された環境でコードを安全に実行するために、Daytona サンドボックスを作成します。次のスニペットは、Daytona サンドボックス内で安全に実行される「Hello, World」プログラムの例です。
+
+<Tabs>
   <TabItem label="Sync" icon="seti:python">
     ```python
     from daytona import Daytona
@@ -68,11 +70,11 @@ Daytona の Python SDK を使い始めるためのシンプルな例を示しま
   </TabItem>
 </Tabs>
 
-## 構成
+## 構成 \{#configuration\}
 
-SDK は環境変数を使うか、コンストラクタにオプションを渡して設定できます:
+Daytona SDK は環境変数を使うか、コンストラクタにオプションを渡して設定できます:
 
-<Tabs syncKey="language">
+<Tabs>
   <TabItem label="Sync" icon="seti:python">
     ```python
     from daytona import Daytona, DaytonaConfig
@@ -82,7 +84,7 @@ SDK は環境変数を使うか、コンストラクタにオプションを渡�
 
     # 明示的な設定を使用
     config = DaytonaConfig(
-        api_key="your-api-key",
+        api_key="YOUR_API_KEY",
         api_url="https://app.daytona.io/api",
         target="us"
     )
@@ -106,7 +108,7 @@ SDK は環境変数を使うか、コンストラクタにオプションを渡�
 
         # 明示的な設定を使用
         config = DaytonaConfig(
-            api_key="your-api-key",
+            api_key="YOUR_API_KEY",
             api_url="https://app.daytona.io/api",
             target="us"
         )
@@ -119,3 +121,5 @@ SDK は環境変数を使うか、コンストラクタにオプションを渡�
     ```
   </TabItem>
 </Tabs>
+
+Daytona SDK の構成に関する詳細は、[configuration](/docs/ja/configuration) を参照してください。
