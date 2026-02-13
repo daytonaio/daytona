@@ -80,8 +80,6 @@ module DaytonaApiClient
         if (value = attributes[:'headers']).is_a?(Hash)
           self.headers = value
         end
-      else
-        self.headers = nil
       end
     end
 

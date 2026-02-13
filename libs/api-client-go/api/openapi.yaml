@@ -9731,7 +9731,6 @@ components:
           type: object
       required:
         - endpoint
-        - headers
       type: object
     OrganizationSandboxDefaultLimitedNetworkEgress:
       example:

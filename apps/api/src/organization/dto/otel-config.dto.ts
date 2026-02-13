@@ -18,7 +18,7 @@ export class OtelConfigDto {
       'x-api-key': 'my-api-key',
     },
     nullable: true,
-    type: 'object',
+    required: false,
     additionalProperties: { type: 'string' },
   })
   headers?: Record<string, string>
