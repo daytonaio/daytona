@@ -1,0 +1,299 @@
+---
+title: "ComputerUse"
+hideTitleOnPage: true
+---
+
+## ComputerUse \{#computeruse\}
+
+新しい ComputerUse インスタンスを初期化します。
+
+### コンストラクタ \{#constructors\}
+
+#### new ComputerUse() \{#new-computeruse\}
+
+```ruby
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
+
+```
+
+新しい ComputerUse インスタンスを初期化します。
+
+**パラメーター**:
+
+* `sandbox_id` *String* - サンドボックスの ID
+* `toolbox_api` *DaytonaApiClient:ToolboxApi* - サンドボックス操作用の API クライアント
+* `otel_state` *Daytona:OtelState, nil* -
+
+**戻り値**:
+
+* `ComputerUse` - 新しい ComputerUse インスタンスを返します
+
+### メソッド \{#methods\}
+
+#### sandbox_id() \{#sandbox_id\}
+
+```ruby
+def sandbox_id()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックス ID
+
+#### toolbox_api() \{#toolbox_api\}
+
+```ruby
+def toolbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:ToolboxApi` - サンドボックス操作用のAPIクライアント
+
+#### mouse() \{#mouse\}
+
+```ruby
+def mouse()
+
+```
+
+**戻り値**:
+
+* `Mouse` - マウス操作用インターフェース
+
+#### keyboard() \{#keyboard\}
+
+```ruby
+def keyboard()
+
+```
+
+**戻り値**:
+
+* `Keyboard` - キーボード操作用インターフェース
+
+#### screenshot() \{#screenshot\}
+
+```ruby
+def screenshot()
+
+```
+
+**戻り値**:
+
+* `Screenshot` - スクリーンショット操作用インターフェース
+
+#### display() \{#display\}
+
+```ruby
+def display()
+
+```
+
+**戻り値**:
+
+* `Display` - 表示操作用インターフェース
+
+#### recording() \{#recording\}
+
+```ruby
+def recording()
+
+```
+
+**戻り値**:
+
+* `Recording` - 画面録画を操作するためのインターフェース
+
+#### start() \{#start\}
+
+```ruby
+def start()
+
+```
+
+すべてのコンピューター使用関連プロセス（Xvfb、xfce4、x11vnc、novnc）を開始します。
+
+**戻り値**:
+
+* `DaytonaApiClient:ComputerUseStartResponse` - コンピューター使用の開始レスポンス
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合
+
+**使用例:**
+
+```ruby
+result = sandbox.computer_use.start
+puts "コンピューター使用プロセスが開始されました: #{result.message}"
+
+```
+
+#### stop() \{#stop\}
+
+```ruby
+def stop()
+
+```
+
+すべてのコンピューター使用プロセスを停止します。
+
+**戻り値**:
+
+* `DaytonaApiClient:ComputerUseStopResponse` - コンピューター使用停止レスポンス
+
+**例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合に送出されます
+
+**使用例:**
+
+```ruby
+result = sandbox.computer_use.stop
+puts "コンピューター使用プロセスが停止しました: #{result.message}"
+
+```
+
+#### status() \{#status\}
+
+```ruby
+def status()
+
+```
+
+すべてのコンピューター使用プロセスのステータスを取得します。
+
+**戻り値**:
+
+* `DaytonaApiClient:ComputerUseStatusResponse` - すべての VNC デスクトップ プロセスのステータス情報
+
+**例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合に発生します
+
+**使用例:**
+
+```ruby
+response = sandbox.computer_use.get_status
+puts "コンピューター使用ステータス: #{response.status}"
+
+```
+
+#### get_process_status() \{#get_process_status\}
+
+```ruby
+def get_process_status(process_name:)
+
+```
+
+特定の VNC プロセスのステータスを取得します。
+
+**パラメータ**:
+
+* `process_name` *String* - 確認するプロセスの名前
+
+**戻り値**:
+
+* `DaytonaApiClient:ProcessStatusResponse` - 特定のプロセスに関するステータス情報
+
+**例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合に発生します
+
+**使用例:**
+
+```ruby
+xvfb_status = sandbox.computer_use.get_process_status("xvfb")
+no_vnc_status = sandbox.computer_use.get_process_status("novnc")
+
+```
+
+#### restart_process() \{#restart_process\}
+
+```ruby
+def restart_process(process_name:)
+
+```
+
+特定の VNC プロセスを再起動します。
+
+**パラメータ**:
+
+* `process_name` *String* - 再起動するプロセス名
+
+**戻り値**:
+
+* `DaytonaApiClient:ProcessRestartResponse` - プロセス再起動のレスポンス
+
+**送出される例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合に送出されます
+
+**使用例:**
+
+```ruby
+result = sandbox.computer_use.restart_process("xfce4")
+puts "XFCE4 process restarted: #{result.message}"
+
+```
+
+#### get_process_logs() \{#get_process_logs\}
+
+```ruby
+def get_process_logs(process_name:)
+
+```
+
+特定の VNC プロセスのログを取得します。
+
+**パラメーター**:
+
+* `process_name` *String* - ログを取得するプロセスの名前
+
+**戻り値**:
+
+* `DaytonaApiClient:ProcessLogsResponse` - プロセスのログ
+
+**例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合にスローされる
+
+**使用例:**
+
+```ruby
+logs = sandbox.computer_use.get_process_logs("novnc")
+puts "NoVNC logs: #{logs}"
+
+```
+
+#### get_process_errors() \{#get_process_errors\}
+
+```ruby
+def get_process_errors(process_name:)
+
+```
+
+特定の VNC プロセスのエラーログを取得します。
+
+**パラメータ**:
+
+* `process_name` *String* - エラーログを取得するプロセスの名前
+
+**戻り値**:
+
+* `DaytonaApiClient:ProcessErrorsResponse` - プロセスのエラーログ
+
+**例外**:
+
+* `Daytona:Sdk:Error` - 操作が失敗した場合に発生
+
+**使用例:**
+
+```ruby
+errors = sandbox.computer_use.get_process_errors("x11vnc")
+puts "X11VNC errors: #{errors}"
+
+```
