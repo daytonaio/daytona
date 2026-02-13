@@ -9,15 +9,12 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
-import { Repository, FindOptionsWhere } from 'typeorm'
+import { Repository } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { SandboxDesiredState } from '../../enums/sandbox-desired-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
-import { SandboxLookupCacheInvalidationService } from '../../services/sandbox-lookup-cache-invalidation.service'
-import { SandboxStateUpdatedEvent } from '../../events/sandbox-state-updated.event'
-import { SandboxEvents } from '../../constants/sandbox-events.constants'
+import { SandboxService } from '../../services/sandbox.service'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -30,8 +27,8 @@ export abstract class SandboxAction {
   @Inject(EventEmitter2)
   protected readonly eventEmitter: EventEmitter2
 
-  @Inject(SandboxLookupCacheInvalidationService)
-  protected readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService
+  @Inject(SandboxService)
+  protected readonly sandboxService: SandboxService
 
   constructor(
     protected readonly runnerService: RunnerService,
@@ -44,17 +41,13 @@ export abstract class SandboxAction {
   abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
 
   /**
-   * Updates a sandbox's state using a single targeted UPDATE query instead of
-   * loading the full entity and saving all 35+ columns back.
+   * Validates the Redis lock code and then delegates to SandboxService.updateSandboxState
+   * for a single targeted UPDATE with hook replication, event emission, and cache invalidation.
    *
-   * The caller must pass the already-loaded sandbox entity (from syncInstanceState)
-   * so we can read desiredState, organizationId, name etc. for hook replication,
-   * event emission, and cache invalidation — without an extra SELECT.
-   *
-   * @BeforeUpdate hooks (updateLastActivityAt, updatePendingFlag, handleDestroyedState,
-   * validateDesiredState) are replicated inline.
+   * A WHERE guard of { pending: true } is added for non-ARCHIVED transitions to prevent
+   * concurrent writes from overwriting each other.
    */
-  protected async updateSandboxState(
+  protected async guardedUpdateState(
     sandbox: Sandbox,
     state: SandboxState,
     expectedLockCode: LockCode,
@@ -82,115 +75,34 @@ export abstract class SandboxAction {
       return undefined
     }
 
-    const oldState = sandbox.state
-
-    // ── Build the update patch (same order as the old entity-mutation logic) ──
-
-    const patch: Partial<Record<string, unknown>> = {}
-
-    patch.state = state
-
-    if (runnerId !== undefined) {
-      patch.runnerId = runnerId
-    }
-
-    if (errorReason !== undefined) {
-      patch.errorReason = errorReason
-      if (state === SandboxState.ERROR) {
-        patch.recoverable = recoverable ?? false
-      }
-    }
-
     //  If transitioning to ERROR without an error reason, set a default
     const effectiveErrorReason = errorReason !== undefined ? errorReason : sandbox.errorReason
     if (state === SandboxState.ERROR && !effectiveErrorReason) {
-      patch.errorReason = 'Sandbox is in error state during update'
-      patch.recoverable = false
+      errorReason = 'Sandbox is in error state during update'
+      recoverable = false
     }
 
-    if (daemonVersion !== undefined) {
-      patch.daemonVersion = daemonVersion
-    }
+    //  WHERE guard: only update if the sandbox is still in 'pending' state
+    //  (skip for ARCHIVED transitions since those aren't set to pending beforehand)
+    const where = state !== SandboxState.ARCHIVED ? { pending: true } : undefined
 
-    //  Replicate handleDestroyedState @BeforeUpdate hook
-    if (state === SandboxState.DESTROYED) {
-      patch.runnerId = null
-      patch.backupState = BackupState.NONE
-    }
+    const updated = await this.sandboxService.updateSandboxState(
+      sandbox,
+      state,
+      {
+        runnerId,
+        errorReason,
+        recoverable,
+        daemonVersion,
+        backupState,
+      },
+      where,
+    )
 
-    //  Handle setBackupState (only BackupState.NONE is passed in practice)
-    if (backupState !== undefined) {
-      patch.backupState = backupState
-      if (backupState === BackupState.NONE) {
-        patch.backupSnapshot = null
-      }
-    }
-
-    if (recoverable !== undefined) {
-      patch.recoverable = recoverable
-    }
-
-    //  Replicate updateLastActivityAt @BeforeUpdate hook
-    patch.lastActivityAt = new Date()
-
-    //  Replicate updatePendingFlag @BeforeUpdate hook
-    const effectiveDesiredState = sandbox.desiredState
-    let pendingValue = sandbox.pending ?? false
-    if (!pendingValue && String(state) !== String(effectiveDesiredState)) {
-      pendingValue = true
-    }
-    if (pendingValue && String(state) === String(effectiveDesiredState)) {
-      pendingValue = false
-    }
-    if (
-      state === SandboxState.ERROR ||
-      state === SandboxState.BUILD_FAILED ||
-      effectiveDesiredState === SandboxDesiredState.ARCHIVED
-    ) {
-      pendingValue = false
-    }
-    patch.pending = pendingValue
-
-    // ── Execute a single targeted UPDATE with WHERE guard ──
-
-    const whereClause: FindOptionsWhere<Sandbox> = { id: sandbox.id }
-    if (state !== SandboxState.ARCHIVED) {
-      whereClause.pending = true
-    }
-
-    const result = await this.sandboxRepository.update(whereClause, patch)
-
-    if (!result.affected || result.affected === 0) {
-      //  Sandbox wasn't found or wasn't in the expected pending state.
-      //  This indicates a concurrency conflict — log and return gracefully
-      //  to avoid incorrectly setting the error state on an otherwise ready sandbox.
+    if (!updated) {
       const err = new Error(`sandbox ${sandbox.id} is not in a pending state`)
       this.logger.error(err)
       return undefined
-    }
-
-    // ── Apply patch to the in-memory entity so callers see the new values ──
-
-    Object.assign(sandbox, patch)
-
-    // ── Emit STATE_UPDATED event (replaces subscriber behaviour for save()) ──
-
-    if (oldState !== state) {
-      this.eventEmitter.emit(SandboxEvents.STATE_UPDATED, new SandboxStateUpdatedEvent(sandbox, oldState, state))
-    }
-
-    // ── Invalidate lookup cache (replaces subscriber behaviour for save()) ──
-
-    try {
-      this.sandboxLookupCacheInvalidationService.invalidate({
-        sandboxId: sandbox.id,
-        organizationId: sandbox.organizationId,
-        name: sandbox.name,
-      })
-    } catch (error) {
-      this.logger.warn(
-        `Failed to invalidate sandbox lookup cache for ${sandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
-      )
     }
 
     return sandbox

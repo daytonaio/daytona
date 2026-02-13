@@ -39,7 +39,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.STARTED: {
         // stop sandbox
         await runnerAdapter.stopSandbox(sandbox.id)
-        await this.updateSandboxState(sandbox, SandboxState.STOPPING, lockCode)
+        await this.guardedUpdateState(sandbox, SandboxState.STOPPING, lockCode)
         //  sync states again immediately for sandbox
         return SYNC_AGAIN
       }
@@ -48,7 +48,7 @@ export class SandboxStopAction extends SandboxAction {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         switch (sandboxInfo.state) {
           case SandboxState.STOPPED: {
-            await this.updateSandboxState(
+            await this.guardedUpdateState(
               sandbox,
               SandboxState.STOPPED,
               lockCode,
@@ -60,7 +60,7 @@ export class SandboxStopAction extends SandboxAction {
             return DONT_SYNC_AGAIN
           }
           case SandboxState.ERROR: {
-            await this.updateSandboxState(
+            await this.guardedUpdateState(
               sandbox,
               SandboxState.ERROR,
               lockCode,
@@ -75,7 +75,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.ERROR: {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STOPPED) {
-          await this.updateSandboxState(sandbox, SandboxState.STOPPED, lockCode)
+          await this.guardedUpdateState(sandbox, SandboxState.STOPPED, lockCode)
         }
       }
     }

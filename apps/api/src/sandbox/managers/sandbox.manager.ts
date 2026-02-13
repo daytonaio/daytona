@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
+import { Inject, Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
 import { randomUUID } from 'crypto'
@@ -41,6 +41,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxService } from '../services/sandbox.service'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -54,6 +55,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   activeJobs = new Set<string>()
 
   private readonly logger = new Logger(SandboxManager.name)
+
+  @Inject(SandboxService)
+  private readonly sandboxService: SandboxService
 
   constructor(
     private readonly sandboxRepository: SandboxRepository,
@@ -748,20 +752,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     } catch (error) {
       this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
-      const sandbox = await this.sandboxRepository.findOneBy({
-        id: sandboxId,
-      })
-      if (!sandbox) {
-        //  edge case where sandbox is deleted while desired state is being processed
-        return
-      }
-      sandbox.state = SandboxState.ERROR
-
       const { recoverable, errorReason } = sanitizeSandboxError(error)
-      sandbox.errorReason = errorReason
-      sandbox.recoverable = recoverable
-
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+        errorReason,
+        recoverable,
+      })
     }
 
     await this.redisLockProvider.unlock(lockKey)
