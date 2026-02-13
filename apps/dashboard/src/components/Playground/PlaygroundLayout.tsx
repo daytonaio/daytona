@@ -5,8 +5,10 @@
 
 import { cn } from '@/lib/utils'
 
-function PlaygroundLayout({ children }: { children: React.ReactNode }) {
-  return <div className="grid grid-cols-1 lg:grid-cols-[minmax(320px,400px)_1fr] h-full">{children}</div>
+function PlaygroundLayout({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn('grid grid-cols-1 lg:grid-cols-[minmax(320px,400px)_1fr] h-full', className)}>{children}</div>
+  )
 }
 
 function PlaygroundLayoutSidebar({ children }: { children: React.ReactNode }) {
