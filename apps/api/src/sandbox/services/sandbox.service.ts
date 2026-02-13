@@ -1582,8 +1582,8 @@ export class SandboxService {
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    await this.updateById(sandbox.id, { public: isPublic, lastActivityAt: new Date() }, sandbox)
     sandbox.public = isPublic
-    await this.sandboxRepository.save(sandbox)
 
     return sandbox
   }
@@ -1673,9 +1673,8 @@ export class SandboxService {
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    // Replace all labels
+    await this.updateById(sandbox.id, { labels, lastActivityAt: new Date() }, sandbox)
     sandbox.labels = labels
-    await this.sandboxRepository.save(sandbox)
 
     return sandbox
   }
@@ -1718,8 +1717,9 @@ export class SandboxService {
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const autoStopInterval = this.resolveAutoStopInterval(interval)
+    await this.updateById(sandbox.id, { autoStopInterval, lastActivityAt: new Date() }, sandbox)
+    sandbox.autoStopInterval = autoStopInterval
 
     return sandbox
   }
@@ -1727,8 +1727,9 @@ export class SandboxService {
   async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
+    await this.updateById(sandbox.id, { autoArchiveInterval, lastActivityAt: new Date() }, sandbox)
+    sandbox.autoArchiveInterval = autoArchiveInterval
 
     return sandbox
   }
@@ -1736,8 +1737,8 @@ export class SandboxService {
   async setAutoDeleteInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    await this.updateById(sandbox.id, { autoDeleteInterval: interval, lastActivityAt: new Date() }, sandbox)
     sandbox.autoDeleteInterval = interval
-    await this.sandboxRepository.save(sandbox)
 
     return sandbox
   }
@@ -1750,15 +1751,18 @@ export class SandboxService {
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    const patch: Partial<Record<string, unknown>> = { lastActivityAt: new Date() }
     if (networkBlockAll !== undefined) {
+      patch.networkBlockAll = networkBlockAll
       sandbox.networkBlockAll = networkBlockAll
     }
-
     if (networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      const resolved = this.resolveNetworkAllowList(networkAllowList)
+      patch.networkAllowList = resolved
+      sandbox.networkAllowList = resolved
     }
 
-    await this.sandboxRepository.save(sandbox)
+    await this.updateById(sandbox.id, patch, sandbox)
 
     // Update network settings on the runner
     if (sandbox.runnerId) {

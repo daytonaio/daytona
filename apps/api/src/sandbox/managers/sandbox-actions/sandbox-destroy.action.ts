@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
+import { SandboxAction, SyncState, SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox.action'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
@@ -28,7 +28,7 @@ export class SandboxDestroyAction extends SandboxAction {
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     if (sandbox.state === SandboxState.ARCHIVED) {
-      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
+      await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
       return DONT_SYNC_AGAIN
     }
 
@@ -56,7 +56,7 @@ export class SandboxDestroyAction extends SandboxAction {
           }
         }
 
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED, lockCode)
+        await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
         return DONT_SYNC_AGAIN
       }
       default: {
@@ -64,7 +64,7 @@ export class SandboxDestroyAction extends SandboxAction {
         try {
           const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
           if (sandboxInfo?.state === SandboxState.DESTROYED) {
-            await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
+            await this.updateSandboxState(sandbox, SandboxState.DESTROYING, lockCode)
             return SYNC_AGAIN
           }
           await runnerAdapter.destroySandbox(sandbox.id)
@@ -74,7 +74,7 @@ export class SandboxDestroyAction extends SandboxAction {
             throw e
           }
         }
-        await this.updateSandboxState(sandbox.id, SandboxState.DESTROYING, lockCode)
+        await this.updateSandboxState(sandbox, SandboxState.DESTROYING, lockCode)
         return SYNC_AGAIN
       }
     }

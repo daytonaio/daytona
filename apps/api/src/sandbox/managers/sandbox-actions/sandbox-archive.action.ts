@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
+import { SandboxAction, SyncState, SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
 import { Repository } from 'typeorm'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
@@ -15,7 +15,6 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../../constants/sandbox-events.constants'
 import { SandboxBackupCreatedEvent } from '../../events/sandbox-backup-created.event'
 
@@ -28,7 +27,6 @@ export class SandboxArchiveAction extends SandboxAction {
     protected sandboxRepository: Repository<Sandbox>,
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
-    private readonly eventEmitter: EventEmitter2,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
@@ -57,7 +55,7 @@ export class SandboxArchiveAction extends SandboxAction {
             // Only transition to ERROR if not already in ERROR state
             if (!isFromErrorState) {
               await this.updateSandboxState(
-                sandbox.id,
+                sandbox,
                 SandboxState.ERROR,
                 lockCode,
                 undefined,
@@ -94,7 +92,7 @@ export class SandboxArchiveAction extends SandboxAction {
               if (isFromErrorState) {
                 this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
               }
-              await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+              await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
               return DONT_SYNC_AGAIN
             default:
               await runnerAdapter.destroySandbox(sandbox.id)
@@ -115,7 +113,7 @@ export class SandboxArchiveAction extends SandboxAction {
           if (isFromErrorState) {
             this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
           }
-          await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+          await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
           return DONT_SYNC_AGAIN
         }
       }

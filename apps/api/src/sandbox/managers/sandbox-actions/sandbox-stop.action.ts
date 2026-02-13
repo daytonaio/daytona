@@ -6,7 +6,7 @@
 import { Injectable } from '@nestjs/common'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
-import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
+import { SandboxAction, SyncState, SYNC_AGAIN, DONT_SYNC_AGAIN } from './sandbox.action'
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
@@ -39,7 +39,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.STARTED: {
         // stop sandbox
         await runnerAdapter.stopSandbox(sandbox.id)
-        await this.updateSandboxState(sandbox.id, SandboxState.STOPPING, lockCode)
+        await this.updateSandboxState(sandbox, SandboxState.STOPPING, lockCode)
         //  sync states again immediately for sandbox
         return SYNC_AGAIN
       }
@@ -49,7 +49,7 @@ export class SandboxStopAction extends SandboxAction {
         switch (sandboxInfo.state) {
           case SandboxState.STOPPED: {
             await this.updateSandboxState(
-              sandbox.id,
+              sandbox,
               SandboxState.STOPPED,
               lockCode,
               undefined,
@@ -61,7 +61,7 @@ export class SandboxStopAction extends SandboxAction {
           }
           case SandboxState.ERROR: {
             await this.updateSandboxState(
-              sandbox.id,
+              sandbox,
               SandboxState.ERROR,
               lockCode,
               undefined,
@@ -75,7 +75,7 @@ export class SandboxStopAction extends SandboxAction {
       case SandboxState.ERROR: {
         const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
         if (sandboxInfo.state === SandboxState.STOPPED) {
-          await this.updateSandboxState(sandbox.id, SandboxState.STOPPED, lockCode)
+          await this.updateSandboxState(sandbox, SandboxState.STOPPED, lockCode)
         }
       }
     }
