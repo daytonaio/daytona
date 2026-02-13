@@ -4,8 +4,9 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import ClassVar, TypeVar, Union
 
 from daytona_toolbox_api_client import SessionExecuteRequest as ApiSessionExecuteRequest
 from daytona_toolbox_api_client import SessionExecuteResponse as ApiSessionExecuteResponse
@@ -192,3 +193,15 @@ def demux_log(data: bytes) -> tuple[bytes, bytes]:
             state = "stderr"
 
     return bytes(out_buf), bytes(err_buf)
+
+
+# Type aliases for callbacks
+T = TypeVar("T")
+OutputHandler = Union[
+    Callable[[T], None],
+    Callable[[T], Awaitable[None]],
+]
+"""Callback type that accepts both sync and async handlers.
+
+Blocking synchronous operations inside handlers may cause WebSocket disconnections.
+"""

@@ -19,7 +19,7 @@ from .common.charts import (
     PieChart,
     ScatterChart,
 )
-from .common.code_interpreter import ExecutionError, ExecutionResult, OutputHandler, OutputMessage
+from .common.code_interpreter import ExecutionError, ExecutionResult, OutputMessage
 from .common.computer_use import ScreenshotOptions, ScreenshotRegion
 from .common.daytona import (
     CodeLanguage,
@@ -32,7 +32,7 @@ from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitE
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspCompletionPosition, LspLanguageId
-from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
 from .common.pty import PtySize
 from .common.sandbox import Resources
 from .common.snapshot import CreateSnapshotParams

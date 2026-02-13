@@ -13,7 +13,7 @@ import websockets
 from websockets.asyncio.connection import Connection
 
 from ..common.errors import DaytonaError
-from ..common.process import MAX_PREFIX_LEN, STDERR_PREFIX, STDOUT_PREFIX
+from ..common.process import MAX_PREFIX_LEN, STDERR_PREFIX, STDOUT_PREFIX, OutputHandler
 
 T = TypeVar("T")
 
@@ -33,7 +33,7 @@ except ImportError:
 async def process_streaming_response(
     url: str,
     headers: dict[str, str],
-    on_chunk: Callable[[str], None],
+    on_chunk: OutputHandler[str],
     should_terminate: Callable[[], bool] | Callable[[], Awaitable[bool]],
     method: str = "GET",
     chunk_timeout: float = 2.0,
@@ -98,7 +98,7 @@ async def process_streaming_response(
                             break
 
                         # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
-                        on_chunk(decoder.decode(chunk, final=False))
+                        await _invoke(on_chunk, decoder.decode(chunk, final=False))
                         exit_check_streak = 0  # Reset on activity
 
                     elif timeout_task in done:
@@ -117,7 +117,7 @@ async def process_streaming_response(
                 # Flush any remaining buffered bytes from the decoder
                 remaining = decoder.decode(b"", final=True)
                 if remaining:
-                    on_chunk(remaining)
+                    await _invoke(on_chunk, remaining)
 
                 # Final cleanup - ensure any remaining tasks are cancelled
                 if timeout_task is not None:
@@ -139,18 +139,29 @@ async def process_streaming_response(
                             raise e
 
 
+async def _invoke(handler: OutputHandler[str], text: str) -> None:
+    """Call an output handler and await the result if it is an awaitable."""
+    result = handler(text)
+    if inspect.isawaitable(result):
+        await result
+
+
 async def std_demux_stream(
     connection: Connection,
-    on_stdout: Callable[[str], None],
-    on_stderr: Callable[[str], None],
+    on_stdout: OutputHandler[str],
+    on_stderr: OutputHandler[str],
 ) -> None:
     """
     Demultiplex a WebSocket stream into separate stdout and stderr streams.
 
+    Accepts both sync and async callbacks. Async callbacks are awaited.
+    Blocking operations inside sync callbacks may cause WebSocket
+    disconnections — use async callbacks or async libraries to avoid this.
+
     Args:
         connection: The WebSocket connection to demultiplex.
-        on_stdout: Callback function for stdout messages.
-        on_stderr: Callback function for stderr messages.
+        on_stdout: Callback function for stdout messages (sync or async).
+        on_stderr: Callback function for stderr messages (sync or async).
 
     Raises:
         DaytonaError: If the WebSocket connection closed error occurs.
@@ -162,16 +173,16 @@ async def std_demux_stream(
     stdout_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
     stderr_decoder = codecs.getincrementaldecoder("utf-8")(errors="replace")
 
-    def emit(payload: bytes):
+    async def emit(payload: bytes):
         if not payload:
             return
         # Use final=False to buffer incomplete UTF-8 sequences for the next chunk
         if current_data_type == "stdout":
             text = stdout_decoder.decode(payload, final=False)
-            on_stdout(text)
+            await _invoke(on_stdout, text)
         elif current_data_type == "stderr":
             text = stderr_decoder.decode(payload, final=False)
-            on_stderr(text)
+            await _invoke(on_stderr, text)
         # If current is None, drop unlabeled bytes (shouldn't happen with proper labeling)
 
     try:
@@ -240,14 +251,14 @@ async def std_demux_stream(
                 if next_idx == -1:
                     # No full marker in safe region: emit everything we safely can as payload
                     to_emit = bytes(buf[:safe_len])
-                    emit(to_emit)
+                    await emit(to_emit)
                     del buf[:safe_len]
                     break  # wait for more data to resolve any partial marker at the end
 
                 # We found a marker. Emit preceding bytes (if any) under the current stream.
                 if next_idx > 0:
                     to_emit = bytes(buf[:next_idx])
-                    emit(to_emit)
+                    await emit(to_emit)
 
                 # Advance past the marker and switch current stream
                 del buf[: next_idx + next_len]
@@ -259,15 +270,15 @@ async def std_demux_stream(
             if current_data_type == "stdout":
                 # Use final=True to flush any buffered incomplete UTF-8 sequences
                 text = stdout_decoder.decode(bytes(buf), final=True)
-                on_stdout(text)
+                await _invoke(on_stdout, text)
             else:
                 text = stderr_decoder.decode(bytes(buf), final=True)
-                on_stderr(text)
+                await _invoke(on_stderr, text)
         else:
             # Flush any remaining bytes in the decoders even if buf is empty
             stdout_flushed = stdout_decoder.decode(b"", final=True)
             stderr_flushed = stderr_decoder.decode(b"", final=True)
             if stdout_flushed:
-                on_stdout(stdout_flushed)
+                await _invoke(on_stdout, stdout_flushed)
             if stderr_flushed:
-                on_stderr(stderr_flushed)
+                await _invoke(on_stderr, stderr_flushed)
