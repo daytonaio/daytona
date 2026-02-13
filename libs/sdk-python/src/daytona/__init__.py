@@ -6,9 +6,9 @@ from daytona_toolbox_api_client import SessionExecuteResponse
 
 from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
 from ._async.daytona import AsyncDaytona
-from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
+from ._async.sandbox import AsyncPaginatedSandboxes, AsyncPaginatedSandboxesV2, AsyncSandbox
 from ._sync.daytona import Daytona
-from ._sync.sandbox import Sandbox
+from ._sync.sandbox import PaginatedSandboxesV2, Sandbox
 from .common.charts import (
     BarChart,
     BoxAndWhiskerChart,
@@ -67,6 +67,8 @@ __all__ = [
     "AsyncDaytona",
     "AsyncSandbox",
     "AsyncPaginatedSandboxes",
+    "AsyncPaginatedSandboxesV2",
+    "PaginatedSandboxesV2",
     "AsyncComputerUse",
     "AsyncMouse",
     "AsyncKeyboard",

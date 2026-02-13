@@ -12,6 +12,7 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
+  ListSandboxesStatesEnum,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
@@ -19,7 +20,7 @@ import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox, PaginatedSandboxes } from './Sandbox'
+import { Sandbox, PaginatedSandboxes, PaginatedSandboxesV2 } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
@@ -640,6 +641,7 @@ export class Daytona implements AsyncDisposable {
       return this.get(filter.idOrName)
     }
 
+    // TODO: implement top-level search method, and consume it here
     const result = await this.list(filter.labels, 1, 1)
     if (result.items.length === 0) {
       const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
@@ -655,6 +657,10 @@ export class Daytona implements AsyncDisposable {
    * @param {number} [page] - Page number for pagination (starting from 1)
    * @param {number} [limit] - Maximum number of items per page
    * @returns {Promise<PaginatedSandboxes>} Paginated list of Sandboxes that match the labels.
+   *
+   * @deprecated Use {@link listV2} instead. This method uses offset-based pagination against a
+   * deprecated API endpoint that will be removed on April 1, 2026. After that date, this method
+   * will be removed and {@link listV2} will be renamed to `list`.
    *
    * @example
    * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
@@ -688,6 +694,57 @@ export class Daytona implements AsyncDisposable {
       total: response.data.total,
       page: response.data.page,
       totalPages: response.data.totalPages,
+    }
+  }
+
+  /**
+   * Returns a paginated list of Sandboxes with optional state filtering.
+   * Uses cursor-based pagination, ordered newest first.
+   *
+   * @param {string} [cursor] - Pagination cursor from a previous response. Omit to start from the beginning.
+   * @param {number} [limit] - Maximum number of items per page.
+   * @param {SandboxState[]} [states] - Filter by Sandbox states.
+   * @returns {Promise<PaginatedSandboxesV2>} Cursor-paginated list of Sandboxes.
+   *
+   * @example
+   * // First page
+   * const page1 = await daytona.listV2(undefined, 10);
+   * for (const sandbox of page1.items) {
+   *     console.log(`${sandbox.id}: ${sandbox.state}`);
+   * }
+   *
+   * // Next page
+   * if (page1.nextCursor) {
+   *     const page2 = await daytona.listV2(page1.nextCursor, 10);
+   * }
+   *
+   * @example
+   * // Filter by state
+   * const running = await daytona.listV2(undefined, 10, [SandboxState.Started]);
+   */
+  @WithInstrumentation()
+  public async listV2(cursor?: string, limit?: number, states?: SandboxState[]): Promise<PaginatedSandboxesV2> {
+    const response = await this.sandboxApi.listSandboxes(
+      undefined,
+      cursor,
+      limit,
+      undefined,
+      states as unknown as ListSandboxesStatesEnum[],
+    )
+
+    return {
+      items: response.data.items.map((sandbox) => {
+        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
+        return new Sandbox(
+          sandbox,
+          structuredClone(this.clientConfig),
+          this.createAxiosInstance(),
+          this.sandboxApi,
+          this.getCodeToolbox(language),
+          this.getProxyToolboxUrl.bind(this),
+        )
+      }),
+      nextCursor: response.data.nextCursor,
     }
   }
 

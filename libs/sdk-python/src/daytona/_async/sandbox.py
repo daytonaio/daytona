@@ -5,7 +5,13 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 
-from daytona_api_client_async import BuildInfo, DeprecatedPaginatedSandboxes, PortPreviewUrl, ResizeSandbox
+from daytona_api_client_async import (
+    BuildInfo,
+    DeprecatedPaginatedSandboxes,
+    PaginatedSandboxes,
+    PortPreviewUrl,
+    ResizeSandbox,
+)
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import (
     SandboxApi,
@@ -717,8 +723,25 @@ class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes):
         total (int): Total number of Sandboxes across all pages.
         page (int): Current page number.
         total_pages (int): Total number of pages available.
+
+    .. deprecated::
+        Use :class:`AsyncPaginatedSandboxesV2` instead. Will be removed on April 1, 2026.
     """
 
     items: list[AsyncSandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
+
+
+class AsyncPaginatedSandboxesV2(PaginatedSandboxes):
+    """Paginated list of Daytona Sandboxes using cursor-based pagination.
+
+    Attributes:
+        items (list[AsyncSandbox]): List of Sandbox instances for the current page.
+        next_cursor (str | None): Cursor for the next page of results. None if there are no more results.
+    """
+
+    items: list[AsyncSandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
+    next_cursor: str | None
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)

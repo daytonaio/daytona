@@ -698,6 +698,7 @@ func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels 
 		return c.Get(ctx, *sandboxIDOrName)
 	}
 
+	// TODO: implement top-level search method, and consume it here
 	pages := 1
 	limit := 1
 	result, err := c.List(ctx, labels, &pages, &limit)
@@ -714,6 +715,10 @@ func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels 
 }
 
 // List retrieves sandboxes with optional label filtering and pagination.
+//
+// Deprecated: Use [Client.ListV2] instead. This method uses offset-based pagination against a
+// deprecated API endpoint that will be removed on April 1, 2026. After that date,
+// this method will be removed and [Client.ListV2] will be renamed to List.
 //
 // Parameters:
 //   - labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
@@ -808,6 +813,98 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 		Total:      int(result.GetTotal()),
 		Page:       int(result.GetPage()),
 		TotalPages: int(result.GetTotalPages()),
+	}, nil
+}
+
+// ListV2 retrieves sandboxes with optional state filtering.
+// Uses cursor-based pagination, ordered newest first.
+//
+// Parameters:
+//   - cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
+//   - limit: Optional number of results per page. Pass nil for the default limit.
+//   - states: Optional list of sandbox states to filter by. Pass nil for no filtering.
+//
+// Example:
+//
+//	// First page
+//	result, err := client.ListV2(ctx, nil, nil, nil)
+//
+//	// Next page
+//	result2, err := client.ListV2(ctx, result.NextCursor, nil, nil)
+//
+//	// Filter by state
+//	states := []apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED}
+//	result, err := client.ListV2(ctx, nil, nil, states)
+//
+// Returns a [PaginatedSandboxesV2] containing the matching sandboxes and a cursor for the next page.
+func (c *Client) ListV2(ctx context.Context, cursor *string, limit *int, states []apiclient.SandboxState) (*PaginatedSandboxesV2, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "ListV2", func(ctx context.Context) (*PaginatedSandboxesV2, error) {
+		return c.doListV2(ctx, cursor, limit, states)
+	})
+}
+
+func (c *Client) doListV2(ctx context.Context, cursor *string, limit *int, states []apiclient.SandboxState) (*PaginatedSandboxesV2, error) {
+	authCtx := c.getAuthContext(ctx)
+	request := c.apiClient.SandboxAPI.ListSandboxes(authCtx)
+
+	if cursor != nil {
+		request = request.Cursor(*cursor)
+	}
+	if limit != nil {
+		request = request.Limit(float32(*limit))
+	}
+	if states != nil {
+		stateStrings := make([]string, len(states))
+		for i, s := range states {
+			stateStrings[i] = string(s)
+		}
+		request = request.States(stateStrings)
+	}
+
+	result, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, errors.ConvertAPIError(err, httpResp)
+	}
+
+	items := result.GetItems()
+	sandboxes := make([]*Sandbox, len(items))
+	for i := range items {
+		toolboxClient, err := c.createToolboxClient(ctx, items[i].GetId(), items[i].GetTarget())
+		if err != nil {
+			return nil, err
+		}
+
+		autoArchiveInterval := 0
+		if items[i].AutoArchiveInterval != nil {
+			autoArchiveInterval = int(*items[i].AutoArchiveInterval)
+		}
+
+		autoDeleteInterval := 0
+		if items[i].AutoDeleteInterval != nil {
+			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
+		}
+
+		sandboxes[i] = NewSandbox(c,
+			toolboxClient,
+			items[i].GetId(),
+			items[i].GetName(),
+			items[i].GetState(),
+			items[i].GetTarget(),
+			autoArchiveInterval,
+			autoDeleteInterval,
+			items[i].GetNetworkBlockAll(),
+			items[i].NetworkAllowList,
+		)
+	}
+
+	var nextCursor *string
+	if nc, ok := result.GetNextCursorOk(); ok && nc != nil {
+		nextCursor = nc
+	}
+
+	return &PaginatedSandboxesV2{
+		Items:      sandboxes,
+		NextCursor: nextCursor,
 	}, nil
 }
 

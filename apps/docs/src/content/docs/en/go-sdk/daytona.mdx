@@ -85,6 +85,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*Client\) FindOne\(ctx context.Context, sandboxIDOrName \*string, labels map\[string\]string\) \(\*Sandbox, error\)](<#Client.FindOne>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
+  - [func \(c \*Client\) ListV2\(ctx context.Context, cursor \*string, limit \*int, states \[\]apiclient.SandboxState\) \(\*PaginatedSandboxesV2, error\)](<#Client.ListV2>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
   - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
@@ -175,6 +176,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(m \*MouseService\) Scroll\(ctx context.Context, x, y int, direction string, amount \*int\) \(bool, error\)](<#MouseService.Scroll>)
 - [type OutputChannels](<#OutputChannels>)
 - [type PaginatedSandboxes](<#PaginatedSandboxes>)
+- [type PaginatedSandboxesV2](<#PaginatedSandboxesV2>)
 - [type ProcessService](<#ProcessService>)
   - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ProcessService](<#NewProcessService>)
   - [func \(p \*ProcessService\) CodeRun\(ctx context.Context, code string, opts ...func\(\*options.CodeRun\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.CodeRun>)
@@ -456,6 +458,8 @@ func (c *Client) List(ctx context.Context, labels map[string]string, page *int, 
 
 List retrieves sandboxes with optional label filtering and pagination.
 
+Deprecated: Use [Client.ListV2](<#Client.ListV2>) instead. This method uses offset\-based pagination against a deprecated API endpoint that will be removed on April 1, 2026. After that date, this method will be removed and [Client.ListV2](<#Client.ListV2>) will be renamed to List.
+
 Parameters:
 
 - labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
@@ -482,6 +486,37 @@ for _, sandbox := range result.Items {
 ```
 
 Returns a [PaginatedSandboxes](<#PaginatedSandboxes>) containing the matching sandboxes and pagination metadata.
+
+<a name="Client.ListV2"></a>
+### func \(\*Client\) ListV2
+
+```go
+func (c *Client) ListV2(ctx context.Context, cursor *string, limit *int, states []apiclient.SandboxState) (*PaginatedSandboxesV2, error)
+```
+
+ListV2 retrieves sandboxes with optional state filtering. Uses cursor\-based pagination, ordered newest first.
+
+Parameters:
+
+- cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
+- limit: Optional number of results per page. Pass nil for the default limit.
+- states: Optional list of sandbox states to filter by. Pass nil for no filtering.
+
+Example:
+
+```
+// First page
+result, err := client.ListV2(ctx, nil, nil, nil)
+
+// Next page
+result2, err := client.ListV2(ctx, result.NextCursor, nil, nil)
+
+// Filter by state
+states := []apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED}
+result, err := client.ListV2(ctx, nil, nil, states)
+```
+
+Returns a [PaginatedSandboxesV2](<#PaginatedSandboxesV2>) containing the matching sandboxes and a cursor for the next page.
 
 <a name="CodeInterpreterService"></a>
 ## type CodeInterpreterService
@@ -2534,12 +2569,26 @@ type OutputChannels struct {
 
 PaginatedSandboxes represents a paginated list of sandboxes.
 
+Deprecated: Use [PaginatedSandboxesV2](<#PaginatedSandboxesV2>) instead. Will be removed on April 1, 2026.
+
 ```go
 type PaginatedSandboxes struct {
     Items      []*Sandbox // Sandboxes in this page
     Total      int        // Total number of sandboxes
     Page       int        // Current page number
     TotalPages int        // Total number of pages
+}
+```
+
+<a name="PaginatedSandboxesV2"></a>
+## type PaginatedSandboxesV2
+
+PaginatedSandboxesV2 represents a paginated list of sandboxes using cursor\-based pagination.
+
+```go
+type PaginatedSandboxesV2 struct {
+    Items      []*Sandbox // Sandboxes in this page
+    NextCursor *string    // Cursor for the next page of results. Nil if there are no more results.
 }
 ```
 

@@ -9,6 +9,7 @@ import os
 import threading
 import time
 import warnings
+from collections.abc import Sequence
 from concurrent.futures import Future
 from copy import deepcopy
 from importlib.metadata import version
@@ -28,6 +29,7 @@ from daytona_api_client import (
 )
 from daytona_api_client import VolumesApi as VolumesApi
 from daytona_toolbox_api_client import ApiClient as ToolboxApiClient
+from deprecated import deprecated
 from environs import Env
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -55,7 +57,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
-from .sandbox import PaginatedSandboxes, Sandbox
+from .sandbox import PaginatedSandboxes, PaginatedSandboxesV2, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
 
@@ -599,11 +601,19 @@ class Daytona:
         """
         if sandbox_id_or_name:
             return self.get(sandbox_id_or_name)
+
+        # TODO: implement top-level search method, and consume it here  # pylint: disable=fixme
         sandboxes = self.list(labels, page=1, limit=1)
         if len(sandboxes.items) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")
         return sandboxes.items[0]
 
+    @deprecated(
+        reason=(
+            "Use `list_v2` instead. This method uses offset-based pagination against a "
+            "deprecated API endpoint that will be removed on April 1, 2026."
+        )
+    )
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation()
     def list(
@@ -650,6 +660,61 @@ class Daytona:
             total=response.total,
             page=response.page,
             total_pages=response.total_pages,
+        )
+
+    @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation()
+    def list_v2(
+        self,
+        cursor: str | None = None,
+        limit: int | None = None,
+        states: Sequence[str] | None = None,
+    ) -> PaginatedSandboxesV2:
+        """Returns a paginated list of Sandboxes with optional state filtering.
+
+        Uses cursor-based pagination, ordered newest first.
+
+        Args:
+            cursor (str | None): Pagination cursor from a previous response. Omit to start from the beginning.
+            limit (int | None): Maximum number of items per page.
+            states (Sequence[SandboxState] | None): Filter by Sandbox states.
+
+        Returns:
+            PaginatedSandboxesV2: Cursor-paginated list of Sandbox instances.
+
+        Example:
+            ```python
+            # First page
+            page1 = daytona.list_v2(limit=10)
+            for sandbox in page1.items:
+                print(f"{sandbox.id}: {sandbox.state}")
+
+            # Next page
+            if page1.next_cursor:
+                page2 = daytona.list_v2(cursor=page1.next_cursor, limit=10)
+
+            # Filter by state
+            running = daytona.list_v2(limit=10, states=[SandboxState.STARTED])
+            ```
+        """
+        response = self._sandbox_api.list_sandboxes(
+            cursor=cursor,
+            limit=limit,
+            states=list(states) if states else None,
+        )
+
+        return PaginatedSandboxesV2(
+            items=[
+                Sandbox(
+                    sandbox,
+                    self._toolbox_api_client,
+                    self._sandbox_api,
+                    self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    self._get_proxy_toolbox_url,
+                )
+                for sandbox in response.items
+            ],
+            next_cursor=response.next_cursor,
         )
 
     def _validate_language_label(self, language: str | None = None) -> CodeLanguage:
