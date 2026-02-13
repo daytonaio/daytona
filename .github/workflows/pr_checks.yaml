@@ -187,6 +187,7 @@ jobs:
         run: |
           source "$(poetry env info --path)/bin/activate"
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
           yarn
           VERSION=0.0.0-dev yarn build --nxBail=true
 
