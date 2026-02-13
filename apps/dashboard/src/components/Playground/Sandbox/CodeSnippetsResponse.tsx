@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import PythonIcon from '@/assets/python.svg'
+import TypescriptIcon from '@/assets/typescript.svg'
 import CodeBlock from '@/components/CodeBlock'
 import { CopyButton } from '@/components/CopyButton'
 import TooltipButton from '@/components/TooltipButton'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import PythonIcon from '@/assets/python.svg'
-import TypescriptIcon from '@/assets/typescript.svg'
 import { FileSystemActions, GitOperationsActions, ProcessCodeExecutionActions } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { usePlaygroundSandbox } from '@/hooks/usePlaygroundSandbox'
@@ -27,7 +27,7 @@ import { codeSnippetGenerators, CodeSnippetParams } from './CodeSnippets'
 const codeSnippetSupportedLanguages = [
   { value: CodeLanguage.PYTHON, label: 'Python', icon: PythonIcon },
   { value: CodeLanguage.TYPESCRIPT, label: 'TypeScript', icon: TypescriptIcon },
-]
+] as const
 
 const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
   const [codeSnippetLanguage, setCodeSnippetLanguage] = useState<CodeLanguage>(CodeLanguage.PYTHON)
