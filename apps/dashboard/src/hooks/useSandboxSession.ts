@@ -155,7 +155,7 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
 
   const vncUrlQuery = useQuery<string, Error>({
     queryKey: queryKeys.sandbox.vncUrl(key),
-    queryFn: async () => (await getPortPreviewUrl(sandboxId, VNC_PORT)) + '/vnc.html',
+    queryFn: async () => (await getPortPreviewUrl(sandboxId, VNC_PORT)) + '/vnc.html?autoconnect=true',
     enabled: vnc && !!sandboxId && vncStatusQuery.data === 'active',
     staleTime: Infinity,
   })
