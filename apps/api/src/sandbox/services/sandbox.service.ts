@@ -1368,7 +1368,7 @@ export class SandboxService {
     if (!sandbox.runnerId) {
       throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
     }
-    const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (!runner) {
       throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
     }
@@ -1990,9 +1990,7 @@ export class SandboxService {
 
     // Get runner information if sandbox exists
     if (sshAccess.sandbox && sshAccess.sandbox.runnerId) {
-      const runner = await this.runnerRepository.findOne({
-        where: { id: sshAccess.sandbox.runnerId },
-      })
+      const runner = await this.runnerService.findOne(sshAccess.sandbox.runnerId)
 
       if (runner) {
         return {
