@@ -34,7 +34,7 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["api:openapi"],
+      "dependsOn": ["api:openapi", "copy-toolbox-openapi"],
       "configurations": {
         "production": {
           "commands": [
@@ -73,6 +73,16 @@
         "command": "node ./update-api-reference.js"
       },
       "dependsOn": ["api:openapi"]
+    },
+    "copy-toolbox-openapi": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "outputs": ["{projectRoot}/public/toolbox-openapi.json"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json"
+      }
     },
     "check-version-env": {},
     "docker": {
