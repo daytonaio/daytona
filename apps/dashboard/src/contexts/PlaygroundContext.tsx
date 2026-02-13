@@ -4,16 +4,6 @@
  */
 
 import {
-  CodeLanguage,
-  Resources,
-  CreateSandboxBaseParams,
-  ScreenshotRegion,
-  CreateSandboxFromImageParams,
-  CreateSandboxFromSnapshotParams,
-  ScreenshotOptions,
-  ComputerUse,
-} from '@daytonaio/sdk'
-import {
   FileSystemActions,
   GitOperationsActions,
   KeyboardActions,
@@ -25,6 +15,16 @@ import {
   ScreenshotActions,
   ScreenshotFormatOption,
 } from '@/enums/Playground'
+import {
+  CodeLanguage,
+  ComputerUse,
+  CreateSandboxBaseParams,
+  CreateSandboxFromImageParams,
+  CreateSandboxFromSnapshotParams,
+  Resources,
+  ScreenshotOptions,
+  ScreenshotRegion,
+} from '@daytonaio/sdk'
 import { createContext, ReactNode } from 'react'
 
 export interface ParameterFormItem {

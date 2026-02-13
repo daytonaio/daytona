@@ -4,35 +4,36 @@
  */
 
 import {
-  PlaygroundContext,
-  SandboxParams,
-  SetSandboxParamsValue,
-  VNCInteractionOptionsParams,
-  SetVNCInteractionOptionsParamValue,
-  RunningActionMethodName,
-  ActionRuntimeError,
-  ValidatePlaygroundActionRequiredParams,
-  RunPlaygroundActionBasic,
-  RunPlaygroundActionWithParams,
-  ValidatePlaygroundActionWithParams,
-  PlaygroundActionParamValueSetter,
-  SetPlaygroundActionParamValue,
-} from '@/contexts/PlaygroundContext'
-import { ScreenshotFormatOption, MouseButton, MouseScrollDirection } from '@/enums/Playground'
-import {
   DEFAULT_CPU_RESOURCES,
-  DEFAULT_MEMORY_RESOURCES,
   DEFAULT_DISK_RESOURCES,
+  DEFAULT_MEMORY_RESOURCES,
   SANDBOX_SNAPSHOT_DEFAULT_VALUE,
 } from '@/constants/Playground'
+import {
+  ActionRuntimeError,
+  PlaygroundActionParams,
+  PlaygroundActionParamValueSetter,
+  PlaygroundContext,
+  RunningActionMethodName,
+  RunPlaygroundActionBasic,
+  RunPlaygroundActionWithParams,
+  SandboxParams,
+  SetPlaygroundActionParamValue,
+  SetSandboxParamsValue,
+  SetVNCInteractionOptionsParamValue,
+  ValidatePlaygroundActionRequiredParams,
+  ValidatePlaygroundActionWithParams,
+  VNCInteractionOptionsParams,
+} from '@/contexts/PlaygroundContext'
+import { MouseButton, MouseScrollDirection, ScreenshotFormatOption } from '@/enums/Playground'
+import { getLanguageCodeToRun, objectHasAnyValue } from '@/lib/playground'
 import {
   CreateSandboxBaseParams,
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
   Image,
 } from '@daytonaio/sdk'
-import { getLanguageCodeToRun, objectHasAnyValue } from '@/lib/playground'
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
@@ -236,9 +237,11 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         actionParamsKey in sandboxParametersState
           ? sandboxParametersState[actionParamsKey as keyof SandboxParams]
           : VNCInteractionOptionsParamsState[actionParamsKey as keyof VNCInteractionOptionsParams]
-      const newState = { ...prev, [paramFormData.key]: value }
-      setPlaygroundActionParamValue(actionParamsKey, newState)
-      if (!actionFormData.onChangeParamsValidationDisabled) validatePlaygroundActionWithParams(actionFormData, newState)
+      const newState = Object.assign({}, prev, { [paramFormData.key]: value })
+
+      setPlaygroundActionParamValue(actionParamsKey, newState as PlaygroundActionParams[typeof actionParamsKey])
+      if (!actionFormData.onChangeParamsValidationDisabled)
+        validatePlaygroundActionWithParams(actionFormData, newState as typeof actionFormData.parametersState)
     },
     [
       setPlaygroundActionParamValue,
