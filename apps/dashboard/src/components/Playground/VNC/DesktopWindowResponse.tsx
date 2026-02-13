@@ -100,7 +100,7 @@ const VNCDesktopWindowResponse: React.FC<{ className?: string }> = ({ className 
                   </AnimatePresence>
                 </div>
               ) : (
-                <iframe title="VNC desktop window" src={`${vnc.url}?resize=scale`} className="w-full h-full" />
+                <iframe title="VNC desktop window" src={`${vnc.url}&resize=scale`} className="w-full h-full" />
               )}
             </div>
           </Panel>
