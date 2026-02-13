@@ -15,7 +15,8 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -38,6 +39,7 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerEvents } from '../constants/runner-events'
 import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
+import { RunnerUnschedulableUpdatedEvent } from '../events/runner-unschedulable-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
@@ -45,6 +47,7 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 
 @Injectable()
 export class RunnerService {
@@ -125,6 +128,7 @@ export class RunnerService {
 
     try {
       const savedRunner = await this.runnerRepository.save(runner)
+      this.invalidateRunnerCache(savedRunner.id)
       return { runner: savedRunner, apiKey }
     } catch (error) {
       if (error.code === '23505') {
@@ -212,7 +216,13 @@ export class RunnerService {
   }
 
   async findOne(id: string): Promise<Runner | null> {
-    return this.runnerRepository.findOneBy({ id })
+    return this.runnerRepository.findOne({
+      where: { id },
+      cache: {
+        id: runnerLookupCacheKeyById(id),
+        milliseconds: RUNNER_LOOKUP_CACHE_TTL_MS,
+      },
+    })
   }
 
   async findOneFullOrFail(id: string): Promise<RunnerFullDto> {
@@ -253,7 +263,7 @@ export class RunnerService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
-    return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    return this.findOne(sandbox.runnerId)
   }
 
   async getRegionId(runnerId: string): Promise<string> {
@@ -356,6 +366,7 @@ export class RunnerService {
       await em.delete(Runner, id)
       await this.eventEmitter.emitAsync(RunnerEvents.DELETED, new RunnerDeletedEvent(em, id))
     })
+    this.invalidateRunnerCache(id)
   }
 
   async updateRunnerHealth(
@@ -379,7 +390,7 @@ export class RunnerService {
     },
     appVersion?: string,
   ): Promise<void> {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    const runner = await this.findOne(runnerId)
     if (!runner) {
       this.logger.error(`Runner ${runnerId} not found when trying to update health`)
       return
@@ -440,7 +451,7 @@ export class RunnerService {
       })
     }
 
-    await this.runnerRepository.update(runnerId, updateData)
+    await this.updateRunner(runnerId, updateData)
     this.logger.debug(`Updated health for runner ${runnerId}`)
 
     this.eventEmitter.emit(
@@ -450,7 +461,7 @@ export class RunnerService {
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    const runner = await this.findOne(runnerId)
     if (!runner) {
       this.logger.error(`Runner ${runnerId} not found when trying to update state`)
       return
@@ -462,7 +473,7 @@ export class RunnerService {
       return
     }
 
-    await this.runnerRepository.update(runnerId, {
+    await this.updateRunner(runnerId, {
       state: newState,
       lastChecked: new Date(),
     })
@@ -675,7 +686,7 @@ export class RunnerService {
 
               if (count >= 3) {
                 // Decommission the runner
-                await this.runnerRepository.update(runner.id, {
+                await this.updateRunner(runner.id, {
                   state: RunnerState.DECOMMISSIONED,
                 })
                 await this.redis.del(redisKey)
@@ -698,23 +709,27 @@ export class RunnerService {
   }
 
   async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
-    const runner = await this.runnerRepository.findOne({ where: { id } })
-    if (!runner) {
+    const result = await this.updateRunner(id, { unschedulable })
+    if (result.affected === 0) {
       throw new NotFoundException('Runner not found')
     }
+    const runner = await this.findOne(id)
 
-    runner.unschedulable = unschedulable
-    return this.runnerRepository.save(runner)
+    // Repository.update() does not trigger TypeORM subscribers, so emit manually.
+    this.eventEmitter.emit(
+      RunnerEvents.UNSCHEDULABLE_UPDATED,
+      new RunnerUnschedulableUpdatedEvent(runner, !unschedulable, unschedulable),
+    )
+
+    return runner
   }
 
   async updateDrainingStatus(id: string, draining: boolean): Promise<Runner> {
-    const runner = await this.runnerRepository.findOne({ where: { id } })
-    if (!runner) {
+    const result = await this.updateRunner(id, { draining })
+    if (result.affected === 0) {
       throw new NotFoundException('Runner not found')
     }
-
-    runner.draining = draining
-    return this.runnerRepository.save(runner)
+    return this.findOne(id)
   }
 
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
@@ -843,13 +858,35 @@ export class RunnerService {
       throw new BadRequestException('Initial runner not found')
     }
 
-    const runner = await this.runnerRepository.findOne({ where: { id: snapshot.initialRunnerId } })
+    const runner = await this.findOne(snapshot.initialRunnerId)
 
     if (!runner) {
       throw new NotFoundException('Runner not found')
     }
 
     return runner
+  }
+
+  private async updateRunner(id: string, data: QueryDeepPartialEntity<Runner>): Promise<UpdateResult> {
+    const result = await this.runnerRepository.update(id, data)
+    this.invalidateRunnerCache(id)
+    return result
+  }
+
+  private invalidateRunnerCache(runnerId: string): void {
+    const cache = this.dataSource.queryResultCache
+    if (!cache) {
+      return
+    }
+
+    cache
+      .remove([runnerLookupCacheKeyById(runnerId)])
+      .then(() => this.logger.debug(`Invalidated runner lookup cache for ${runnerId}`))
+      .catch((error) =>
+        this.logger.warn(
+          `Failed to invalidate runner lookup cache for ${runnerId}: ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      )
   }
 
   private calculateAvailabilityScore(runnerId: string, params: AvailabilityScoreParams): number {
