@@ -69,4 +69,11 @@ export const queryKeys = {
     traceSpans: (sandboxId: string, traceId: string) =>
       [...queryKeys.telemetry.all, sandboxId, 'traces', traceId] as const,
   },
+  sandbox: {
+    all: ['sandbox'] as const,
+    instance: (key: string) => [...queryKeys.sandbox.all, key] as const,
+    terminalUrl: (key: string) => [...queryKeys.sandbox.all, key, 'terminal-url'] as const,
+    vncStatus: (key: string) => [...queryKeys.sandbox.all, key, 'vnc-status'] as const,
+    vncUrl: (key: string) => [...queryKeys.sandbox.all, key, 'vnc-url'] as const,
+  },
 } as const
