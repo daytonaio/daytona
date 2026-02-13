@@ -131,6 +131,7 @@ definitions:
       result:
         type: string
     required:
+      - exitCode
       - result
     type: object
   FileInfo:

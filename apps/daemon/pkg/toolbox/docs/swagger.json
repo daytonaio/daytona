@@ -2638,7 +2638,7 @@
     },
     "ExecuteResponse": {
       "type": "object",
-      "required": ["result"],
+      "required": ["exitCode", "result"],
       "properties": {
         "exitCode": {
           "type": "integer"
