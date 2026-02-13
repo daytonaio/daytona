@@ -367,6 +367,9 @@ module Daytona
           # Check if the line contains a COPY command (at the beginning of the line)
           next unless line.match?(/^\s*COPY\s+(?!.*--from=)/i)
 
+          # Skip COPY instructions that use heredoc syntax (inline content, not file references)
+          next if line.include?('<<')
+
           # Extract the sources from the COPY command
           command_parts = parse_copy_command(line)
           next unless command_parts
