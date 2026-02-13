@@ -1574,7 +1574,7 @@
     },
     "RecoverSandboxDTO": {
       "type": "object",
-      "required": ["errorReason", "osUser", "snapshot", "userId"],
+      "required": ["errorReason", "osUser", "userId"],
       "properties": {
         "backupErrorReason": {
           "type": "string"

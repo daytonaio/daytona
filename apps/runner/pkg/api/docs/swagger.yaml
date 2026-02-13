@@ -199,7 +199,6 @@ definitions:
     required:
       - errorReason
       - osUser
-      - snapshot
       - userId
     type: object
   RegistryDTO:
