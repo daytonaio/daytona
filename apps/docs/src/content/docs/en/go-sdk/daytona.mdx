@@ -423,6 +423,8 @@ sandbox, err := client.FindOne(ctx, nil, map[string]string{
 })
 ```
 
+Deprecated: Use [Client.Get](<#Client.Get>) for name lookup. This method relies on a deprecated API endpoint that will be removed on April 1, 2026. After that date, this method will be removed.
+
 Returns [errors.DaytonaNotFoundError](<https://pkg.go.dev/errors/#DaytonaNotFoundError>) if no matching sandbox is found.
 
 <a name="Client.Get"></a>

@@ -323,6 +323,10 @@ print(sandbox.state)
 #### AsyncDaytona.find\_one
 
 ```python
+@deprecated(reason=(
+    "Use `get` for name lookup. "
+    "This method relies on a deprecated API endpoint that will be removed on April 1, 2026."
+))
 @intercept_errors(message_prefix="Failed to find sandbox: ")
 @with_instrumentation()
 async def find_one(sandbox_id_or_name: str | None = None,
@@ -330,6 +334,11 @@ async def find_one(sandbox_id_or_name: str | None = None,
 ```
 
 Finds a Sandbox by its ID or name or labels.
+
+.. deprecated::
+Use :meth:`get` for name lookup.
+This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+After that date, this method will be removed.
 
 **Arguments**:
 

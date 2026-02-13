@@ -628,6 +628,10 @@ export class Daytona implements AsyncDisposable {
   /**
    * Finds a Sandbox by its ID or name or labels.
    *
+   * @deprecated Use {@link get} for name lookup.
+   * This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+   * After that date, this method will be removed.
+   *
    * @param {SandboxFilter} filter - Filter for Sandboxes
    * @returns {Promise<Sandbox>} First Sandbox that matches the ID or name or labels.
    *
@@ -641,7 +645,6 @@ export class Daytona implements AsyncDisposable {
       return this.get(filter.idOrName)
     }
 
-    // TODO: implement top-level search method, and consume it here
     const result = await this.list(filter.labels, 1, 1)
     if (result.items.length === 0) {
       const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`

@@ -88,6 +88,9 @@ module Daytona
 
     # Finds a Sandbox by its ID or labels.
     #
+    # @deprecated Use {#get} for name lookup.
+    #   This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+    #   After that date, this method will be removed.
     # @param id [String, Nil]
     # @param labels [Hash<String, String>]
     # @return [Daytona::Sandbox]
@@ -95,7 +98,6 @@ module Daytona
     def find_one(id: nil, labels: nil)
       return get(id) if id
 
-      # TODO: implement top-level search method, and consume it here
       response = list(labels)
       raise Sdk::Error, "No sandbox found with labels #{labels}" if response.items.empty?
 

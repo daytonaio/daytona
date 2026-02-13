@@ -218,7 +218,7 @@ await daytona.delete(sandbox);
 
 ***
 
-#### findOne()
+#### ~~findOne()~~
 
 ```ts
 findOne(filter: SandboxFilter): Promise<Sandbox>
@@ -234,6 +234,12 @@ Finds a Sandbox by its ID or name or labels.
 **Returns**:
 
 - `Promise<Sandbox>` - First Sandbox that matches the ID or name or labels.
+
+##### Deprecated
+
+Use get for name lookup.
+This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+After that date, this method will be removed.
 
 **Example:**
 

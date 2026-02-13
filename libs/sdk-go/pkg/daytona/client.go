@@ -686,6 +686,10 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 //	    "team":        "backend",
 //	})
 //
+// Deprecated: Use [Client.Get] for name lookup.
+// This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+// After that date, this method will be removed.
+//
 // Returns [errors.DaytonaNotFoundError] if no matching sandbox is found.
 func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error) {
 	return withInstrumentation(ctx, c.Otel, "Client", "FindOne", func(ctx context.Context) (*Sandbox, error) {
@@ -698,7 +702,6 @@ func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels 
 		return c.Get(ctx, *sandboxIDOrName)
 	}
 
-	// TODO: implement top-level search method, and consume it here
 	pages := 1
 	limit := 1
 	result, err := c.List(ctx, labels, &pages, &limit)

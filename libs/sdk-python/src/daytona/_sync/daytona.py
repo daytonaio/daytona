@@ -578,10 +578,21 @@ class Daytona:
             self._get_proxy_toolbox_url,
         )
 
+    @deprecated(
+        reason=(
+            "Use `get` for name lookup. "
+            "This method relies on a deprecated API endpoint that will be removed on April 1, 2026."
+        )
+    )
     @intercept_errors(message_prefix="Failed to find sandbox: ")
     @with_instrumentation()
     def find_one(self, sandbox_id_or_name: str | None = None, labels: dict[str, str] | None = None) -> Sandbox:
         """Finds a Sandbox by its ID or name or labels.
+
+        .. deprecated::
+            Use :meth:`get` for name lookup.
+            This method relies on a deprecated API endpoint that will be removed on April 1, 2026.
+            After that date, this method will be removed.
 
         Args:
             sandbox_id_or_name (str | None): The ID or name of the Sandbox to retrieve.
@@ -602,7 +613,6 @@ class Daytona:
         if sandbox_id_or_name:
             return self.get(sandbox_id_or_name)
 
-        # TODO: implement top-level search method, and consume it here  # pylint: disable=fixme
         sandboxes = self.list(labels, page=1, limit=1)
         if len(sandboxes.items) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")
