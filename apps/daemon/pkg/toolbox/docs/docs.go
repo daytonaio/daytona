@@ -3047,6 +3047,7 @@ const docTemplate = `{
         "ExecuteResponse": {
             "type": "object",
             "required": [
+                "exitCode",
                 "result"
             ],
             "properties": {
