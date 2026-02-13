@@ -18,8 +18,11 @@
     const headings = document.querySelectorAll(
       '.markdown-content h2[id], .markdown-content h3[id], .markdown-content h4[id], .markdown-content h5[id]'
     )
+    const filteredHeadings = Array.from(headings).filter(
+      heading => !heading.closest('#scalar-container')
+    )
 
-    headings.forEach(heading => {
+    filteredHeadings.forEach(heading => {
       const anchor = document.createElement('a')
       anchor.href = `#${heading.id}`
       anchor.className = 'heading-anchor'
