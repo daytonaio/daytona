@@ -136,17 +136,23 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   })
 
   const vncToastId = `vnc-${resolvedScope}-${sandboxId}`
+  const vncToastShownRef = useRef(false)
 
   const startVncMutation = useMutation<void, Error>({
     mutationFn: async () => {
       await toolboxApi.startComputerUseDeprecated(sandboxId, selectedOrganization?.id)
     },
-    onMutate: () => notifyRef.current.vnc && toast.loading('Starting VNC desktop...', { id: vncToastId }),
-    onSuccess: () =>
-      notifyRef.current.vnc && toast.loading('VNC desktop started, checking status...', { id: vncToastId }),
-    onError: (error) =>
-      notifyRef.current.vnc &&
-      toast.error('Failed to start VNC desktop', { id: vncToastId, description: error.message }),
+    onMutate: () => {
+      if (notifyRef.current.vnc) {
+        vncToastShownRef.current = true
+        toast.loading('Starting VNC desktop...', { id: vncToastId })
+      }
+    },
+    onSuccess: () => {
+      if (vncToastShownRef.current) {
+        toast.loading('VNC desktop started, checking status...', { id: vncToastId })
+      }
+    },
   })
 
   const prevSandboxIdRef = useRef<string>('')
@@ -154,6 +160,7 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
     if (prevSandboxIdRef.current && !sandboxQuery.data && !sandboxQuery.isFetching) {
       createMutation.reset()
       startVncMutation.reset()
+      vncToastShownRef.current = false
       if (scope) removeSandboxSessionQueries(queryClient, scope)
     }
     prevSandboxIdRef.current = sandboxId
@@ -181,14 +188,19 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   })
 
   useEffect(() => {
-    if (vncStatusQuery.error && notifyRef.current.vnc) {
-      toast.error('VNC desktop failed to become ready', { id: vncToastId, description: vncStatusQuery.error.message })
-    }
-  }, [vncStatusQuery.error, vncToastId])
+    if (!vncToastShownRef.current) return
 
-  useEffect(() => {
-    if (vncUrlQuery.data && notifyRef.current.vnc) toast.success('VNC desktop is ready', { id: vncToastId })
-  }, [vncUrlQuery.data, vncToastId])
+    if (vncUrlQuery.data) {
+      toast.success('VNC desktop is ready', { id: vncToastId })
+      vncToastShownRef.current = false
+    } else if (startVncMutation.error) {
+      toast.error('Failed to start VNC desktop', { id: vncToastId, description: startVncMutation.error.message })
+      vncToastShownRef.current = false
+    } else if (vncStatusQuery.error) {
+      toast.error('VNC desktop failed to become ready', { id: vncToastId, description: vncStatusQuery.error.message })
+      vncToastShownRef.current = false
+    }
+  }, [vncToastId, vncUrlQuery.data, startVncMutation.error, vncStatusQuery.error])
 
   const createSandbox = useCallback(
     (params?: CreateSandboxParams) => createMutation.mutateAsync(params ?? createParams),
@@ -217,7 +229,10 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
         startVncMutation.reset()
         queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncStatus(resolvedScope, sandboxId) })
         queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncUrl(resolvedScope, sandboxId) })
-        if (notifyRef.current.vnc) toast.loading('Retrying VNC desktop...', { id: vncToastId })
+        if (notifyRef.current.vnc) {
+          vncToastShownRef.current = true
+          toast.loading('Retrying VNC desktop...', { id: vncToastId })
+        }
         startVncMutation.mutate()
       },
     },
