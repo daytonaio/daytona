@@ -13,8 +13,8 @@ import {
   Daytona,
   Sandbox,
 } from '@daytonaio/sdk'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useMemo } from 'react'
+import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
@@ -24,11 +24,11 @@ const TERMINAL_PORT = 22222
 const VNC_PORT = 6080
 
 export type UseSandboxSessionOptions = {
-  key?: string
+  scope?: string
   createParams?: CreateSandboxParams
-  autoCreate?: boolean
   terminal?: boolean
   vnc?: boolean
+  notify?: { sandbox?: boolean; terminal?: boolean; vnc?: boolean }
 }
 
 export type SandboxState = {
@@ -55,8 +55,28 @@ export type UseSandboxSessionResult = {
   vnc: VncState
 }
 
+export function removeSandboxSessionQueries(queryClient: QueryClient, scope: string): void {
+  queryClient
+    .getMutationCache()
+    .findAll({ mutationKey: ['create-sandbox', scope] })
+    .forEach((m) => queryClient.getMutationCache().remove(m))
+  queryClient.removeQueries({ queryKey: queryKeys.sandbox.session(scope) })
+}
+
+export function removeSandboxSessionQueriesByInstanceId(queryClient: QueryClient, sandboxId: string): void {
+  const scopes = new Set<string>()
+  for (const query of queryClient.getQueryCache().findAll({ queryKey: queryKeys.sandbox.all })) {
+    if (query.queryKey.includes(sandboxId)) {
+      scopes.add(query.queryKey[1] as string)
+    }
+  }
+  scopes.forEach((s) => removeSandboxSessionQueries(queryClient, s))
+}
+
 export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandboxSessionResult {
-  const { key: sessionKey, autoCreate = false, createParams, terminal = false, vnc = false } = options ?? {}
+  const { scope, createParams, terminal = false, vnc = false, notify } = options ?? {}
+  const notifyRef = useRef({ sandbox: true, terminal: true, vnc: true, ...notify })
+  notifyRef.current = { sandbox: true, terminal: true, vnc: true, ...notify }
   const { user } = useAuth()
   const { selectedOrganization } = useSelectedOrganization()
   const { sandboxApi, toolboxApi } = useApi()
@@ -72,75 +92,75 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   }, [user?.access_token, selectedOrganization?.id])
 
   const createMutation = useMutation<Sandbox, Error, CreateSandboxParams | undefined>({
+    mutationKey: ['create-sandbox', scope ?? 'default'],
     mutationFn: async (params) => {
       if (!client) throw new Error('Unable to create Daytona client: missing access token or organization ID.')
       return await client.create(params ?? createParams)
     },
     onSuccess: (newSandbox) => {
-      queryClient.setQueryData(queryKeys.sandbox.instance(sessionKey ?? newSandbox.id), newSandbox)
+      if (scope) queryClient.setQueryData(queryKeys.sandbox.currentId(scope), newSandbox.id)
     },
     onError: (error) => {
-      toast.error('Failed to create sandbox', {
-        description: error.message,
-        action: { label: 'Try again', onClick: () => createMutation.mutate(createParams) },
-      })
+      if (notifyRef.current.sandbox) {
+        toast.error('Failed to create sandbox', {
+          description: error.message,
+          action: { label: 'Try again', onClick: () => createMutation.mutate(createParams) },
+        })
+      }
     },
   })
 
-  // Derive sandbox ID from cache first, then from mutation result
-  const cachedSandbox = sessionKey
-    ? queryClient.getQueryData<Sandbox>(queryKeys.sandbox.instance(sessionKey))
-    : undefined
-  const sandboxId = cachedSandbox?.id ?? createMutation.data?.id ?? ''
-  const key = sessionKey ?? createMutation.data?.id ?? ''
+  const persistedSandboxId = scope ? queryClient.getQueryData<string>(queryKeys.sandbox.currentId(scope)) : undefined
+  const sandboxId = createMutation.data?.id ?? persistedSandboxId ?? ''
+  const resolvedScope = scope ?? sandboxId
 
   const sandboxQuery = useQuery<Sandbox>({
-    queryKey: queryKeys.sandbox.instance(key),
+    queryKey: queryKeys.sandbox.instance(resolvedScope, sandboxId),
     queryFn: () => client?.get(sandboxId) ?? Promise.reject(new Error('Client not initialized')),
-    enabled: !!key && !!sandboxId && !!client,
-    staleTime: Infinity,
+    enabled: !!resolvedScope && !!sandboxId && !!client,
   })
 
-  const sandbox = sandboxQuery.data ?? null
-
-  useEffect(() => {
-    if (autoCreate && createMutation.status === 'idle' && !cachedSandbox) {
-      createMutation.mutate(createParams)
-    }
-  }, [autoCreate, createMutation.status, cachedSandbox, createParams])
+  const sandbox = sandboxQuery.data ?? createMutation.data ?? null
 
   const getPortPreviewUrl = useCallback(
-    async (sandboxId: string, port: number) =>
-      (await sandboxApi.getSignedPortPreviewUrl(sandboxId, port, selectedOrganization?.id)).data.url,
+    async (id: string, port: number) =>
+      (await sandboxApi.getSignedPortPreviewUrl(id, port, selectedOrganization?.id)).data.url,
     [sandboxApi, selectedOrganization?.id],
   )
 
   const terminalQuery = useQuery<string, Error>({
-    queryKey: queryKeys.sandbox.terminalUrl(key),
+    queryKey: queryKeys.sandbox.terminalUrl(resolvedScope, sandboxId),
     queryFn: () => getPortPreviewUrl(sandboxId, TERMINAL_PORT),
     enabled: terminal && !!sandboxId,
     staleTime: Infinity,
   })
 
-  const vncToastId = `vnc-${key}`
+  const vncToastId = `vnc-${resolvedScope}-${sandboxId}`
 
   const startVncMutation = useMutation<void, Error>({
     mutationFn: async () => {
       await toolboxApi.startComputerUseDeprecated(sandboxId, selectedOrganization?.id)
     },
-    onMutate: () => {
-      toast.loading('Starting VNC desktop...', { id: vncToastId })
-    },
-    onSuccess: () => {
-      toast.loading('VNC desktop started, checking status...', { id: vncToastId })
-    },
-    onError: (error) => {
-      toast.error('Failed to start VNC desktop', { id: vncToastId, description: error.message })
-    },
+    onMutate: () => notifyRef.current.vnc && toast.loading('Starting VNC desktop...', { id: vncToastId }),
+    onSuccess: () =>
+      notifyRef.current.vnc && toast.loading('VNC desktop started, checking status...', { id: vncToastId }),
+    onError: (error) =>
+      notifyRef.current.vnc &&
+      toast.error('Failed to start VNC desktop', { id: vncToastId, description: error.message }),
   })
 
+  const prevSandboxIdRef = useRef<string>('')
+  useEffect(() => {
+    if (prevSandboxIdRef.current && !sandboxQuery.data && !sandboxQuery.isFetching) {
+      createMutation.reset()
+      startVncMutation.reset()
+      if (scope) removeSandboxSessionQueries(queryClient, scope)
+    }
+    prevSandboxIdRef.current = sandboxId
+  }, [sandboxId, sandboxQuery.data, sandboxQuery.isFetching, createMutation, startVncMutation, queryClient, scope])
+
   const vncStatusQuery = useQuery<string, Error>({
-    queryKey: queryKeys.sandbox.vncStatus(key),
+    queryKey: queryKeys.sandbox.vncStatus(resolvedScope, sandboxId),
     queryFn: async () => {
       const {
         data: { status },
@@ -154,22 +174,20 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   const vncReady = vncStatusQuery.data === 'active'
 
   const vncUrlQuery = useQuery<string, Error>({
-    queryKey: queryKeys.sandbox.vncUrl(key),
-    queryFn: async () => (await getPortPreviewUrl(sandboxId, VNC_PORT)) + '/vnc.html?autoconnect=true',
-    enabled: vnc && !!sandboxId && vncStatusQuery.data === 'active',
+    queryKey: queryKeys.sandbox.vncUrl(resolvedScope, sandboxId),
+    queryFn: async () => await getPortPreviewUrl(sandboxId, VNC_PORT),
+    enabled: vnc && !!sandboxId && vncReady,
     staleTime: Infinity,
   })
 
   useEffect(() => {
-    if (vncStatusQuery.error) {
+    if (vncStatusQuery.error && notifyRef.current.vnc) {
       toast.error('VNC desktop failed to become ready', { id: vncToastId, description: vncStatusQuery.error.message })
     }
   }, [vncStatusQuery.error, vncToastId])
 
   useEffect(() => {
-    if (vncUrlQuery.data) {
-      toast.success('VNC desktop is ready', { id: vncToastId })
-    }
+    if (vncUrlQuery.data && notifyRef.current.vnc) toast.success('VNC desktop is ready', { id: vncToastId })
   }, [vncUrlQuery.data, vncToastId])
 
   const createSandbox = useCallback(
@@ -180,8 +198,8 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   return {
     sandbox: {
       instance: sandbox,
-      loading: createMutation.isPending || (autoCreate && !sandbox && !createMutation.error),
-      error: createMutation.error?.message ?? null,
+      loading: createMutation.isPending || (!!sandboxId && sandboxQuery.isLoading),
+      error: createMutation.error?.message ?? sandboxQuery.error?.message ?? null,
       create: createSandbox,
     },
     terminal: {
@@ -197,9 +215,9 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
       start: () => startVncMutation.mutate(),
       refetch: () => {
         startVncMutation.reset()
-        queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncStatus(key) })
-        queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncUrl(key) })
-        toast.loading('Retrying VNC desktop...', { id: vncToastId })
+        queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncStatus(resolvedScope, sandboxId) })
+        queryClient.removeQueries({ queryKey: queryKeys.sandbox.vncUrl(resolvedScope, sandboxId) })
+        if (notifyRef.current.vnc) toast.loading('Retrying VNC desktop...', { id: vncToastId })
         startVncMutation.mutate()
       },
     },
