@@ -28,7 +28,7 @@ class OtelConfig(BaseModel):
     OtelConfig
     """ # noqa: E501
     endpoint: StrictStr = Field(description="Endpoint")
-    headers: Optional[Dict[str, StrictStr]] = Field(description="Headers")
+    headers: Optional[Dict[str, StrictStr]] = Field(default=None, description="Headers")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["endpoint", "headers"]
 

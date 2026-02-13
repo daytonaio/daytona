@@ -29,5 +29,5 @@ export interface OtelConfig {
    * @type {{ [key: string]: string; }}
    * @memberof OtelConfig
    */
-  headers: { [key: string]: string } | null
+  headers?: { [key: string]: string } | null
 }

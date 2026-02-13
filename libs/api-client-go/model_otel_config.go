@@ -24,7 +24,7 @@ type OtelConfig struct {
 	// Endpoint
 	Endpoint string `json:"endpoint"`
 	// Headers
-	Headers              map[string]string `json:"headers"`
+	Headers              map[string]string `json:"headers,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -34,10 +34,9 @@ type _OtelConfig OtelConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOtelConfig(endpoint string, headers map[string]string) *OtelConfig {
+func NewOtelConfig(endpoint string) *OtelConfig {
 	this := OtelConfig{}
 	this.Endpoint = endpoint
-	this.Headers = headers
 	return &this
 }
 
@@ -73,18 +72,16 @@ func (o *OtelConfig) SetEndpoint(v string) {
 	o.Endpoint = v
 }
 
-// GetHeaders returns the Headers field value
-// If the value is explicit nil, the zero value for map[string]string will be returned
+// GetHeaders returns the Headers field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *OtelConfig) GetHeaders() map[string]string {
 	if o == nil {
 		var ret map[string]string
 		return ret
 	}
-
 	return o.Headers
 }
 
-// GetHeadersOk returns a tuple with the Headers field value
+// GetHeadersOk returns a tuple with the Headers field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *OtelConfig) GetHeadersOk() (*map[string]string, bool) {
@@ -94,7 +91,16 @@ func (o *OtelConfig) GetHeadersOk() (*map[string]string, bool) {
 	return &o.Headers, true
 }
 
-// SetHeaders sets field value
+// HasHeaders returns a boolean if a field has been set.
+func (o *OtelConfig) HasHeaders() bool {
+	if o != nil && !IsNil(o.Headers) {
+		return true
+	}
+
+	return false
+}
+
+// SetHeaders gets a reference to the given map[string]string and assigns it to the Headers field.
 func (o *OtelConfig) SetHeaders(v map[string]string) {
 	o.Headers = v
 }
@@ -127,7 +133,6 @@ func (o *OtelConfig) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"endpoint",
-		"headers",
 	}
 
 	allProperties := make(map[string]interface{})
