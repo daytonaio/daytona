@@ -1,0 +1,1525 @@
+---
+title: 疑似端末 (PTY)
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona は、サンドボックス内で `process` モジュールを通じて強力な擬似端末 (PTY) 機能を提供します。PTY セッションを使用すると、コマンドの実行、ユーザー入力の処理、ターミナル操作の管理が可能な対話型のターミナルセッションを作成できます。
+
+PTY (Pseudo Terminal) は、実際の端末に接続されているかのように、プログラムがシェルと対話できる仮想端末インターフェースです。Daytona の PTY セッションにより、次のことが可能になります:
+
+* **インタラクティブ開発**: REPL、デバッガ、開発ツール
+* **ビルド処理**: コンパイル、テスト、デプロイの実行と監視
+* **システム管理**: リモートサーバーの管理と設定
+* **ユーザーインターフェース**: ユーザー操作を伴うターミナルベースのアプリケーション
+
+## PTY セッションを作成する \{#create-pty-session\}
+
+Daytona は、コマンドの実行やユーザー入力の処理が可能な対話型ターミナルセッションを作成するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona.common.pty import PtySize
+
+    pty_handle = sandbox.process.create_pty_session(
+        id="my-session",
+        cwd="/workspace",
+        envs={"TERM": "xterm-256color"},
+        pty_size=PtySize(cols=120, rows=30)
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // カスタム設定で PTY セッションを作成
+    const ptyHandle = await sandbox.process.createPty({
+      id: 'my-interactive-session',
+      cwd: '/workspace',
+      envs: { TERM: 'xterm-256color', LANG: 'en_US.UTF-8' },
+      cols: 120,
+      rows: 30,
+      onData: (data) => {
+        // ターミナル出力を処理
+        const text = new TextDecoder().decode(data)
+        process.stdout.write(text)
+      },
+    })
+
+    // 接続が確立されるまで待機
+    await ptyHandle.waitForConnection()
+
+    // ターミナルにコマンドを送信
+    await ptyHandle.sendInput('ls -la\n')
+    await ptyHandle.sendInput('echo "Hello, PTY!"\n')
+    await ptyHandle.sendInput('exit\n')
+
+    // 完了を待ち、結果を取得
+    const result = await ptyHandle.wait()
+    console.log(`PTY session completed with exit code: ${result.exitCode}`)
+
+    // 後処理
+    await ptyHandle.disconnect()
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    pty_size = Daytona::PtySize.new(rows: 30, cols: 120)
+    pty_handle = sandbox.process.create_pty_session(
+      id: 'my-interactive-session',
+      cwd: '/workspace',
+      envs: { 'TERM' => 'xterm-256color' },
+      pty_size: pty_size
+    )
+
+    # PTY セッションを使用
+    pty_handle.send_input("ls -la\n")
+    pty_handle.send_input("echo 'Hello, PTY!'\n")
+    pty_handle.send_input("exit\n")
+
+    # 出力を処理
+    pty_handle.each { |data| print data }
+
+    puts "PTY session completed with exit code: #{pty_handle.exit_code}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // カスタム設定で PTY セッションを作成
+    handle, err := sandbox.Process.CreatePty(ctx, "my-interactive-session",
+    	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+    	options.WithCreatePtyEnv(map[string]string{"TERM": "xterm-256color"}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    // 接続が確立されるまで待機
+    if err := handle.WaitForConnection(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // ターミナルにコマンドを送信
+    handle.SendInput([]byte("ls -la\n"))
+    handle.SendInput([]byte("echo 'Hello, PTY!'\n"))
+    handle.SendInput([]byte("exit\n"))
+
+    // チャネルから出力を読み取る
+    for data := range handle.DataChan() {
+    	fmt.Print(string(data))
+    }
+
+    // 完了を待ち、結果を取得
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("PTY session completed with exit code: %d\n", *result.ExitCode)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "cols": 1,
+      "cwd": "",
+      "envs": {
+        "additionalProperty": ""
+      },
+      "id": "",
+      "lazyStart": true,
+      "rows": 1
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/#createpty)、[Ruby SDK](/docs/ja/ruby-sdk/process/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**create&#95;pty&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processcreate_pty_session)
+>
+> [**createPty (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#createpty)
+>
+> [**create&#95;pty&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#create_pty_session)
+>
+> [**CreatePty (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.CreatePty)
+>
+> [**PTY セッションの作成 (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/POST/process/pty)
+
+## PTY セッションに接続する \{#connect-to-pty-session\}
+
+Daytona には既存の PTY セッションに接続するためのメソッドが用意されており、すでに作成済みのターミナルと対話できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    pty_handle = sandbox.process.connect_pty_session("my-session")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Connect to an existing PTY session
+    const handle = await sandbox.process.connectPty('my-session', {
+      onData: (data) => {
+        // Handle terminal output
+        const text = new TextDecoder().decode(data)
+        process.stdout.write(text)
+      },
+    })
+
+    // Wait for connection to be established
+    await handle.waitForConnection()
+
+    // Send commands to the existing session
+    await handle.sendInput('pwd\n')
+    await handle.sendInput('ls -la\n')
+    await handle.sendInput('exit\n')
+
+    // Wait for completion
+    const result = await handle.wait()
+    console.log(`Session exited with code: ${result.exitCode}`)
+
+    // Clean up
+    await handle.disconnect()
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Connect to an existing PTY session
+    pty_handle = sandbox.process.connect_pty_session('my-session')
+    pty_handle.send_input("echo 'Hello World'\n")
+    pty_handle.send_input("exit\n")
+
+    # Handle output
+    pty_handle.each { |data| print data }
+
+    puts "Session exited with code: #{pty_handle.exit_code}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Connect to an existing PTY session
+    handle, err := sandbox.Process.ConnectPty(ctx, "my-session")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    // Wait for connection to be established
+    if err := handle.WaitForConnection(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // Send commands to the existing session
+    handle.SendInput([]byte("pwd\n"))
+    handle.SendInput([]byte("ls -la\n"))
+    handle.SendInput([]byte("exit\n"))
+
+    // Read output
+    for data := range handle.DataChan() {
+    	fmt.Print(string(data))
+    }
+
+    // Wait for completion
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Session exited with code: %d\n", *result.ExitCode)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty/{sessionId}/connect'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/)、[Ruby SDK](/docs/ja/ruby-sdk/process/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**connect&#95;pty&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processconnect_pty_session)
+>
+> [**connectPty (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#connectpty)
+>
+> [**connect&#95;pty&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#connect_pty_session)
+>
+> [**ConnectPty (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ConnectPty)
+>
+> [**PTY セッションに接続する (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/GET/process/pty/\{sessionId}/connect)
+
+## PTY セッションの一覧取得 \{#list-pty-sessions\}
+
+Daytona では、サンドボックス内で作成されたすべての PTY セッション（アクティブ・非アクティブを問わず）の情報を取得するためのメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # List all PTY sessions
+    sessions = sandbox.process.list_pty_sessions()
+
+    for session in sessions:
+        print(f"Session ID: {session.id}")
+        print(f"Active: {session.active}")
+        print(f"Created: {session.created_at}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // List all PTY sessions
+    const sessions = await sandbox.process.listPtySessions()
+
+    for (const session of sessions) {
+      console.log(`Session ID: ${session.id}`)
+      console.log(`Active: ${session.active}`)
+      console.log(`Created: ${session.createdAt}`)
+      console.log('---')
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # List all PTY sessions
+    sessions = sandbox.process.list_pty_sessions
+
+    sessions.each do |session|
+      puts "Session ID: #{session.id}"
+      puts "Active: #{session.active}"
+      puts "Terminal Size: #{session.cols}x#{session.rows}"
+      puts '---'
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // List all PTY sessions
+    sessions, err := sandbox.Process.ListPtySessions(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    for _, session := range sessions {
+    	fmt.Printf("Session ID: %s\n", session.Id)
+    	fmt.Printf("Active: %t\n", session.Active)
+    	fmt.Printf("Terminal Size: %dx%d\n", session.Cols, session.Rows)
+    	fmt.Println("---")
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/)、[Ruby SDK](/docs/ja/ruby-sdk/process/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**list&#95;pty&#95;sessions (Python SDK)**](/docs/ja/python-sdk/sync/process/#processlist_pty_sessions)
+>
+> [**listPtySessions (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#listptysessions)
+>
+> [**list&#95;pty&#95;sessions (Ruby SDK)**](/docs/ja/ruby-sdk/process/#list_pty_sessions)
+>
+> [**ListPtySessions (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ListPtySessions)
+>
+> [**List PTY sessions (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/GET/process/pty)
+
+## PTY セッション情報を取得する \{#get-pty-session-info\}
+
+Daytona では、特定の PTY セッションの情報を取得するためのメソッドを提供しており、そのセッションの現在の状態、設定、メタデータなどを含む詳細な情報を取得できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Get details about a specific PTY session
+    session_info = sandbox.process.get_pty_session_info("my-session")
+
+    print(f"Session ID: {session_info.id}")
+    print(f"Active: {session_info.active}")
+    print(f"Working Directory: {session_info.cwd}")
+    print(f"Terminal Size: {session_info.cols}x{session_info.rows}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Get details about a specific PTY session
+    const session = await sandbox.process.getPtySessionInfo('my-session')
+
+    console.log(`Session ID: ${session.id}`)
+    console.log(`Active: ${session.active}`)
+    console.log(`Working Directory: ${session.cwd}`)
+    console.log(`Terminal Size: ${session.cols}x${session.rows}`)
+
+    if (session.processId) {
+      console.log(`Process ID: ${session.processId}`)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Get details about a specific PTY session
+    session_info = sandbox.process.get_pty_session_info('my-session')
+
+    puts "Session ID: #{session_info.id}"
+    puts "Active: #{session_info.active}"
+    puts "Working Directory: #{session_info.cwd}"
+    puts "Terminal Size: #{session_info.cols}x#{session_info.rows}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Get details about a specific PTY session
+    session, err := sandbox.Process.GetPtySessionInfo(ctx, "my-session")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    fmt.Printf("Session ID: %s\n", session.Id)
+    fmt.Printf("Active: %t\n", session.Active)
+    fmt.Printf("Working Directory: %s\n", session.Cwd)
+    fmt.Printf("Terminal Size: %dx%d\n", session.Cols, session.Rows)
+
+    if session.ProcessId != nil {
+    	fmt.Printf("Process ID: %d\n", *session.ProcessId)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/)、[Ruby SDK](/docs/ja/ruby-sdk/process/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**get&#95;pty&#95;session&#95;info (Python SDK)**](/docs/ja/python-sdk/sync/process/#processget_pty_session_info)
+>
+> [**getPtySessionInfo (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#getptysessioninfo)
+>
+> [**get&#95;pty&#95;session&#95;info (Ruby SDK)**](/docs/ja/ruby-sdk/process/#get_pty_session_info)
+>
+> [**GetPtySessionInfo (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.GetPtySessionInfo)
+>
+> [**Get PTY session info (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/GET/process/session/\{sessionId})
+
+## PTY セッションの強制終了 \{#kill-pty-session\}
+
+Daytona は PTY セッションを強制終了するためのメソッドを提供しており、PTY セッションを強制的に終了し、関連するすべてのリソースをクリーンアップできます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 特定の PTY セッションを強制終了する
+    sandbox.process.kill_pty_session("my-session")
+
+    # セッションが存在しないことを確認する
+    pty_sessions = sandbox.process.list_pty_sessions()
+    for pty_session in pty_sessions:
+        print(f"PTY session: {pty_session.id}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 特定の PTY セッションを強制終了する
+    await sandbox.process.killPtySession('my-session')
+
+    // セッションがすでに非アクティブであることを確認する
+    try {
+      const info = await sandbox.process.getPtySessionInfo('my-session')
+      console.log(`Session still exists but active: ${info.active}`)
+    } catch (error) {
+      console.log('Session has been completely removed')
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 特定の PTY セッションを削除する
+    sandbox.process.delete_pty_session('my-session')
+
+    # セッションが存在しないことを確認する
+    sessions = sandbox.process.list_pty_sessions
+    sessions.each do |session|
+      puts "PTY session: #{session.id}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 特定の PTY セッションを強制終了する
+    err := sandbox.Process.KillPtySession(ctx, "my-session")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // セッションがすでに非アクティブであることを確認する
+    sessions, err := sandbox.Process.ListPtySessions(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    for _, session := range sessions {
+    	fmt.Printf("PTY session: %s\n", session.Id)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}' \
+      --request DELETE
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/)、[Ruby SDK](/docs/ja/ruby-sdk/process/#delete_pty_session)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**kill&#95;pty&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processkill_pty_session)
+>
+> [**killPtySession (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#killptysession)
+>
+> [**delete&#95;pty&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#delete_pty_session)
+>
+> [**KillPtySession (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.KillPtySession)
+>
+> [**Kill PTY session (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/DELETE/process/session/\{sessionId})
+
+## PTY セッションのサイズ変更 \{#resize-pty-session\}
+
+Daytona では、PTY セッションのサイズを変更するためのメソッドを提供しており、アクティブな PTY セッションのターミナルの行数と列数を変更できます。これによりシェルプロセスに SIGWINCH シグナルが送信され、ターミナルアプリケーションが新しいサイズに合わせて動作を調整できるようになります。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona.common.pty import PtySize
+
+    # Resize a PTY session to a larger terminal
+    new_size = PtySize(rows=40, cols=150)
+    updated_info = sandbox.process.resize_pty_session("my-session", new_size)
+
+    print(f"Terminal resized to {updated_info.cols}x{updated_info.rows}")
+
+    # You can also use the PtyHandle's resize method
+    pty_handle.resize(new_size)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Resize a PTY session to a larger terminal
+    const updatedInfo = await sandbox.process.resizePtySession('my-session', 150, 40)
+    console.log(`Terminal resized to ${updatedInfo.cols}x${updatedInfo.rows}`)
+
+    // You can also use the PtyHandle's resize method
+    await ptyHandle.resize(150, 40) // cols, rows
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Resize a PTY session to a larger terminal
+    pty_size = Daytona::PtySize.new(rows: 40, cols: 150)
+    session_info = sandbox.process.resize_pty_session('my-session', pty_size)
+
+    puts "Terminal resized to #{session_info.cols}x#{session_info.rows}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Resize a PTY session to a larger terminal
+    updatedInfo, err := sandbox.Process.ResizePtySession(ctx, "my-session", types.PtySize{
+    	Cols: 150,
+    	Rows: 40,
+    })
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    fmt.Printf("Terminal resized to %dx%d\n", updatedInfo.Cols, updatedInfo.Rows)
+
+    // You can also use the PtyHandle's Resize method
+    info, err := handle.Resize(ctx, 150, 40)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Terminal resized to %dx%d\n", info.Cols, info.Rows)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/pty/{sessionId}/resize' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "cols": 1,
+      "rows": 1
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/process/)、[TypeScript SDK](/docs/ja/typescript-sdk/process/#resizeptysession)、[Ruby SDK](/docs/ja/ruby-sdk/process/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice)、および [API](/docs/ja/tools/api#daytona-toolbox/tag/process) のリファレンスを参照してください。
+
+> [**resize&#95;pty&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processresize_pty_session)
+>
+> [**resizePtySession (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#resizeptysession)
+>
+> [**resize&#95;pty&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#resize_pty_session)
+>
+> [**ResizePtySession (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ResizePtySession)
+>
+> [**Resize PTY session (API)**](/docs/ja/tools/api#daytona-toolbox/tag/process/POST/process/pty/\{sessionId}/resize)
+
+## 対話型コマンド \{#interactive-commands\}
+
+Daytona は PTY セッションを用いて対話型コマンドを扱うためのメソッドを提供しており、ユーザー入力を伴い、実行中にターミナルサイズを変更できる対話型コマンドを処理できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import time
+    from daytona import Daytona, Sandbox
+    from daytona.common.pty import PtySize
+
+    def handle_pty_data(data: bytes):
+        text = data.decode("utf-8", errors="replace")
+        print(text, end="")
+
+    # PTY セッションを作成
+    pty_handle = sandbox.process.create_pty_session(
+        id="interactive-session",
+        pty_size=PtySize(cols=300, rows=100)
+    )
+
+    # 対話型コマンドを送信
+    pty_handle.send_input('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n')
+    time.sleep(1)
+    pty_handle.send_input("y\n")
+
+    # ターミナルをリサイズ
+    pty_session_info = pty_handle.resize(PtySize(cols=210, rows=110))
+    print(f"PTY session resized to {pty_session_info.cols}x{pty_session_info.rows}")
+
+    # セッションを終了
+    pty_handle.send_input('exit\n')
+
+    # イテレーターで出力を処理
+    for data in pty_handle:
+        handle_pty_data(data)
+
+    print(f"Session completed with exit code: {pty_handle.exit_code}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+    // Create PTY session
+    const ptyHandle = await sandbox.process.createPty({
+      id: 'interactive-session',
+      cols: 300,
+      rows: 100,
+      onData: data => {
+        const text = new TextDecoder().decode(data)
+        process.stdout.write(text)
+      },
+    })
+
+    await ptyHandle.waitForConnection()
+
+    // 対話型コマンドを送信
+    await ptyHandle.sendInput(
+      'printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi\n'
+    )
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    await ptyHandle.sendInput('y\n')
+
+    // Resize terminal
+    const ptySessionInfo = await sandbox.process.resizePtySession(
+      'interactive-session',
+      210,
+      110
+    )
+    console.log(
+      `\nPTY session resized to ${ptySessionInfo.cols}x${ptySessionInfo.rows}`
+    )
+
+    // Exit the session
+    await ptyHandle.sendInput('exit\n')
+
+    // Wait for completion
+    const result = await ptyHandle.wait()
+    console.log(`Session completed with exit code: ${result.exitCode}`)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # PTY セッションを作成
+    pty_handle = sandbox.process.create_pty_session(
+      id: 'interactive-session',
+      pty_size: Daytona::PtySize.new(cols: 300, rows: 100)
+    )
+
+    # 別スレッドで出力を処理
+    thread = Thread.new do
+      pty_handle.each { |data| print data }
+    end
+
+    # 対話型コマンドを送信
+    pty_handle.send_input('printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi' + "\n")
+    sleep(1)
+    pty_handle.send_input("y\n")
+
+    # ターミナルをリサイズ
+    pty_handle.resize(Daytona::PtySize.new(cols: 210, rows: 110))
+    puts "\nPTY session resized"
+
+    # セッションを終了
+    pty_handle.send_input("exit\n")
+
+    # スレッドの終了を待機
+    thread.join
+
+    puts "Session completed with exit code: #{pty_handle.exit_code}"
+    ```
+  </TabItem>
+
+  <TabItem label="実行" icon="seti:go">
+    ```go
+    // Create PTY session
+    handle, err := sandbox.Process.CreatePty(ctx, "interactive-session",
+    	options.WithCreatePtySize(types.PtySize{Cols: 300, Rows: 100}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    if err := handle.WaitForConnection(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // goroutine で出力を処理
+    go func() {
+    	for data := range handle.DataChan() {
+    		fmt.Print(string(data))
+    	}
+    }()
+
+    // Send interactive command
+    handle.SendInput([]byte(`printf "Are you accepting the terms and conditions? (y/n): " && read confirm && if [ "$confirm" = "y" ]; then echo "You accepted"; else echo "You did not accept"; fi` + "\n"))
+    time.Sleep(1 * time.Second)
+    handle.SendInput([]byte("y\n"))
+
+    // Resize terminal
+    info, err := handle.Resize(ctx, 210, 110)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("\nPTY session resized to %dx%d\n", info.Cols, info.Rows)
+
+    // Exit the session
+    handle.SendInput([]byte("exit\n"))
+
+    // Wait for completion
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Session completed with exit code: %d\n", *result.ExitCode)
+    ```
+  </TabItem>
+</Tabs>
+
+## 長時間実行プロセス \{#long-running-processes\}
+
+Daytona は、PTY セッションを使用して長時間実行プロセスを管理するためのメソッドを提供しており、監視や強制終了が必要な長時間実行プロセスを管理できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import time
+    import threading
+    from daytona import Daytona, Sandbox
+    from daytona.common.pty import PtySize
+
+    def handle_pty_data(data: bytes):
+        text = data.decode("utf-8", errors="replace")
+        print(text, end="")
+
+    # PTY セッションを作成
+    pty_handle = sandbox.process.create_pty_session(
+        id="long-running-session",
+        pty_size=PtySize(cols=120, rows=30)
+    )
+
+    # 長時間実行プロセスを開始
+    pty_handle.send_input('while true; do echo "Running... $(date)"; sleep 1; done\n')
+
+    # スレッドと wait() メソッドで PTY の出力を処理
+    thread = threading.Thread(target=pty_handle.wait, args=(handle_pty_data, 10))
+    thread.start()
+
+    time.sleep(3)  # しばらく実行させる
+
+    print("長時間実行プロセスを終了します...")
+    pty_handle.kill()
+
+    thread.join()
+
+    print(f"\nプロセスは終了コード {pty_handle.exit_code} で終了しました")
+    if pty_handle.error:
+        print(f"終了理由: {pty_handle.error}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Sandbox } from '@daytonaio/sdk'
+
+    // PTY セッションを作成
+    const ptyHandle = await sandbox.process.createPty({
+      id: 'long-running-session',
+      cols: 120,
+      rows: 30,
+      onData: (data) => {
+        const text = new TextDecoder().decode(data)
+        process.stdout.write(text)
+      },
+    })
+
+    await ptyHandle.waitForConnection()
+
+    // 長時間実行プロセスを開始
+    await ptyHandle.sendInput('while true; do echo "Running... $(date)"; sleep 1; done\n')
+    await new Promise(resolve => setTimeout(resolve, 3000)) // しばらく実行させる
+
+    console.log('長時間実行プロセスを終了します...')
+    await ptyHandle.kill()
+
+    // 終了を待機
+    const result = await ptyHandle.wait()
+    console.log(`\nプロセスは終了コード: ${result.exitCode} で終了しました`)
+    if (result.error) {
+      console.log(`終了理由: ${result.error}`)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # PTY セッションを作成
+    pty_handle = sandbox.process.create_pty_session(
+      id: 'long-running-session',
+      pty_size: Daytona::PtySize.new(cols: 120, rows: 30)
+    )
+
+    # 別スレッドで出力を処理
+    thread = Thread.new do
+      pty_handle.each { |data| print data }
+    end
+
+    # 長時間実行プロセスを開始
+    pty_handle.send_input("while true; do echo \"Running... $(date)\"; sleep 1; done\n")
+    sleep(3) # しばらく実行させる
+
+    puts "長時間実行プロセスを終了します..."
+    pty_handle.kill
+
+    thread.join
+
+    puts "\nプロセスは終了コード: #{pty_handle.exit_code} で終了しました"
+    puts "終了理由: #{pty_handle.error}" if pty_handle.error
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // PTY セッションを作成
+    handle, err := sandbox.Process.CreatePty(ctx, "long-running-session",
+    	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    if err := handle.WaitForConnection(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // goroutine で出力を処理
+    go func() {
+    	for data := range handle.DataChan() {
+    		fmt.Print(string(data))
+    	}
+    }()
+
+    // 長時間実行プロセスを開始
+    handle.SendInput([]byte(`while true; do echo "Running... $(date)"; sleep 1; done` + "\n"))
+    time.Sleep(3 * time.Second) // しばらく実行させる
+
+    fmt.Println("長時間実行プロセスを終了します...")
+    if err := handle.Kill(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // 終了を待機
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("\nプロセスは終了コード: %d\n", *result.ExitCode)
+    if result.Error != nil {
+    	fmt.Printf("終了理由: %s\n", *result.Error)
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## リソース管理 \{#resource-management\}
+
+Daytona は PTY セッションに関連するリソースリークを管理するためのメソッドを提供しており、PTY セッションを常にクリーンアップしてリソースリークを防止できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python: try/finally を使用
+    pty_handle = None
+    try:
+        pty_handle = sandbox.process.create_pty_session(id="session", pty_size=PtySize(cols=120, rows=30))
+        # ここで処理を行う...
+    finally:
+        if pty_handle:
+            pty_handle.kill()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // TypeScript: try/finally を使用
+    let ptyHandle
+    try {
+      ptyHandle = await sandbox.process.createPty({
+        id: 'session',
+        cols: 120,
+        rows: 30,
+      })
+      # ここで処理を行う...
+    } finally {
+      if (ptyHandle) await ptyHandle.kill()
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby: begin/ensure を使用
+    pty_handle = nil
+    begin
+      pty_handle = sandbox.process.create_pty_session(
+        id: 'session',
+        pty_size: Daytona::PtySize.new(cols: 120, rows: 30)
+      )
+      # ここで処理を行う...
+    ensure
+      pty_handle&.kill
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Go: クリーンアップには defer を使用
+    handle, err := sandbox.Process.CreatePty(ctx, "session",
+    	options.WithCreatePtySize(types.PtySize{Cols: 120, Rows: 30}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    // ここで処理を行う...
+
+    // または Kill を使用してプロセスを終了
+    defer handle.Kill(ctx)
+    ```
+  </TabItem>
+</Tabs>
+
+## PtyHandle メソッド \{#ptyhandle-methods\}
+
+Daytona では PTY セッションと対話するためのメソッドが用意されており、入力の送信、ターミナルサイズの変更、処理の完了待ち、PTY セッションへの WebSocket 接続の管理が行えます。
+
+### 入力を送信する \{#send-input\}
+
+Daytona は PTY セッションに入力を送信するためのメソッドを提供しており、キー入力やコマンドなどの入力データを PTY セッションに送信できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # コマンドを送信
+    pty_handle.send_input("ls -la\n")
+
+    # ユーザー入力を送信
+    pty_handle.send_input("y\n")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // コマンドを送信
+    await ptyHandle.sendInput('ls -la\n')
+
+    // 生のバイト列を送信
+    await ptyHandle.sendInput(new Uint8Array([3])) // Ctrl+C
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # コマンドを送信
+    pty_handle.send_input("ls -la\n")
+
+    # ユーザー入力を送信
+    pty_handle.send_input("y\n")
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // コマンドを送信
+    handle.SendInput([]byte("ls -la\n"))
+
+    // Ctrl+C を送信
+    handle.SendInput([]byte{0x03})
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**sendInput (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#sendinput)
+>
+> [**SendInput (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.SendInput)
+
+### 完了を待機する \{#wait-for-completion\}
+
+Daytona では、PTY プロセスの終了を待ち、その結果を取得するためのメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 出力データ用のコールバック関数を使って待機する
+    def handle_data(data: bytes):
+        print(data.decode("utf-8", errors="replace"), end="")
+
+    result = pty_handle.wait(on_data=handle_data, timeout=30)
+    print(f"Exit code: {result.exit_code}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // プロセスの完了を待機する
+    const result = await ptyHandle.wait()
+
+    if (result.exitCode === 0) {
+      console.log('Process completed successfully')
+    } else {
+      console.log(`Process failed with code: ${result.exitCode}`)
+      if (result.error) {
+        console.log(`Error: ${result.error}`)
+      }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 出力を順に処理して待機する（PTY セッションが終了するまでブロックされる）
+    pty_handle.each { |data| print data }
+
+    if pty_handle.exit_code == 0
+      puts 'Process completed successfully'
+    else
+      puts "Process failed with code: #{pty_handle.exit_code}"
+      puts "Error: #{pty_handle.error}" if pty_handle.error
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // プロセスの完了を待機する
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    if result.ExitCode != nil && *result.ExitCode == 0 {
+    	fmt.Println("Process completed successfully")
+    } else {
+    	fmt.Printf("Process failed with code: %d\n", *result.ExitCode)
+    	if result.Error != nil {
+    		fmt.Printf("Error: %s\n", *result.Error)
+    	}
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**wait (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#wait)
+>
+> [**Wait (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.Wait)
+
+### 接続の待機 \{#wait-for-connection\}
+
+Daytona では、入力を送信する前に WebSocket 接続が確立されるまで待機できるメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python は作成時に内部で接続を処理します
+    # 明示的に待機する必要はありません
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 接続が確立されるまで待機
+    await ptyHandle.waitForConnection()
+
+    // ここからは安全に入力を送信できます
+    await ptyHandle.sendInput('echo "Connected!"\n')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby は作成時に内部で接続を処理します
+    # 明示的な待機は不要 - 作成直後に入力を送信できます
+    pty_handle.send_input("echo 'Connected!'\n")
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 接続が確立されるまで待機
+    if err := handle.WaitForConnection(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // ここからは安全に入力を送信できます
+    handle.SendInput([]byte("echo 'Connected!'\n"))
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**waitForConnection (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#waitforconnection)
+>
+> [**WaitForConnection (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.WaitForConnection)
+
+### PTY プロセスを強制終了する \{#kill-pty-process\}
+
+Daytona は、ハンドルを使用して PTY プロセスを強制終了し、セッションを終了するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    pty_handle.kill()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 長時間実行中のプロセスを強制終了する
+    await ptyHandle.kill()
+
+    // 終了を確認するために待機する
+    const result = await ptyHandle.wait()
+    console.log(`Process terminated with exit code: ${result.exitCode}`)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 長時間実行中のプロセスを強制終了する
+    pty_handle.kill
+
+    puts "Process terminated with exit code: #{pty_handle.exit_code}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 長時間実行中のプロセスを強制終了する
+    if err := handle.Kill(ctx); err != nil {
+    	log.Fatal(err)
+    }
+
+    // 終了を確認するために待機する
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Process terminated with exit code: %d\n", *result.ExitCode)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**kill（TypeScript SDK）**](/docs/ja/typescript-sdk/pty-handle/#kill)
+>
+> [**Kill（Go SDK）**](/docs/ja/go-sdk/daytona/#PtyHandle.Kill)
+
+### ハンドルからのサイズ変更 \{#resize-from-handle\}
+
+Daytona は、ハンドルから直接 PTY ターミナルのサイズを変更するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona.common.pty import PtySize
+
+    pty_handle.resize(PtySize(cols=120, rows=30))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Resize to 120x30
+    await ptyHandle.resize(120, 30)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Resize to 120x30
+    pty_handle.resize(Daytona::PtySize.new(cols: 120, rows: 30))
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Resize to 120x30
+    info, err := handle.Resize(ctx, 120, 30)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Resized to %dx%d\n", info.Cols, info.Rows)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**resize (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#resize)
+>
+> [**Resize (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.Resize)
+
+### 切断 \{#disconnect\}
+
+Daytona は、プロセスを強制終了せずに PTY セッションから切断し、リソースをクリーンアップするためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python: kill() を使って終了させるか、ハンドルをスコープから外す
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 処理完了時には必ずクリーンアップすること
+    try {
+      // ... PTY セッションを使用
+    } finally {
+      await ptyHandle.disconnect()
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby: begin/ensure を使うか、セッションを kill する
+    begin
+      # ... PTY セッションを使用
+    ensure
+      pty_handle.kill
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // defer を使って、使用後は必ずクリーンアップする
+    handle, err := sandbox.Process.CreatePty(ctx, "session")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer handle.Disconnect()
+
+    // ... PTY セッションを使用
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**disconnect (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#disconnect)
+>
+> [**Disconnect (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.Disconnect)
+
+### 接続状態の確認 \{#check-connection-status\}
+
+Daytona では、PTY セッションがまだ接続中かどうかを確認するためのメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python: Check by attempting operations or using session info
+    session_info = sandbox.process.get_pty_session_info("my-session")
+    print(f"Session active: {session_info.active}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    if (ptyHandle.isConnected()) {
+      console.log('PTY session is active')
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby: Check by using session info
+    session_info = sandbox.process.get_pty_session_info('my-session')
+    puts 'PTY session is active' if session_info.active
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    if handle.IsConnected() {
+    	fmt.Println("PTY session is active")
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) の各リファレンスを参照してください。
+
+> [**isConnected (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#isconnected)
+>
+> [**IsConnected (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.IsConnected)
+
+### 終了コードとエラー \{#exit-code-and-error\}
+
+Daytona は、PTY プロセスが終了した後に終了コードとエラーメッセージを取得するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # イテレーションまたは待機が完了した後
+    print(f"Exit code: {pty_handle.exit_code}")
+    if pty_handle.error:
+        print(f"Error: {pty_handle.error}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // プロセス終了後にゲッター経由でアクセス
+    console.log(`Exit code: ${ptyHandle.exitCode}`)
+    if (ptyHandle.error) {
+      console.log(`Error: ${ptyHandle.error}`)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # プロセス終了後にアクセス
+    puts "Exit code: #{pty_handle.exit_code}"
+    puts "Error: #{pty_handle.error}" if pty_handle.error
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // プロセス終了後にメソッド経由でアクセス
+    if exitCode := handle.ExitCode(); exitCode != nil {
+    	fmt.Printf("Exit code: %d\n", *exitCode)
+    }
+    if errMsg := handle.Error(); errMsg != nil {
+    	fmt.Printf("Error: %s\n", *errMsg)
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/daytona/#type-processservice) のリファレンスを参照してください。
+
+> [**exitCode (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#exitcode)
+>
+> [**error (TypeScript SDK)**](/docs/ja/typescript-sdk/pty-handle/#error)
+>
+> [**ExitCode (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.ExitCode)
+>
+> [**Error (Go SDK)**](/docs/ja/go-sdk/daytona/#PtyHandle.Error)
+
+### 出力を反復処理する (Python) \{#iterate-over-output-python\}
+
+Daytona では、PTY ハンドルを反復処理して出力データを受信するためのメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # PTY 出力を反復処理する
+    for data in pty_handle:
+        text = data.decode("utf-8", errors="replace")
+        print(text, end="")
+
+    print(f"Session ended with exit code: {pty_handle.exit_code}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // TypeScript では代わりに onData コールバックを使用します
+    const ptyHandle = await sandbox.process.createPty({
+      id: 'my-session',
+      onData: (data) => {
+        const text = new TextDecoder().decode(data)
+        process.stdout.write(text)
+      },
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # PTY 出力を反復処理する
+    pty_handle.each do |data|
+      print data
+    end
+
+    puts "Session ended with exit code: #{pty_handle.exit_code}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Go ではチャネルを使用して出力データを受信します
+    for data := range handle.DataChan() {
+    	fmt.Print(string(data))
+    }
+
+    // あるいは io.Reader として使用する
+    io.Copy(os.Stdout, handle)
+
+    fmt.Printf("Session ended with exit code: %d\n", *handle.ExitCode())
+    ```
+  </TabItem>
+</Tabs>
+
+## エラー処理 \{#error-handling\}
+
+Daytona は、PTY セッションで終了コードを監視し、エラーを適切に処理するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python: 終了コードを確認
+    result = pty_handle.wait()
+    if result.exit_code != 0:
+        print(f"Command failed: {result.exit_code}")
+        print(f"Error: {result.error}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // TypeScript: 終了コードを確認
+    const result = await ptyHandle.wait()
+    if (result.exitCode !== 0) {
+      console.log(`Command failed: ${result.exitCode}`)
+      console.log(`Error: ${result.error}`)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby: 終了コードを確認
+    # ハンドルは PTY セッションが完了するまでブロックします
+    pty_handle.each { |data| print data }
+
+    if pty_handle.exit_code != 0
+      puts "Command failed: #{pty_handle.exit_code}"
+      puts "Error: #{pty_handle.error}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Go: 終了コードを確認
+    result, err := handle.Wait(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    if result.ExitCode != nil && *result.ExitCode != 0 {
+    	fmt.Printf("Command failed: %d\n", *result.ExitCode)
+    	if result.Error != nil {
+    		fmt.Printf("Error: %s\n", *result.Error)
+    	}
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+## トラブルシューティング \{#troubleshooting\}
+
+* **接続の問題**: サンドボックスのステータス、ネットワーク接続、正しいセッションIDを確認してください。
+* **パフォーマンスの問題**: 適切なターミナルサイズと効率的なデータハンドラーを使用してください。
+* **プロセス管理**: 長時間実行されるプロセスには、明示的な `kill()` の呼び出しと適切なタイムアウト処理を行ってください。
