@@ -71,9 +71,11 @@ export const queryKeys = {
   },
   sandbox: {
     all: ['sandbox'] as const,
-    instance: (key: string) => [...queryKeys.sandbox.all, key] as const,
-    terminalUrl: (key: string) => [...queryKeys.sandbox.all, key, 'terminal-url'] as const,
-    vncStatus: (key: string) => [...queryKeys.sandbox.all, key, 'vnc-status'] as const,
-    vncUrl: (key: string) => [...queryKeys.sandbox.all, key, 'vnc-url'] as const,
+    session: (scope: string) => [...queryKeys.sandbox.all, scope] as const,
+    currentId: (scope: string) => [...queryKeys.sandbox.all, scope, 'current-id'] as const,
+    instance: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id] as const,
+    terminalUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'terminal-url'] as const,
+    vncStatus: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-status'] as const,
+    vncUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-url'] as const,
   },
 } as const

@@ -95,7 +95,7 @@ const Playground: React.FC = () => {
 
       <PageContent size="full" className="!p-0 h-full flex flex-col flex-1 overflow-auto" ref={pageContentRef}>
         <PlaygroundProvider>
-          <PlaygroundSandboxProvider>
+          <PlaygroundSandboxProvider activeTab={playgroundCategory}>
             <Tabs
               value={playgroundCategory}
               onValueChange={(value) => setPlaygroundCategory(value as PlaygroundCategories)}

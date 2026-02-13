@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { PlaygroundCategories } from '@/enums/Playground'
 import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { usePlayground } from '@/hooks/usePlayground'
 import { useSandboxSession, UseSandboxSessionResult } from '@/hooks/useSandboxSession'
@@ -10,18 +11,31 @@ import { createContext, useEffect, useRef } from 'react'
 
 export const PlaygroundSandboxContext = createContext<UseSandboxSessionResult | null>(null)
 
-export const PlaygroundSandboxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PlaygroundSandboxProvider: React.FC<{
+  activeTab: PlaygroundCategories
+  children: React.ReactNode
+}> = ({ activeTab, children }) => {
   const { getSandboxParametersInfo } = usePlayground()
   const { createSandboxParams } = getSandboxParametersInfo()
   const stableCreateParams = useDeepCompareMemo(createSandboxParams)
 
   const session = useSandboxSession({
-    key: 'playground',
+    scope: 'playground',
     createParams: stableCreateParams,
-    autoCreate: true,
     terminal: true,
     vnc: true,
+    notify: { vnc: activeTab === PlaygroundCategories.VNC },
   })
+
+  const createRef = useRef(session.sandbox.create)
+  createRef.current = session.sandbox.create
+
+  useEffect(() => {
+    const needsSandbox = activeTab === PlaygroundCategories.TERMINAL || activeTab === PlaygroundCategories.VNC
+    if (needsSandbox && !session.sandbox.instance && !session.sandbox.loading && !session.sandbox.error) {
+      createRef.current()
+    }
+  }, [activeTab, session.sandbox.instance, session.sandbox.loading, session.sandbox.error])
 
   const vncSandboxId = useRef<string | null>(null)
   useEffect(() => {
