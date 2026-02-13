@@ -87,7 +87,7 @@ The plugin uses git to synchronize files between the sandbox and your local syst
 When a new Daytona sandbox is created:
 
 1. The plugin looks for a git repository in the local directory. If none is found, file synchronization will be disabled.
-2. In the sandbox, a parallel repository to the local repository is created in the sandbox. An `opencode` branch is created in the sandbox repository.
+2. A parallel repository is created in the sandbox with a single `opencode` branch, mirroring the checked out local branch.
 3. A new `sandbox` remote is added to the local repository using an SSH connection to the sandbox.
 4. The `HEAD` of the local repository is pushed to `opencode`, and the sandbox repository is reset to match this initial state.
 5. Each sandbox is assigned a unique incrementing branch number (1, 2, 3, etc.) that persists across sessions.
@@ -113,7 +113,7 @@ The plugin keeps track of which sandbox belongs to each OpenCode project using l
 
 Each JSON file contains the sandbox metadata for each session in the project, including when the sandbox was created, and when it was last used.
 
-The plugin uses [XDG Base Directory](https://specifications.freedesktop.org/basedir/latest/) specifical to resolve the path to this directory, using the convention [set by OpenCode](https://github.com/anomalyco/opencode/blob/052f887a9a7aaf79d9f1a560f9b686d59faa8348/packages/opencode/src/global/index.ts#L4).
+The plugin uses [XDG Base Directory](https://specifications.freedesktop.org/basedir/latest/) specifically to resolve the path to this directory, using the convention [set by OpenCode](https://github.com/anomalyco/opencode/blob/052f887a9a7aaf79d9f1a560f9b686d59faa8348/packages/opencode/src/global/index.ts#L4).
 
 ## Development
 
