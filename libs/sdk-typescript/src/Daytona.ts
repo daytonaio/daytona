@@ -89,7 +89,7 @@ export interface DaytonaConfig {
   /** Target environment for sandboxes */
   target?: string
   /** Configuration for experimental features */
-  _experimental: Record<string, any>
+  _experimental?: Record<string, any>
 }
 
 /**
