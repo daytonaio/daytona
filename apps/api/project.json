@@ -37,7 +37,12 @@
     "openapi": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{projectRoot}/src/**/*.ts", "!{projectRoot}/src/**/*.spec.ts", "{projectRoot}/tsconfig.app.json"],
+      "inputs": [
+        "{projectRoot}/src/**/*.ts",
+        "!{projectRoot}/src/**/*.spec.ts",
+        "{projectRoot}/tsconfig.app.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{workspaceRoot}/dist/apps/api/openapi.json", "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"],
       "options": {
         "commands": [
@@ -50,7 +55,13 @@
           "NODE_OPTIONS": "--require tsconfig-paths/register",
           "SKIP_CONNECTIONS": "true"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "generate:api-client",
+          "projects": "runner-api-client"
+        }
+      ]
     },
     "serve": {
       "executor": "@nx/js:node",
