@@ -4,248 +4,977 @@ title: プロセスとコード実行
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-DaytonaのTS SDK / Python SDKは、サンドボックス内の`process`モジュールを通じて強力なプロセスとコード実行機能を提供します。本ガイドでは、利用可能なプロセス操作のすべてとベストプラクティスを解説します。
+Daytonaは、サンドボックス内の`process`モジュールを通じて、プロセスとコード実行の機能を提供します。
 
-## プロセスとコード実行
+## コード実行 \{#code-execution\}
 
-Daytona SDK は、Python と TypeScript でコードを実行できます。
+Daytona はサンドボックス内でコードを実行するためのメソッドを提供します。複数の言語でコードスニペットを実行でき、ステートレス実行と、コンテキストを永続化するステートフルなインタープリタの両方をサポートします。
 
-### コードの実行
+:::note
 
-Daytona SDK は、Python と TypeScript のコードスニペット実行に対応しています。入力、タイムアウト、環境変数を指定して実行できます。
+ステートレス実行では、[サンドボックスの作成](/docs/ja/sandboxes#create-sandboxes) 時に選択したサンドボックスの言語が引き継がれます。ステートフルなインタープリタは Python のみをサポートします。
+:::
+
+### コードを実行（ステートレス） \{#run-code-stateless\}
+
+Daytona では、ステートレス実行によりサンドボックス内でコードスニペットを実行するメソッドを提供しています。各呼び出しはクリーンな状態のインタープリタから開始されるため、互いに独立したコードスニペットの実行に最適です。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Python コードを実行
-response = sandbox.process.code_run('''
-def greet(name):
-    return f"Hello, {name}!"
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python コードを実行
+    response = sandbox.process.code_run('''
+    def greet(name):
+        return f"Hello, {name}!"
 
-print(greet("Daytona"))
-''')
+    print(greet("Daytona"))
+    ''')
 
-print(response.result)
+    print(response.result)
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// TypeScript コードを実行
-let response = await sandbox.process.codeRun(`
-function greet(name: string): string {
-    return \`Hello, \${name}!\`;
-}
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // TypeScript コードを実行
+    let response = await sandbox.process.codeRun(`
+    function greet(name: string): string {
+        return \`Hello, \${name}!\`;
+    }
 
-console.log(greet("Daytona"));
-`);
-console.log(response.result);
+    console.log(greet("Daytona"));
+    `);
+    console.log(response.result);
 
-// argv と環境変数を指定して実行
-response = await sandbox.process.codeRun(
+    // argv と環境変数を指定してコードを実行
+    response = await sandbox.process.codeRun(
+        `
+        console.log(\`Hello, \${process.argv[2]}!\`);
+        console.log(\`FOO: \${process.env.FOO}\`);
+        `,
+        { 
+          argv: ["Daytona"],
+          env: { FOO: "BAR" }
+        }
+    );
+    console.log(response.result);
+
+    // タイムアウト（5 秒）を指定してコードを実行
+    response = await sandbox.process.codeRun(
+        'setTimeout(() => console.log("Done"), 2000);',
+        undefined,
+        5
+    );
+    console.log(response.result);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Python コードを実行
+    response = sandbox.process.code_run(code: <<~PYTHON)
+      def greet(name):
+          return f"Hello, {name}!"
+
+      print(greet("Daytona"))
+    PYTHON
+
+    puts response.result
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // シェルコマンド実行を使用してコードを実行
+    // 注意: Go でステートレスなコード実行を行う場合は、適切なインタープリタとともに ExecuteCommand を使用してください
+    result, err := sandbox.Process.ExecuteCommand(ctx, `python3 -c '
+    def greet(name):
+        return f"Hello, {name}!"
+
+    print(greet("Daytona"))
+    '`)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+
+    // 環境変数を指定してコードを実行
+    result, err = sandbox.Process.ExecuteCommand(ctx, `python3 -c 'import os; print(f"FOO: {os.environ.get(\"FOO\")}")'`,
+    	options.WithCommandEnv(map[string]string{"FOO": "BAR"}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+
+    // タイムアウトを指定してコードを実行
+    result, err = sandbox.Process.ExecuteCommand(ctx, `python3 -c 'import time; time.sleep(2); print("Done")'`,
+    	options.WithExecuteTimeout(5*time.Second),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println(result.Result)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/code-run' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "code": "def greet(name):\n    return f\"Hello, {name}!\"\n\nprint(greet(\"Daytona\"))",
+      "env": {
+        "FOO": "BAR"
+      },
+      "timeout": 5000
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
+
+> [**code&#95;run (Python SDK)**](/docs/ja/python-sdk/sync/process/#processcode_run)
+>
+> [**codeRun (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#coderun)
+>
+> [**code&#95;run (Ruby SDK)**](/docs/ja/ruby-sdk/process/#code_run)
+>
+> [**ExecuteCommand (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ExecuteCommand)
+>
+> [**execute command (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
+
+### ステートフルなコードの実行 \{#run-code-stateful\}
+
+Daytona は、code interpreter を使用して状態を永続化しながらコードを実行するためのメソッドを提供します。呼び出し間で変数や import を保持し、分離されたコンテキストを作成し、環境変数を制御できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, OutputMessage
+
+    def handle_stdout(message: OutputMessage):
+        print(f"[STDOUT] {message.output}")
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+
+    # Shared default context
+    result = sandbox.code_interpreter.run_code(
+        "counter = 1\nprint(f'Counter initialized at {counter}')",
+        on_stdout=handle_stdout,
+    )
+
+    # Isolated context
+    ctx = sandbox.code_interpreter.create_context()
+    try:
+        sandbox.code_interpreter.run_code(
+            "value = 'stored in ctx'",
+            context=ctx,
+        )
+        sandbox.code_interpreter.run_code(
+            "print(value)",
+            context=ctx,
+            on_stdout=handle_stdout,
+        )
+    finally:
+        sandbox.code_interpreter.delete_context(ctx)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    const daytona = new Daytona()
+
+    async function main() {
+        const sandbox = await daytona.create()
+
+        // Shared default context
+        await sandbox.codeInterpreter.runCode(
     `
-    console.log(\`Hello, \${process.argv[2]}!\`);
-    console.log(\`FOO: \${process.env.FOO}\`);
+    counter = 1
+    print(f'Counter initialized at {counter}')
     `,
-    { 
-      argv: ["Daytona"],
-      env: { FOO: "BAR" }
+            { onStdout: (msg) => process.stdout.write(`[STDOUT] ${msg.output}`)},
+        )
+
+        // Isolated context
+        const ctx = await sandbox.codeInterpreter.createContext()
+        try {
+        await sandbox.codeInterpreter.runCode(
+            `value = 'stored in ctx'`,
+            { context: ctx },
+        )
+        await sandbox.codeInterpreter.runCode(
+            `print(value)`,
+            { context: ctx, onStdout: (msg) => process.stdout.write(`[STDOUT] ${msg.output}`) },
+        )
+        } finally {
+        await sandbox.codeInterpreter.deleteContext(ctx)
+        }
     }
-);
-console.log(response.result);
 
-// タイムアウトを指定して実行
-response = await sandbox.process.codeRun(
-    'setTimeout(() => console.log("Done"), 2000);',
-    undefined,
-    5000
-);
-console.log(response.result);
-```
+    main()
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby SDK はコード実行に process.code_run を使用します
+    # ステートフルなコンテキストは code interpreter API を通じて管理されます
+
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    # コードを実行 (Ruby SDK ではステートレス)
+    response = sandbox.process.code_run(code: <<~PYTHON)
+      counter = 1
+      print(f'Counter initialized at {counter}')
+    PYTHON
+
+    puts response.result
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // コードインタープリタのコンテキストを作成
+    ctxInfo, err := sandbox.CodeInterpreter.CreateContext(ctx, nil)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    contextID := ctxInfo["id"].(string)
+
+    // コンテキスト内でコードを実行
+    channels, err := sandbox.CodeInterpreter.RunCode(ctx,
+    	"counter = 1\nprint(f'Counter initialized at {counter}')",
+    	options.WithCustomContext(contextID),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 出力を読み取る
+    for msg := range channels.Stdout {
+    	fmt.Printf("[STDOUT] %s\n", msg.Text)
+    }
+
+    // コンテキストをクリーンアップ
+    err = sandbox.CodeInterpreter.DeleteContext(ctx, contextID)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # コンテキストを作成
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/interpreter/context' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{}'
+
+    # コンテキスト内でコードを実行 (WebSocket エンドポイント)
+    # 次の URL に WebSocket で接続:
+    # wss://proxy.app.daytona.io/toolbox/{sandboxId}/process/interpreter/execute
+    # 次の JSON メッセージを送信:
+    # {
+    #   "code": "counter = 1\nprint(f\"Counter initialized at {counter}\")",
+    #   "contextId": "your-context-id"
+    # }
+
+    # コンテキストを削除
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/interpreter/context/{contextId}' \
+      --request DELETE
+    ```
+  </TabItem>
 </Tabs>
 
-## プロセスとコード実行
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
 
-Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内でシェルコマンドを実行し、バックグラウンドプロセスを管理できます。実行時の作業ディレクトリはデフォルトで現在のサンドボックスユーザーのホーム配下です。たとえば `workspace/repo` は `/home/[username]/workspace/repo` を指しますが、絶対パス（先頭を `/` にする）を指定して上書きできます。
+> [**run&#95;code (Python SDK)**](/docs/ja/python-sdk/sync/code-interpreter/#codeinterpreterrun_code)
+>
+> [**create&#95;context (Python SDK)**](/docs/ja/python-sdk/sync/code-interpreter/#codeinterpretercreate_context)
+>
+> [**delete&#95;context (Python SDK)**](/docs/ja/python-sdk/sync/code-interpreter/#codeinterpreterdelete_context)
+>
+> [**runCode (TypeScript SDK)**](/docs/ja/typescript-sdk/code-interpreter/#runcode)
+>
+> [**createContext (TypeScript SDK)**](/docs/ja/typescript-sdk/code-interpreter/#createcontext)
+>
+> [**deleteContext (TypeScript SDK)**](/docs/ja/typescript-sdk/code-interpreter/#deletecontext)
+>
+> [**code&#95;run (Ruby SDK)**](/docs/ja/ruby-sdk/process/#code_run)
+>
+> [**RunCode (Go SDK)**](/docs/ja/go-sdk/daytona/#CodeInterpreterService.RunCode)
+>
+> [**CreateContext (Go SDK)**](/docs/ja/go-sdk/daytona/#CodeInterpreterService.CreateContext)
+>
+> [**DeleteContext (Go SDK)**](/docs/ja/go-sdk/daytona/#CodeInterpreterService.DeleteContext)
+>
+> [**コードインタープリター (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/interpreter)
 
-### コマンドの実行
+## コマンド実行 \{#command-execution\}
 
-Daytona SDK は、Python と TypeScript からシェルコマンドを実行できます。標準入力、タイムアウト、環境変数を指定してコマンドを実行可能です。
+Daytona はサンドボックス内でシェルコマンドを実行するためのメソッドを提供します。作業ディレクトリ、タイムアウト、および環境変数のオプションを指定してコマンドを実行できます。
+
+作業ディレクトリの既定値はサンドボックスの作業ディレクトリです。Dockerfile に `WORKDIR` が指定されている場合はその値が使用され、指定されていない場合はユーザーのホームディレクトリが使用されます（例: `workspace/repo` は `/home/daytona/workspace/repo` を指します）。パスを `/` で始めることで、絶対パスを指定してこの既定値を上書きできます。
+
+### コマンドの実行 \{#execute-commands\}
+
+Daytona では、コマンド文字列に加えて作業ディレクトリ、タイムアウト、環境変数のオプションパラメータを指定することで、サンドボックス内でシェルコマンドを実行するためのメソッドを提供しています。また、`daytona exec` CLI コマンドを使用して、手早くコマンドを実行することもできます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# 任意のシェルコマンドを実行
-response = sandbox.process.exec("ls -la")
-print(response.result)
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 任意のシェルコマンドを実行
+    response = sandbox.process.exec("ls -la")
+    print(response.result)
 
-# 作業ディレクトリとタイムアウトを設定
-response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
-print(response.result)
+    # 作業ディレクトリとタイムアウトを設定
 
-# 環境変数を渡す
-response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
-        "CUSTOM_SECRET": "DAYTONA"
+    response = sandbox.process.exec("sleep 3", cwd="workspace/src", timeout=5)
+    print(response.result)
+
+    # 環境変数を渡す
+
+    response = sandbox.process.exec("echo $CUSTOM_SECRET", env={
+            "CUSTOM_SECRET": "DAYTONA"
+        }
+    )
+    print(response.result)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+
+    // 任意のシェルコマンドを実行
+    const response = await sandbox.process.executeCommand("ls -la");
+    console.log(response.result);
+
+    // 作業ディレクトリとタイムアウトを設定
+    const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
+    console.log(response2.result);
+
+    // 環境変数を渡す
+    const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", ".", {
+            "CUSTOM_SECRET": "DAYTONA"
+        }
+    );
+    console.log(response3.result);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 任意のシェルコマンドを実行
+    response = sandbox.process.exec(command: 'ls -la')
+    puts response.result
+
+    # 作業ディレクトリとタイムアウトを設定
+    response = sandbox.process.exec(command: 'sleep 3', cwd: 'workspace/src', timeout: 5)
+    puts response.result
+
+    # 環境変数を渡す
+    response = sandbox.process.exec(
+      command: 'echo $CUSTOM_SECRET',
+      env: { 'CUSTOM_SECRET' => 'DAYTONA' }
+    )
+    puts response.result
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 任意のシェルコマンドを実行
+    response, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
+    if err != nil {
+    	log.Fatal(err)
     }
-)
-print(response.result)
+    fmt.Println(response.Result)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-
-// 任意のシェルコマンドを実行
-const response = await sandbox.process.executeCommand("ls -la");
-console.log(response.result);
-
-// 作業ディレクトリとタイムアウトを設定
-const response2 = await sandbox.process.executeCommand("sleep 3", "workspace/src", undefined, 5);
-console.log(response2.result);
-
-// 環境変数を渡す
-const response3 = await sandbox.process.executeCommand("echo $CUSTOM_SECRET", "~", {
-        "CUSTOM_SECRET": "DAYTONA"
+    // 作業ディレクトリとタイムアウトを設定
+    response, err = sandbox.Process.ExecuteCommand(ctx, "sleep 3",
+    	options.WithCwd("workspace/src"),
+    	options.WithExecuteTimeout(5*time.Second),
+    )
+    if err != nil {
+    	log.Fatal(err)
     }
-);
-console.log(response3.result);
+    fmt.Println(response.Result)
 
-```
+    // 環境変数を渡す
+    response, err = sandbox.Process.ExecuteCommand(ctx, "echo $CUSTOM_SECRET",
+    	options.WithCommandEnv(map[string]string{"CUSTOM_SECRET": "DAYTONA"}),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println(response.Result)
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="CLI" icon="seti:shell">
+    ```bash
+    # 任意のシェルコマンドを実行
+    daytona exec my-sandbox -- ls -la
+
+    # 作業ディレクトリとタイムアウトを設定
+    daytona exec my-sandbox --cwd workspace/src --timeout 5 -- sleep 3
+
+    # 環境変数を渡す（シェル構文を使用）
+    daytona exec my-sandbox -- sh -c 'CUSTOM_SECRET=DAYTONA echo $CUSTOM_SECRET'
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "command": "ls -la",
+      "cwd": "workspace",
+      "timeout": 5
+    }'
+    ```
+  </TabItem>
 </Tabs>
 
-## セッション（バックグラウンドプロセス）
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、[CLI](/docs/ja/tools/cli/)、[API](/docs/ja/tools/api/) のリファレンスを参照してください。
 
-Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内でバックグラウンドプロセスのセッションを開始・停止・管理する機能を提供します。長時間実行のコマンドを走らせ、プロセスの状態を監視し、稼働中のすべてのプロセスを一覧できます。
+> [**exec (Python SDK)**](/docs/ja/python-sdk/sync/process/#processexec)
+>
+> [**executeCommand (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#executecommand)
+>
+> [**exec (Ruby SDK)**](/docs/ja/ruby-sdk/process/#exec)
+>
+> [**ExecuteCommand (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ExecuteCommand)
+>
+> [**daytona exec (CLI)**](/docs/ja/tools/cli/#daytona-exec)
+>
+> [**execute command (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/execute)
 
-### 長時間実行プロセスの管理
+## セッション操作 \{#session-operations\}
 
-Daytona SDK は、バックグラウンドプロセスの開始および停止機能を提供します。長時間実行のコマンドを実行し、プロセスの状態を監視できます。
+Daytona では、サンドボックス内のバックグラウンドプロセスセッションを管理するためのメソッドを提供しています。セッションを作成し、コマンドを実行し、状態を監視し、長時間実行されるプロセスを管理できます。
+
+### セッションの状態を取得する \{#get-session-status\}
+
+Daytona では、セッション ID を指定することで、サンドボックス内のセッションの状態を取得したり、すべてのセッションを一覧表示したりするためのメソッドを提供しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# セッションで実行されたコマンドを確認
-session = sandbox.process.get_session(session_id)
-print(f"Session {session_id}:")
-for command in session.commands:
-    print(f"Command: {command.command}, Exit Code: {command.exit_code}")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # セッションで実行されたコマンドを確認
+    session = sandbox.process.get_session(session_id)
+    print(f"Session {session_id}:")
+    for command in session.commands:
+        print(f"Command: {command.command}, Exit Code: {command.exit_code}")
 
-# 実行中のすべてのセッションを一覧表示
-sessions = sandbox.process.list_sessions()
-for session in sessions:
-    print(f"PID: {session.id}, Commands: {session.commands}")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// セッションで実行されたコマンドを確認
-const session = await sandbox.process.getSession(sessionId);
-console.log(`Session ${sessionId}:`);
-for (const command of session.commands) {
-    console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
-}
+    # 実行中の全セッションを一覧表示
 
-// 実行中のすべてのセッションを一覧表示
-const sessions = await sandbox.process.listSessions();
-for (const session of sessions) {
-    console.log(`PID: ${session.id}, Commands: ${session.commands}`);
-}
-```
-</TabItem>
-</Tabs>
+    sessions = sandbox.process.list_sessions()
+    for session in sessions:
+        print(f"Session: {session.session_id}, Commands: {session.commands}")
+    ```
+  </TabItem>
 
-## ベストプラクティス
-
-Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）におけるプロセスとコード実行（サンドボックス内でのコマンド／コード実行モジュール）のベストプラクティスを提供します。
-
-1. **リソース管理**
-
-- 長時間実行の処理にはセッションを使用する
-- 実行後はセッションを確実にクリーンアップする
-- セッションで発生する例外を適切に処理する
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-   ```python
-   # Python - セッションのクリーンアップ
-   session_id = "long-running-cmd"
-   try:
-       sandbox.process.create_session(session_id)
-       session = sandbox.process.get_session(session_id)
-       # 処理を実行...
-   finally:
-       sandbox.process.delete_session(session.session_id)
-   ```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-   ```typescript
-   // TypeScript - セッションのクリーンアップ
-   const sessionId = "long-running-cmd";
-   try {
-       await sandbox.process.createSession(sessionId);
-       const session = await sandbox.process.getSession(sessionId);
-       // 処理を実行...
-   } finally {
-       await sandbox.process.deleteSession(session.sessionId);
-   }
-   ```
-</TabItem>
-</Tabs>
-
-2. **エラーハンドリング**
-
-- プロセスの例外を適切に処理する
-- デバッグのためにエラーの詳細を記録する
-- エラーハンドリングには try-catch ブロックを使用する
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-try:
-    response = sandbox.process.code_run("invalid python code")
-except ProcessExecutionError as e:
-    print(f"Execution failed: {e}")
-    print(f"Exit code: {e.exit_code}")
-    print(f"Error output: {e.stderr}")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-try {
-    const response = await sandbox.process.codeRun("invalid typescript code");
-} catch (e) {
-    if (e instanceof ProcessExecutionError) {
-        console.error("Execution failed:", e);
-        console.error("Exit code:", e.exitCode);
-        console.error("Error output:", e.stderr);
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // セッションで実行されたコマンドを確認
+    const session = await sandbox.process.getSession(sessionId);
+    console.log(`Session ${sessionId}:`);
+    for (const command of session.commands) {
+        console.log(`Command: ${command.command}, Exit Code: ${command.exitCode}`);
     }
-}
-```
-</TabItem>
+
+    // 実行中の全セッションを一覧表示
+    const sessions = await sandbox.process.listSessions();
+    for (const session of sessions) {
+        console.log(`Session: ${session.sessionId}, Commands: ${session.commands}`);
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # セッションで実行されたコマンドを確認
+    session = sandbox.process.get_session(session_id)
+    puts "Session #{session_id}:"
+    session.commands.each do |command|
+      puts "Command: #{command.command}, Exit Code: #{command.exit_code}"
+    end
+
+    # 実行中の全セッションを一覧表示
+    sessions = sandbox.process.list_sessions
+    sessions.each do |session|
+      puts "Session: #{session.session_id}, Commands: #{session.commands}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // セッションで実行されたコマンドを確認
+    session, err := sandbox.Process.GetSession(ctx, sessionID)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Session %s:\n", sessionID)
+    commands := session["commands"].([]any)
+    for _, cmd := range commands {
+    	cmdMap := cmd.(map[string]any)
+    	fmt.Printf("Command: %s, Exit Code: %v\n", cmdMap["command"], cmdMap["exitCode"])
+    }
+
+    // 実行中の全セッションを一覧表示
+    sessions, err := sandbox.Process.ListSessions(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    for _, sess := range sessions {
+    	fmt.Printf("Session: %s, Commands: %v\n", sess["sessionId"], sess["commands"])
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # セッション情報を取得
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}'
+
+    # すべてのセッションを一覧表示
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session'
+    ```
+  </TabItem>
 </Tabs>
 
-## よくある問題
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) リファレンスを参照してください。
 
-Daytona SDK は、プロセスとコードの実行（プロセスとコード実行）に関する一般的な問題のトラブルシューティング手段を提供します。
+> [**get&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processget_session)
+>
+> [**list&#95;sessions (Python SDK)**](/docs/ja/python-sdk/sync/process/#processlist_sessions)
+>
+> [**getSession (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#getsession)
+>
+> [**listSessions (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#listsessions)
+>
+> [**get&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#get_session)
+>
+> [**list&#95;sessions (Ruby SDK)**](/docs/ja/ruby-sdk/process/#list_sessions)
+>
+> [**GetSession (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.GetSession)
+>
+> [**ListSessions (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ListSessions)
+>
+> [**get session (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/GET/process/session/\{sessionId})
+>
+> [**list sessions (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/GET/process/session)
 
-### プロセス実行に失敗する
+### 対話的コマンドを実行する \{#execute-interactive-commands\}
 
-- コマンドの構文を確認する
-- 必要な依存関係を満たしているか確認する
-- 必要な権限が付与されていることを確認する
+Daytona はセッション内で対話的なコマンドを実行するためのメソッドを提供します。確認や対話的なツール（例: データベース CLI やパッケージマネージャーなど）のようにユーザーからの入力を想定している実行中のコマンドに対して入力を送信できます。
 
-### プロセスがタイムアウトする
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    session_id = "interactive-session"
+    sandbox.process.create_session(session_id)
 
-- タイムアウト設定を調整する
-- 長時間実行タスクを最適化する
-- バックグラウンド処理の利用を検討する
+    # 確認を必要とするコマンドを実行
+    command = sandbox.process.execute_session_command(
+        session_id,
+        SessionExecuteRequest(
+            command='pip uninstall requests',
+            run_async=True,
+        ),
+    )
 
-### リソース制限
+    # ログを非同期でストリーミング
+    logs_task = asyncio.create_task(
+        sandbox.process.get_session_command_logs_async(
+            session_id,
+            command.cmd_id,
+            lambda log: print(f"[STDOUT]: {log}"),
+            lambda log: print(f"[STDERR]: {log}"),
+        )
+    )
 
-- プロセスのメモリ使用量を監視する
-- プロセスのクリーンアップを適切に行う
-- 適切なリソース制約を設定する
+    await asyncio.sleep(1)
+    # コマンドに入力を送信
+    sandbox.process.send_session_command_input(session_id, command.cmd_id, "y")
+
+    # ログ取得の完了を待機
+    await logs_task
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sessionId = 'interactive-session'
+    await sandbox.process.createSession(sessionId)
+
+    // 確認を必要とするコマンドを実行
+    const command = await sandbox.process.executeSessionCommand(sessionId, {
+        command: 'pip uninstall requests',
+        runAsync: true,
+    })
+
+    // ログを非同期でストリーミング
+    const logPromise = sandbox.process.getSessionCommandLogs(
+        sessionId,
+        command.cmdId!,
+        (stdout) => console.log('[STDOUT]:', stdout),
+        (stderr) => console.log('[STDERR]:', stderr),
+    )
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // コマンドに入力を送信
+    await sandbox.process.sendSessionCommandInput(sessionId, command.cmdId!, 'y')
+
+    // ログ取得の完了を待機
+    await logPromise
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    session_id = "interactive-session"
+    sandbox.process.create_session(session_id)
+
+    # 確認を必要とするコマンドを実行
+    interactive_command = sandbox.process.execute_session_command(
+      session_id: session_id,
+      req: Daytona::SessionExecuteRequest.new(
+        command: 'pip uninstall requests',
+        run_async: true
+      )
+    )
+
+    # コマンドが開始するまで少し待機
+    sleep 1
+
+    # コマンドに入力を送信
+    sandbox.process.send_session_command_input(
+      session_id: session_id,
+      command_id: interactive_command.cmd_id,
+      data: "y"
+    )
+
+    # 対話的なコマンドのログを非同期で取得
+    sandbox.process.get_session_command_logs_async(
+      session_id: session_id,
+      command_id: interactive_command.cmd_id,
+      on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+      on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    sessionID := "interactive-session"
+    err := sandbox.Process.CreateSession(ctx, sessionID)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 確認を必要とするコマンドを実行
+    result, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, "pip uninstall requests", true)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    cmdID := result["cmdId"].(string)
+
+    // ログを非同期でストリーミング
+    stdout := make(chan string)
+    stderr := make(chan string)
+
+    go func() {
+    	err := sandbox.Process.GetSessionCommandLogsStream(ctx, sessionID, cmdID, stdout, stderr)
+    	if err != nil {
+    		log.Println("Log stream error:", err)
+    	}
+    }()
+
+    time.Sleep(1 * time.Second)
+
+    // 注意: SendSessionCommandInput は Go SDK では利用できません
+    // 入力を送信するには API エンドポイントを直接使用してください
+
+    // ログを読み取る
+    for msg := range stdout {
+    	fmt.Printf("[STDOUT]: %s\n", msg)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # セッションを作成
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{"sessionId": "interactive-session"}'
+
+    # セッションコマンドを実行
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/exec' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "command": "pip uninstall requests",
+      "runAsync": true
+    }'
+
+    # コマンドに入力を送信
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/input' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "data": "y"
+    }'
+
+    # コマンドのログを取得
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}/command/{commandId}/logs'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
+
+> [**create&#95;session (Python SDK)**](/docs/ja/python-sdk/sync/process/#processcreate_session)
+>
+> [**execute&#95;session&#95;command (Python SDK)**](/docs/ja/python-sdk/sync/process/#processexecute_session_command)
+>
+> [**send&#95;session&#95;command&#95;input (Python SDK)**](/docs/ja/python-sdk/sync/process/#processsend_session_command_input)
+>
+> [**get&#95;session&#95;command&#95;logs&#95;async (Python SDK)**](/docs/ja/python-sdk/sync/process/#processget_session_command_logs_async)
+>
+> [**createSession (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#createsession)
+>
+> [**executeSessionCommand (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#executesessioncommand)
+>
+> [**sendSessionCommandInput (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#sendsessioncommandinput)
+>
+> [**getSessionCommandLogs (TypeScript SDK)**](/docs/ja/typescript-sdk/process/#getsessioncommandlogs)
+>
+> [**create&#95;session (Ruby SDK)**](/docs/ja/ruby-sdk/process/#create_session)
+>
+> [**execute&#95;session&#95;command (Ruby SDK)**](/docs/ja/ruby-sdk/process/#execute_session_command)
+>
+> [**send&#95;session&#95;command&#95;input (Ruby SDK)**](/docs/ja/ruby-sdk/process/#send_session_command_input)
+>
+> [**CreateSession (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.CreateSession)
+>
+> [**ExecuteSessionCommand (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.ExecuteSessionCommand)
+>
+> [**GetSessionCommandLogsStream (Go SDK)**](/docs/ja/go-sdk/daytona/#ProcessService.GetSessionCommandLogsStream)
+>
+> [**create session (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/session)
+>
+> [**execute session command (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/session/\{sessionId}/exec)
+
+## リソース管理 \{#resource-management\}
+
+Daytona はセッションのリソースを管理するためのメソッドを提供します。長時間実行される処理にはセッションを使用し、実行後にはセッションを後片付け（クリーンアップ）し、例外を適切に処理する必要があります。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Python - セッションのクリーンアップ
+    session_id = "long-running-cmd"
+    try:
+        sandbox.process.create_session(session_id)
+        session = sandbox.process.get_session(session_id)
+        # Do work...
+    finally:
+        sandbox.process.delete_session(session.session_id)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // TypeScript - セッションのクリーンアップ
+    const sessionId = "long-running-cmd";
+    try {
+        await sandbox.process.createSession(sessionId);
+        const session = await sandbox.process.getSession(sessionId);
+        // Do work...
+    } finally {
+        await sandbox.process.deleteSession(session.sessionId);
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby - セッションのクリーンアップ
+    session_id = 'long-running-cmd'
+    begin
+      sandbox.process.create_session(session_id)
+      session = sandbox.process.get_session(session_id)
+      # Do work...
+    ensure
+      sandbox.process.delete_session(session.session_id)
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Go - セッションのクリーンアップ
+    sessionID := "long-running-cmd"
+    err := sandbox.Process.CreateSession(ctx, sessionID)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer sandbox.Process.DeleteSession(ctx, sessionID)
+
+    session, err := sandbox.Process.GetSession(ctx, sessionID)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    // Do work...
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # セッションの作成
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{"sessionId": "long-running-cmd"}'
+
+    # 完了したらセッションを削除
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/{sessionId}' \
+      --request DELETE
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください：
+
+> [**create&#95;session（Python SDK）**](/docs/ja/python-sdk/sync/process/#processcreate_session)
+>
+> [**delete&#95;session（Python SDK）**](/docs/ja/python-sdk/sync/process/#processdelete_session)
+>
+> [**createSession（TypeScript SDK）**](/docs/ja/typescript-sdk/process/#createsession)
+>
+> [**deleteSession（TypeScript SDK）**](/docs/ja/typescript-sdk/process/#deletesession)
+>
+> [**create&#95;session（Ruby SDK）**](/docs/ja/ruby-sdk/process/#create_session)
+>
+> [**delete&#95;session（Ruby SDK）**](/docs/ja/ruby-sdk/process/#delete_session)
+>
+> [**CreateSession（Go SDK）**](/docs/ja/go-sdk/daytona/#ProcessService.CreateSession)
+>
+> [**DeleteSession（Go SDK）**](/docs/ja/go-sdk/daytona/#ProcessService.DeleteSession)
+>
+> [**create session（API）**](/docs/ja/tools/api/#daytona-toolbox/tag/process/POST/process/session)
+>
+> [**delete session（API）**](/docs/ja/tools/api/#daytona-toolbox/tag/process/DELETE/process/session/\{sessionId})
+
+## エラー処理 \{#error-handling\}
+
+Daytona は、プロセス実行時のエラーを処理するためのメソッドを提供します。プロセスの例外を適切に処理し、デバッグのためにエラーの詳細をログ出力し、エラー処理には try-catch ブロックを使用してください。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import DaytonaError
+
+    try:
+        response = sandbox.process.code_run("invalid python code")
+        if response.exit_code != 0:
+            print(f"Exit code: {response.exit_code}")
+            print(f"Error output: {response.result}")
+    except DaytonaError as e:
+        print(f"Execution failed: {e}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { DaytonaError } from '@daytonaio/sdk'
+
+    try {
+        const response = await sandbox.process.codeRun("invalid typescript code");
+        if (response.exitCode !== 0) {
+            console.error("Exit code:", response.exitCode);
+            console.error("Error output:", response.result);
+        }
+    } catch (e) {
+        if (e instanceof DaytonaError) {
+            console.error("Execution failed:", e);
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    begin
+      response = sandbox.process.code_run(code: 'invalid python code')
+      if response.exit_code != 0
+        puts "Exit code: #{response.exit_code}"
+        puts "Error output: #{response.result}"
+      end
+    rescue StandardError => e
+      puts "Execution failed: #{e}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    result, err := sandbox.Process.ExecuteCommand(ctx, "python3 -c 'invalid python code'")
+    if err != nil {
+    	fmt.Println("Execution failed:", err)
+    }
+    if result != nil && result.ExitCode != 0 {
+    	fmt.Println("Exit code:", result.ExitCode)
+    	fmt.Println("Error output:", result.Result)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # API レスポンスには、エラー処理のために exitCode フィールドが含まれます
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "command": "python3 -c \"invalid python code\""
+    }'
+
+    # レスポンスには次の内容が含まれます:
+    # {
+    #   "result": "",
+    #   "exitCode": 1
+    # }
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、および [Go SDK](/docs/ja/go-sdk/) のリファレンスを参照してください。
+
+## よくある問題 \{#common-issues\}
+
+Daytona では、プロセスやコードの実行に関連して発生するよくある問題のトラブルシューティング方法を提供しています。
+
+| **問題**                 | **解決策**                                                                                                        |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| プロセス実行の失敗       | ・コマンド構文を確認する<br />・必要な依存関係が満たされていることを確認する<br />・十分な権限があることを確認する    |
+| プロセスのタイムアウト   | ・タイムアウト設定を調整する<br />・長時間実行される処理を最適化する<br />・バックグラウンドプロセスの利用を検討する |
+| リソース制限             | ・プロセスのメモリ使用量を監視する<br />・プロセスのクリーンアップを適切に行う<br />・適切なリソース制限を設定する   |
