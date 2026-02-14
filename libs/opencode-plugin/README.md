@@ -198,10 +198,12 @@ libs/opencode-plugin/
 │   │   └── index.ts               # Plugin entry point
 ├── dist/                          # Build output
 │   └── .opencode/                 # Compiled JavaScript files
+├── .gitignore
+├── .npmignore
 ├── package.json                   # Package metadata (includes main/types)
 ├── project.json                   # Nx build configuration
 ├── tsconfig.json                  # TypeScript config
-├── tsconfig.build.json            # TypeScript config
+├── tsconfig.lib.json              # TypeScript config for library build
 └── README.md
 ```
 
