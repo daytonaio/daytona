@@ -11,11 +11,24 @@ Customer Managed Compute is a feature that allows you to use your own runner mac
 - **Health reporting**: providing metrics and health status to the Daytona control plane
 - **Network connectivity**: managing sandbox networking, proxy connections, and SSH access
 
+Daytona provides two sets of runner management endpoints: [custom runner](#custom-regions) (`/runners`) and [admin](#admin-operations) (`/admin/runners`). While both support creating, listing, updating, and deleting runners, they serve different purposes and offer different levels of control.
+
+Custom runner endpoints are scoped to your organization and require the `X-Daytona-Organization-ID` header. Admin endpoints operate across the entire platform and do not require an organization header.
+
+|               | **Custom runner endpoints**                                                  | **Admin endpoints**                                                                                                                                                                                            |
+| ------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Scope         | Organization                                                                 | Platform-wide                                                                                                                                                                                                  |
+| Configuration | Minimal (**`name`**, **`regionId`**); API key is auto-generated and returned | Full configuration; requires **`apiKey`** and **`apiVersion`**, and specifying resource capacity (**`cpu`**, **`memoryGiB`**, **`diskGiB`**) and network settings (**`domain`**, **`apiUrl`**, **`proxyUrl`**) |
+| Response      | Returns **`Runner`**                                                         | Returns **`RunnerFull`** (includes additional **`apiKey`** and **`regionType`** fields)                                                                                                                        |
+| Filtering     | No filtering support                                                         | Supports filtering by **`regionId`** query parameter                                                                                                                                                           |
+
+Both `Runner` and `RunnerFull` share the same base fields, including resource metrics such as CPU/memory/disk usage percentages, allocated resources, availability score, snapshot count, and started sandboxes. The `RunnerFull` type extends `Runner` with the runner's `apiKey` and `regionType`.
+
 Runners in [shared](/docs/en/regions#shared-regions) and [dedicated](/docs/en/regions#dedicated-regions) regions are fully managed by Daytona — from provisioning and maintenance to monitoring and scaling. For custom regions, you bring your own runner machines and are responsible for their management and operation.
 
 :::caution
 Custom runners are currently an experimental feature and may change in future releases.
-To request access, please contact [support@daytona.io](mailto:support@daytona.io).
+To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
 ## Custom regions
@@ -376,10 +389,128 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) refe
 
 > [**deleteRunner (API)**](/docs/en/tools/api#daytona/tag/runners/DELETE/runners/{id})
 
-### Installing the custom runner
+## Admin operations
+
+### Create a runner (admin)
+
+Daytona provides an admin API to create a runner with full configuration, including resource capacity and network settings. Unlike the custom runner endpoint, you must provide your own `apiKey` and specify the `apiVersion` (`0` or `2`).
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/admin/runners \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-custom-runner",
+    "regionId": "region_12345",
+    "apiKey": "dtn_1234567890",
+    "apiVersion": "2",
+    "domain": "runner1.example.com",
+    "apiUrl": "https://api.runner1.example.com",
+    "proxyUrl": "https://proxy.runner1.example.com",
+    "cpu": 8,
+    "memoryGiB": 16,
+    "diskGiB": 100
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) reference:
+
+> [**adminCreateRunner (API)**](/docs/en/tools/api#daytona/tag/admin/POST/admin/runners)
+
+### List runners (admin)
+
+Daytona provides an admin API to list all runners with full details, including resource usage metrics. You can optionally filter runners by region.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# List all runners
+curl https://app.daytona.io/api/admin/runners \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+
+# Filter runners by region
+curl 'https://app.daytona.io/api/admin/runners?regionId=region_12345' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) reference:
+
+> [**adminListRunners (API)**](/docs/en/tools/api#daytona/tag/admin/GET/admin/runners)
+
+### Get runner (admin)
+
+Daytona provides an admin API to get full runner details, including resource usage and allocation metrics.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/admin/runners/{runnerId} \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) reference:
+
+> [**adminGetRunnerById (API)**](/docs/en/tools/api#daytona/tag/admin/GET/admin/runners/{id})
+
+### Update runner scheduling (admin)
+
+Daytona provides an admin API to update the scheduling status of a runner.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/admin/runners/{runnerId}/scheduling \
+  --request PATCH \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) reference:
+
+> [**adminUpdateRunnerScheduling (API)**](/docs/en/tools/api#daytona/tag/admin/PATCH/admin/runners/{id}/scheduling)
+
+### Delete runner (admin)
+
+Daytona provides an admin API to delete a runner.
+
+<Tabs>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/admin/runners/{runnerId} \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) reference:
+
+> [**adminDeleteRunner (API)**](/docs/en/tools/api#daytona/tag/admin/DELETE/admin/runners/{id})
+
+## Install the custom runner
 
 After registering a custom runner and obtaining its secure token, you need to install and configure the Daytona runner application on your infrastructure.
 
 :::note
-Detailed installation instructions for the runner application will be provided in a future update. For assistance with runner installation, please contact [support@daytona.io](mailto:support@daytona.io).
+Detailed installation instructions for the runner application will be provided in a future update. For assistance with runner installation, contact [support@daytona.io](mailto:support@daytona.io).
 :::
