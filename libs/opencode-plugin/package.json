@@ -13,6 +13,12 @@
   },
   "author": "Daytona Platforms Inc.",
   "license": "Apache-2.0",
+  "dependencies": {
+    "@daytonaio/sdk": "^0.125.0",
+    "@opencode-ai/plugin": "1.1.59",
+    "xdg-basedir": "^5.1.0",
+    "zod": "^4.2.1"
+  },
   "bugs": {
     "url": "https://github.com/daytonaio/daytona/issues"
   },
