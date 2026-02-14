@@ -64,6 +64,7 @@ export class DaytonaSessionManager {
   setProjectContext(projectId: string): void {
     if (this.currentProjectId !== projectId) {
       this.currentProjectId = projectId
+      this.sessionSandboxes.clear()
       this.loadProjectSessions(projectId)
     }
   }
