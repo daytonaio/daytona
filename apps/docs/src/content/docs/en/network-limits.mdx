@@ -4,26 +4,22 @@ title: Network Limits (Firewall)
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your organization's billing tier or manually configured for specific sandboxes.
+Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your [organization's billing tier](/docs/en/limits/) or manually configured for specific sandboxes.
 
-## Tier-Based Network Restrictions
+## Tier-based network restrictions
 
 Network limits are automatically applied to sandboxes based on your organization's billing tier. This provides secure and controlled internet access for development environments:
 
-- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level
+- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level. Organization-level network restrictions take precedence over sandbox-level settings. Even with [`networkAllowList`](#create-sandboxes-with-network-restrictions) specified when creating a sandbox, the organization's network restrictions still apply
 - **Tier 3 & Tier 4**: Full internet access is available by default, with the ability to configure custom network settings
 
-:::note
-**Tier 1 & 2**: Organization-level network restrictions take precedence over sandbox-level settings. Even if you specify `networkAllowList` when creating a sandbox, the organization's network restrictions will still apply.
-:::
+> To learn more about organization tiers and limits, see [limits](/docs/en/limits/).
 
-To learn more about organization tiers and limits, see the [Limits documentation](/docs/limits/).
+[Essential services](#essential-services) are available on all tiers and include services essential for development: package registries, container registries, Git repositories, CDN services, platform services, and system package managers.
 
-## Managing Network Access
+## Create sandboxes with network restrictions
 
-### Creating Sandboxes with Network Restrictions
-
-You can control network access when creating sandboxes using the `networkAllowList` and `networkBlockAll` parameters:
+Daytona provides methods to control network access when [creating sandboxes](/docs/en/sandboxes#create-sandboxes) by using the `networkAllowList` and `networkBlockAll` parameters:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -64,7 +60,6 @@ const sandbox = await daytona.create({
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
@@ -88,6 +83,44 @@ sandbox = daytona.create(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+
+	// Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+	allowList := "208.80.154.232/32,199.16.156.103/32,192.168.1.0/24"
+	sandbox, err := client.Create(ctx, types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			NetworkAllowList: &allowList,
+		},
+	})
+
+	// Or block all network access
+	sandbox, err = client.Create(ctx, types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			NetworkBlockAll: true,
+		},
+	})
+}
+```
+
+</TabItem>
 </Tabs>
 
 
@@ -95,27 +128,19 @@ sandbox = daytona.create(
 If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
 
+## Network allow list format
 
-### Network Allow List Format
-
-The `networkAllowList` accepts up to 5 CIDR network blocks separated by commas:
+The `networkAllowList` parameter accepts up to 5 CIDR network blocks separated by commas:
 
 - **Single IP**: `208.80.154.232/32` (Wikipedia)
 - **Subnet**: `192.168.1.0/24` (Private network)
 - **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
 
-:::note
-**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries, container registries, Git repositories, CDN services, platform services, system package managers etc.\
-If you experience issues with any essential development services, please contact [support@daytona.io](mailto:support@daytona.io) for assistance as these should be accessible on all tiers.
-
-For a complete list of whitelisted services, see [Essential Services](#essential-services) below.
-:::
-
-## Organization Configuration
+## Organization configuration
 
 The network access policies for your organization are set automatically depending on your organization's limits tier and cannot be modified by organization administrators. These policies determine the default network behavior for all sandboxes in your organization.
 
-## Testing Network Access
+## Test network access
 
 To test network connectivity from your sandbox:
 
@@ -129,7 +154,7 @@ npm ping    # For Node.js
 pip install --dry-run requests  # For Python
 ```
 
-## Security Benefits
+## Security benefits
 
 Network limits provide several security advantages:
 
@@ -145,36 +170,40 @@ Test network connectivity before starting critical development work and consider
 :::
 
 
-## Essential Services
+## Essential services
 
-The following services are whitelisted and accessible on all tiers:
+Daytona provides a list of essential services that are available on all tiers and can be used for development.
 
-### NPM Registry and Package Managers
+:::note
+This list is continuously updated. If you require access to additional essential development services, submit a request in the [sandbox network whitelist](https://github.com/daytonaio/sandbox-network-whitelist) repository or contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+### NPM registry and package managers
 
 - **NPM Registry**: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
 - **Yarn Packages**: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
 
-### Git Hosting and Version Control
+### Git hosting and version control
 
 - **GitHub**: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
 - **GitLab**: `gitlab.com`, `registry.gitlab.com`
 - **Bitbucket**: `bitbucket.org`
 
-### Python Package Managers
+### Python package managers
 
 - **PyPI**: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
 
-### Ubuntu/Debian Package Repositories
+### Ubuntu/Debian package repositories
 
 - **Ubuntu Repos**: `archive.ubuntu.com`, `security.ubuntu.com`
 - **Debian Repos**: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
 
-### CDN and Content Delivery
+### CDN and content delivery
 
 - **CDN Services**: `fastly.com`, `cloudflare.com`
 - **JavaScript CDNs**: `unpkg.com`, `jsdelivr.net`
 
-### AI/ML Services
+### AI/ML services
 
 - **Anthropic**: `api.anthropic.com`
 - **OpenAI**: `api.openai.com`
@@ -184,7 +213,7 @@ The following services are whitelisted and accessible on all tiers:
 - **Expo**: `api.expo.dev`
 - **OpenRouter**: `openrouter.ai`
 
-### Docker Registries and Container Services
+### Docker registries and container services
 
 - **Docker Registries**: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
 - **Microsoft Container Registry**: `mcr.microsoft.com`
@@ -192,30 +221,26 @@ The following services are whitelisted and accessible on all tiers:
 - **Google Container Registry**: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
 - **Quay**: `quay.io`, `quay-registry.s3.amazonaws.com`
 
-### Maven Repositories
+### Maven repositories
 
 - **Maven Repos**: `repo1.maven.org`, `repo.maven.apache.org`
 
-### Google Fonts
+### Google fonts
 
 - **Google Fonts**: `fonts.googleapis.com`, `fonts.gstatic.com`
 
-### AWS S3 Endpoints
+### AWS S3 endpoints
 
 - **US East**: `s3.us-east-1.amazonaws.com`, `s3.us-east-2.amazonaws.com`
 - **US West**: `s3.us-west-1.amazonaws.com`, `s3.us-west-2.amazonaws.com`
 - **EU**: `s3.eu-central-1.amazonaws.com`, `s3.eu-west-1.amazonaws.com`, `s3.eu-west-2.amazonaws.com`
 
-### Daytona Platform
+### Daytona
 
 - **Daytona**: `app.daytona.io`
 
-:::note
-This list is continuously updated. If you require access to additional essential development services, you can submit a request via the [sandbox-network-whitelist](https://github.com/daytonaio/sandbox-network-whitelist) repository or contact [support@daytona.io](mailto:support@daytona.io).
-:::
 
-
-## Getting Help
+## Getting help
 
 If you encounter network access issues or need unrestricted network access
 
