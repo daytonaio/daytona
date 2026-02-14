@@ -121,45 +121,8 @@ func (d *DockerClient) isDirectoryMounted(path string) bool {
 	return err == nil
 }
 
-// waitForMountReady waits for a FUSE mount to be fully accessible
-// FUSE mounts can be asynchronous - the mount command may return before the filesystem is ready
-// This prevents a race condition where the container writes to the directory before the mount is ready
-func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error {
-	maxAttempts := 50 // 5 seconds total (50 * 100ms)
-	sleepDuration := 100 * time.Millisecond
-
-	for i := 0; i < maxAttempts; i++ {
-		// First verify the mountpoint is still registered
-		if !d.isDirectoryMounted(path) {
-			return fmt.Errorf("mount disappeared during readiness check")
-		}
-
-		// Try to stat the mount point to ensure filesystem is responsive
-		// This will fail if FUSE is not ready yet
-		_, err := os.Stat(path)
-		if err == nil {
-			// Try to read directory to ensure it's fully operational
-			_, err = os.ReadDir(path)
-			if err == nil {
-				log.Infof("mount %s is ready after %d attempts", path, i+1)
-				return nil
-			}
-		}
-
-		// Wait a bit before retrying
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf("context cancelled while waiting for mount ready: %w", ctx.Err())
-		case <-time.After(sleepDuration):
-			// Continue to next iteration
-		}
-	}
-
-	return fmt.Errorf("mount did not become ready within timeout")
-}
-
 func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
-	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
+	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777", "--upload-checksums", "off"}
 
 	if subpath != nil && *subpath != "" {
 		// Ensure subpath ends with /
@@ -194,4 +157,41 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *
 	cmd.Stdout = io.Writer(&util.InfoLogWriter{})
 
 	return cmd
+}
+
+// waitForMountReady waits for a FUSE mount to be fully accessible
+// FUSE mounts can be asynchronous - the mount command may return before the filesystem is ready
+// This prevents a race condition where the container writes to the directory before the mount is ready
+func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error {
+	maxAttempts := 50 // 5 seconds total (50 * 100ms)
+	sleepDuration := 100 * time.Millisecond
+
+	for i := 0; i < maxAttempts; i++ {
+		// First verify the mountpoint is still registered
+		if !d.isDirectoryMounted(path) {
+			return fmt.Errorf("mount disappeared during readiness check")
+		}
+
+		// Try to stat the mount point to ensure filesystem is responsive
+		// This will fail if FUSE is not ready yet
+		_, err := os.Stat(path)
+		if err == nil {
+			// Try to read directory to ensure it's fully operational
+			_, err = os.ReadDir(path)
+			if err == nil {
+				log.Infof("mount %s is ready after %d attempts", path, i+1)
+				return nil
+			}
+		}
+
+		// Wait a bit before retrying
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("context cancelled while waiting for mount readiness")
+		case <-time.After(sleepDuration):
+			// Continue to next iteration
+		}
+	}
+
+	return fmt.Errorf("mount %s not ready after %d attempts", path, maxAttempts)
 }
