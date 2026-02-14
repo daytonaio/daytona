@@ -128,7 +128,20 @@ export class HostGitManager {
       throw new Error(`Failed to create empty tree: ${errorMsg}`)
     }
 
-    const commitRes = execCommand(`git commit-tree ${treeOid} -m "opencode reservation"`, { cwd })
+    // Provide a default identity for reservation commits when repo has no user.name/user.email (e.g. CI).
+    const reservationCommitName = 'OpenCode Plugin'
+    const reservationCommitEmail = 'opencode@daytona.io'
+    const reservationCommitMessage = 'OpenCode reservation'
+    const commitEnv = {
+      ...process.env,
+      GIT_AUTHOR_NAME: reservationCommitName,
+      GIT_AUTHOR_EMAIL: reservationCommitEmail,
+      GIT_COMMITTER_NAME: reservationCommitName,
+      GIT_COMMITTER_EMAIL: reservationCommitEmail,
+    }
+
+    // Create the commit
+    const commitRes = execCommand(`git commit-tree ${treeOid} -m "${reservationCommitMessage}"`, { cwd, env: commitEnv })
     if (!commitRes.ok) throw new Error(`Failed to create empty commit: ${commitRes.stderr}`)
     const commitOid = commitRes.stdout.trim()
     this.emptyCommitOidCache.set(cwd, commitOid)
