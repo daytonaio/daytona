@@ -202,7 +202,7 @@ export class HostGitManager {
   private setRemote(remoteName: string, sshUrl: string, cwd: string): void {
     try {
       // remove existing remote if it exists
-      execCommand(`git remote remove ${remoteName} || true`, { cwd })
+      execCommand(`git remote remove ${remoteName}`, { cwd })
       execCommand(`git remote add ${remoteName} ${sshUrl}`, { cwd })
     } catch (e) {
       logger.warn(`Could not set sandbox remote: ${e}`)
