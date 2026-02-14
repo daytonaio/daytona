@@ -45,7 +45,6 @@ export class SessionGitManager {
 
   private async getSshUrl(): Promise<string> {
     const sshAccess = await this.sandbox.createSshAccess(10)
-    logger.info(`Created SSH access token ${sshAccess.token}@ssh.app.daytona.io`)
     return `ssh://${sshAccess.token}@ssh.app.daytona.io${this.repoPath}`
   }
 
