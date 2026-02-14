@@ -142,18 +142,25 @@ To test the OpenCode plugin, create a test project to run OpenCode in:
 
 ```bash
 mkdir ~/myproject
+cd myproject
 ```
 
 Add a symlink from the project directory to the plugin source code:
 
 ```
-ln -s libs/opencode-plugin/.opencode ~/myproject
+ln -s /absolute/path/to/daytona/libs/opencode-plugin/.opencode .opencode
 ```
 
-Start OpenCode in the project directory:
+Initialize git to enable file syncing:
+
+```
+git init
+```
+
+Start OpenCode in the test project:
 
 ```bash
-cd ~/myproject && opencode
+opencode
 ```
 
 Use the instructions from [Running OpenCode](#running-opencode) above to check that the plugin is running and view live logs for debugging.
