@@ -41,8 +41,8 @@ import {
 export type { EventSessionDeleted, LogLevel, SandboxInfo, SessionInfo, ProjectSessionData } from './core/types'
 
 // Initialize logger and session manager using xdg-basedir (same as OpenCode)
-const LOG_FILE = join(xdgData!, 'opencode', 'log', 'daytona.log')
-const STORAGE_DIR = join(xdgData!, 'opencode', 'storage', 'daytona')
+const LOG_FILE = join(xdgData, 'opencode', 'log', 'daytona.log')
+const STORAGE_DIR = join(xdgData, 'opencode', 'storage', 'daytona')
 const REPO_PATH = '/home/daytona/project'
 
 setLogFilePath(LOG_FILE)
