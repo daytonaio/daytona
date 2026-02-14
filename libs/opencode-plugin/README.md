@@ -113,7 +113,7 @@ The plugin keeps track of which sandbox belongs to each OpenCode project using l
 
 Each JSON file contains the sandbox metadata for each session in the project, including when the sandbox was created, and when it was last used.
 
-The plugin uses [XDG Base Directory](https://specifications.freedesktop.org/basedir/latest/) specifically to resolve the path to this directory, using the convention [set by OpenCode](https://github.com/anomalyco/opencode/blob/052f887a9a7aaf79d9f1a560f9b686d59faa8348/packages/opencode/src/global/index.ts#L4).
+The plugin uses [XDG Base Directory](https://specifications.freedesktop.org/basedir/latest/) specifically to resolve the path to this directory, using the convention [set by OpenCode](https://github.com/anomalyco/opencode/blob/052f887a9a7aaf79d9f1a560f9b686d59faa8348/packages/opencode/src/global/index.ts#L8).
 
 ## Development
 
