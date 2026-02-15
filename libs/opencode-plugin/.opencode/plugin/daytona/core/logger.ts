@@ -7,7 +7,7 @@
  * Logger class for handling plugin logging
  */
 
-import { appendFileSync, mkdirSync, statSync, truncateSync } from 'fs'
+import { appendFileSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
 import type { LogLevel } from './types'
 import { LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_WARN } from './types'
@@ -31,12 +31,17 @@ class Logger {
     } catch (err) {
       // Directory may already exist, ignore
     }
-    // Truncate log file if it exceeds 5MB
+    // Trim log file if it exceeds 3MB (keep last 1MB)
     try {
       const stats = statSync(this.logFile)
-      const maxSize = 5 * 1024 * 1024 // 5MB
+      const maxSize = 3 * 1024 * 1024
+      const keepSize = 1024 * 1024
       if (stats.size > maxSize) {
-        truncateSync(this.logFile, 0)
+        const content = readFileSync(this.logFile, 'utf8')
+        const trimmed = content.slice(-keepSize)
+        // Drop partial first line so we don't start mid-log
+        const firstNewline = trimmed.indexOf('\n')
+        writeFileSync(this.logFile, firstNewline >= 0 ? trimmed.slice(firstNewline + 1) : trimmed)
       }
     } catch (err) {
       // File may not exist yet, ignore
