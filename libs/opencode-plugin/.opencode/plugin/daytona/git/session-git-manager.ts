@@ -13,19 +13,29 @@ export class SessionGitManager {
   private readonly hostGit: HostGitManager
   private readonly sandbox: Sandbox
   private readonly repoPath: string
+  private readonly worktree: string
   private readonly branch: string
   private readonly localBranch: string
   /** Numbered remote (sandbox-2) matches localBranch (opencode/2) */
   private readonly remoteName: string
 
-  constructor(sandbox: Sandbox, repoPath: string, branchNumber: number) {
+  constructor(sandbox: Sandbox, repoPath: string, worktree: string, branchNumber: number) {
     this.sandbox = sandbox
     this.repoPath = repoPath
+    this.worktree = worktree
     this.branch = 'opencode'
     this.localBranch = `opencode/${branchNumber}`
     this.remoteName = `sandbox-${branchNumber}`
     this.sandboxGit = new DaytonaSandboxGitManager(sandbox, repoPath)
     this.hostGit = new HostGitManager()
+  }
+
+  /**
+   * Allocate and reserve the next opencode/N number in the local repo at `worktree`.
+   * This keeps all host-git concerns inside the git manager layer.
+   */
+  static allocateAndReserveBranchNumber(worktree: string, prefix = 'opencode'): number {
+    return new HostGitManager().allocateAndReserveBranchNumber(worktree, prefix)
   }
 
   private async getSshUrl(): Promise<string> {
@@ -39,7 +49,7 @@ export class SessionGitManager {
    * @returns true if repo exists, false otherwise
    */
   hasLocalRepo(): boolean {
-    return this.hostGit.hasRepo()
+    return this.hostGit.hasRepo(this.worktree)
   }
 
   /**
@@ -52,7 +62,7 @@ export class SessionGitManager {
     }
     try {
       // Check if local git repo exists before initializing sandbox repo
-      if (!this.hostGit.hasRepo()) {
+      if (!this.hostGit.hasRepo(this.worktree)) {
         // Always ensure the directory exists, even if git syncing is disabled
         await this.sandboxGit.ensureDirectory()
         logger.warn('No local git repository found. Git syncing is disabled.')
@@ -66,7 +76,7 @@ export class SessionGitManager {
 
       await this.sandboxGit.ensureRepo()
       const sshUrl = await this.getSshUrl()
-      const pushed = await this.hostGit.pushLocalToSandboxRemote(this.remoteName, sshUrl, this.branch)
+      const pushed = await this.hostGit.pushLocalToSandboxRemote(this.remoteName, sshUrl, this.branch, this.worktree)
       if (pushed) {
         await this.sandboxGit.resetToRemote(this.branch)
       }
@@ -91,7 +101,7 @@ export class SessionGitManager {
     }
     try {
       // Check if local git repo exists before attempting any git operations
-      if (!this.hostGit.hasRepo()) {
+      if (!this.hostGit.hasRepo(this.worktree)) {
         logger.warn('No local git repository found. Git syncing is disabled.')
         return false
       }
@@ -105,7 +115,8 @@ export class SessionGitManager {
       }
 
       const sshUrl = await this.getSshUrl()
-      await this.hostGit.pull(this.remoteName, sshUrl, this.branch, this.localBranch)
+
+      await this.hostGit.pull(this.remoteName, sshUrl, this.branch, this.worktree, this.localBranch)
       toast.show({
         title: 'Changes synced',
         message: `Changes have been synced to ${this.localBranch} in your local repository`,
@@ -118,6 +129,7 @@ export class SessionGitManager {
         message: err?.message || 'Failed to auto-commit and pull.',
         variant: 'error',
       })
+      logger.error(`[idle/git] error sandboxId=${this.sandbox.id}: ${err}`)
       throw err
     }
   }

@@ -97,7 +97,10 @@ Each time the agent makes changes:
 1. A new commit is created in the sandbox repository on the `opencode` branch.
 2. The plugin pulls the latest commits from the sandbox remote into a unique local branch named `opencode/1`, `opencode/2`, etc. This keeps both environments in sync while isolating changes from different sandboxes in separate local branches.
 
-The above workflow only synchronizes changes from the sandbox to your local system. To apply changes made locally, it is recommend to start with a new OpenCode session (and sandbox).
+The plugin only synchronizes changes from the sandbox to your system. To pass local changes to the agent, commit them to a local branch, and start a new OpenCode session with that branch checked out. 
+
+> [!CAUTION]
+> When changes are synchronized to local `opencode` branches, any locally made changes will be overwritten.
 
 ### Session to sandbox mapping
 
