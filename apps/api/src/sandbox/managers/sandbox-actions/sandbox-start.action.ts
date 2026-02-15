@@ -28,8 +28,6 @@ import { Organization } from '../../../organization/entities/organization.entity
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
-import { SandboxService } from '../../services/sandbox.service'
-
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
   protected readonly logger = new Logger(SandboxStartAction.name)
@@ -38,7 +36,6 @@ export class SandboxStartAction extends SandboxAction {
     protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     protected sandboxRepository: Repository<Sandbox>,
-    private readonly sandboxService: SandboxService,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
@@ -120,8 +117,8 @@ export class SandboxStartAction extends SandboxAction {
     const timeoutMs = timeoutMinutes * 60 * 1000
 
     if (sandbox.updatedAt && Date.now() - sandbox.updatedAt.getTime() > timeoutMs) {
-      await this.updateSandboxState(
-        sandbox.id,
+      await this.guardedUpdateState(
+        sandbox,
         SandboxState.ERROR,
         lockCode,
         undefined,
@@ -135,12 +132,12 @@ export class SandboxStartAction extends SandboxAction {
       switch (snapshotRunner.state) {
         case SnapshotRunnerState.READY: {
           // TODO: "UNKNOWN" should probably be changed to something else
-          await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
+          await this.guardedUpdateState(sandbox, SandboxState.UNKNOWN, lockCode)
           return SYNC_AGAIN
         }
         case SnapshotRunnerState.ERROR: {
-          await this.updateSandboxState(
-            sandbox.id,
+          await this.guardedUpdateState(
+            sandbox,
             SandboxState.BUILD_FAILED,
             lockCode,
             undefined,
@@ -188,7 +185,7 @@ export class SandboxStartAction extends SandboxAction {
           }),
       })
       if (runner) {
-        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode, runner.id)
+        await this.guardedUpdateState(sandbox, SandboxState.UNKNOWN, lockCode, runner.id)
         return SYNC_AGAIN
       }
     } catch {
@@ -206,10 +203,10 @@ export class SandboxStartAction extends SandboxAction {
       const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
       if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
-          await this.updateSandboxState(sandbox.id, targetSandboxState, lockCode, runner.id)
+          await this.guardedUpdateState(sandbox, targetSandboxState, lockCode, runner.id)
           return SYNC_AGAIN
         } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxState(sandbox.id, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
+          await this.guardedUpdateState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
           return DONT_SYNC_AGAIN
         }
       }
@@ -242,12 +239,12 @@ export class SandboxStartAction extends SandboxAction {
 
     if (isBuild) {
       this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
-      await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
+      await this.guardedUpdateState(sandbox, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
     } else {
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
       this.pullSnapshotToRunner(snapshot, runner)
-      await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
+      await this.guardedUpdateState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
     }
 
     return SYNC_AGAIN
@@ -381,14 +378,7 @@ export class SandboxStartAction extends SandboxAction {
       this.configService.get('sandboxOtel.endpointUrl'),
     )
 
-    await this.updateSandboxState(
-      sandbox.id,
-      SandboxState.CREATING,
-      lockCode,
-      undefined,
-      undefined,
-      result?.daemonVersion,
-    )
+    await this.guardedUpdateState(sandbox, SandboxState.CREATING, lockCode, undefined, undefined, result?.daemonVersion)
     //  sync states again immediately for sandbox
     return SYNC_AGAIN
   }
@@ -467,8 +457,8 @@ export class SandboxStartAction extends SandboxAction {
       //  use the backup to start the sandbox
 
       if (sandbox.backupState !== BackupState.COMPLETED) {
-        await this.updateSandboxState(
-          sandbox.id,
+        await this.guardedUpdateState(
+          sandbox,
           SandboxState.ERROR,
           lockCode,
           undefined,
@@ -514,7 +504,7 @@ export class SandboxStartAction extends SandboxAction {
         throw error
       }
 
-      await this.updateSandboxState(sandbox.id, SandboxState.STARTING, lockCode)
+      await this.guardedUpdateState(sandbox, SandboxState.STARTING, lockCode)
       return SYNC_AGAIN
     }
 
@@ -534,19 +524,19 @@ export class SandboxStartAction extends SandboxAction {
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
     if (sandboxInfo.state === SandboxState.PULLING_SNAPSHOT) {
-      await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT, lockCode)
+      await this.guardedUpdateState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode)
     } else if (sandboxInfo.state === SandboxState.ERROR) {
-      await this.updateSandboxState(
-        sandbox.id,
+      await this.guardedUpdateState(
+        sandbox,
         SandboxState.ERROR,
         lockCode,
         undefined,
         'Sandbox is in error state on runner',
       )
     } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
-      await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
+      await this.guardedUpdateState(sandbox, SandboxState.UNKNOWN, lockCode)
     } else {
-      await this.updateSandboxState(sandbox.id, SandboxState.STARTING, lockCode)
+      await this.guardedUpdateState(sandbox, SandboxState.STARTING, lockCode)
     }
 
     return SYNC_AGAIN
@@ -564,8 +554,8 @@ export class SandboxStartAction extends SandboxAction {
       case SandboxState.STARTED: {
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          await this.updateSandboxState(
-            sandbox.id,
+          await this.guardedUpdateState(
+            sandbox,
             SandboxState.STARTED,
             lockCode,
             undefined,
@@ -575,8 +565,8 @@ export class SandboxStartAction extends SandboxAction {
           )
           return DONT_SYNC_AGAIN
         } else {
-          await this.updateSandboxState(
-            sandbox.id,
+          await this.guardedUpdateState(
+            sandbox,
             SandboxState.STARTED,
             lockCode,
             undefined,
@@ -610,12 +600,12 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.UNKNOWN: {
-        await this.updateSandboxState(sandbox.id, SandboxState.UNKNOWN, lockCode)
+        await this.guardedUpdateState(sandbox, SandboxState.UNKNOWN, lockCode)
         break
       }
       case SandboxState.ERROR: {
-        await this.updateSandboxState(
-          sandbox.id,
+        await this.guardedUpdateState(
+          sandbox,
           SandboxState.ERROR,
           lockCode,
           undefined,
@@ -637,8 +627,8 @@ export class SandboxStartAction extends SandboxAction {
       // also any other state that is not STARTED
       default: {
         this.logger.error(`Sandbox ${sandbox.id} is in unexpected state ${sandboxInfo.state}`)
-        await this.updateSandboxState(
-          sandbox.id,
+        await this.guardedUpdateState(
+          sandbox,
           SandboxState.ERROR,
           lockCode,
           undefined,
@@ -656,10 +646,10 @@ export class SandboxStartAction extends SandboxAction {
       sandbox.lastActivityAt &&
       new Date(sandbox.lastActivityAt).getTime() < Date.now() - 1000 * 60 * timeoutMinutes
     ) {
-      sandbox.state = SandboxState.ERROR
-      sandbox.errorReason = errorReason
-      sandbox.recoverable = false
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+        errorReason,
+        recoverable: false,
+      })
       return true
     }
     return false
@@ -806,8 +796,8 @@ export class SandboxStartAction extends SandboxAction {
 
         // After 3 retries, error out and clear the retry counter
         await this.redis.del(restoreBackupSnapshotRetryKey)
-        await this.updateSandboxState(
-          sandbox.id,
+        await this.guardedUpdateState(
+          sandbox,
           SandboxState.ERROR,
           lockCode,
           undefined,
@@ -822,7 +812,7 @@ export class SandboxStartAction extends SandboxAction {
     // Clear the retry counter on success
     await this.redis.del(restoreBackupSnapshotRetryKey)
 
-    await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, lockCode, runner.id)
+    await this.guardedUpdateState(sandbox, SandboxState.RESTORING, lockCode, runner.id)
 
     sandbox.snapshot = validBackup
 

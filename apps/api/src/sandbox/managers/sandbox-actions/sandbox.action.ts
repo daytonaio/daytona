@@ -3,16 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
-import { Repository, FindOptionsWhere } from 'typeorm'
+import { Repository } from 'typeorm'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { SandboxService } from '../../services/sandbox.service'
 
 export const SYNC_AGAIN = 'sync-again'
 export const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -21,6 +23,12 @@ export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 @Injectable()
 export abstract class SandboxAction {
   protected readonly logger = new Logger(SandboxAction.name)
+
+  @Inject(EventEmitter2)
+  protected readonly eventEmitter: EventEmitter2
+
+  @Inject(SandboxService)
+  protected readonly sandboxService: SandboxService
 
   constructor(
     protected readonly runnerService: RunnerService,
@@ -32,8 +40,15 @@ export abstract class SandboxAction {
 
   abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
 
-  protected async updateSandboxState(
-    sandboxId: string,
+  /**
+   * Validates the Redis lock code and then delegates to SandboxService.updateSandboxState
+   * for a single targeted UPDATE with hook replication, event emission, and cache invalidation.
+   *
+   * A WHERE guard of { pending: true } is added for non-ARCHIVED transitions to prevent
+   * concurrent writes from overwriting each other.
+   */
+  protected async guardedUpdateState(
+    sandbox: Sandbox,
     state: SandboxState,
     expectedLockCode: LockCode,
     runnerId?: string | null | undefined,
@@ -41,81 +56,55 @@ export abstract class SandboxAction {
     daemonVersion?: string,
     backupState?: BackupState,
     recoverable?: boolean,
-  ) {
+  ): Promise<Sandbox | undefined> {
     //  check if the lock code is still valid
-    const lockKey = getStateChangeLockKey(sandboxId)
+    const lockKey = getStateChangeLockKey(sandbox.id)
     const currentLockCode = await this.redisLockProvider.getCode(lockKey)
 
     if (currentLockCode === null) {
       this.logger.warn(
-        `no lock code found - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+        `no lock code found - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
       )
-      return
+      return undefined
     }
 
     if (expectedLockCode.getCode() !== currentLockCode.getCode()) {
       this.logger.warn(
-        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
       )
-      return
+      return undefined
     }
 
-    const query: FindOptionsWhere<Sandbox> = {
-      id: sandboxId,
+    //  If transitioning to ERROR without an error reason, set a default
+    const effectiveErrorReason = errorReason !== undefined ? errorReason : sandbox.errorReason
+    if (state === SandboxState.ERROR && !effectiveErrorReason) {
+      errorReason = 'Sandbox is in error state during update'
+      recoverable = false
     }
-    if (state !== SandboxState.ARCHIVED) {
-      query.pending = true
-    }
-    const sandbox = await this.sandboxRepository.findOneBy(query)
-    if (!sandbox) {
-      //  this should never happen
-      //  if it does, we need to log the error and return
-      //  this indicates a concurrency error and should be investigated
-      //  we don't to throw the error, just log it and return to avoid setting the error state
-      //  on the otherwise ready sandbox
-      const err = new Error(`sandbox ${sandboxId} is not in a pending state`)
+
+    //  WHERE guard: only update if the sandbox is still in 'pending' state
+    //  (skip for ARCHIVED transitions since those aren't set to pending beforehand)
+    const where = state !== SandboxState.ARCHIVED ? { pending: true } : undefined
+
+    const updated = await this.sandboxService.updateSandboxState(
+      sandbox,
+      state,
+      {
+        runnerId,
+        errorReason,
+        recoverable,
+        daemonVersion,
+        backupState,
+      },
+      where,
+    )
+
+    if (!updated) {
+      const err = new Error(`sandbox ${sandbox.id} is not in a pending state`)
       this.logger.error(err)
-      return
+      return undefined
     }
 
-    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
-      return
-    }
-
-    sandbox.state = state
-
-    if (runnerId !== undefined) {
-      sandbox.runnerId = runnerId
-    }
-
-    if (errorReason !== undefined) {
-      sandbox.errorReason = errorReason
-      if (state === SandboxState.ERROR) {
-        sandbox.recoverable = recoverable ?? false
-      }
-    }
-
-    if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
-      sandbox.errorReason = 'Sandbox is in error state during update'
-      sandbox.recoverable = false
-    }
-
-    if (daemonVersion !== undefined) {
-      sandbox.daemonVersion = daemonVersion
-    }
-
-    if (sandbox.state == SandboxState.DESTROYED) {
-      sandbox.backupState = BackupState.NONE
-    }
-
-    if (backupState !== undefined) {
-      sandbox.setBackupState(backupState)
-    }
-
-    if (recoverable !== undefined) {
-      sandbox.recoverable = recoverable
-    }
-
-    await this.sandboxRepository.save(sandbox)
+    return sandbox
   }
 }

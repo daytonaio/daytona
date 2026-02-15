@@ -19,6 +19,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { SandboxService } from './sandbox.service'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -36,6 +37,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly sandboxService: SandboxService,
   ) {}
 
   /**
@@ -109,21 +111,21 @@ export class JobStateHandlerService {
         this.logger.debug(
           `CREATE_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
         )
-        sandbox.state = SandboxState.STARTED
-        sandbox.errorReason = null
         const metadata = job.getResultMetadata()
-        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
-          sandbox.daemonVersion = metadata.daemonVersion
-        }
+        const daemonVersion =
+          metadata?.daemonVersion && typeof metadata.daemonVersion === 'string' ? metadata.daemonVersion : undefined
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.STARTED, {
+          errorReason: null,
+          daemonVersion,
+        })
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        sandbox.errorReason = errorReason || 'Failed to create sandbox'
-        sandbox.recoverable = recoverable
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+          errorReason: errorReason || 'Failed to create sandbox',
+          recoverable,
+        })
       }
-
-      await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling CREATE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -149,21 +151,21 @@ export class JobStateHandlerService {
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
-        sandbox.state = SandboxState.STARTED
-        sandbox.errorReason = null
         const metadata = job.getResultMetadata()
-        if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
-          sandbox.daemonVersion = metadata.daemonVersion
-        }
+        const daemonVersion =
+          metadata?.daemonVersion && typeof metadata.daemonVersion === 'string' ? metadata.daemonVersion : undefined
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.STARTED, {
+          errorReason: null,
+          daemonVersion,
+        })
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`START_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        sandbox.errorReason = errorReason || 'Failed to start sandbox'
-        sandbox.recoverable = recoverable
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+          errorReason: errorReason || 'Failed to start sandbox',
+          recoverable,
+        })
       }
-
-      await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling START_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -189,17 +191,15 @@ export class JobStateHandlerService {
 
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`STOP_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STOPPED`)
-        sandbox.state = SandboxState.STOPPED
-        sandbox.errorReason = null
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.STOPPED, { errorReason: null })
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`STOP_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        sandbox.errorReason = errorReason || 'Failed to stop sandbox'
-        sandbox.recoverable = recoverable
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+          errorReason: errorReason || 'Failed to stop sandbox',
+          recoverable,
+        })
       }
-
-      await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling STOP_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -224,17 +224,15 @@ export class JobStateHandlerService {
         this.logger.debug(
           `DESTROY_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as DESTROYED`,
         )
-        sandbox.state = SandboxState.DESTROYED
-        sandbox.errorReason = null
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.DESTROYED, { errorReason: null })
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`DESTROY_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = SandboxState.ERROR
         const { recoverable, errorReason } = sanitizeSandboxError(job.errorMessage)
-        sandbox.errorReason = errorReason || 'Failed to destroy sandbox'
-        sandbox.recoverable = recoverable
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+          errorReason: errorReason || 'Failed to destroy sandbox',
+          recoverable,
+        })
       }
-
-      await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling DESTROY_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -390,12 +388,24 @@ export class JobStateHandlerService {
         this.logger.debug(
           `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
         )
-        sandbox.setBackupState(BackupState.COMPLETED)
-        await this.sandboxRepository.save(sandbox)
+        await this.sandboxService.updateSandboxBackupState(
+          sandbox.id,
+          BackupState.COMPLETED,
+          undefined,
+          undefined,
+          undefined,
+          sandbox,
+        )
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.setBackupState(BackupState.ERROR, undefined, undefined, job.errorMessage)
-        await this.sandboxRepository.save(sandbox)
+        await this.sandboxService.updateSandboxBackupState(
+          sandbox.id,
+          BackupState.ERROR,
+          undefined,
+          undefined,
+          job.errorMessage || 'Failed to create backup',
+          sandbox,
+        )
       }
     } catch (error) {
       this.logger.error(`Error handling CREATE_BACKUP job completion for sandbox ${sandboxId}:`, error)
@@ -424,15 +434,13 @@ export class JobStateHandlerService {
         this.logger.debug(
           `RECOVER_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`,
         )
-        sandbox.state = SandboxState.STARTED
-        sandbox.errorReason = null
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.STARTED, { errorReason: null })
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
-        sandbox.state = SandboxState.ERROR
-        sandbox.errorReason = job.errorMessage || 'Failed to recover sandbox'
+        await this.sandboxService.updateSandboxState(sandbox, SandboxState.ERROR, {
+          errorReason: job.errorMessage || 'Failed to recover sandbox',
+        })
       }
-
-      await this.sandboxRepository.save(sandbox)
     } catch (error) {
       this.logger.error(`Error handling RECOVER_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
@@ -483,12 +491,11 @@ export class JobStateHandlerService {
       if (job.status === JobStatus.COMPLETED) {
         this.logger.debug(`RESIZE_SANDBOX job ${job.id} completed successfully for sandbox ${sandboxId}`)
 
-        // Update sandbox resources
-        sandbox.cpu = payload.cpu ?? sandbox.cpu
-        sandbox.mem = payload.memory ?? sandbox.mem
-        sandbox.disk = payload.disk ?? sandbox.disk
-        sandbox.state = previousState
-        await this.sandboxRepository.save(sandbox)
+        await this.sandboxService.updateSandboxState(sandbox, previousState, {
+          cpu: payload.cpu ?? sandbox.cpu,
+          mem: payload.memory ?? sandbox.mem,
+          disk: payload.disk ?? sandbox.disk,
+        })
 
         // Apply usage change (handles both positive and negative deltas)
         await this.organizationUsageService.applyResizeUsageChange(
@@ -511,8 +518,7 @@ export class JobStateHandlerService {
           diskDeltaForQuota !== 0 ? diskDeltaForQuota : undefined,
         )
 
-        sandbox.state = previousState
-        await this.sandboxRepository.save(sandbox)
+        await this.sandboxService.updateSandboxState(sandbox, previousState)
       }
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
