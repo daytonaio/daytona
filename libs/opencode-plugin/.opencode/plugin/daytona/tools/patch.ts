@@ -16,7 +16,7 @@ export const patchTool = (
 ) => ({
   description: 'Applies a patch to the project in Daytona sandbox',
   args: {
-    patchText: z.string().describe("The full patch text that describes all changes to be made")
+    patchText: z.string().describe('The full patch text that describes all changes to be made'),
   },
   async execute(args: { filePath: string; oldSnippet: string; newSnippet: string }, ctx: ToolContext) {
     return `Patch operations are not yet implemented in the Daytona plugin.`

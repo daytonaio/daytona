@@ -141,7 +141,10 @@ export class HostGitManager {
     }
 
     // Create the commit
-    const commitRes = execCommand(`git commit-tree ${treeOid} -m "${reservationCommitMessage}"`, { cwd, env: commitEnv })
+    const commitRes = execCommand(`git commit-tree ${treeOid} -m "${reservationCommitMessage}"`, {
+      cwd,
+      env: commitEnv,
+    })
     if (!commitRes.ok) throw new Error(`Failed to create empty commit: ${commitRes.stderr}`)
     const commitOid = commitRes.stdout.trim()
     this.emptyCommitOidCache.set(cwd, commitOid)
