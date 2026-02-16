@@ -549,8 +549,266 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/admin) refere
 
 ## Install a custom runner
 
-After registering a custom runner and obtaining its secure token, you need to install and configure the Daytona runner application on your infrastructure.
+After registering a custom runner and obtaining its secure token, you need to install and configure the Daytona runner application on your infrastructure. Daytona provides official Terraform modules and Helm charts for automated runner deployment.
 
-:::note
-Detailed installation instructions for the runner application will be provided in a future update. For assistance with runner installation, contact [support@daytona.io](mailto:support@daytona.io).
-:::
+### Terraform
+
+Daytona provides a Terraform module for deploying runners on AWS EC2 with automated installation and configuration. The module handles instance provisioning, security configuration, and runner registration with the Daytona platform.
+
+#### Prerequisites
+
+- Terraform >= 1.0
+- AWS credentials configured
+- VPC and subnet already created
+- Ubuntu 22.04 or later AMI
+- Daytona runner .deb package hosted at an accessible URL
+
+#### Usage
+
+##### Basic example
+
+```hcl
+module "daytona_runner" {
+  source = "./runner"
+
+  # Network Configuration
+  vpc_id    = "vpc-1234567890abcdef0"
+  subnet_id = "subnet-1234567890abcdef0"
+
+  # EC2 Configuration
+  ami_id        = "ami-0c55b159cbfafe1f0"  # Ubuntu 22.04 LTS
+  instance_type = "t3.medium"
+
+  # Daytona Configuration
+  api_url   = "https://daytona.example.com/api"
+  api_key   = "your-api-key-here"
+  region_id = "your-region-id"
+
+  # Optional: Enable SSM for secure access
+  enable_ssm = true
+
+  tags = {
+    Environment = "production"
+    ManagedBy   = "terraform"
+  }
+}
+```
+
+##### Advanced example with custom configuration
+
+```hcl
+module "daytona_runner" {
+  source = "./runner"
+
+  name_prefix = "production"
+
+  # Network Configuration
+  vpc_id    = "vpc-1234567890abcdef0"
+  subnet_id = "subnet-1234567890abcdef0"
+
+  # EC2 Configuration
+  ami_id             = "ami-0c55b159cbfafe1f0"
+  instance_type      = "t3.large"
+  root_volume_size   = 100
+  root_volume_type   = "gp3"
+
+  # Daytona Configuration
+  api_url   = "https://api.daytona.example.com"
+  api_key   = var.api_key  # Use variable for sensitive data
+  region_id = var.region_id
+
+  # Security Configuration
+  enable_ssh       = true
+  ssh_cidr_blocks  = ["10.0.0.0/8"]
+  key_name         = "my-ssh-key"
+  enable_ssm       = true
+
+  tags = {
+    Environment = "production"
+    Team        = "platform"
+    ManagedBy   = "terraform"
+  }
+}
+```
+
+##### Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|----------|
+| vpc_id | VPC ID where the runner will be deployed | string | - | yes |
+| subnet_id | Subnet ID where the runner will be deployed | string | - | yes |
+| ami_id | AMI ID for the EC2 instance | string | - | yes |
+| api_url | Daytona API URL | string | - | yes |
+| api_key | Daytona API key | string | - | yes |
+| region_id | Daytona region ID | string | - | yes |
+| name_prefix | Prefix for resource names | string | "daytona" | no |
+| runner_name | Name for the runner (used in API registration) | string | null | no |
+| runner_version | Daytona runner version | string | "0.125.0-rc1" | no |
+| instance_type | EC2 instance type | string | "t3.medium" | no |
+| key_name | SSH key pair name | string | null | no |
+| root_volume_type | Root volume type | string | "gp3" | no |
+| root_volume_size | Root volume size in GB | number | 50 | no |
+| poll_timeout | Job polling timeout | string | "30s" | no |
+| poll_limit | Job polling limit | number | 10 | no |
+| enable_ssh | Enable SSH access | bool | false | no |
+| ssh_cidr_blocks | CIDR blocks for SSH access | list(string) | [] | no |
+| enable_ssm | Enable SSM Session Manager | bool | true | no |
+| additional_security_group_ids | Additional security group IDs to attach | list(string) | [] | no |
+| ingress_security_group_ids | Security group IDs allowed to access port 8080 | map(string) | {} | no |
+| additional_iam_policy_arns | Additional IAM policy ARNs to attach | list(string) | [] | no |
+| custom_iam_policy | Custom IAM policy document (JSON) | string | null | no |
+| user_data_append | Additional user data script to run after init | string | null | no |
+| tags | Additional tags | map(string) | {} | no |
+
+##### Outputs
+
+| Name | Description |
+|------|-------------|
+| runner_id | Daytona runner ID |
+| runner_name | Daytona runner name |
+| instance_id | ID of the EC2 instance |
+| instance_private_ip | Private IP address of the instance |
+| instance_public_ip | Public IP address of the instance |
+| security_group_id | ID of the security group |
+| iam_role_arn | ARN of the IAM role |
+| iam_role_name | Name of the IAM role |
+
+##### Security considerations
+
+1. **API Key**: The `api_key` is marked as sensitive. Use Terraform variables or a secrets manager.
+2. **SSH Access**: Disabled by default. Use SSM Session Manager instead for better security.
+3. **Encryption**: Root volume is encrypted by default.
+4. **IMDSv2**: Instance Metadata Service v2 is enforced.
+5. **Network**: The instance only allows outbound traffic by default.
+
+##### Accessing the instance
+
+**Using SSM session manager (recommended)**
+
+```bash
+# No SSH key required
+aws ssm start-session --target <instance-id>
+
+# Check runner status
+sudo systemctl status daytona-runner
+
+# View logs
+sudo journalctl -u daytona-runner -f
+```
+
+**Using SSH (if enabled)**
+
+```bash
+ssh -i ~/.ssh/your-key.pem ubuntu@<instance-ip>
+```
+
+#### Troubleshooting
+
+##### Check cloud-init logs
+
+```bash
+# View cloud-init output
+sudo cat /var/log/cloud-init-output.log
+
+# Check cloud-init status
+sudo cloud-init status
+```
+
+##### Check runner status
+
+```bash
+# Service status
+sudo systemctl status daytona-runner
+
+# Service logs
+sudo journalctl -u daytona-runner -n 100 --no-pager
+
+# Check configuration
+sudo cat /etc/daytona/runner.env
+```
+
+##### Verify installation
+
+```bash
+# Check if binary exists
+ls -la /opt/daytona/runner
+
+# Check binary permissions
+file /opt/daytona/runner
+```
+
+### Helm charts
+
+Daytona provides Helm charts for deploying custom regions and their supporting infrastructure on Kubernetes. The `daytona-region` chart deploys a proxy service and optional snapshot manager, allowing you to run Daytona sandboxes within your own Kubernetes cluster.
+
+#### Prerequisites
+
+- **Supported OS Architecture:** AMD64/x86_64
+- **Docker:** The script will install Docker if not present.
+- **Systemd:** Required for service management.
+
+#### Installation
+
+1. Run the runner install script
+
+```bash
+curl -sSL https://download.daytona.io/install.sh | sudo bash
+```
+
+The script will prompt you for:
+- Daytona API URL
+- Daytona Admin API Key
+- System resource allocation (CPU, memory, disk)
+- Domain name for the runner
+- Runner API URL
+- Optional proxy URL, region, runner capacity, and runner API key
+
+2. Automatic steps performed by the script
+
+- Checks system architecture
+- Downloads the Daytona runner binary
+- Installs Docker if missing
+- Registers the runner with the Daytona API
+- Creates and enables a systemd service for the runner
+- Starts the runner service
+
+#### Manage the runner service
+
+- **Check status:**
+```bash
+sudo systemctl status daytona-runner
+```
+- **View logs:**
+```bash
+sudo tail -f /var/log/daytona-runner.log
+```
+- **Stop service:**
+```bash
+sudo systemctl stop daytona-runner
+```
+
+##### Override with env vars
+
+The following environment variables can be set to override default values in the install script:
+
+| Variable Name            | Description                                                      | Default Value / Notes                       |
+|------------------------- |------------------------------------------------------------------|---------------------------------------------|
+| `CONTAINER_RUNTIME`      | Container runtime to use                                         | `sysbox-runc`                              |
+| `API_TOKEN`              | API token for runner                                             | Auto-generated or user-provided            |
+| `TLS_CERT_FILE`          | Path to TLS certificate file                                     | `/etc/letsencrypt/live/$DOMAIN/fullchain.pem` |
+| `TLS_KEY_FILE`           | Path to TLS key file                                             | `/etc/letsencrypt/live/$DOMAIN/privkey.pem`   |
+| `ENABLE_TLS`             | Enable TLS for runner                                            | `false`                                    |
+| `API_PORT`               | Port for runner API                                              | `3000`                                     |
+| `LOG_FILE_PATH`          | Path to runner log file                                          | `/var/log/daytona-runner.log`               |
+| `LOG_LEVEL`              | Log level                                                        | `info`                                     |
+| `AWS_ENDPOINT_URL`       | AWS S3 endpoint URL                                              | `https://s3.us-east-1.amazonaws.com`        |
+| `AWS_ACCESS_KEY_ID`      | AWS access key ID                                                | (empty)                                    |
+| `AWS_SECRET_ACCESS_KEY`  | AWS secret access key                                            | (empty)                                    |
+| `AWS_REGION`             | AWS region                                                       | `us-east-1`                                |
+| `AWS_DEFAULT_BUCKET`     | AWS S3 bucket name                                               | `daytona`                                  |
+| `SSH_GATEWAY_ENABLE`     | Enable SSH gateway                                               | `true` or `false` (auto-detected)          |
+| `SSH_PUBLIC_KEY`         | SSH gateway public key                                           | Fetched from API                           |
+| `SSH_HOST_KEY_PATH`      | Path to SSH host key                                             | `/etc/ssh/ssh_host_rsa_key`                |
+| `SERVER_URL`             | Daytona API URL                                                  | User-provided                              |
+
+You can set these variables before running the install script to customize the runner configuration.
