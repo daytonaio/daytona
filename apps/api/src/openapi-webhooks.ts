@@ -4,7 +4,7 @@
  */
 
 import { OpenAPIObject, getSchemaPath } from '@nestjs/swagger'
-import { WebhookEvents } from './webhook/constants/webhook-events.constants'
+import { WebhookEvent } from './webhook/constants/webhook-events.constants'
 import {
   SandboxCreatedWebhookDto,
   SandboxStateUpdatedWebhookDto,
@@ -41,7 +41,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
   return {
     ...document,
     webhooks: {
-      [WebhookEvents.SANDBOX_CREATED]: {
+      [WebhookEvent.SANDBOX_CREATED]: {
         post: {
           requestBody: {
             description: 'Sandbox created event',
@@ -58,7 +58,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.SANDBOX_STATE_UPDATED]: {
+      [WebhookEvent.SANDBOX_STATE_UPDATED]: {
         post: {
           requestBody: {
             description: 'Sandbox state updated event',
@@ -75,7 +75,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.SNAPSHOT_CREATED]: {
+      [WebhookEvent.SNAPSHOT_CREATED]: {
         post: {
           requestBody: {
             description: 'Snapshot created event',
@@ -92,7 +92,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.SNAPSHOT_STATE_UPDATED]: {
+      [WebhookEvent.SNAPSHOT_STATE_UPDATED]: {
         post: {
           requestBody: {
             description: 'Snapshot state updated event',
@@ -109,7 +109,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.SNAPSHOT_REMOVED]: {
+      [WebhookEvent.SNAPSHOT_REMOVED]: {
         post: {
           requestBody: {
             description: 'Snapshot removed event',
@@ -126,7 +126,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.VOLUME_CREATED]: {
+      [WebhookEvent.VOLUME_CREATED]: {
         post: {
           requestBody: {
             description: 'Volume created event',
@@ -143,7 +143,7 @@ export function addWebhookDocumentation(document: OpenAPIObject): OpenAPIObjectW
           },
         },
       },
-      [WebhookEvents.VOLUME_STATE_UPDATED]: {
+      [WebhookEvent.VOLUME_STATE_UPDATED]: {
         post: {
           requestBody: {
             description: 'Volume state updated event',

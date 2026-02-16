@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { IsString, IsObject, IsOptional } from 'class-validator'
+import { IsString, IsObject, IsOptional, IsEnum } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { WebhookEvent } from '../constants/webhook-events.constants'
 
 export class SendWebhookDto {
   @ApiProperty({
     description: 'The type of event being sent',
+    enum: WebhookEvent,
+    enumName: 'WebhookEvent',
     example: 'sandbox.created',
   })
-  @IsString()
-  eventType: string
+  @IsEnum(WebhookEvent)
+  eventType: WebhookEvent
 
   @ApiProperty({
     description: 'The payload data to send',
