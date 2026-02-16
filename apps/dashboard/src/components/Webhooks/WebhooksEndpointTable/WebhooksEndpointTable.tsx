@@ -200,6 +200,17 @@ export function WebhooksEndpointTable({
                 description={
                   <div className="space-y-2">
                     <p>Create an endpoint to start receiving webhook events.</p>
+                    <p>
+                      <a
+                        href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Check out the Docs
+                      </a>{' '}
+                      to learn more.
+                    </p>
                   </div>
                 }
               />
