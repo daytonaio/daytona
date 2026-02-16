@@ -34,7 +34,7 @@ import (
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [post]
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [delete]
 func ProxyRequest(ctx *gin.Context) {
-	if regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
+	if ctx.Request.Header.Get("Upgrade") != "websocket" && regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
 		if ctx.Query("follow") == "true" {
 			ProxyCommandLogsStream(ctx)
 			return
