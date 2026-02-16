@@ -635,7 +635,9 @@ func (s *Sandbox) doSetAutoDeleteInterval(ctx context.Context, intervalMinutes *
 //	sandbox.Stop(ctx)
 //	err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
 func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error {
-	return s.ResizeWithTimeout(ctx, resources, 60*time.Second)
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Resize", func(ctx context.Context) error {
+		return s.ResizeWithTimeout(ctx, resources, 60*time.Second)
+	})
 }
 
 // ResizeWithTimeout resizes the sandbox resources with a custom timeout.
@@ -648,6 +650,16 @@ func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error 
 //
 //	err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ResizeWithTimeout", func(ctx context.Context) error {
+		return s.doResizeWithTimeout(ctx, resources, timeout)
+	})
+}
+
+func (s *Sandbox) doResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error {
+	if resources == nil {
+		return errors.NewDaytonaError("Resources must not be nil", 0, nil)
+	}
+
 	if timeout < 0 {
 		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
@@ -705,34 +717,36 @@ func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resour
 //
 //	err := sandbox.WaitForResize(ctx, 2*time.Minute)
 func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error {
-	if timeout < 0 {
-		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
-	}
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "WaitForResize", func(ctx context.Context) error {
+		if timeout < 0 {
+			return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
+		}
 
-	if timeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, timeout)
-		defer cancel()
-	}
+		if timeout > 0 {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, timeout)
+			defer cancel()
+		}
 
-	ticker := time.NewTicker(100 * time.Millisecond)
-	defer ticker.Stop()
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
 
-	for {
-		select {
-		case <-ctx.Done():
-			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
-		case <-ticker.C:
-			if err := s.RefreshData(ctx); err != nil {
-				return err
-			}
+		for {
+			select {
+			case <-ctx.Done():
+				return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
+			case <-ticker.C:
+				if err := s.RefreshData(ctx); err != nil {
+					return err
+				}
 
-			if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-				return errors.NewDaytonaError("Sandbox resize failed", 0, nil)
-			}
-			if s.State != apiclient.SANDBOXSTATE_RESIZING {
-				return nil
+				if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
+					return errors.NewDaytonaError("Sandbox resize failed", 0, nil)
+				}
+				if s.State != apiclient.SANDBOXSTATE_RESIZING {
+					return nil
+				}
 			}
 		}
-	}
+	})
 }

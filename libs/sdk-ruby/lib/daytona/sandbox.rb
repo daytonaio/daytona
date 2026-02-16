@@ -396,6 +396,8 @@ module Daytona
     #   sandbox.stop
     #   sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
     def resize(resources, timeout = DEFAULT_TIMEOUT)
+      raise Sdk::Error, 'Resources must not be nil' if resources.nil?
+
       with_timeout(
         timeout:,
         message: "Sandbox #{id} failed to resize within the #{timeout} seconds timeout period",
@@ -463,7 +465,7 @@ module Daytona
                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
-               :wait_for_sandbox_stop,
+               :wait_for_sandbox_stop, :resize, :wait_for_resize_complete,
                component: 'Sandbox'
 
     private
