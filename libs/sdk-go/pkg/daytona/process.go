@@ -260,6 +260,7 @@ func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, er
 //   - sessionID: The session to execute the command in
 //   - command: The command to execute
 //   - runAsync: If true, return immediately without waiting for completion
+//   - suppressInputEcho: If true, suppress input echo
 //
 // When runAsync is true, use [ProcessService.GetSessionCommand] to check status
 // and [ProcessService.GetSessionCommandLogs] to retrieve output.
