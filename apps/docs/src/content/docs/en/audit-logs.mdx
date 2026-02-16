@@ -3,49 +3,80 @@ title: Audit Logs
 description: View and monitor all user actions across your Daytona organization.
 ---
 
-Daytona Audit Logs provide a detailed record of user and system activity across your organization. Use this feature to track sandbox lifecycle events, user access, system changes, and more.
+Daytona audit logs provide a detailed record of user and system activity across your organization. Use this feature to track sandbox lifecycle events, user access, system changes, and more.
 
-You can access Audit Logs from the [Dashboard](https://app.daytona.io/dashboard/audit-logs).
+- **Security audits**: monitor for unauthorized access or sandbox misuse
+- **Debugging**: understand sandbox lifecycle issues (e.g. failed starts)
+- **Compliance Export**: export logs for internal or external audits (coming soon)
 
-## Prerequisites
+Audit logs are available to [admins](/docs/en/organizations#organization-roles) with full access and [members](/docs/en/organizations#organization-roles) with audit log permissions. Contact your organization administrator if you cannot access audit logs.
 
-Audit logs are available to:
-- **Admins** - Full access to all audit logs
-- **Members** - Access only if they have audit log permissions
+## Access from Dashboard
 
-Contact your organization admin if you cannot access audit logs.
+Access the audit logs page directly from [Daytona Dashboard ↗](https://app.daytona.io/dashboard/audit-logs). The audit logs page displays a list of all audit logs for your organization, including the following columns:
 
-## Real-Time Updates
+- **Time**: the timestamp of the action
+- **User**: the user who performed the action
+- [Actions](#actions): the action performed
+- [Targets](#targets): the resource affected by the action
+- [Outcomes](#outcomes): the result of the action
 
-Enable the **Auto Refresh** toggle in the top-right corner of the Audit Logs page to automatically refresh logs as new events occur.
+To filter audit logs by time, use the date range picker in the top-left corner of the page.
+
+## Real-time updates
+
+Daytona provides real-time updates of audit logs. Enable the **Auto Refresh** toggle in the top-right corner of the [Daytona Audit Logs ↗](https://app.daytona.io/dashboard/audit-logs) page to automatically refresh logs as new events occur.
+
+## Programmatic management
+
+Daytona provides API endpoints for programmatic access to audit logs.
+
+### Get all audit logs
+
+To get all audit logs, use the following API endpoint:
+
+```bash
+curl https://app.daytona.io/api/audit \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/audit) reference:
+
+> [**Get all audit logs (API)**](/docs/en/tools/api/#daytona/tag/audit/GET/audit-logs)
+
+### Get audit logs for organization
+
+To get audit logs for a specific organization, use the following API endpoint:
+
+```bash
+curl https://app.daytona.io/api/audit/organizations/{organizationId} \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/audit) reference:
+
+> [**Get audit logs for organization (API)**](/docs/en/tools/api/#daytona/tag/audit/GET/audit/organizations/{organizationId})
 
 ## Log Structure
 
-Each log entry includes the following columns:
+Each audit log entry contains the following fields:
 
-| Field     | Description                            |
-|---------- |----------------------------------------|
-| **Time**  | Timestamp of when the action occurred (UTC)  |
-| **User**  | Email of the user who performed action  |
-| **Action**| Operation executed                      |
-| **Target**| Resource type affected                  |
-| **Outcome**| Result status code and message         |
-
-### Example
-
-```text
-Time:       5h ago (7/31/2025, 8:15:27 AM)
-User:       janedoe@acme.com
-Action:     create
-Target:     sandbox (ID: 10f249ad-...)
-Outcome:    Success (200)
-```
-
-## Use Cases
-
-- **Security audits**: Monitor for unauthorized access or sandbox misuse
-- **Debugging**: Understand sandbox lifecycle issues (e.g. failed starts)
-- **Compliance Export**: Export logs for internal or external audits (Coming soon)
+| Field                | Type   | Description                                          |
+| -------------------- | ------ | ---------------------------------------------------- |
+| **`id`**             | string | Unique log entry identifier                          |
+| **`actorId`**        | string | ID of the user who performed the action              |
+| **`actorEmail`**     | string | Email of the user who performed the action           |
+| **`organizationId`** | string | Organization ID                                      |
+| **`action`**         | string | Operation executed (e.g., `create`, `start`, `stop`) |
+| **`targetType`**     | string | Resource type affected (e.g., `sandbox`, `snapshot`) |
+| **`targetId`**       | string | ID of the affected resource                          |
+| **`statusCode`**     | number | HTTP status code of the result                       |
+| **`errorMessage`**   | string | Error message if the action failed                   |
+| **`ipAddress`**      | string | IP address of the request origin                     |
+| **`userAgent`**      | string | User agent of the request origin                     |
+| **`source`**         | string | Source of the action                                 |
+| **`metadata`**       | object | Additional context about the action                  |
+| **`createdAt`**      | string | ISO 8601 timestamp of when the action occurred       |
 
 ## Actions
 
@@ -92,26 +123,9 @@ runner, sandbox, snapshot, user, volume
 
 The outcome field indicates the result of the action. Statuses follow standard HTTP semantics:
 
-| Outcome | Description |
-|---------|-------------|
-| **Info** | Informational (1xx codes) |
-| **Success** | Action succeeded (2xx codes) |
-| **Redirect** | Redirects (3xx codes) |
-| **Error** | Client/server error (4xx/5xx) |
-
-Example errors may include:
-
-- `400` – Sandbox is not started
-- `403` – Unauthorized
-- `500` – Internal error
-
-{/* ## Filtering & Pagination
-
-You can filter and search logs by:
-
-- Action type
-- Target resource
-- Outcome status
-- User email
-
-Use the page size selector to change how many results are shown per page. */} 
+| **Outcome** | **Description**               |
+| ----------- | ----------------------------- |
+| Info        | Informational (1xx codes)     |
+| Success     | Action succeeded (2xx codes)  |
+| Redirect    | Redirects (3xx codes)         |
+| Error       | Client/server error (4xx/5xx) |
