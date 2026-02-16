@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Spinner } from '@/components/ui/spinner'
 import { WEBHOOK_EVENT_CATEGORIES, WEBHOOK_EVENTS } from '@/constants/webhook-events'
 import { handleApiError } from '@/lib/error-handling'
+import { cn } from '@/lib/utils'
 import { useForm } from '@tanstack/react-form'
 import { ChevronsUpDown, Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -38,8 +39,8 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   url: z.string().min(1, 'URL is required').url('Must be a valid URL'),
-  description: z.string().optional(),
-  filterTypes: z.array(z.string()),
+  description: z.string().min(1, 'Name is required'),
+  filterTypes: z.array(z.string()).min(1, 'At least one event is required'),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -176,8 +177,9 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
           <form.Field name="filterTypes">
             {(field) => {
               const selectedEvents = field.state.value
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
               return (
-                <Field>
+                <Field data-invalid={isInvalid}>
                   <FieldLabel>Events</FieldLabel>
                   <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen} modal>
                     <PopoverTrigger asChild>
@@ -185,7 +187,9 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                         variant="outline"
                         role="combobox"
                         aria-expanded={eventsPopoverOpen}
-                        className="w-full justify-between h-auto min-h-10"
+                        className={cn('w-full justify-between h-auto min-h-10', {
+                          '!pl-2': selectedEvents.length > 0,
+                        })}
                       >
                         <div className="flex flex-wrap gap-1">
                           {selectedEvents.length === 0 ? (
@@ -227,6 +231,9 @@ export const CreateEndpointDialog: React.FC<CreateEndpointDialogProps> = ({ onSu
                       </Command>
                     </PopoverContent>
                   </Popover>
+                  {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
                 </Field>
               )
             }}
