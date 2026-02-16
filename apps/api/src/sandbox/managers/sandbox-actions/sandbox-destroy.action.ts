@@ -32,7 +32,7 @@ export class SandboxDestroyAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }

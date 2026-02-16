@@ -1086,10 +1086,7 @@ export class SandboxController {
       throw new NotFoundException(`Sandbox with ID or name ${sandboxIdOrName} has no build info`)
     }
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} not found`)
-    }
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     if (!runner.apiUrl) {
       throw new NotFoundException(`Runner for sandbox ${sandboxIdOrName} has no API URL`)

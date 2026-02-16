@@ -203,7 +203,7 @@ export class SandboxStartAction extends SandboxAction {
 
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
-      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
+      const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
       if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox.id, targetSandboxState, lockCode, runner.id)
@@ -340,7 +340,7 @@ export class SandboxStartAction extends SandboxAction {
     sandbox: Sandbox,
     lockCode: LockCode,
   ): Promise<SyncState> {
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }
@@ -403,7 +403,7 @@ export class SandboxStartAction extends SandboxAction {
     //  if it is, move sandbox to prevRunnerId, and set runnerId to null
     //  this will assign a new runner to the sandbox and restore the sandbox from the latest backup
     if (sandbox.runnerId) {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
       const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
@@ -483,7 +483,7 @@ export class SandboxStartAction extends SandboxAction {
       }
     } else {
       // if sandbox has runner, start sandbox
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
       if (runner.state !== RunnerState.READY) {
         return DONT_SYNC_AGAIN
@@ -528,7 +528,7 @@ export class SandboxStartAction extends SandboxAction {
       return SYNC_AGAIN
     }
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
@@ -555,7 +555,7 @@ export class SandboxStartAction extends SandboxAction {
   //  used to check if sandbox is started on runner and update sandbox state accordingly
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
   private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)

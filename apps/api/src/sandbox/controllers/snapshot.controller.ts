@@ -333,10 +333,7 @@ export class SnapshotController {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
-    if (!runner) {
-      throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
-    }
+    const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
 
     if (!runner.apiUrl) {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} has no API URL`)
