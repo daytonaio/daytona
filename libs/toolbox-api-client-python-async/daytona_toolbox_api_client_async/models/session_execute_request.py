@@ -29,8 +29,9 @@ class SessionExecuteRequest(BaseModel):
     var_async: Optional[StrictBool] = Field(default=None, serialization_alias="async")
     command: StrictStr
     run_async: Optional[StrictBool] = Field(default=None, serialization_alias="runAsync")
+    suppress_input_echo: Optional[StrictBool] = Field(default=None, serialization_alias="suppressInputEcho")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["async", "command", "runAsync"]
+    __properties: ClassVar[List[str]] = ["async", "command", "runAsync", "suppressInputEcho"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,7 +93,8 @@ class SessionExecuteRequest(BaseModel):
         _obj = cls.model_validate({
             "var_async": obj.get("async"),
             "command": obj.get("command"),
-            "run_async": obj.get("runAsync")
+            "run_async": obj.get("runAsync"),
+            "suppress_input_echo": obj.get("suppressInputEcho")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

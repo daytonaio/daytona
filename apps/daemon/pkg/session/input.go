@@ -54,18 +54,20 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 		return common_errors.NewInternalServerError(fmt.Errorf("failed to write to input pipe: %w", err))
 	}
 
-	// Also echo input to log file for visibility (appears as stdout)
-	logFilePath, _ := command.LogFilePath(session.Dir(s.configDir))
-	logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil {
-		log.Debugf("failed to open log file to echo input: %v", err)
-	} else {
-		defer logFile.Close()
-		// Write with STDOUT prefix to maintain log format consistency
-		dataWithPrefix := append(STDOUT_PREFIX, []byte(data)...)
-		_, err = logFile.Write(dataWithPrefix)
+	if !command.SuppressInputEcho {
+		// Also echo input to log file for visibility (appears as stdout)
+		logFilePath, _ := command.LogFilePath(session.Dir(s.configDir))
+		logFile, err := os.OpenFile(logFilePath, os.O_APPEND|os.O_WRONLY, 0600)
 		if err != nil {
-			log.Errorf("failed to echo input to log file: %v", err)
+			log.Debugf("failed to open log file to echo input: %v", err)
+		} else {
+			defer logFile.Close()
+			// Write with STDOUT prefix to maintain log format consistency
+			dataWithPrefix := append(STDOUT_PREFIX, []byte(data)...)
+			_, err = logFile.Write(dataWithPrefix)
+			if err != nil {
+				log.Errorf("failed to echo input to log file: %v", err)
+			}
 		}
 	}
 

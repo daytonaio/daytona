@@ -778,6 +778,8 @@ definitions:
         type: string
       runAsync:
         type: boolean
+      suppressInputEcho:
+        type: boolean
     required:
       - command
     type: object

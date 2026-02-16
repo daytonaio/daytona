@@ -69,7 +69,7 @@ func main() {
 	done
 	echo "stdout: done!"`
 
-	cmdResult, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, cmd, true)
+	cmdResult, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, cmd, true, false)
 	if err != nil {
 		log.Fatalf("Failed to execute async command: %v", err)
 	}

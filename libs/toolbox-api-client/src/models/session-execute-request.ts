@@ -36,4 +36,10 @@ export interface SessionExecuteRequest {
    * @memberof SessionExecuteRequest
    */
   runAsync?: boolean
+  /**
+   *
+   * @type {boolean}
+   * @memberof SessionExecuteRequest
+   */
+  suppressInputEcho?: boolean
 }

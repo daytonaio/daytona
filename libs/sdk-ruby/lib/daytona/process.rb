@@ -169,7 +169,8 @@ module Daytona
     def execute_session_command(session_id:, req:) # rubocop:disable Metrics/MethodLength
       response = toolbox_api.session_execute_command(
         session_id,
-        DaytonaToolboxApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async)
+        DaytonaToolboxApiClient::SessionExecuteRequest.new(command: req.command, run_async: req.run_async,
+                                                           suppress_input_echo: req.suppress_input_echo)
       )
 
       stdout, stderr = Util.demux(response.output || '')

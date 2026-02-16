@@ -279,10 +279,11 @@ func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, er
 //	// Later: check status with GetSessionCommand(ctx, "my-session", cmdID)
 //
 // Returns command result including id, exitCode (if completed), stdout, and stderr.
-func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool) (map[string]any, error) {
+func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool, suppressInputEcho bool) (map[string]any, error) {
 	return withInstrumentation(ctx, p.otel, "Process", "ExecuteSessionCommand", func(ctx context.Context) (map[string]any, error) {
 		req := toolbox.NewSessionExecuteRequest(command)
 		req.SetRunAsync(runAsync)
+		req.SetSuppressInputEcho(suppressInputEcho)
 		resp, httpResp, err := p.toolboxClient.ProcessAPI.SessionExecuteCommand(ctx, sessionID).Request(*req).Execute()
 		if err != nil {
 			return nil, errors.ConvertToolboxError(err, httpResp)

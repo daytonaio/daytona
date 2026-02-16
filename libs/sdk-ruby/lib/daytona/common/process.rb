@@ -69,13 +69,18 @@ module Daytona
     # @return [Boolean] Whether to execute the command asynchronously
     attr_accessor :run_async
 
+    # @return [Boolean] Whether to suppress input echo
+    attr_accessor :suppress_input_echo
+
     # Initialize a new SessionExecuteRequest
     #
     # @param command [String] The command to execute
     # @param run_async [Boolean] Whether to execute the command asynchronously
-    def initialize(command:, run_async: false)
+    # @param suppress_input_echo [Boolean] Whether to suppress input echo (default is false)
+    def initialize(command:, run_async: false, suppress_input_echo: false)
       @command = command
       @run_async = run_async
+      @suppress_input_echo = suppress_input_echo
     end
   end
 

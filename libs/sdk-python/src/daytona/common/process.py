@@ -41,6 +41,7 @@ class SessionExecuteRequest(ApiSessionExecuteRequest, AsyncApiSessionExecuteRequ
         command (str): The command to execute.
         run_async (bool | None): Whether to execute the command asynchronously.
         var_async (bool | None): Deprecated. Use `run_async` instead.
+        suppress_input_echo (bool | None): Whether to suppress input echo. Default is `False`.
     """
 
     @model_validator(mode="before")
