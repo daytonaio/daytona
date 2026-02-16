@@ -4,6 +4,7 @@
  */
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { WebhookEvent } from '../constants/webhook-events.constants'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxClass } from '../../sandbox/enums/sandbox-class.enum'
 import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
@@ -19,6 +20,8 @@ import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updat
 export abstract class BaseWebhookEventDto {
   @ApiProperty({
     description: 'Event type identifier',
+    enum: WebhookEvent,
+    enumName: 'WebhookEvent',
     example: 'sandbox.created',
   })
   event: string
