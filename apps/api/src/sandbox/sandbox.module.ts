@@ -23,7 +23,6 @@ import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
-import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
 import { OrganizationModule } from '../organization/organization.module'
 import { SandboxWarmPoolService } from './services/sandbox-warm-pool.service'
@@ -55,6 +54,7 @@ import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
 import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Module({
   imports: [
@@ -98,7 +98,6 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     ProxyCacheInvalidationService,
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
-    SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,
     VolumeService,
@@ -114,8 +113,12 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     JobStateHandlerService,
     {
       provide: SandboxRepository,
-      inject: [DataSource],
-      useFactory: (dataSource: DataSource) => new SandboxRepository(dataSource),
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
+      useFactory: (
+        dataSource: DataSource,
+        eventEmitter: EventEmitter2,
+        sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
   ],
   exports: [

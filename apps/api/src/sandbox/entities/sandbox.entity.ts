@@ -4,7 +4,6 @@
  */
 
 import {
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -20,7 +19,6 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { v4 as uuidv4 } from 'uuid'
-import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 
@@ -225,147 +223,52 @@ export class Sandbox {
     this.region = region
   }
 
-  public setBackupState(
+  static getBackupStateUpdate(
+    sandbox: Sandbox,
     state: BackupState,
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
-  ) {
-    this.backupState = state
+  ): Partial<Sandbox> {
+    const update: Partial<Sandbox> = {
+      backupState: state,
+    }
     switch (state) {
       case BackupState.NONE:
-        this.backupSnapshot = null
+        update.backupSnapshot = null
         break
       case BackupState.COMPLETED: {
         const now = new Date()
-        this.lastBackupAt = now
-        this.existingBackupSnapshots = [
-          ...this.existingBackupSnapshots,
+        update.lastBackupAt = now
+        update.existingBackupSnapshots = [
+          ...sandbox.existingBackupSnapshots,
           {
-            snapshotName: this.backupSnapshot,
+            snapshotName: sandbox.backupSnapshot,
             createdAt: now,
           },
         ]
-        this.backupErrorReason = null
+        update.backupErrorReason = null
         break
       }
     }
     if (backupSnapshot !== undefined) {
-      this.backupSnapshot = backupSnapshot
+      update.backupSnapshot = backupSnapshot
     }
     if (backupRegistryId !== undefined) {
-      this.backupRegistryId = backupRegistryId
+      update.backupRegistryId = backupRegistryId
     }
     if (backupErrorReason !== undefined) {
-      this.backupErrorReason = backupErrorReason
+      update.backupErrorReason = backupErrorReason
     }
+    return update
   }
 
-  public applyDesiredDestroyedState(): void {
-    this.pending = true
-    this.desiredState = SandboxDesiredState.DESTROYED
-    this.backupState = BackupState.NONE
-    this.name = 'DESTROYED_' + this.name + '_' + Date.now()
-  }
-
-  @BeforeUpdate()
-  updateLastActivityAt() {
-    this.lastActivityAt = new Date()
-  }
-
-  @BeforeUpdate()
-  validateDesiredState() {
-    switch (this.desiredState) {
-      case SandboxDesiredState.STARTED:
-        if (
-          [
-            SandboxState.STARTED,
-            SandboxState.STOPPED,
-            SandboxState.STARTING,
-            SandboxState.ARCHIVED,
-            SandboxState.CREATING,
-            SandboxState.UNKNOWN,
-            SandboxState.RESTORING,
-            SandboxState.PENDING_BUILD,
-            SandboxState.BUILDING_SNAPSHOT,
-            SandboxState.PULLING_SNAPSHOT,
-            SandboxState.ARCHIVING,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.RESIZING,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
-      case SandboxDesiredState.STOPPED:
-        if (
-          [
-            SandboxState.STARTED,
-            SandboxState.STOPPING,
-            SandboxState.STOPPED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.RESIZING,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
-      case SandboxDesiredState.ARCHIVED:
-        if (
-          [
-            SandboxState.ARCHIVED,
-            SandboxState.ARCHIVING,
-            SandboxState.STOPPED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
-      case SandboxDesiredState.DESTROYED:
-        if (
-          [
-            SandboxState.DESTROYED,
-            SandboxState.DESTROYING,
-            SandboxState.STOPPED,
-            SandboxState.STARTED,
-            SandboxState.ARCHIVED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.ARCHIVING,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
-    }
-  }
-
-  @BeforeUpdate()
-  updatePendingFlag() {
-    if (!this.pending && String(this.state) !== String(this.desiredState)) {
-      this.pending = true
-    }
-    if (this.pending && String(this.state) === String(this.desiredState)) {
-      this.pending = false
-    }
-    if (
-      this.state === SandboxState.ERROR ||
-      this.state === SandboxState.BUILD_FAILED ||
-      this.desiredState === SandboxDesiredState.ARCHIVED
-    ) {
-      this.pending = false
-    }
-  }
-
-  @BeforeUpdate()
-  handleDestroyedState() {
-    if (this.state === SandboxState.DESTROYED) {
-      this.runnerId = null
-      this.backupState = BackupState.NONE
+  static getSoftDeleteUpdate(sandbox: Sandbox): Partial<Sandbox> {
+    return {
+      pending: true,
+      desiredState: SandboxDesiredState.DESTROYED,
+      backupState: BackupState.NONE,
+      name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
     }
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { Repository } from 'typeorm'
+import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
@@ -19,7 +19,6 @@ import { DockerRegistryService } from '../../../docker-registry/services/docker-
 import { DockerRegistry } from '../../../docker-registry/entities/docker-registry.entity'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
 import { OrganizationService } from '../../../organization/services/organization.service'
 import { TypedConfigService } from '../../../config/typed-config.service'
@@ -28,7 +27,6 @@ import { Organization } from '../../../organization/entities/organization.entity
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
-import { SandboxService } from '../../services/sandbox.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -36,9 +34,7 @@ export class SandboxStartAction extends SandboxAction {
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
-    private readonly sandboxService: SandboxService,
+    protected sandboxRepository: SandboxRepository,
     protected readonly snapshotService: SnapshotService,
     protected readonly dockerRegistryService: DockerRegistryService,
     protected readonly organizationService: OrganizationService,
@@ -417,13 +413,15 @@ export class SandboxStartAction extends SandboxAction {
         sandbox.prevRunnerId = originalRunnerId
         sandbox.runnerId = null
 
-        await this.sandboxService.updateById(
+        await this.sandboxRepository.update(
           sandbox.id,
           {
-            prevRunnerId: originalRunnerId,
-            runnerId: null,
+            updateData: {
+              prevRunnerId: originalRunnerId,
+              runnerId: null,
+            },
           },
-          sandbox,
+          true,
         )
       }
 
@@ -439,13 +437,15 @@ export class SandboxStartAction extends SandboxAction {
 
           //  temp workaround to move sandboxes to less used runner
           if (lessUsedRunners.length > 0) {
-            await this.sandboxService.updateById(
+            await this.sandboxRepository.update(
               sandbox.id,
               {
-                runnerId: null,
-                prevRunnerId: originalRunnerId,
+                updateData: {
+                  runnerId: null,
+                  prevRunnerId: originalRunnerId,
+                },
               },
-              sandbox,
+              true,
             )
             try {
               const runnerAdapter = await this.runnerAdapterFactory.create(runner)
@@ -656,10 +656,13 @@ export class SandboxStartAction extends SandboxAction {
       sandbox.lastActivityAt &&
       new Date(sandbox.lastActivityAt).getTime() < Date.now() - 1000 * 60 * timeoutMinutes
     ) {
-      sandbox.state = SandboxState.ERROR
-      sandbox.errorReason = errorReason
-      sandbox.recoverable = false
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxRepository.update(sandbox.id, {
+        updateData: {
+          state: SandboxState.ERROR,
+          errorReason,
+          recoverable: false,
+        },
+      })
       return true
     }
     return false
@@ -846,7 +849,7 @@ export class SandboxStartAction extends SandboxAction {
     if (!runner) {
       this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
 
-      await this.sandboxService.updateById(sandbox.id, { prevRunnerId: null }, sandbox)
+      await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
       return
     }
 
@@ -877,7 +880,7 @@ export class SandboxStartAction extends SandboxAction {
       // Finally remove the destroyed sandbox
       await runnerAdapter.removeDestroyedSandbox(sandbox.id)
 
-      await this.sandboxService.updateById(sandbox.id, { prevRunnerId: null }, sandbox)
+      await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
     } catch (error) {
       this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
     }

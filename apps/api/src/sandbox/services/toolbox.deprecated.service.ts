@@ -12,14 +12,14 @@ import axios from 'axios'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxService } from './sandbox.service'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class ToolboxService {
   private readonly logger = new Logger(ToolboxService.name)
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,
@@ -115,7 +115,7 @@ export class ToolboxService {
       // redis for cooldown period - 10 seconds
       // prevents database flooding when multiple requests are made at the same time
       if (acquired) {
-        await this.sandboxService.updateById(sandboxId, { lastActivityAt: new Date() })
+        await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
       }
     }
   }

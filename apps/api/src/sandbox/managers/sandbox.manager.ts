@@ -121,15 +121,21 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 return
               }
 
+              let updateData: Partial<Sandbox> = {}
+
+              //  if auto-delete interval is 0, delete the sandbox immediately
+              if (sandbox.autoDeleteInterval === 0) {
+                updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+              } else {
+                updateData.pending = true
+                updateData.desiredState = SandboxDesiredState.STOPPED
+              }
+
               try {
-                //  if auto-delete interval is 0, delete the sandbox immediately
-                if (sandbox.autoDeleteInterval === 0) {
-                  sandbox.applyDesiredDestroyedState()
-                } else {
-                  sandbox.pending = true
-                  sandbox.desiredState = SandboxDesiredState.STOPPED
-                }
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData,
+                  whereCondition: { pending: false, state: sandbox.state },
+                })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
@@ -181,8 +187,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           }
 
           try {
-            sandbox.desiredState = SandboxDesiredState.ARCHIVED
-            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData: {
+                desiredState: SandboxDesiredState.ARCHIVED,
+              },
+              whereCondition: { pending: false, state: sandbox.state },
+            })
+
             this.syncInstanceState(sandbox.id).catch(this.logger.error)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -238,8 +249,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.applyDesiredDestroyedState()
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData: Sandbox.getSoftDeleteUpdate(sandbox),
+                  whereCondition: { pending: false, state: sandbox.state },
+                })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
@@ -371,8 +384,12 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           this.logger.warn(
             `Setting desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId} (previous desired state: ${sandbox.desiredState})`,
           )
-          sandbox.desiredState = SandboxDesiredState.ARCHIVED
-          await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData: {
+              desiredState: SandboxDesiredState.ARCHIVED,
+            },
+            whereCondition: { state: SandboxState.ERROR },
+          })
         } catch (e) {
           this.logger.error(
             `Failed to set desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId}`,
@@ -509,8 +526,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     // Update the sandbox to use the new runner; roll back on failure
     try {
       await this.sandboxRepository.update(sandbox.id, {
-        prevRunnerId: sandbox.runnerId,
-        runnerId: newRunnerId,
+        updateData: {
+          prevRunnerId: sandbox.runnerId,
+          runnerId: newRunnerId,
+        },
       })
     } catch (e) {
       this.logger.error(`Failed to update sandbox ${sandbox.id} runnerId to ${newRunnerId}, rolling back`, e)
@@ -748,20 +767,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     } catch (error) {
       this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
-      const sandbox = await this.sandboxRepository.findOneBy({
-        id: sandboxId,
-      })
-      if (!sandbox) {
-        //  edge case where sandbox is deleted while desired state is being processed
-        return
-      }
-      sandbox.state = SandboxState.ERROR
-
       const { recoverable, errorReason } = sanitizeSandboxError(error)
-      sandbox.errorReason = errorReason
-      sandbox.recoverable = recoverable
 
-      await this.sandboxRepository.save(sandbox)
+      const updateData: Partial<Sandbox> = {
+        state: SandboxState.ERROR,
+        errorReason,
+        recoverable,
+      }
+
+      await this.sandboxRepository.update(sandboxId, { updateData })
     }
 
     await this.redisLockProvider.unlock(lockKey)
