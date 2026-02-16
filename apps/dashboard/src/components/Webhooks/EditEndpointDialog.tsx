@@ -38,8 +38,8 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   url: z.string().min(1, 'URL is required').url('Must be a valid URL'),
-  description: z.string().optional(),
-  filterTypes: z.array(z.string()),
+  description: z.string().min(1, 'Name is required'),
+  filterTypes: z.array(z.string()).min(1, 'At least one event is required'),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -181,8 +181,9 @@ export const EditEndpointDialog: React.FC<EditEndpointDialogProps> = ({ endpoint
           <form.Field name="filterTypes">
             {(field) => {
               const selectedEvents = field.state.value
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
               return (
-                <Field>
+                <Field data-invalid={isInvalid}>
                   <FieldLabel>Events</FieldLabel>
                   <Popover open={eventsPopoverOpen} onOpenChange={setEventsPopoverOpen} modal>
                     <PopoverTrigger asChild>
@@ -232,6 +233,9 @@ export const EditEndpointDialog: React.FC<EditEndpointDialogProps> = ({ endpoint
                       </Command>
                     </PopoverContent>
                   </Popover>
+                  {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                    <FieldError errors={field.state.meta.errors} />
+                  )}
                 </Field>
               )
             }}
