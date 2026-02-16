@@ -77,8 +77,11 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import {
   SANDBOX_LOOKUP_CACHE_TTL_MS,
+  SANDBOX_ORG_ID_CACHE_TTL_MS,
   sandboxLookupCacheKeyById,
   sandboxLookupCacheKeyByName,
+  sandboxOrgIdCacheKeyById,
+  sandboxOrgIdCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 
@@ -609,6 +612,14 @@ export class SandboxService {
 
     const result = await this.sandboxRepository.save(warmPoolSandbox)
 
+    // Defensive invalidation of orgId cache since the sandbox moved from unassigned to a real organization
+    this.sandboxLookupCacheInvalidationService.invalidateOrgId({
+      sandboxId: warmPoolSandbox.id,
+      organizationId: organization.id,
+      name: warmPoolSandbox.name,
+      previousOrganizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+    })
+
     // Treat this as a newly started sandbox
     this.eventEmitter.emit(
       SandboxEvents.STATE_UPDATED,
@@ -1035,7 +1046,10 @@ export class SandboxService {
         ...(organizationId ? { organizationId: organizationId } : {}),
       },
       select: ['organizationId'],
-      loadEagerRelations: false,
+      cache: {
+        id: sandboxOrgIdCacheKeyById({ organizationId, sandboxId: sandboxIdOrName }),
+        milliseconds: SANDBOX_ORG_ID_CACHE_TTL_MS,
+      },
     })
 
     if (!sandbox && organizationId) {
@@ -1045,7 +1059,10 @@ export class SandboxService {
           organizationId: organizationId,
         },
         select: ['organizationId'],
-        loadEagerRelations: false,
+        cache: {
+          id: sandboxOrgIdCacheKeyByName({ organizationId, sandboxName: sandboxIdOrName }),
+          milliseconds: SANDBOX_ORG_ID_CACHE_TTL_MS,
+        },
       })
     }
 
