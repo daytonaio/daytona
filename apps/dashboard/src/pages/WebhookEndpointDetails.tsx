@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { Skeleton } from '@/components/ui/skeleton'
+import DeliveryStatsLine from '@/components/Webhooks/DeliveryStatsLine'
 import { EditEndpointDialog } from '@/components/Webhooks/EditEndpointDialog'
 import { EndpointEventsTable } from '@/components/Webhooks/EndpointEventsTable'
 import { RoutePath } from '@/enums/RoutePath'
@@ -37,11 +38,11 @@ import { useRotateWebhookSecretMutation } from '@/hooks/mutations/useRotateWebho
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
 import { getMaskedToken, getRelativeTimeString } from '@/lib/utils'
-import { ArrowLeft, Eye, EyeOff, MoreHorizontal, RefreshCcw } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Loader2, MoreHorizontal, RefreshCcw } from 'lucide-react'
 import React, { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { useAttemptedMessages, useEndpoint, useEndpointSecret } from 'svix-react'
+import { useAttemptedMessages, useEndpoint, useEndpointSecret, useEndpointStats } from 'svix-react'
 
 const WebhookEndpointDetails: React.FC = () => {
   const { endpointId } = useParams<{ endpointId: string }>()
@@ -55,6 +56,7 @@ const WebhookEndpointDetails: React.FC = () => {
   const endpoint = useEndpoint(endpointId || '')
   const secret = useEndpointSecret(endpointId || '')
   const messages = useAttemptedMessages(endpointId || '', {})
+  const stats = useEndpointStats(endpointId || '')
 
   const updateMutation = useUpdateWebhookEndpointMutation()
   const deleteMutation = useDeleteWebhookEndpointMutation()
@@ -63,10 +65,16 @@ const WebhookEndpointDetails: React.FC = () => {
 
   const isMutating = updateMutation.isPending || deleteMutation.isPending || rotateSecretMutation.isPending
 
+  const isRefreshing = endpoint.loading || secret.loading || messages.loading || stats.loading
+
+  const statsIsLoading = !stats.data && stats.loading
+  const statsIsFetching = !!stats.data && stats.loading
+
   const handleRetry = () => {
     endpoint.reload()
     secret.reload()
     messages.reload()
+    stats.reload()
   }
 
   const handleDisable = async () => {
@@ -114,6 +122,7 @@ const WebhookEndpointDetails: React.FC = () => {
       await replayMutation.mutateAsync({ endpointId, msgId })
       toast.success('Event replayed')
       messages.reload()
+      stats.reload()
     } catch (error) {
       handleApiError(error, 'Failed to replay event')
     }
@@ -134,8 +143,8 @@ const WebhookEndpointDetails: React.FC = () => {
       </PageHeader>
 
       <PageContent>
-        <div className="flex items-center gap-3 mb-6">
-          <Button variant="ghost" size="icon-sm" onClick={() => navigate(RoutePath.WEBHOOKS)}>
+        <div className="flex items-center gap-3 mb-6 min-w-0">
+          <Button variant="ghost" size="icon-sm" className="shrink-0" onClick={() => navigate(RoutePath.WEBHOOKS)}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           {endpoint.loading ? (
@@ -146,11 +155,11 @@ const WebhookEndpointDetails: React.FC = () => {
             </>
           ) : endpointData ? (
             <>
-              <h2 className="text-lg font-medium">{endpointData.description || 'Unnamed Endpoint'}</h2>
-              <Badge variant={endpointData.disabled ? 'secondary' : 'success'}>
+              <h2 className="text-lg font-medium truncate min-w-0">{endpointData.description || 'Unnamed Endpoint'}</h2>
+              <Badge variant={endpointData.disabled ? 'secondary' : 'success'} className="shrink-0">
                 {endpointData.disabled ? 'Disabled' : 'Enabled'}
               </Badge>
-              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-muted-foreground shrink-0 hidden sm:inline">•</span>
               <TimestampTooltip
                 timestamp={
                   typeof endpointData.createdAt === 'string'
@@ -158,9 +167,14 @@ const WebhookEndpointDetails: React.FC = () => {
                     : endpointData.createdAt.toISOString()
                 }
               >
-                <span className="text-sm text-muted-foreground cursor-default">{relativeTime}</span>
+                <span className="text-sm text-muted-foreground cursor-default shrink-0 hidden sm:inline">
+                  {relativeTime}
+                </span>
               </TimestampTooltip>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-2 shrink-0">
+                <Button variant="ghost" size="icon-sm" onClick={handleRetry} disabled={isRefreshing}>
+                  {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon-sm" disabled={isMutating}>
@@ -194,8 +208,8 @@ const WebhookEndpointDetails: React.FC = () => {
         </div>
 
         {endpoint.loading ? (
-          <>
-            <Card className="mb-6">
+          <div className="flex flex-col gap-4">
+            <Card>
               <CardHeader>
                 <CardTitle>Endpoint Configuration</CardTitle>
               </CardHeader>
@@ -210,6 +224,30 @@ const WebhookEndpointDetails: React.FC = () => {
                     <Skeleton className="h-9 w-full" />
                   </div>
                 </div>
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Listening For</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Skeleton className="h-5 w-24 rounded-full" />
+                    <Skeleton className="h-5 w-32 rounded-full" />
+                    <Skeleton className="h-5 w-20 rounded-full" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <Skeleton className="h-2 w-full rounded-full" />
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-3 w-18" />
+                    <Skeleton className="h-3 w-18" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -220,7 +258,7 @@ const WebhookEndpointDetails: React.FC = () => {
                 <EndpointEventsTable data={[]} loading={true} onReplay={handleReplay} />
               </CardContent>
             </Card>
-          </>
+          </div>
         ) : endpoint.error || !endpointData ? (
           <Card>
             <CardHeader>
@@ -235,8 +273,8 @@ const WebhookEndpointDetails: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <>
-            <Card className="mb-6">
+          <div className="flex flex-col gap-4">
+            <Card>
               <CardHeader>
                 <CardTitle>Endpoint Configuration</CardTitle>
               </CardHeader>
@@ -291,13 +329,35 @@ const WebhookEndpointDetails: React.FC = () => {
             </Card>
             <Card>
               <CardHeader>
+                <CardTitle>Delivery Stats</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {statsIsLoading ? (
+                  <div className="flex flex-col gap-2">
+                    <Skeleton className="h-2 w-full rounded-full" />
+                    <div className="flex items-center gap-4">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-3 w-16" />
+                      <Skeleton className="h-3 w-18" />
+                      <Skeleton className="h-3 w-18" />
+                    </div>
+                  </div>
+                ) : stats.data ? (
+                  <div className={statsIsFetching ? 'opacity-50 transition-opacity' : ''}>
+                    <DeliveryStatsLine stats={stats.data} />
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
                 <CardTitle>Event History</CardTitle>
               </CardHeader>
               <CardContent>
                 <EndpointEventsTable data={messages.data || []} loading={messages.loading} onReplay={handleReplay} />
               </CardContent>
             </Card>
-          </>
+          </div>
         )}
       </PageContent>
 

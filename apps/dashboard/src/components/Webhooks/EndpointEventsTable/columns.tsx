@@ -107,13 +107,13 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
       const msgId = row.original.id
       return (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             <Button variant="ghost" size="icon-xs">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem className="cursor-pointer" onClick={() => onReplay(msgId)}>
               Replay
             </DropdownMenuItem>
