@@ -12,9 +12,10 @@ import { ResourceTypeForJobType } from '../dto/job-type-map.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { JobStateHandlerService } from './job-state-handler.service'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 import { propagation, context as otelContext } from '@opentelemetry/api'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
+import { JOB_COMPLETED_EVENT } from '../events/job.events'
 
 @Injectable()
 export class JobService {
@@ -25,7 +26,7 @@ export class JobService {
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     @InjectRedis() private readonly redis: Redis,
-    private readonly jobStateHandlerService: JobStateHandlerService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -242,10 +243,7 @@ export class JobService {
 
     // Handle job completion for v2 runners - update sandbox/snapshot/backup state
     if (status === JobStatus.COMPLETED || status === JobStatus.FAILED) {
-      // Fire and forget - don't block the response
-      this.jobStateHandlerService.handleJobCompletion(updatedJob).catch((error) => {
-        this.logger.error(`Error handling job completion for job ${jobId}:`, error)
-      })
+      this.eventEmitter.emit(JOB_COMPLETED_EVENT, updatedJob)
     }
 
     return updatedJob

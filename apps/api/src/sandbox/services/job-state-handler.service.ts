@@ -5,6 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
+import { OnEvent } from '@nestjs/event-emitter'
 import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -20,6 +21,7 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SandboxService } from './sandbox.service'
+import { JOB_COMPLETED_EVENT } from '../events/job.events'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -44,6 +46,7 @@ export class JobStateHandlerService {
    * Handle job completion and update entity state accordingly.
    * Called when a job status is updated to COMPLETED or FAILED.
    */
+  @OnEvent(JOB_COMPLETED_EVENT, { async: true })
   async handleJobCompletion(job: Job): Promise<void> {
     if (job.status !== JobStatus.COMPLETED && job.status !== JobStatus.FAILED) {
       return
