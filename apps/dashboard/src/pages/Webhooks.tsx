@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { ExternalLink, RefreshCcw } from 'lucide-react'
+import { RefreshCcw } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
@@ -122,8 +122,7 @@ const Webhooks: React.FC = () => {
           rel="noopener noreferrer"
           className="ml-auto"
         >
-          <Button variant="outline" size="sm">
-            <ExternalLink className="w-4 h-4" />
+          <Button variant="link" size="sm">
             Docs
           </Button>
         </a>

@@ -24,7 +24,6 @@ import {
 } from '@tanstack/react-table'
 import { Mail } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { MessageOut } from 'svix'
 import { useMessages } from 'svix-react'
 import { columns, eventTypeOptions } from './columns'
 import { MessageDetailsSheet } from './MessageDetailsSheet'
