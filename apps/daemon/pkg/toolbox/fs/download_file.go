@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,9 +32,53 @@ func DownloadFile(c *gin.Context) {
 		return
 	}
 
+	requestedPath = filepath.Clean(requestedPath)
+
+	if !filepath.IsAbs(requestedPath) {
+		workDir, err := os.Getwd()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get working directory: %w", err))
+			return
+		}
+		requestedPath = filepath.Join(workDir, requestedPath)
+	}
+
 	absPath, err := filepath.Abs(requestedPath)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid path: %w", err))
+		return
+	}
+
+	evalPath, err := filepath.EvalSymlinks(absPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		if os.IsPermission(err) {
+			c.AbortWithError(http.StatusForbidden, err)
+			return
+		}
+		c.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid path: %w", err))
+		return
+	}
+	absPath = evalPath
+
+	workDir, err := os.Getwd()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get working directory: %w", err))
+		return
+	}
+
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get home directory: %w", err))
+		return
+	}
+
+	if !strings.HasPrefix(absPath, workDir+string(filepath.Separator)) && absPath != workDir &&
+		!strings.HasPrefix(absPath, homeDir+string(filepath.Separator)) && absPath != homeDir {
+		c.AbortWithError(http.StatusForbidden, errors.New("access denied: path is outside of the allowed directory"))
 		return
 	}
 
