@@ -61,7 +61,7 @@ import {
   ARCHIVE_SANDBOXES_MESSAGE,
   PER_SANDBOX_LIMIT_MESSAGE,
 } from '../../common/constants/error-messages'
-import { RedisLockProvider } from '../common/redis-lock.provider'
+import { LockCode, RedisLockProvider } from '../common/redis-lock.provider'
 import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
@@ -69,6 +69,7 @@ import { SandboxRepository } from '../repositories/sandbox.repository'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
+import { getStateChangeLockKey } from '../utils/lock-key.util'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -236,7 +237,7 @@ export class SandboxService {
   }
 
   async archive(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    let sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
       throw new SandboxError('State change in progress')
@@ -254,9 +255,16 @@ export class SandboxService {
       throw new SandboxError('Ephemeral sandboxes cannot be archived')
     }
 
-    sandbox.state = SandboxState.ARCHIVING
-    sandbox.desiredState = SandboxDesiredState.ARCHIVED
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
+    sandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+      updateData: {
+        state: SandboxState.ARCHIVING,
+        desiredState: SandboxDesiredState.ARCHIVED,
+      },
+      whereCondition: {
+        pending: false,
+        state: SandboxState.STOPPED,
+      },
+    })
 
     this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
     return sandbox
@@ -487,32 +495,34 @@ export class SandboxService {
     createSandboxDto: CreateSandboxDto,
     organization: Organization,
   ): Promise<SandboxDto> {
-    if (createSandboxDto.name) {
-      warmPoolSandbox.name = createSandboxDto.name
+    const updateData: Partial<Sandbox> = {
+      public: createSandboxDto.public || false,
+      labels: createSandboxDto.labels || {},
+      organizationId: organization.id,
+      createdAt: new Date(),
     }
 
-    warmPoolSandbox.public = createSandboxDto.public || false
-    warmPoolSandbox.labels = createSandboxDto.labels || {}
-    warmPoolSandbox.organizationId = organization.id
-    warmPoolSandbox.createdAt = new Date()
+    if (createSandboxDto.name) {
+      updateData.name = createSandboxDto.name
+    }
 
     if (createSandboxDto.autoStopInterval !== undefined) {
-      warmPoolSandbox.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
+      updateData.autoStopInterval = this.resolveAutoStopInterval(createSandboxDto.autoStopInterval)
     }
 
     if (createSandboxDto.autoArchiveInterval !== undefined) {
-      warmPoolSandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+      updateData.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
     if (createSandboxDto.autoDeleteInterval !== undefined) {
-      warmPoolSandbox.autoDeleteInterval = createSandboxDto.autoDeleteInterval
+      updateData.autoDeleteInterval = createSandboxDto.autoDeleteInterval
     }
 
     if (createSandboxDto.networkBlockAll !== undefined) {
-      warmPoolSandbox.networkBlockAll = createSandboxDto.networkBlockAll
+      updateData.networkBlockAll = createSandboxDto.networkBlockAll
     }
     if (createSandboxDto.networkAllowList !== undefined) {
-      warmPoolSandbox.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
+      updateData.networkAllowList = this.resolveNetworkAllowList(createSandboxDto.networkAllowList)
     }
 
     if (!warmPoolSandbox.runnerId) {
@@ -538,14 +548,15 @@ export class SandboxService {
       )
     }
 
-    const result = await this.sandboxRepository.save(warmPoolSandbox)
+    const sandbox = await this.sandboxRepository.update(warmPoolSandbox.id, updateData)
 
     // Treat this as a newly started sandbox
     this.eventEmitter.emit(
       SandboxEvents.STATE_UPDATED,
-      new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
+      new SandboxStateUpdatedEvent(sandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result)
+
+    return SandboxDto.fromSandbox(sandbox)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -685,7 +696,7 @@ export class SandboxService {
   }
 
   async createBackup(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    let sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (sandbox.autoDeleteInterval === 0) {
       throw new SandboxError('Ephemeral sandboxes cannot be backed up')
@@ -695,9 +706,7 @@ export class SandboxService {
       throw new SandboxError('Sandbox backup is already in progress')
     }
 
-    await this.sandboxRepository.update(sandbox.id, {
-      backupState: BackupState.PENDING,
-    })
+    sandbox = await this.updateSandboxBackupState(sandbox.id, BackupState.PENDING)
 
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
@@ -1018,18 +1027,24 @@ export class SandboxService {
   }
 
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    let sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (sandbox.pending) {
       throw new SandboxError('Sandbox state change in progress')
     }
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.DESTROYED
-    sandbox.backupState = BackupState.NONE
-    sandbox.name = 'DESTROYED_' + sandbox.name + '_' + Date.now()
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+
+    sandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+      updateData: {
+        pending: true,
+        desiredState: SandboxDesiredState.DESTROYED,
+        backupState: BackupState.NONE,
+        name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
+      },
+      whereCondition: { pending: false, state: sandbox.state },
+    })
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
+
     return sandbox
   }
 
@@ -1038,7 +1053,7 @@ export class SandboxService {
     let pendingMemoryIncrement: number | undefined
     let pendingDiskIncrement: number | undefined
 
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
+    let sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
     if (sandbox.state === SandboxState.STARTED && sandbox.desiredState === SandboxDesiredState.STARTED) {
       return sandbox
@@ -1084,12 +1099,18 @@ export class SandboxService {
       pendingDiskIncrement = sandbox.disk
     }
 
-    sandbox.pending = true
-    sandbox.desiredState = SandboxDesiredState.STARTED
-    sandbox.authToken = nanoid(32).toLocaleLowerCase()
-
     try {
-      await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+      sandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+        updateData: {
+          pending: true,
+          desiredState: SandboxDesiredState.STARTED,
+          authToken: nanoid(32).toLocaleLowerCase(),
+        },
+        whereCondition: {
+          pending: false,
+          state: sandbox.state,
+        },
+      })
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1107,7 +1128,7 @@ export class SandboxService {
   }
 
   async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
-    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+    let sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     if (String(sandbox.state) !== String(sandbox.desiredState)) {
       throw new SandboxError('State change in progress')
@@ -1121,15 +1142,16 @@ export class SandboxService {
       throw new SandboxError('Sandbox state change in progress')
     }
 
-    sandbox.pending = true
-    //  if auto-delete interval is 0, delete the sandbox immediately
-    if (sandbox.autoDeleteInterval === 0) {
-      sandbox.desiredState = SandboxDesiredState.DESTROYED
-    } else {
-      sandbox.desiredState = SandboxDesiredState.STOPPED
-    }
-
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+    sandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
+      updateData: {
+        pending: true,
+        desiredState: sandbox.autoDeleteInterval === 0 ? SandboxDesiredState.DESTROYED : SandboxDesiredState.STOPPED,
+      },
+      whereCondition: {
+        pending: false,
+        state: sandbox.state,
+      },
+    })
 
     if (sandbox.autoDeleteInterval === 0) {
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(sandbox))
@@ -1142,13 +1164,10 @@ export class SandboxService {
   async updatePublicStatus(sandboxIdOrName: string, isPublic: boolean, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.public = isPublic
-    await this.sandboxRepository.save(sandbox)
-
-    return sandbox
+    return await this.sandboxRepository.update(sandbox.id, { public: isPublic })
   }
 
-  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
+  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<Sandbox> {
     // Prevent spamming updates
     const lockKey = `sandbox:update-last-activity:${sandboxId}`
     const acquired = await this.redisLockProvider.lock(lockKey, 45)
@@ -1156,11 +1175,9 @@ export class SandboxService {
       return
     }
 
-    const result = await this.sandboxRepository.update({ id: sandboxId }, { lastActivityAt })
+    const sandbox = await this.findOne(sandboxId)
 
-    if (!result.affected) {
-      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
-    }
+    return await this.sandboxRepository.update(sandbox.id, { lastActivityAt })
   }
 
   private async getValidatedOrDefaultRegionId(organization: Organization, regionIdOrName?: string): Promise<string> {
@@ -1206,10 +1223,7 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     // Replace all labels
-    sandbox.labels = labels
-    await this.sandboxRepository.save(sandbox)
-
-    return sandbox
+    return await this.sandboxRepository.update(sandbox.id, { labels })
   }
 
   @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
@@ -1219,13 +1233,13 @@ export class SandboxService {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
+    if (destroyedSandboxes.affected > 0) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} destroyed sandboxes`)
     }
   }
 
@@ -1236,42 +1250,37 @@ export class SandboxService {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes.affected > 0) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
-    await this.sandboxRepository.save(sandbox)
-
-    return sandbox
+    return await this.sandboxRepository.update(sandbox.id, {
+      autoStopInterval: this.resolveAutoStopInterval(interval),
+    })
   }
 
   async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
-    await this.sandboxRepository.save(sandbox)
-
-    return sandbox
+    return await this.sandboxRepository.update(sandbox.id, {
+      autoArchiveInterval: this.resolveAutoArchiveInterval(interval),
+    })
   }
 
   async setAutoDeleteInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoDeleteInterval = interval
-    await this.sandboxRepository.save(sandbox)
-
-    return sandbox
+    return await this.sandboxRepository.update(sandbox.id, { autoDeleteInterval: interval })
   }
 
   async updateNetworkSettings(
@@ -1282,26 +1291,28 @@ export class SandboxService {
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    const updateData: Partial<Sandbox> = {}
+
     if (networkBlockAll !== undefined) {
-      sandbox.networkBlockAll = networkBlockAll
+      updateData.networkBlockAll = networkBlockAll
     }
 
     if (networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      updateData.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
     }
 
-    await this.sandboxRepository.save(sandbox)
+    const updatedSandbox = await this.sandboxRepository.update(sandbox.id, updateData)
 
     // Update network settings on the runner
-    if (sandbox.runnerId) {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+    if (updatedSandbox.runnerId) {
+      const runner = await this.runnerService.findOne(updatedSandbox.runnerId)
       if (runner) {
         const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-        await runnerAdapter.updateNetworkSettings(sandbox.id, networkBlockAll, networkAllowList)
+        await runnerAdapter.updateNetworkSettings(updatedSandbox.id, networkBlockAll, networkAllowList)
       }
     }
 
-    return sandbox
+    return updatedSandbox
   }
 
   // used by internal services to update the state of a sandbox to resolve domain and runner state mismatch
@@ -1332,16 +1343,19 @@ export class SandboxService {
 
     const oldState = sandbox.state
     const oldDesiredState = sandbox.desiredState
-    sandbox.state = newState
-    if (errorReason !== undefined) {
-      sandbox.errorReason = errorReason
-    }
-    //  we need to update the desired state to match the new state
-    const desiredState = this.getExpectedDesiredStateForState(newState)
-    if (desiredState) {
-      sandbox.desiredState = desiredState
-    }
-    await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: oldState, desiredState: oldDesiredState })
+
+    await this.sandboxRepository.updateWhere(sandbox.id, {
+      updateData: {
+        state: newState,
+        desiredState: this.getExpectedDesiredStateForState(newState),
+        errorReason,
+      },
+      whereCondition: {
+        pending: false,
+        state: oldState,
+        desiredState: oldDesiredState,
+      },
+    })
   }
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
@@ -1513,13 +1527,99 @@ export class SandboxService {
     return { valid: true, sandboxId: sshAccess.sandbox.id }
   }
 
+  /**
+   * If the current lock code is not the expected lock code, the update will be skipped.
+   */
+  async updateSandboxState(
+    sandboxId: string,
+    state: SandboxState,
+    expectedLockCode: LockCode,
+    runnerId?: string | null | undefined,
+    errorReason?: string,
+    daemonVersion?: string,
+    backupState?: BackupState,
+  ): Promise<Sandbox> {
+    //  check if the lock code is still valid
+    const lockKey = getStateChangeLockKey(sandboxId)
+    const currentLockCode = await this.redisLockProvider.getCode(lockKey)
+
+    if (currentLockCode === null) {
+      this.logger.warn(
+        `no lock code found - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+      )
+      return
+    }
+
+    if (expectedLockCode.getCode() !== currentLockCode.getCode()) {
+      this.logger.warn(
+        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+      )
+      return
+    }
+
+    const query: FindOptionsWhere<Sandbox> = {
+      id: sandboxId,
+    }
+    if (state !== SandboxState.ARCHIVED) {
+      query.pending = true
+    }
+    const sandbox = await this.sandboxRepository.findOneBy(query)
+    if (!sandbox) {
+      //  this should never happen
+      //  if it does, we need to log the error and return
+      //  this indicates a concurrency error and should be investigated
+      //  we don't to throw the error, just log it and return to avoid setting the error state
+      //  on the otherwise ready sandbox
+      const err = new Error(`sandbox ${sandboxId} is not in a pending state`)
+      this.logger.error(err)
+      return
+    }
+
+    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
+      return
+    }
+
+    const updateData: Partial<Sandbox> = {
+      state: state,
+    }
+
+    if (runnerId !== undefined) {
+      updateData.runnerId = runnerId
+    }
+
+    if (errorReason !== undefined) {
+      updateData.errorReason = errorReason
+    }
+
+    if (state === SandboxState.ERROR && !errorReason && !sandbox.errorReason) {
+      updateData.errorReason = 'Sandbox is in error state during update'
+    }
+
+    if (daemonVersion !== undefined) {
+      updateData.daemonVersion = daemonVersion
+    }
+
+    if (state == SandboxState.DESTROYED) {
+      updateData.backupState = BackupState.NONE
+    }
+
+    // TODO: refactor
+    if (backupState !== undefined) {
+      // Call the setter to compute the derived value
+      sandbox.setBackupState(backupState)
+      updateData.backupState = sandbox.backupState
+    }
+
+    await this.sandboxRepository.update(sandbox.id, updateData)
+  }
+
   async updateSandboxBackupState(
     sandboxId: string,
     backupState: BackupState,
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
-  ): Promise<void> {
+  ): Promise<Sandbox> {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
@@ -1545,9 +1645,6 @@ export class SandboxService {
       updateData.runnerId = sandboxToUpdate.runnerId
     }
 
-    const updateResult = await this.sandboxRepository.update(sandboxId, updateData)
-    if (!updateResult.affected) {
-      throw new NotFoundException(`Sandbox with id ${sandboxId} no longer exists`)
-    }
+    return await this.sandboxRepository.update(sandboxToUpdate.id, updateData)
   }
 }

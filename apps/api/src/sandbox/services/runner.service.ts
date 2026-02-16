@@ -16,7 +16,6 @@ import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -26,6 +25,7 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class RunnerService {
@@ -35,8 +35,7 @@ export class RunnerService {
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     @InjectRepository(Snapshot)

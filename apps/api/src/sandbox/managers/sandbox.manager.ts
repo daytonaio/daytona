@@ -111,14 +111,17 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
-                //  if auto-delete interval is 0, delete the sandbox immediately
-                if (sandbox.autoDeleteInterval === 0) {
-                  sandbox.desiredState = SandboxDesiredState.DESTROYED
-                } else {
-                  sandbox.desiredState = SandboxDesiredState.STOPPED
-                }
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData: {
+                    pending: true,
+                    desiredState:
+                      sandbox.autoDeleteInterval === 0 ? SandboxDesiredState.DESTROYED : SandboxDesiredState.STOPPED,
+                  },
+                  whereCondition: {
+                    pending: false,
+                    state: sandbox.state,
+                  },
+                })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, error)
@@ -169,8 +172,15 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           }
 
           try {
-            sandbox.desiredState = SandboxDesiredState.ARCHIVED
-            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData: {
+                desiredState: SandboxDesiredState.ARCHIVED,
+              },
+              whereCondition: {
+                pending: false,
+                state: sandbox.state,
+              },
+            })
             this.syncInstanceState(sandbox.id)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -228,9 +238,16 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.pending = true
-                sandbox.desiredState = SandboxDesiredState.DESTROYED
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData: {
+                    pending: true,
+                    desiredState: SandboxDesiredState.DESTROYED,
+                  },
+                  whereCondition: {
+                    pending: false,
+                    state: sandbox.state,
+                  },
+                })
                 this.syncInstanceState(sandbox.id)
               } catch (error) {
                 this.logger.error(`Error processing auto-delete state for sandbox ${sandbox.id}:`, error)
@@ -446,9 +463,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         //  edge case where sandbox is deleted while desired state is being processed
         return
       }
-      sandbox.state = SandboxState.ERROR
-      sandbox.errorReason = error.message || String(error)
-      await this.sandboxRepository.save(sandbox)
+      await this.sandboxRepository.update(sandbox.id, {
+        state: SandboxState.ERROR,
+        errorReason: error.message || String(error),
+      })
     }
 
     await this.redisLockProvider.unlock(lockKey)

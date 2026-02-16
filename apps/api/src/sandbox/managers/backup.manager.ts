@@ -4,9 +4,8 @@
  */
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Or, Repository } from 'typeorm'
+import { In, IsNull, LessThan, Not, Or } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -34,6 +33,7 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxService } from '../services/sandbox.service'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class BackupManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -42,8 +42,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   private readonly logger = new Logger(BackupManager.name)
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     private readonly sandboxService: SandboxService,
     private readonly runnerService: RunnerService,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,

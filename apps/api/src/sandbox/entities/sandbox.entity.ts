@@ -4,7 +4,6 @@
  */
 
 import {
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -201,6 +200,7 @@ export class Sandbox {
     this.region = region
   }
 
+  // TODO: move to sandbox service
   public setBackupState(
     state: BackupState,
     backupSnapshot?: string | null,
@@ -240,105 +240,6 @@ export class Sandbox {
     }
     if (backupErrorReason !== undefined) {
       this.backupErrorReason = backupErrorReason
-    }
-  }
-
-  @BeforeUpdate()
-  updateLastActivityAt() {
-    this.lastActivityAt = new Date()
-  }
-
-  @BeforeUpdate()
-  validateDesiredState() {
-    switch (this.desiredState) {
-      case SandboxDesiredState.STARTED:
-        if (
-          [
-            SandboxState.STARTED,
-            SandboxState.STOPPED,
-            SandboxState.STARTING,
-            SandboxState.ARCHIVED,
-            SandboxState.CREATING,
-            SandboxState.UNKNOWN,
-            SandboxState.RESTORING,
-            SandboxState.PENDING_BUILD,
-            SandboxState.BUILDING_SNAPSHOT,
-            SandboxState.PULLING_SNAPSHOT,
-            SandboxState.ARCHIVING,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
-      case SandboxDesiredState.STOPPED:
-        if (
-          [
-            SandboxState.STARTED,
-            SandboxState.STOPPING,
-            SandboxState.STOPPED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
-      case SandboxDesiredState.ARCHIVED:
-        if (
-          [
-            SandboxState.ARCHIVED,
-            SandboxState.ARCHIVING,
-            SandboxState.STOPPED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
-      case SandboxDesiredState.DESTROYED:
-        if (
-          [
-            SandboxState.DESTROYED,
-            SandboxState.DESTROYING,
-            SandboxState.STOPPED,
-            SandboxState.STARTED,
-            SandboxState.ARCHIVED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.ARCHIVING,
-          ].includes(this.state)
-        ) {
-          break
-        }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
-    }
-  }
-
-  @BeforeUpdate()
-  updatePendingFlag() {
-    if (!this.pending && String(this.state) !== String(this.desiredState)) {
-      this.pending = true
-    }
-    if (this.pending && String(this.state) === String(this.desiredState)) {
-      this.pending = false
-    }
-    if (
-      this.state === SandboxState.ERROR ||
-      this.state === SandboxState.BUILD_FAILED ||
-      this.desiredState === SandboxDesiredState.ARCHIVED
-    ) {
-      this.pending = false
-    }
-  }
-
-  @BeforeUpdate()
-  handleDestroyedState() {
-    if (this.state === SandboxState.DESTROYED) {
-      this.runnerId = null
-      this.backupState = BackupState.NONE
     }
   }
 }
