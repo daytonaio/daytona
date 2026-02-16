@@ -168,6 +168,7 @@ export * from './volume-dto';
 export * from './volume-state';
 export * from './webhook-app-portal-access';
 export * from './webhook-controller-get-status200-response';
+export * from './webhook-event';
 export * from './webhook-initialization-status';
 export * from './windows-response';
 export * from './work-dir-response';

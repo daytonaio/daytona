@@ -197,6 +197,7 @@ models/volume-dto.ts
 models/volume-state.ts
 models/webhook-app-portal-access.ts
 models/webhook-controller-get-status200-response.ts
+models/webhook-event.ts
 models/webhook-initialization-status.ts
 models/windows-response.ts
 models/work-dir-response.ts

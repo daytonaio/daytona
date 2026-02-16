@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,6 +12,8 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
  * The type of event being sent
  * @export
@@ -19,13 +21,16 @@
  */
 
 export const WebhookEvent = {
-  SANDBOX_CREATED: 'sandbox.created',
-  SANDBOX_STATE_UPDATED: 'sandbox.state.updated',
-  SNAPSHOT_CREATED: 'snapshot.created',
-  SNAPSHOT_STATE_UPDATED: 'snapshot.state.updated',
-  SNAPSHOT_REMOVED: 'snapshot.removed',
-  VOLUME_CREATED: 'volume.created',
-  VOLUME_STATE_UPDATED: 'volume.state.updated',
-} as const
+    SANDBOX_CREATED: 'sandbox.created',
+    SANDBOX_STATE_UPDATED: 'sandbox.state.updated',
+    SNAPSHOT_CREATED: 'snapshot.created',
+    SNAPSHOT_STATE_UPDATED: 'snapshot.state.updated',
+    SNAPSHOT_REMOVED: 'snapshot.removed',
+    VOLUME_CREATED: 'volume.created',
+    VOLUME_STATE_UPDATED: 'volume.state.updated'
+} as const;
 
-export type WebhookEvent = (typeof WebhookEvent)[keyof typeof WebhookEvent]
+export type WebhookEvent = typeof WebhookEvent[keyof typeof WebhookEvent];
+
+
+
