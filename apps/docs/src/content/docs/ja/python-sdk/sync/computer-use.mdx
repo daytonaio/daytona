@@ -1,9 +1,9 @@
 ---
-title: "コンピューター使用"
+title: "ComputerUse"
 hideTitleOnPage: true
 ---
 
-## ComputerUse
+## ComputerUse \{#computeruse\}
 
 ```python
 class ComputerUse()
@@ -11,19 +11,21 @@ class ComputerUse()
 
 デスクトップ環境と対話するためのコンピューター使用機能。
 
-サンドボックス内でのデスクトップ操作を自動化するために、マウス、キーボード、スクリーンショット、ディスプレイの操作にアクセスできます。
+サンドボックス内でのデスクトップ操作を自動化するために、マウス、キーボード、スクリーンショット、ディスプレイ、録画の各操作にアクセスできます。
 
 **属性**:
 
-- `mouse` _Mouse_ - マウス操作インターフェース。
-- `keyboard` _Keyboard_ - キーボード操作インターフェース。
-- `screenshot` _Screenshot_ - スクリーンショット操作インターフェース。
-- `display` _Display_ - ディスプレイ操作インターフェース。
+* `mouse` *Mouse* - マウス操作インターフェース。
+* `keyboard` *Keyboard* - キーボード操作インターフェース。
+* `screenshot` *Screenshot* - スクリーンショット操作インターフェース。
+* `display` *Display* - ディスプレイ操作インターフェース。
+* `recording` *RecordingService* - 画面録画操作インターフェース。
 
-#### ComputerUse.start
+#### ComputerUse.start \{#computerusestart\}
 
 ```python
-@intercept_errors(message_prefix="Failed to start computer use: ")
+@intercept_errors(message_prefix="コンピューター使用の開始に失敗しました: ")
+@with_instrumentation()
 def start() -> ComputerUseStartResponse
 ```
 
@@ -31,20 +33,20 @@ def start() -> ComputerUseStartResponse
 
 **戻り値**:
 
-- `ComputerUseStartResponse` - コンピューター使用の起動レスポンス。
-  
+* `ComputerUseStartResponse` - コンピューター使用の開始応答。
 
 **例**:
 
 ```python
 result = sandbox.computer_use.start()
-print("Computer use processes started:", result.message)
+print("コンピューター使用プロセスが開始されました:", result.message)
 ```
 
-#### ComputerUse.stop
+#### ComputerUse.stop（停止） \{#computerusestop\}
 
 ```python
-@intercept_errors(message_prefix="Failed to stop computer use: ")
+@intercept_errors(message_prefix="コンピューター使用の停止に失敗しました: ")
+@with_instrumentation()
 def stop() -> ComputerUseStopResponse
 ```
 
@@ -52,41 +54,41 @@ def stop() -> ComputerUseStopResponse
 
 **戻り値**:
 
-- `ComputerUseStopResponse` - コンピューター使用の停止レスポンス。
-  
+* `ComputerUseStopResponse` - コンピューター使用停止レスポンス。
 
 **例**:
 
 ```python
 result = sandbox.computer_use.stop()
-print("Computer use processes stopped:", result.message)
+print("コンピューター使用プロセスが停止しました:", result.message)
 ```
 
-#### ComputerUse.get_status
+#### ComputerUse.get_status \{#computeruseget_status\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get computer use status: ")
+@intercept_errors(message_prefix="コンピューター使用ステータスの取得に失敗しました: ")
+@with_instrumentation()
 def get_status() -> ComputerUseStatusResponse
 ```
 
-すべてのコンピューター使用プロセスのステータスを取得します。
+すべてのコンピューター使用プロセスの状態を取得します。
 
 **戻り値**:
 
-- `ComputerUseStatusResponse` - すべてのVNCデスクトッププロセスに関するステータス情報。
-  
+* `ComputerUseStatusResponse` - すべての VNC デスクトッププロセスに関する状態情報。
 
 **例**:
 
 ```python
 response = sandbox.computer_use.get_status()
-print("Computer use status:", response.status)
+print("コンピューター使用ステータス:", response.status)
 ```
 
-#### ComputerUse.get_process_status
+#### ComputerUse.get_process_status \{#computeruseget_process_status\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get process status: ")
+@intercept_errors(message_prefix="プロセスステータスの取得に失敗しました: ")
+@with_instrumentation()
 def get_process_status(process_name: str) -> ProcessStatusResponse
 ```
 
@@ -94,13 +96,11 @@ def get_process_status(process_name: str) -> ProcessStatusResponse
 
 **引数**:
 
-- `process_name` _str_ - 確認するプロセス名。
-  
+* `process_name` *str* - 確認するプロセス名。
 
 **戻り値**:
 
-- `ProcessStatusResponse` - 指定したプロセスに関するステータス情報。
-  
+* `ProcessStatusResponse` - 指定したプロセスのステータス情報。
 
 **例**:
 
@@ -109,170 +109,164 @@ xvfb_status = sandbox.computer_use.get_process_status("xvfb")
 no_vnc_status = sandbox.computer_use.get_process_status("novnc")
 ```
 
-#### ComputerUse.restart_process
+#### ComputerUse.restart_process \{#computeruserestart_process\}
 
 ```python
-@intercept_errors(message_prefix="Failed to restart process: ")
+@intercept_errors(message_prefix="プロセスの再起動に失敗しました: ")
+@with_instrumentation()
 def restart_process(process_name: str) -> ProcessRestartResponse
 ```
 
-特定のVNCプロセスを再起動します。
+特定の VNC プロセスを再起動します。
 
 **引数**:
 
-- `process_name` _str_ - 再起動するプロセス名。
-  
+* `process_name` *str* - 再起動するプロセス名。
 
 **戻り値**:
 
-- `ProcessRestartResponse` - プロセス再起動レスポンス。
-  
+* `ProcessRestartResponse` - プロセス再起動の応答。
 
 **例**:
 
 ```python
 result = sandbox.computer_use.restart_process("xfce4")
-print("XFCE4 process restarted:", result.message)
+print("XFCE4プロセスを再起動しました:", result.message)
 ```
 
-#### ComputerUse.get_process_logs
+#### ComputerUse.get_process_logs \{#computeruseget_process_logs\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get process logs: ")
+@intercept_errors(message_prefix="プロセスログの取得に失敗しました: ")
+@with_instrumentation()
 def get_process_logs(process_name: str) -> ProcessLogsResponse
 ```
 
-特定のVNCプロセスのログを取得します。
+特定の VNC プロセスのログを取得します。
 
 **引数**:
 
-- `process_name` _str_ - ログを取得するプロセス名。
-  
+* `process_name` *str* - ログを取得する対象のプロセス名。
 
 **戻り値**:
 
-- `ProcessLogsResponse` - プロセスのログ。
-  
+* `ProcessLogsResponse` - プロセスのログ。
 
 **例**:
 
 ```python
 logs = sandbox.computer_use.get_process_logs("novnc")
-print("NoVNC logs:", logs)
+print("NoVNC ログ:", logs)
 ```
 
-#### ComputerUse.get_process_errors
+#### ComputerUse.get_process_errors \{#computeruseget_process_errors\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get process errors: ")
+@intercept_errors(message_prefix="プロセスエラーの取得に失敗しました: ")
+@with_instrumentation()
 def get_process_errors(process_name: str) -> ProcessErrorsResponse
 ```
 
-特定のVNCプロセスのエラーログを取得します。
+特定の VNC プロセスのエラーログを取得します。
 
 **引数**:
 
-- `process_name` _str_ - エラーログを取得するプロセス名。
-  
+* `process_name` *str* - エラーログを取得する対象のプロセス名。
 
 **戻り値**:
 
-- `ProcessErrorsResponse` - プロセスのエラーログ。
-  
+* `ProcessErrorsResponse` - プロセスのエラーログ。
 
 **例**:
 
 ```python
 errors = sandbox.computer_use.get_process_errors("x11vnc")
-print("X11VNC errors:", errors)
+print("X11VNCエラー:", errors)
 ```
 
-
-## マウス
+## マウス \{#mouse\}
 
 ```python
 class Mouse()
 ```
 
-コンピューター使用機能のマウス操作。
+コンピューター使用機能におけるマウス操作
 
-#### Mouse.get\_position
+#### Mouse.get_position \{#mouseget_position\}
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
-def get_position() -> MousePosition
+@with_instrumentation()
+def get_position() -> MousePositionResponse
 ```
 
-現在のマウスカーソル位置を取得します。
+現在のマウスカーソルの位置を取得します。
 
 **戻り値**:
 
-- `MousePosition` - 現在のマウス位置（x および y 座標）。
-  
+* `MousePositionResponse` - x および y 座標を含む現在のマウス位置。
 
 **例**:
 
 ```python
 position = sandbox.computer_use.mouse.get_position()
-print(f"Mouse is at: {position.x}, {position.y}")
+print(f"マウスの位置: {position.x}, {position.y}")
 ```
 
-#### Mouse.move
+#### Mouse.move \{#mousemove\}
 
 ```python
-@intercept_errors(message_prefix="Failed to move mouse: ")
-def move(x: int, y: int) -> MouseMoveResponse
+@intercept_errors(message_prefix="マウスの移動に失敗しました: ")
+@with_instrumentation()
+def move(x: int, y: int) -> MousePositionResponse
 ```
 
-マウスカーソルを指定した座標に移動します。
+指定した座標にマウスカーソルを移動します。
 
 **引数**:
 
-- `x` _int_ - 移動先の x 座標。
-- `y` _int_ - 移動先の y 座標。
-  
+* `x` *int* - 移動先のx座標。
+* `y` *int* - 移動先のy座標。
 
 **戻り値**:
 
-- `MouseMoveResponse` - 移動操作の結果。
-  
+* `MousePositionResponse` - 移動後の位置。
 
 **例**:
 
 ```python
 result = sandbox.computer_use.mouse.move(100, 200)
-print(f"Mouse moved to: {result.x}, {result.y}")
+print(f"マウスを移動しました: {result.x}, {result.y}")
 ```
 
-#### Mouse.click
+#### Mouse.click \{#mouseclick\}
 
 ```python
-@intercept_errors(message_prefix="Failed to click mouse: ")
+@intercept_errors(message_prefix="マウスクリックに失敗しました: ")
+@with_instrumentation()
 def click(x: int,
           y: int,
           button: str = "left",
           double: bool = False) -> MouseClickResponse
 ```
 
-指定した座標でクリックします。
+指定した座標でマウスをクリックします。
 
 **引数**:
 
-- `x` _int_ - クリックする x 座標。
-- `y` _int_ - クリックする y 座標。
-- `button` _str_ - クリックするボタン（'left'、'right'、'middle'）。
-- `double` _bool_ - ダブルクリックを行うかどうか。
-  
+* `x` *int* - クリック先の x 座標。
+* `y` *int* - クリック先の y 座標。
+* `button` *str* - クリックするマウスボタン（&#39;left&#39;、&#39;right&#39;、&#39;middle&#39;）。
+* `double` *bool* - ダブルクリックを行うかどうか。
 
 **戻り値**:
 
-- `MouseClickResponse` - クリック操作の結果。
-  
+* `MouseClickResponse` - クリック操作の結果。
 
 **例**:
 
 ```python
-# Single left click
+# 左シングルクリック
 result = sandbox.computer_use.mouse.click(100, 200)
 
 # Double click
@@ -282,10 +276,11 @@ double_click = sandbox.computer_use.mouse.click(100, 200, "left", True)
 right_click = sandbox.computer_use.mouse.click(100, 200, "right")
 ```
 
-#### Mouse.drag
+#### Mouse.drag \{#mousedrag\}
 
 ```python
-@intercept_errors(message_prefix="Failed to drag mouse: ")
+@intercept_errors(message_prefix="マウスのドラッグに失敗しました: ")
+@with_instrumentation()
 def drag(start_x: int,
          start_y: int,
          end_x: int,
@@ -293,33 +288,32 @@ def drag(start_x: int,
          button: str = "left") -> MouseDragResponse
 ```
 
-開始座標から終了座標までドラッグします。
+開始座標から終了座標までマウスをドラッグします。
 
 **引数**:
 
-- `start_x` _int_ - 開始 x 座標。
-- `start_y` _int_ - 開始 y 座標。
-- `end_x` _int_ - 終了 x 座標。
-- `end_y` _int_ - 終了 y 座標。
-- `button` _str_ - ドラッグに使用するボタン。
-  
+* `start_x` *int* - 開始x座標。
+* `start_y` *int* - 開始y座標。
+* `end_x` *int* - 終了x座標。
+* `end_y` *int* - 終了y座標。
+* `button` *str* - ドラッグに使用するマウスボタン。
 
 **戻り値**:
 
-- `MouseDragResponse` - ドラッグ操作の結果。
-  
+* `MouseDragResponse` - ドラッグ操作の結果。
 
 **例**:
 
 ```python
 result = sandbox.computer_use.mouse.drag(50, 50, 150, 150)
-print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to_y}")
+print(f"ドラッグしました: ({result.from_x},{result.from_y}) から ({result.to_x},{result.to_y}) へ")
 ```
 
-#### Mouse.scroll
+#### Mouse.scroll \{#mousescroll\}
 
 ```python
-@intercept_errors(message_prefix="Failed to scroll mouse: ")
+@intercept_errors(message_prefix="マウススクロールに失敗しました: ")
+@with_instrumentation()
 def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
@@ -327,16 +321,14 @@ def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 
 **引数**:
 
-- `x` _int_ - スクロールする x 座標。
-- `y` _int_ - スクロールする y 座標。
-- `direction` _str_ - スクロール方向（'up' または 'down'）。
-- `amount` _int_ - スクロール量。
-  
+* `x` *int* - スクロールするX座標。
+* `y` *int* - スクロールするY座標。
+* `direction` *str* - スクロール方向（&#39;up&#39; または &#39;down&#39;）。
+* `amount` *int* - スクロール量。
 
 **戻り値**:
 
-- `bool` - スクロール操作が成功したかどうか。
-  
+* `bool` - スクロール操作が成功したかどうか。
 
 **例**:
 
@@ -344,37 +336,36 @@ def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 # Scroll up
 scroll_up = sandbox.computer_use.mouse.scroll(100, 200, "up", 3)
 
-# Scroll down
+# 下にスクロール
 scroll_down = sandbox.computer_use.mouse.scroll(100, 200, "down", 5)
 ```
 
-## キーボード
+## キーボード \{#keyboard\}
 
 ```python
 class Keyboard()
 ```
 
-コンピューター使用機能向けのキーボード操作。
+コンピューター使用機能のキーボード操作
 
-#### Keyboard.type
+#### Keyboard.type \{#keyboardtype\}
 
 ```python
-@intercept_errors(message_prefix="Failed to type text: ")
-def type(text: str, delay: Optional[int] = None) -> None
+@intercept_errors(message_prefix="テキストの入力に失敗しました: ")
+@with_instrumentation()
+def type(text: str, delay: int | None = None) -> None
 ```
 
-指定したテキストを入力します。
+指定したテキストをタイプ入力します。
 
 **引数**:
 
-- `text` _str_ - 入力するテキスト。
-- `delay` _int_ - 文字間の遅延（ミリ秒）。
-  
+* `text` *str* - タイプするテキスト。
+* `delay` *int* - 文字ごとの遅延（ミリ秒）。
 
-**送出**:
+**例外**:
 
-- `DaytonaError` - 入力処理に失敗した場合。
-  
+* `DaytonaError` - タイプ操作に失敗した場合。
 
 **例**:
 
@@ -383,63 +374,63 @@ try:
     sandbox.computer_use.keyboard.type("Hello, World!")
     print(f"Operation success")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 
-# 文字間に遅延を設ける場合
+# With delay between characters
 try:
     sandbox.computer_use.keyboard.type("Slow typing", 100)
     print(f"Operation success")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 ```
 
-#### Keyboard.press
+#### Keyboard.press \{#keyboardpress\}
 
 ```python
-@intercept_errors(message_prefix="Failed to press key: ")
-def press(key: str, modifiers: Optional[List[str]] = None) -> None
+@intercept_errors(message_prefix="キーの押下に失敗しました: ")
+@with_instrumentation()
+def press(key: str, modifiers: list[str] | None = None) -> None
 ```
 
-必要に応じてモディファイアを併用してキーを押します。
+オプションの修飾キーとともにキーを押します。
 
 **引数**:
 
-- `key` _str_ - 押すキー（例: 'Enter', 'Escape', 'Tab', 'a', 'A'）。
-- `modifiers` _List[str]_ - モディファイアキー（'ctrl', 'alt', 'meta', 'shift'）。
-  
+* `key` *str* - 押すキー（例: &#39;Enter&#39;, &#39;Escape&#39;, &#39;Tab&#39;, &#39;a&#39;, &#39;A&#39;）。
+* `modifiers` *list[str]* - 修飾キー（&#39;ctrl&#39;, &#39;alt&#39;, &#39;meta&#39;, &#39;shift&#39;）。
 
 **送出**:
 
-- `DaytonaError` - キー押下処理に失敗した場合。
-  
+* `DaytonaError` - 押下操作に失敗した場合。
 
 **例**:
 
 ```python
-# Enter を押す
+# Enterキーを押す
 try:
     sandbox.computer_use.keyboard.press("Return")
-    print(f"Operation success")
+    print(f"操作成功")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 
-# Ctrl+C を押す
+# Ctrl+Cを押す
 try:
     sandbox.computer_use.keyboard.press("c", ["ctrl"])
-    print(f"Operation success")
+    print(f"操作成功")
 
-# Ctrl+Shift+T を押す
+# Ctrl+Shift+Tを押す
 try:
     sandbox.computer_use.keyboard.press("t", ["ctrl", "shift"])
-    print(f"Operation success")
+    print(f"操作成功")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 ```
 
-#### Keyboard.hotkey
+#### Keyboard.hotkey \{#keyboardhotkey\}
 
 ```python
-@intercept_errors(message_prefix="Failed to press hotkey: ")
+@intercept_errors(message_prefix="ホットキーの押下に失敗しました: ")
+@with_instrumentation()
 def hotkey(keys: str) -> None
 ```
 
@@ -447,13 +438,11 @@ def hotkey(keys: str) -> None
 
 **引数**:
 
-- `keys` _str_ - ホットキーの組み合わせ（例: 'ctrl+c', 'alt+tab', 'cmd+shift+t'）。
-  
+* `keys` *str* - ホットキーの組み合わせ（例: &#39;ctrl+c&#39;, &#39;alt+tab&#39;, &#39;cmd+shift+t&#39;）。
 
-**送出**:
+**例外**:
 
-- `DaytonaError` - ホットキー処理に失敗した場合。
-  
+* `DaytonaError` - ホットキーの実行に失敗した場合。
 
 **例**:
 
@@ -461,152 +450,146 @@ def hotkey(keys: str) -> None
 # コピー
 try:
     sandbox.computer_use.keyboard.hotkey("ctrl+c")
-    print(f"Operation success")
+    print(f"操作成功")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 
-# ペースト
+# 貼り付け
 try:
     sandbox.computer_use.keyboard.hotkey("ctrl+v")
-    print(f"Operation success")
+    print(f"操作成功")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 
 # Alt+Tab
 try:
     sandbox.computer_use.keyboard.hotkey("alt+tab")
-    print(f"Operation success")
+    print(f"操作成功")
 except Exception as e:
-    print(f"Operation failed: {e}")
+    print(f"操作失敗: {e}")
 ```
 
-## スクリーンショット
+## スクリーンショット \{#screenshot\}
 
 ```python
 class Screenshot()
 ```
 
-コンピューター使用機能のスクリーンショット操作。
+コンピューター使用機能向けのスクリーンショット操作
 
-#### Screenshot.take\_full\_screen
+#### Screenshot.take_full_screen \{#screenshottake_full_screen\}
 
 ```python
-@intercept_errors(message_prefix="Failed to take screenshot: ")
+@intercept_errors(message_prefix="スクリーンショットの取得に失敗しました: ")
+@with_instrumentation()
 def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 ```
 
-画面全体のスクリーンショットを撮影します。
+画面全体のスクリーンショットを取得します。
 
 **引数**:
 
-- `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
+* `show_cursor` *bool* - スクリーンショットにカーソルを表示するかどうか。
 
 **戻り値**:
 
-- `ScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
+* `ScreenshotResponse` - 画像を base64 エンコードしたスクリーンショットデータ。
 
 **例**:
 
 ```python
 screenshot = sandbox.computer_use.screenshot.take_full_screen()
-print(f"Screenshot size: {screenshot.width}x{screenshot.height}")
+print(f"スクリーンショットサイズ: {screenshot.width}x{screenshot.height}")
 
-# カーソルを表示
+# With cursor visible
 with_cursor = sandbox.computer_use.screenshot.take_full_screen(True)
 ```
 
-#### Screenshot.take\_region
+#### Screenshot.take_region \{#screenshottake_region\}
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
+@with_instrumentation()
 def take_region(region: ScreenshotRegion,
-                show_cursor: bool = False) -> RegionScreenshotResponse
+                show_cursor: bool = False) -> ScreenshotResponse
 ```
 
-指定した領域のスクリーンショットを撮影します。
+特定の領域のスクリーンショットを撮影します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - 取得する領域。
-- `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-  
+* `region` *ScreenshotRegion* - キャプチャする領域。
+* `show_cursor` *bool* - スクリーンショットにカーソルを表示するかどうか。
 
 **戻り値**:
 
-- `RegionScreenshotResponse` - 画像をbase64エンコードしたスクリーンショットデータ。
-  
+* `ScreenshotResponse` - 画像を base64 でエンコードしたスクリーンショットデータ。
 
 **例**:
 
 ```python
 region = ScreenshotRegion(x=100, y=100, width=300, height=200)
 screenshot = sandbox.computer_use.screenshot.take_region(region)
-print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
+print(f"キャプチャした領域: {screenshot.region.width}x{screenshot.region.height}")
 ```
 
-#### Screenshot.take\_compressed
+#### Screenshot.take_compressed \{#screenshottake_compressed\}
 
 ```python
-@intercept_errors(message_prefix="Failed to take compressed screenshot: ")
+@intercept_errors(message_prefix="圧縮スクリーンショットの取得に失敗しました: ")
+@with_instrumentation()
 def take_compressed(
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
 
-画面全体の圧縮スクリーンショットを撮影します。
+画面全体の圧縮スクリーンショットを取得します。
 
 **引数**:
 
-- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
+* `options` *ScreenshotOptions | None* - 圧縮および表示のオプション。
 
 **戻り値**:
 
-- `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
-  
+* `ScreenshotResponse` - 圧縮済みスクリーンショットデータ。
 
 **例**:
 
 ```python
-# 既定の圧縮
+# デフォルトの圧縮
 screenshot = sandbox.computer_use.screenshot.take_compressed()
 
-# 高品質JPEG
+# High quality JPEG
 jpeg = sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="jpeg", quality=95, show_cursor=True)
 )
 
-# 縮小PNG
+# Scaled down PNG
 scaled = sandbox.computer_use.screenshot.take_compressed(
     ScreenshotOptions(format="png", scale=0.5)
 )
 ```
 
-#### Screenshot.take\_compressed\_region
+#### Screenshot.take_compressed_region \{#screenshottake_compressed_region\}
 
 ```python
 @intercept_errors(
-    message_prefix="Failed to take compressed region screenshot: ")
+    message_prefix="圧縮領域のスクリーンショット取得に失敗しました: ")
+@with_instrumentation()
 def take_compressed_region(
-    region: ScreenshotRegion,
-    options: Optional[ScreenshotOptions] = None
-) -> CompressedScreenshotResponse
+        region: ScreenshotRegion,
+        options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
 
-指定した領域の圧縮スクリーンショットを撮影します。
+特定の領域の圧縮済みスクリーンショットを取得します。
 
 **引数**:
 
-- `region` _ScreenshotRegion_ - 取得する領域。
-- `options` _ScreenshotOptions_ - 圧縮および表示のオプション。
-  
+* `region` *ScreenshotRegion* - キャプチャする領域。
+* `options` *ScreenshotOptions | None* - 圧縮および表示オプション。
 
-**戻り値**:
+**返り値**:
 
-- `CompressedScreenshotResponse` - 圧縮されたスクリーンショットデータ。
-  
+* `ScreenshotResponse` - 圧縮済みスクリーンショットデータ。
 
 **例**:
 
@@ -616,30 +599,30 @@ screenshot = sandbox.computer_use.screenshot.take_compressed_region(
     region,
     ScreenshotOptions(format="webp", quality=80, show_cursor=True)
 )
-print(f"Compressed size: {screenshot.size_bytes} bytes")
+print(f"圧縮後のサイズ: {screenshot.size_bytes} バイト")
 ```
 
-## ディスプレイ
+## 表示 \{#display\}
 
 ```python
 class Display()
 ```
 
-コンピューター使用機能のディスプレイ操作を提供します。
+コンピューター使用機能のディスプレイ操作
 
-#### Display.get_info
+#### Display.get_info \{#displayget_info\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get display info: ")
+@intercept_errors(message_prefix="ディスプレイ情報の取得に失敗しました: ")
+@with_instrumentation()
 def get_info() -> DisplayInfoResponse
 ```
 
-ディスプレイ情報を取得します。
+ディスプレイに関する情報を取得します。
 
 **戻り値**:
 
-- `DisplayInfoResponse` - プライマリーディスプレイおよび利用可能なすべてのディスプレイを含む情報。
-  
+* `DisplayInfoResponse` - プライマリディスプレイおよび利用可能なすべてのディスプレイを含むディスプレイ情報。
 
 **例**:
 
@@ -648,13 +631,14 @@ info = sandbox.computer_use.display.get_info()
 print(f"Primary display: {info.primary_display.width}x{info.primary_display.height}")
 print(f"Total displays: {info.total_displays}")
 for i, display in enumerate(info.displays):
-    print(f"Display {i}: {display.width}x{display.height} at {display.x},{display.y}")
+    print(f"ディスプレイ {i}: {display.width}x{display.height} at {display.x},{display.y}")
 ```
 
-#### Display.get_windows
+#### Display.get_windows \{#displayget_windows\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get windows: ")
+@intercept_errors(message_prefix="ウィンドウの取得に失敗しました: ")
+@with_instrumentation()
 def get_windows() -> WindowsResponse
 ```
 
@@ -662,45 +646,200 @@ def get_windows() -> WindowsResponse
 
 **戻り値**:
 
-- `WindowsResponse` - ID とタイトルを含む開いているウィンドウの一覧。
-  
+* `WindowsResponse` - 各ウィンドウのIDとタイトルを含む、開いているウィンドウの一覧。
 
 **例**:
 
 ```python
 windows = sandbox.computer_use.display.get_windows()
-print(f"Found {windows.count} open windows:")
+print(f"{windows.count}個の開いているウィンドウが見つかりました:")
 for window in windows.windows:
     print(f"- {window.title} (ID: {window.id})")
 ```
 
-## ScreenshotRegion
+## RecordingService \{#recordingservice\}
 
 ```python
-class ScreenshotRegion()
+class RecordingService()
 ```
 
-スクリーンショット操作用の領域座標。
+コンピューター使用機能に対する操作を記録します。
+
+#### RecordingService.start \{#recordingservicestart\}
+
+```python
+@intercept_errors(message_prefix="Failed to start recording: ")
+@with_instrumentation()
+def start(label: str | None = None) -> Recording
+```
+
+新しい画面録画セッションを開始します。
+
+**引数**:
+
+* `label` *str | None* - 録画に付与する任意のカスタムラベル。
+
+**戻り値**:
+
+* `Recording` - 録画開始のレスポンス。
+
+**例**:
+
+```python
+# ラベルを指定して録画を開始
+recording = sandbox.computer_use.recording.start("my-test-recording")
+print(f"Recording started: {recording.id}")
+print(f"File: {recording.file_path}")
+```
+
+#### RecordingService.stop \{#recordingservicestop\}
+
+```python
+@intercept_errors(message_prefix="Failed to stop recording: ")
+@with_instrumentation()
+def stop(recording_id: str) -> Recording
+```
+
+アクティブな画面録画セッションを停止します。
+
+**引数**:
+
+* `recording_id` *str* - 停止する録画のID。
+
+**戻り値**:
+
+* `Recording` - 録画停止のレスポンス。
+
+**例**:
+
+```python
+result = sandbox.computer_use.recording.stop(recording.id)
+print(f"Recording stopped: {result.duration_seconds} seconds")
+print(f"Saved to: {result.file_path}")
+```
+
+#### RecordingService.list \{#recordingservicelist\}
+
+```python
+@intercept_errors(message_prefix="Failed to list recordings: ")
+@with_instrumentation()
+def list() -> ListRecordingsResponse
+```
+
+すべてのレコーディング（アクティブおよび完了したもの）を一覧表示します。
+
+**戻り値**:
+
+* `ListRecordingsResponse` - すべてのレコーディングの一覧。
+
+**例**:
+
+```python
+recordings = sandbox.computer_use.recording.list()
+print(f"Found {len(recordings.recordings)} recordings")
+for rec in recordings.recordings:
+    print(f"- {rec.file_name}: {rec.status}")
+```
+
+#### RecordingService.get \{#recordingserviceget\}
+
+```python
+@intercept_errors(message_prefix="Failed to get recording: ")
+@with_instrumentation()
+def get(recording_id: str) -> Recording
+```
+
+指定した ID の recording の詳細を取得します。
+
+**引数**:
+
+* `recording_id` *str* - 取得する recording の ID。
+
+**戻り値**:
+
+* `Recording` - recording の詳細。
+
+**例**:
+
+```python
+recording = sandbox.computer_use.recording.get(recording_id)
+print(f"Recording: {recording.file_name}")
+print(f"Status: {recording.status}")
+print(f"Duration: {recording.duration_seconds} seconds")
+```
+
+#### RecordingService.delete \{#recordingservicedelete\}
+
+```python
+@intercept_errors(message_prefix="Failed to delete recording: ")
+@with_instrumentation()
+def delete(recording_id: str) -> None
+```
+
+ID を指定して録画を削除します。
+
+**引数**:
+
+* `recording_id` *str* - 削除する録画の ID。
+
+**例**:
+
+```python
+sandbox.computer_use.recording.delete(recording_id)
+print("録画が削除されました")
+```
+
+#### RecordingService.download \{#recordingservicedownload\}
+
+```python
+@intercept_errors(message_prefix="Failed to download recording: ")
+@with_instrumentation()
+def download(recording_id: str, local_path: str) -> None
+```
+
+サンドボックスから録画ファイルをダウンロードし、ローカルファイルとして保存します。
+
+ファイルは全内容をメモリに読み込まず、ディスクに直接書き込まれます。
+
+**引数**:
+
+* `recording_id` *str* - ダウンロードする録画の ID。
+* `local_path` *str* - 録画ファイルをローカルに保存するパス。
+
+**例**:
+
+```python
+# レコーディングをファイルにダウンロード
+sandbox.computer_use.recording.download(recording_id, "local_recording.mp4")
+print("Recording downloaded")
+```
+
+## ScreenshotRegion \{#screenshotregion\}
+
+```python
+class ScreenshotRegion(BaseModel)
+```
+
+スクリーンショット操作のための領域座標。
 
 **属性**:
 
-- `x` _int_ - 領域のX座標。
-- `y` _int_ - 領域のY座標。
-- `width` _int_ - 領域の幅。
-- `height` _int_ - 領域の高さ。
+* `x` *int* - 領域のX座標。
+* `y` *int* - 領域のY座標。
+* `width` *int* - 領域の幅。
+* `height` *int* - 領域の高さ。
 
-## ScreenshotOptions
+## ScreenshotOptions \{#screenshotoptions\}
 
 ```python
-class ScreenshotOptions()
+class ScreenshotOptions(BaseModel)
 ```
 
 スクリーンショットの圧縮および表示に関するオプション。
 
 **属性**:
 
-- `show_cursor` _bool_ - スクリーンショットにカーソルを表示するかどうか。
-- `fmt` _str_ - 画像形式（例：'png'、'jpeg'、'webp'）。
-- `quality` _int_ - 圧縮品質（0〜100）。
-- `scale` _float_ - スクリーンショットのスケール係数。
-
+* `show_cursor` *bool | None* - スクリーンショットにカーソルを表示するかどうか。
+* `fmt` *str | None* - 画像形式（例: &#39;png&#39;、&#39;jpeg&#39;、&#39;webp&#39;）。
+* `quality` *int | None* - 圧縮品質（0～100）。
+* `scale` *float | None* - スクリーンショットの拡大縮小率。
