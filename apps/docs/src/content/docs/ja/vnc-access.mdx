@@ -1,0 +1,294 @@
+---
+title: VNC アクセス
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+VNC (Virtual Network Computing) アクセスを利用すると、ブラウザーから Daytona サンドボックスのグラフィカルなデスクトップ環境に直接アクセスできます。これにより、サンドボックス内で動作している GUI アプリケーション、デスクトップツール、およびビジュアルインターフェースを操作できます。
+
+VNC と [コンピューター使用](/docs/ja/computer-use) を組み合わせることで、手動および自動の両方のデスクトップ操作が可能になります。VNC はユーザーがデスクトップを手動で操作するためのビジュアルインターフェースを提供し、コンピューター使用は AI エージェントがマウス、キーボード、スクリーンショット操作を自動化するためのプログラムによる API を提供します。VNC を通じて、コンピューター使用を利用して AI エージェントが自動化されたタスクを実行している様子をリアルタイムに観察できます。
+
+* **GUI アプリケーション開発**: ビジュアルインターフェースを持つデスクトップアプリケーションの構築とテスト
+* **ブラウザテスト**: フルブラウザー環境での Web アプリケーションの実行とデバッグ
+* **ビジュアルデバッグ**: グラフィカルな出力や UI の挙動をリアルタイムに確認
+* **デスクトップツールへのアクセス**: グラフィカルな IDE、デザインツール、その他のデスクトップソフトウェアを利用
+* **エージェントの観察**: コンピューター使用を通じて AI エージェントが自動化されたタスクを実行する様子を観察
+
+:::note[サンドボックスイメージの要件]
+VNC とコンピューター使用を利用するには、デフォルトイメージを使用したサンドボックスが必要です。カスタムイメージで作成されたサンドボックスには、[必要なパッケージ](#required-packages) をインストールしない限り VNC サポートは含まれません。
+:::
+
+## Dashboard から VNC にアクセスする \{#access-vnc-from-dashboard\}
+
+[Daytona Dashboard ↗](https://app.daytona.io/dashboard/sandboxes) から VNC デスクトップ環境に直接アクセスできます。
+
+1. [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes) にアクセスします
+2. VNC でアクセスしたいサンドボックスを探します
+3. サンドボックスの横にあるオプションメニュー（**⋮**）をクリックします
+4. ドロップダウンメニューから **VNC** を選択します
+
+ブラウザ内で VNC ビューアが開き、**Connect** ボタンが表示されます。
+
+5. **Connect** をクリックして VNC セッションを確立します
+
+接続されると、ブラウザ内にフル機能のデスクトップ環境が読み込まれ、サンドボックスのグラフィカルインターフェースをマウスとキーボードで操作できるようになります。
+
+:::note
+VNC セッションはサンドボックスが稼働している限り有効です。サンドボックスが非アクティブ状態により自動的に停止した場合、VNC で再接続する前にサンドボックスを再起動する必要があります。
+:::
+
+## プログラムによる VNC 管理 \{#programmatic-vnc-management\}
+
+Daytona は、自動化されたワークフローの一部として [コンピューター使用](/docs/ja/computer-use) のリファレンスを利用し、VNC セッションおよびプロセスをプログラムから [開始](#start-vnc)、[停止](#stop-vnc)、[監視](#get-vnc-status) するためのメソッドを提供します。
+
+### VNC の開始 \{#start-vnc\}
+
+デスクトップアクセスを有効化するために、サンドボックス内のすべての VNC プロセス（Xvfb、xfce4、x11vnc、novnc）を起動します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    result = sandbox.computer_use.start()
+    print("VNC processes started:", result.message)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const result = await sandbox.computerUse.start();
+    console.log('VNC processes started:', result.message);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    result = sandbox.computer_use.start
+    puts "VNC processes started: #{result.message}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    err := sandbox.ComputerUse.Start(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    defer sandbox.ComputerUse.Stop(ctx)
+
+    fmt.Println("VNC processes started")
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/start' \
+      --request POST
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[コンピューター使用](/docs/ja/computer-use#start-computer-use) のリファレンスを参照してください。
+
+> [**start (Python SDK)**](/docs/ja/python-sdk/sync/computer-use#computerusestart)
+>
+> [**start (TypeScript SDK)**](/docs/ja/typescript-sdk/computer-use#start)
+>
+> [**start (Ruby SDK)**](/docs/ja/ruby-sdk/computer-use#start)
+>
+> [**Start (Go SDK)**](/docs/ja/go-sdk/daytona#ComputerUseService.Start)
+>
+> [**Start Computer Use Processes (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/start)
+
+### VNC を停止する \{#stop-vnc\}
+
+サンドボックス内のすべての VNC プロセスを停止します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    result = sandbox.computer_use.stop()
+    print("VNC processes stopped:", result.message)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const result = await sandbox.computerUse.stop();
+    console.log('VNC processes stopped:', result.message);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    result = sandbox.computer_use.stop
+    puts "VNC processes stopped: #{result.message}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    err := sandbox.ComputerUse.Stop(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    fmt.Println("VNC processes stopped")
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/stop' \
+      --request POST
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[コンピューター使用](/docs/ja/computer-use#stop-computer-use) のリファレンスを参照してください。
+
+> [**stop (Python SDK)**](/docs/ja/python-sdk/sync/computer-use#computerusestop)
+>
+> [**stop (TypeScript SDK)**](/docs/ja/typescript-sdk/computer-use#stop)
+>
+> [**stop (Ruby SDK)**](/docs/ja/ruby-sdk/computer-use#stop)
+>
+> [**Stop (Go SDK)**](/docs/ja/go-sdk/daytona#ComputerUseService.Stop)
+>
+> [**Stop Computer Use Processes (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/stop)
+
+### VNC ステータスの取得 \{#get-vnc-status\}
+
+VNC プロセスのステータスを確認し、実行中であることを確認します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    response = sandbox.computer_use.get_status()
+    print("VNC status:", response.status)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const status = await sandbox.computerUse.getStatus();
+    console.log('VNC status:', status.status);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    response = sandbox.computer_use.status
+    puts "VNC status: #{response.status}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    status, err := sandbox.ComputerUse.GetStatus(ctx)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    fmt.Printf("VNC status: %v\n", status["status"])
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/status'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[コンピューター使用](/docs/ja/computer-use#get-status) リファレンスを参照してください。
+
+> [**get&#95;status (Python SDK)**](/docs/ja/python-sdk/sync/computer-use#computeruseget_status)
+>
+> [**getStatus (TypeScript SDK)**](/docs/ja/typescript-sdk/computer-use#getstatus)
+>
+> [**status (Ruby SDK)**](/docs/ja/ruby-sdk/computer-use#status)
+>
+> [**GetStatus (Go SDK)**](/docs/ja/go-sdk/daytona#ComputerUseService.GetStatus)
+>
+> [**Get Computer Use Status (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/status)
+
+個々のプロセスの再起動やログの閲覧など、追加のプロセス管理操作については、[コンピューター使用](/docs/ja/computer-use) リファレンスを参照してください。
+
+## デスクトップ操作の自動化 \{#automating-desktop-interactions\}
+
+VNC が起動したら、コンピューター使用を利用してデスクトップ操作を自動化できます。これにより、AI エージェントが VNC セッション内でマウスやキーボードをプログラムから制御し、スクリーンショットを取得できるようになります。
+
+**利用可能な操作:**
+
+* **Mouse**: クリック、移動、ドラッグ、スクロール、カーソル位置の取得
+* **Keyboard**: テキスト入力、キー押下、ホットキーの組み合わせ実行
+* **Screenshot**: 画面全体、指定領域、圧縮画像のキャプチャ
+* **Display**: ディスプレイ情報の取得と開いているウィンドウの一覧取得
+
+デスクトップ操作の自動化に関する詳細なドキュメントは、[Computer Use](/docs/ja/computer-use) を参照してください。
+
+> **例**: ブラウザー操作の自動化
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # VNC プロセスを開始
+    sandbox.computer_use.start()
+
+    # ブラウザーを開くためにクリック
+    sandbox.computer_use.mouse.click(50, 50)
+
+    # URL を入力
+    sandbox.computer_use.keyboard.type("https://www.daytona.io/docs/")
+    sandbox.computer_use.keyboard.press("Return")
+
+    # スクリーンショットを取得
+    screenshot = sandbox.computer_use.screenshot.take_full_screen()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // VNC プロセスを開始
+    await sandbox.computerUse.start();
+
+    // ブラウザーを開くためにクリック
+    await sandbox.computerUse.mouse.click(50, 50);
+
+    // URL を入力
+    await sandbox.computerUse.keyboard.type('https://www.daytona.io/docs/');
+    await sandbox.computerUse.keyboard.press('Return');
+
+    // スクリーンショットを取得
+    const screenshot = await sandbox.computerUse.screenshot.takeFullScreen();
+    ```
+  </TabItem>
+</Tabs>
+
+## 必要なパッケージ \{#required-packages\}
+
+デフォルトのサンドボックスイメージには、VNC とコンピューター使用に必要なパッケージがすべて含まれています。カスタムイメージを使用している場合は、以下のパッケージをインストールする必要があります。
+
+### VNC とデスクトップ環境 \{#vnc-and-desktop-environment\}
+
+| Package              | Description                                      |
+| -------------------- | ------------------------------------------------ |
+| **`xvfb`**           | ディスプレイ非搭載環境向けの X Virtual Framebuffer |
+| **`xfce4`**          | デスクトップ環境                                |
+| **`xfce4-terminal`** | ターミナルエミュレータ                          |
+| **`x11vnc`**         | VNC サーバー                                    |
+| **`novnc`**          | Web ベースの VNC クライアント                  |
+| **`dbus-x11`**       | D-Bus セッションのサポート                      |
+
+### X11 ライブラリ \{#x11-libraries\}
+
+| Library           | Description                                   |
+| ----------------- | --------------------------------------------- |
+| **`libx11-6`**    | X11 クライアントライブラリ                   |
+| **`libxrandr2`**  | X11 RandR 拡張（ディスプレイ設定）           |
+| **`libxext6`**    | X11 拡張ライブラリ                            |
+| **`libxrender1`** | X11 レンダリング拡張                         |
+| **`libxfixes3`**  | X11 Fixes 拡張                                |
+| **`libxss1`**     | X11 スクリーンセーバー拡張                   |
+| **`libxtst6`**    | X11 テスト用拡張（入力シミュレーション）     |
+| **`libxi6`**      | X11 入力拡張                                  |
