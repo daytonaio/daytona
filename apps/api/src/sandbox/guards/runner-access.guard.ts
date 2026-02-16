@@ -41,10 +41,7 @@ export class RunnerAccessGuard implements CanActivate {
     const authContext: BaseAuthContext = request.user
 
     try {
-      const runner = await this.runnerService.findOne(runnerId)
-      if (!runner) {
-        throw new NotFoundException('Runner not found')
-      }
+      const runner = await this.runnerService.findOneOrFail(runnerId)
 
       switch (true) {
         case isRegionProxyContext(authContext):

@@ -588,10 +588,7 @@ export class WorkspaceController {
       throw new NotFoundException(`Workspace with ID ${workspaceId} has no build info`)
     }
 
-    const runner = await this.runnerService.findOne(workspace.runnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner for workspace ${workspaceId} not found`)
-    }
+    const runner = await this.runnerService.findOneOrFail(workspace.runnerId)
 
     if (!runner.apiUrl) {
       throw new NotFoundException(`Runner for workspace ${workspaceId} has no API URL`)

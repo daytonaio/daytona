@@ -16,7 +16,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -225,12 +224,16 @@ export class RunnerService {
     })
   }
 
-  async findOneFullOrFail(id: string): Promise<RunnerFullDto> {
+  async findOneOrFail(id: string): Promise<Runner> {
     const runner = await this.findOne(id)
     if (!runner) {
-      throw new NotFoundException('Runner not found')
+      throw new NotFoundException(`Runner with ID ${id} not found`)
     }
+    return runner
+  }
 
+  async findOneFullOrFail(id: string): Promise<RunnerFullDto> {
+    const runner = await this.findOneOrFail(id)
     const region = await this.regionService.findOne(runner.region)
 
     return RunnerFullDto.fromRunner(runner, region?.regionType)
@@ -867,7 +870,10 @@ export class RunnerService {
     return runner
   }
 
-  private async updateRunner(id: string, data: QueryDeepPartialEntity<Runner>): Promise<UpdateResult> {
+  private async updateRunner(
+    id: string,
+    data: Partial<Omit<Runner, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<UpdateResult> {
     const result = await this.runnerRepository.update(id, data)
     this.invalidateRunnerCache(id)
     return result

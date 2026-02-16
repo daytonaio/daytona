@@ -447,11 +447,7 @@ export class SnapshotService {
       throw new NotFoundException(`Snapshot ${snapshot.id} has no initial runner`)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
-    if (!runner) {
-      throw new NotFoundException(`Initial runner for snapshot ${snapshot.id} not found`)
-    }
-
+    const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     const region = await this.regionService.findOne(runner.region, true)
 
     if (!region) {

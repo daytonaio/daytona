@@ -157,12 +157,7 @@ export class RunnerController {
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
   async getRunnerById(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerDto> {
-    const runner = await this.runnerService.findOne(id)
-
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
-    }
-
+    const runner = await this.runnerService.findOneOrFail(id)
     return RunnerDto.fromRunner(runner)
   }
 
@@ -184,12 +179,7 @@ export class RunnerController {
   @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RunnerAccessGuard]))
   @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
   async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
-    const runner = await this.runnerService.findOne(id)
-
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
-    }
-
+    const runner = await this.runnerService.findOneOrFail(id)
     return RunnerFullDto.fromRunner(runner)
   }
 

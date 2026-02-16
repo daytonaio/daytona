@@ -95,11 +95,7 @@ export class ToolboxService {
         throw new NotFoundException('Sandbox not found')
       }
 
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-
-      if (!runner) {
-        throw new NotFoundException('Runner not found for the sandbox')
-      }
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
       if (sandbox.state !== SandboxState.STARTED) {
         throw new BadRequestException('Sandbox is not running')

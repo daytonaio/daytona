@@ -465,11 +465,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       sandboxName: sandbox.name,
     }
 
-    const newRunner = await this.runnerService.findOne(newRunnerId)
-    if (!newRunner) {
-      throw new Error(`Target runner ${newRunnerId} not found`)
-    }
-
+    const newRunner = await this.runnerService.findOneOrFail(newRunnerId)
     const newRunnerAdapter = await this.runnerAdapterFactory.create(newRunner)
 
     const originalSnapshot = sandbox.snapshot

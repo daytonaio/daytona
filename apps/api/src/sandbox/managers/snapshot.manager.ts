@@ -731,11 +731,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
     }
 
-    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
-    if (!runner) {
-      throw new NotFoundException(`Runner with ID ${snapshot.initialRunnerId} not found`)
-    }
-
+    const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     const initialImageRefOnRunner = snapshot.buildInfo
@@ -952,10 +948,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       snapshot.initialRunnerId = initialRunner.id
       await this.snapshotRepository.save(snapshot)
     } else {
-      initialRunner = await this.runnerService.findOne(snapshot.initialRunnerId)
-      if (!initialRunner) {
-        throw new NotFoundException(`Runner with ID ${snapshot.initialRunnerId} not found`)
-      }
+      initialRunner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     }
 
     if (snapshot.buildInfo) {
