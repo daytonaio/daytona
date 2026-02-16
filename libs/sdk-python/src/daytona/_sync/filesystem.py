@@ -266,7 +266,7 @@ class FileSystem:
                         name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
                         source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
                         if not source:
-                            raise DaytonaError("No source path found for this file {result.filename}")
+                            raise DaytonaError("No source path found for this file")
 
                         if name == "error":
                             mode = "error"

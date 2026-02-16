@@ -284,10 +284,8 @@ class AsyncFileSystem:
                         },
                     )
 
-                    async for chunk in resp.aiter_bytes(64 * 1024):
-                        events.clear()
-                        _ = parser.write(chunk)
-
+                    async def _process_events() -> None:
+                        nonlocal writer, mode, source
                         for event_tag, event_payload in events:
                             if event_tag == "begin":
                                 part_headers.clear()
@@ -303,7 +301,7 @@ class AsyncFileSystem:
                                 name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
                                 source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
                                 if not source:
-                                    raise DaytonaError("No source path found for this file {result.filename}")
+                                    raise DaytonaError("No source path found for this file")
 
                                 if name == "error":
                                     mode = "error"
@@ -353,7 +351,14 @@ class AsyncFileSystem:
                                 mode = None
                                 source = None
 
+                    async for chunk in resp.aiter_bytes(64 * 1024):
+                        events.clear()
+                        _ = parser.write(chunk)
+                        await _process_events()
+
+                    events.clear()
                     parser.finalize()
+                    await _process_events()
         finally:
             for writer in file_writers:
                 await writer.close()
