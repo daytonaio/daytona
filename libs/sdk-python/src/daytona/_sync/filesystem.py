@@ -6,10 +6,9 @@ from __future__ import annotations
 import io
 import os
 from contextlib import ExitStack
-from typing import cast, overload
+from typing import overload
 
 import httpx
-import multipart
 from daytona_toolbox_api_client import (
     FileInfo,
     FilesDownloadRequest,
@@ -19,7 +18,7 @@ from daytona_toolbox_api_client import (
     ReplaceResult,
     SearchFilesResponse,
 )
-from multipart import MultipartSegment, PushMultipartParser
+from multipart.multipart import MultipartParser, parse_options_header
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
@@ -220,78 +219,113 @@ class FileSystem:
                 ) as resp:
                     _ = resp.raise_for_status()
 
-                    content_type, options = multipart.parse_options_header(resp.headers.get("Content-Type", ""))
-                    if not (content_type == "multipart/form-data" and "boundary" in options):
-                        raise DaytonaError(f"Unexpected Content-Type: {content_type}")
-                    boundary = cast(str | bytes, options["boundary"])
+                    content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
+                    if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
+                        raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
+                    boundary = options[b"boundary"]
 
-                    with PushMultipartParser(boundary) as parser:
+                    writer: io.BytesIO | io.BufferedIOBase | None = None
+                    mode: str | None = None
+                    source: str | None = None
+                    header_field = bytearray()
+                    header_value = bytearray()
+                    part_headers: dict[str, str] = {}
+                    error_buffer = bytearray()
+
+                    def on_part_begin() -> None:
+                        nonlocal writer, mode, source
+                        part_headers.clear()
+                        error_buffer.clear()
                         writer = None
-                        mode = None  # "file" or "error"
+                        mode = None
                         source = None
 
-                        for chunk in resp.iter_bytes(64 * 1024):
-                            if parser.closed:
-                                raise DaytonaError("Unexpected end of multipart data")
+                    def on_header_field(data: bytes, start: int, end: int) -> None:
+                        header_field.extend(data[start:end])
 
-                            for result in parser.parse(chunk):  # pyright: ignore[reportUnknownVariableType]
-                                if isinstance(result, MultipartSegment):  # New part starting
-                                    writer = None
-                                    mode = None
-                                    source = result.filename
-                                    if not source:
-                                        raise DaytonaError(f"No source path found for this file {result.filename}")
+                    def on_header_value(data: bytes, start: int, end: int) -> None:
+                        header_value.extend(data[start:end])
 
-                                    if result.name == "error":
-                                        mode = "error"
-                                    elif result.name == "file":
-                                        mode = "file"
-                                        meta = src_file_meta_dict[source]
-                                        if meta.dst:
-                                            parent = os.path.dirname(meta.dst)
-                                            if parent:
-                                                os.makedirs(parent, exist_ok=True)
-                                            # pylint: disable=consider-using-with
-                                            writer = open(meta.dst, mode="wb")
-                                            file_writers.append(writer)
-                                            meta.result = meta.dst
-                                        else:
-                                            writer = io.BytesIO()
-                                            meta.result = writer
+                    def on_header_end() -> None:
+                        field = bytes(header_field).decode("utf-8", errors="ignore").lower()
+                        value = bytes(header_value).decode("utf-8", errors="ignore")
+                        part_headers[field] = value
+                        header_field.clear()
+                        header_value.clear()
 
-                                elif result:  # Non-empty bytearray with content
-                                    if mode == "error":
-                                        raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                        error_text = raw.decode("utf-8", errors="ignore").strip()
-                                        if source:
-                                            src_file_meta_dict[source].error = error_text
-                                        else:
-                                            raise DaytonaError(
-                                                f"Error happened for unknown file with error {error_text}"
-                                            )
-                                    elif mode == "file":
-                                        try:
-                                            if isinstance(writer, io.BytesIO):
-                                                raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                                _ = writer.write(raw)
-                                            elif writer:
-                                                raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                                _ = writer.write(raw)
-                                        except Exception as e:
-                                            if source:
-                                                src_file_meta_dict[source].error = f"Write failed: {e}"
-                                            else:
-                                                raise DaytonaError(
-                                                    (f"Write failed for unknown file with error {e}")
-                                                ) from e
-                                            mode = None
+                    def on_headers_finished() -> None:
+                        nonlocal writer, mode, source
+                        cd = part_headers.get("content-disposition", "")
+                        _, cd_params = parse_options_header(cd)
+                        name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
+                        source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
+                        if not source:
+                            raise DaytonaError("No source path found for this file")
 
-                                else:  # None - end of current part
-                                    if writer and not isinstance(writer, io.BytesIO):
-                                        writer.close()
-                                    writer = None
-                                    mode = None
-                                    source = None
+                        if name == "error":
+                            mode = "error"
+                        elif name == "file":
+                            mode = "file"
+                            meta = src_file_meta_dict[source]
+                            if meta.dst:
+                                parent = os.path.dirname(meta.dst)
+                                if parent:
+                                    os.makedirs(parent, exist_ok=True)
+                                # pylint: disable=consider-using-with
+                                writer = open(meta.dst, mode="wb")
+                                file_writers.append(writer)
+                                meta.result = meta.dst
+                            else:
+                                writer = io.BytesIO()
+                                meta.result = writer
+
+                    def on_part_data(data: bytes, start: int, end: int) -> None:
+                        nonlocal mode
+                        part_data = data[start:end]
+                        if mode == "error":
+                            error_buffer.extend(part_data)
+                        elif mode == "file":
+                            try:
+                                if writer:
+                                    _ = writer.write(part_data)
+                            except Exception as e:
+                                if source:
+                                    src_file_meta_dict[source].error = f"Write failed: {e}"
+                                else:
+                                    raise DaytonaError(f"Write failed for unknown file with error {e}") from e
+                                mode = None
+
+                    def on_part_end() -> None:
+                        nonlocal writer, mode, source
+                        if mode == "error" and error_buffer:
+                            error_text = bytes(error_buffer).decode("utf-8", errors="ignore").strip()
+                            if source:
+                                src_file_meta_dict[source].error = error_text
+                            else:
+                                raise DaytonaError(f"Error happened for unknown file with error {error_text}")
+                            error_buffer.clear()
+                        if writer and not isinstance(writer, io.BytesIO):
+                            writer.close()
+                        writer = None
+                        mode = None
+                        source = None
+
+                    parser = MultipartParser(
+                        boundary,
+                        callbacks={
+                            "on_part_begin": on_part_begin,
+                            "on_header_field": on_header_field,
+                            "on_header_value": on_header_value,
+                            "on_header_end": on_header_end,
+                            "on_headers_finished": on_headers_finished,
+                            "on_part_data": on_part_data,
+                            "on_part_end": on_part_end,
+                        },
+                    )
+
+                    for chunk in resp.iter_bytes(64 * 1024):
+                        _ = parser.write(chunk)
+                    parser.finalize()
         finally:
             for writer in file_writers:
                 writer.close()
