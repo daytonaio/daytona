@@ -148,7 +148,7 @@ cd myproject
 Add a symlink from the project directory to the plugin source code:
 
 ```
-ln -s /absolute/path/to/daytona/libs/opencode-plugin/.opencode .opencode
+ln -s [ABSOLUTE_PATH_TO_DAYTONA]/libs/opencode-plugin/.opencode .opencode
 ```
 
 Initialize git to enable file syncing:
