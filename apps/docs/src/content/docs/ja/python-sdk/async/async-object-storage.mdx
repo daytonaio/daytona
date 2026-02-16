@@ -3,7 +3,7 @@ title: "AsyncObjectStorage"
 hideTitleOnPage: true
 ---
 
-## AsyncObjectStorage
+## AsyncObjectStorage \{#asyncobjectstorage\}
 
 ```python
 class AsyncObjectStorage()
@@ -11,33 +11,31 @@ class AsyncObjectStorage()
 
 オブジェクトストレージサービスとやり取りするための AsyncObjectStorage クラス。
 
-**Attributes**:
+**属性**:
 
-- `endpoint_url` _str_ - オブジェクトストレージサービスのエンドポイントURL。
-- `aws_access_key_id` _str_ - オブジェクトストレージサービスのアクセスキーID。
-- `aws_secret_access_key` _str_ - オブジェクトストレージサービスのシークレットアクセスキー。
-- `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用。
-- `bucket_name` _str_ - 使用するバケット名。既定値は "daytona-volume-builds"。
+* `endpoint_url` *str* - オブジェクトストレージサービスのエンドポイント URL。
+* `aws_access_key_id` *str* - オブジェクトストレージサービスのアクセスキー ID。
+* `aws_secret_access_key` *str* - オブジェクトストレージサービスのシークレットアクセスキー。
+* `aws_session_token` *str* - オブジェクトストレージサービスのセッショントークン。一時的な認証情報に使用します。
+* `bucket_name` *str* - 使用するバケット名。既定値は &quot;daytona-volume-builds&quot;。
 
-#### AsyncObjectStorage.upload
+#### AsyncObjectStorage.upload \{#asyncobjectstorageupload\}
 
 ```python
+@with_instrumentation()
 async def upload(path: str,
                  organization_id: str,
                  archive_base_path: str | None = None) -> str
 ```
 
-ファイルをオブジェクトストレージサービスにアップロードします。
+オブジェクトストレージサービスにファイルをアップロードします。
 
-**Arguments**:
+**引数**:
 
-- `path` _str_ - アップロードするファイルのパス。
-- `organization_id` _str_ - 使用する組織ID。
-- `archive_base_path` _str_ - アーカイブに使用するベースパス。
-  
+* `path` *str* - アップロードするファイルへのパス。
+* `organization_id` *str* - 使用する組織 ID。
+* `archive_base_path` *str* - アーカイブに使用するベースパス。
 
-**Returns**:
+**戻り値**:
 
-- `str` - アップロードしたファイルのハッシュ値。
-
-
+* `str` - アップロードされたファイルのハッシュ。
