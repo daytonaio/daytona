@@ -6,6 +6,7 @@
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateEndpointDialog } from '@/components/Webhooks/CreateEndpointDialog'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
+import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,10 +19,11 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteWebhookEndpointMutation } from '@/hooks/mutations/useDeleteWebhookEndpointMutation'
 import { useUpdateWebhookEndpointMutation } from '@/hooks/mutations/useUpdateWebhookEndpointMutation'
 import { handleApiError } from '@/lib/error-handling'
-import { RefreshCcw } from 'lucide-react'
+import { ExternalLink, RefreshCcw } from 'lucide-react'
 import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { EndpointOut } from 'svix'
@@ -32,6 +34,7 @@ const Webhooks: React.FC = () => {
   const [mutatingEndpointId, setMutatingEndpointId] = useState<string | null>(null)
   const [endpointToDelete, setEndpointToDelete] = useState<EndpointOut | null>(null)
   const [deleteDialogIsOpen, setDeleteDialogIsOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('endpoints')
 
   const updateMutation = useUpdateWebhookEndpointMutation()
   const deleteMutation = useDeleteWebhookEndpointMutation()
@@ -113,20 +116,52 @@ const Webhooks: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Webhooks</PageTitle>
-        <CreateEndpointDialog onSuccess={handleSuccess} className="ml-auto" />
+        <a
+          href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto"
+        >
+          <Button variant="outline" size="sm">
+            <ExternalLink className="w-4 h-4" />
+            Docs
+          </Button>
+        </a>
+        {activeTab === 'endpoints' && <CreateEndpointDialog onSuccess={handleSuccess} />}
       </PageHeader>
 
       <PageContent>
-        <WebhooksEndpointTable
-          data={endpoints.data || []}
-          loading={endpoints.loading}
-          isLoadingEndpoint={isLoadingEndpoint}
-          onDisable={handleDisable}
-          onDelete={(endpoint) => {
-            setEndpointToDelete(endpoint)
-            setDeleteDialogIsOpen(true)
-          }}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="gap-6">
+          <TabsList className="shadow-none bg-transparent w-auto p-0 pb-0 justify-start border-b rounded-none">
+            <TabsTrigger
+              value="endpoints"
+              className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
+            >
+              Endpoints
+            </TabsTrigger>
+            <TabsTrigger
+              value="messages"
+              className="data-[state=inactive]:border-b-transparent data-[state=active]:border-b-foreground border-b rounded-none !shadow-none -mb-0.5 pb-1.5"
+            >
+              Messages
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="endpoints">
+            <WebhooksEndpointTable
+              data={endpoints.data || []}
+              loading={endpoints.loading}
+              isLoadingEndpoint={isLoadingEndpoint}
+              onDisable={handleDisable}
+              onDelete={(endpoint) => {
+                setEndpointToDelete(endpoint)
+                setDeleteDialogIsOpen(true)
+              }}
+            />
+          </TabsContent>
+          <TabsContent value="messages">
+            <WebhooksMessagesTable />
+          </TabsContent>
+        </Tabs>
       </PageContent>
 
       <AlertDialog
