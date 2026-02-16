@@ -1,0 +1,841 @@
+---
+title: "サンドボックス"
+hideTitleOnPage: true
+---
+
+## サンドボックス \{#sandbox\}
+
+Daytona SDK の Sandbox クラスです。
+
+### コンストラクター \{#constructors\}
+
+#### new Sandbox() \{#new-sandbox\}
+
+```ruby
+def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:, otel_state:)
+
+```
+
+**戻り値**:
+
+* `Sandbox` - 新しいサンドボックスのインスタンス
+
+### メソッド \{#methods\}
+
+#### id() \{#id\}
+
+```ruby
+def id()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスの ID
+
+#### organization_id() \{#organization_id\}
+
+```ruby
+def organization_id()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスの組織 ID
+
+#### snapshot() \{#snapshot\}
+
+```ruby
+def snapshot()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスで使用されるスナップショット
+
+#### user() \{#user\}
+
+```ruby
+def user()
+
+```
+
+**戻り値**:
+
+* `String` - プロジェクトに対応するユーザー
+
+#### env() \{#env\}
+
+```ruby
+def env()
+
+```
+
+**戻り値**:
+
+* `Hash\<String, String\>` - サンドボックスの環境変数
+
+#### labels() \{#labels\}
+
+```ruby
+def labels()
+
+```
+
+**戻り値**:
+
+* `Hash\<String, String\>` - サンドボックス用のラベル
+
+#### public() \{#public\}
+
+```ruby
+def public()
+
+```
+
+**戻り値**:
+
+* `Boolean` - サンドボックスの HTTP プレビューが公開かどうかを示す値
+
+#### network_block_all() \{#network_block_all\}
+
+```ruby
+def network_block_all()
+
+```
+
+**戻り値**:
+
+* `Boolean` - サンドボックスのすべてのネットワークアクセスをブロックするかどうか
+
+#### network_allow_list() \{#network_allow_list\}
+
+```ruby
+def network_allow_list()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスで許可されている CIDR 形式のネットワークアドレスをカンマ区切りで並べたリスト
+
+#### target() \{#target\}
+
+```ruby
+def target()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスの対象環境
+
+#### cpu() \{#cpu\}
+
+```ruby
+def cpu()
+
+```
+
+**戻り値**:
+
+* `Float` - サンドボックスの CPU クォータ
+
+#### gpu() \{#gpu\}
+
+```ruby
+def gpu()
+
+```
+
+**戻り値**:
+
+* `Float` - サンドボックスの GPU クォータ
+
+#### memory() \{#memory\}
+
+```ruby
+def memory()
+
+```
+
+**返り値**:
+
+* `Float` - サンドボックスのメモリクォータを表す値
+
+#### disk() \{#disk\}
+
+```ruby
+def disk()
+
+```
+
+**戻り値**:
+
+* `Float` - サンドボックスのディスククォータ
+
+#### state() \{#state\}
+
+```ruby
+def state()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:SandboxState` - サンドボックスの状態
+
+#### desired_state() \{#desired_state\}
+
+```ruby
+def desired_state()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:SandboxDesiredState` - サンドボックスの望ましい状態
+
+#### error_reason() \{#error_reason\}
+
+```ruby
+def error_reason()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスのエラー理由を表す文字列
+
+#### backup_state() \{#backup_state\}
+
+```ruby
+def backup_state()
+
+```
+
+**戻り値**:
+
+* `String` - バックアップの状態
+
+#### backup_created_at() \{#backup_created_at\}
+
+```ruby
+def backup_created_at()
+
+```
+
+**戻り値**:
+
+* `String` - 最後のバックアップ作成時刻のタイムスタンプ
+
+#### auto_stop_interval() \{#auto_stop_interval\}
+
+```ruby
+def auto_stop_interval()
+
+```
+
+**戻り値**:
+
+* `Float` - 自動停止までの間隔（分単位、0 の場合は無効）
+
+#### auto_archive_interval() \{#auto_archive_interval\}
+
+```ruby
+def auto_archive_interval()
+
+```
+
+**戻り値**:
+
+* `Float` - 自動アーカイブまでの時間（分）
+
+#### auto_delete_interval() \{#auto_delete_interval\}
+
+```ruby
+def auto_delete_interval()
+
+```
+
+(負の値の場合は無効、0 の場合は停止時に即時削除されることを意味します)
+
+**戻り値**:
+
+* `Float` - 自動削除までの時間（分単位）
+
+#### volumes() \{#volumes\}
+
+```ruby
+def volumes()
+
+```
+
+**戻り値**:
+
+* `Array\<DaytonaApiClient:SandboxVolume\>` - サンドボックスに接続されているボリュームの配列
+
+#### build_info() \{#build_info\}
+
+```ruby
+def build_info()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:BuildInfo` - サンドボックスのビルド情報
+
+#### created_at() \{#created_at\}
+
+```ruby
+def created_at()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスの作成日時
+
+#### updated_at() \{#updated_at\}
+
+```ruby
+def updated_at()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックスの最終更新時刻を示すタイムスタンプ
+
+#### daemon_version() \{#daemon_version\}
+
+```ruby
+def daemon_version()
+
+```
+
+**戻り値**:
+
+* `String` - サンドボックス内で動作しているデーモンのバージョン
+
+#### code_toolbox() \{#code_toolbox\}
+
+```ruby
+def code_toolbox()
+
+```
+
+**戻り値**:
+
+* `Daytona:SandboxPythonCodeToolbox, Daytona:SandboxTsCodeToolbox`
+
+#### config() \{#config\}
+
+```ruby
+def config()
+
+```
+
+**戻り値**:
+
+* `Daytona:Config`
+
+#### sandbox_api() \{#sandbox_api\}
+
+```ruby
+def sandbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:SandboxApi`
+
+#### process() \{#process\}
+
+```ruby
+def process()
+
+```
+
+**戻り値**:
+
+* `Daytona:Process`
+
+#### fs() \{#fs\}
+
+```ruby
+def fs()
+
+```
+
+**戻り値**:
+
+* `Daytona:FileSystem`
+
+#### git() \{#git\}
+
+```ruby
+def git()
+
+```
+
+**戻り値**:
+
+* `Daytona:Git`
+
+#### computer_use() \{#computer_use\}
+
+```ruby
+def computer_use()
+
+```
+
+**戻り値**:
+
+* `Daytona:ComputerUse`
+
+#### code_interpreter() \{#code_interpreter\}
+
+```ruby
+def code_interpreter()
+
+```
+
+**戻り値**:
+
+* `Daytona:CodeInterpreter`
+
+#### archive() \{#archive\}
+
+```ruby
+def archive()
+
+```
+
+サンドボックスをアーカイブして非アクティブ状態にし、その時点の状態を保持します。サンドボックスが
+アーカイブされると、ファイルシステム全体の状態がコスト効率の高いオブジェクトストレージに移動され、
+サンドボックスを長期間アクセス可能な状態で保持できるようになります。アーカイブ状態と停止状態の
+トレードオフは、サンドボックスのサイズに応じて、アーカイブ済みサンドボックスの起動により多くの時間が
+かかることです。アーカイブする前にサンドボックスを停止しておく必要があります。
+
+**戻り値**:
+
+* `void`
+
+#### auto_archive_interval=() \{#auto_archive_interval\}
+
+```ruby
+def auto_archive_interval=(interval)
+
+```
+
+サンドボックスの自動アーカイブ間隔を設定します。
+サンドボックスは、指定された間隔のあいだ連続して停止していた場合、自動的にアーカイブされます。
+
+**パラメーター**:
+
+* `interval` *Integer* -
+
+**戻り値**:
+
+* `Integer`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` -
+
+#### auto_delete_interval=() \{#auto_delete_interval\}
+
+```ruby
+def auto_delete_interval=(interval)
+
+```
+
+サンドボックスの自動削除間隔を設定します。
+サンドボックスは、指定された間隔以上、連続して停止状態が続いた場合に自動的に削除されます。
+
+**パラメーター**:
+
+* `interval` *Integer* -
+
+**戻り値**:
+
+* `Integer`
+
+**送出される例外**:
+
+* `Daytona:Sdk:Error` -
+
+#### auto_stop_interval=() \{#auto_stop_interval\}
+
+```ruby
+def auto_stop_interval=(interval)
+
+```
+
+サンドボックスの自動停止までの間隔を設定します。
+サンドボックスは、指定された間隔のあいだアイドル状態（新しいイベントが発生しない状態）が続くと自動的に停止します。
+イベントには、SDK を通じたサンドボックスの状態変更やサンドボックスとの各種やり取りが含まれます。
+Sandbox Previews を使用した操作は含まれません。
+
+**パラメーター**:
+
+* `interval` *Integer* -
+
+**戻り値**:
+
+* `Integer`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` -
+
+#### create_ssh_access() \{#create_ssh_access\}
+
+```ruby
+def create_ssh_access(expires_in_minutes)
+
+```
+
+サンドボックス用の SSH アクセストークンを作成します。
+
+**パラメーター**:
+
+* `expires_in_minutes` *Integer* - SSH アクセストークンが有効である時間（分単位）
+
+**戻り値**:
+
+* `DaytonaApiClient:SshAccessDto`
+
+#### delete() \{#delete\}
+
+```ruby
+def delete()
+
+```
+
+**返り値**:
+
+* `void`
+
+#### get_user_home_dir() \{#get_user_home_dir\}
+
+```ruby
+def get_user_home_dir()
+
+```
+
+ログイン中のユーザーのサンドボックス内ホームディレクトリのパスを取得します。
+
+**戻り値**:
+
+* `String` - サンドボックス内でログイン中のユーザーのホームディレクトリへの絶対パス
+
+**例:**
+
+```ruby
+user_home_dir = sandbox.get_user_home_dir
+puts "Sandbox user home: #{user_home_dir}"
+
+```
+
+#### get_work_dir() \{#get_work_dir\}
+
+```ruby
+def get_work_dir()
+
+```
+
+サンドボックス内の作業ディレクトリのパスを取得します。
+
+**戻り値**:
+
+* `String` - サンドボックスの作業ディレクトリへの絶対パス。Dockerfile で WORKDIR が指定されている場合はそのパスを使用し、指定されていない場合はユーザーのホームディレクトリを使用します。
+
+**使用例:**
+
+```ruby
+work_dir = sandbox.get_work_dir
+puts "サンドボックス作業ディレクトリ: #{work_dir}"
+
+```
+
+#### labels=() \{#labels\}
+
+```ruby
+def labels=(labels)
+
+```
+
+サンドボックスにラベルを設定します。
+
+**パラメーター**:
+
+* `labels` *Hash&lt;String, String&gt;* -
+
+**戻り値**:
+
+* `Hash\<String, String\>`
+
+#### preview_url() \{#preview_url\}
+
+```ruby
+def preview_url(port)
+
+```
+
+指定したポートのサンドボックスに対するプレビューリンクを取得します。ポートが閉じている場合は、
+自動的に開かれます。プライベートサンドボックスの場合は、URL へのアクセス権を付与するトークンが
+URL に含まれます。
+
+**パラメーター**:
+
+* `port` *Integer* -
+
+**戻り値**:
+
+* `DaytonaApiClient:PortPreviewUrl`
+
+#### create_signed_preview_url() \{#create_signed_preview_url\}
+
+```ruby
+def create_signed_preview_url(port, expires_in_seconds)
+
+```
+
+指定されたポートでサンドボックス用の署名付きプレビューリンクを作成します。
+
+**パラメーター**:
+
+* `port` *Integer* - プレビューリンクを開くポート
+* `expires_in_seconds` *Integer, nil* - 署名付きプレビューリンクが有効となる秒数。
+  既定値は60秒です。
+
+**戻り値**:
+
+* `DaytonaApiClient:SignedPortPreviewUrl` - 署名付きプレビューリンクのレスポンスオブジェクト
+
+**使用例:**
+
+```ruby
+signed_url = sandbox.create_signed_preview_url(3000, 120)
+puts "Signed URL: #{signed_url.url}"
+puts "Token: #{signed_url.token}"
+
+```
+
+#### expire_signed_preview_url() \{#expire_signed_preview_url\}
+
+```ruby
+def expire_signed_preview_url(port, token)
+
+```
+
+指定されたポートでサンドボックスの署名付きプレビュー URL を失効させます。
+
+**パラメーター**:
+
+* `port` *Integer* - 署名付きプレビュー URL を失効させるポート
+* `token` *String* - 失効させるトークン
+
+**戻り値**:
+
+* `void`
+
+**例:**
+
+```ruby
+sandbox.expire_signed_preview_url(3000, "token-value")
+
+```
+
+#### refresh() \{#refresh\}
+
+```ruby
+def refresh()
+
+```
+
+API からサンドボックスのデータを再取得します。
+
+**戻り値**:
+
+* `void`
+
+#### refresh_activity() \{#refresh_activity\}
+
+```ruby
+def refresh_activity()
+
+```
+
+サンドボックスのアクティビティをリフレッシュし、自動ライフサイクル管理処理用のタイマーをリセットします。
+
+このメソッドは、サンドボックスの状態を変更せずに、最後のアクティビティのタイムスタンプだけを更新します。
+ユーザーの操作が続いている間、長時間実行されるセッションを維持するのに有用です。
+
+**戻り値**:
+
+* `void`
+
+**使用例:**
+
+```ruby
+sandbox.refresh_activity
+
+```
+
+#### revoke_ssh_access() \{#revoke_ssh_access\}
+
+```ruby
+def revoke_ssh_access(token)
+
+```
+
+サンドボックスの SSH アクセストークンを無効化します。
+
+**パラメーター**:
+
+* `token` *String* -
+
+**戻り値**:
+
+* `void`
+
+#### start() \{#start\}
+
+```ruby
+def start(timeout)
+
+```
+
+サンドボックスを起動し、準備が整うまで待機します。
+
+**パラメーター**:
+
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合は 60 秒です。
+
+**戻り値**:
+
+* `void`
+
+#### recover() \{#recover\}
+
+```ruby
+def recover(timeout)
+
+```
+
+サンドボックスを回復可能なエラー状態から復旧させ、そのサンドボックスの準備が整うまで待機します。
+
+**パラメーター**:
+
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合は 60 秒です。
+
+**戻り値**:
+
+* `void`
+
+**使用例:**
+
+```ruby
+sandbox = daytona.get('my-sandbox-id')
+sandbox.recover(timeout: 40)  # 最大40秒待機
+puts 'サンドボックスが正常に復旧しました'
+
+```
+
+#### stop() \{#stop\}
+
+```ruby
+def stop(timeout)
+
+```
+
+サンドボックスを停止し、その停止が完了するまで待機します。
+
+**パラメーター**:
+
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合は 60 秒です。
+
+**戻り値**:
+
+* `void`
+
+#### create_lsp_server() \{#create_lsp_server\}
+
+```ruby
+def create_lsp_server(language_id:, path_to_project:)
+
+```
+
+新しい Language Server Protocol (LSP) サーバーインスタンスを作成します。
+LSP サーバーは、コード補完や診断などの言語固有の機能を提供します。
+
+**パラメーター**:
+
+* `language_id` *Symbol* - 言語サーバーのタイプ（例: Daytona::LspServer::Language::PYTHON）
+* `path_to_project` *String* - プロジェクトのルートディレクトリへのパス。相対パスは、
+  サンドボックスの作業ディレクトリを基準に解決されます。
+
+**返り値**:
+
+* `Daytona:LspServer`
+
+#### validate_ssh_access() \{#validate_ssh_access\}
+
+```ruby
+def validate_ssh_access(token)
+
+```
+
+サンドボックス用の SSH アクセストークンを検証します。
+
+**パラメーター**:
+
+* `token` *String* -
+
+**戻り値**:
+
+* `DaytonaApiClient:SshAccessValidationDto`
+
+#### wait_for_sandbox_start() \{#wait_for_sandbox_start\}
+
+```ruby
+def wait_for_sandbox_start(_timeout)
+
+```
+
+サンドボックスが「started」状態になるまで待機します。サンドボックスのステータスをポーリングし、
+「started」状態に到達するかエラーが発生するまで繰り返します。
+
+**パラメーター**:
+
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合はデフォルトで 60 秒です。
+
+**戻り値**:
+
+* `void`
+
+#### wait_for_sandbox_stop() \{#wait_for_sandbox_stop\}
+
+```ruby
+def wait_for_sandbox_stop(_timeout)
+
+```
+
+サンドボックスが「stopped」状態に到達するまで待機します。サンドボックスのステータスをポーリングし続け、
+「stopped」状態に到達するかエラーが発生するまで処理を行います。
+停止後に自動的に削除される一時的なサンドボックスも考慮し、destroyed 状態も stopped と同等として扱います。
+
+**パラメーター**:
+
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合は 60 秒です。
+
+**戻り値**:
+
+* `void`

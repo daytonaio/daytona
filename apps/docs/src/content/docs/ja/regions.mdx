@@ -1,30 +1,102 @@
 ---
-title: リージョンの選択
+title: "リージョン"
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona は現在、以下のリージョンで利用可能です。
+サンドボックスは、[ランナー](/docs/ja/runners) 上で動作する分離されたランタイム環境であり、ランナーはDaytonaのコンピュートプレーンを構成するマシンです。
 
-- 米国（US）
-- 欧州（EU）
+ランナーは**リージョン**として編成されており、これはコンピュートインフラストラクチャを地理的または論理的にグループ化したものです。サンドボックスを作成する際、特定のリージョンを指定でき、Daytonaはそのリージョン内で利用可能なランナー上にワークロードをスケジュールします。
 
-Daytona の[設定](/docs/ja/configuration)手順でリージョンを選択できます。
+これにより、次のことが可能になります:
 
-```python
-from daytona import Daytona, DaytonaConfig
+* レイテンシー削減のために特定の地理的ロケーションを選択する
+* データ所在地要件に準拠する
+* カスタムリージョン向けに独自のランナーマシンを利用する
+* 各カスタムリージョン内でコンピュートリソースを個別にスケールする
 
-config = DaytonaConfig(
-    target="us"
-)
+リージョンは、サンドボックスのワークロードを実行するランナーを地理的または論理的にグループ化したものです。サンドボックスのリージョンは初期化時に`target`パラメータを設定して指定します:
 
-daytona = Daytona(config)
-```
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
 
-```typescript
-import { Daytona } from '@daytonaio/sdk';
+    # DaytonaをUSリージョンで使用するように設定
+    config = DaytonaConfig(
+        target="us"
+    )
 
-const daytona: Daytona = new Daytona({
-    target: "eu"
-});
-```
+    # 指定した設定でDaytonaクライアントを初期化
+    daytona = Daytona(config)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    // DaytonaをEUリージョンで使用するように設定
+    const daytona: Daytona = new Daytona({
+        target: "eu"
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    // DaytonaをUSリージョンで使用するように設定
+    client, _ := daytona.NewClientWithConfig(&types.DaytonaConfig{
+        Target: "us",
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # DaytonaをEUリージョンで使用するように設定
+    config = Daytona::Config.new(
+        target: "eu"
+    )
+
+    # 指定した設定でDaytonaクライアントを初期化
+    daytona = Daytona::Daytona.new(config)
+    ```
+  </TabItem>
+</Tabs>
+
+### 共有リージョン \{#shared-regions\}
+
+共有リージョンは Daytona によって管理されており、すべての組織で利用できます。これらのリージョンにより、セットアップ不要で Daytona のインフラストラクチャへ即座にアクセスできます。
+
+制限は、組織のデフォルトリージョンに適用されます。別の共有リージョンへのアクセスが必要な場合は、[sales@daytona.io](mailto:sales@daytona.io) までお問い合わせください。
+
+| Region        | Target   |
+| ------------- | -------- |
+| United States | **`us`** |
+| Europe        | **`eu`** |
+
+### 専用リージョン \{#dedicated-regions\}
+
+専用リージョンはDaytonaによって管理され、各組織専用としてプロビジョニングされます。これらのリージョンは、マネージドサービスとしての運用のシンプルさを維持しつつ、専用インフラストラクチャを提供します。
+
+:::note
+組織向けの専用リージョンのセットアップについては、[sales@daytona.io](mailto:sales@daytona.io) までお問い合わせください。
+:::
+
+### カスタムリージョン \{#custom-regions\}
+
+カスタムリージョンは、組織によって作成および管理され、独自のランナーマシンを利用し、リージョンごとにコンピュートリソースを個別にスケールできるようにします。これにより、データローカリティ、コンプライアンス、およびインフラストラクチャ構成を最大限に制御できます。
+
+さらに、カスタムリージョンには同時リソース使用量に対する制限が適用されないため、キャパシティとパフォーマンスを完全に制御できます。
+
+詳細については、[runners](/docs/ja/runners) ガイドを参照してください。

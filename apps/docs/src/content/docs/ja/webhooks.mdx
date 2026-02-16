@@ -1,108 +1,119 @@
 ---
 title: Webhooks
-description: 自動化・監視・連携のために、リアルタイムでDaytonaのイベントをアプリケーションに接続するWebhooks。
+description: Webhooks を使用すると、Daytona のイベントをアプリケーションとリアルタイムに連携でき、自動化・監視・インテグレーションを実現できます。
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Webhooksは、特定のイベントが発生した際に、Daytonaが指定したエンドポイントへ送信するHTTPコールバックです。
-いわば「逆方向のAPIコール」です。アプリケーション側がDaytonaに更新を問い合わせるのではなく、重要なイベントが発生するとDaytonaが能動的にアプリケーションへ通知します。
-
-## ユースケース
+Webhooks は、特定のイベントが発生したときに、Daytona がユーザーが指定したエンドポイントに送信する HTTP コールバックです。
+アプリケーション側から Daytona に更新を問い合わせるのではなく、重要な出来事が起きたタイミングで Daytona からアプリケーションに通知してくれる「逆方向の API コール」のようなものと考えてください。
 
 Webhooks により、強力な自動化と統合が可能になります。
 
-- **リアルタイム通知**: サンドボックスの作成・起動・停止時に即時にアラートを受け取る
-- **自動化ワークフロー**: スナップショット作成時にデプロイメントパイプラインを起動する
-- **監視と分析**: 組織全体の利用傾向やリソース消費を追跡する
-- **統合**: Daytona を Slack、Discord、カスタムアプリケーションなどの既存ツールと連携する
-- **監査とコンプライアンス**: 重要な変更の詳細なログを保持する
+* **リアルタイム通知**: サンドボックスの作成・起動・停止時に即時にアラートを受け取る
+* **自動化ワークフロー**: スナップショット作成時にデプロイメントパイプラインを起動する
+* **監視と分析**: 組織全体の利用傾向やリソース消費を追跡する
+* **統合**: Daytona を Slack、Discord、カスタムアプリケーションなどの既存ツールと連携する
+* **監査とコンプライアンス**: 重要な変更の詳細なログを保持する
 
----
+## Webhooks へのアクセス \{#accessing-webhooks\}
 
-## はじめに
+Daytona では、Webhook エンドポイントへのアクセスおよび管理のための Webhook 管理インターフェースを提供しています。
 
-### Webhooks へのアクセス
-
-ダッシュボードのサイドバーに **Webhooks** が表示されていない場合は、[support@daytona.io](mailto:support@daytona.io) までご連絡のうえ、組織向けに Webhooks の有効化をリクエストしてください。アクセス申請の際は、組織設定で確認できる組織 ID を併せてご提供ください。
-
-組織で Webhooks が有効化されたら:
-
-1. [Daytona Dashboard](https://app.daytona.io/dashboard) にアクセスします
-2. 左サイドバーの **Webhooks** をクリックします
-3. Webhook の管理インターフェースにアクセスできます
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーの **Webhooks** をクリックします
 
 :::note
-Webhooks は、組織の管理者および適切な権限を持つメンバーが利用できます。
+Webhooks は、組織の管理者および適切な権限を持つメンバーが利用できます。**Webhooks** が [Daytona Dashboard ↗](https://app.daytona.io/dashboard) に表示されていない場合は、[support@daytona.io](mailto:support@daytona.io) までご連絡のうえ、組織向けに Webhooks の有効化をリクエストしてください。アクセス申請の際は、組織設定で確認できる組織 ID を併せてご提供ください。
 :::
 
----
+## Webhook エンドポイントを作成する \{#create-webhook-endpoints\}
 
-## Webhookエンドポイントの管理
+Daytona は Webhook 管理インターフェースを提供しており、Webhook エンドポイントを作成できます。
 
-### エンドポイントの作成
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) に移動します
+2. サイドバーで **Webhooks** をクリックします
+3. **Add Endpoint** をクリックします
+4. エンドポイントを設定します:
 
-Webhookイベントの受信を開始するには:
+* **Endpoint URL**: イベントを受信する HTTPS エンドポイント
+* **Description**: このエンドポイントの説明
+* **Subscribe to events**: 受信するイベントを選択
 
-1. Webhookダッシュボードの**Endpoints**タブに移動します
-2. **Add Endpoint**をクリックします
-3. エンドポイントを設定します:
-   - **Endpoint URL**: イベントを受信するHTTPSエンドポイント
-   - **Description**: このエンドポイントの説明
-   - **Subscribe to events**: 受信するイベントを選択
+5. **Create** をクリックします
 
-### エンドポイントのテスト
+新しい Webhook エンドポイントが作成され、エンドポイントの詳細ページに自動的に移動します。ここからテストイベントを送信して、エンドポイントをテストできます。
 
-運用開始前に、Webhookエンドポイントをテストします:
+## Webhook エンドポイントをテストする \{#test-webhook-endpoints\}
 
-1. **Endpoints**リストからWebhooksを選択します
-2. **Testing**タブに移動します
-3. テストイベントを設定して送信します
-4. エンドポイントがテストペイロードを正しく受信していることを確認します
-5. アプリケーションがWebhookの形式を正しく処理できることを確認します
+Daytona では webhook エンドポイントを検証するためのテストインターフェースを提供しています。テストイベントを設定してエンドポイントに送信し、テストペイロードを正しく受信できているかを確認できます。
 
----
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. **Endpoints** リストから webhook エンドポイントを選択します
+4. **Testing** タブを開きます
+5. イベントタイプを選択し、**Send Example** をクリックします
+6. エンドポイントがテストペイロードを正しく受信していることを確認します
+7. アプリケーションが webhook フォーマットを正しく処理できていることを確認します
 
-## 利用可能なイベント
+## Webhook エンドポイントを編集する \{#edit-webhook-endpoints\}
+
+Daytona には、Webhook エンドポイントを編集するための Webhook 管理インターフェースが用意されています。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. **Endpoints** リストから Webhook エンドポイントを選択します
+4. 更新したい項目の横にある **Edit** をクリックします
+5. エンドポイントの詳細を編集します
+6. **Save** をクリックします
+
+## Webhook エンドポイントの削除 \{#delete-webhook-endpoints\}
+
+Daytona では、Webhook エンドポイントを削除するための Webhook 管理インターフェースを提供しています。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーの **Webhooks** をクリックします
+3. **Endpoints** リストから Webhook エンドポイントを 1 つ選択します
+4. 三点リーダーメニュー（**⋮**）をクリックします
+5. **Delete** をクリックします
+6. 削除を確認します
+
+## Webhook イベント \{#webhook-events\}
 
 Daytona は、インフラストラクチャ リソース全体のライフサイクルイベントについて Webhook を送信します。特定のイベントタイプに購読することも、すべてのイベントを受け取ってアプリケーション内でフィルタリングすることもできます。
 
-##### イベントカテゴリ
+* サンドボックスのライフサイクルイベント
+* スナップショットのライフサイクルイベント
+* ボリュームのライフサイクルイベント
 
-- サンドボックスのライフサイクルイベント
-- スナップショットのライフサイクルイベント
-- ボリュームのライフサイクルイベント
+利用可能なイベントの一覧については、[webhooks API リファレンス](/docs/ja/tools/api/#daytona/webhook/undefined/) を参照してください。
 
----
+## Webhook ペイロードの形式 \{#webhook-payload-format\}
 
-## Webhook ペイロード形式
-
-すべての Webhook イベントは一貫した構造に従います。
+Webhook のペイロードは、イベントデータを含む JSON オブジェクトです。[Webhooks API リファレンス](/docs/ja/tools/api/#daytona/tag/webhooks) を使用して、ペイロードをパースし、イベントデータを抽出できます。すべての Webhook ペイロードは、共通の形式に従います。
 
 ```json
 {
   "event": "event.type",
   "timestamp": "2024-01-15T10:30:00Z",
   "data": {
-    // イベント固有のデータ
+    // イベント固有データ
   }
 }
 ```
 
 **共通フィールド:**
 
-- `event`: イベントの種類（例: "sandbox.created"）
-- `timestamp`: イベント発生時刻（ISO 8601）
-- `data`: 関連情報を含むイベント固有のペイロード
+* `event`: イベントの種類（例: &quot;sandbox.created&quot;）
+* `timestamp`: イベントが発生した時刻を示す ISO 8601 タイムスタンプ
+* `data`: イベント固有の関連情報を含むペイロード
 
----
+## Webhook ログ \{#webhook-logs\}
 
-## 監視とアクティビティ
+Daytona では、Webhook ログを確認するための Webhook 管理インターフェースを提供しています。
 
-### アクティビティ
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. サイドバーで **Logs** をクリックします
 
-**アクティビティ** タブでは、配信統計、イベント量の推移、パフォーマンス指標など、Webhook のアクティビティを可視化して確認でき、Webhook 連携の健全性の監視に役立ちます。
-
-### イベントログ
-
-**ログ** タブには、トラブルシューティングおよび監視のために、イベント履歴、配信ステータス、再試行情報など、Webhook 配信に関する詳細が表示されます。
+ログページには、メッセージログ、イベントタイプ、メッセージ ID、タイムスタンプなど、Webhook の配信に関する詳細な情報が表示されます。
