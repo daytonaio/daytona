@@ -5,7 +5,7 @@ title: Playground
 Daytona provides an interactive environment ("Playground") for creating sandboxes, running SDK operations, and exploring Daytona features directly from your browser.
 
 - **Interactive sandbox creation**: configure and create sandboxes with custom resources
-- **Code snippet generation**: automatically generate SDK code samples for operations
+- **Code snippet generation**: automatically generate SDK code samples based on the values configured in the [management](#management) section
 - [Web terminal](/docs/en/web-terminal): run commands directly in your sandbox through a built-in web terminal
 - [VNC access](/docs/en/vnc-access): interact with GUI applications using [Computer Use](/docs/en/computer-use) features
 
@@ -28,7 +28,7 @@ The management section contains the parameters used to configure a sandbox. You 
 - [sandbox lifecycle](/docs/en/sandboxes#sandbox-lifecycle): set the sandbox lifecycle policies
 
 :::note
-If there are no active sandboxes, the playground automatically creates one using the configured parameters. Clicking **Run** always creates a new sandbox, replacing any existing playground sandbox.
+In the management section, sandboxes are only created when you explicitly click **Run**, replacing any existing playground sandbox. In the [Terminal](#terminal) or [VNC](#vnc) tabs, if there are no active sandboxes, the playground automatically creates one using the configured parameters.
 :::
 
 ### File system
@@ -53,7 +53,7 @@ For more information, see [Git operations](/docs/en/git-operations).
 
 ### Process and code execution
 
-The process and code execution section provides operations to run code snippets and shell commands directly in the sandbox.
+The process and code execution section provides operations to run code snippets and shell commands directly in the sandbox. Shell commands are fixed, while code snippets change automatically based on the selected [sandbox language](/docs/en/sandboxes#multiple-runtime-support) parameter.
 
 For more information, see [process and code execution](/docs/en/process-code-execution).
 
