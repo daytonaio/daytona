@@ -38,7 +38,6 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerEvents } from '../constants/runner-events'
 import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
-import { RunnerUnschedulableUpdatedEvent } from '../events/runner-unschedulable-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
@@ -712,27 +711,17 @@ export class RunnerService {
   }
 
   async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
-    const result = await this.updateRunner(id, { unschedulable })
-    if (result.affected === 0) {
-      throw new NotFoundException('Runner not found')
-    }
-    const runner = await this.findOne(id)
-
-    // Repository.update() does not trigger TypeORM subscribers, so emit manually.
-    this.eventEmitter.emit(
-      RunnerEvents.UNSCHEDULABLE_UPDATED,
-      new RunnerUnschedulableUpdatedEvent(runner, !unschedulable, unschedulable),
-    )
-
+    const runner = await this.findOneOrFail(id)
+    runner.unschedulable = unschedulable
+    await this.runnerRepository.save(runner)
     return runner
   }
 
   async updateDrainingStatus(id: string, draining: boolean): Promise<Runner> {
-    const result = await this.updateRunner(id, { draining })
-    if (result.affected === 0) {
-      throw new NotFoundException('Runner not found')
-    }
-    return this.findOne(id)
+    const runner = await this.findOneOrFail(id)
+    runner.draining = draining
+    await this.runnerRepository.save(runner)
+    return runner
   }
 
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
@@ -861,13 +850,7 @@ export class RunnerService {
       throw new BadRequestException('Initial runner not found')
     }
 
-    const runner = await this.findOne(snapshot.initialRunnerId)
-
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
-    }
-
-    return runner
+    return await this.findOneOrFail(snapshot.initialRunnerId)
   }
 
   private async updateRunner(
