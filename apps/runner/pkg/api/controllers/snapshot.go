@@ -76,9 +76,9 @@ func TagImage(ctx *gin.Context) {
 //
 //	@Tags			snapshots
 //	@Summary		Pull a snapshot
-//	@Description	Pull a snapshot from a registry and optionally push to another registry
+//	@Description	Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
 //	@Param			request	body		dto.PullSnapshotRequestDTO	true	"Pull snapshot"
-//	@Success		200		{string}	string						"Snapshot successfully pulled"
+//	@Success		202		{string}	string						"Snapshot pull started"
 //	@Failure		400		{object}	common_errors.ErrorResponse
 //	@Failure		401		{object}	common_errors.ErrorResponse
 //	@Failure		404		{object}	common_errors.ErrorResponse
@@ -98,22 +98,37 @@ func PullSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.PullSnapshot(ctx.Request.Context(), request)
+	err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
 	if err != nil {
-		ctx.Error(err)
-		return
+		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
 	}
 
-	ctx.JSON(http.StatusOK, "Snapshot pulled successfully")
+	go func() {
+		err := runner.Docker.PullSnapshot(runner.Ctx, request)
+		if err != nil {
+			log.Debugf("Pull snapshot %s failed: %v", request.Snapshot, err)
+			err = runner.SnapshotErrorCache.SetError(request.Snapshot, err.Error())
+			if err != nil {
+				log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			}
+		} else {
+			err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
+			if err != nil {
+				log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			}
+		}
+	}()
+
+	ctx.JSON(http.StatusAccepted, "Snapshot pull started")
 }
 
 // BuildSnapshot godoc
 //
 //	@Tags			snapshots
 //	@Summary		Build a snapshot
-//	@Description	Build a snapshot from a Dockerfile and context hashes
+//	@Description	Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
 //	@Param			request	body		dto.BuildSnapshotRequestDTO	true	"Build snapshot request"
-//	@Success		200		{string}	string						"Snapshot successfully built"
+//	@Success		202		{string}	string						"Snapshot build started"
 //	@Failure		400		{object}	common_errors.ErrorResponse
 //	@Failure		401		{object}	common_errors.ErrorResponse
 //	@Failure		404		{object}	common_errors.ErrorResponse
@@ -137,14 +152,28 @@ func BuildSnapshot(ctx *gin.Context) {
 	}
 
 	runner := runner.GetInstance(nil)
-
-	err = runner.Docker.BuildSnapshot(ctx.Request.Context(), request)
+	err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
 	if err != nil {
-		ctx.Error(err)
-		return
+		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
 	}
 
-	ctx.JSON(http.StatusOK, "Snapshot built successfully")
+	go func() {
+		err := runner.Docker.BuildSnapshot(runner.Ctx, request)
+		if err != nil {
+			log.Debugf("Build snapshot %s failed: %v", request.Snapshot, err)
+			err = runner.SnapshotErrorCache.SetError(request.Snapshot, err.Error())
+			if err != nil {
+				log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			}
+		} else {
+			err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
+			if err != nil {
+				log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			}
+		}
+	}()
+
+	ctx.JSON(http.StatusAccepted, "Snapshot build started")
 }
 
 // SnapshotExists godoc
@@ -212,6 +241,11 @@ func RemoveSnapshot(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		return
+	}
+
+	err = runner.SnapshotErrorCache.RemoveError(snapshot)
+	if err != nil {
+		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", snapshot, err)
 	}
 
 	ctx.JSON(http.StatusOK, "Snapshot removed successfully")
@@ -331,13 +365,14 @@ func GetBuildLogs(ctx *gin.Context) {
 //
 //	@Tags			snapshots
 //	@Summary		Get snapshot information
-//	@Description	Get information about a specified snapshot including size and entrypoint
+//	@Description	Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.
 //	@Produce		json
 //	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"nginx:latest"
 //	@Success		200			{object}	dto.SnapshotInfoResponse
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		422			{object}	common_errors.ErrorResponse
 //	@Failure		500			{object}	common_errors.ErrorResponse
 //	@Router			/snapshots/info [get]
 //
@@ -358,6 +393,11 @@ func GetSnapshotInfo(ctx *gin.Context) {
 	}
 
 	if !exists {
+		errReason, err := runner.SnapshotErrorCache.GetError(snapshot)
+		if err == nil && errReason != nil {
+			ctx.Error(common_errors.NewUnprocessableEntityError(errors.New(*errReason)))
+			return
+		}
 		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("snapshot not found: %s", snapshot)))
 		return
 	}

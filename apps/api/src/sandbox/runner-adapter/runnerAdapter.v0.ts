@@ -16,6 +16,7 @@ import {
   StartSandboxResponse,
   SnapshotDigestResponse,
 } from './runnerAdapter'
+import { SnapshotStateError } from '../errors/snapshot-state-error'
 import { Runner } from '../entities/runner.entity'
 import {
   Configuration,
@@ -37,6 +38,7 @@ import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { RunnerApiError } from '../errors/runner-api-error'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
 
@@ -139,8 +141,10 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       },
       (error) => {
         const errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+        const statusCode = error.response?.data?.statusCode || error.response?.status || error.status
+        const code = error.response?.data?.code || ''
 
-        throw new Error(String(errorMessage))
+        throw new RunnerApiError(String(errorMessage), statusCode, code)
       },
     )
 
@@ -359,13 +363,21 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   }
 
   async getSnapshotInfo(snapshotName: string): Promise<RunnerSnapshotInfo> {
-    const response = await this.snapshotApiClient.getSnapshotInfo(snapshotName)
-    return {
-      name: response.data.name || '',
-      sizeGB: response.data.sizeGB,
-      entrypoint: response.data.entrypoint,
-      cmd: response.data.cmd,
-      hash: response.data.hash,
+    try {
+      const response = await this.snapshotApiClient.getSnapshotInfo(snapshotName)
+
+      return {
+        name: response.data.name || '',
+        sizeGB: response.data.sizeGB,
+        entrypoint: response.data.entrypoint,
+        cmd: response.data.cmd,
+        hash: response.data.hash,
+      }
+    } catch (err) {
+      if (err instanceof RunnerApiError && err.statusCode === 422) {
+        throw new SnapshotStateError(err.message)
+      }
+      throw err
     }
   }
 

@@ -158,12 +158,14 @@ func main() {
 	metricsCollector.Start(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		StatesCache:       statesCache,
-		Docker:            dockerClient,
-		SandboxService:    sandboxService,
-		MetricsCollector:  metricsCollector,
-		NetRulesManager:   netRulesManager,
-		SSHGatewayService: sshGatewayService,
+		Ctx:                ctx,
+		StatesCache:        statesCache,
+		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, 10*time.Minute),
+		Docker:             dockerClient,
+		SandboxService:     sandboxService,
+		MetricsCollector:   metricsCollector,
+		NetRulesManager:    netRulesManager,
+		SSHGatewayService:  sshGatewayService,
 	})
 
 	if cfg.ApiVersion == 2 {
