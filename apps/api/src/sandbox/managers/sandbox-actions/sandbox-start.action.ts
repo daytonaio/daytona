@@ -19,6 +19,7 @@ import { DockerRegistryService } from '../../../docker-registry/services/docker-
 import { DockerRegistry } from '../../../docker-registry/entities/docker-registry.entity'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
+import { SnapshotStateError } from '../../errors/snapshot-state-error'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Snapshot } from '../../entities/snapshot.entity'
 import { OrganizationService } from '../../../organization/services/organization.service'
@@ -264,20 +265,23 @@ export class SandboxStartAction extends SandboxAction {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    let retries = 0
-    while (retries < 10) {
+    // Fire the pull request (runner returns 202 immediately)
+    await runnerAdapter.pullSnapshot(snapshot.ref, internalRegistry)
+
+    const pollTimeoutMs = 60 * 60 * 1_000 // 1 hour
+    const pollIntervalMs = 5 * 1_000 // 5 seconds
+    const startTime = Date.now()
+
+    while (Date.now() - startTime < pollTimeoutMs) {
       try {
-        await runnerAdapter.pullSnapshot(snapshot.ref, internalRegistry)
-        break
+        await runnerAdapter.getSnapshotInfo(snapshot.ref)
+        return
       } catch (err) {
-        if (err.code !== 'ECONNRESET') {
+        if (err instanceof SnapshotStateError) {
           throw err
         }
-        if (++retries >= 10) {
-          throw err
-        }
-        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
       }
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
     }
   }
 
@@ -290,18 +294,23 @@ export class SandboxStartAction extends SandboxAction {
       organizationId,
     )
 
-    let retries = 0
+    // Fire build request (runner returns 202 immediately)
+    await runnerAdapter.buildSnapshot(
+      buildInfo,
+      organizationId,
+      sourceRegistries.length > 0 ? sourceRegistries : undefined,
+    )
 
-    while (retries < 10) {
+    const pollTimeoutMs = 60 * 60 * 1_000 // 1 hour
+    const pollIntervalMs = 5 * 1_000 // 5 seconds
+    const startTime = Date.now()
+
+    while (Date.now() - startTime < pollTimeoutMs) {
       try {
-        await runnerAdapter.buildSnapshot(
-          buildInfo,
-          organizationId,
-          sourceRegistries.length > 0 ? sourceRegistries : undefined,
-        )
+        await runnerAdapter.getSnapshotInfo(buildInfo.snapshotRef)
         break
       } catch (err) {
-        if (err.code !== 'ECONNRESET') {
+        if (err instanceof SnapshotStateError) {
           await this.runnerService.createSnapshotRunnerEntry(
             runner.id,
             buildInfo.snapshotRef,
@@ -310,14 +319,11 @@ export class SandboxStartAction extends SandboxAction {
           )
           return
         }
-        if (++retries >= 10) {
-          throw err
-        }
-        await new Promise((resolve) => setTimeout(resolve, retries * 1000))
+        await new Promise((resolve) => setTimeout(resolve, pollIntervalMs))
       }
     }
 
-    if (retries === 10) {
+    if (Date.now() - startTime >= pollTimeoutMs) {
       await this.runnerService.createSnapshotRunnerEntry(
         runner.id,
         buildInfo.snapshotRef,

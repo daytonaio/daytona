@@ -201,3 +201,17 @@ func NewInternalServerError(err error) error {
 func IsInternalServerError(err error) bool {
 	return err != nil && strings.Contains(err.Error(), "internal server error")
 }
+
+type UnprocessableEntityError struct {
+	Message string
+}
+
+func (e *UnprocessableEntityError) Error() string {
+	return e.Message
+}
+
+func NewUnprocessableEntityError(err error) error {
+	return &UnprocessableEntityError{
+		Message: fmt.Sprintf("unprocessable entity: %s", err.Error()),
+	}
+}

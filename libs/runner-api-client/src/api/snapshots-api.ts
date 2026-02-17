@@ -54,7 +54,7 @@ import type { TagImageRequestDTO } from '../models'
 export const SnapshotsApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
     /**
-     * Build a snapshot from a Dockerfile and context hashes
+     * Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
      * @summary Build a snapshot
      * @param {BuildSnapshotRequestDTO} request Build snapshot request
      * @param {*} [options] Override http request option.
@@ -141,7 +141,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Get information about a specified snapshot including size and entrypoint
+     * Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.
      * @summary Get snapshot information
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
@@ -219,7 +219,7 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
       }
     },
     /**
-     * Pull a snapshot from a registry and optionally push to another registry
+     * Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
      * @summary Pull a snapshot
      * @param {PullSnapshotRequestDTO} request Pull snapshot
      * @param {*} [options] Override http request option.
@@ -383,7 +383,7 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = SnapshotsApiAxiosParamCreator(configuration)
   return {
     /**
-     * Build a snapshot from a Dockerfile and context hashes
+     * Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
      * @summary Build a snapshot
      * @param {BuildSnapshotRequestDTO} request Build snapshot request
      * @param {*} [options] Override http request option.
@@ -431,7 +431,7 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Get information about a specified snapshot including size and entrypoint
+     * Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.
      * @summary Get snapshot information
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
@@ -477,7 +477,7 @@ export const SnapshotsApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Pull a snapshot from a registry and optionally push to another registry
+     * Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
      * @summary Pull a snapshot
      * @param {PullSnapshotRequestDTO} request Pull snapshot
      * @param {*} [options] Override http request option.
@@ -580,7 +580,7 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
   const localVarFp = SnapshotsApiFp(configuration)
   return {
     /**
-     * Build a snapshot from a Dockerfile and context hashes
+     * Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
      * @summary Build a snapshot
      * @param {BuildSnapshotRequestDTO} request Build snapshot request
      * @param {*} [options] Override http request option.
@@ -601,7 +601,7 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
       return localVarFp.getBuildLogs(snapshotRef, follow, options).then((request) => request(axios, basePath))
     },
     /**
-     * Get information about a specified snapshot including size and entrypoint
+     * Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.
      * @summary Get snapshot information
      * @param {string} snapshot Snapshot name and tag
      * @param {*} [options] Override http request option.
@@ -624,7 +624,7 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
       return localVarFp.inspectSnapshotInRegistry(request, options).then((request) => request(axios, basePath))
     },
     /**
-     * Pull a snapshot from a registry and optionally push to another registry
+     * Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
      * @summary Pull a snapshot
      * @param {PullSnapshotRequestDTO} request Pull snapshot
      * @param {*} [options] Override http request option.
@@ -675,7 +675,7 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
  */
 export class SnapshotsApi extends BaseAPI {
   /**
-   * Build a snapshot from a Dockerfile and context hashes
+   * Build a snapshot from a Dockerfile and context hashes. The operation runs asynchronously and returns 202 immediately.
    * @summary Build a snapshot
    * @param {BuildSnapshotRequestDTO} request Build snapshot request
    * @param {*} [options] Override http request option.
@@ -704,7 +704,7 @@ export class SnapshotsApi extends BaseAPI {
   }
 
   /**
-   * Get information about a specified snapshot including size and entrypoint
+   * Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.
    * @summary Get snapshot information
    * @param {string} snapshot Snapshot name and tag
    * @param {*} [options] Override http request option.
@@ -732,7 +732,7 @@ export class SnapshotsApi extends BaseAPI {
   }
 
   /**
-   * Pull a snapshot from a registry and optionally push to another registry
+   * Pull a snapshot from a registry and optionally push to another registry. The operation runs asynchronously and returns 202 immediately.
    * @summary Pull a snapshot
    * @param {PullSnapshotRequestDTO} request Pull snapshot
    * @param {*} [options] Override http request option.
