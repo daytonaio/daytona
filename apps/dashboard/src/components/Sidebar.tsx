@@ -440,16 +440,14 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                {config.linkedAccountsEnabled && (
-                  <DropdownMenuItem asChild>
-                    <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                      <Link to={RoutePath.ACCOUNT_SETTINGS}>
-                        <Settings className="w-4 h-4" />
-                        Account Settings
-                      </Link>
-                    </Button>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild>
+                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
+                    <Link to={RoutePath.ACCOUNT_SETTINGS}>
+                      <Settings className="w-4 h-4" />
+                      Account Settings
+                    </Link>
+                  </Button>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
                     <Link to={RoutePath.USER_INVITATIONS}>
