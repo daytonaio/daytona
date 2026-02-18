@@ -281,7 +281,7 @@ await sandbox.delete()
 require 'daytona'
 
 # Initialize the Daytona client
-config = Daytona::Config.new(api_key: 'your-api-key')
+config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
 daytona = Daytona::Daytona.new(config)
 
 # Create the Sandbox instance
@@ -289,6 +289,7 @@ sandbox = daytona.create
 
 # Run the code securely inside the Sandbox
 response = sandbox.process.code_run(code: 'print("Hello World")')
+puts response.result
 ```
 
 </TabItem>
