@@ -40,6 +40,7 @@ import { SandboxDto, SandboxLabelsDto } from '../dto/sandbox.dto'
 import { ResizeSandboxDto } from '../dto/resize-sandbox.dto'
 import { UpdateSandboxStateDto } from '../dto/update-sandbox-state.dto'
 import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
+import { DeprecatedPaginatedSandboxesDto } from '../dto/deprecated-paginated-sandboxes.dto'
 import { RunnerService } from '../services/runner.service'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
 import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
@@ -65,7 +66,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
-import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
+import { DeprecatedListSandboxesQueryDto } from '../dto/deprecated-list-sandboxes-query.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
@@ -161,18 +162,19 @@ export class SandboxController {
 
   @Get('paginated')
   @ApiOperation({
-    summary: 'List all sandboxes paginated',
-    operationId: 'listSandboxesPaginated',
+    summary: '[DEPRECATED] List all sandboxes paginated',
+    operationId: 'listSandboxesPaginated_deprecated',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of all sandboxes',
-    type: PaginatedSandboxesDto,
+    type: DeprecatedPaginatedSandboxesDto,
   })
   async listSandboxesPaginated(
     @AuthContext() authContext: OrganizationAuthContext,
-    @Query() queryParams: ListSandboxesQueryDto,
-  ): Promise<PaginatedSandboxesDto> {
+    @Query() queryParams: DeprecatedListSandboxesQueryDto,
+  ): Promise<DeprecatedPaginatedSandboxesDto> {
     const {
       page,
       limit,
@@ -195,7 +197,7 @@ export class SandboxController {
       order: sortDirection,
     } = queryParams
 
-    const result = await this.sandboxService.findAll(
+    const result = await this.sandboxService.list_deprecated_v2(
       authContext.organizationId,
       page,
       limit,

@@ -50,11 +50,11 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
-  SandboxSortField,
-  SandboxSortDirection,
-  DEFAULT_SANDBOX_SORT_FIELD,
-  DEFAULT_SANDBOX_SORT_DIRECTION,
-} from '../dto/list-sandboxes-query.dto'
+  DeprecatedSandboxSortField,
+  DeprecatedSandboxSortDirection,
+  DEPRECATED_DEFAULT_SANDBOX_SORT_FIELD,
+  DEPRECATED_DEFAULT_SANDBOX_SORT_DIRECTION,
+} from '../dto/deprecated-list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import {
@@ -814,7 +814,7 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
-  async findAll(
+  async list_deprecated_v2(
     organizationId: string,
     page = 1,
     limit = 10,
@@ -836,8 +836,8 @@ export class SandboxService {
       lastEventBefore?: Date
     },
     sort?: {
-      field?: SandboxSortField
-      direction?: SandboxSortDirection
+      field?: DeprecatedSandboxSortField
+      direction?: DeprecatedSandboxSortDirection
     },
   ): Promise<PaginatedList<Sandbox>> {
     const pageNum = Number(page)
@@ -861,8 +861,10 @@ export class SandboxService {
       lastEventBefore,
     } = filters || {}
 
-    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
-      sort || {}
+    const {
+      field: sortField = DEPRECATED_DEFAULT_SANDBOX_SORT_FIELD,
+      direction: sortDirection = DEPRECATED_DEFAULT_SANDBOX_SORT_DIRECTION,
+    } = sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
@@ -908,7 +910,7 @@ export class SandboxService {
           direction: sortDirection,
           nulls: 'LAST',
         },
-        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+        ...(sortField !== DeprecatedSandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
