@@ -226,6 +226,8 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
   - [func \(s \*Sandbox\) GetWorkingDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetWorkingDir>)
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
+  - [func \(s \*Sandbox\) Resize\(ctx context.Context, resources \*types.Resources\) error](<#Sandbox.Resize>)
+  - [func \(s \*Sandbox\) ResizeWithTimeout\(ctx context.Context, resources \*types.Resources, timeout time.Duration\) error](<#Sandbox.ResizeWithTimeout>)
   - [func \(s \*Sandbox\) SetAutoArchiveInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoArchiveInterval>)
   - [func \(s \*Sandbox\) SetAutoDeleteInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoDeleteInterval>)
   - [func \(s \*Sandbox\) SetLabels\(ctx context.Context, labels map\[string\]string\) error](<#Sandbox.SetLabels>)
@@ -233,6 +235,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) StartWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StartWithTimeout>)
   - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
   - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StopWithTimeout>)
+  - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
 - [type ScreenshotService](<#ScreenshotService>)
@@ -3698,7 +3701,7 @@ err := sandbox.Delete(ctx)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error
 ```
 
-DeleteWithTimeout deletes the sandbox with a custom timeout.
+DeleteWithTimeout deletes the sandbox with a custom timeout. 0 means no timeout.
 
 Example:
 
@@ -3788,6 +3791,45 @@ if err != nil {
     return err
 }
 fmt.Printf("Current state: %s\n", sandbox.State)
+```
+
+<a name="Sandbox.Resize"></a>
+### func \(\*Sandbox\) Resize
+
+```go
+func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error
+```
+
+Resize resizes the sandbox resources with a default timeout of 60 seconds.
+
+Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started sandbox allows increasing CPU and memory. To resize disk or decrease resources, the sandbox must be stopped first.
+
+Example:
+
+```
+// Resize a started sandbox (CPU and memory can be increased)
+err := sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8})
+
+// Resize a stopped sandbox (CPU, memory, and disk can be changed)
+sandbox.Stop(ctx)
+err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
+```
+
+<a name="Sandbox.ResizeWithTimeout"></a>
+### func \(\*Sandbox\) ResizeWithTimeout
+
+```go
+func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error
+```
+
+ResizeWithTimeout resizes the sandbox resources with a custom timeout.
+
+Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started sandbox allows increasing CPU and memory. To resize disk or decrease resources, the sandbox must be stopped first. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 ```
 
 <a name="Sandbox.SetAutoArchiveInterval"></a>
@@ -3896,7 +3938,7 @@ func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) e
 
 StartWithTimeout starts the sandbox with a custom timeout.
 
-The method blocks until the sandbox reaches the "started" state or the timeout is exceeded.
+The method blocks until the sandbox reaches the "started" state or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
@@ -3933,12 +3975,29 @@ func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) er
 
 StopWithTimeout stops the sandbox with a custom timeout.
 
-The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded.
+The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
 ```
 err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.WaitForResize"></a>
+### func \(\*Sandbox\) WaitForResize
+
+```go
+func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error
+```
+
+WaitForResize waits for the sandbox resize operation to complete.
+
+This method polls the sandbox state until it's no longer resizing, encounters an error state, or the timeout is exceeded. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.WaitForResize(ctx, 2*time.Minute)
 ```
 
 <a name="Sandbox.WaitForStart"></a>
@@ -3950,7 +4009,7 @@ func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error
 
 WaitForStart waits for the sandbox to reach the "started" state.
 
-This method polls the sandbox state until it's started, encounters an error state, or the timeout is exceeded.
+This method polls the sandbox state until it's started, encounters an error state, or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
@@ -3971,7 +4030,7 @@ func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error
 
 WaitForStop waits for the sandbox to reach the "stopped" state.
 
-This method polls the sandbox state until it's stopped or the timeout is exceeded.
+This method polls the sandbox state until it's stopped or the timeout is exceeded. 0 means no timeout.
 
 Example:
 

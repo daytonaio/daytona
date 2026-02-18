@@ -379,6 +379,49 @@ module Daytona
       end
     end
 
+    # Resizes the Sandbox resources.
+    #
+    # Changes the CPU, memory, or disk allocation for the Sandbox. Resizing a started
+    # sandbox allows increasing CPU and memory. To resize disk or decrease resources,
+    # the sandbox must be stopped first.
+    #
+    # @param resources [Daytona::Resources] New resource configuration
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s)
+    # @return [void]
+    #
+    # @example Resize a started sandbox (CPU and memory can be increased)
+    #   sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8))
+    #
+    # @example Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    #   sandbox.stop
+    #   sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
+    def resize(resources, timeout = DEFAULT_TIMEOUT)
+      raise Sdk::Error, 'Resources must not be nil' if resources.nil?
+
+      with_timeout(
+        timeout:,
+        message: "Sandbox #{id} failed to resize within the #{timeout} seconds timeout period",
+        setup: proc {
+          resize_attrs = {}
+          resize_attrs[:cpu] = resources.cpu if resources.cpu
+          resize_attrs[:memory] = resources.memory if resources.memory
+          resize_attrs[:disk] = resources.disk if resources.disk
+          resize_request = DaytonaApiClient::ResizeSandbox.new(resize_attrs)
+          process_response(sandbox_api.resize_sandbox(id, resize_request))
+        }
+      ) { wait_for_resize_complete }
+    end
+
+    # Waits for the Sandbox resize operation to complete.
+    # Polls the Sandbox status until the state is no longer 'resizing'.
+    #
+    # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s)
+    # @return [void]
+    def wait_for_resize_complete(_timeout = DEFAULT_TIMEOUT)
+      wait_for_states(operation: OPERATION_RESIZE, target_states: [DaytonaApiClient::SandboxState::STARTED,
+                                                                   DaytonaApiClient::SandboxState::STOPPED])
+    end
+
     # Creates a new Language Server Protocol (LSP) server instance.
     # The LSP server provides language-specific features like code completion,
     # diagnostics, and more.
@@ -422,7 +465,7 @@ module Daytona
                :preview_url, :create_signed_preview_url, :expire_signed_preview_url,
                :refresh, :refresh_activity, :revoke_ssh_access, :start, :recover, :stop,
                :create_lsp_server, :validate_ssh_access, :wait_for_sandbox_start,
-               :wait_for_sandbox_stop,
+               :wait_for_sandbox_stop, :resize, :wait_for_resize_complete,
                component: 'Sandbox'
 
     private
@@ -531,5 +574,8 @@ module Daytona
 
     OPERATION_STOP = :stop
     private_constant :OPERATION_STOP
+
+    OPERATION_RESIZE = :resize
+    private_constant :OPERATION_RESIZE
   end
 end
