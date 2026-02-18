@@ -1,0 +1,4589 @@
+---
+title: "daytona"
+hideTitleOnPage: true
+---
+
+{/* gomarkdoc によって生成されたコードです。編集しないでください。*/}
+
+# daytona \{#daytona\}
+
+```go
+import "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+```
+
+daytona パッケージは、Daytona プラットフォームとやり取りするための Go 向け SDK を提供します。
+
+Daytona SDK を利用すると、開発者はコードの実行やコマンドの発行、ファイルの管理が可能な、隔離された開発環境であるサンドボックスをプログラムから作成・管理・操作できます。
+
+### はじめに \{#getting-started\}
+
+API キーまたは JWT トークンを使用してクライアントを作成します。
+
+```
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+クライアントは環境変数から設定を読み込みます:
+
+* DAYTONA&#95;API&#95;KEY: 認証用の API キー
+* DAYTONA&#95;JWT&#95;TOKEN: 認証用の JWT トークン（API キーの代替）
+* DAYTONA&#95;ORGANIZATION&#95;ID: 組織 ID（JWT トークン使用時は必須）
+* DAYTONA&#95;API&#95;URL: API の URL（デフォルトは https://app.daytona.io/api）
+* DAYTONA&#95;TARGET: 対象環境
+
+または設定を明示的に指定します:
+
+```
+client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
+    APIKey: "your-api-key",
+    APIUrl: "https://your-instance.daytona.io/api",
+})
+```
+
+### サンドボックスの作成 \{#creating-sandboxes\}
+
+スナップショットからサンドボックスを作成します：
+
+```
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+    Snapshot: "my-snapshot",
+})
+```
+
+Docker イメージからサンドボックスを作成する：
+
+```
+sandbox, err := client.Create(ctx, types.ImageParams{
+    Image: "python:3.11",
+})
+```
+
+### サンドボックスの利用 \{#working-with-sandboxes\}
+
+サンドボックス内でコードを実行する:
+
+```
+result, err := sandbox.Process.CodeRun(ctx, "print('Hello, World!')")
+```
+
+シェルコマンドを実行する：
+
+```
+result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
+```
+
+## 目次 \{#index\}
+
+* [変数](#variables)
+* [type Client](#Client)
+  * [func NewClient() (*Client, error)](#NewClient)
+  * [func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error)](#NewClientWithConfig)
+  * [func (c *Client) Close(ctx context.Context) error](#Client.Close)
+  * [func (c *Client) Create(ctx context.Context, params any, opts ...func(*options.CreateSandbox)) (*Sandbox, error)](#Client.Create)
+  * [func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error)](#Client.FindOne)
+  * [func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, error)](#Client.Get)
+  * [func (c *Client) List(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error)](#Client.List)
+* [type CodeInterpreterService](#CodeInterpreterService)
+  * [func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState) *CodeInterpreterService](#NewCodeInterpreterService)
+  * [func (c *CodeInterpreterService) CreateContext(ctx context.Context, cwd *string) (map[string]any, error)](#CodeInterpreterService.CreateContext)
+  * [func (c *CodeInterpreterService) DeleteContext(ctx context.Context, contextID string) error](#CodeInterpreterService.DeleteContext)
+  * [func (c *CodeInterpreterService) ListContexts(ctx context.Context) ([]map[string]any, error)](#CodeInterpreterService.ListContexts)
+  * [func (c *CodeInterpreterService) RunCode(ctx context.Context, code string, opts ...func(*options.RunCode)) (*OutputChannels, error)](#CodeInterpreterService.RunCode)
+* [type ComputerUseService](#ComputerUseService)
+  * [func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *ComputerUseService](#NewComputerUseService)
+  * [func (c *ComputerUseService) Display() *DisplayService](#ComputerUseService.Display)
+  * [func (c *ComputerUseService) GetStatus(ctx context.Context) (map[string]any, error)](#ComputerUseService.GetStatus)
+  * [func (c *ComputerUseService) Keyboard() *KeyboardService](#ComputerUseService.Keyboard)
+  * [func (c *ComputerUseService) Mouse() *MouseService](#ComputerUseService.Mouse)
+  * [func (c *ComputerUseService) Recording() *RecordingService](#ComputerUseService.Recording)
+  * [func (c *ComputerUseService) Screenshot() *ScreenshotService](#ComputerUseService.Screenshot)
+  * [func (c *ComputerUseService) Start(ctx context.Context) error](#ComputerUseService.Start)
+  * [func (c *ComputerUseService) Stop(ctx context.Context) error](#ComputerUseService.Stop)
+* [DisplayService 型](#DisplayService)
+  * [func NewDisplayService(toolboxClient *toolbox.APIClient, otel *otelState) *DisplayService](#NewDisplayService)
+  * [func (d *DisplayService) GetInfo(ctx context.Context) (map[string]any, error)](#DisplayService.GetInfo)
+  * [func (d *DisplayService) GetWindows(ctx context.Context) (map[string]any, error)](#DisplayService.GetWindows)
+* [DockerImage 型](#DockerImage)
+  * [func Base(baseImage string) *DockerImage](#Base)
+  * [func DebianSlim(pythonVersion *string) *DockerImage](#DebianSlim)
+  * [func FromDockerfile(dockerfile string) *DockerImage](#FromDockerfile)
+  * [func (img *DockerImage) Add(source, destination string) *DockerImage](#DockerImage.Add)
+  * [func (img *DockerImage) AddLocalDir(localPath, remotePath string) *DockerImage](#DockerImage.AddLocalDir)
+  * [func (img *DockerImage) AddLocalFile(localPath, remotePath string) *DockerImage](#DockerImage.AddLocalFile)
+  * [func (img *DockerImage) AptGet(packages []string) *DockerImage](#DockerImage.AptGet)
+  * [func (img *DockerImage) Cmd(cmd []string) *DockerImage](#DockerImage.Cmd)
+  * [func (img *DockerImage) Contexts() []DockerImageContext](#DockerImage.Contexts)
+  * [func (img *DockerImage) Copy(source, destination string) *DockerImage](#DockerImage.Copy)
+  * [func (img *DockerImage) Dockerfile() string](#DockerImage.Dockerfile)
+  * [func (img *DockerImage) Entrypoint(cmd []string) *DockerImage](#DockerImage.Entrypoint)
+  * [func (img *DockerImage) Env(key, value string) *DockerImage](#DockerImage.Env)
+  * [func (img *DockerImage) Expose(ports []int) *DockerImage](#DockerImage.Expose)
+  * [func (img *DockerImage) Label(key, value string) *DockerImage](#DockerImage.Label)
+  * [func (img *DockerImage) PipInstall(packages []string, opts ...func(*options.PipInstall)) *DockerImage](#DockerImage.PipInstall)
+  * [func (img *DockerImage) Run(command string) *DockerImage](#DockerImage.Run)
+  * [func (img *DockerImage) User(username string) *DockerImage](#DockerImage.User)
+  * [func (img *DockerImage) Volume(paths []string) *DockerImage](#DockerImage.Volume)
+  * [func (img *DockerImage) Workdir(path string) *DockerImage](#DockerImage.Workdir)
+* [DockerImageContext 型](#DockerImageContext)
+* [FileSystemService 型](#FileSystemService)
+  * [func NewFileSystemService(toolboxClient *toolbox.APIClient, otel *otelState) *FileSystemService](#NewFileSystemService)
+  * [func (f *FileSystemService) CreateFolder(ctx context.Context, path string, opts ...func(*options.CreateFolder)) error](#FileSystemService.CreateFolder)
+  * [func (f *FileSystemService) DeleteFile(ctx context.Context, path string, recursive bool) error](#FileSystemService.DeleteFile)
+  * [func (f *FileSystemService) DownloadFile(ctx context.Context, remotePath string, localPath *string) ([]byte, error)](#FileSystemService.DownloadFile)
+  * [func (f *FileSystemService) FindFiles(ctx context.Context, path, pattern string) (any, error)](#FileSystemService.FindFiles)
+  * [func (f *FileSystemService) GetFileInfo(ctx context.Context, path string) (*types.FileInfo, error)](#FileSystemService.GetFileInfo)
+  * [func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*types.FileInfo, error)](#FileSystemService.ListFiles)
+  * [func (f *FileSystemService) MoveFiles(ctx context.Context, source, destination string) error](#FileSystemService.MoveFiles)
+  * [func (f *FileSystemService) ReplaceInFiles(ctx context.Context, files []string, pattern, newValue string) (any, error)](#FileSystemService.ReplaceInFiles)
+  * [func (f *FileSystemService) SearchFiles(ctx context.Context, path, pattern string) (any, error)](#FileSystemService.SearchFiles)
+  * [func (f *FileSystemService) SetFilePermissions(ctx context.Context, path string, opts ...func(*options.SetFilePermissions)) error](#FileSystemService.SetFilePermissions)
+  * [func (f *FileSystemService) UploadFile(ctx context.Context, source any, destination string) error](#FileSystemService.UploadFile)
+* [GitService 型](#GitService)
+  * [func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitService](#NewGitService)
+  * [func (g *GitService) Add(ctx context.Context, path string, files []string) error](#GitService.Add)
+  * [func (g *GitService) Branches(ctx context.Context, path string) ([]string, error)](#GitService.Branches)
+  * [func (g *GitService) Checkout(ctx context.Context, path, name string) error](#GitService.Checkout)
+  * [func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*options.GitClone)) error](#GitService.Clone)
+  * [func (g *GitService) Commit(ctx context.Context, path, message, author, email string, opts ...func(*options.GitCommit)) (*types.GitCommitResponse, error)](#GitService.Commit)
+  * [func (g *GitService) CreateBranch(ctx context.Context, path, name string) error](#GitService.CreateBranch)
+  * [func (g *GitService) DeleteBranch(ctx context.Context, path, name string, opts ...func(*options.GitDeleteBranch)) error](#GitService.DeleteBranch)
+  * [func (g *GitService) Pull(ctx context.Context, path string, opts ...func(*options.GitPull)) error](#GitService.Pull)
+  * [func (g *GitService) Push(ctx context.Context, path string, opts ...func(*options.GitPush)) error](#GitService.Push)
+  * [func (g *GitService) Status(ctx context.Context, path string) (*types.GitStatus, error)](#GitService.Status)
+* [type KeyboardService](#KeyboardService)
+  * [func NewKeyboardService(toolboxClient *toolbox.APIClient, otel *otelState) *KeyboardService](#NewKeyboardService)
+  * [func (k *KeyboardService) Hotkey(ctx context.Context, keys string) error](#KeyboardService.Hotkey)
+  * [func (k *KeyboardService) Press(ctx context.Context, key string, modifiers []string) error](#KeyboardService.Press)
+  * [func (k *KeyboardService) Type(ctx context.Context, text string, delay *int) error](#KeyboardService.Type)
+* [type LspServerService](#LspServerService)
+  * [func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel *otelState) *LspServerService](#NewLspServerService)
+  * [func (l *LspServerService) Completions(ctx context.Context, path string, position types.Position) (any, error)](#LspServerService.Completions)
+  * [func (l *LspServerService) DidClose(ctx context.Context, path string) error](#LspServerService.DidClose)
+  * [func (l *LspServerService) DidOpen(ctx context.Context, path string) error](#LspServerService.DidOpen)
+  * [func (l *LspServerService) DocumentSymbols(ctx context.Context, path string) ([]any, error)](#LspServerService.DocumentSymbols)
+  * [func (l *LspServerService) SandboxSymbols(ctx context.Context, query string) ([]any, error)](#LspServerService.SandboxSymbols)
+  * [func (l *LspServerService) Start(ctx context.Context) error](#LspServerService.Start)
+  * [func (l *LspServerService) Stop(ctx context.Context) error](#LspServerService.Stop)
+* [type MouseService](#MouseService)
+  * [func NewMouseService(toolboxClient *toolbox.APIClient, otel *otelState) *MouseService](#NewMouseService)
+  * [func (m *MouseService) Click(ctx context.Context, x, y int, button *string, double *bool) (map[string]any, error)](#MouseService.Click)
+  * [func (m *MouseService) Drag(ctx context.Context, startX, startY, endX, endY int, button *string) (map[string]any, error)](#MouseService.Drag)
+  * [func (m *MouseService) GetPosition(ctx context.Context) (map[string]any, error)](#MouseService.GetPosition)
+  * [func (m *MouseService) Move(ctx context.Context, x, y int) (map[string]any, error)](#MouseService.Move)
+  * [func (m *MouseService) Scroll(ctx context.Context, x, y int, direction string, amount *int) (bool, error)](#MouseService.Scroll)
+* [OutputChannels 型](#OutputChannels)
+* [PaginatedSandboxes 型](#PaginatedSandboxes)
+* [ProcessService 型](#ProcessService)
+  * [func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService](#NewProcessService)
+  * [func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error)](#ProcessService.CodeRun)
+  * [func (p *ProcessService) ConnectPty(ctx context.Context, sessionID string) (*PtyHandle, error)](#ProcessService.ConnectPty)
+  * [func (p *ProcessService) CreatePty(ctx context.Context, id string, opts ...func(*options.CreatePty)) (*PtyHandle, error)](#ProcessService.CreatePty)
+  * [func (p *ProcessService) CreatePtySession(ctx context.Context, id string, opts ...func(*options.PtySession)) (*types.PtySessionInfo, error)](#ProcessService.CreatePtySession)
+  * [func (p *ProcessService) CreateSession(ctx context.Context, sessionID string) error](#ProcessService.CreateSession)
+  * [func (p *ProcessService) DeleteSession(ctx context.Context, sessionID string) error](#ProcessService.DeleteSession)
+  * [func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opts ...func(*options.ExecuteCommand)) (*types.ExecuteResponse, error)](#ProcessService.ExecuteCommand)
+  * [func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool) (map[string]any, error)](#ProcessService.ExecuteSessionCommand)
+  * [func (p *ProcessService) GetPtySessionInfo(ctx context.Context, sessionID string) (*types.PtySessionInfo, error)](#ProcessService.GetPtySessionInfo)
+  * [func (p *ProcessService) GetSession(ctx context.Context, sessionID string) (map[string]any, error)](#ProcessService.GetSession)
+  * [func (p *ProcessService) GetSessionCommand(ctx context.Context, sessionID, commandID string) (map[string]any, error)](#ProcessService.GetSessionCommand)
+  * [func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, commandID string) (map[string]any, error)](#ProcessService.GetSessionCommandLogs)
+  * [func (p *ProcessService) GetSessionCommandLogsStream(ctx context.Context, sessionID, commandID string, stdout, stderr chan&lt;- string) error](#ProcessService.GetSessionCommandLogsStream)
+  * [func (p *ProcessService) KillPtySession(ctx context.Context, sessionID string) error](#ProcessService.KillPtySession)
+  * [func (p *ProcessService) ListPtySessions(ctx context.Context) ([]*types.PtySessionInfo, error)](#ProcessService.ListPtySessions)
+  * [func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, error)](#ProcessService.ListSessions)
+  * [func (p *ProcessService) ResizePtySession(ctx context.Context, sessionID string, ptySize types.PtySize) (*types.PtySessionInfo, error)](#ProcessService.ResizePtySession)
+* [PtyHandle 型](#PtyHandle)
+  * [func (h *PtyHandle) DataChan() &lt;-chan []byte](#PtyHandle.DataChan)
+  * [func (h *PtyHandle) Disconnect() error](#PtyHandle.Disconnect)
+  * [func (h *PtyHandle) Error() *string](#PtyHandle.Error)
+  * [func (h *PtyHandle) ExitCode() *int](#PtyHandle.ExitCode)
+  * [func (h *PtyHandle) IsConnected() bool](#PtyHandle.IsConnected)
+  * [func (h *PtyHandle) Kill(ctx context.Context) error](#PtyHandle.Kill)
+  * [func (h *PtyHandle) Read(p []byte) (n int, err error)](#PtyHandle.Read)
+  * [func (h *PtyHandle) Resize(ctx context.Context, cols, rows int) (*types.PtySessionInfo, error)](#PtyHandle.Resize)
+  * [func (h *PtyHandle) SendInput(data []byte) error](#PtyHandle.SendInput)
+  * [func (h *PtyHandle) SessionID() string](#PtyHandle.SessionID)
+  * [func (h *PtyHandle) Wait(ctx context.Context) (*types.PtyResult, error)](#PtyHandle.Wait)
+  * [func (h *PtyHandle) WaitForConnection(ctx context.Context) error](#PtyHandle.WaitForConnection)
+  * [func (h *PtyHandle) Write(p []byte) (n int, err error)](#PtyHandle.Write)
+* [PushAccessCredentials 型](#PushAccessCredentials)
+* [RecordingService 型](#RecordingService)
+  * [func NewRecordingService(toolboxClient *toolbox.APIClient) *RecordingService](#NewRecordingService)
+  * [func (r *RecordingService) Delete(ctx context.Context, id string) error](#RecordingService.Delete)
+  * [func (r *RecordingService) Download(ctx context.Context, id string, localPath string) error](#RecordingService.Download)
+  * [func (r *RecordingService) Get(ctx context.Context, id string) (*toolbox.Recording, error)](#RecordingService.Get)
+  * [func (r *RecordingService) List(ctx context.Context) (*toolbox.ListRecordingsResponse, error)](#RecordingService.List)
+  * [func (r *RecordingService) Start(ctx context.Context, label *string) (*toolbox.Recording, error)](#RecordingService.Start)
+  * [func (r *RecordingService) Stop(ctx context.Context, id string) (*toolbox.Recording, error)](#RecordingService.Stop)
+* [Sandbox 型](#Sandbox)
+  * [func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox](#NewSandbox)
+  * [func (s *Sandbox) Archive(ctx context.Context) error](#Sandbox.Archive)
+  * [func (s *Sandbox) Delete(ctx context.Context) error](#Sandbox.Delete)
+  * [func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error](#Sandbox.DeleteWithTimeout)
+  * [func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error)](#Sandbox.GetPreviewLink)
+  * [func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error)](#Sandbox.GetUserHomeDir)
+  * [func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error)](#Sandbox.GetWorkingDir)
+  * [func (s *Sandbox) RefreshData(ctx context.Context) error](#Sandbox.RefreshData)
+  * [func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error](#Sandbox.SetAutoArchiveInterval)
+  * [func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error](#Sandbox.SetAutoDeleteInterval)
+  * [func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error](#Sandbox.SetLabels)
+  * [func (s *Sandbox) Start(ctx context.Context) error](#Sandbox.Start)
+  * [func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error](#Sandbox.StartWithTimeout)
+  * [func (s *Sandbox) Stop(ctx context.Context) error](#Sandbox.Stop)
+  * [func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error](#Sandbox.StopWithTimeout)
+  * [func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error](#Sandbox.WaitForStart)
+  * [func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error](#Sandbox.WaitForStop)
+* [ScreenshotService 型](#ScreenshotService)
+  * [func NewScreenshotService(toolboxClient *toolbox.APIClient, otel *otelState) *ScreenshotService](#NewScreenshotService)
+  * [func (s *ScreenshotService) TakeFullScreen(ctx context.Context, showCursor *bool) (*types.ScreenshotResponse, error)](#ScreenshotService.TakeFullScreen)
+  * [func (s *ScreenshotService) TakeRegion(ctx context.Context, region types.ScreenshotRegion, showCursor *bool) (*types.ScreenshotResponse, error)](#ScreenshotService.TakeRegion)
+* [SnapshotService 型](#SnapshotService)
+  * [func NewSnapshotService(client *Client) *SnapshotService](#NewSnapshotService)
+  * [func (s *SnapshotService) Create(ctx context.Context, params *types.CreateSnapshotParams) (*types.Snapshot, &lt;-chan string, error)](#SnapshotService.Create)
+  * [func (s *SnapshotService) Delete(ctx context.Context, snapshot *types.Snapshot) error](#SnapshotService.Delete)
+  * [func (s *SnapshotService) Get(ctx context.Context, nameOrID string) (*types.Snapshot, error)](#SnapshotService.Get)
+  * [func (s *SnapshotService) List(ctx context.Context, page *int, limit *int) (*types.PaginatedSnapshots, error)](#SnapshotService.List)
+* [VolumeService 型](#VolumeService)
+  * [func NewVolumeService(client *Client) *VolumeService](#NewVolumeService)
+  * [func (v *VolumeService) Create(ctx context.Context, name string) (*types.Volume, error)](#VolumeService.Create)
+  * [func (v *VolumeService) Delete(ctx context.Context, volume *types.Volume) error](#VolumeService.Delete)
+  * [func (v *VolumeService) Get(ctx context.Context, name string) (*types.Volume, error)](#VolumeService.Get)
+  * [func (v *VolumeService) List(ctx context.Context) ([]*types.Volume, error)](#VolumeService.List)
+  * [func (v *VolumeService) WaitForReady(ctx context.Context, volume *types.Volume, timeout time.Duration) (*types.Volume, error)](#VolumeService.WaitForReady)
+
+## 変数 \{#variables\}
+
+<a name="Version" />Version は Daytona SDK のセマンティックバージョンを表します。
+
+この値は、ビルド時に VERSION ファイルから取り込まれます。
+
+例:
+
+```
+fmt.Printf("Daytona SDK version: %s\n", daytona.Version)
+```
+
+```go
+var Version = strings.TrimSpace(version)
+```
+
+<a name="Client" />
+
+## type Client \{#type-client\}
+
+Client は、Daytona プラットフォームを操作するための主なエントリポイントです。
+
+Client は、サンドボックスの作成、取得、一覧、管理を行うメソッドを提供します。認証や API 通信を処理し、ボリュームやスナップショット管理などのサービスへのアクセスも提供します。
+
+[NewClient](#NewClient) または [NewClientWithConfig](#NewClientWithConfig) を使用して Client を作成します。
+
+```
+client, err := daytona.NewClient()
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+Client は複数の goroutine から並行して使用しても安全です。
+
+```go
+type Client struct {
+
+    // Otel holds OpenTelemetry state; nil when OTel is disabled.
+    Otel *otelState
+
+    // Volume provides methods for managing persistent volumes.
+    Volume *VolumeService
+
+    // Snapshot はサンドボックススナップショットを管理するためのメソッドを提供します。
+    Snapshot *SnapshotService
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewClient" />
+
+### func NewClient \{#func-newclient\}
+
+```go
+func NewClient() (*Client, error)
+```
+
+NewClient は、デフォルト設定で新しい Daytona クライアントを作成します。
+
+NewClient は設定を環境変数から読み込みます：
+
+* 認証用の DAYTONA&#95;API&#95;KEY または DAYTONA&#95;JWT&#95;TOKEN（いずれか一方が必須）
+* JWT トークン利用時に必須となる DAYTONA&#95;ORGANIZATION&#95;ID
+* カスタム API エンドポイントを指定する DAYTONA&#95;API&#95;URL
+* 対象環境を指定する DAYTONA&#95;TARGET
+
+設定を明示的に指定したい場合は、代わりに [NewClientWithConfig](#NewClientWithConfig) を使用してください。
+
+<a name="NewClientWithConfig" />
+
+### func NewClientWithConfig \{#func-newclientwithconfig\}
+
+```go
+func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error)
+```
+
+NewClientWithConfig は、カスタム設定を用いて新しい Daytona クライアントを作成します。
+
+`config` で指定された設定値は、環境変数よりも優先されます。空のままにされた設定フィールドについては、対応する環境変数が代わりに使用されます（サポートされている変数の一覧については [NewClient](#NewClient) を参照してください）。
+
+例:
+
+```
+client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
+    APIKey:         "your-api-key",
+    APIUrl:         "https://custom.daytona.io/api",
+    OrganizationID: "org-123",
+})
+if err != nil {
+    log.Fatal(err)
+}
+```
+
+API キーと JWT トークンのどちらも指定されていない場合、または JWT トークンが組織 ID なしで指定された場合は、エラーを返します。
+
+<a name="Client.Close" />
+
+### func (*Client) Close \{#func-client-close\}
+
+```go
+func (c *Client) Close(ctx context.Context) error
+```
+
+Close はクライアントをシャットダウンし、リソースを解放します。OpenTelemetry が有効な場合、Close は OTel プロバイダーをフラッシュしてからシャットダウンします。OTel が有効でない場合でも、Close を呼び出して問題ありません。
+
+<a name="Client.Create" />
+
+### func (*Client) Create \{#func-client-create\}
+
+```go
+func (c *Client) Create(ctx context.Context, params any, opts ...func(*options.CreateSandbox)) (*Sandbox, error)
+```
+
+Create は、指定されたパラメーターに基づいて新しいサンドボックスを作成します。
+
+params 引数は、スナップショットから作成するための [types.SnapshotParams] または Docker イメージから作成するための [types.ImageParams] のいずれかを受け取ります。
+
+```
+// Create from a snapshot
+sandbox, err := client.Create(ctx, types.SnapshotParams{
+    Snapshot: "my-snapshot",
+    SandboxBaseParams: types.SandboxBaseParams{
+        Name: "my-sandbox",
+    },
+})
+
+// Docker イメージから作成
+sandbox, err := client.Create(ctx, types.ImageParams{
+    Image: "python:3.11",
+    Resources: &types.Resources{
+        CPU:    2,
+        Memory: 4096,
+    },
+})
+```
+
+デフォルトでは、Create はサンドボックスが started 状態に到達するまで待機してから制御を返します。作成後ただちに戻したい場合は、[options.WithWaitForStart](false) を使用します。
+
+オプションパラメーターは、関数型オプションを使用して設定できます:
+
+* [options.WithTimeout]: 作成処理の最大待機時間を設定
+* [options.WithWaitForStart]: started 状態を待機するかどうかを制御
+* [options.WithLogChannel]: イメージのビルド中にビルドログを受信
+
+作成された [Sandbox](#Sandbox) を返すか、作成に失敗した場合はエラーを返します。
+
+<a name="Client.FindOne" />
+
+### func (*Client) FindOne \{#func-client-findone\}
+
+```go
+func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error)
+```
+
+FindOne は、ID／名前または一致するラベルによって単一のサンドボックスを検索します。
+
+sandboxIDOrName が指定されていて空でない場合、FindOne は処理を [Client.Get](#Client.Get) に委譲します。そうでない場合は、指定されたラベルに一致するサンドボックスを検索し、最初に一致したものを返します。
+
+このメソッドは、サンドボックスを特定したいが、その識別子かラベルのいずれか一方しか分からない場合に有用です。
+
+```
+// Find by name
+name := "my-sandbox"
+sandbox, err := client.FindOne(ctx, &name, nil)
+
+// ラベルで検索
+sandbox, err := client.FindOne(ctx, nil, map[string]string{
+    "environment": "production",
+    "team":        "backend",
+})
+```
+
+該当するサンドボックスが存在しない場合、[errors.DaytonaNotFoundError](https://pkg.go.dev/errors/#DaytonaNotFoundError) を返します。
+
+<a name="Client.Get" />
+
+### func (*Client) Get \{#func-client-get\}
+
+```go
+func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, error)
+```
+
+Get は、ID または名前によって既存のサンドボックスを取得します。
+
+sandboxIDOrName パラメーターには、サンドボックスの一意の ID か、人間が判読しやすい名前のいずれかを指定できます。指定された識別子に一致するサンドボックスが見つからない場合は、[errors.DaytonaNotFoundError](https://pkg.go.dev/errors/#DaytonaNotFoundError) が返されます。
+
+例:
+
+```
+sandbox, err := client.Get(ctx, "my-sandbox")
+if err != nil {
+    var notFound *errors.DaytonaNotFoundError
+    if errors.As(err, &notFound) {
+        log.Println("サンドボックスが見つかりません")
+    }
+    return err
+}
+```
+
+<a name="Client.List" />
+
+### func (*Client) List \{#func-client-list\}
+
+```go
+func (c *Client) List(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error)
+```
+
+List は、ラベルによる任意のフィルタリングとページネーションを用いてサンドボックスを取得します。
+
+Parameters:
+
+* labels: サンドボックスをフィルタリングするための省略可能なラベルのマップ。フィルタリングしない場合は nil を渡します。
+* page: 省略可能なページ番号（1 始まり）。最初のページの場合は nil を渡します。
+* limit: 1 ページあたりの省略可能な取得件数。デフォルトの上限を使用する場合は nil を渡します。
+
+Example:
+
+```
+// すべてのサンドボックスをリスト表示
+result, err := client.List(ctx, nil, nil, nil)
+
+// ページネーションを使用してサンドボックスをリスト表示
+page, limit := 1, 10
+result, err := client.List(ctx, nil, &page, &limit)
+
+// ラベルでフィルター
+result, err := client.List(ctx, map[string]string{"env": "dev"}, nil, nil)
+
+// 結果を反復処理
+for _, sandbox := range result.Items {
+    fmt.Printf("Sandbox: %s (state: %s)\n", sandbox.Name, sandbox.State)
+}
+```
+
+一致するサンドボックスおよびページネーション用のメタデータを含む [PaginatedSandboxes](#PaginatedSandboxes) を返します。
+
+<a name="CodeInterpreterService" />
+
+## type CodeInterpreterService \{#type-codeinterpreterservice\}
+
+CodeInterpreterService は、サンドボックス内での Python コード実行機能を提供します。
+
+CodeInterpreterService は、ストリーミング出力、永続状態、および環境変数をサポートしつつ、分離された実行コンテキストで Python コードを実行できるようにします。リアルタイムの出力ストリーミングには WebSocket を使用します。[Sandbox.CodeInterpreter] を通じて利用できます。
+
+例:
+
+```
+// Simple code execution
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, "print('Hello, World!')")
+if err != nil {
+    return err
+}
+
+// 完了を待機して結果を取得
+result := <-channels.Done
+fmt.Println(result.Stdout)
+
+// With persistent context
+ctxInfo, _ := sandbox.CodeInterpreter.CreateContext(ctx, nil)
+contextID := ctxInfo["id"].(string)
+channels, _ = sandbox.CodeInterpreter.RunCode(ctx, "x = 42",
+    options.WithCustomContext(contextID),
+)
+<-channels.Done
+channels, _ = sandbox.CodeInterpreter.RunCode(ctx, "print(x)",
+    options.WithCustomContext(contextID),
+)
+```
+
+```go
+type CodeInterpreterService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewCodeInterpreterService" />
+
+### func NewCodeInterpreterService \{#func-newcodeinterpreterservice\}
+
+```go
+func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState) *CodeInterpreterService
+```
+
+NewCodeInterpreterService は、新しい CodeInterpreterService を作成します。
+
+これは通常、[サンドボックス](#Sandbox) を作成する際に SDK によって内部的に呼び出されます。ユーザーは CodeInterpreterService を直接作成するのではなく、[Sandbox.CodeInterpreter] 経由で利用する必要があります。
+
+<a name="CodeInterpreterService.CreateContext" />
+
+### func (*CodeInterpreterService) CreateContext \{#func-codeinterpreterservice-createcontext\}
+
+```go
+func (c *CodeInterpreterService) CreateContext(ctx context.Context, cwd *string) (map[string]any, error)
+```
+
+CreateContext は、永続状態を保持するための分離された実行コンテキストを作成します。
+
+コンテキストを使用すると、複数回のコード実行にわたって状態（変数、import など）を維持できます。コンテキストを使わない場合、各 RunCode 呼び出しは毎回新しい状態から開始されます。
+
+パラメータ:
+
+* cwd: コンテキスト用の任意の作業ディレクトリ
+
+例:
+
+```
+// コンテキストを作成する
+ctxInfo, err := sandbox.CodeInterpreter.CreateContext(ctx, nil)
+if err != nil {
+    return err
+}
+contextID := ctxInfo["id"].(string)
+
+// コンテキストを使用して状態を維持する
+sandbox.CodeInterpreter.RunCode(ctx, "x = 42", options.WithCustomContext(contextID))
+sandbox.CodeInterpreter.RunCode(ctx, "print(x)", options.WithCustomContext(contextID)) // 42を出力する
+
+// 完了時にクリーンアップする
+sandbox.CodeInterpreter.DeleteContext(ctx, contextID)
+```
+
+「id」、「cwd」、「language」、「active」、「createdAt」などのコンテキスト情報を返します。
+
+<a name="CodeInterpreterService.DeleteContext" />
+
+### func (*CodeInterpreterService) DeleteContext \{#func-codeinterpreterservice-deletecontext\}
+
+```go
+func (c *CodeInterpreterService) DeleteContext(ctx context.Context, contextID string) error
+```
+
+DeleteContext は実行コンテキストを削除し、そのリソースを解放します。
+
+Parameters:
+
+* contextID: 削除する実行コンテキストの識別子
+
+Example:
+
+```
+err := sandbox.CodeInterpreter.DeleteContext(ctx, contextID)
+```
+
+コンテキストが存在しないか削除に失敗した場合、エラーを返します。
+
+<a name="CodeInterpreterService.ListContexts" />
+
+### func (*CodeInterpreterService) ListContexts \{#func-codeinterpreterservice-listcontexts\}
+
+```go
+func (c *CodeInterpreterService) ListContexts(ctx context.Context) ([]map[string]any, error)
+```
+
+ListContexts は、すべてのアクティブな実行コンテキストを返します。
+
+例：
+
+```
+contexts, err := sandbox.CodeInterpreter.ListContexts(ctx)
+if err != nil {
+    return err
+}
+for _, ctx := range contexts {
+    fmt.Printf("Context %s (language: %s)\n", ctx["id"], ctx["language"])
+}
+```
+
+コンテキスト情報マップのスライスを返します。
+
+<a name="CodeInterpreterService.RunCode" />
+
+### func (*CodeInterpreterService) RunCode \{#func-codeinterpreterservice-runcode\}
+
+```go
+func (c *CodeInterpreterService) RunCode(ctx context.Context, code string, opts ...func(*options.RunCode)) (*OutputChannels, error)
+```
+
+RunCode は Python コードを実行し、出力をストリーミングするためのチャネルを返します。
+
+このメソッドは WebSocket 接続を確立してコードを非同期に実行し、stdout と stderr を利用可能になり次第ストリーミングします。
+
+オプションパラメータは、関数型オプションを使って設定できます:
+
+* [options.WithCustomContext]: 状態を保持するための永続的なコンテキストを使用
+* [options.WithEnv]: 環境変数を設定
+* [options.WithInterpreterTimeout]: 実行タイムアウトを設定
+
+例:
+
+```
+// 基本的な実行
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, `
+    for i in range(5):
+        print(f"Count: {i}")
+`)
+if err != nil {
+    return err
+}
+
+// 出力をストリーミング
+for msg := range channels.Stdout {
+    fmt.Print(msg.Text)
+}
+
+// 最終結果を取得
+result := <-channels.Done
+if result.Error != nil {
+    fmt.Printf("Error: %s\n", result.Error.Value)
+}
+
+// オプションを指定
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, "import os; print(os.environ['API_KEY'])",
+    options.WithEnv(map[string]string{"API_KEY": "secret"}),
+    options.WithInterpreterTimeout(30*time.Second),
+)
+```
+
+接続に失敗した場合はエラーを返し、成功した場合はストリーミング形式の出力を受信するための [OutputChannels](#OutputChannels) を返します。
+
+<a name="ComputerUseService" />
+
+## type ComputerUseService \{#type-computeruseservice\}
+
+ComputerUseService は、サンドボックス向けのデスクトップ自動化機能を提供します。
+
+ComputerUseService により、マウス制御、キーボード入力、スクリーンショット取得、ディスプレイ管理、画面録画を含む GUI 自動化が可能になります。これらの機能を使用する前に、デスクトップ環境を起動しておく必要があります。[Sandbox.ComputerUse] を通じてアクセスできます。
+
+例:
+
+```
+cu := sandbox.ComputerUse
+
+// デスクトップ環境を起動する
+if err := cu.Start(ctx); err != nil {
+    return err
+}
+defer cu.Stop(ctx)
+
+// スクリーンショットを撮る
+screenshot, err := cu.Screenshot().TakeFullScreen(ctx, nil)
+if err != nil {
+    return err
+}
+
+// 座標位置をクリックする
+cu.Mouse().Click(ctx, 100, 200, nil, nil)
+
+// テキストを入力する
+cu.Keyboard().Type(ctx, "Hello, World!", nil)
+```
+
+```go
+type ComputerUseService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewComputerUseService" />
+
+### func NewComputerUseService \{#func-newcomputeruseservice\}
+
+```go
+func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *ComputerUseService
+```
+
+NewComputerUseService は、新しい ComputerUseService を作成します。
+
+これは通常、[サンドボックス](#Sandbox) を作成する際に SDK の内部から呼び出されます。ユーザーは ComputerUseService を直接作成するのではなく、[Sandbox.ComputerUse] 経由で利用する必要があります。
+
+<a name="ComputerUseService.Display" />
+
+### func (*ComputerUseService) Display \{#func-computeruseservice-display\}
+
+```go
+func (c *ComputerUseService) Display() *DisplayService
+```
+
+Display は、ディスプレイ情報を提供する [DisplayService](#DisplayService) を返します。
+
+このサービスは、初回アクセス時に遅延初期化されます。
+
+<a name="ComputerUseService.GetStatus" />
+
+### func (*ComputerUseService) GetStatus \{#func-computeruseservice-getstatus\}
+
+```go
+func (c *ComputerUseService) GetStatus(ctx context.Context) (map[string]any, error)
+```
+
+GetStatus は、デスクトップ環境の現在の状態を返します。
+
+例：
+
+```
+status, err := cu.GetStatus(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Desktop status: %v\n", status["status"])
+```
+
+ステータス情報を含むマップを返します。
+
+<a name="ComputerUseService.Keyboard" />
+
+### func (*ComputerUseService) Keyboard \{#func-computeruseservice-keyboard\}
+
+```go
+func (c *ComputerUseService) Keyboard() *KeyboardService
+```
+
+Keyboard は、キーボード操作を行うための [KeyboardService](#KeyboardService) を返します。
+
+このサービスは、初回アクセス時に遅延初期化されます。
+
+<a name="ComputerUseService.Mouse" />
+
+### func (*ComputerUseService) Mouse \{#func-computeruseservice-mouse\}
+
+```go
+func (c *ComputerUseService) Mouse() *MouseService
+```
+
+Mouse は、マウス操作用の [MouseService](#MouseService) を返します。
+
+このサービスは、初回アクセス時に遅延初期化されます。
+
+<a name="ComputerUseService.Recording" />
+
+### func (*ComputerUseService) Recording \{#func-computeruseservice-recording\}
+
+```go
+func (c *ComputerUseService) Recording() *RecordingService
+```
+
+Recording は、画面録画操作用の [RecordingService](#RecordingService) を返します。
+
+このサービスは、初回アクセス時に遅延初期化されます。
+
+<a name="ComputerUseService.Screenshot" />
+
+### func (*ComputerUseService) Screenshot \{#func-computeruseservice-screenshot\}
+
+```go
+func (c *ComputerUseService) Screenshot() *ScreenshotService
+```
+
+Screenshot は、スクリーンショット画像を取得するための [ScreenshotService](#ScreenshotService) を返します。
+
+このサービスは、初回アクセス時に遅延初期化されます。
+
+<a name="ComputerUseService.Start" />
+
+### func (*ComputerUseService) Start \{#func-computeruseservice-start\}
+
+```go
+func (c *ComputerUseService) Start(ctx context.Context) error
+```
+
+Start は、デスクトップ環境を初期化して起動します。
+
+マウス、キーボード、スクリーンショットの操作を行う前に、デスクトップ環境を起動しておく必要があります。作業が終わったら、[ComputerUseService.Stop](#ComputerUseService.Stop) を呼び出してください。
+
+例:
+
+```
+if err := cu.Start(ctx); err != nil {
+    return err
+}
+defer cu.Stop(ctx)
+```
+
+デスクトップの起動に失敗した場合はエラーを返します。
+
+<a name="ComputerUseService.Stop" />
+
+### func (*ComputerUseService) Stop \{#func-computeruseservice-stop\}
+
+```go
+func (c *ComputerUseService) Stop(ctx context.Context) error
+```
+
+Stop はデスクトップ環境をシャットダウンし、リソースを解放します。
+
+例:
+
+```
+err := cu.Stop(ctx)
+```
+
+デスクトップが正常に停止できなかった場合はエラーを返します。
+
+<a name="DisplayService" />
+
+## type DisplayService \{#type-displayservice\}
+
+DisplayService は、ディスプレイ情報およびウィンドウ管理操作を提供します。
+
+DisplayService を使用すると、ディスプレイ設定やウィンドウ情報を取得できます。[ComputerUseService.Display](#ComputerUseService.Display) を通じて利用します。
+
+```go
+type DisplayService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewDisplayService" />
+
+### func NewDisplayService \{#func-newdisplayservice\}
+
+```go
+func NewDisplayService(toolboxClient *toolbox.APIClient, otel *otelState) *DisplayService
+```
+
+NewDisplayService は新しい DisplayService インスタンスを作成します。
+
+<a name="DisplayService.GetInfo" />
+
+### func (*DisplayService) GetInfo \{#func-displayservice-getinfo\}
+
+```go
+func (d *DisplayService) GetInfo(ctx context.Context) (map[string]any, error)
+```
+
+GetInfo は接続されているディスプレイの情報を返します。
+
+例:
+
+```
+info, err := display.GetInfo(ctx)
+if err != nil {
+    return err
+}
+displays := info["displays"]
+fmt.Printf("Connected displays: %v\n", displays)
+```
+
+表示情報を格納したマップを返します。
+
+<a name="DisplayService.GetWindows" />
+
+### func (*DisplayService) GetWindows \{#func-displayservice-getwindows\}
+
+```go
+func (d *DisplayService) GetWindows(ctx context.Context) (map[string]any, error)
+```
+
+GetWindows は、開いているウィンドウの情報を返します。
+
+例：
+
+```
+result, err := display.GetWindows(ctx)
+if err != nil {
+    return err
+}
+windows := result["windows"]
+fmt.Printf("Open windows: %v\n", windows)
+```
+
+ウィンドウ情報を格納したマップを返します。
+
+<a name="DockerImage" />
+
+## type DockerImage \{#type-dockerimage\}
+
+DockerImage は、Docker イメージを宣言的に構築するためのフルーエントインターフェースを提供します。
+
+DockerImage を使用すると、Dockerfile の代わりに Go コードを使って Docker イメージを定義できます。メソッドをチェーンしてイメージ定義を組み立て、それを [SnapshotService.Create](#SnapshotService.Create) と併用すると、Dockerfile に変換されます。
+
+例:
+
+```
+// 依存関係を含むPythonイメージを作成
+image := daytona.Base("python:3.11-slim").
+    AptGet([]string{"git", "curl"}).
+    PipInstall([]string{"numpy", "pandas"}).
+    Workdir("/app").
+    Env("PYTHONUNBUFFERED", "1")
+
+// Use with snapshot creation
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-python-env",
+    DockerImage: image,
+})
+```
+
+```go
+type DockerImage struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="Base" />
+
+### func Base \{#func-base\}
+
+```go
+func Base(baseImage string) *DockerImage
+```
+
+Base は、ベースとなる Docker イメージから新しい Image を生成します。
+
+これは、イメージ定義を作成する際の典型的な出発点です。baseImage パラメータには、有効な任意の Docker イメージ参照を指定できます。
+
+例:
+
+```
+image := daytona.Base("ubuntu:22.04")
+image := daytona.Base("python:3.11-slim")
+image := daytona.Base("node:18-alpine")
+```
+
+<a name="DebianSlim" />
+
+### func DebianSlim \{#func-debianslim\}
+
+```go
+func DebianSlim(pythonVersion *string) *DockerImage
+```
+
+DebianSlim は、Debian slim ベースの Python イメージを作成します。
+
+これは Python 環境を作成するためのヘルパー関数です。pythonVersion が nil の場合は、Python 3.12 がデフォルトで使用されます。
+
+例:
+
+```
+// デフォルトの Python 3.12 を使用
+image := daytona.DebianSlim(nil)
+
+// Use specific version
+version := "3.10"
+image := daytona.DebianSlim(&version)
+```
+
+<a name="FromDockerfile" />
+
+### func FromDockerfile \{#func-fromdockerfile\}
+
+```go
+func FromDockerfile(dockerfile string) *DockerImage
+```
+
+FromDockerfile は、既存の Dockerfile 文字列から Image を作成します。
+
+既存の Dockerfile を利用したい場合に使用します。
+
+例:
+
+```
+dockerfile := `FROM python:3.11
+RUN pip install numpy
+WORKDIR /app`
+image := daytona.FromDockerfile(dockerfile)
+```
+
+<a name="DockerImage.Add" />
+
+### func (*DockerImage) Add \{#func-dockerimage-add\}
+
+```go
+func (img *DockerImage) Add(source, destination string) *DockerImage
+```
+
+Add は、イメージに ADD 命令を追加します。
+
+ADD は URL と tar アーカイブの自動展開をサポートします。単純なファイルコピーには [DockerImage.Copy](#DockerImage.Copy) の使用を推奨します。
+
+例:
+
+```
+image := daytona.Base("ubuntu:22.04").
+    Add("https://example.com/app.tar.gz", "/app/")
+```
+
+<a name="DockerImage.AddLocalDir" />
+
+### func (*DockerImage) AddLocalDir \{#func-dockerimage-addlocaldir\}
+
+```go
+func (img *DockerImage) AddLocalDir(localPath, remotePath string) *DockerImage
+```
+
+AddLocalDir はローカルディレクトリをビルドコンテキストに追加し、そのディレクトリをイメージ内にコピーします。
+
+ディレクトリはオブジェクトストレージにアップロードされ、Docker のビルドコンテキストに含まれます。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    AddLocalDir("./src", "/app/src")
+```
+
+<a name="DockerImage.AddLocalFile" />
+
+### func (*DockerImage) AddLocalFile \{#func-dockerimage-addlocalfile\}
+
+```go
+func (img *DockerImage) AddLocalFile(localPath, remotePath string) *DockerImage
+```
+
+AddLocalFile はローカルファイルをビルドコンテキストに追加し、イメージにコピーします。
+
+ファイルはオブジェクトストレージにアップロードされ、Docker ビルドコンテキストに含まれます。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    AddLocalFile("./requirements.txt", "/app/requirements.txt").
+    Run("pip install -r /app/requirements.txt")
+```
+
+<a name="DockerImage.AptGet" />
+
+### func (*DockerImage) AptGet \{#func-dockerimage-aptget\}
+
+```go
+func (img *DockerImage) AptGet(packages []string) *DockerImage
+```
+
+AptGet は、システムパッケージ用の `apt-get install` 命令を追加します。
+
+これにより、パッケージ一覧の更新とその後のクリーンアップ処理が自動的に行われ、イメージサイズを最小限に抑えます。
+
+例:
+
+```
+image := daytona.Base("ubuntu:22.04").AptGet([]string{"git", "curl", "build-essential"})
+```
+
+<a name="DockerImage.Cmd" />
+
+### func (*DockerImage) Cmd \{#func-dockerimage-cmd\}
+
+```go
+func (img *DockerImage) Cmd(cmd []string) *DockerImage
+```
+
+Cmd は、イメージのデフォルトコマンドを設定します。
+
+entrypoint が設定されている場合、cmd はその entrypoint に渡されるデフォルト引数になります。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Cmd([]string{"python", "app.py"})
+```
+
+<a name="DockerImage.Contexts" />
+
+### func (*DockerImage) Contexts \{#func-dockerimage-contexts\}
+
+```go
+func (img *DockerImage) Contexts() []DockerImageContext
+```
+
+Contexts は、ローカルファイルやディレクトリ用のビルドコンテキストを返します。
+
+これは、ローカルファイルをアップロードするためのスナップショットを作成する際に、内部的に呼び出されます。
+
+<a name="DockerImage.Copy" />
+
+### func (*DockerImage) Copy \{#func-dockerimage-copy\}
+
+```go
+func (img *DockerImage) Copy(source, destination string) *DockerImage
+```
+
+Copy は、ファイルをイメージ内にコピーするための COPY 命令を追加します。
+
+ローカルファイルの場合は、代わりに [DockerImage.AddLocalFile](#DockerImage.AddLocalFile) を使用してください。このメソッドがビルドコンテキストへのアップロードを処理します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Copy("requirements.txt", "/app/requirements.txt")
+```
+
+<a name="DockerImage.Dockerfile" />
+
+### func (*DockerImage) Dockerfile \{#func-dockerimage-dockerfile\}
+
+```go
+func (img *DockerImage) Dockerfile() string
+```
+
+Dockerfile は、生成された Dockerfile の内容を返します。
+
+これはスナップショットを作成する際に内部的に呼び出されます。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
+fmt.Println(image.Dockerfile())
+// 出力:
+// FROM python:3.11
+// RUN pip install numpy
+```
+
+<a name="DockerImage.Entrypoint" />
+
+### func (*DockerImage) Entrypoint \{#func-dockerimage-entrypoint\}
+
+```go
+func (img *DockerImage) Entrypoint(cmd []string) *DockerImage
+```
+
+Entrypoint は、イメージのエントリポイントを設定します。
+
+cmd パラメーターは、コマンドと引数をスライスで指定します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Entrypoint([]string{"python", "-m", "myapp"})
+```
+
+<a name="DockerImage.Env" />
+
+### func (*DockerImage) Env \{#func-dockerimage-env\}
+
+```go
+func (img *DockerImage) Env(key, value string) *DockerImage
+```
+
+Env は、イメージに環境変数を設定します。
+
+例：
+
+```
+image := daytona.Base("python:3.11").
+    Env("PYTHONUNBUFFERED", "1").
+    Env("APP_ENV", "production")
+```
+
+<a name="DockerImage.Expose" />
+
+### func (*DockerImage) Expose \{#func-dockerimage-expose\}
+
+```go
+func (img *DockerImage) Expose(ports []int) *DockerImage
+```
+
+Expose は、コンテナがリッスンするポートを宣言します。
+
+これはユーザーおよびツール向けのドキュメントであり、実際にポートを公開するものではありません。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Expose([]int{8080, 8443})
+```
+
+<a name="DockerImage.Label" />
+
+### func (*DockerImage) Label \{#func-dockerimage-label\}
+
+```go
+func (img *DockerImage) Label(key, value string) *DockerImage
+```
+
+Label はイメージにメタデータを付与します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Label("maintainer", "team@example.com").
+    Label("version", "1.0.0")
+```
+
+<a name="DockerImage.PipInstall" />
+
+### func (*DockerImage) PipInstall \{#func-dockerimage-pipinstall\}
+
+```go
+func (img *DockerImage) PipInstall(packages []string, opts ...func(*options.PipInstall)) *DockerImage
+```
+
+PipInstall は、Python パッケージ用の `pip install` コマンドを追加します。
+
+オプションパラメーターは、関数オプションを使用して設定できます：
+
+* [options.WithFindLinks]: find-links 用の URL を追加
+* [options.WithIndexURL]: カスタム PyPI インデックスを設定
+* [options.WithExtraIndexURLs]: 追加のインデックス URL を追加
+* [options.WithPre]: プレリリース版を許可
+* [options.WithExtraOptions]: 追加の pip オプションを追加
+
+例：
+
+```
+// 基本的なインストール
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy", "pandas"})
+
+// オプションを指定する場合
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"torch"},
+    options.WithIndexURL("https://download.pytorch.org/whl/cpu"),
+    options.WithExtraOptions("--no-cache-dir"),
+)
+```
+
+<a name="DockerImage.Run" />
+
+### func (*DockerImage) Run \{#func-dockerimage-run\}
+
+```go
+func (img *DockerImage) Run(command string) *DockerImage
+```
+
+Run は、シェルコマンドを実行する RUN 命令を追加します。
+
+例:
+
+```
+image := daytona.Base("ubuntu:22.04").
+    Run("mkdir -p /app/data").
+    Run("chmod 755 /app")
+```
+
+<a name="DockerImage.User" />
+
+### func (*DockerImage) User \{#func-dockerimage-user\}
+
+```go
+func (img *DockerImage) User(username string) *DockerImage
+```
+
+User は、以降の命令およびコンテナランタイムで使用されるユーザーを設定します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Run("useradd -m appuser").
+    User("appuser").
+    Workdir("/home/appuser")
+```
+
+<a name="DockerImage.Volume" />
+
+### func (*DockerImage) Volume \{#func-dockerimage-volume\}
+
+```go
+func (img *DockerImage) Volume(paths []string) *DockerImage
+```
+
+ボリュームはコンテナのマウントポイントを指定します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Volume([]string{"/data", "/logs"})
+```
+
+<a name="DockerImage.Workdir" />
+
+### func (*DockerImage) Workdir \{#func-dockerimage-workdir\}
+
+```go
+func (img *DockerImage) Workdir(path string) *DockerImage
+```
+
+Workdir は、後続の命令で使用される作業ディレクトリを設定します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").
+    Workdir("/app").
+    Run("pip install -r requirements.txt")
+```
+
+<a name="DockerImageContext" />
+
+## type DockerImageContext \{#type-dockerimagecontext\}
+
+DockerImageContext は、ビルドコンテキストに含めるローカルファイルまたはディレクトリを表します。
+
+[DockerImage.AddLocalFile](#DockerImage.AddLocalFile) または [DockerImage.AddLocalDir](#DockerImage.AddLocalDir) を使用すると、対象のファイル／ディレクトリがオブジェクトストレージにアップロードされ、Docker ビルドコンテキストに含められます。
+
+```go
+type DockerImageContext struct {
+    SourcePath  string // ファイルまたはディレクトリへのローカルパス
+    ArchivePath string // ビルドコンテキストアーカイブ内のパス
+}
+```
+
+<a name="FileSystemService" />
+
+## type FileSystemService \{#type-filesystemservice\}
+
+FileSystemService は、サンドボックス用のファイルシステム操作を提供します。
+
+FileSystemService は、ファイルおよびディレクトリの作成、読み取り、書き込み、移動、削除といった管理を行えます。さらに、ファイル検索および権限管理もサポートします。[Sandbox.FileSystem] を通じてアクセスできます。
+
+例:
+
+```
+// ディレクトリ内のファイルを一覧表示
+files, err := sandbox.FileSystem.ListFiles(ctx, "/home/user")
+
+// Create a directory
+err = sandbox.FileSystem.CreateFolder(ctx, "/home/user/mydir")
+
+// Upload a file
+err = sandbox.FileSystem.UploadFile(ctx, "/local/path/file.txt", "/home/user/file.txt")
+
+// Download a file
+data, err := sandbox.FileSystem.DownloadFile(ctx, "/home/user/file.txt", nil)
+```
+
+```go
+type FileSystemService struct {
+    // フィルタされた、またはエクスポートされていないフィールドを含みます
+}
+```
+
+<a name="NewFileSystemService" />
+
+### func NewFileSystemService \{#func-newfilesystemservice\}
+
+```go
+func NewFileSystemService(toolboxClient *toolbox.APIClient, otel *otelState) *FileSystemService
+```
+
+NewFileSystemService は、指定された toolbox クライアントを使用して新しい FileSystemService を作成します。
+
+これは通常、[サンドボックス](#Sandbox) を作成するときに SDK によって内部的に呼び出されます。ユーザーは FileSystemService を直接作成するのではなく、[Sandbox.FileSystem] を通じて利用してください。
+
+<a name="FileSystemService.CreateFolder" />
+
+### func (*FileSystemService) CreateFolder \{#func-filesystemservice-createfolder\}
+
+```go
+func (f *FileSystemService) CreateFolder(ctx context.Context, path string, opts ...func(*options.CreateFolder)) error
+```
+
+CreateFolder は、指定されたパスにディレクトリを作成します。
+
+path パラメータには、新しいディレクトリの絶対パスを指定します。親ディレクトリが存在しない場合は、自動的に作成されます。
+
+オプションのパラメータは、関数オプションを使って設定できます：
+
+* [options.WithMode]: Unix ファイルパーミッションを設定します（デフォルトは「0755」）
+
+例：
+
+```
+// デフォルトの権限で作成
+err := sandbox.FileSystem.CreateFolder(ctx, "/home/user/mydir")
+
+// カスタム権限で作成
+err := sandbox.FileSystem.CreateFolder(ctx, "/home/user/private",
+    options.WithMode("0700"),
+)
+```
+
+ディレクトリの作成に失敗した場合、エラーを返します。
+
+<a name="FileSystemService.DeleteFile" />
+
+### func (*FileSystemService) DeleteFile \{#func-filesystemservice-deletefile\}
+
+```go
+func (f *FileSystemService) DeleteFile(ctx context.Context, path string, recursive bool) error
+```
+
+DeleteFile はファイルまたはディレクトリを削除します。
+
+Parameters:
+
+* path: 削除するファイルまたはディレクトリのパス
+* recursive: true の場合、ディレクトリおよびその内容を再帰的に削除します
+
+Example:
+
+```
+// ファイルを削除
+err := sandbox.FileSystem.DeleteFile(ctx, "/home/user/file.txt", false)
+
+// ディレクトリを再帰的に削除
+err := sandbox.FileSystem.DeleteFile(ctx, "/home/user/mydir", true)
+```
+
+削除が失敗した場合（例：パスが存在しない、パーミッションが拒否された、`recursive=true` を指定せずに空でないディレクトリを削除しようとした場合）にはエラーを返します。
+
+<a name="FileSystemService.DownloadFile" />
+
+### func (*FileSystemService) DownloadFile \{#func-filesystemservice-downloadfile\}
+
+```go
+func (f *FileSystemService) DownloadFile(ctx context.Context, remotePath string, localPath *string) ([]byte, error)
+```
+
+DownloadFile は、サンドボックスからファイルをダウンロードします。
+
+Parameters:
+
+* remotePath: サンドボックス内のファイルへのパス
+* localPath: ファイルを保存するための任意のローカルパス。nil の場合はデータのみが返されます。
+
+ファイルの内容をバイトスライスとして返します。localPath が指定されている場合は、そのローカルファイルにも内容を書き込みます。
+
+Example:
+
+```
+// Download and get contents
+data, err := sandbox.FileSystem.DownloadFile(ctx, "/home/user/file.txt", nil)
+fmt.Println(string(data))
+
+// ダウンロードしてローカルファイルに保存
+localPath := "/tmp/downloaded.txt"
+data, err := sandbox.FileSystem.DownloadFile(ctx, "/home/user/file.txt", &localPath)
+```
+
+ファイルが存在しないか読み込めない場合はエラーを返します。
+
+<a name="FileSystemService.FindFiles" />
+
+### func (*FileSystemService) FindFiles \{#func-filesystemservice-findfiles\}
+
+```go
+func (f *FileSystemService) FindFiles(ctx context.Context, path, pattern string) (any, error)
+```
+
+FindFiles は、ファイル内のテキスト内容を検索します。
+
+パラメーター:
+
+* path: 検索対象とするディレクトリ
+* pattern: 検索するテキストパターン（正規表現対応）
+
+ファイルパス、行番号、一致した内容を含む一致結果のリストを返します。
+
+例:
+
+```
+result, err := sandbox.FileSystem.FindFiles(ctx, "/home/user/project", "TODO:")
+if err != nil {
+    return err
+}
+matches := result.([]map[string]any)
+for _, match := range matches {
+    fmt.Printf("%s:%d: %s\n", match["file"], match["line"], match["content"])
+}
+```
+
+検索に失敗した場合はエラーを返します。
+
+<a name="FileSystemService.GetFileInfo" />
+
+### func (*FileSystemService) GetFileInfo \{#func-filesystemservice-getfileinfo\}
+
+```go
+func (f *FileSystemService) GetFileInfo(ctx context.Context, path string) (*types.FileInfo, error)
+```
+
+GetFileInfo は、ファイルまたはディレクトリのメタデータを取得します。
+
+path パラメータには、ファイルまたはディレクトリのパスを指定します。
+
+[types.FileInfo] を返し、その中にファイル名、サイズ、パーミッション、更新日時、ディレクトリかどうかといった情報が含まれます。
+
+例:
+
+```
+info, err := sandbox.FileSystem.GetFileInfo(ctx, "/home/user/file.txt")
+if err != nil {
+    return err
+}
+fmt.Printf("Size: %d bytes, Modified: %s\n", info.Size, info.ModifiedTime)
+```
+
+指定されたパスが存在しない場合はエラーを返します。
+
+<a name="FileSystemService.ListFiles" />
+
+### func (*FileSystemService) ListFiles \{#func-filesystemservice-listfiles\}
+
+```go
+func (f *FileSystemService) ListFiles(ctx context.Context, path string) ([]*types.FileInfo, error)
+```
+
+ListFiles は、指定されたパス内のファイルおよびディレクトリを一覧表示します。
+
+path パラメーターは、一覧表示するディレクトリを指定します。
+
+各ファイルおよびディレクトリについて、名前、サイズ、パーミッション、更新日時、ディレクトリかどうかなどのメタデータを格納した [types.FileInfo] のスライスを返します。
+
+例:
+
+```
+files, err := sandbox.FileSystem.ListFiles(ctx, "/home/user")
+if err != nil {
+    return err
+}
+for _, file := range files {
+    if file.IsDirectory {
+        fmt.Printf("[DIR]  %s\n", file.Name)
+    } else {
+        fmt.Printf("[FILE] %s (%d bytes)\n", file.Name, file.Size)
+    }
+}
+```
+
+パスが存在しない、またはアクセスできない場合はエラーを返します。
+
+<a name="FileSystemService.MoveFiles" />
+
+### func (*FileSystemService) MoveFiles \{#func-filesystemservice-movefiles\}
+
+```go
+func (f *FileSystemService) MoveFiles(ctx context.Context, source, destination string) error
+```
+
+MoveFiles は、ファイルまたはディレクトリの移動または名前変更を行います。
+
+Parameters:
+
+* source: ファイルまたはディレクトリの現在のパス
+* destination: ファイルまたはディレクトリの新しいパス
+
+この操作は、移動と名前変更の両方に使用できます:
+
+* 同じディレクトリ内で名前のみ変更 = 名前変更
+* 異なるディレクトリに変更 = 移動
+
+Example:
+
+```
+// ファイル名を変更
+err := sandbox.FileSystem.MoveFiles(ctx, "/home/user/old.txt", "/home/user/new.txt")
+
+// ファイルを別のディレクトリへ移動
+err := sandbox.FileSystem.MoveFiles(ctx, "/home/user/file.txt", "/home/user/backup/file.txt")
+```
+
+操作が失敗した場合はエラーを返します。
+
+<a name="FileSystemService.ReplaceInFiles" />
+
+### func (*FileSystemService) ReplaceInFiles \{#func-filesystemservice-replaceinfiles\}
+
+```go
+func (f *FileSystemService) ReplaceInFiles(ctx context.Context, files []string, pattern, newValue string) (any, error)
+```
+
+ReplaceInFiles は、複数ファイル内のテキストを一括置換します。
+
+パラメータ:
+
+* files: 処理対象のファイルパスのリスト
+* pattern: 検索するテキストパターン（正規表現対応）
+* newValue: 置換するテキスト
+
+各ファイルごとの結果（成功または失敗）を示すリストを返します。
+
+例:
+
+```
+files := []string{"/home/user/file1.txt", "/home/user/file2.txt"}
+result, err := sandbox.FileSystem.ReplaceInFiles(ctx, files, "oldValue", "newValue")
+if err != nil {
+    return err
+}
+results := result.([]map[string]any)
+for _, r := range results {
+    if r["success"].(bool) {
+        fmt.Printf("Updated: %s\n", r["file"])
+    } else {
+        fmt.Printf("Failed: %s - %s\n", r["file"], r["error"])
+    }
+}
+```
+
+この操作が完全に失敗した場合、エラーを返します。
+
+<a name="FileSystemService.SearchFiles" />
+
+### func (*FileSystemService) SearchFiles \{#func-filesystemservice-searchfiles\}
+
+```go
+func (f *FileSystemService) SearchFiles(ctx context.Context, path, pattern string) (any, error)
+```
+
+SearchFiles は、ディレクトリ内でパターンに一致するファイルを検索します。
+
+Parameters:
+
+* path: 検索対象のディレクトリ
+* pattern: ファイル名にマッチさせる glob パターン（例: &quot;*.txt&quot;, &quot;test&#95;*&quot;）
+
+一致したファイルパスのリストを格納した &quot;files&quot; キーを持つ map を返します。
+
+Example:
+
+```
+result, err := sandbox.FileSystem.SearchFiles(ctx, "/home/user", "*.go")
+if err != nil {
+    return err
+}
+files := result.(map[string]any)["files"].([]string)
+for _, file := range files {
+    fmt.Println(file)
+}
+```
+
+検索が失敗した場合はエラーを返します。
+
+<a name="FileSystemService.SetFilePermissions" />
+
+### func (*FileSystemService) SetFilePermissions \{#func-filesystemservice-setfilepermissions\}
+
+```go
+func (f *FileSystemService) SetFilePermissions(ctx context.Context, path string, opts ...func(*options.SetFilePermissions)) error
+```
+
+SetFilePermissions は、ファイルのパーミッション、所有者、グループを設定します。
+
+path パラメータは、変更対象のファイルまたはディレクトリを指定します。
+
+オプションパラメータは、関数型オプションを使用して設定できます：
+
+* [options.WithPermissionMode]: Unix ファイルパーミッションを設定します（例: &quot;0644&quot;）
+* [options.WithOwner]: ファイルの所有者ユーザー名を設定します
+* [options.WithGroup]: ファイルのグループ名を設定します
+
+例:
+
+```
+// パーミッションのみを設定
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/script.sh",
+    options.WithPermissionMode("0755"),
+)
+
+// 所有者とグループを設定
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/file.txt",
+    options.WithOwner("root"),
+    options.WithGroup("users"),
+)
+
+// すべてを一度に設定
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/file.txt",
+    options.WithPermissionMode("0640"),
+    options.WithOwner("user"),
+    options.WithGroup("staff"),
+)
+```
+
+操作が失敗した場合、エラーを返します。
+
+<a name="FileSystemService.UploadFile" />
+
+### func (*FileSystemService) UploadFile \{#func-filesystemservice-uploadfile\}
+
+```go
+func (f *FileSystemService) UploadFile(ctx context.Context, source any, destination string) error
+```
+
+UploadFile は、ファイルをサンドボックスにアップロードします。
+
+パラメーター:
+
+* source: ローカルファイルパス（string）またはファイル内容（[]byte）のいずれか
+* destination: サンドボックス内の保存先パス
+
+例:
+
+```
+// ローカルファイルパスからアップロード
+err := sandbox.FileSystem.UploadFile(ctx, "/local/path/file.txt", "/home/user/file.txt")
+
+// バイトスライスからアップロード
+content := []byte("Hello, World!")
+err := sandbox.FileSystem.UploadFile(ctx, content, "/home/user/hello.txt")
+```
+
+アップロードに失敗した場合はエラーを返します。
+
+<a name="GitService" />
+
+## type GitService \{#type-gitservice\}
+
+GitService は、サンドボックスに対する Git 操作を提供します。
+
+GitService は、リポジトリのクローン、変更のステージングとコミット、ブランチの管理、リモートリポジトリとの同期など、一般的な Git ワークフローをサポートします。[Sandbox.Git] フィールドを通じてアクセスできます。
+
+Example:
+
+```
+// Clone a repository
+err := sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "/home/user/repo")
+
+// 変更を加えてコミットする
+err = sandbox.Git.Add(ctx, "/home/user/repo", []string{"."})
+resp, err := sandbox.Git.Commit(ctx, "/home/user/repo", "Initial commit", "John Doe", "john@example.com")
+
+// Push to remote
+err = sandbox.Git.Push(ctx, "/home/user/repo",
+    options.WithPushUsername("username"),
+    options.WithPushPassword("token"),
+)
+```
+
+```go
+type GitService struct {
+    // フィルタされた、またはエクスポートされていないフィールドを含みます
+}
+```
+
+<a name="NewGitService" />
+
+### func NewGitService \{#func-newgitservice\}
+
+```go
+func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitService
+```
+
+NewGitService は、指定された toolbox クライアントを用いて新しい GitService インスタンスを作成します。
+
+これは通常、[サンドボックス](#Sandbox) を作成する際に SDK によって内部的に呼び出されます。ユーザーは GitService を直接作成するのではなく、[Sandbox.Git] を通じてアクセスしてください。
+
+<a name="GitService.Add" />
+
+### func (*GitService) Add \{#func-gitservice-add\}
+
+```go
+func (g *GitService) Add(ctx context.Context, path string, files []string) error
+```
+
+次回のコミット用にファイルをステージします。
+
+path パラメーターはリポジトリディレクトリを指定します。files パラメーターはステージするファイルパス（リポジトリルートからの相対パス）のリストです。すべての変更をステージするには &quot;.&quot; を使用します。
+
+例:
+
+```
+// 特定のファイルをステージする
+err := sandbox.Git.Add(ctx, "/home/user/repo", []string{"file1.txt", "src/main.go"})
+
+// すべての変更をステージする
+err := sandbox.Git.Add(ctx, "/home/user/repo", []string{"."})
+```
+
+追加操作が失敗した場合はエラーを返します。
+
+<a name="GitService.Branches" />
+
+### func (*GitService) Branches \{#func-gitservice-branches\}
+
+```go
+func (g *GitService) Branches(ctx context.Context, path string) ([]string, error)
+```
+
+Branches は Git リポジトリ内のすべてのブランチを一覧表示します。
+
+`path` パラメータは、リポジトリディレクトリのパスを指定します。
+
+例:
+
+```
+branches, err := sandbox.Git.Branches(ctx, "/home/user/repo")
+if err != nil {
+    return err
+}
+for _, branch := range branches {
+    fmt.Println(branch)
+}
+```
+
+ブランチ名のスライスを返します。操作が失敗した場合はエラーを返します。
+
+<a name="GitService.Checkout" />
+
+### func (*GitService) Checkout \{#func-gitservice-checkout\}
+
+```go
+func (g *GitService) Checkout(ctx context.Context, path, name string) error
+```
+
+checkout は、別のブランチまたはコミットに切り替えます。
+
+path パラメータは、リポジトリディレクトリのパスを指定します。name パラメータは、チェックアウトするブランチ名またはコミット SHA を指定します。
+
+例：
+
+```
+// Switch to a branch
+err := sandbox.Git.Checkout(ctx, "/home/user/repo", "develop")
+
+// 特定のコミットをチェックアウトする
+err := sandbox.Git.Checkout(ctx, "/home/user/repo", "abc123def")
+```
+
+チェックアウトに失敗した場合（例：ブランチが存在しない、コミットされていない変更があるなど）は、エラーを返します。
+
+<a name="GitService.Clone" />
+
+### func (*GitService) Clone \{#func-gitservice-clone\}
+
+```go
+func (g *GitService) Clone(ctx context.Context, url, path string, opts ...func(*options.GitClone)) error
+```
+
+Clone は Git リポジトリを指定されたパスにクローンします。
+
+`url` パラメーターはリポジトリの URL（HTTPS または SSH 形式）を指定します。`path` パラメーターは、クローンされたリポジトリの保存先ディレクトリを指定します。
+
+オプションのパラメーターは、関数型オプションを使用して設定できます。
+
+* [options.WithBranch]: デフォルトブランチではなく特定のブランチをクローンします
+* [options.WithCommitId]: クローン後に特定のコミットをチェックアウトします
+* [options.WithUsername]: 認証用のユーザー名（HTTPS）
+* [options.WithPassword]: 認証用のパスワードまたはトークン（HTTPS）
+
+例：
+
+```
+// デフォルトブランチをクローンする
+err := sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "/home/user/repo")
+
+// 認証を使用して特定のブランチをクローンする
+err := sandbox.Git.Clone(ctx, "https://github.com/user/private-repo.git", "/home/user/repo",
+    options.WithBranch("develop"),
+    options.WithUsername("username"),
+    options.WithPassword("github_token"),
+)
+
+// 特定のコミットをクローンしてチェックアウトする
+err := sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "/home/user/repo",
+    options.WithCommitId("abc123"),
+)
+```
+
+クローン処理が失敗した場合はエラーを返します。
+
+<a name="GitService.Commit" />
+
+### func (*GitService) Commit \{#func-gitservice-commit\}
+
+```go
+func (g *GitService) Commit(ctx context.Context, path, message, author, email string, opts ...func(*options.GitCommit)) (*types.GitCommitResponse, error)
+```
+
+Commit は、ステージされた変更を含む新しい Git コミットを作成します。
+
+パラメーター:
+
+* path: リポジトリのディレクトリ
+* message: コミットメッセージ
+* author: コミットの作成者名
+* email: コミットの作成者のメールアドレス
+
+オプションのパラメーターは、関数オプションを使用して設定できます:
+
+* [options.WithAllowEmpty]: 変更がなくてもコミットを作成できるようにする
+
+例:
+
+```
+// コミットを作成する
+resp, err := sandbox.Git.Commit(ctx, "/home/user/repo",
+    "Add new feature",
+    "John Doe",
+    "john@example.com",
+)
+if err != nil {
+    return err
+}
+fmt.Printf("Created commit: %s\n", resp.SHA)
+
+// 空のコミットを作成する
+resp, err := sandbox.Git.Commit(ctx, "/home/user/repo",
+    "Empty commit for CI trigger",
+    "John Doe",
+    "john@example.com",
+    options.WithAllowEmpty(true),
+)
+```
+
+コミット SHA を含む [types.GitCommitResponse] を返します。コミットに失敗した場合はエラーを返します。
+
+<a name="GitService.CreateBranch" />
+
+### func (*GitService) CreateBranch \{#func-gitservice-createbranch\}
+
+```go
+func (g *GitService) CreateBranch(ctx context.Context, path, name string) error
+```
+
+CreateBranch は、現在の HEAD の位置に新しいブランチを作成します。
+
+path パラメータにはリポジトリのディレクトリを指定します。name パラメータには新しいブランチ名を指定します。
+
+注意: これはブランチを作成するだけで、そのブランチへは切り替えません。作成後に新しいブランチへ切り替えるには、[GitService.Checkout](#GitService.Checkout) を使用してください。
+
+例:
+
+```
+// 新しいブランチを作成する
+err := sandbox.Git.CreateBranch(ctx, "/home/user/repo", "feature/new-feature")
+if err != nil {
+    return err
+}
+
+// 新しいブランチに切り替える
+err = sandbox.Git.Checkout(ctx, "/home/user/repo", "feature/new-feature")
+```
+
+ブランチの作成に失敗した場合（例：ブランチがすでに存在する場合など）、エラーを返します。
+
+<a name="GitService.DeleteBranch" />
+
+### func (*GitService) DeleteBranch \{#func-gitservice-deletebranch\}
+
+```go
+func (g *GitService) DeleteBranch(ctx context.Context, path, name string, opts ...func(*options.GitDeleteBranch)) error
+```
+
+DeleteBranch は、リポジトリからブランチを削除します。
+
+path パラメーターにはリポジトリのディレクトリを指定します。name パラメーターには削除するブランチを指定します。
+
+オプションのパラメーターは、関数型オプションを使用して設定できます：
+
+* [options.WithForce]: ブランチが完全にマージされていない場合でも強制削除します
+
+注意：現在チェックアウトされているブランチは削除できません。
+
+例:
+
+```
+// マージ済みブランチを削除
+err := sandbox.Git.DeleteBranch(ctx, "/home/user/repo", "feature/old-feature")
+
+// マージされていないブランチを強制削除
+err := sandbox.Git.DeleteBranch(ctx, "/home/user/repo", "feature/abandoned",
+    options.WithForce(true),
+)
+```
+
+削除に失敗した場合、エラーを返します。
+
+<a name="GitService.Pull" />
+
+### func (*GitService) Pull \{#func-gitservice-pull\}
+
+```go
+func (g *GitService) Pull(ctx context.Context, path string, opts ...func(*options.GitPull)) error
+```
+
+Pull は、リモートリポジトリから変更を取得してマージします。
+
+path パラメータは、リポジトリのディレクトリパスを指定します。
+
+オプションパラメータは、関数オプションを使用して設定できます:
+
+* [options.WithPullUsername]: 認証に使用するユーザー名
+* [options.WithPullPassword]: 認証に使用するパスワードまたはトークン
+
+例:
+
+```
+// パブリックリポジトリからプル
+err := sandbox.Git.Pull(ctx, "/home/user/repo")
+
+// 認証付きでプル
+err := sandbox.Git.Pull(ctx, "/home/user/repo",
+    options.WithPullUsername("username"),
+    options.WithPullPassword("github_token"),
+)
+```
+
+プルが失敗した場合（例：マージコンフリクトや認証エラーなど）、エラーを返します。
+
+<a name="GitService.Push" />
+
+### func (*GitService) Push \{#func-gitservice-push\}
+
+```go
+func (g *GitService) Push(ctx context.Context, path string, opts ...func(*options.GitPush)) error
+```
+
+Push はローカルのコミットをリモートリポジトリにプッシュします。
+
+path パラメータでリポジトリのディレクトリを指定します。
+
+オプションパラメータは、関数オプションを使用して設定できます:
+
+* [options.WithPushUsername]: 認証用のユーザー名
+* [options.WithPushPassword]: 認証用のパスワードまたはトークン
+
+例:
+
+```
+// パブリックリポジトリへプッシュ（認証不要）
+err := sandbox.Git.Push(ctx, "/home/user/repo")
+
+// Push with authentication
+err := sandbox.Git.Push(ctx, "/home/user/repo",
+    options.WithPushUsername("username"),
+    options.WithPushPassword("github_token"),
+)
+```
+
+プッシュに失敗した場合（例：認証の失敗、リモート側での拒否など）、エラーを返します。
+
+<a name="GitService.Status" />
+
+### func (*GitService) Status \{#func-gitservice-status\}
+
+```go
+func (g *GitService) Status(ctx context.Context, path string) (*types.GitStatus, error)
+```
+
+Status は、リポジトリの現在の Git ステータスを返します。
+
+path パラメーターは、ステータスを確認するリポジトリディレクトリを指定します。
+
+返される [types.GitStatus] には次が含まれます:
+
+* CurrentBranch: 現在チェックアウトされているブランチ名
+* Ahead: リモート追跡ブランチより先行しているコミット数
+* Behind: リモート追跡ブランチより遅れているコミット数
+* BranchPublished: ブランチがリモートにプッシュされているかどうか
+* FileStatus: ステージング領域および作業ツリーにおけるステータスを含むファイルの一覧
+
+例:
+
+```
+status, err := sandbox.Git.Status(ctx, "/home/user/repo")
+if err != nil {
+    return err
+}
+fmt.Printf("On branch %s\n", status.CurrentBranch)
+fmt.Printf("Ahead: %d, Behind: %d\n", status.Ahead, status.Behind)
+for _, file := range status.FileStatus {
+    fmt.Printf("%s %s\n", file.Status, file.Path)
+}
+```
+
+ステータス操作が失敗するか、パスが Git リポジトリでない場合はエラーを返します。
+
+<a name="KeyboardService" />
+
+## type KeyboardService \{#type-keyboardservice\}
+
+KeyboardService はキーボード入力操作を提供します。
+
+KeyboardService を使うと、テキストの入力、キー操作、キーボードショートカットの実行が行えます。[ComputerUseService.Keyboard](#ComputerUseService.Keyboard) を通じてアクセスできます。
+
+```go
+type KeyboardService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewKeyboardService" />
+
+### func NewKeyboardService \{#func-newkeyboardservice\}
+
+```go
+func NewKeyboardService(toolboxClient *toolbox.APIClient, otel *otelState) *KeyboardService
+```
+
+NewKeyboardService は新しい KeyboardService を生成します。
+
+<a name="KeyboardService.Hotkey" />
+
+### func (*KeyboardService) Hotkey \{#func-keyboardservice-hotkey\}
+
+```go
+func (k *KeyboardService) Hotkey(ctx context.Context, keys string) error
+```
+
+Hotkey はキーボードショートカットを実行します。
+
+Parameters:
+
+* keys: ホットキーとなるキーの組み合わせを表す文字列（例: &quot;ctrl+c&quot;, &quot;alt+tab&quot;）
+
+Example:
+
+```
+// Copy (Ctrl+C)
+err := keyboard.Hotkey(ctx, "ctrl+c")
+
+// Paste (Ctrl+V)
+err := keyboard.Hotkey(ctx, "ctrl+v")
+
+// ウィンドウの切り替え (Alt+Tab)
+err := keyboard.Hotkey(ctx, "alt+tab")
+```
+
+ホットキーの送信に失敗した場合、エラーを返します。
+
+<a name="KeyboardService.Press" />
+
+### func (*KeyboardService) Press \{#func-keyboardservice-press\}
+
+```go
+func (k *KeyboardService) Press(ctx context.Context, key string, modifiers []string) error
+```
+
+Press は、オプションの修飾キーとともにキー押下をシミュレートします。
+
+パラメータ:
+
+* key: 押下するキー (例: &quot;a&quot;, &quot;Enter&quot;, &quot;Tab&quot;, &quot;F1&quot;)
+* modifiers: 押下中に保持する修飾キー (例: &quot;ctrl&quot;, &quot;alt&quot;, &quot;shift&quot;, &quot;meta&quot;)
+
+例:
+
+```
+// Press Enter
+err := keyboard.Press(ctx, "Enter", nil)
+
+// Press Ctrl+S
+err := keyboard.Press(ctx, "s", []string{"ctrl"})
+
+// Ctrl+Shift+Nを押す
+err := keyboard.Press(ctx, "n", []string{"ctrl", "shift"})
+```
+
+キー押下に失敗した場合、エラーを返します。
+
+<a name="KeyboardService.Type" />
+
+### func (*KeyboardService) Type \{#func-keyboardservice-type\}
+
+```go
+func (k *KeyboardService) Type(ctx context.Context, text string, delay *int) error
+```
+
+Type は、指定されたテキストの入力をシミュレートします。
+
+パラメーター:
+
+* text: 入力するテキスト
+* delay: キーストロークごとの遅延（ミリ秒）。デフォルト値を使用する場合は nil を指定
+
+例:
+
+```
+// デフォルトの速度でテキストを入力
+err := keyboard.Type(ctx, "Hello, World!", nil)
+
+// キーストローク間のカスタム遅延を指定して入力
+delay := 50
+err := keyboard.Type(ctx, "Slow typing", &delay)
+```
+
+型付けに失敗した場合はエラーを返します。
+
+<a name="LspServerService" />
+
+## type LspServerService \{#type-lspserverservice\}
+
+LspServerService は、サンドボックスに対する Language Server Protocol (LSP) の操作を提供します。
+
+LspServerService は、LSP を通じてコード補完、シンボル検索、ドキュメント解析などの IDE 的な機能を利用可能にします。このサービスは、特定の言語およびプロジェクトパスに対応する言語サーバーインスタンスを管理します。[Sandbox.Lsp] 経由でアクセスします。
+
+例:
+
+```
+// Python用のLSPサービスを取得
+lsp := sandbox.Lsp(types.LspLanguageIDPython, "/home/user/project")
+
+// Start the language server
+if err := lsp.Start(ctx); err != nil {
+    return err
+}
+defer lsp.Stop(ctx)
+
+// Open a file for analysis
+if err := lsp.DidOpen(ctx, "/home/user/project/main.py"); err != nil {
+    return err
+}
+
+// Get code completions
+completions, err := lsp.Completions(ctx, "/home/user/project/main.py",
+    types.Position{Line: 10, Character: 5})
+```
+
+```go
+type LspServerService struct {
+    // フィルタリング済みまたは非公開のフィールドを含む
+}
+```
+
+<a name="NewLspServerService" />
+
+### func NewLspServerService \{#func-newlspserverservice\}
+
+```go
+func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel *otelState) *LspServerService
+```
+
+NewLspServerService は、新しい LspServerService を作成します。
+
+これは通常、SDK によって内部的に [Sandbox.Lsp] を通じて呼び出されます。ユーザーは、LspServerService を直接作成するのではなく、[Sandbox.Lsp] を通じてアクセスする必要があります。
+
+パラメーター:
+
+* toolboxClient: toolbox API クライアント
+* languageID: 言語識別子（例: [types.LspLanguageIDPython]）
+* projectPath: LSP 解析のためのプロジェクトのルートパス
+
+<a name="LspServerService.Completions" />
+
+### func (*LspServerService) Completions \{#func-lspserverservice-completions\}
+
+```go
+func (l *LspServerService) Completions(ctx context.Context, path string, position types.Position) (any, error)
+```
+
+Completions は、指定された位置でコード補完候補を返します。
+
+補完をリクエストする前に、ファイルは [LspServerService.DidOpen](#LspServerService.DidOpen) で開かれている必要があります。
+
+Parameters:
+
+* path: ファイルへの絶対パス
+* position: カーソル位置（行番号と文字位置。いずれも 0 始まりのインデックス）
+
+Example:
+
+```
+lsp.DidOpen(ctx, "/home/user/project/main.py")
+completions, err := lsp.Completions(ctx, "/home/user/project/main.py",
+    types.Position{Line: 10, Character: 5})
+if err != nil {
+    return err
+}
+fmt.Printf("Completions: %v\n", completions)
+```
+
+補完項目またはエラーを返します。
+
+<a name="LspServerService.DidClose" />
+
+### func (*LspServerService) DidClose \{#func-lspserverservice-didclose\}
+
+```go
+func (l *LspServerService) DidClose(ctx context.Context, path string) error
+```
+
+DidClose は、ファイルが閉じられたことを言語サーバーに通知します。
+
+ファイルの作業が完了したら、この関数を呼び出して、そのファイルに関連付けられているリソースをサーバーが解放できるようにします。
+
+Parameters:
+
+* path: ファイルへの絶対パス
+
+Example:
+
+```
+err := lsp.DidClose(ctx, "/home/user/project/main.py")
+```
+
+通知の送信に失敗した場合はエラーを返します。
+
+<a name="LspServerService.DidOpen" />
+
+### func (*LspServerService) DidOpen \{#func-lspserverservice-didopen\}
+
+```go
+func (l *LspServerService) DidOpen(ctx context.Context, path string) error
+```
+
+DidOpen は、ファイルが開かれたことを言語サーバーに通知します。
+
+このメソッドは、ファイルに対して補完やシンボル情報をリクエストする前に呼び出す必要があります。必要に応じて、パスは自動的に file:// スキームの URI に変換されます。
+
+Parameters:
+
+* path: ファイルへの絶対パス
+
+Example:
+
+```
+err := lsp.DidOpen(ctx, "/home/user/project/main.py")
+```
+
+通知の送信に失敗した場合はエラーを返します。
+
+<a name="LspServerService.DocumentSymbols" />
+
+### func (*LspServerService) DocumentSymbols \{#func-lspserverservice-documentsymbols\}
+
+```go
+func (l *LspServerService) DocumentSymbols(ctx context.Context, path string) ([]any, error)
+```
+
+DocumentSymbols は、ドキュメント内に含まれるすべてのシンボル（関数、クラス、変数）を返します。
+
+Parameters:
+
+* path: ファイルへの絶対パス
+
+Example:
+
+```
+symbols, err := lsp.DocumentSymbols(ctx, "/home/user/project/main.py")
+if err != nil {
+    return err
+}
+for _, sym := range symbols {
+    fmt.Printf("Symbol: %v\n", sym)
+}
+```
+
+シンボル情報のスライスまたはエラーを返します。
+
+<a name="LspServerService.SandboxSymbols" />
+
+### func (*LspServerService) SandboxSymbols \{#func-lspserverservice-sandboxsymbols\}
+
+```go
+func (l *LspServerService) SandboxSymbols(ctx context.Context, query string) ([]any, error)
+```
+
+SandboxSymbols は、ワークスペース全体を対象にシンボルを検索します。
+
+これを使用すると、プロジェクト内のすべてのファイルを横断して、名前でシンボル（関数、クラスなど）を検索できます。
+
+Parameters:
+
+* query: シンボル名に一致させる検索クエリ
+
+Example:
+
+```
+symbols, err := lsp.SandboxSymbols(ctx, "MyClass")
+if err != nil {
+    return err
+}
+for _, sym := range symbols {
+    fmt.Printf("Found: %v\n", sym)
+}
+```
+
+一致するシンボルのスライスかエラーを返します。
+
+<a name="LspServerService.Start" />
+
+### func (*LspServerService) Start \{#func-lspserverservice-start\}
+
+```go
+func (l *LspServerService) Start(ctx context.Context) error
+```
+
+Start は言語サーバーを初期化して起動します。
+
+他の LSP 操作を使用する前に、事前に Start を呼び出して言語サーバーを起動しておく必要があります。使用が終わったら [LspServerService.Stop](#LspServerService.Stop) を呼び出してリソースを解放してください。
+
+例:
+
+```
+if err := lsp.Start(ctx); err != nil {
+    return err
+}
+defer lsp.Stop(ctx)
+```
+
+サーバーの起動に失敗した場合、エラーを返します。
+
+<a name="LspServerService.Stop" />
+
+### func (*LspServerService) Stop \{#func-lspserverservice-stop\}
+
+```go
+func (l *LspServerService) Stop(ctx context.Context) error
+```
+
+Stop は言語サーバーをシャットダウンし、リソースを解放します。
+
+例：
+
+```
+err := lsp.Stop(ctx)
+```
+
+サーバーが正常に停止できなかった場合、エラーを返します。
+
+<a name="MouseService" />
+
+## type MouseService \{#type-mouseservice\}
+
+MouseService はマウス操作機能を提供します。
+
+MouseService により、カーソルの移動、クリック、ドラッグ、スクロールが行えます。[ComputerUseService.Mouse](#ComputerUseService.Mouse) から利用できます。
+
+```go
+type MouseService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewMouseService" />
+
+### func NewMouseService \{#func-newmouseservice\}
+
+```go
+func NewMouseService(toolboxClient *toolbox.APIClient, otel *otelState) *MouseService
+```
+
+NewMouseService は、新しい MouseService を生成します。
+
+<a name="MouseService.Click" />
+
+### func (*MouseService) Click \{#func-mouseservice-click\}
+
+```go
+func (m *MouseService) Click(ctx context.Context, x, y int, button *string, double *bool) (map[string]any, error)
+```
+
+Click は、指定された座標でマウスクリックを実行します。
+
+Parameters:
+
+* x: クリック位置の X 座標
+* y: クリック位置の Y 座標
+* button: マウスボタン (&quot;left&quot;, &quot;right&quot;, &quot;middle&quot;)。nil の場合は左クリック
+* double: ダブルクリックするかどうか。nil の場合は単一クリック
+
+Example:
+
+```
+// 左シングルクリック
+pos, err := mouse.Click(ctx, 100, 200, nil, nil)
+
+// Right click
+button := "right"
+pos, err := mouse.Click(ctx, 100, 200, &button, nil)
+
+// Double click
+doubleClick := true
+pos, err := mouse.Click(ctx, 100, 200, nil, &doubleClick)
+```
+
+クリック位置の x および y 座標を含むマップを返します。
+
+<a name="MouseService.Drag" />
+
+### func (*MouseService) Drag \{#func-mouseservice-drag\}
+
+```go
+func (m *MouseService) Drag(ctx context.Context, startX, startY, endX, endY int, button *string) (map[string]any, error)
+```
+
+Drag は、開始座標から終了座標までマウスドラッグ操作を実行します。
+
+Parameters:
+
+* startX, startY: 開始座標
+* endX, endY: 終了座標
+* button: 使用するマウスボタン。nil の場合は左ボタン
+
+Example:
+
+```
+// (100, 100) から (300, 300) へドラッグ
+pos, err := mouse.Drag(ctx, 100, 100, 300, 300, nil)
+```
+
+最終的な x 座標および y 座標を含むマップを返します。
+
+<a name="MouseService.GetPosition" />
+
+### func (*MouseService) GetPosition \{#func-mouseservice-getposition\}
+
+```go
+func (m *MouseService) GetPosition(ctx context.Context) (map[string]any, error)
+```
+
+GetPosition は現在のカーソル位置を返します。
+
+例:
+
+```
+pos, err := mouse.GetPosition(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Cursor at (%v, %v)\n", pos["x"], pos["y"])
+```
+
+x 座標と y 座標を含むマップを返します。
+
+<a name="MouseService.Move" />
+
+### func (*MouseService) Move \{#func-mouseservice-move\}
+
+```go
+func (m *MouseService) Move(ctx context.Context, x, y int) (map[string]any, error)
+```
+
+Move はカーソルを指定された座標に移動します。
+
+パラメーター:
+
+* x: 移動先の X 座標
+* y: 移動先の Y 座標
+
+例:
+
+```
+pos, err := mouse.Move(ctx, 500, 300)
+```
+
+新しい x 座標と y 座標を含むマップを返します。
+
+<a name="MouseService.Scroll" />
+
+### func (*MouseService) Scroll \{#func-mouseservice-scroll\}
+
+```go
+func (m *MouseService) Scroll(ctx context.Context, x, y int, direction string, amount *int) (bool, error)
+```
+
+Scroll は、指定した座標でマウスのスクロール操作を実行します。
+
+Parameters:
+
+* x, y: スクロールを行う座標
+* direction: スクロール方向 (&quot;up&quot;, &quot;down&quot;, &quot;left&quot;, &quot;right&quot;)
+* amount: スクロール量。デフォルト値を使用する場合は nil
+
+Example:
+
+```
+// 位置 (500, 400) で下にスクロール
+success, err := mouse.Scroll(ctx, 500, 400, "down", nil)
+
+// Scroll up with specific amount
+amount := 5
+success, err := mouse.Scroll(ctx, 500, 400, "up", &amount)
+```
+
+スクロールに成功した場合は true を返します。
+
+<a name="OutputChannels" />
+
+## type OutputChannels \{#type-outputchannels\}
+
+OutputChannels は、実行出力をストリーミングするためのチャネルを提供します。
+
+すべてのチャネルは、実行が完了するかエラーが発生した時点でクローズされます。Done チャネルは、最終結果を含むメッセージを必ず 1 回だけ受信します。
+
+```go
+type OutputChannels struct {
+    Stdout <-chan *types.OutputMessage   // 標準出力メッセージを発生時に受信
+    Stderr <-chan *types.OutputMessage   // 標準エラーメッセージを発生時に受信
+    Errors <-chan *types.ExecutionError  // 実行エラーを受信
+    Done   <-chan *types.ExecutionResult // 実行完了時に最終結果を受信
+}
+```
+
+<a name="PaginatedSandboxes" />
+
+## type PaginatedSandboxes \{#type-paginatedsandboxes\}
+
+PaginatedSandboxes は、ページネーションされたサンドボックスのリストを表します。
+
+```go
+type PaginatedSandboxes struct {
+    Items      []*Sandbox // このページのサンドボックス
+    Total      int        // サンドボックスの総数
+    Page       int        // 現在のページ番号
+    TotalPages int        // 総ページ数
+}
+```
+
+<a name="ProcessService" />
+
+## type ProcessService \{#type-processservice\}
+
+ProcessService は、サンドボックス内でのプロセス実行機能を提供します。
+
+ProcessService は、コマンド実行、セッション管理、および PTY（疑似ターミナル）操作を可能にします。同期的なコマンド実行とインタラクティブなターミナルセッションの両方をサポートします。[Sandbox.Process] 経由でアクセスできます。
+
+例:
+
+```
+// Execute a command
+result, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello, World!'")
+fmt.Println(result.Result)
+
+// Execute with options
+result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la",
+    options.WithCwd("/home/user/project"),
+    options.WithExecuteTimeout(30*time.Second),
+)
+
+// インタラクティブなPTYセッションを作成
+handle, err := sandbox.Process.CreatePty(ctx, "my-terminal")
+defer handle.Disconnect()
+```
+
+```go
+type ProcessService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewProcessService" />
+
+### func NewProcessService \{#func-newprocessservice\}
+
+```go
+func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService
+```
+
+NewProcessService は、指定された toolbox クライアントを使用して新しい ProcessService を作成します。
+
+これは通常、[サンドボックス](#Sandbox) を作成する際に SDK によって内部的に呼び出されます。ユーザーは、ProcessService を直接作成するのではなく、[Sandbox.Process] を通じてアクセスする必要があります。
+
+<a name="ProcessService.CodeRun" />
+
+### func (*ProcessService) CodeRun \{#func-processservice-coderun\}
+
+```go
+func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error)
+```
+
+CodeRun は、言語固有の方法でコードを実行します。
+
+注意: 現在、このメソッドは toolbox-api-client-go が CodeRun エンドポイントを公開していないため利用できません。コード実行には [ProcessService.ExecuteCommand](#ProcessService.ExecuteCommand) または [CodeInterpreterService](#CodeInterpreterService) を使用してください。
+
+オプションのパラメーターは、関数型オプションを使って設定できます:
+
+* [options.WithCodeRunParams]: コード実行パラメーターを設定します
+* [options.WithCodeRunTimeout]: 実行タイムアウトを設定します
+
+<a name="ProcessService.ConnectPty" />
+
+### func (*ProcessService) ConnectPty \{#func-processservice-connectpty\}
+
+```go
+func (p *ProcessService) ConnectPty(ctx context.Context, sessionID string) (*PtyHandle, error)
+```
+
+ConnectPty は既存の PTY セッションへの WebSocket 接続を確立します。
+
+ターミナルと対話するための [PtyHandle](#PtyHandle) を返します。このハンドルは以下を提供します:
+
+* DataChan(): ターミナル出力を受信するチャネル
+* SendInput(): キーボード入力を送信するメソッド
+* Resize(): ターミナルサイズを変更するメソッド
+* Disconnect(): 接続を閉じるメソッド
+
+パラメーター:
+
+* sessionID: 接続する PTY セッション
+
+例:
+
+```
+handle, err := sandbox.Process.ConnectPty(ctx, "my-terminal")
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// 接続を待機
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// 出力を読み取り
+for data := range handle.DataChan() {
+    fmt.Print(string(data))
+}
+```
+
+ターミナルとの対話に使用する [PtyHandle](#PtyHandle) を返すか、エラーを返します。
+
+<a name="ProcessService.CreatePty" />
+
+### func (*ProcessService) CreatePty \{#func-processservice-createpty\}
+
+```go
+func (p *ProcessService) CreatePty(ctx context.Context, id string, opts ...func(*options.CreatePty)) (*PtyHandle, error)
+```
+
+CreatePty は新しい PTY セッションを作成し、直ちにそのセッションに接続します。
+
+これは、[ProcessService.CreatePtySession](#ProcessService.CreatePtySession) と [ProcessService.ConnectPty](#ProcessService.ConnectPty) を 1 つの操作にまとめたユーティリティメソッドです。
+
+パラメータ:
+
+* id: PTY セッションの一意の識別子
+
+オプションのパラメータは、関数オプションを使って設定できます:
+
+* [options.WithCreatePtySize]: 端末サイズを設定
+* [options.WithCreatePtyEnv]: 環境変数を設定
+
+例:
+
+```
+handle, err := sandbox.Process.CreatePty(ctx, "interactive-shell",
+    options.WithCreatePtySize(types.PtySize{Rows: 24, Cols: 80}),
+    options.WithCreatePtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// 接続を待機
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// コマンドを送信
+handle.SendInput([]byte("ls -la\n"))
+
+// 出力を読み取る
+for data := range handle.DataChan() {
+    fmt.Print(string(data))
+}
+```
+
+ターミナルとの対話用の [PtyHandle](#PtyHandle) を返すか、エラーを返します。
+
+<a name="ProcessService.CreatePtySession" />
+
+### func (*ProcessService) CreatePtySession \{#func-processservice-createptysession\}
+
+```go
+func (p *ProcessService) CreatePtySession(ctx context.Context, id string, opts ...func(*options.PtySession)) (*types.PtySessionInfo, error)
+```
+
+CreatePtySession は PTY (疑似端末) セッションを作成します。
+
+PTY セッションは、対話型アプリケーション向けのターミナルインターフェースを提供します。作成後のセッションに接続するには [ProcessService.ConnectPty](#ProcessService.ConnectPty) を使用します。
+
+パラメーター:
+
+* id: セッションの一意の識別子
+
+オプションのパラメーターは、関数オプションを使用して設定できます:
+
+* [options.WithPtySize]: ターミナルのサイズ (行数と列数) を設定
+* [options.WithPtyEnv]: 環境変数を設定
+
+例:
+
+```
+// デフォルト設定で作成
+session, err := sandbox.Process.CreatePtySession(ctx, "my-terminal")
+
+// カスタムサイズで作成
+session, err := sandbox.Process.CreatePtySession(ctx, "my-terminal",
+    options.WithPtySize(types.PtySize{Rows: 24, Cols: 80}),
+)
+```
+
+セッションの詳細が格納された [types.PtySessionInfo] を返すか、エラーを返します。
+
+<a name="ProcessService.CreateSession" />
+
+### func (*ProcessService) CreateSession \{#func-processservice-createsession\}
+
+```go
+func (p *ProcessService) CreateSession(ctx context.Context, sessionID string) error
+```
+
+CreateSession は、複数のコマンドを実行するための名前付きセッションを作成します。
+
+セッションでは、コマンド間で環境変数やカレントディレクトリなどの状態を保持したまま、複数のコマンドを実行できます。
+
+例:
+
+```
+// セッションを作成する
+err := sandbox.Process.CreateSession(ctx, "my-session")
+if err != nil {
+    return err
+}
+defer sandbox.Process.DeleteSession(ctx, "my-session")
+
+// セッション内でコマンドを実行する
+result, err := sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "cd /home/user", false)
+result, err = sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "pwd", false)
+```
+
+セッションの作成に失敗した場合にはエラーを返します。
+
+<a name="ProcessService.DeleteSession" />
+
+### func (*ProcessService) DeleteSession \{#func-processservice-deletesession\}
+
+```go
+func (p *ProcessService) DeleteSession(ctx context.Context, sessionID string) error
+```
+
+DeleteSession はセッションを削除し、そのリソースを解放します。
+
+`sessionID` パラメーターは、どのセッションを削除するかを識別します。
+
+例:
+
+```
+err := sandbox.Process.DeleteSession(ctx, "my-session")
+```
+
+セッションが存在しない、または削除に失敗した場合はエラーを返します。
+
+<a name="ProcessService.ExecuteCommand" />
+
+### func (*ProcessService) ExecuteCommand \{#func-processservice-executecommand\}
+
+```go
+func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opts ...func(*options.ExecuteCommand)) (*types.ExecuteResponse, error)
+```
+
+ExecuteCommand はシェル コマンドを実行し、その実行結果を返します。
+
+コマンドはシェルコンテキスト内で実行されます。複雑なコマンドの場合は、適切なシェルエスケープを行うか、スクリプトとしてラップして実行することを検討してください。
+
+オプションのパラメーターは、関数型オプションを使って設定できます:
+
+* [options.WithCwd]: コマンド実行時の作業ディレクトリを設定
+* [options.WithCommandEnv]: 環境変数を設定
+* [options.WithExecuteTimeout]: 実行タイムアウトを設定
+
+例:
+
+```
+// シンプルなコマンド
+result, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello'")
+if err != nil {
+    return err
+}
+fmt.Println(result.Result)
+
+// オプション付きのコマンド
+result, err := sandbox.Process.ExecuteCommand(ctx, "npm install",
+    options.WithCwd("/home/user/project"),
+    options.WithExecuteTimeout(5*time.Minute),
+)
+
+// 終了コードを確認
+if result.ExitCode != 0 {
+    fmt.Printf("Command failed with exit code %d\n", result.ExitCode)
+}
+```
+
+出力と終了コードを含む [types.ExecuteResponse]、またはエラーを返します。
+
+<a name="ProcessService.ExecuteSessionCommand" />
+
+### func (*ProcessService) ExecuteSessionCommand \{#func-processservice-executesessioncommand\}
+
+```go
+func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool) (map[string]any, error)
+```
+
+ExecuteSessionCommand は、セッション内でコマンドを実行します。
+
+パラメータ:
+
+* sessionID: コマンドを実行するセッション
+* command: 実行するコマンド
+* runAsync: true の場合、完了を待たずに直ちに制御を返します
+
+runAsync が true の場合、ステータスの確認には [ProcessService.GetSessionCommand](#ProcessService.GetSessionCommand)、出力の取得には [ProcessService.GetSessionCommandLogs](#ProcessService.GetSessionCommandLogs) を使用します。
+
+例:
+
+```
+// Synchronous execution
+result, err := sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "ls -la", false)
+if err != nil {
+    return err
+}
+fmt.Println(result["stdout"])
+
+// Asynchronous execution
+result, err := sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "long-running-cmd", true)
+cmdID := result["id"].(string)
+// 後で GetSessionCommand(ctx, "my-session", cmdID) でステータスを確認
+```
+
+コマンドの結果として、id、stdout、stderr、および（完了している場合は）exitCode を返します。
+
+<a name="ProcessService.GetPtySessionInfo" />
+
+### func (*ProcessService) GetPtySessionInfo \{#func-processservice-getptysessioninfo\}
+
+```go
+func (p *ProcessService) GetPtySessionInfo(ctx context.Context, sessionID string) (*types.PtySessionInfo, error)
+```
+
+GetPtySessionInfo は、PTY セッションの情報を取得します。
+
+パラメーター:
+
+* sessionID: PTY セッション識別子
+
+例:
+
+```
+info, err := sandbox.Process.GetPtySessionInfo(ctx, "my-terminal")
+if err != nil {
+    return err
+}
+fmt.Printf("Terminal size: %dx%d\n", info.Cols, info.Rows)
+```
+
+セッションの詳細情報を含む [types.PtySessionInfo] を返すか、エラーを返します。
+
+<a name="ProcessService.GetSession" />
+
+### func (*ProcessService) GetSession \{#func-processservice-getsession\}
+
+```go
+func (p *ProcessService) GetSession(ctx context.Context, sessionID string) (map[string]any, error)
+```
+
+GetSession は、セッション情報を取得します。
+
+`sessionID` パラメーターは、照会対象のセッションを識別します。
+
+次の内容を含むマップを返します:
+
+* `sessionId`: セッション識別子
+* `commands`: セッション内で実行されたコマンドのリスト
+
+例:
+
+```
+info, err := sandbox.Process.GetSession(ctx, "my-session")
+if err != nil {
+    return err
+}
+fmt.Printf("Session: %s\n", info["sessionId"])
+```
+
+セッションが存在しない場合はエラーを返します。
+
+<a name="ProcessService.GetSessionCommand" />
+
+### func (*ProcessService) GetSessionCommand \{#func-processservice-getsessioncommand\}
+
+```go
+func (p *ProcessService) GetSessionCommand(ctx context.Context, sessionID, commandID string) (map[string]any, error)
+```
+
+GetSessionCommand は、セッション内のコマンドのステータスを取得します。
+
+パラメータ:
+
+* sessionID: 対象のコマンドを含むセッションの ID
+* commandID: コマンドの識別子（ExecuteSessionCommand の結果で返される値）
+
+例:
+
+```
+status, err := sandbox.Process.GetSessionCommand(ctx, "my-session", cmdID)
+if err != nil {
+    return err
+}
+if exitCode, ok := status["exitCode"]; ok {
+    fmt.Printf("コマンドが終了コード %v で完了しました\n", exitCode)
+} else {
+    fmt.Println("コマンドは実行中です")
+}
+```
+
+id、コマンドテキスト、および（完了している場合は）exitCode を含むコマンドのステータスを返します。
+
+<a name="ProcessService.GetSessionCommandLogs" />
+
+### func (*ProcessService) GetSessionCommandLogs \{#func-processservice-getsessioncommandlogs\}
+
+```go
+func (p *ProcessService) GetSessionCommandLogs(ctx context.Context, sessionID, commandID string) (map[string]any, error)
+```
+
+GetSessionCommandLogs は、コマンドの出力ログを取得します。
+
+パラメーター:
+
+* sessionID: コマンドを含むセッション
+* commandID: コマンドの識別子
+
+例:
+
+```
+logs, err := sandbox.Process.GetSessionCommandLogs(ctx, "my-session", cmdID)
+if err != nil {
+    return err
+}
+fmt.Println(logs["logs"])
+```
+
+コマンド出力が格納された「logs」キーを持つマップを返します。
+
+<a name="ProcessService.GetSessionCommandLogsStream" />
+
+### func (*ProcessService) GetSessionCommandLogsStream \{#func-processservice-getsessioncommandlogsstream\}
+
+```go
+func (p *ProcessService) GetSessionCommandLogsStream(ctx context.Context, sessionID, commandID string, stdout, stderr chan<- string) error
+```
+
+GetSessionCommandLogsStream は、コマンドログを生成され次第ストリーミングします。
+
+このメソッドは、ログをリアルタイムでストリーミングするために WebSocket 接続を確立します。`stdout` と `stderr` のチャネルはログチャンクを文字列として受信し、ストリームが終了するかエラーが発生した時点で閉じられます。
+
+パラメーター:
+
+* sessionID: コマンドを含むセッション
+* commandID: コマンド識別子
+* stdout: stdout 出力を受信するチャネル
+* stderr: stderr 出力を受信するチャネル
+
+呼び出し側はブロッキングを避けるためにバッファ付きチャネルを提供する必要があります。
+
+例:
+
+```
+stdout := make(chan string, 100)
+stderr := make(chan string, 100)
+
+go func() {
+    err := sandbox.Process.GetSessionCommandLogsStream(ctx, "session", "cmd", stdout, stderr)
+    if err != nil {
+        log.Printf("ストリームエラー: %v", err)
+    }
+}()
+
+for {
+    select {
+    case chunk, ok := <-stdout:
+        if !ok {
+            stdout = nil
+        } else {
+            fmt.Print(chunk)
+        }
+    case chunk, ok := <-stderr:
+        if !ok {
+            stderr = nil
+        } else {
+            fmt.Fprint(os.Stderr, chunk)
+        }
+    }
+    if stdout == nil && stderr == nil {
+        break
+    }
+}
+```
+
+接続に失敗した場合、またはストリームでエラーが発生した場合はエラーを返します。
+
+<a name="ProcessService.KillPtySession" />
+
+### func (*ProcessService) KillPtySession \{#func-processservice-killptysession\}
+
+```go
+func (p *ProcessService) KillPtySession(ctx context.Context, sessionID string) error
+```
+
+KillPtySession は PTY セッションを終了します。
+
+これにより、そのターミナルセッションとその中で実行中のすべてのプロセスが終了します。
+
+Parameters:
+
+* sessionID: 終了する PTY セッション
+
+Example:
+
+```
+err := sandbox.Process.KillPtySession(ctx, "my-terminal")
+```
+
+セッションが存在しないか、終了に失敗した場合はエラーを返します。
+
+<a name="ProcessService.ListPtySessions" />
+
+### func (*ProcessService) ListPtySessions \{#func-processservice-listptysessions\}
+
+```go
+func (p *ProcessService) ListPtySessions(ctx context.Context) ([]*types.PtySessionInfo, error)
+```
+
+ListPtySessions は、すべてのアクティブな PTY セッションを返します。
+
+例：
+
+```
+sessions, err := sandbox.Process.ListPtySessions(ctx)
+if err != nil {
+    return err
+}
+for _, session := range sessions {
+    fmt.Printf("PTY: %s (%dx%d)\n", session.ID, session.Cols, session.Rows)
+}
+```
+
+[types.PtySessionInfo] のスライス、またはエラーを返します。
+
+<a name="ProcessService.ListSessions" />
+
+### func (*ProcessService) ListSessions \{#func-processservice-listsessions\}
+
+```go
+func (p *ProcessService) ListSessions(ctx context.Context) ([]map[string]any, error)
+```
+
+ListSessions は現在アクティブなセッションをすべて返します。
+
+例：
+
+```
+sessions, err := sandbox.Process.ListSessions(ctx)
+if err != nil {
+    return err
+}
+for _, session := range sessions {
+    fmt.Printf("Session: %s\n", session["sessionId"])
+}
+```
+
+セッション情報マップからなるスライス、またはエラーを返します。
+
+<a name="ProcessService.ResizePtySession" />
+
+### func (*ProcessService) ResizePtySession \{#func-processservice-resizeptysession\}
+
+```go
+func (p *ProcessService) ResizePtySession(ctx context.Context, sessionID string, ptySize types.PtySize) (*types.PtySessionInfo, error)
+```
+
+ResizePtySession は、PTY セッションの端末サイズを変更します。
+
+これによりアプリケーションに SIGWINCH シグナルが送信され、サイズ変更が通知されます。
+
+Parameters:
+
+* sessionID: サイズ変更する PTY セッション
+* ptySize: 新しい端末サイズ
+
+Example:
+
+```
+newSize := types.PtySize{Rows: 40, Cols: 120}
+info, err := sandbox.Process.ResizePtySession(ctx, "my-terminal", newSize)
+if err != nil {
+    return err
+}
+fmt.Printf("新しいサイズ: %dx%d\n", info.Cols, info.Rows)
+```
+
+更新された [types.PtySessionInfo] を返すか、エラーを返します。
+
+<a name="PtyHandle" />
+
+## type PtyHandle \{#type-ptyhandle\}
+
+PtyHandle は、PTY（疑似端末）セッションへの WebSocket 接続を管理します。
+
+PtyHandle は、入力の送信、チャネル経由での出力の受信、端末サイズの変更、および接続のライフサイクル管理のためのメソッドを提供します。標準的な Go の I/O と統合するために、[io.Reader](https://pkg.go.dev/io/#Reader) および [io.Writer](https://pkg.go.dev/io/#Writer) インターフェイスを実装します。
+
+PtyHandle は [ProcessService.CreatePty](#ProcessService.CreatePty) を使用して作成します。
+
+例:
+
+```
+// Create a PTY session
+handle, err := sandbox.Process.CreatePty(ctx, "my-pty", nil)
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// 接続が確立されるまで待機
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// Send input
+handle.SendInput([]byte("ls -la\n"))
+
+// Read output from channel
+for data := range handle.DataChan() {
+    fmt.Print(string(data))
+}
+
+// Or use as io.Reader
+io.Copy(os.Stdout, handle)
+```
+
+```go
+type PtyHandle struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="PtyHandle.DataChan" />
+
+### func (*PtyHandle) DataChan \{#func-ptyhandle-datachan\}
+
+```go
+func (h *PtyHandle) DataChan() <-chan []byte
+```
+
+DataChan は、PTY 出力を受信するためのチャネルを返します。
+
+このチャネルはターミナルからの生のバイト列を受信します。PTY セッションが終了するか、接続が切断されると、チャネルもクローズされます。
+
+例:
+
+```
+for data := range handle.DataChan() {
+    fmt.Print(string(data))
+}
+```
+
+<a name="PtyHandle.Disconnect" />
+
+### func (*PtyHandle) Disconnect \{#func-ptyhandle-disconnect\}
+
+```go
+func (h *PtyHandle) Disconnect() error
+```
+
+Disconnect は WebSocket 接続を閉じて、リソースを解放します。
+
+PTY セッションの利用が終わったら、これを呼び出してください。なお、これによって下位のプロセスが終了することはありません。プロセスを終了するには [PtyHandle.Kill](#PtyHandle.Kill) を使用してください。
+
+例:
+
+```
+defer handle.Disconnect()
+```
+
+WebSocket をクローズできなかった場合にエラーを返します。
+
+<a name="PtyHandle.Error" />
+
+### func (*PtyHandle) Error \{#func-ptyhandle-error\}
+
+```go
+func (h *PtyHandle) Error() *string
+```
+
+Error は、PTY セッションが失敗した場合にエラーメッセージを返し、それ以外の場合は nil を返します。
+
+<a name="PtyHandle.ExitCode" />
+
+### func (*PtyHandle) ExitCode \{#func-ptyhandle-exitcode\}
+
+```go
+func (h *PtyHandle) ExitCode() *int
+```
+
+ExitCode は、PTY プロセスの終了コードを返します。まだ実行中の場合は nil を返します。
+
+<a name="PtyHandle.IsConnected" />
+
+### func (*PtyHandle) IsConnected \{#func-ptyhandle-isconnected\}
+
+```go
+func (h *PtyHandle) IsConnected() bool
+```
+
+IsConnected は、WebSocket 接続が有効な場合に true を返します。
+
+<a name="PtyHandle.Kill" />
+
+### func (*PtyHandle) Kill \{#func-ptyhandle-kill\}
+
+```go
+func (h *PtyHandle) Kill(ctx context.Context) error
+```
+
+Kill は、PTY セッションとそのセッションに関連付けられているプロセスを強制終了します。
+
+この操作は取り消せません。プロセスは SIGKILL シグナルを受け取り、直ちに終了します。
+
+例:
+
+```
+err := handle.Kill(ctx)
+```
+
+kill 操作が失敗した場合、エラーを返します。
+
+<a name="PtyHandle.Read" />
+
+### func (*PtyHandle) Read \{#func-ptyhandle-read\}
+
+```go
+func (h *PtyHandle) Read(p []byte) (n int, err error)
+```
+
+Read は、PTY の出力を読み取るための [io.Reader](https://pkg.go.dev/io/#Reader) を実装します。
+
+このメソッドは、データが利用可能になるか、PTY がクローズして [io.EOF](https://pkg.go.dev/io/#EOF) を返すまでブロックします。[io.Copy](https://pkg.go.dev/io/#Copy)、[bufio.Scanner](https://pkg.go.dev/bufio/#Scanner)、または標準的な Go の I/O ユーティリティと組み合わせて使用してください。
+
+例：
+
+```
+// すべての出力を標準出力にコピーする
+io.Copy(os.Stdout, handle)
+
+// bufio.Scannerを使用する
+scanner := bufio.NewScanner(handle)
+for scanner.Scan() {
+    fmt.Println(scanner.Text())
+}
+```
+
+<a name="PtyHandle.Resize" />
+
+### func (*PtyHandle) Resize \{#func-ptyhandle-resize\}
+
+```go
+func (h *PtyHandle) Resize(ctx context.Context, cols, rows int) (*types.PtySessionInfo, error)
+```
+
+Resize は PTY ターミナルの寸法を変更します。
+
+これにより、SIGWINCH シグナルを介して新しい寸法がターミナルアプリケーションに通知されます。端末の表示サイズが変化したときに呼び出してください。
+
+Parameters:
+
+* cols: 列数（文字単位の幅）
+* rows: 行数（文字単位の高さ）
+
+Example:
+
+```
+info, err := handle.Resize(ctx, 120, 40)
+```
+
+更新された [types.PtySessionInfo] を返すか、エラーを返します。
+
+<a name="PtyHandle.SendInput" />
+
+### func (*PtyHandle) SendInput \{#func-ptyhandle-sendinput\}
+
+```go
+func (h *PtyHandle) SendInput(data []byte) error
+```
+
+SendInput は入力データを PTY セッションに送信します。
+
+データはそのままのバイト列として送信され、ターミナルで入力されたかのように処理されます。これを使用して、コマンド、キーストローク、その他のターミナル入力を送信します。
+
+例:
+
+```
+// コマンドを送信
+handle.SendInput([]byte("ls -la\n"))
+
+// Ctrl+Cを送信
+handle.SendInput([]byte{0x03})
+```
+
+PTY が接続されていないか、送信に失敗した場合はエラーを返します。
+
+<a name="PtyHandle.SessionID" />
+
+### func (*PtyHandle) SessionID \{#func-ptyhandle-sessionid\}
+
+```go
+func (h *PtyHandle) SessionID() string
+```
+
+SessionID は、この PTY セッションを一意に識別する ID を返します。
+
+<a name="PtyHandle.Wait" />
+
+### func (*PtyHandle) Wait \{#func-ptyhandle-wait\}
+
+```go
+func (h *PtyHandle) Wait(ctx context.Context) (*types.PtyResult, error)
+```
+
+Wait は、PTY プロセスが終了するまで処理をブロックし、その終了結果を返します。
+
+例：
+
+```
+result, err := handle.Wait(ctx)
+if err != nil {
+    return err
+}
+if result.ExitCode != nil {
+    fmt.Printf("Process exited with code: %d\n", *result.ExitCode)
+}
+```
+
+終了コードおよび発生したエラーを含む [types.PtyResult] を返すか、コンテキストがキャンセルされていた場合にはエラーを返します。
+
+<a name="PtyHandle.WaitForConnection" />
+
+### func (*PtyHandle) WaitForConnection \{#func-ptyhandle-waitforconnection\}
+
+```go
+func (h *PtyHandle) WaitForConnection(ctx context.Context) error
+```
+
+WaitForConnection は、WebSocket 接続が確立されるまで待機します。
+
+このメソッドは、PTY セッションが入力の受信および出力の送信を行える状態になるか、もしくはタイムアウト（10 秒）が発生するまでブロックします。接続の準備が整っていることを保証するため、PTY を作成した後は必ずこのメソッドを呼び出してください。
+
+例:
+
+```
+handle, _ := sandbox.Process.CreatePty(ctx, "my-pty", nil)
+if err := handle.WaitForConnection(ctx); err != nil {
+    return fmt.Errorf("PTY connection failed: %w", err)
+}
+```
+
+接続がタイムアウトするか失敗すると、エラーを返します。
+
+<a name="PtyHandle.Write" />
+
+### func (*PtyHandle) Write \{#func-ptyhandle-write\}
+
+```go
+func (h *PtyHandle) Write(p []byte) (n int, err error)
+```
+
+`Write` は、PTY に入力を送信するための [io.Writer](https://pkg.go.dev/io/#Writer) インターフェースを実装します。
+
+例:
+
+```
+// 直接書き込み
+handle.Write([]byte("echo hello\n"))
+
+// io.Copyと併用
+io.Copy(handle, strings.NewReader("echo hello\n"))
+```
+
+<a name="PushAccessCredentials" />
+
+## type PushAccessCredentials \{#type-pushaccesscredentials\}
+
+PushAccessCredentials は、オブジェクトストレージへのアップロードに使用する一時的な認証情報を保持します。
+
+これらの認証情報は API から取得され、カスタムの [DockerImage](#DockerImage) 定義を使用してスナップショットを作成する際に、ビルドコンテキストをアップロードするために利用されます。
+
+```go
+type PushAccessCredentials struct {
+    StorageURL     string `json:"storageUrl"`
+    AccessKey      string `json:"accessKey"`
+    Secret         string `json:"secret"`
+    SessionToken   string `json:"sessionToken"`
+    Bucket         string `json:"bucket"`
+    OrganizationID string `json:"organizationId"`
+}
+```
+
+<a name="RecordingService" />
+
+## type RecordingService \{#type-recordingservice\}
+
+RecordingService は、画面録画機能を提供します。
+
+RecordingService により、画面録画の開始・停止および管理を行えます。[ComputerUseService.Recording](#ComputerUseService.Recording) を通じてアクセスできます。
+
+```go
+type RecordingService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewRecordingService" />
+
+### func NewRecordingService \{#func-newrecordingservice\}
+
+```go
+func NewRecordingService(toolboxClient *toolbox.APIClient) *RecordingService
+```
+
+NewRecordingService は新しい RecordingService を生成します。
+
+<a name="RecordingService.Delete" />
+
+### func (*RecordingService) Delete \{#func-recordingservice-delete\}
+
+```go
+func (r *RecordingService) Delete(ctx context.Context, id string) error
+```
+
+Delete は、ID を指定して recording を削除します。
+
+Parameters:
+
+* id: 削除する recording の ID
+
+Example:
+
+```
+err := cu.Recording().Delete(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Println("Recording deleted")
+```
+
+削除に失敗した場合はエラーを返します。
+
+<a name="RecordingService.Download" />
+
+### func (*RecordingService) Download \{#func-recordingservice-download\}
+
+```go
+func (r *RecordingService) Download(ctx context.Context, id string, localPath string) error
+```
+
+Download は録画ファイルをダウンロードし、ローカルパスに保存します。
+
+ファイルは全内容をメモリに読み込むことなく、ディスクへ直接ストリーミングされます。
+
+Parameters:
+
+* id: ダウンロードする録画の ID
+* localPath: 録画ファイルをローカルに保存するパス
+
+Example:
+
+```
+err := cu.Recording().Download(ctx, recordingID, "local_recording.mp4")
+if err != nil {
+    return err
+}
+fmt.Println("Recording downloaded")
+```
+
+ダウンロードに失敗した場合、エラーを返します。
+
+<a name="RecordingService.Get" />
+
+### func (*RecordingService) Get \{#func-recordingservice-get\}
+
+```go
+func (r *RecordingService) Get(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Get は、ID で指定された特定の recording の詳細を取得します。
+
+パラメーター:
+
+* id: 取得する recording の ID
+
+例:
+
+```
+recording, err := cu.Recording().Get(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording: %s\n", recording.GetFileName())
+fmt.Printf("Status: %s\n", recording.GetStatus())
+fmt.Printf("Duration: %v seconds\n", recording.GetDurationSeconds())
+```
+
+記録の詳細を含む [toolbox.Recording] を返します。
+
+<a name="RecordingService.List" />
+
+### func (*RecordingService) List \{#func-recordingservice-list\}
+
+```go
+func (r *RecordingService) List(ctx context.Context) (*toolbox.ListRecordingsResponse, error)
+```
+
+List は、すべてのレコーディング（アクティブおよび完了済み）を一覧表示します。
+
+例:
+
+```
+recordings, err := cu.Recording().List(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Found %d recordings\n", len(recordings.GetRecordings()))
+for _, rec := range recordings.GetRecordings() {
+    fmt.Printf("- %s: %s\n", rec.GetFileName(), rec.GetStatus())
+}
+```
+
+すべてのレコーディングを含む [toolbox.ListRecordingsResponse] を返します。
+
+<a name="RecordingService.Start" />
+
+### func (*RecordingService) Start \{#func-recordingservice-start\}
+
+```go
+func (r *RecordingService) Start(ctx context.Context, label *string) (*toolbox.Recording, error)
+```
+
+Start は新しいスクリーン録画セッションを開始します。
+
+パラメーター:
+
+* label: 録画に付与する任意のカスタムラベル
+
+例:
+
+```
+// ラベルを指定して録画を開始
+recording, err := cu.Recording().Start(ctx, stringPtr("my-test-recording"))
+if err != nil {
+    return err
+}
+fmt.Printf("Recording started: %s\n", recording.GetId())
+fmt.Printf("File: %s\n", recording.GetFilePath())
+```
+
+録画の詳細を含む [toolbox.Recording] を返します。
+
+<a name="RecordingService.Stop" />
+
+### func (*RecordingService) Stop \{#func-recordingservice-stop\}
+
+```go
+func (r *RecordingService) Stop(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Stop は、進行中の画面録画セッションを停止します。
+
+パラメータ:
+
+* id: 停止する録画の ID
+
+例:
+
+```
+result, err := cu.Recording().Stop(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording stopped: %v seconds\n", result.GetDurationSeconds())
+fmt.Printf("Saved to: %s\n", result.GetFilePath())
+```
+
+記録の詳細を含む [toolbox.Recording] を返します。
+
+<a name="Sandbox" />
+
+## type Sandbox \{#type-sandbox\}
+
+Sandbox は、Daytona のサンドボックス環境を表します。
+
+サンドボックスは、ファイルシステム、Git、プロセス実行、コード解釈、デスクトップ自動化といった機能を備えた、分離された開発環境を提供します。サンドボックスは、起動、停止、アーカイブ、削除が可能です。
+
+サービスフィールドを通じて、サンドボックスの各種機能にアクセスします:
+
+* FileSystem: ファイルおよびディレクトリ操作
+* Git: Git リポジトリ操作
+* Process: コマンド実行および PTY セッション
+* CodeInterpreter: Python コードの実行
+* ComputerUse: デスクトップ自動化 (マウス、キーボード、スクリーンショット)
+
+例:
+
+```
+// サンドボックスを作成して使用する
+sandbox, err := client.Create(ctx)
+if err != nil {
+    return err
+}
+defer sandbox.Delete(ctx)
+
+// コマンドを実行する
+result, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello'")
+
+// ファイルを操作する
+err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/user/remote.txt")
+```
+
+```go
+type Sandbox struct {
+    ID            string                 // Unique sandbox identifier
+    Name          string                 // Human-readable sandbox name
+    State         apiclient.SandboxState // Current sandbox state
+    Target        string                 // Target region/environment where the sandbox runs
+    ToolboxClient *toolbox.APIClient     // Internal API client
+
+    // AutoArchiveInterval is the time in minutes after stopping before auto-archiving.
+    // Set to 0 to disable auto-archiving.
+    AutoArchiveInterval int
+
+    // AutoDeleteInterval is the time in minutes after stopping before auto-deletion.
+    // Set to -1 to disable auto-deletion.
+    // Set to 0 to delete immediately upon stopping.
+    AutoDeleteInterval int
+
+    // NetworkBlockAll blocks all network access when true.
+    NetworkBlockAll bool
+
+    // NetworkAllowList is a comma-separated list of allowed CIDR addresses.
+    NetworkAllowList *string
+
+    FileSystem      *FileSystemService      // ファイルシステム操作
+    Git             *GitService             // Git操作
+    Process         *ProcessService         // プロセスおよびPTY操作
+    CodeInterpreter *CodeInterpreterService // Pythonコード実行
+    ComputerUse     *ComputerUseService     // デスクトップ自動化
+    // フィルタリングされた、またはエクスポートされていないフィールドを含みます
+}
+```
+
+<a name="NewSandbox" />
+
+### func NewSandbox \{#func-newsandbox\}
+
+```go
+func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList *string) *Sandbox
+```
+
+NewSandbox は新しいサンドボックスインスタンスを生成します。
+
+これは通常、SDK によって内部的に呼び出されます。ユーザーはサンドボックスを作成する際、この関数を直接呼び出すのではなく、[Client.Create](#Client.Create) を使用する必要があります。
+
+<a name="Sandbox.Archive" />
+
+### func (*Sandbox) Archive \{#func-sandbox-archive\}
+
+```go
+func (s *Sandbox) Archive(ctx context.Context) error
+```
+
+Archive はサンドボックスをアーカイブし、その状態をコスト効率の高いストレージに保存します。
+
+サンドボックスがアーカイブされると、ファイルシステム全体の状態がオブジェクトストレージに移動され、コストを抑えながらサンドボックスを長期間利用可能な状態で保持できます。サンドボックスのアーカイブを解除して再開するには [Sandbox.Start](#Sandbox.Start) を使用します。
+
+例:
+
+```
+err := sandbox.Archive(ctx)
+if err != nil {
+    return err
+}
+// サンドボックスがアーカイブされ、後で復元可能になりました
+```
+
+<a name="Sandbox.Delete" />
+
+### func (*Sandbox) Delete \{#func-sandbox-delete\}
+
+```go
+func (s *Sandbox) Delete(ctx context.Context) error
+```
+
+Delete は、デフォルトのタイムアウト 60 秒でサンドボックスを削除します。
+
+この操作は取り消せません。サンドボックス内のすべてのデータは失われます。タイムアウトを変更するには、[Sandbox.DeleteWithTimeout](#Sandbox.DeleteWithTimeout) を使用してください。
+
+例:
+
+```
+err := sandbox.Delete(ctx)
+```
+
+<a name="Sandbox.DeleteWithTimeout" />
+
+### func (*Sandbox) DeleteWithTimeout \{#func-sandbox-deletewithtimeout\}
+
+```go
+func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+DeleteWithTimeout は、指定したタイムアウトでサンドボックスを削除します。
+
+例:
+
+```
+err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.GetPreviewLink" />
+
+### func (*Sandbox) GetPreviewLink \{#func-sandbox-getpreviewlink\}
+
+```go
+func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error)
+```
+
+GetPreviewLink は、サンドボックス上のポートにアクセスするための URL を返します。
+
+プレビュー URL を使用すると、サンドボックス内の指定されたポートで動作しているサービスに外部からアクセスできます。
+
+例:
+
+```
+// サンドボックス内のポート3000でWebサーバーを起動
+sandbox.Process.ExecuteCommand(ctx, "python -m http.server 3000 &")
+
+// プレビューURLを取得
+url, err := sandbox.GetPreviewLink(ctx, 3000)
+if err != nil {
+    return err
+}
+fmt.Printf("Access at: %s\n", url)
+```
+
+<a name="Sandbox.GetUserHomeDir" />
+
+### func (*Sandbox) GetUserHomeDir \{#func-sandbox-getuserhomedir\}
+
+```go
+func (s *Sandbox) GetUserHomeDir(ctx context.Context) (string, error)
+```
+
+GetUserHomeDir は、サンドボックス内のユーザーのホームディレクトリのパスを返します。
+
+例:
+
+```
+homeDir, err := sandbox.GetUserHomeDir(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Home directory: %s\n", homeDir) // 例: "/home/daytona"
+```
+
+<a name="Sandbox.GetWorkingDir" />
+
+### func (*Sandbox) GetWorkingDir \{#func-sandbox-getworkingdir\}
+
+```go
+func (s *Sandbox) GetWorkingDir(ctx context.Context) (string, error)
+```
+
+GetWorkingDir は、サンドボックス内の現在の作業ディレクトリを返します。
+
+例:
+
+```
+workDir, err := sandbox.GetWorkingDir(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Working directory: %s\n", workDir)
+```
+
+<a name="Sandbox.RefreshData" />
+
+### func (*Sandbox) RefreshData \{#func-sandbox-refreshdata\}
+
+```go
+func (s *Sandbox) RefreshData(ctx context.Context) error
+```
+
+RefreshData は、API からサンドボックスのデータを再取得します。
+
+これにより、サーバー上の情報を元にサンドボックスの State およびその他のプロパティが更新されます。サンドボックスの状態が変更されたかどうかを確認するのに便利です。
+
+例:
+
+```
+err := sandbox.RefreshData(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Current state: %s\n", sandbox.State)
+```
+
+<a name="Sandbox.SetAutoArchiveInterval" />
+
+### func (*Sandbox) SetAutoArchiveInterval \{#func-sandbox-setautoarchiveinterval\}
+
+```go
+func (s *Sandbox) SetAutoArchiveInterval(ctx context.Context, intervalMinutes *int) error
+```
+
+SetAutoArchiveInterval は、自動アーカイブの間隔（分）を設定します。
+
+サンドボックスは、停止後に指定した分が経過すると自動的にアーカイブされます。自動アーカイブを無効にするには 0 に設定します（サンドボックスは自動アーカイブされません）。
+
+例:
+
+```
+// 停止後30分でアーカイブする
+interval := 30
+err := sandbox.SetAutoArchiveInterval(ctx, &interval)
+
+// 自動アーカイブを無効にする
+interval := 0
+err := sandbox.SetAutoArchiveInterval(ctx, &interval)
+```
+
+<a name="Sandbox.SetAutoDeleteInterval" />
+
+### func (*Sandbox) SetAutoDeleteInterval \{#func-sandbox-setautodeleteinterval\}
+
+```go
+func (s *Sandbox) SetAutoDeleteInterval(ctx context.Context, intervalMinutes *int) error
+```
+
+SetAutoDeleteInterval は、自動削除までの時間間隔を分単位で設定します。
+
+サンドボックスは、停止されてから指定した分が経過すると自動的に削除されます。
+
+特別な値:
+
+* -1: 自動削除を無効にする（サンドボックスは自動削除されない）
+* 0: 停止と同時に削除
+
+例:
+
+```
+// 停止後60分で削除
+interval := 60
+err := sandbox.SetAutoDeleteInterval(ctx, &interval)
+
+// Delete immediately when stopped
+interval := 0
+err := sandbox.SetAutoDeleteInterval(ctx, &interval)
+
+// Never auto-delete
+interval := -1
+err := sandbox.SetAutoDeleteInterval(ctx, &interval)
+```
+
+<a name="Sandbox.SetLabels" />
+
+### func (*Sandbox) SetLabels \{#func-sandbox-setlabels\}
+
+```go
+func (s *Sandbox) SetLabels(ctx context.Context, labels map[string]string) error
+```
+
+SetLabels はサンドボックスにカスタムラベルを設定します。
+
+ラベルはキーと値のペアであり、整理やフィルタリングに利用できます。既存のラベルはすべて上書きされます。
+
+例：
+
+```
+err := sandbox.SetLabels(ctx, map[string]string{
+    "environment": "development",
+    "team": "backend",
+    "project": "api-server",
+})
+```
+
+<a name="Sandbox.Start" />
+
+### func (*Sandbox) Start \{#func-sandbox-start\}
+
+```go
+func (s *Sandbox) Start(ctx context.Context) error
+```
+
+Start は、デフォルトのタイムアウト 60 秒でサンドボックスを起動します。
+
+サンドボックスがすでに実行中の場合は、何も実行されません。カスタムのタイムアウト値を指定するには、[Sandbox.StartWithTimeout](#Sandbox.StartWithTimeout) を使用してください。
+
+例:
+
+```
+err := sandbox.Start(ctx)
+if err != nil {
+    return err
+}
+// サンドボックスが起動しました
+```
+
+<a name="Sandbox.StartWithTimeout" />
+
+### func (*Sandbox) StartWithTimeout \{#func-sandbox-startwithtimeout\}
+
+```go
+func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+StartWithTimeout は、カスタムタイムアウト値を指定してサンドボックスを起動します。
+
+このメソッドは、サンドボックスが「started」状態に到達するか、タイムアウトを超えるまでブロックされます。
+
+例:
+
+```
+err := sandbox.StartWithTimeout(ctx, 2*time.Minute)
+if err != nil {
+    return err
+}
+```
+
+<a name="Sandbox.Stop" />
+
+### func (*Sandbox) Stop \{#func-sandbox-stop\}
+
+```go
+func (s *Sandbox) Stop(ctx context.Context) error
+```
+
+Stop は、デフォルトのタイムアウト 60 秒でサンドボックスを停止します。
+
+サンドボックスを停止しても、その状態は保持されます。再開するには [Sandbox.Start](#Sandbox.Start) を使用してください。カスタムのタイムアウトを指定するには [Sandbox.StopWithTimeout](#Sandbox.StopWithTimeout) を使用してください。
+
+例:
+
+```
+err := sandbox.Stop(ctx)
+```
+
+<a name="Sandbox.StopWithTimeout" />
+
+### func (*Sandbox) StopWithTimeout \{#func-sandbox-stopwithtimeout\}
+
+```go
+func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error
+```
+
+StopWithTimeout は、カスタムのタイムアウト値を指定してサンドボックスを停止します。
+
+このメソッドは、サンドボックスが &quot;stopped&quot; 状態に到達するか、タイムアウトが発生するまで処理をブロックします。
+
+例:
+
+```
+err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.WaitForStart" />
+
+### func (*Sandbox) WaitForStart \{#func-sandbox-waitforstart\}
+
+```go
+func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error
+```
+
+WaitForStart は、サンドボックスが「started」状態に到達するまで待機します。
+
+このメソッドは、サンドボックスが started 状態になるか、エラー状態に遷移するか、またはタイムアウトに達するまで、その状態をポーリングし続けます。
+
+例:
+
+```
+err := sandbox.WaitForStart(ctx, 2*time.Minute)
+if err != nil {
+    return err
+}
+// サンドボックスが起動しました
+```
+
+<a name="Sandbox.WaitForStop" />
+
+### func (*Sandbox) WaitForStop \{#func-sandbox-waitforstop\}
+
+```go
+func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error
+```
+
+WaitForStop は、サンドボックスが「stopped」状態に到達するまで待機します。
+
+このメソッドは、サンドボックスが停止状態になるか、タイムアウトに達するまで状態をポーリングします。
+
+使用例:
+
+```
+err := sandbox.WaitForStop(ctx, 2*time.Minute)
+```
+
+<a name="ScreenshotService" />
+
+## type ScreenshotService \{#type-screenshotservice\}
+
+ScreenshotService は画面キャプチャ機能を提供します。
+
+ScreenshotService を使用すると、画面全体または任意の領域のスクリーンショットを取得できます。[ComputerUseService.Screenshot](#ComputerUseService.Screenshot) から利用できます。
+
+```go
+type ScreenshotService struct {
+    // フィルタリングされた、または非公開のフィールドを含む
+}
+```
+
+<a name="NewScreenshotService" />
+
+### func NewScreenshotService \{#func-newscreenshotservice\}
+
+```go
+func NewScreenshotService(toolboxClient *toolbox.APIClient, otel *otelState) *ScreenshotService
+```
+
+NewScreenshotService は、新しい ScreenshotService インスタンスを作成します。
+
+<a name="ScreenshotService.TakeFullScreen" />
+
+### func (*ScreenshotService) TakeFullScreen \{#func-screenshotservice-takefullscreen\}
+
+```go
+func (s *ScreenshotService) TakeFullScreen(ctx context.Context, showCursor *bool) (*types.ScreenshotResponse, error)
+```
+
+TakeFullScreen は、画面全体のスクリーンショットをキャプチャします。
+
+Parameters:
+
+* showCursor: スクリーンショットにカーソルを含めるかどうか。デフォルト動作の場合は nil
+
+Example:
+
+```
+// 全画面をキャプチャ
+screenshot, err := ss.TakeFullScreen(ctx, nil)
+if err != nil {
+    return err
+}
+// screenshot.Imageにはbase64エンコードされた画像データが含まれます
+
+// カーソルを表示した状態でキャプチャ
+showCursor := true
+screenshot, err := ss.TakeFullScreen(ctx, &showCursor)
+```
+
+取得した画像を含む [types.ScreenshotResponse] を返します。
+
+<a name="ScreenshotService.TakeRegion" />
+
+### func (*ScreenshotService) TakeRegion \{#func-screenshotservice-takeregion\}
+
+```go
+func (s *ScreenshotService) TakeRegion(ctx context.Context, region types.ScreenshotRegion, showCursor *bool) (*types.ScreenshotResponse, error)
+```
+
+TakeRegion は、画面の特定の領域のスクリーンショットを取得します。
+
+パラメータ:
+
+* region: 取得する領域 (X, Y, Width, Height)
+* showCursor: スクリーンショットにカーソルを含めるかどうか。デフォルト動作の場合は nil
+
+例:
+
+```
+// (50, 50) から始まる 200x100 の領域をキャプチャ
+region := types.ScreenshotRegion{X: 50, Y: 50, Width: 200, Height: 100}
+screenshot, err := ss.TakeRegion(ctx, region, nil)
+if err != nil {
+    return err
+}
+```
+
+キャプチャした画像を含む [types.ScreenshotResponse] を返します。
+
+<a name="SnapshotService" />
+
+## type SnapshotService \{#type-snapshotservice\}
+
+SnapshotService は、スナップショット（イメージテンプレート）の管理操作を提供します。
+
+SnapshotService を使用すると、サンドボックスのテンプレートとして利用されるスナップショットの作成、管理、および削除が可能になります。スナップショットは、Docker イメージ、またはビルドコンテキストを含むカスタムの [DockerImage](#DockerImage) 定義からビルドできます。[Client.Snapshots] を通じてアクセスできます。
+
+例:
+
+```
+// 既存のイメージからスナップショットを作成する
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-python-env",
+    Image: "python:3.11-slim",
+})
+if err != nil {
+    return err
+}
+
+// ビルドログをストリーム配信する
+for log := range logChan {
+    fmt.Println(log)
+}
+
+// カスタムイメージ定義からスナップショットを作成する
+image := daytona.Base("python:3.11-slim").
+    PipInstall([]string{"numpy", "pandas"}).
+    Workdir("/app")
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "custom-python-env",
+    Image: image,
+})
+```
+
+```go
+type SnapshotService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewSnapshotService" />
+
+### func NewSnapshotService \{#func-newsnapshotservice\}
+
+```go
+func NewSnapshotService(client *Client) *SnapshotService
+```
+
+NewSnapshotService は、新しい SnapshotService を作成します。
+
+これは通常、[Client](#Client) を作成する際に SDK によって内部で呼び出されます。ユーザーは SnapshotService を直接作成するのではなく、[Client.Snapshots] を通じて利用してください。
+
+<a name="SnapshotService.Create" />
+
+### func (*SnapshotService) Create \{#func-snapshotservice-create\}
+
+```go
+func (s *SnapshotService) Create(ctx context.Context, params *types.CreateSnapshotParams) (*types.Snapshot, <-chan string, error)
+```
+
+Create は、イメージから新しいスナップショットを作成し、そのビルドログをストリーミングします。
+
+image パラメーターには、Docker イメージ参照文字列（例: &quot;python:3.11&quot;）または、カスタム Dockerfile 定義用の [DockerImage](#DockerImage) ビルダーオブジェクトのいずれかを指定できます。
+
+パラメーター:
+
+* params: name、image、resources、entrypoint を含むスナップショット作成用パラメーター
+
+例:
+
+```
+// Docker Hubイメージから作成
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-env",
+    Image: "python:3.11-slim",
+})
+if err != nil {
+    return err
+}
+
+// ビルドログをストリーム
+for log := range logChan {
+    fmt.Println(log)
+}
+
+// カスタムイメージとリソースで作成
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "custom-env",
+    Image: image,
+    Resources: &types.Resources{CPU: 2, Memory: 4096},
+})
+```
+
+作成された [types.Snapshot]、ビルドログをストリーミングするためのチャネル、またはエラーのいずれかを返します。ビルドが完了するか失敗すると、ログチャネルは閉じられます。
+
+<a name="SnapshotService.Delete" />
+
+### func (*SnapshotService) Delete \{#func-snapshotservice-delete\}
+
+```go
+func (s *SnapshotService) Delete(ctx context.Context, snapshot *types.Snapshot) error
+```
+
+Delete はスナップショットを完全に削除します。
+
+このスナップショットから作成されたサンドボックスは引き続き動作しますが、削除後はこのスナップショットから新しいサンドボックスを作成することはできません。
+
+Parameters:
+
+* snapshot: 削除するスナップショット
+
+Example:
+
+```
+err := client.Snapshots.Delete(ctx, snapshot)
+if err != nil {
+    return err
+}
+```
+
+削除に失敗した場合はエラーを返します。
+
+<a name="SnapshotService.Get" />
+
+### func (*SnapshotService) Get \{#func-snapshotservice-get\}
+
+```go
+func (s *SnapshotService) Get(ctx context.Context, nameOrID string) (*types.Snapshot, error)
+```
+
+Get は、名前または ID を指定してスナップショットを取得します。
+
+Parameters:
+
+* nameOrID: スナップショット名または一意の ID
+
+Example:
+
+```
+snapshot, err := client.Snapshots.Get(ctx, "my-python-env")
+if err != nil {
+    return err
+}
+fmt.Printf("スナップショット %s: %s\n", snapshot.Name, snapshot.State)
+```
+
+[types.Snapshot] を返します。見つからなかった場合はエラーを返します。
+
+<a name="SnapshotService.List" />
+
+### func (*SnapshotService) List \{#func-snapshotservice-list\}
+
+```go
+func (s *SnapshotService) List(ctx context.Context, page *int, limit *int) (*types.PaginatedSnapshots, error)
+```
+
+List は、必要に応じてページネーションを指定してスナップショットを返します。
+
+Parameters:
+
+* page: ページ番号（1 始まり）。最初のページの場合は nil を指定
+* limit: 1 ページあたりの最大スナップショット数。デフォルト値を使う場合は nil を指定
+
+Example:
+
+```
+// デフォルトの制限で最初のページを一覧表示
+result, err := client.Snapshots.List(ctx, nil, nil)
+if err != nil {
+    return err
+}
+
+// List with pagination
+page, limit := 2, 10
+result, err := client.Snapshots.List(ctx, &page, &limit)
+fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.Total)
+```
+
+スナップショットとページング情報を含む [types.PaginatedSnapshots] を返します。
+
+<a name="VolumeService" />
+
+## type VolumeService \{#type-volumeservice\}
+
+VolumeService は永続ストレージ用ボリュームの管理操作を提供します。
+
+VolumeService は、サンドボックスにアタッチ可能な永続ストレージ用ボリュームの作成、管理、削除を行えます。ボリュームはサンドボックスのライフサイクルとは独立してデータを保持し、サンドボックス間で共有できます。[Client.Volumes] 経由でアクセスします。
+
+Example:
+
+```
+// 新しいボリュームを作成する
+volume, err := client.Volumes.Create(ctx, "my-data-volume")
+if err != nil {
+    return err
+}
+
+// ボリュームが準備完了するまで待機する
+volume, err = client.Volumes.WaitForReady(ctx, volume, 60*time.Second)
+if err != nil {
+    return err
+}
+
+// すべてのボリュームを一覧表示する
+volumes, err := client.Volumes.List(ctx)
+```
+
+```go
+type VolumeService struct {
+    // フィルタリングされた、またはエクスポートされていないフィールドが含まれます
+}
+```
+
+<a name="NewVolumeService" />
+
+### func NewVolumeService \{#func-newvolumeservice\}
+
+```go
+func NewVolumeService(client *Client) *VolumeService
+```
+
+NewVolumeService は新しい VolumeService を生成します。
+
+これは通常、[Client](#Client) を作成する際に SDK によって内部的に呼び出されます。ユーザーは VolumeService を直接作成するのではなく、[Client.Volumes] を通じてアクセスしてください。
+
+<a name="VolumeService.Create" />
+
+### func (*VolumeService) Create \{#func-volumeservice-create\}
+
+```go
+func (v *VolumeService) Create(ctx context.Context, name string) (*types.Volume, error)
+```
+
+Create は、新しい永続ストレージのボリュームを作成します。
+
+ボリュームは最初は「pending」状態で開始し、利用可能になると「ready」状態に遷移します。ボリュームが「ready」状態になるまで待機するには、[VolumeService.WaitForReady](#VolumeService.WaitForReady) を使用します。
+
+Parameters:
+
+* name: ボリュームの一意の名前
+
+Example:
+
+```
+volume, err := client.Volumes.Create(ctx, "my-data-volume")
+if err != nil {
+    return err
+}
+
+// ボリュームが準備完了するまで待機
+volume, err = client.Volumes.WaitForReady(ctx, volume, 60*time.Second)
+```
+
+作成された [types.Volume] またはエラーを返します。
+
+<a name="VolumeService.Delete" />
+
+### func (*VolumeService) Delete \{#func-volumeservice-delete\}
+
+```go
+func (v *VolumeService) Delete(ctx context.Context, volume *types.Volume) error
+```
+
+削除は、ボリュームとそのすべてのデータを完全に削除します。
+
+この操作は取り消せません。削除前に、どのサンドボックスもそのボリュームを使用していないことを確認してください。
+
+パラメーター:
+
+* volume: 削除するボリューム
+
+例:
+
+```
+err := client.Volumes.Delete(ctx, volume)
+if err != nil {
+    return err
+}
+```
+
+削除に失敗した場合、エラーを返します。
+
+<a name="VolumeService.Get" />
+
+### func (*VolumeService) Get \{#func-volumeservice-get\}
+
+```go
+func (v *VolumeService) Get(ctx context.Context, name string) (*types.Volume, error)
+```
+
+Get は、指定した名前のボリュームを取得します。
+
+Parameters:
+
+* name: ボリューム名
+
+Example:
+
+```
+volume, err := client.Volumes.Get(ctx, "my-data-volume")
+if err != nil {
+    return err
+}
+fmt.Printf("Volume state: %s\n", volume.State)
+```
+
+[types.Volume] を返すか、見つからない場合はエラーを返します。
+
+<a name="VolumeService.List" />
+
+### func (*VolumeService) List \{#func-volumeservice-list\}
+
+```go
+func (v *VolumeService) List(ctx context.Context) ([]*types.Volume, error)
+```
+
+List は組織内に存在するすべてのボリュームを返します。
+
+例:
+
+```
+volumes, err := client.Volumes.List(ctx)
+if err != nil {
+    return err
+}
+for _, vol := range volumes {
+    fmt.Printf("ボリューム %s: %s\n", vol.Name, vol.State)
+}
+```
+
+[types.Volume] のスライス、またはリクエストが失敗した場合にはエラーを返します。
+
+<a name="VolumeService.WaitForReady" />
+
+### func (*VolumeService) WaitForReady \{#func-volumeservice-waitforready\}
+
+```go
+func (v *VolumeService) WaitForReady(ctx context.Context, volume *types.Volume, timeout time.Duration) (*types.Volume, error)
+```
+
+WaitForReady は、ボリュームが &quot;ready&quot; 状態に到達するまで待機します。
+
+このメソッドは、ボリュームの状態を 1 秒間隔でポーリングし、ボリュームが &quot;ready&quot; 状態になるか、エラー状態に到達するか、またはタイムアウトに達するまで待機します。
+
+Parameters:
+
+* volume: 待機対象のボリューム
+* timeout: ボリュームが &quot;ready&quot; 状態になるまで待機する最大時間
+
+Example:
+
+```
+volume, err := client.Volumes.Create(ctx, "my-volume")
+if err != nil {
+    return err
+}
+
+// ボリュームが準備完了状態になるまで最大2分間待機
+volume, err = client.Volumes.WaitForReady(ctx, volume, 2*time.Minute)
+if err != nil {
+    return fmt.Errorf("volume failed to become ready: %w", err)
+}
+```
+
+準備が整うまで待機し、準備完了した更新済みの [types.Volume] を返します。タイムアウトに達するか、ボリュームがエラー状態になった場合はエラーを返します。

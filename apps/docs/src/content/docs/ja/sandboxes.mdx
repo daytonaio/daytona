@@ -1,0 +1,849 @@
+---
+title: サンドボックス
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import SandboxDiagram from '@components/SandboxDiagram.astro'
+
+サンドボックスは、Daytona によって管理される隔離された実行環境です。このガイドでは、サンドボックスのライフサイクルと、Daytona SDK を使用して作成・管理・削除する方法について説明します。
+
+Daytona のサンドボックスは、デフォルトで **1 vCPU**、**1GB RAM**、**3GiB ディスク** を使用します。
+[組織](/docs/ja/organizations) には、サンドボックスに対するリソース上限として **4 vCPU**、**8GB RAM**、**10GB ディスク** が設定されています。
+より多くのリソースが必要な場合は、[support@daytona.io](mailto:support@daytona.io) までお問い合わせください。
+
+## サンドボックスのライフサイクル \{#sandbox-lifecycle\}
+
+ライフサイクル全体を通して、Daytona のサンドボックスはいくつかの異なる状態を取り得ます。
+下の図は、これらの状態とそれらの間で可能な遷移を示しています。
+
+<SandboxDiagram />
+
+## 複数ランタイムのサポート \{#multiple-runtime-support\}
+
+Daytona のサンドボックスは、サンドボックス内でコードを直接実行するために、Python、TypeScript、JavaScript の各プログラミング言語ランタイムをサポートします。
+
+`language` パラメーターで、サンドボックスで使用するプログラミング言語ランタイムを指定します。
+
+* **`python`**
+* **`typescript`**
+* **`javascript`**
+
+省略した場合、Daytona SDK はデフォルトで `python` を使用します。これを上書きするには、サンドボックスを作成する際に `language` の値を明示的に指定してください。
+
+:::note
+**サンドボックス名**: `name` パラメーターを使用して、サンドボックスに任意の名前を指定できます。指定しない場合、サンドボックス ID が名前として使用されます。サンドボックス名は再利用可能であり、特定の名前を持つサンドボックスが削除されると、その名前は再び使用可能になります。
+:::
+
+## サンドボックスの作成 \{#create-sandboxes\}
+
+Daytona は、デフォルトまたはカスタム設定を使用して、サンドボックスをプログラムから作成するためのオプションを提供します。
+各サンドボックスに対して、[プログラミング言語ランタイム](/docs/sandboxes#multiple-runtime-support)、[スナップショット](/docs/snapshots)、[リソース](/docs/sandboxes#resources)、[環境変数](/docs/configuration#environment-variables)、および [ボリューム](/docs/volumes) を指定できます。
+実行中のサンドボックスは CPU、メモリ、およびディスクストレージを使用します。すべてのリソースは秒単位の使用量に応じて課金されます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # サンドボックスを作成
+    sandbox = daytona.create()
+
+    # Python を使用してサンドボックスを作成
+    params = CreateSandboxFromSnapshotParams(language="python")
+    sandbox = daytona.create(params)
+
+    # カスタム名でサンドボックスを作成
+    params = CreateSandboxFromSnapshotParams(name="my_awesome_sandbox")
+    sandbox = daytona.create(params)
+
+    # カスタムラベル付きでサンドボックスを作成
+    params = CreateSandboxFromSnapshotParams(labels={"LABEL": "label"})
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // サンドボックスを作成
+    const sandbox = await daytona.create();
+
+    // TypeScript を使用してサンドボックスを作成
+    const sandbox = await daytona.create({ language: 'typescript' });
+
+    // カスタム名でサンドボックスを作成
+    const sandbox = await daytona.create({ name: 'my_awesome_sandbox' });
+
+    // カスタムラベル付きでサンドボックスを作成
+    const sandbox = await daytona.create({ labels: { LABEL: 'label' } });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # サンドボックスを作成
+    sandbox = daytona.create
+
+    # Python を使用してサンドボックスを作成
+    params = Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON)
+    sandbox = daytona.create(params)
+
+    # カスタム名でサンドボックスを作成
+    params = Daytona::CreateSandboxFromSnapshotParams.new(name: 'my_awesome_sandbox')
+    sandbox = daytona.create(params)
+
+    # カスタムラベル付きでサンドボックスを作成
+    params = Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'LABEL' => 'label' })
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
+</Tabs>
+
+特定のポートのプレビュー URL を取得するには、[Preview &amp; Authentication](/docs/ja/preview-and-authentication) を参照してください。
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**create (Python SDK)**](/docs/ja/python-sdk/sync/daytona#daytonacreate)
+>
+> [**create (TypeScript SDK)**](/docs/ja/typescript-sdk/daytona#create)
+>
+> [**create (Ruby SDK)**](/docs/ja/ruby-sdk/daytona#create)
+
+### リソース \{#resources\}
+
+Daytona サンドボックスは、デフォルトで **1 vCPU**、**1GB RAM**、**3GiB ディスク**を使用します。
+
+Daytona は、デフォルトのスナップショットを使用してウォーム状態のサンドボックスをプールとして保持しています。
+ウォームサンドボックスが利用可能な場合、コールドブートすることなくミリ秒単位で起動します。
+
+サンドボックスのリソース（CPU、メモリ、ディスク容量）をカスタマイズするには、`Resources` クラスを使用します:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, Resources, CreateSandboxFromImageParams, Image
+
+    daytona = Daytona()
+
+    # カスタムリソースを使用してサンドボックスを作成
+    resources = Resources(
+        cpu=2,    # CPU コア数 2
+        memory=4, # 4GB の RAM
+        disk=8,   # 8GB のディスク容量
+    )
+
+    params = CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=resources
+    )
+
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from "@daytonaio/sdk";
+
+    async function main() {
+      const daytona = new Daytona();
+
+      // カスタムリソースを使用してサンドボックスを作成
+      const sandbox = await daytona.create({
+        image: Image.debianSlim("3.13"),
+        resources: {
+          cpu: 2,     // CPU コア数 2
+          memory: 4,  // 4GB の RAM
+          disk: 8,    // 8GB のディスク容量
+        },
+      });
+    }
+
+    main();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # カスタムリソースを使用してサンドボックスを作成
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromImageParams.new(
+        image: Daytona::Image.debian_slim('3.12'),
+        resources: Daytona::Resources.new(
+          cpu: 2,     # CPU コア数 2
+          memory: 4,  # 4GB の RAM
+          disk: 8     # 8GB のディスク容量
+        )
+      )
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+すべてのリソースパラメータは省略可能です。指定しなかった場合、Daytona は選択した言語とユースケースに適したデフォルト値を使用します。
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/daytona#resources)、[TypeScript SDK](/docs/ja/typescript-sdk/daytona#resources)、および [Ruby SDK](/docs/ja/ruby-sdk/daytona#resources) のリファレンスを参照してください:
+
+> [**Resources (Python SDK)**](/docs/ja/python-sdk/sync/sandbox#resources)
+>
+> [**Resources (TypeScript SDK)**](/docs/ja/typescript-sdk/snapshot#createsnapshotparams)
+
+### エフェメラルサンドボックス \{#ephemeral-sandboxes\}
+
+エフェメラルサンドボックスは、停止されると自動的に削除されます。短時間で完了するタスクやテスト用途に便利です。
+
+エフェメラルサンドボックスを作成するには、サンドボックスを作成する際に `ephemeral` パラメータを `True` に設定します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+
+    # エフェメラルサンドボックスを作成
+    params = CreateSandboxFromSnapshotParams(
+      ephemeral=True,
+      auto_stop_interval=5 # エフェメラルサンドボックスは 5 分間操作がないと削除されます
+    )
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+
+    // エフェメラルサンドボックスを作成
+    const sandbox = await daytona.create({
+      ephemeral: true,
+      autoStopInterval: 5 # エフェメラルサンドボックスは 5 分間操作がないと削除されます
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # エフェメラルサンドボックスを作成
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      ephemeral: true,
+      auto_stop_interval: 5 # エフェメラルサンドボックスは 5 分間操作がないと削除されます
+    )
+    sandbox = daytona.create(params)
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+[&quot;autoDeleteInterval: 0&quot;](#auto-delete-interval) を設定すると、&quot;ephemeral&quot; を `true` に設定した場合と同じ動作になります。
+:::
+
+### ネットワーク設定（ファイアウォール） \{#network-settings-firewall\}
+
+Daytona のサンドボックスは、セキュリティの強化および接続の管理のために、設定可能なネットワークファイアウォールの制御機能を提供します。
+デフォルトでは、ネットワークアクセスには標準的なセキュリティポリシーが適用されますが、サンドボックスを作成する際に[ネットワーク設定をカスタマイズ](/docs/ja/network-limits)できます。
+
+## サンドボックスを起動する \{#start-sandboxes\}
+
+Daytona では、[Daytona Dashboard ↗](https://app.daytona.io/dashboard/) からサンドボックスを起動するか、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) を使用してプログラムから起動することができます。
+
+1. [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes) に移動します。
+2. 起動するサンドボックスの隣にある起動アイコン（**▶**）をクリックします。
+
+```text
+Starting sandbox with ID: <sandbox-id>
+```
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
+    # サンドボックスを開始
+    sandbox.start()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
+    # サンドボックスを開始
+    await sandbox.start();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
+    # サンドボックスを開始
+    sandbox.start
+    ```
+  </TabItem>
+</Tabs>
+
+より詳しくは、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop)、[TypeScript SDK](/docs/typescript-sdk/sandbox#stop)、および [Ruby SDK](/docs/ruby-sdk/sandbox#start) のリファレンスを参照してください。
+
+> [**start (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstart)
+>
+> [**start (TypeScript SDK)**](/docs/typescript-sdk/sandbox#start)
+>
+> [**start (Ruby SDK)**](/docs/ruby-sdk/sandbox#start)
+
+## サンドボックスを一覧表示する \{#list-sandboxes\}
+
+Daytona では、サンドボックスの情報（ID、ルートディレクトリ、ステータス）を表示し、そのライフサイクルを管理するための機能を提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # サンドボックス ID を取得
+    sandbox_id = sandbox.id
+
+    # サンドボックスユーザーのルートディレクトリを取得
+    root_dir = sandbox.get_user_root_dir()
+
+    # サンドボックスの ID、自動停止間隔、状態を取得
+    print(sandbox.id)
+    print(sandbox.auto_stop_interval)
+    print(sandbox.state)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // サンドボックス ID を取得
+    const sandboxId = sandbox.id;
+
+    // サンドボックスユーザーのルートディレクトリを取得
+    const rootDir = await sandbox.getUserRootDir();
+
+    // サンドボックスの ID、自動停止間隔、状態を取得
+    console.log(sandbox.id)
+    console.log(sandbox.autoStopInterval)
+    console.log(sandbox.state)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # サンドボックス ID を取得
+    sandbox_id = sandbox.id
+
+    # サンドボックスユーザーのルートディレクトリを取得
+    root_dir = sandbox.get_user_home_dir
+
+    # サンドボックスの ID、自動停止間隔、状態を取得
+    puts sandbox.id
+    puts sandbox.auto_stop_interval
+    puts sandbox.state
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop)、[TypeScript SDK](/docs/typescript-sdk/sandbox#stop)、および [Ruby SDK](/docs/ruby-sdk/sandbox#list) のリファレンスを参照してください。
+
+> [**list (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxlist)
+>
+> [**list (TypeScript SDK)**](/docs/typescript-sdk/sandbox#list)
+>
+> [**list (Ruby SDK)**](/docs/ruby-sdk/sandbox#list)
+
+## サンドボックスを停止する \{#stop-sandboxes\}
+
+Daytona では、Python、TypeScript および Ruby からサンドボックスを停止するためのメソッドを提供しています。
+
+1. [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes) にアクセスします。
+2. 停止したいサンドボックスの横にある停止アイコン（**⏹**）をクリックします。
+
+停止中のサンドボックスでは、メモリ状態は破棄されますが、ファイルシステムの状態は保持されます。ストレージに対するコストのみが発生し、必要に応じて再起動できます。
+
+サンドボックスを近いうちに再起動する予定がある場合は、停止状態のままにしておくとよいでしょう。それ以外の場合は、ディスク使用量のコストをなくすために、サンドボックスを停止してからアーカイブすることを推奨します。
+
+```text
+Stopping sandbox with ID: <sandbox-id>
+```
+
+停止中のサンドボックスでは、メモリ状態は破棄されますが、ファイルシステムの状態は保持されます。ストレージに対するコストのみが発生し、必要に応じて再起動できます。
+
+サンドボックスを近いうちに再起動する予定がある場合は、停止状態のままにしておくとよいでしょう。それ以外の場合は、ディスク使用量のコストをなくすために、サンドボックスを停止してからアーカイブすることを推奨します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxParams(language="python"))
+
+    # サンドボックスを停止
+    sandbox.stop()
+
+    print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    # 後でこのサンドボックス ID を使用してサンドボックスを検索し、起動できる
+    sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+
+    # サンドボックスを起動
+    sandbox.start()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({ language: 'typescript' });
+
+    // サンドボックスを停止
+    await sandbox.stop();
+
+    console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    // 後でこのサンドボックス ID を使用してサンドボックスを検索し、起動できる
+    const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+
+    // サンドボックスを起動
+    await sandbox.start();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(language: Daytona::CodeLanguage::PYTHON))
+
+    # サンドボックスを停止
+    sandbox.stop
+
+    puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
+
+    # 後でこのサンドボックス ID を使用してサンドボックスを検索し、起動できる
+    sandbox = daytona.find_one('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
+
+    # サンドボックスを起動
+    sandbox.start
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxstop)、[TypeScript SDK](/docs/typescript-sdk/sandbox#stop)、および [Ruby SDK](/docs/ruby-sdk/sandbox#stop) のリファレンスを参照してください。
+
+> [**stop (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxstop), [**stop (TypeScript SDK)**](/docs/typescript-sdk/sandbox#stop), [**stop (Ruby SDK)**](/docs/ruby-sdk/sandbox#stop)
+>
+> [**find&#95;one (Python SDK)**](/docs/python-sdk/sync/daytona#daytonafind_one), [**findOne (TypeScript SDK)**](/docs/typescript-sdk/daytona#findone), [**find&#95;one (Ruby SDK)**](/docs/ruby-sdk/daytona#find_one)
+
+## サンドボックスのアーカイブ \{#archive-sandboxes\}
+
+Daytona は、Python、TypeScript、および Ruby を使用してサンドボックスをアーカイブするためのメソッドを提供します。
+
+サンドボックスがアーカイブされると、ファイルシステム全体の状態がコスト効率の高いオブジェクトストレージに移動され、サンドボックスを長期間利用可能な状態で保持できます。
+アーカイブされたサンドボックスを起動するには、サイズにもよりますが、停止中のサンドボックスを起動する場合よりも時間がかかります。
+
+サンドボックスをアーカイブする前にはあらかじめ停止しておく必要があり、その後は停止中のサンドボックスと同じ方法で再度起動できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # サンドボックスをアーカイブする
+    sandbox.archive()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // サンドボックスをアーカイブする
+    await sandbox.archive();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # サンドボックスをアーカイブする
+    sandbox.archive
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**archive (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxarchive)
+>
+> [**archive (TypeScript SDK)**](/docs/typescript-sdk/sandbox#archive)
+>
+> [**archive (Ruby SDK)**](/docs/ruby-sdk/sandbox#archive)
+
+## サンドボックスの復旧 \{#recover-sandboxes\}
+
+Daytona では、Python、TypeScript、および Ruby を使用してサンドボックスを復旧するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Recover sandbox
+    sandbox.recover()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Recover sandbox
+    await sandbox.recover();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Recover sandbox
+    sandbox.recover
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover)、[TypeScript SDK](/docs/typescript-sdk/sandbox#recover)、および [Ruby SDK](/docs/ruby-sdk/sandbox#recover) のリファレンスを参照してください。
+
+> [**recover (Python SDK)**](/docs/ja/python-sdk/sync/sandbox#sandboxrecover)
+>
+> [**recover (TypeScript SDK)**](/docs/ja/typescript-sdk/sandbox#recover)
+>
+> [**recover (Ruby SDK)**](/docs/ja/ruby-sdk/sandbox#recover)
+
+### エラー状態からの復旧 \{#recover-from-error-state\}
+
+サンドボックスがエラー状態になった場合、エラーの原因によっては `recover` メソッドを使用して復旧できる場合があります。`recoverable` フラグは、そのエラー状態が自動復旧手順によって解消可能かどうかを示します。
+
+:::note
+ストレージ領域の解放など、**さらなるユーザーによる対応が必要なエラー** に対処するため、復旧処理は自動では実行されません。
+:::
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable:
+        sandbox.recover()
+        print("Sandbox recovered successfully")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Check if the Sandbox is recoverable
+    if (sandbox.recoverable) {
+        await sandbox.recover();
+        console.log('Sandbox recovered successfully');
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Check if the Sandbox is recoverable
+    if sandbox.recoverable
+      sandbox.recover
+      puts 'Sandbox recovered successfully'
+    end
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxrecover)、[TypeScript SDK](/docs/typescript-sdk/sandbox#recover)、および [Ruby SDK](/docs/ruby-sdk/sandbox#recover) のリファレンスを参照してください。
+
+> [**recover (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxrecover)
+>
+> [**recover (TypeScript SDK)**](/docs/typescript-sdk/sandbox#recover)
+>
+> [**recover (Ruby SDK)**](/docs/ruby-sdk/sandbox#recover)
+
+## サンドボックスの削除 \{#delete-sandboxes\}
+
+Daytona では、サンドボックスを削除できます。
+
+1. [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes) に移動します。
+2. 削除したいサンドボックスの横にある **Delete** ボタンをクリックします。
+
+```text
+Stopping sandbox with ID: <sandbox-id>
+```
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # サンドボックスを削除
+    sandbox.delete()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // サンドボックスを削除
+    await sandbox.delete();
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # サンドボックスを削除
+    sandbox.delete
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/) および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**delete (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxdelete)
+>
+> [**delete (TypeScript SDK)**](/docs/typescript-sdk/sandbox#delete)
+>
+> [**delete (Ruby SDK)**](/docs/ruby-sdk/sandbox#delete)
+
+## 自動ライフサイクル管理 \{#automated-lifecycle-management\}
+
+Daytona のサンドボックスは、ユーザーが設定した間隔に基づいて自動的に停止、アーカイブ、および削除されます。
+
+### 自動停止間隔 \{#auto-stop-interval\}
+
+自動停止間隔パラメータは、実行中のサンドボックスが自動的に停止されるまでの時間を設定します。
+
+**重要**: 自動停止間隔は、サンドボックス内で内部プロセスが実行されている場合でも作動します。システムは「内部プロセス」と「アクティブなユーザー操作」を区別します。単にスクリプトやバックグラウンドタスクが動作しているだけでは、サンドボックスを稼働状態に維持するには不十分です。
+
+#### タイマーがリセットされる条件 \{#what-resets-the-timer\}
+
+非アクティブタイマーがリセットされるのは、特定の外部からの操作があった場合にのみです：
+
+* 開いている[プレビューウィンドウ](/docs/ja/preview-and-authentication)
+* アクティブな[SSH 接続](/docs/ja/ssh-access)
+* [Daytona Toolbox SDK API](/docs/ja/tools/api/#daytona-toolbox) の呼び出し
+
+#### タイマーをリセットしないもの \{#what-does-not-reset-the-timer\}
+
+バックグラウンドで実行されている内部プロセスでは、タイマーはリセットされません:
+
+* バックグラウンドスクリプト（例: `npm run dev` を fire-and-forget 的なコマンドとして実行した場合）
+* 外部からのインタラクションを伴わない長時間実行タスク
+* SDK のポーリングやアクティブなモニタリングを伴わないプロセス
+
+**例**: 外部とのインタラクションなしで 15 分を超える LLM 推論のような長時間タスクを実行した場合、そのプロセス自体は「アクティビティ」と見なされないため、処理の途中でサンドボックスが自動停止される可能性があります。
+
+このパラメータには、次のいずれかを設定できます:
+
+* 分単位の時間間隔
+* `0`: 自動停止機能を無効にし、サンドボックスを無期限に実行できるようにする
+
+パラメータが設定されていない場合は、デフォルト値として `15` 分が使用されます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # Disables the auto-stop feature - default is 15 minutes
+        auto_stop_interval=0,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+         // Disables the auto-stop feature - default is 15 minutes
+        autoStopInterval: 0,
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # 自動停止機能を無効化します - デフォルトは 15 分です
+        auto_stop_interval: 0
+      )
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval)、[TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_stop_interval)、および [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_stop_interval) のリファレンスを参照してください:
+
+> [**set&#95;auto&#95;stop&#95;interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_autostop_interval)
+>
+> [**setAutostopInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautostopinterval)
+>
+> [**set&#95;auto&#95;stop&#95;interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_stop_interval)
+
+### 自動アーカイブ間隔 \{#auto-archive-interval\}
+
+自動アーカイブ間隔パラメーターは、サンドボックスが継続して停止状態になってから自動的にアーカイブされるまでの時間を設定します。
+
+このパラメーターには、次のいずれかを指定できます:
+
+* 分単位で指定した時間間隔
+* `0`: 最大間隔である `30 days` が使用されることを意味します
+
+パラメーターが設定されていない場合、デフォルトの `7 days` の間隔が使用されます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # サンドボックスが 1 時間停止してから自動的にアーカイブする
+        auto_archive_interval=60,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        // サンドボックスが 1 時間停止してから自動的にアーカイブする
+        autoArchiveInterval: 60,
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # サンドボックスが 1 時間停止してから自動的にアーカイブする
+        auto_archive_interval: 60
+      )
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)、[TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_archive_interval)、および [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_archive_interval) のリファレンスを参照してください:
+
+> [**set&#95;auto&#95;archive&#95;interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_archive_interval)
+>
+> [**setAutoArchiveInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautoarchiveinterval)
+>
+> [**set&#95;auto&#95;archive&#95;interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_archive_interval)
+
+### 自動削除間隔 \{#auto-delete-interval\}
+
+`auto-delete interval` パラメーターは、サンドボックスが停止した状態のままどれくらい経過したら自動的に削除するかを設定します。デフォルトでは、サンドボックスは自動的に削除されません。
+
+このパラメーターには、次のいずれかを設定できます:
+
+* 分単位の時間間隔
+* `-1`: 自動削除機能を無効化
+* `0`: サンドボックスを停止直後に削除する
+
+パラメーターが設定されていない場合、サンドボックスは自動的には削除されません。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        # サンドボックスが 1 時間停止していたら自動削除
+        auto_delete_interval=60,
+    ))
+
+    # サンドボックスを停止直後に削除
+    sandbox.set_auto_delete_interval(0)
+
+    # 自動削除を無効化
+    sandbox.set_auto_delete_interval(-1)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my-snapshot-name",
+        // サンドボックスが 1 時間停止していたら自動削除
+        autoDeleteInterval: 60,
+    });
+
+    // サンドボックスを停止直後に削除
+    await sandbox.setAutoDeleteInterval(0)
+
+    // 自動削除を無効化
+    await sandbox.setAutoDeleteInterval(-1)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my-snapshot-name',
+        # サンドボックスが 1 時間停止していたら自動削除
+        auto_delete_interval: 60
+      )
+    )
+
+    # サンドボックスを停止直後に削除
+    sandbox.set_auto_delete_interval(0)
+
+    # 自動削除を無効化
+    sandbox.set_auto_delete_interval(-1)
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)、[TypeScript SDK](/docs/typescript-sdk/sandbox#set_auto_delete_interval)、および [Ruby SDK](/docs/ruby-sdk/sandbox#set_auto_delete_interval) のリファレンスを参照してください:
+
+> [**set&#95;auto&#95;delete&#95;interval (Python SDK)**](/docs/python-sdk/sync/sandbox#sandboxset_auto_delete_interval)
+>
+> [**setAutoDeleteInterval (TypeScript SDK)**](/docs/typescript-sdk/sandbox#setautodeleteinterval)
+>
+> [**set&#95;auto&#95;delete&#95;interval (Ruby SDK)**](/docs/ruby-sdk/sandbox#set_auto_delete_interval)
+
+### 無期限で実行する \{#running-indefinitely\}
+
+デフォルトでは、Daytona サンドボックスは 15 分間アクティビティがないと自動的に停止します。サンドボックスを中断なく実行し続けるには、新しいサンドボックスを作成する際に自動停止間隔を `0` に設定します:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox = daytona.create(CreateSandboxFromSnapshotParams(
+        snapshot="my_awesome_snapshot",
+        # 自動停止機能を無効にする - デフォルトは 15 分
+        auto_stop_interval=0,
+    ))
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const sandbox = await daytona.create({
+        snapshot: "my_awesome_snapshot",
+        // 自動停止機能を無効にする - デフォルトは 15 分
+        autoStopInterval: 0,
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(
+        snapshot: 'my_awesome_snapshot',
+        # 自動停止機能を無効にする - デフォルトは 15 分
+        auto_stop_interval: 0
+      )
+    )
+    ```
+  </TabItem>
+</Tabs>

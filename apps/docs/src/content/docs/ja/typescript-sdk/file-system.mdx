@@ -3,84 +3,77 @@ title: "ファイルシステム"
 hideTitleOnPage: true
 ---
 
+## FileSystem \{#filesystem\}
 
-## FileSystem
+サンドボックス内のファイルシステム操作を提供します。
 
-サンドボックス内でのファイルシステム操作を提供します。
+### コンストラクタ \{#constructors\}
 
-### Constructors
-
-#### new FileSystem()
+#### new FileSystem() \{#new-filesystem\}
 
 ```ts
 new FileSystem(
-   sandboxId: string, 
    clientConfig: Configuration, 
-   toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): FileSystem
+   apiClient: FileSystemApi, 
+   ensureToolboxUrl: () => Promise<void>): FileSystem
 ```
 
-**Parameters**:
+**パラメータ**:
 
-- `sandboxId` _string_
-- `clientConfig` _Configuration_
-- `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
+* `clientConfig` *Configuration*
+* `apiClient` *FileSystemApi*
+* `ensureToolboxUrl` *() =&gt; Promise&lt;void&gt;*
 
+**戻り値**:
 
-**Returns**:
+* `FileSystem`
 
-- `FileSystem`
+### メソッド \{#methods\}
 
-### Methods
-
-#### createFolder()
+#### createFolder() \{#createfolder\}
 
 ```ts
 createFolder(path: string, mode: string): Promise<void>
 ```
 
-指定した権限でサンドボックス内に新しいディレクトリを作成します。
+指定したパーミッションでサンドボックス内に新しいディレクトリを作成します。
 
-**Parameters**:
+**パラメータ**:
 
-- `path` _string_ - ディレクトリを作成するパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `mode` _string_ - 8 進数形式のディレクトリ権限（例: "755"）
+* `path` *string* - ディレクトリを作成するパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `mode` *string* - 8進数表記のディレクトリのパーミッション（例: &quot;755&quot;）
 
+**返り値**:
 
-**Returns**:
+* `Promise<void>`
 
-- `Promise<void>`
-
-**Example:**
+**例:**
 
 ```ts
-// 標準的な権限でディレクトリを作成
+// 標準権限でディレクトリを作成
 await fs.createFolder('app/data', '755');
 ```
 
 ***
 
-#### deleteFile()
+#### deleteFile() \{#deletefile\}
 
 ```ts
-deleteFile(path: string): Promise<void>
+deleteFile(path: string, recursive?: boolean): Promise<void>
 ```
 
 サンドボックスからファイルまたはディレクトリを削除します。
 
-**Parameters**:
+**パラメーター**:
 
-- `path` _string_ - 削除するファイルまたはディレクトリのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+* `path` *string* - 削除対象のファイルまたはディレクトリへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `recursive?` *boolean* - 対象がディレクトリの場合、削除するには true に設定する必要があります。
 
+**戻り値**:
 
-**Returns**:
+* `Promise<void>`
 
-- `Promise<void>`
-
-**Example:**
+**例:**
 
 ```ts
 // ファイルを削除
@@ -89,37 +82,35 @@ await fs.deleteFile('app/temp.log');
 
 ***
 
-#### downloadFile()
+#### downloadFile() \{#downloadfile\}
 
-##### Call Signature
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
 downloadFile(remotePath: string, timeout?: number): Promise<Buffer<ArrayBufferLike>>
 ```
 
-サンドボックスからファイルをダウンロードします。このメソッドはファイル全体をメモリに読み込むため、
-大きなファイルのダウンロードには推奨されません。
+サンドボックスからファイルをダウンロードします。このメソッドはファイル全体をメモリに読み込むため、大きなファイルのダウンロードには推奨しません。
 
-**Parameters**:
+**パラメーター**:
 
-- `remotePath` _string_ - ダウンロードするファイルのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `timeout?` _number_ - ダウンロード操作のタイムアウト（秒）。0 はタイムアウトなしを意味します。
-    既定は 30 分です。
+* `remotePath` *string* - ダウンロードするファイルのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `timeout?` *number* - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  既定値は30分です。
 
-**Returns**:
+**戻り値**:
 
-- `Promise<Buffer<ArrayBufferLike>>` - ファイル内容を表す Buffer。
+* `Promise<Buffer<ArrayBufferLike>>` - ファイル内容を表す Buffer。
 
-**Example:**
+**例:**
 
 ```ts
-// ファイルをダウンロードして処理
+// ファイルをダウンロードして処理する
 const fileBuffer = await fs.downloadFile('tmp/data.json');
-console.log('File content:', fileBuffer.toString());
+console.log('ファイル内容:', fileBuffer.toString());
 ```
 
-##### Call Signature
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
 downloadFile(
@@ -128,22 +119,20 @@ downloadFile(
 timeout?: number): Promise<void>
 ```
 
-サンドボックスからファイルをダウンロードしてローカルファイルに保存します。このメソッドはストリーミングを使用して
-ファイルをダウンロードするため、より大きなファイルのダウンロードに適しています。
+サンドボックスからファイルをダウンロードしてローカルファイルに保存します。このメソッドはストリーミングでダウンロードを行うため、大きなファイルの取得に適しています。
 
-**Parameters**:
+**パラメーター**:
 
-- `remotePath` _string_ - サンドボックス内でダウンロードするファイルのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `localPath` _string_ - ダウンロードしたファイルの保存先パス。
-- `timeout?` _number_ - ダウンロード操作のタイムアウト（秒）。0 はタイムアウトなしを意味します。
-    既定は 30 分です。
+* `remotePath` *string* - サンドボックス内でダウンロードするファイルのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `localPath` *string* - ダウンロードしたファイルの保存先パス。
+* `timeout?` *number* - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  既定値は 30 分です。
 
-**Returns**:
+**戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
-**Example:**
+**例:**
 
 ```ts
 // ファイルをダウンロードして保存
@@ -152,29 +141,69 @@ await fs.downloadFile('tmp/data.json', 'local_file.json');
 
 ***
 
-#### findFiles()
+#### downloadFiles() \{#downloadfiles\}
+
+```ts
+downloadFiles(files: FileDownloadRequest[], timeoutSec?: number): Promise<FileDownloadResponse[]>
+```
+
+サンドボックスから複数のファイルをダウンロードします。対象のファイルがローカルに既に存在する場合は上書きされます。
+
+**パラメータ**:
+
+* `files` *FileDownloadRequest[]* - ファイルダウンロード要求の配列。
+* `timeoutSec?` *number = ...* - ダウンロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  既定値は30分です。
+
+**戻り値**:
+
+* `Promise<FileDownloadResponse[]>` - ダウンロード結果の配列。
+
+**スロー**:
+
+リクエスト自体が失敗した場合（ネットワーク障害、不正なリクエスト/レスポンスなど）。個々の
+ファイルのダウンロードエラーは `FileDownloadResponse.error` フィールドで返されます。
+
+**例:**
+
+```ts
+// 複数のファイルをダウンロード
+const results = await fs.downloadFiles([
+  { source: 'tmp/data.json' },
+  { source: 'tmp/config.json', destination: 'local_config.json' }
+]);
+results.forEach(result => {
+  if (result.error) {
+    console.error(`${result.source}のダウンロード中にエラーが発生しました: ${result.error}`);
+  } else if (result.result) {
+    console.log(`${result.source}を${result.result}にダウンロードしました`);
+  }
+});
+```
+
+***
+
+#### findFiles() \{#findfiles\}
 
 ```ts
 findFiles(path: string, pattern: string): Promise<Match[]>
 ```
 
-サンドボックス内のファイルでテキストパターンを検索します。
+サンドボックス内のファイルからテキストパターンを検索します。
 
-**Parameters**:
+**パラメータ**:
 
-- `path` _string_ - 検索対象のディレクトリ。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `pattern` _string_ - 検索パターン
+* `path` *string* - 検索対象のディレクトリ。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `pattern` *string* - 検索パターン
 
+**戻り値**:
 
-**Returns**:
+* `Promise<Match[]>` - ファイル名と行情報を含む一致結果の配列
 
-- `Promise<Match[]>` - ファイルおよび行情報を含む一致結果の配列
-
-**Example:**
+**例:**
 
 ```ts
-// TypeScript ファイル内の TODO コメントをすべて検索
+// TypeScriptファイル内のすべてのTODOコメントを検索
 const matches = await fs.findFiles('app/src', 'TODO:');
 matches.forEach(match => {
   console.log(`${match.file}:${match.line}: ${match.content}`);
@@ -183,7 +212,7 @@ matches.forEach(match => {
 
 ***
 
-#### getFileDetails()
+#### getFileDetails() \{#getfiledetails\}
 
 ```ts
 getFileDetails(path: string): Promise<FileInfo>
@@ -191,48 +220,44 @@ getFileDetails(path: string): Promise<FileInfo>
 
 ファイルまたはディレクトリの詳細情報を取得します。
 
-**Parameters**:
+**パラメーター**:
 
-- `path` _string_ - ファイルまたはディレクトリのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
+* `path` *string* - ファイルまたはディレクトリのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
 
+**戻り値**:
 
-**Returns**:
+* `Promise<FileInfo>` - サイズ、権限、更新時刻などを含む詳細なファイル情報
 
-- `Promise<FileInfo>` - サイズ、権限、更新時刻などの詳細情報
-
-**Example:**
+**例:**
 
 ```ts
 // ファイルの詳細を取得
 const info = await fs.getFileDetails('app/config.json');
-console.log(`Size: ${info.size}, Modified: ${info.modTime}`);
+console.log(`サイズ: ${info.size}, 更新日時: ${info.modTime}`);
 ```
 
 ***
 
-#### listFiles()
+#### listFiles() \{#listfiles\}
 
 ```ts
 listFiles(path: string): Promise<FileInfo[]>
 ```
 
-サンドボックス内のディレクトリの内容を一覧表示します。
+サンドボックス内のディレクトリ内容を一覧表示します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `path` _string_ - 一覧表示するディレクトリのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-
+* `path` *string* - 一覧表示するディレクトリのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
 
 **戻り値**:
 
-- `Promise<FileInfo[]>` - ファイルおよびディレクトリ情報の配列
+* `Promise<FileInfo[]>` - ファイルおよびディレクトリの情報配列
 
 **例:**
 
 ```ts
-// List directory contents
+// ディレクトリの内容を一覧表示
 const files = await fs.listFiles('app/src');
 files.forEach(file => {
   console.log(`${file.name} (${file.size} bytes)`);
@@ -241,36 +266,33 @@ files.forEach(file => {
 
 ***
 
-#### moveFiles()
+#### moveFiles() \{#movefiles\}
 
 ```ts
 moveFiles(source: string, destination: string): Promise<void>
 ```
 
-ファイルまたはディレクトリを移動または名前変更します。
+ファイルまたはディレクトリを移動または名称変更します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `source` _string_ - 移動元のパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `destination` _string_ - 移動先のパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-
+* `source` *string* - ソースパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `destination` *string* - 宛先パス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
 ```ts
-// Move a file to a new location
+// ファイルを新しい場所に移動
 await fs.moveFiles('app/temp/data.json', 'app/data/data.json');
 ```
 
 ***
 
-#### replaceInFiles()
+#### replaceInFiles() \{#replaceinfiles\}
 
 ```ts
 replaceInFiles(
@@ -279,23 +301,22 @@ replaceInFiles(
 newValue: string): Promise<ReplaceResult[]>
 ```
 
-複数のファイル内のテキストを置換します。
+複数ファイルのテキスト内容を一括置換します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `files` _string\[\]_ - 処理するファイルパスの配列。相対パスはユーザーの
-- `pattern` _string_ - 置換対象のパターン
-- `newValue` _string_ - 置換後のテキスト
-
+* `files` *string[]* - 処理するファイルパスの配列。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `pattern` *string* - 置換対象のパターン
+* `newValue` *string* - 置換するテキスト
 
 **戻り値**:
 
-- `Promise<ReplaceResult[]>` - 各ファイルに対する置換結果
+* `Promise<ReplaceResult[]>` - 各ファイルに対する置換処理の結果
 
 **例:**
 
 ```ts
-// Update version number across multiple files
+// 複数のファイルでバージョン番号を更新
 const results = await fs.replaceInFiles(
   ['app/package.json', 'app/version.ts'],
   '"version": "1.0.0"',
@@ -305,69 +326,66 @@ const results = await fs.replaceInFiles(
 
 ***
 
-#### searchFiles()
+#### searchFiles() \{#searchfiles\}
 
 ```ts
 searchFiles(path: string, pattern: string): Promise<SearchFilesResponse>
 ```
 
-サンドボックス内で、名前パターンに一致するファイルやディレクトリを検索します。
+サンドボックス内で、名前パターンに基づいてファイルやディレクトリを検索します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `path` _string_ - 検索対象のディレクトリ。相対パスはユーザーの
-- `pattern` _string_ - ファイル名のパターン（グロブ対応）
-
+* `path` *string* - 検索対象のディレクトリ。相対パスはサンドボックスのワーキングディレクトリを基準に解決されます。
+* `pattern` *string* - ファイル名のパターン（グロブをサポート）
 
 **戻り値**:
 
-- `Promise<SearchFilesResponse>` - 一致したファイルを含む検索結果
+* `Promise<SearchFilesResponse>` - 一致したファイルを含む検索結果
 
 **例:**
 
 ```ts
-// Find all TypeScript files
+// すべてのTypeScriptファイルを検索
 const result = await fs.searchFiles('app', '*.ts');
 result.files.forEach(file => console.log(file));
 ```
 
 ***
 
-#### setFilePermissions()
+#### setFilePermissions() \{#setfilepermissions\}
 
 ```ts
 setFilePermissions(path: string, permissions: FilePermissionsParams): Promise<void>
 ```
 
-ファイルまたはディレクトリの権限と所有権を設定します。
+ファイルまたはディレクトリのパーミッションと所有権を設定します。
 
 **パラメータ**:
 
-- `path` _string_ - ファイルまたはディレクトリのパス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `permissions` _FilePermissionsParams_ - 権限設定
-
+* `path` *string* - ファイルまたはディレクトリへのパス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `permissions` *FilePermissionsParams* - パーミッション設定
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
 ```ts
-// Set file permissions and ownership
+// ファイルの権限と所有者を設定
 await fs.setFilePermissions('app/script.sh', {
   owner: 'daytona',
   group: 'users',
-  mode: '755'  // シェルスクリプトに実行権限を付与
+  mode: '755'  // シェルスクリプトの実行権限
 });
 ```
 
 ***
 
-#### uploadFile()
+#### uploadFile() \{#uploadfile\}
 
-##### 呼び出しシグネチャ
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
 uploadFile(
@@ -376,28 +394,27 @@ uploadFile(
 timeout?: number): Promise<void>
 ```
 
-サンドボックスにファイルをアップロードします。このメソッドはファイル全体をメモリに読み込むため、大きなファイルのアップロードには推奨されません。
+サンドボックスにファイルをアップロードします。このメソッドはファイル全体をメモリに読み込むため、大容量ファイルのアップロードには推奨されません。
 
 **パラメータ**:
 
-- `file` _Buffer_ - アップロードするファイルのバッファ。
-- `remotePath` _string_ - サンドボックス内のアップロード先パス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `timeout?` _number_ - アップロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
-    既定値は30分です。
+* `file` *Buffer* - アップロードするファイルのバッファ。
+* `remotePath` *string* - サンドボックス内のアップロード先パス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `timeout?` *number* - アップロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  既定値は30分です。
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
 ```ts
-// Upload a configuration file
+// 設定ファイルをアップロード
 await fs.uploadFile(Buffer.from('{"setting": "value"}'), 'tmp/config.json');
 ```
 
-##### 呼び出しシグネチャ
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
 uploadFile(
@@ -406,18 +423,18 @@ uploadFile(
 timeout?: number): Promise<void>
 ```
 
-ローカルファイルシステムからサンドボックスへファイルをアップロードします。このメソッドはストリーミングでアップロードを行うため、大きなファイルのアップロードに適しています。
+ローカルのファイルシステムからサンドボックスにファイルをアップロードします。このメソッドはストリーミングでアップロードを行うため、大きなファイルのアップロードに推奨されます。
 
-**パラメータ**:
+**パラメーター**:
 
-- `localPath` _string_ - アップロードするローカルファイルのパス。
-- `remotePath` _string_ - サンドボックス内の保存先パス。相対パスはユーザーのルートディレクトリを基準に解決されます。
-- `timeout?` _number_ - アップロード操作のタイムアウト（秒）。0 はタイムアウトなしを意味します。
-    既定値は 30 分です。
+* `localPath` *string* - アップロードするローカルファイルのパス。
+* `remotePath` *string* - サンドボックス内の保存先パス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `timeout?` *number* - アップロード処理のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  デフォルトは 30 分です。
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -428,24 +445,23 @@ await fs.uploadFile('local_file.txt', 'tmp/file.txt');
 
 ***
 
-#### uploadFiles()
+#### uploadFiles() \{#uploadfiles\}
 
 ```ts
 uploadFiles(files: FileUpload[], timeout?: number): Promise<void>
 ```
 
-複数のファイルをサンドボックスにアップロードします。保存先パスに既にファイルが存在する場合は上書きされます。
+複数のファイルをサンドボックスにアップロードします。宛先パスに既にファイルが存在する場合は上書きされます。
 
-**パラメータ**:
+**パラメーター**:
 
-- `files` _FileUpload\[\]_ - アップロードするファイルの配列。
-- `timeout?` _number = ..._ - アップロード操作のタイムアウト（秒）。0 はタイムアウトなしを意味します。
-    既定値は 30 分です。
-
+* `files` *FileUpload[]* - アップロードするファイルの配列。
+* `timeout?` *number = ...* - アップロードのタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  既定値は 30 分です。
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -470,20 +486,45 @@ await fs.uploadFiles(files);
 
 ***
 
+## DownloadMetadata \{#downloadmetadata\}
 
-## FilePermissionsParams
+ファイルダウンロード操作のメタデータを表します。
+
+**プロパティ**:
+
+* `destination?` *string* - ファイル内容がストリーミングされるローカルファイルシステム内の保存先パス。
+* `error?` *string* - ダウンロードが失敗した場合のエラーメッセージ。成功時は undefined。
+* `result?` *string | Buffer&lt;ArrayBufferLike&gt; | Uint8Array&lt;ArrayBufferLike&gt;* - ダウンロード結果。リクエストで `destination` が指定されている場合はファイルパス、
+  指定されていない場合はバイト列データ。失敗した場合、またはデータが受信されなかった場合は undefined。
+
+## FileDownloadRequest \{#filedownloadrequest\}
+
+サンドボックスから単一のファイルをダウンロードするリクエストを表します。
+
+**プロパティ**:
+
+* `destination?` *string* - ファイル内容をストリーミングするローカルファイルシステム上の保存先パス。指定しない場合、ファイルはバイトバッファにダウンロードされます（ファイルが大きい場合はメモリ問題を引き起こす可能性があります）。
+* `source` *string* - サンドボックス内のソースパス。相対パスはユーザーのルートディレクトリを基準に解決されます。
+
+## FileDownloadResponse \{#filedownloadresponse\}
+
+単一のファイルダウンロード要求に対するレスポンスを表します。
+
+**プロパティ**:
+
+* `error?` *string* - ダウンロードが失敗した場合のエラーメッセージ。成功した場合は未定義。
+* `result?` *string | Buffer&lt;ArrayBufferLike&gt;* - ダウンロード結果。リクエストで保存先が指定されている場合はファイルパス、指定されていない場合はバイト列の内容。失敗した場合、またはデータを受信しなかった場合は未定義。
+* `source` *string* - ダウンロード対象としてリクエストされた元のソースパス。
+
+## FilePermissionsParams \{#filepermissionsparams\}
 
 サンドボックス内のファイル権限を設定するためのパラメータ。
 
 **プロパティ**:
 
-- `group?` _string_ - ファイルのグループ所有者
-- `mode?` _string_ - 8進数形式のファイルモード／権限（例: "644"）
-- `owner?` _string_ - ファイルのユーザー所有者
-    
-
-
-
+* `group?` *string* - ファイルのグループ所有者
+* `mode?` *string* - 8進数形式のファイルモード/パーミッション（例: &quot;644&quot;）
+* `owner?` *string* - ファイルのユーザー所有者
 
 **例:**
 
@@ -494,13 +535,13 @@ const permissions: FilePermissionsParams = {
   group: 'users'
 };
 ```
-## FileUpload
+
+## FileUpload \{#fileupload\}
 
 サンドボックスにアップロードするファイルを表します。
 
 **プロパティ**:
 
-- `destination` _string_ - サンドボックス内の絶対パス。相対パスはユーザーの
-    ルートディレクトリを基準に解決されます。
-- `source` _string \| Buffer\<ArrayBufferLike\>_ - アップロード対象のファイル。Buffer の場合、ファイル内容として解釈され、メモリに読み込まれます。
-    メモリに収まることを確認してください。収まらない場合はローカルファイルパスを使用すると、その内容がサンドボックスへストリーミングされます。
+* `destination` *string* - サンドボックス内の絶対パス。相対パスはサンドボックスの作業ディレクトリを基準に解決されます。
+* `source` *string | Buffer&lt;ArrayBufferLike&gt;* - アップロードするファイル。Buffer の場合、ファイル内容として解釈され、メモリに読み込まれます。
+  メモリに収まることを確認してください。収まらない場合は、内容がサンドボックスへストリーミングされるローカルファイルのパスを使用してください。

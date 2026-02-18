@@ -1,0 +1,186 @@
+---
+title: Daytona と Letta Code を使用してコーディングエージェントを構築する
+description: Daytona のサンドボックス内で、永続メモリを備えたステートフルなコーディングエージェント Letta Code を実行するためのステップバイステップガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import lettaCodeAgentResult from '../../../../../assets/docs/images/letta-code-agent-result.gif'
+
+このガイドでは、[Letta Code](https://docs.letta.com/letta-code/) をベースにした自律型コーディングエージェントを Daytona のサンドボックス環境内で実行する方法を説明します。エージェントは、Web アプリの開発、任意の言語でのコード記述、依存関係のインストール、スクリプトの実行を行うことができます。Letta Code は状態を保持するエージェントと組み込みメモリを備えており、セッションをまたいで会話履歴を保持できます。
+
+***
+
+### 1. ワークフロー概要 \{#1-workflow-overview\}
+
+メインスクリプトを起動すると、Daytona のサンドボックスが作成され、その中に Letta Code がインストールされます。エージェントは、Daytona を前提としたカスタムのシステムプロンプトで構成されます。
+
+このスクリプトは、エージェントとチャットしたりコマンドを実行したりできる対話型 CLI インターフェイスを提供します。
+
+```
+$ npm run start
+Creating sandbox...
+Installing Letta Code...
+Starting Letta Code...
+Initializing agent...
+Agent initialized. Press Ctrl+C at any time to exit.
+
+User: create a beautiful, professional themed app that lets me write markdown documents and render them live
+Thinking...
+
+🔧 TodoWrite
+🔧 Write /home/daytona/markdown-editor/index.html
+🔧 TodoWrite
+🔧 Start HTTP server on port 8080
+🔧 TodoWrite
+Perfect! I've created a beautiful markdown editor with live preview for you! 🎉
+
+## Access your app here:
+https://8080-c157e5cb-5e11-4bb6-883d-c873169223b8.proxy.daytona.works
+
+## Features:
+
+✨ **Live Preview** — Real-time markdown rendering  
+
+📝 **Full Markdown Support** — Headers, text styles, lists, code blocks, tables, links, images  
+
+💾 **Auto-Save** — Persists to browser localStorage  
+
+📥 **Export** — Download as `.md` or standalone `.html`
+```
+
+エージェントは Web アプリケーションをホストし、[Daytona Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) 機能を使用してプレビューリンクを提供できます。タスクで Web アプリケーションの実行やプレビューが必要な場合には、エージェントがアプリケーションを自動的にホストし、稼働中のアプリケーションを確認できるリンクを生成します。
+
+<Image src={lettaCodeAgentResult} alt="Letta Code エージェントによって生成された Markdown エディターデモ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+完了するまでエージェントとのやり取りを続けることができます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytona の [リポジトリ](https://github.com/daytonaio/daytona.git) をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/letta-code
+```
+
+#### 環境の設定 \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から Daytona の API キーを取得し、[Letta Platform](https://app.letta.com/api-keys) から Letta の API キーを取得してください。
+
+`.env.example` を `.env` にコピーし、そこにキーを追加します。
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+SANDBOX_LETTA_API_KEY=your_letta_api_key
+```
+
+:::caution[APIキーのセキュリティ]
+この例では、LettaのAPIキーがサンドボックス環境に渡され、その中で実行されるあらゆるコードからアクセスされる可能性があります。
+:::
+
+#### ローカル環境での利用 \{#local-usage\}
+
+:::note[Node.js バージョン]
+この例を実行するには Node.js 18 以降が必要です。続行する前に、ご利用の環境がこの要件を満たしていることを確認してください。
+:::
+
+依存関係をインストールします：
+
+```bash
+npm install
+```
+
+サンプルを実行します：
+
+```bash
+npm run start
+```
+
+Letta Code エージェントは初期化され、コマンドを入力できる対話型プロンプトが表示されます。
+
+### 3. エージェントのアーキテクチャを理解する \{#3-understanding-the-agents-architecture\}
+
+この例は、主に 2 つの TypeScript ファイルで構成されています。
+
+* **index.ts**: Daytona のサンドボックスを作成し、Letta Code をインストールし、システムプロンプトを設定し、対話型の CLI インターフェースを提供するメインプログラムです。
+* **letta-session.ts**: Letta Code との PTY ベースの双方向通信を管理し、JSON メッセージのストリーミングとレスポンスの解析を行うヘルパークラスです。
+
+#### 初期化 \{#initialization\}
+
+初期化時、メインプログラムは次の処理を行います。
+
+1. 環境変数に Letta API キーを含めた状態で、新しい [Daytona サンドボックス](/docs/ja/sandboxes) を作成します。
+2. [プロセス実行](/docs/ja/process-code-execution#process-execution) を用いて `npm install` を実行し、サンドボックス内に Letta Code をグローバルにインストールします。
+3. Letta Code との双方向通信のために、サンドボックス内で [PTY (pseudoterminal)](/docs/ja/pty/) セッションを作成します。
+4. PTY を通じて stream-json フォーマットで、Letta Code を [双方向ヘッドレスモード](https://docs.letta.com/letta-code/headless/) で起動します。
+5. ユーザー入力を待機し、PTY セッションを通じてエージェントにプロンプトを送信します。
+
+#### メインプログラムコード \{#main-program-code\}
+
+このプログラムは、環境変数として渡された Letta の API キーを用いて [Daytona サンドボックス](/docs/ja/sandboxes) を作成します。
+
+```typescript
+sandbox = await daytona.create({
+  envVars: { LETTA_API_KEY: process.env.SANDBOX_LETTA_API_KEY },
+})
+```
+
+#### 疑似端末内での Letta Code の実行 \{#running-letta-code-in-a-pseudoterminal\}
+
+Letta Code との双方向通信を行うために、[PTY（pseudoterminal）](/docs/ja/pty/) が生成されます。
+
+```typescript
+this.ptyHandle = await this.sandbox.process.createPty({
+  id: `letta-pty-${Date.now()}`,
+  onData: (data: Uint8Array) => this.handleData(data),
+})
+```
+
+その後、Letta Code は PTY を介して [双方向ヘッドレスモード](https://docs.letta.com/letta-code/headless/#bidirectional-mode) で起動されます。
+
+```typescript
+await this.ptyHandle.sendInput(
+  `letta --new --system-custom "${systemPrompt.replace(/"/g, '\\"')}" --input-format stream-json --output-format stream-json --yolo -p\n`,
+)
+```
+
+`stream-json` 設定は入出力フォーマットとして使用され、プログラムがエージェントとの間で JSON メッセージをリアルタイムに送受信できるようにします。
+
+`--system-custom` プロンプトを使うと、カスタムの system プロンプトをエージェントに渡せます。このプロンプトでは、Daytona 固有の指示や、エージェントがプレビューリンクを生成できるようにする URL パターンなどを含めてエージェントを構成します。
+
+`--yolo` フラグを使用すると、各コマンドごとに明示的なユーザー承認を求めることなく、エージェントがシェルコマンドを実行できるようになります。
+
+#### メッセージ処理 \{#message-handling\}
+
+エージェントにプロンプトを送信するために、メインスクリプトは `processPrompt()` メソッドを呼び出します。このメソッドはユーザー入力を JSON 形式のメッセージに変換し、上記のように `this.ptyHandle.sendInput()` を使って PTY に送信します。
+
+フォーマットされたユーザーメッセージは次のようになります。
+
+```json
+{"type": "user", "message": {"role": "user", "content": "create a simple web server"}}
+```
+
+エージェントはストリーミング形式の JSON メッセージで応答します。ツール呼び出しはフラグメントとして届きます。
+
+```json
+{"type": "message", "message_type": "approval_request_message", "tool_call": {"tool_call_id": "call_123", "name": "Bash", "arguments": "{\"command\": \"python3 -m http.server 8080\"}"}}
+```
+
+これらの JSON フラグメントは `handleParsedMessage()` メソッドでパースされます。同一のツール呼び出しに対して連続して複数のフラグメントが受信された場合、それらは 1 つのツール呼び出しオブジェクトにまとめられます。ツール呼び出しまたはメッセージが完了すると、その結果がフォーマットされ、ユーザーに表示されます。
+
+#### クリーンアップ \{#clean-up\}
+
+メインプログラムを終了すると、Daytona のサンドボックスとすべてのファイルは自動的に削除されます。
+
+**主な利点:**
+
+* Daytona のサンドボックス内での安全かつ分離された実行環境
+* セッション間でメモリが保持されるステートフルなエージェント
+* ファイル操作やシェルコマンドを含む Letta Code の全機能
+* エージェントを [Letta&#39;s Agent Development Environment](https://app.letta.com/) 上で確認可能
+* ホストされたサービス向けのプレビューリンクを自動生成
+* 複数言語対応およびフルスタック開発のサポート
+* シンプルなセットアップと自動クリーンアップ
