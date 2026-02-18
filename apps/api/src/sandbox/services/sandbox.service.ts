@@ -1800,6 +1800,15 @@ export class SandboxService {
       return
     }
 
+    if (
+      [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.ARCHIVED].includes(
+        sandbox.state,
+      ) ||
+      [SandboxDesiredState.ARCHIVED, SandboxDesiredState.DESTROYED].includes(sandbox.desiredState)
+    ) {
+      throw new BadRequestError('Sandbox is destroyed and cannot be updated')
+    }
+
     //  only allow updating the state of started | stopped sandboxes
     if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
       throw new BadRequestError('Sandbox is not in a valid state to be updated')
