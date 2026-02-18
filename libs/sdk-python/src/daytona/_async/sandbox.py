@@ -725,7 +725,7 @@ class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes):
         total_pages (int): Total number of pages available.
 
     .. deprecated::
-        Use :class:`AsyncPaginatedSandboxesV2` instead. Will be removed on April 1, 2026.
+        Use :class:`AsyncCursorPaginatedSandboxes` instead. Will be removed on April 1, 2026.
     """
 
     items: list[AsyncSandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -733,7 +733,7 @@ class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes):
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
 
-class AsyncPaginatedSandboxesV2(PaginatedSandboxes):
+class AsyncCursorPaginatedSandboxes(PaginatedSandboxes):
     """Paginated list of Daytona Sandboxes using cursor-based pagination.
 
     Attributes:

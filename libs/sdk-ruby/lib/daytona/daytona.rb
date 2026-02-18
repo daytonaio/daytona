@@ -104,54 +104,55 @@ module Daytona
       response.items.first
     end
 
-    # Lists Sandboxes filtered by labels.
+    # Lists Sandboxes. When called with a {ListSandboxesParams} object, uses cursor-based
+    # pagination. When called with positional +labels+ and optional +page+/+limit+ args,
+    # falls back to the deprecated offset-based endpoint.
     #
-    # @deprecated Use {#list_v2} instead. This method uses offset-based pagination against a
-    #   deprecated API endpoint that will be removed on April 1, 2026. After that date,
-    #   this method will be removed and {#list_v2} will be renamed to +list+.
-    # @param labels [Hash<String, String>]
-    # @param page [Integer, Nil]
-    # @param limit [Integer, Nil]
-    # @return [Daytona::PaginatedResource]
-    # @raise [Daytona::Sdk::Error]
-    def list(labels = {}, page: nil, limit: nil)
-      raise Sdk::Error, 'page must be positive integer' if page && page < 1
-
-      raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
-
-      response = sandbox_api.list_sandboxes_paginated_deprecated(labels: JSON.dump(labels), page:, limit:)
-
-      PaginatedResource.new(
-        total: response.total,
-        page: response.page,
-        total_pages: response.total_pages,
-        items: response
-          .items
-          .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) }
-      )
-    end
-
-    # Returns a paginated list of Sandboxes with optional state filtering.
-    # Uses cursor-based pagination, ordered newest first.
+    # @overload list(params)
+    #   Returns a paginated list of Sandboxes using cursor-based pagination, ordered newest first.
+    #   @param params [Daytona::ListSandboxesParams] Cursor-based pagination parameters.
+    #   @return [Daytona::CursorPaginatedResource]
     #
-    # @param cursor [String, nil] Pagination cursor from a previous response. Omit to start from the beginning.
-    # @param limit [Integer, nil] Maximum number of items per page.
-    # @param states [Array<String>, nil] Filter by Sandbox states.
-    # @return [Daytona::PaginatedResourceV2]
-    def list_v2(cursor: nil, limit: nil, states: nil)
-      opts = {}
-      opts[:cursor] = cursor if cursor
-      opts[:limit] = limit if limit
-      opts[:states] = states if states
+    # @overload list(labels = nil, page: nil, limit: nil)
+    #   @deprecated Use the cursor-based overload instead. This overload uses offset-based
+    #     pagination against a deprecated API endpoint that will be removed on April 1, 2026.
+    #   @param labels [Hash<String, String>, nil]
+    #   @param page [Integer, nil]
+    #   @param limit [Integer, nil]
+    #   @return [Daytona::PaginatedResource]
+    #   @raise [Daytona::Sdk::Error]
+    def list(labels = nil, page: nil, limit: nil)
+      if labels.is_a?(ListSandboxesParams)
+        opts = {}
+        opts[:cursor] = labels.cursor if labels.cursor
+        opts[:limit] = labels.limit if labels.limit
+        opts[:states] = labels.states if labels.states
 
-      response = sandbox_api.list_sandboxes(opts)
+        response = sandbox_api.list_sandboxes(opts)
 
-      PaginatedResourceV2.new(
-        items: response
-          .items
-          .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) },
-        next_cursor: response.next_cursor
-      )
+        CursorPaginatedResource.new(
+          items: response
+            .items
+            .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) },
+          next_cursor: response.next_cursor
+        )
+      else
+        raise Sdk::Error, 'page must be positive integer' if page && page < 1
+        raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
+
+        response = sandbox_api.list_sandboxes_paginated_deprecated(
+          labels: JSON.dump(labels || {}), page:, limit:
+        )
+
+        PaginatedResource.new(
+          total: response.total,
+          page: response.page,
+          total_pages: response.total_pages,
+          items: response
+            .items
+            .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) }
+        )
+      end
     end
 
     # Starts a Sandbox and waits for it to be ready.

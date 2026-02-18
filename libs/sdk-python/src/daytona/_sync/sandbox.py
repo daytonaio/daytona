@@ -716,7 +716,7 @@ class PaginatedSandboxes(DeprecatedPaginatedSandboxes):
         total_pages (int): Total number of pages available.
 
     .. deprecated::
-        Use :class:`PaginatedSandboxesV2` instead. Will be removed on April 1, 2026.
+        Use :class:`CursorPaginatedSandboxes` instead. Will be removed on April 1, 2026.
     """
 
     items: list[Sandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -724,7 +724,7 @@ class PaginatedSandboxes(DeprecatedPaginatedSandboxes):
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
 
 
-class PaginatedSandboxesV2(PaginatedSandboxesApi):
+class CursorPaginatedSandboxes(PaginatedSandboxesApi):
     """Paginated list of Daytona Sandboxes using cursor-based pagination.
 
     Attributes:

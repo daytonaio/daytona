@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Daytona
-  # @deprecated Use {PaginatedResourceV2} instead. Will be removed on April 1, 2026.
+  # @deprecated Use {CursorPaginatedResource} instead. Will be removed on April 1, 2026.
   class PaginatedResource
     # @return [Array<Object>]
     attr_reader :items
@@ -28,7 +28,7 @@ module Daytona
   end
 
   # Paginated list of Sandboxes using cursor-based pagination.
-  class PaginatedResourceV2
+  class CursorPaginatedResource
     # @return [Array<Object>]
     attr_reader :items
 

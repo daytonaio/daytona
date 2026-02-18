@@ -6,9 +6,9 @@ from daytona_toolbox_api_client import SessionExecuteResponse
 
 from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
 from ._async.daytona import AsyncDaytona
-from ._async.sandbox import AsyncPaginatedSandboxes, AsyncPaginatedSandboxesV2, AsyncSandbox
+from ._async.sandbox import AsyncCursorPaginatedSandboxes, AsyncPaginatedSandboxes, AsyncSandbox
 from ._sync.daytona import Daytona
-from ._sync.sandbox import PaginatedSandboxesV2, Sandbox
+from ._sync.sandbox import CursorPaginatedSandboxes, Sandbox
 from .common.charts import (
     BarChart,
     BoxAndWhiskerChart,
@@ -27,6 +27,7 @@ from .common.daytona import (
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
+    ListSandboxesParams,
 )
 from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
 from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
@@ -67,8 +68,8 @@ __all__ = [
     "AsyncDaytona",
     "AsyncSandbox",
     "AsyncPaginatedSandboxes",
-    "AsyncPaginatedSandboxesV2",
-    "PaginatedSandboxesV2",
+    "AsyncCursorPaginatedSandboxes",
+    "CursorPaginatedSandboxes",
     "AsyncComputerUse",
     "AsyncMouse",
     "AsyncKeyboard",
@@ -81,6 +82,7 @@ __all__ = [
     "CreateSandboxFromImageParams",
     "CreateSandboxFromSnapshotParams",
     "CreateSnapshotParams",
+    "ListSandboxesParams",
     "PtySize",
     "LspCompletionPosition",
     "ExecutionArtifacts",

@@ -203,4 +203,25 @@ module Daytona
       super.merge(snapshot:).compact
     end
   end
+
+  # Parameters for listing Sandboxes using cursor-based pagination.
+  class ListSandboxesParams
+    # @return [String, nil] Pagination cursor from a previous response
+    attr_accessor :cursor
+
+    # @return [Integer, nil] Maximum number of items per page
+    attr_accessor :limit
+
+    # @return [Array<String>, nil] List of states to filter by.
+    attr_accessor :states
+
+    # @param cursor [String, nil]
+    # @param limit [Integer, nil]
+    # @param states [Array<String>, nil]
+    def initialize(cursor: nil, limit: nil, states: nil)
+      @cursor = cursor
+      @limit = limit
+      @states = states
+    end
+  end
 end

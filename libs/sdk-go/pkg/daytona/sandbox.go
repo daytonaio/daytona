@@ -73,7 +73,7 @@ type Sandbox struct {
 
 // PaginatedSandboxes represents a paginated list of sandboxes.
 //
-// Deprecated: Use [PaginatedSandboxesV2] instead. Will be removed on April 1, 2026.
+// Deprecated: Use [CursorPaginatedSandboxes] instead. Will be removed on April 1, 2026.
 type PaginatedSandboxes struct {
 	Items      []*Sandbox // Sandboxes in this page
 	Total      int        // Total number of sandboxes
@@ -81,8 +81,15 @@ type PaginatedSandboxes struct {
 	TotalPages int        // Total number of pages
 }
 
-// PaginatedSandboxesV2 represents a paginated list of sandboxes using cursor-based pagination.
-type PaginatedSandboxesV2 struct {
+// ListSandboxesParams contains parameters for listing sandboxes using cursor-based pagination.
+type ListSandboxesParams struct {
+	Cursor *string                  // Cursor for pagination
+	Limit  *int                     // Maximum number of results to return
+	States []apiclient.SandboxState // List of states to filter by
+}
+
+// CursorPaginatedSandboxes represents a paginated list of sandboxes using cursor-based pagination.
+type CursorPaginatedSandboxes struct {
 	Items      []*Sandbox // Sandboxes in this page
 	NextCursor *string    // Cursor for the next page of results. Nil if there are no more results.
 }

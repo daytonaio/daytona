@@ -819,49 +819,52 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 	}, nil
 }
 
-// ListV2 retrieves sandboxes with optional state filtering.
+// ListV2 retrieves sandboxes with optional state filtering using cursor-based pagination.
 // Uses cursor-based pagination, ordered newest first.
 //
 // Parameters:
-//   - cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
-//   - limit: Optional number of results per page. Pass nil for the default limit.
-//   - states: Optional list of sandbox states to filter by. Pass nil for no filtering.
+//   - params: Optional [ListSandboxesParams] containing cursor, limit, and state filters. Pass nil for defaults.
+//   - params.cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
+//   - params.limit: Optional number of results per page. Pass nil for the default limit.
+//   - params.states: Optional list of sandbox states to filter by. Pass nil for no filtering.
 //
 // Example:
 //
 //	// First page
-//	result, err := client.ListV2(ctx, nil, nil, nil)
+//	result, err := client.ListV2(ctx, nil)
 //
 //	// Next page
-//	result2, err := client.ListV2(ctx, result.NextCursor, nil, nil)
+//	result2, err := client.ListV2(ctx, &daytona.ListSandboxesParams{Cursor: result.NextCursor})
 //
 //	// Filter by state
 //	states := []apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED}
-//	result, err := client.ListV2(ctx, nil, nil, states)
+//	result, err := client.ListV2(ctx, &daytona.ListSandboxesParams{States: states})
 //
-// Returns a [PaginatedSandboxesV2] containing the matching sandboxes and a cursor for the next page.
-func (c *Client) ListV2(ctx context.Context, cursor *string, limit *int, states []apiclient.SandboxState) (*PaginatedSandboxesV2, error) {
-	return withInstrumentation(ctx, c.Otel, "Client", "ListV2", func(ctx context.Context) (*PaginatedSandboxesV2, error) {
-		return c.doListV2(ctx, cursor, limit, states)
+// Returns a [CursorPaginatedSandboxes] containing the matching sandboxes and a cursor for the next page.
+func (c *Client) ListV2(ctx context.Context, params *ListSandboxesParams) (*CursorPaginatedSandboxes, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "ListV2", func(ctx context.Context) (*CursorPaginatedSandboxes, error) {
+		return c.doListV2(ctx, params)
 	})
 }
 
-func (c *Client) doListV2(ctx context.Context, cursor *string, limit *int, states []apiclient.SandboxState) (*PaginatedSandboxesV2, error) {
+func (c *Client) doListV2(ctx context.Context, params *ListSandboxesParams) (*CursorPaginatedSandboxes, error) {
 	authCtx := c.getAuthContext(ctx)
 	request := c.apiClient.SandboxAPI.ListSandboxes(authCtx)
 
-	if cursor != nil {
-		request = request.Cursor(*cursor)
-	}
-	if limit != nil {
-		request = request.Limit(float32(*limit))
-	}
-	if states != nil {
-		stateStrings := make([]string, len(states))
-		for i, s := range states {
-			stateStrings[i] = string(s)
+	if params != nil {
+		if params.Cursor != nil {
+			request = request.Cursor(*params.Cursor)
 		}
-		request = request.States(stateStrings)
+		if params.Limit != nil {
+			request = request.Limit(float32(*params.Limit))
+		}
+		if params.States != nil {
+			stateStrings := make([]string, len(params.States))
+			for i, s := range params.States {
+				stateStrings[i] = string(s)
+			}
+			request = request.States(stateStrings)
+		}
 	}
 
 	result, httpResp, err := request.Execute()
@@ -905,7 +908,7 @@ func (c *Client) doListV2(ctx context.Context, cursor *string, limit *int, state
 		nextCursor = nc
 	}
 
-	return &PaginatedSandboxesV2{
+	return &CursorPaginatedSandboxes{
 		Items:      sandboxes,
 		NextCursor: nextCursor,
 	}, nil

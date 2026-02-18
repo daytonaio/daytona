@@ -780,7 +780,7 @@ export class Sandbox implements SandboxDto {
 }
 
 /**
- * @deprecated Use {@link PaginatedSandboxesV2} instead. Will be removed on April 1, 2026.
+ * @deprecated Use {@link CursorPaginatedSandboxes} instead. Will be removed on April 1, 2026.
  */
 export interface PaginatedSandboxes extends Omit<DeprecatedPaginatedSandboxes, 'items'> {
   items: Sandbox[]
@@ -793,7 +793,7 @@ export interface PaginatedSandboxes extends Omit<DeprecatedPaginatedSandboxes, '
  * @property {Sandbox[]} items - List of Sandboxes for the current page.
  * @property {string | null} nextCursor - Cursor for the next page of results. Null if there are no more results.
  */
-export interface PaginatedSandboxesV2 {
+export interface CursorPaginatedSandboxes {
   items: Sandbox[]
   nextCursor: string | null
 }
