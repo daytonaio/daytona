@@ -14,18 +14,22 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class PaginatedSandboxes
-    # List of results for the current page
+  class DeprecatedPaginatedSandboxes
     attr_accessor :items
 
-    # Cursor for the next page of results
-    attr_accessor :next_cursor
+    attr_accessor :total
+
+    attr_accessor :page
+
+    attr_accessor :total_pages
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'items' => :'items',
-        :'next_cursor' => :'nextCursor'
+        :'total' => :'total',
+        :'page' => :'page',
+        :'total_pages' => :'totalPages'
       }
     end
 
@@ -43,14 +47,15 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'items' => :'Array<Sandbox>',
-        :'next_cursor' => :'String'
+        :'total' => :'Float',
+        :'page' => :'Float',
+        :'total_pages' => :'Float'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
-        :'next_cursor'
       ])
     end
 
@@ -58,14 +63,14 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::PaginatedSandboxes` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::DeprecatedPaginatedSandboxes` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::PaginatedSandboxes`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::DeprecatedPaginatedSandboxes`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
@@ -78,10 +83,22 @@ module DaytonaApiClient
         self.items = nil
       end
 
-      if attributes.key?(:'next_cursor')
-        self.next_cursor = attributes[:'next_cursor']
+      if attributes.key?(:'total')
+        self.total = attributes[:'total']
       else
-        self.next_cursor = nil
+        self.total = nil
+      end
+
+      if attributes.key?(:'page')
+        self.page = attributes[:'page']
+      else
+        self.page = nil
+      end
+
+      if attributes.key?(:'total_pages')
+        self.total_pages = attributes[:'total_pages']
+      else
+        self.total_pages = nil
       end
     end
 
@@ -94,6 +111,18 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "items", items cannot be nil.')
       end
 
+      if @total.nil?
+        invalid_properties.push('invalid value for "total", total cannot be nil.')
+      end
+
+      if @page.nil?
+        invalid_properties.push('invalid value for "page", page cannot be nil.')
+      end
+
+      if @total_pages.nil?
+        invalid_properties.push('invalid value for "total_pages", total_pages cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -102,6 +131,9 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @items.nil?
+      return false if @total.nil?
+      return false if @page.nil?
+      return false if @total_pages.nil?
       true
     end
 
@@ -115,13 +147,45 @@ module DaytonaApiClient
       @items = items
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] total Value to be assigned
+    def total=(total)
+      if total.nil?
+        fail ArgumentError, 'total cannot be nil'
+      end
+
+      @total = total
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] page Value to be assigned
+    def page=(page)
+      if page.nil?
+        fail ArgumentError, 'page cannot be nil'
+      end
+
+      @page = page
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_pages Value to be assigned
+    def total_pages=(total_pages)
+      if total_pages.nil?
+        fail ArgumentError, 'total_pages cannot be nil'
+      end
+
+      @total_pages = total_pages
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
           items == o.items &&
-          next_cursor == o.next_cursor
+          total == o.total &&
+          page == o.page &&
+          total_pages == o.total_pages
     end
 
     # @see the `==` method
@@ -133,7 +197,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [items, next_cursor].hash
+      [items, total, page, total_pages].hash
     end
 
     # Builds the object from hash

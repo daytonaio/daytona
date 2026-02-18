@@ -1733,7 +1733,8 @@ paths:
         - sandbox
   /sandbox/paginated:
     get:
-      operationId: listSandboxesPaginated
+      deprecated: true
+      operationId: listSandboxesPaginated_deprecated
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -1955,7 +1956,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedSandboxes'
+                $ref: '#/components/schemas/DeprecatedPaginatedSandboxes'
           description: Paginated list of all sandboxes
       security:
         - bearer: []
@@ -1963,7 +1964,83 @@ paths:
             - openid
             - profile
             - email
-      summary: List all sandboxes paginated
+      summary: '[DEPRECATED] List all sandboxes paginated'
+      tags:
+        - sandbox
+  /sandbox/paginated/v2:
+    get:
+      description: Basic filtering with cursor-based pagination. Newest first. Strongly
+        consistent.
+      operationId: listSandboxes_v2
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Pagination cursor from a previous response
+          explode: true
+          in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+          style: form
+        - description: Number of results per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            maximum: 200
+            minimum: 1
+            type: number
+          style: form
+        - description: List of states to filter by.
+          explode: true
+          in: query
+          name: states
+          required: false
+          schema:
+            items:
+              enum:
+                - creating
+                - restoring
+                - destroying
+                - started
+                - stopped
+                - starting
+                - stopping
+                - error
+                - build_failed
+                - pending_build
+                - building_snapshot
+                - unknown
+                - pulling_snapshot
+                - archived
+                - archiving
+                - resizing
+              type: string
+            type: array
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSandboxes'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List sandboxes
       tags:
         - sandbox
   /sandbox/for-runner:
@@ -10609,7 +10686,7 @@ components:
         - target
         - user
       type: object
-    PaginatedSandboxes:
+    DeprecatedPaginatedSandboxes:
       example:
         total: 0.8008281904610115
         totalPages: 1.4658129805029452
@@ -10709,6 +10786,102 @@ components:
         - page
         - total
         - totalPages
+      type: object
+    PaginatedSandboxes:
+      example:
+        nextCursor: nextCursor
+        items:
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            networkBlockAll: false
+            autoDeleteInterval: 30
+            public: false
+            errorReason: The sandbox is not running
+            runnerId: runner123
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            desiredState: destroyed
+            networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+                subpath: users/alice
+              - mountPath: /data
+                volumeId: volume123
+                subpath: users/alice
+            cpu: 2
+            recoverable: true
+            env:
+              NODE_ENV: production
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            name: MySandbox
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+          - memory: 4
+            buildInfo: ''
+            autoStopInterval: 30
+            organizationId: organization123
+            createdAt: 2024-10-01T12:00:00Z
+            networkBlockAll: false
+            autoDeleteInterval: 30
+            public: false
+            errorReason: The sandbox is not running
+            runnerId: runner123
+            id: sandbox123
+            state: creating
+            class: small
+            updatedAt: 2024-10-01T12:00:00Z
+            desiredState: destroyed
+            networkAllowList: '192.168.1.0/16,10.0.0.0/24'
+            volumes:
+              - mountPath: /data
+                volumeId: volume123
+                subpath: users/alice
+              - mountPath: /data
+                volumeId: volume123
+                subpath: users/alice
+            cpu: 2
+            recoverable: true
+            env:
+              NODE_ENV: production
+            gpu: 0
+            daemonVersion: 1.0.0
+            backupCreatedAt: 2024-10-01T12:00:00Z
+            labels:
+              daytona.io/public: 'true'
+            target: local
+            disk: 10
+            name: MySandbox
+            backupState: None
+            user: daytona
+            autoArchiveInterval: 10080
+            snapshot: daytonaio/sandbox:latest
+      properties:
+        items:
+          description: List of results for the current page
+          items:
+            $ref: '#/components/schemas/Sandbox'
+          type: array
+        nextCursor:
+          description: Cursor for the next page of results
+          nullable: true
+          type: string
+      required:
+        - items
+        - nextCursor
       type: object
     CreateBuildInfo:
       properties:
