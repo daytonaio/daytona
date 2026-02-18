@@ -306,14 +306,60 @@ print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 #### Daytona.list
 
 ```python
-@intercept_errors(message_prefix="Failed to list sandboxes: ")
-@with_instrumentation()
+@overload
+def list(params: ListSandboxesParams) -> CursorPaginatedSandboxes
+```
+
+Returns a paginated list of Sandboxes with optional state filtering.
+
+Uses cursor-based pagination, ordered newest first.
+
+**Arguments**:
+
+- `params.cursor` _str | None_ - Pagination cursor from a previous response. Omit to start from the beginning.
+- `params.limit` _int | None_ - Maximum number of items per page.
+- `params.states` _list[str] | None_ - List of states to filter by.
+  
+
+**Returns**:
+
+- `CursorPaginatedSandboxes` - Cursor-paginated list of Sandbox instances.
+  
+
+**Example**:
+
+```python
+# First page
+page1 = daytona.list(ListSandboxesParams(limit=10))
+for sandbox in page1.items:
+    print(f"{sandbox.id}: {sandbox.state}")
+
+# Next page
+if page1.next_cursor:
+    page2 = daytona.list(ListSandboxesParams(cursor=page1.next_cursor, limit=10))
+
+# Filter by state
+running = daytona.list(ListSandboxesParams(limit=10, states=[SandboxState.STARTED]))
+```
+
+#### Daytona.list
+
+```python
+@overload
+@deprecated(reason=(
+    "Use the cursor-based overload instead. "
+    "This overload uses offset-based pagination against a deprecated API endpoint."
+))
 def list(labels: dict[str, str] | None = None,
          page: int | None = None,
          limit: int | None = None) -> PaginatedSandboxes
 ```
 
 Returns paginated list of Sandboxes filtered by labels.
+
+.. deprecated::
+Use the cursor-based overload instead. This overload uses offset-based pagination
+against a deprecated API endpoint.
 
 **Arguments**:
 
@@ -482,4 +528,18 @@ Parameters for creating a new Sandbox from a snapshot.
 **Attributes**:
 
 - `snapshot` _str | None_ - Name of the snapshot to use for the Sandbox.
+
+## ListSandboxesParams
+
+```python
+class ListSandboxesParams(BaseModel)
+```
+
+Parameters for listing Sandboxes using cursor-based pagination.
+
+**Attributes**:
+
+- `cursor` _str | None_ - Pagination cursor from a previous response. Omit to start from the beginning.
+- `limit` _int | None_ - Maximum number of items per page.
+- `states` _Sequence[str] | None_ - List of states to filter by.
 

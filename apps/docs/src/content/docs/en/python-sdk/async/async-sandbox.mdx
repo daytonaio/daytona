@@ -648,10 +648,13 @@ await sandbox.refresh_activity()
 ## AsyncPaginatedSandboxes
 
 ```python
-class AsyncPaginatedSandboxes(PaginatedSandboxesDto)
+class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes)
 ```
 
 Represents a paginated list of Daytona Sandboxes.
+
+.. deprecated::
+Use :class:`AsyncCursorPaginatedSandboxes` instead.
 
 **Attributes**:
 
@@ -659,6 +662,27 @@ Represents a paginated list of Daytona Sandboxes.
 - `total` _int_ - Total number of Sandboxes across all pages.
 - `page` _int_ - Current page number.
 - `total_pages` _int_ - Total number of pages available.
+
+##### items: `list[AsyncSandbox]`
+
+```python
+items = None
+```
+
+pyright: ignore[reportIncompatibleVariableOverride]
+
+## AsyncCursorPaginatedSandboxes
+
+```python
+class AsyncCursorPaginatedSandboxes(CursorPaginatedSandboxesApi)
+```
+
+Paginated list of Daytona Sandboxes using cursor-based pagination.
+
+**Attributes**:
+
+- `items` _list[AsyncSandbox]_ - List of Sandbox instances for the current page.
+- `next_cursor` _str | None_ - Cursor for the next page of results. None if there are no more results.
 
 ##### items: `list[AsyncSandbox]`
 

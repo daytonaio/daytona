@@ -59,6 +59,7 @@ daytona_api_client/models/create_user.py
 daytona_api_client/models/create_volume.py
 daytona_api_client/models/create_workspace.py
 daytona_api_client/models/daytona_configuration.py
+daytona_api_client/models/deprecated_paginated_sandboxes.py
 daytona_api_client/models/display_info_response.py
 daytona_api_client/models/docker_registry.py
 daytona_api_client/models/download_files.py

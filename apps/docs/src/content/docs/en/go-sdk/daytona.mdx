@@ -85,6 +85,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*Client\) FindOne\(ctx context.Context, sandboxIDOrName \*string, labels map\[string\]string\) \(\*Sandbox, error\)](<#Client.FindOne>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
+  - [func \(c \*Client\) ListV2\(ctx context.Context, params \*ListSandboxesParams\) \(\*CursorPaginatedSandboxes, error\)](<#Client.ListV2>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
   - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
@@ -101,6 +102,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(c \*ComputerUseService\) Screenshot\(\) \*ScreenshotService](<#ComputerUseService.Screenshot>)
   - [func \(c \*ComputerUseService\) Start\(ctx context.Context\) error](<#ComputerUseService.Start>)
   - [func \(c \*ComputerUseService\) Stop\(ctx context.Context\) error](<#ComputerUseService.Stop>)
+- [type CursorPaginatedSandboxes](<#CursorPaginatedSandboxes>)
 - [type DisplayService](<#DisplayService>)
   - [func NewDisplayService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*DisplayService](<#NewDisplayService>)
   - [func \(d \*DisplayService\) GetInfo\(ctx context.Context\) \(map\[string\]any, error\)](<#DisplayService.GetInfo>)
@@ -157,6 +159,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(k \*KeyboardService\) Hotkey\(ctx context.Context, keys string\) error](<#KeyboardService.Hotkey>)
   - [func \(k \*KeyboardService\) Press\(ctx context.Context, key string, modifiers \[\]string\) error](<#KeyboardService.Press>)
   - [func \(k \*KeyboardService\) Type\(ctx context.Context, text string, delay \*int\) error](<#KeyboardService.Type>)
+- [type ListSandboxesParams](<#ListSandboxesParams>)
 - [type LspServerService](<#LspServerService>)
   - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel \*otelState\) \*LspServerService](<#NewLspServerService>)
   - [func \(l \*LspServerService\) Completions\(ctx context.Context, path string, position types.Position\) \(any, error\)](<#LspServerService.Completions>)
@@ -459,6 +462,8 @@ func (c *Client) List(ctx context.Context, labels map[string]string, page *int, 
 
 List retrieves sandboxes with optional label filtering and pagination.
 
+Deprecated: Use [Client.ListV2](<#Client.ListV2>) instead. This method uses offset\-based pagination against a deprecated API endpoint.
+
 Parameters:
 
 - labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
@@ -485,6 +490,38 @@ for _, sandbox := range result.Items {
 ```
 
 Returns a [PaginatedSandboxes](<#PaginatedSandboxes>) containing the matching sandboxes and pagination metadata.
+
+<a name="Client.ListV2"></a>
+### func \(\*Client\) ListV2
+
+```go
+func (c *Client) ListV2(ctx context.Context, params *ListSandboxesParams) (*CursorPaginatedSandboxes, error)
+```
+
+ListV2 retrieves sandboxes with optional state filtering using cursor\-based pagination. Uses cursor\-based pagination, ordered newest first.
+
+Parameters:
+
+- params: Optional [ListSandboxesParams](<#ListSandboxesParams>) containing cursor, limit, and state filters. Pass nil for defaults.
+- params.cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
+- params.limit: Optional number of results per page. Pass nil for the default limit.
+- params.states: Optional list of sandbox states to filter by. Pass nil for no filtering.
+
+Example:
+
+```
+// First page
+result, err := client.ListV2(ctx, nil)
+
+// Next page
+result2, err := client.ListV2(ctx, &daytona.ListSandboxesParams{Cursor: result.NextCursor})
+
+// Filter by state
+states := []apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED}
+result, err := client.ListV2(ctx, &daytona.ListSandboxesParams{States: states})
+```
+
+Returns a [CursorPaginatedSandboxes](<#CursorPaginatedSandboxes>) containing the matching sandboxes and a cursor for the next page.
 
 <a name="CodeInterpreterService"></a>
 ## type CodeInterpreterService
@@ -825,6 +862,18 @@ err := cu.Stop(ctx)
 ```
 
 Returns an error if the desktop fails to stop gracefully.
+
+<a name="CursorPaginatedSandboxes"></a>
+## type CursorPaginatedSandboxes
+
+CursorPaginatedSandboxes represents a paginated list of sandboxes using cursor\-based pagination.
+
+```go
+type CursorPaginatedSandboxes struct {
+    Items      []*Sandbox // Sandboxes in this page
+    NextCursor *string    // Cursor for the next page of results. Nil if there are no more results.
+}
+```
 
 <a name="DisplayService"></a>
 ## type DisplayService
@@ -2143,6 +2192,19 @@ err := keyboard.Type(ctx, "Slow typing", &delay)
 
 Returns an error if typing fails.
 
+<a name="ListSandboxesParams"></a>
+## type ListSandboxesParams
+
+ListSandboxesParams contains parameters for listing sandboxes using cursor\-based pagination.
+
+```go
+type ListSandboxesParams struct {
+    Cursor *string                  // Cursor for pagination
+    Limit  *int                     // Maximum number of results to return
+    States []apiclient.SandboxState // List of states to filter by
+}
+```
+
 <a name="LspServerService"></a>
 ## type LspServerService
 
@@ -2536,6 +2598,8 @@ type OutputChannels struct {
 ## type PaginatedSandboxes
 
 PaginatedSandboxes represents a paginated list of sandboxes.
+
+Deprecated: Use [CursorPaginatedSandboxes](<#CursorPaginatedSandboxes>) instead.
 
 ```go
 type PaginatedSandboxes struct {

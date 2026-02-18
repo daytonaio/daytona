@@ -290,6 +290,44 @@ getProxyToolboxUrl(sandboxId: string, regionId: string): Promise<string>
 
 #### list()
 
+##### Call Signature
+
+```ts
+list(params: ListSandboxesParams): Promise<CursorPaginatedSandboxes>
+```
+
+Returns a paginated list of Sandboxes with optional state filtering.
+Uses cursor-based pagination, ordered newest first.
+
+**Parameters**:
+
+- `params` _ListSandboxesParams_ - Cursor-based pagination parameters.
+
+**Returns**:
+
+- `Promise<CursorPaginatedSandboxes>` - Cursor-paginated list of Sandboxes.
+
+**Examples:**
+
+```ts
+const page1 = await daytona.list({ limit: 10 });
+for (const sandbox of page1.items) {
+    console.log(`${sandbox.id}: ${sandbox.state}`);
+}
+
+// Next page
+if (page1.nextCursor) {
+    const page2 = await daytona.list({ cursor: page1.nextCursor, limit: 10 });
+}
+```
+
+```ts
+// Filter by state
+const running = await daytona.list({ limit: 10, states: [SandboxState.Started] });
+```
+
+##### Call Signature
+
 ```ts
 list(
    labels?: Record<string, string>, 
@@ -305,18 +343,19 @@ Returns paginated list of Sandboxes filtered by labels.
 - `page?` _number_ - Page number for pagination (starting from 1)
 - `limit?` _number_ - Maximum number of items per page
 
-
 **Returns**:
 
 - `Promise<PaginatedSandboxes>` - Paginated list of Sandboxes that match the labels.
+
+###### Deprecated
+
+Use the cursor-based overload instead. This overload uses offset-based pagination
+against a deprecated API endpoint.
 
 **Example:**
 
 ```ts
 const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
-for (const sandbox of result.items) {
-    console.log(`${sandbox.id}: ${sandbox.state}`);
-}
 ```
 
 ***
@@ -477,6 +516,15 @@ const config: DaytonaConfig = {
 };
 const daytona = new Daytona(config);
 ```
+## ListSandboxesParams
+
+Parameters for listing Sandboxes using cursor-based pagination.
+
+**Properties**:
+
+- `cursor?` _string_ - Pagination cursor from a previous response. Omit to start from the beginning.
+- `limit?` _number_ - Maximum number of items per page.
+- `states?` _SandboxState\[\]_ - List of states to filter by.
 ## Resources
 
 Resource allocation for a Sandbox.

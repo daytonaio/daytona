@@ -172,7 +172,7 @@ module DaytonaApiClient
       @cert_file = nil
       @key_file = nil
       @timeout = 0
-      @params_encoding = nil
+      @params_encoding = :multi
       @debugging = false
       @ignore_operation_servers = false
       @inject_format = false

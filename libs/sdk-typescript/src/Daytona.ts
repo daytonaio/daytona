@@ -12,6 +12,7 @@ import {
   VolumesApi,
   SandboxVolume,
   ConfigApi,
+  ListSandboxesV2StatesEnum,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
@@ -19,7 +20,7 @@ import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox, PaginatedSandboxes } from './Sandbox'
+import { Sandbox, PaginatedSandboxes, CursorPaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
@@ -197,6 +198,20 @@ export type CreateSandboxFromSnapshotParams = CreateSandboxBaseParams & {
 export type SandboxFilter = {
   idOrName?: string
   labels?: Record<string, string>
+}
+
+/**
+ * Parameters for listing Sandboxes using cursor-based pagination.
+ *
+ * @interface
+ * @property {string} [cursor] - Pagination cursor from a previous response. Omit to start from the beginning.
+ * @property {number} [limit] - Maximum number of items per page.
+ * @property {SandboxState[]} [states] - List of states to filter by.
+ */
+export type ListSandboxesParams = {
+  cursor?: string
+  limit?: number
+  states?: SandboxState[]
 }
 
 /**
@@ -649,7 +664,36 @@ export class Daytona implements AsyncDisposable {
   }
 
   /**
+   * Returns a paginated list of Sandboxes with optional state filtering.
+   * Uses cursor-based pagination, ordered newest first.
+   *
+   * @param {ListSandboxesParams} params - Cursor-based pagination parameters.
+   * @param {string} [params.cursor] - Pagination cursor from a previous response. Omit to start from the beginning.
+   * @param {number} [params.limit] - Maximum number of items per page.
+   * @param {SandboxState[]} [params.states] - List of states to filter by.
+   * @returns {Promise<CursorPaginatedSandboxes>} Cursor-paginated list of Sandboxes.
+   *
+   * @example
+   * const page1 = await daytona.list({ limit: 10 });
+   * for (const sandbox of page1.items) {
+   *     console.log(`${sandbox.id}: ${sandbox.state}`);
+   * }
+   *
+   * // Next page
+   * if (page1.nextCursor) {
+   *     const page2 = await daytona.list({ cursor: page1.nextCursor, limit: 10 });
+   * }
+   *
+   * @example
+   * // Filter by state
+   * const running = await daytona.list({ limit: 10, states: [SandboxState.Started] });
+   */
+  public async list(params: ListSandboxesParams): Promise<CursorPaginatedSandboxes>
+  /**
    * Returns paginated list of Sandboxes filtered by labels.
+   *
+   * @deprecated Use the cursor-based overload instead. This overload uses offset-based pagination
+   * against a deprecated API endpoint.
    *
    * @param {Record<string, string>} [labels] - Labels to filter Sandboxes
    * @param {number} [page] - Page number for pagination (starting from 1)
@@ -658,19 +702,56 @@ export class Daytona implements AsyncDisposable {
    *
    * @example
    * const result = await daytona.list({ 'my-label': 'my-value' }, 2, 10);
-   * for (const sandbox of result.items) {
-   *     console.log(`${sandbox.id}: ${sandbox.state}`);
-   * }
    */
+  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes>
   @WithInstrumentation()
-  public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
-    const response = await this.sandboxApi.listSandboxesPaginated(
+  public async list(
+    paramsOrLabels?: ListSandboxesParams | Record<string, string>,
+    page?: number,
+    limit?: number,
+  ): Promise<CursorPaginatedSandboxes | PaginatedSandboxes> {
+    if (
+      page !== undefined ||
+      limit !== undefined ||
+      paramsOrLabels === undefined ||
+      !('cursor' in paramsOrLabels || 'states' in paramsOrLabels || 'limit' in paramsOrLabels)
+    ) {
+      const labels = paramsOrLabels as Record<string, string> | undefined
+
+      const response = await this.sandboxApi.listSandboxesPaginatedDeprecated(
+        undefined,
+        page,
+        limit,
+        undefined,
+        undefined,
+        labels ? JSON.stringify(labels) : undefined,
+      )
+
+      return {
+        items: response.data.items.map((sandbox) => {
+          const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
+          return new Sandbox(
+            sandbox,
+            structuredClone(this.clientConfig),
+            this.createAxiosInstance(),
+            this.sandboxApi,
+            this.getCodeToolbox(language),
+            this.getProxyToolboxUrl.bind(this),
+          )
+        }),
+        total: response.data.total,
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+      }
+    }
+
+    const params = paramsOrLabels as ListSandboxesParams
+
+    const response = await this.sandboxApi.listSandboxesV2(
       undefined,
-      page,
-      limit,
-      undefined,
-      undefined,
-      labels ? JSON.stringify(labels) : undefined,
+      params.cursor,
+      params.limit,
+      params.states as unknown as ListSandboxesV2StatesEnum[],
     )
 
     return {
@@ -685,9 +766,7 @@ export class Daytona implements AsyncDisposable {
           this.getProxyToolboxUrl.bind(this),
         )
       }),
-      total: response.data.total,
-      page: response.data.page,
-      totalPages: response.data.totalPages,
+      nextCursor: response.data.nextCursor,
     }
   }
 

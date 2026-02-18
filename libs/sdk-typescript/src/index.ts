@@ -9,6 +9,7 @@ export type {
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
   DaytonaConfig,
+  ListSandboxesParams,
   Resources,
   VolumeMount,
 } from './Daytona'
@@ -21,7 +22,7 @@ export { Process } from './Process'
 export { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
-export type { SandboxCodeToolbox } from './Sandbox'
+export type { SandboxCodeToolbox, CursorPaginatedSandboxes } from './Sandbox'
 export type { CreateSnapshotParams } from './Snapshot'
 export { ComputerUse, Mouse, Keyboard, Screenshot, Display } from './ComputerUse'
 export type { ExecutionError, ExecutionResult, OutputMessage, RunCodeOptions } from './types/CodeInterpreter'

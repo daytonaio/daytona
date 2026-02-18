@@ -57,6 +57,7 @@ model_create_user.go
 model_create_volume.go
 model_create_workspace.go
 model_daytona_configuration.go
+model_deprecated_paginated_sandboxes.go
 model_display_info_response.go
 model_docker_registry.go
 model_download_files.go

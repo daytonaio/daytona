@@ -50,11 +50,11 @@ import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
 import { VolumeService } from './volume.service'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import {
-  SandboxSortField,
-  SandboxSortDirection,
-  DEFAULT_SANDBOX_SORT_FIELD,
-  DEFAULT_SANDBOX_SORT_DIRECTION,
-} from '../dto/list-sandboxes-query.dto'
+  DeprecatedSandboxSortField,
+  DeprecatedSandboxSortDirection,
+  DEPRECATED_DEFAULT_SANDBOX_SORT_FIELD,
+  DEPRECATED_DEFAULT_SANDBOX_SORT_DIRECTION,
+} from '../dto/deprecated-list-sandboxes-query.dto'
 import { createRangeFilter } from '../../common/utils/range-filter'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import {
@@ -84,6 +84,7 @@ import {
   sandboxOrgIdCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
+import { PaginatedSandboxesDto } from '../dto/paginated-sandboxes.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -814,7 +815,7 @@ export class SandboxService {
     return this.sandboxRepository.find({ where })
   }
 
-  async findAll(
+  async findAllPaginatedDeprecated(
     organizationId: string,
     page = 1,
     limit = 10,
@@ -836,8 +837,8 @@ export class SandboxService {
       lastEventBefore?: Date
     },
     sort?: {
-      field?: SandboxSortField
-      direction?: SandboxSortDirection
+      field?: DeprecatedSandboxSortField
+      direction?: DeprecatedSandboxSortDirection
     },
   ): Promise<PaginatedList<Sandbox>> {
     const pageNum = Number(page)
@@ -861,8 +862,10 @@ export class SandboxService {
       lastEventBefore,
     } = filters || {}
 
-    const { field: sortField = DEFAULT_SANDBOX_SORT_FIELD, direction: sortDirection = DEFAULT_SANDBOX_SORT_DIRECTION } =
-      sort || {}
+    const {
+      field: sortField = DEPRECATED_DEFAULT_SANDBOX_SORT_FIELD,
+      direction: sortDirection = DEPRECATED_DEFAULT_SANDBOX_SORT_DIRECTION,
+    } = sort || {}
 
     const baseFindOptions: FindOptionsWhere<Sandbox> = {
       organizationId,
@@ -908,7 +911,7 @@ export class SandboxService {
           direction: sortDirection,
           nulls: 'LAST',
         },
-        ...(sortField !== SandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
+        ...(sortField !== DeprecatedSandboxSortField.CREATED_AT && { createdAt: 'DESC' }),
       },
       skip: (pageNum - 1) * limitNum,
       take: limitNum,
@@ -919,6 +922,82 @@ export class SandboxService {
       total,
       page: pageNum,
       totalPages: Math.ceil(total / limitNum),
+    }
+  }
+
+  /**
+   * List sandboxes with pagination (newest first)
+   * @param filters - The filters to apply to the list
+   * @param pagination - The pagination to apply to the list
+   * @returns The paginated list of sandboxes
+   * @throws BadRequestError if the pagination parameters are invalid
+   */
+  async list(
+    filters: {
+      organizationId: string
+      states?: SandboxState[]
+    },
+    pagination: {
+      cursor?: string
+      limit: number
+    },
+  ): Promise<PaginatedSandboxesDto> {
+    const { organizationId, states } = filters
+    const { cursor, limit } = pagination
+
+    if (limit > 200) {
+      throw new BadRequestError('Limit cannot exceed 200')
+    }
+
+    let decodedCursor: { createdAt: Date; id: string } | undefined
+    if (cursor) {
+      try {
+        const decoded = Buffer.from(cursor, 'base64').toString('utf-8')
+        const parsed = JSON.parse(decoded)
+        const createdAt = new Date(parsed.createdAt)
+        if (isNaN(createdAt.getTime()) || !parsed.id) {
+          throw new BadRequestError('Invalid cursor')
+        }
+        decodedCursor = { createdAt, id: parsed.id }
+      } catch (error) {
+        throw new BadRequestError('Invalid cursor')
+      }
+    }
+
+    const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
+
+    const qb = this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .where('sandbox."organizationId" = :organizationId', { organizationId })
+      .andWhere('sandbox.state IN (:...statesToInclude)', { statesToInclude })
+      .andWhere(`sandbox."desiredState" != '${SandboxDesiredState.DESTROYED}'`)
+
+    if (decodedCursor) {
+      qb.andWhere(
+        '(sandbox."createdAt" < :cursorCreatedAt OR (sandbox."createdAt" = :cursorCreatedAt AND sandbox.id < :cursorId))',
+        { cursorCreatedAt: decodedCursor.createdAt, cursorId: decodedCursor.id },
+      )
+    }
+
+    qb.orderBy('sandbox."createdAt"', 'DESC')
+      .addOrderBy('sandbox.id', 'DESC')
+      .take(limit + 1)
+
+    const items = await qb.getMany()
+
+    const hasMore = items.length > limit
+    const returnItems = hasMore ? items.slice(0, limit) : items
+
+    const lastItem = returnItems.length > 0 ? returnItems[returnItems.length - 1] : undefined
+    const nextCursor = lastItem
+      ? Buffer.from(JSON.stringify({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })).toString('base64')
+      : null
+
+    return {
+      items: returnItems.map((sandbox) => {
+        return SandboxDto.fromSandbox(sandbox)
+      }),
+      nextCursor,
     }
   }
 
