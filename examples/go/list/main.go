@@ -19,13 +19,16 @@ func main() {
 
 	ctx := context.Background()
 
-	statesFilter := []apiclient.SandboxState{
+	limit := 2
+	states := []apiclient.SandboxState{
 		apiclient.SANDBOXSTATE_STARTED,
 		apiclient.SANDBOXSTATE_STOPPED,
 	}
-	limit := 2
 
-	page1, err := client.ListV2(ctx, nil, &limit, statesFilter)
+	page1, err := client.ListV2(ctx, &daytona.ListSandboxesParams{
+		Limit:  &limit,
+		States: states,
+	})
 	if err != nil {
 		log.Fatalf("Failed to list sandboxes: %v", err)
 	}
@@ -35,7 +38,11 @@ func main() {
 	}
 
 	if page1.NextCursor != nil {
-		page2, err := client.ListV2(ctx, page1.NextCursor, &limit, statesFilter)
+		page2, err := client.ListV2(ctx, &daytona.ListSandboxesParams{
+			Cursor: page1.NextCursor,
+			Limit:  &limit,
+			States: states,
+		})
 		if err != nil {
 			log.Fatalf("Failed to list sandboxes: %v", err)
 		}

@@ -1,19 +1,20 @@
 import asyncio
 
-from daytona import AsyncDaytona, SandboxState
+from daytona import AsyncDaytona, ListSandboxesParams, SandboxState
 
 
 async def main():
     daytona = AsyncDaytona()
 
-    states_filter = [SandboxState.STARTED, SandboxState.STOPPED]
+    limit = 2
+    states = [SandboxState.STARTED, SandboxState.STOPPED]
 
-    page1 = await daytona.list_v2(limit=2, states=states_filter)
+    page1 = await daytona.list(ListSandboxesParams(limit=limit, states=states))
     for sandbox in page1.items:
         print(f"{sandbox.id}: {sandbox.state}")
 
     if page1.next_cursor:
-        page2 = await daytona.list_v2(cursor=page1.next_cursor, limit=2, states=states_filter)
+        page2 = await daytona.list(ListSandboxesParams(cursor=page1.next_cursor, limit=limit, states=states))
         for sandbox in page2.items:
             print(f"{sandbox.id}: {sandbox.state}")
 
