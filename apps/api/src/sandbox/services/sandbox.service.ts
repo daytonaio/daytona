@@ -610,7 +610,38 @@ export class SandboxService {
       )
     }
 
-    const result = await this.sandboxRepository.save(warmPoolSandbox)
+    const updateData: Partial<Sandbox> = {
+      public: warmPoolSandbox.public,
+      labels: warmPoolSandbox.labels,
+      organizationId: warmPoolSandbox.organizationId,
+      createdAt: warmPoolSandbox.createdAt,
+    }
+
+    if (createSandboxDto.name) {
+      updateData.name = warmPoolSandbox.name
+    }
+
+    if (createSandboxDto.autoStopInterval !== undefined) {
+      updateData.autoStopInterval = warmPoolSandbox.autoStopInterval
+    }
+
+    if (createSandboxDto.autoArchiveInterval !== undefined) {
+      updateData.autoArchiveInterval = warmPoolSandbox.autoArchiveInterval
+    }
+
+    if (createSandboxDto.autoDeleteInterval !== undefined) {
+      updateData.autoDeleteInterval = warmPoolSandbox.autoDeleteInterval
+    }
+
+    if (createSandboxDto.networkBlockAll !== undefined) {
+      updateData.networkBlockAll = warmPoolSandbox.networkBlockAll
+    }
+
+    if (createSandboxDto.networkAllowList !== undefined) {
+      updateData.networkAllowList = warmPoolSandbox.networkAllowList
+    }
+
+    await this.sandboxRepository.update(warmPoolSandbox.id, updateData)
 
     // Defensive invalidation of orgId cache since the sandbox moved from unassigned to a real organization
     this.sandboxLookupCacheInvalidationService.invalidateOrgId({
@@ -625,7 +656,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(result)
+    return SandboxDto.fromSandbox(warmPoolSandbox)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -1590,7 +1621,7 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     sandbox.public = isPublic
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { public: isPublic })
 
     return sandbox
   }
@@ -1682,7 +1713,7 @@ export class SandboxService {
 
     // Replace all labels
     sandbox.labels = labels
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { labels })
 
     return sandbox
   }
@@ -1725,8 +1756,9 @@ export class SandboxService {
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoStopInterval = this.resolveAutoStopInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const autoStopInterval = this.resolveAutoStopInterval(interval)
+    sandbox.autoStopInterval = autoStopInterval
+    await this.sandboxRepository.update(sandbox.id, { autoStopInterval })
 
     return sandbox
   }
@@ -1734,8 +1766,9 @@ export class SandboxService {
   async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
-    await this.sandboxRepository.save(sandbox)
+    const autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
+    sandbox.autoArchiveInterval = autoArchiveInterval
+    await this.sandboxRepository.update(sandbox.id, { autoArchiveInterval })
 
     return sandbox
   }
@@ -1744,7 +1777,7 @@ export class SandboxService {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     sandbox.autoDeleteInterval = interval
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandbox.id, { autoDeleteInterval: interval })
 
     return sandbox
   }
@@ -1757,15 +1790,21 @@ export class SandboxService {
   ): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
+    const updateData: Partial<Sandbox> = {}
     if (networkBlockAll !== undefined) {
       sandbox.networkBlockAll = networkBlockAll
+      updateData.networkBlockAll = networkBlockAll
     }
 
     if (networkAllowList !== undefined) {
-      sandbox.networkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      const resolvedNetworkAllowList = this.resolveNetworkAllowList(networkAllowList)
+      sandbox.networkAllowList = resolvedNetworkAllowList
+      updateData.networkAllowList = resolvedNetworkAllowList
     }
 
-    await this.sandboxRepository.save(sandbox)
+    if (Object.keys(updateData).length > 0) {
+      await this.sandboxRepository.update(sandbox.id, updateData)
+    }
 
     // Update network settings on the runner
     if (sandbox.runnerId) {
