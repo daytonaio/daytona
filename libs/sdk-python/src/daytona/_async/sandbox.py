@@ -5,9 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Awaitable, Callable
 
-from daytona_api_client_async import BuildInfo
-from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
-from daytona_api_client_async import PortPreviewUrl, ResizeSandbox
+from daytona_api_client_async import BuildInfo, DeprecatedPaginatedSandboxes, PortPreviewUrl, ResizeSandbox
 from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import (
     SandboxApi,
@@ -711,7 +709,7 @@ class AsyncSandbox(SandboxDto):
             self.state = SandboxState.DESTROYED
 
 
-class AsyncPaginatedSandboxes(PaginatedSandboxesDto):
+class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes):
     """Represents a paginated list of Daytona Sandboxes.
 
     Attributes:

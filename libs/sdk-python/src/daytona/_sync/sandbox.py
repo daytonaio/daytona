@@ -6,9 +6,7 @@ from __future__ import annotations
 import time
 from typing import Callable
 
-from daytona_api_client import BuildInfo
-from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
-from daytona_api_client import PortPreviewUrl, ResizeSandbox
+from daytona_api_client import BuildInfo, DeprecatedPaginatedSandboxes, PortPreviewUrl, ResizeSandbox
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import (
     SandboxApi,
@@ -706,7 +704,7 @@ class Sandbox(SandboxDto):
             self.state = SandboxState.DESTROYED
 
 
-class PaginatedSandboxes(PaginatedSandboxesDto):
+class PaginatedSandboxes(DeprecatedPaginatedSandboxes):
     """Represents a paginated list of Daytona Sandboxes.
 
     Attributes:

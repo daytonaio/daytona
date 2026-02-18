@@ -113,7 +113,7 @@ module Daytona
 
       raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
 
-      response = sandbox_api.list_sandboxes_paginated(labels: JSON.dump(labels), page:, limit:)
+      response = sandbox_api.list_sandboxes_paginated_deprecated(labels: JSON.dump(labels), page:, limit:)
 
       PaginatedResource.new(
         total: response.total,
