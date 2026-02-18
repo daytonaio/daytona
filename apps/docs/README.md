@@ -40,98 +40,129 @@
 
 ---
 
-## Installation
+## Documentation
 
-### Python SDK
+Daytona provides a website with comprehensive documentation for [SDK](https://www.daytona.io/docs/en/getting-started#sdk), [API](https://www.daytona.io/docs/en/tools/api), and [CLI](https://www.daytona.io/docs/en/tools/cli) references, [guides](https://www.daytona.io/docs/en/guides), and [examples](https://www.daytona.io/docs/en/getting-started#examples).
 
-```bash
-pip install daytona
+### Structure
+
+Documentation resides in the `apps/docs` directory, built with Astro and Starlight. The documentation website is deployed in server-rendered (SSR) mode using an Express adapter, with custom middleware handling redirects and routing.
+
+Documentation content is authored in Markdown (`.md`) and Markdown Extended (`.mdx`) files, organized into the following directory structure:
+
+```
+apps/docs/
+├── astro.config.mjs                 # Astro + Starlight configuration
+├── tools/                           # Automation tools
+│   ├── update-api-reference.js      # Generate API docs from OpenAPI spec
+│   ├── update-cli-reference.js      # Generate CLI docs from CLI source
+│   ├── update-llms.js               # Generate llms.txt and llms-full.txt
+│   └── update-search.js             # Generate search indexes
+├── public/                          # Static assets
+├── server/                          # Express middleware and utilities
+└── src/
+    ├── components/                  # Custom Astro/React components
+    ├── content/
+    │   ├── config.ts                # Content and sidebar configuration
+    │   ├── docs/
+    │   │   ├── en/                  # Documentation content
+    │   │   │   ├── <filename>.mdx   # Documentation pages
+    │   │   │   ├── guides/          # Integration guides
+    │   │   │   ├── tools/           # CLI and API reference pages
+    │   │   │   ├── typescript-sdk/  # TypeScript SDK reference
+    │   │   │   ├── python-sdk/      # Python SDK reference
+    │   │   │   ├── ruby-sdk/        # Ruby SDK reference
+    │   │   │   └── go-sdk/          # Go SDK reference
+    ├── assets/                      # Images, icons, and themes
+    ├── styles/                      # Global SCSS stylesheets
+    ├── pages/                       # Astro routing pages
+    │   ├── index.astro              # Homepage
+    │   └── [...slug].astro          # Dynamic documentation pages
+    └── utils/                       # Shared utilities
 ```
 
-### TypeScript SDK
+### Development
+
+Run the following commands to start the development server and preview changes locally:
+
+```bash
+# Install dependencies
+yarn
+# Start development server
+yarn nx serve docs
+```
+
+The development server is available on <http://localhost:4321/docs>.
+
+### Build
+
+Run the following commands to build the documentation for local or production deployment:
 
 ```bash
 npm install @daytona/sdk
 ```
 
----
+The processes that occur during the build:
 
-## Features
+- pages and components compilation, content processing, route and middleware generation
+- [search index updates](#update-search) with the latest documentation content
+- [LLM-optimized documentation](#update-llms) generation (llms.txt and llms-full.txt)
 
-- **Lightning-Fast Infrastructure**: Sub-90ms Sandbox creation from code to execution.
-- **Separated & Isolated Runtime**: Execute AI-generated code with zero risk to your infrastructure.
-- **Massive Parallelization for Concurrent AI Workflows**: Fork Sandbox filesystem and memory state (Coming soon!)
-- **Programmatic Control**: File, Git, LSP, and Execute API
-- **Unlimited Persistence**: Your Sandboxes can live forever
-- **OCI/Docker Compatibility**: Use any OCI/Docker image to create a Sandbox
+The generated build output is available in `dist/apps/docs/`.
 
----
+### Tools
 
-## Quick Start
+The documentation app includes automation scripts in the `tools/` directory for maintaining auto-generated documentation.
 
-1. Create an account at https://app.daytona.io
-1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
-1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+#### Update CLI Reference
 
-## Creating your first Sandbox
+Update CLI reference documentation from the Daytona CLI source code by reading YAML documentation files and converting them to MDX documentation files.
 
-### Python SDK
+Navigate to the `apps/docs` directory and run the following command:
 
-```py
-from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
-
-# Initialize the Daytona client
-daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
-
-# Create the Sandbox instance
-sandbox = daytona.create(CreateSandboxBaseParams(language="python"))
-
-# Run code securely inside the Sandbox
-response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-if response.exit_code != 0:
-    print(f"Error running code: {response.exit_code} {response.result}")
-else:
-    print(response.result)
-
-# Clean up the Sandbox
-daytona.delete(sandbox)
+```bash
+node tools/update-cli-reference.js
 ```
 
-### Typescript SDK
+- **Input**: `apps/cli/hack/docs/*.yaml` (auto-generated by CLI)
+- **Output**: `apps/docs/src/content/docs/en/tools/cli.mdx`
 
 ```jsx
 import { Daytona } from '@daytona/sdk'
 
-async function main() {
-  // Initialize the Daytona client
-  const daytona = new Daytona({
-    apiKey: 'YOUR_API_KEY',
-  })
+Update API reference documentation from the OpenAPI specification by converting the Swagger/OpenAPI JSON to structured MDX documentation files.
 
-  let sandbox
-  try {
-    // Create the Sandbox instance
-    sandbox = await daytona.create({
-      language: 'typescript',
-    })
-    // Run code securely inside the Sandbox
-    const response = await sandbox.process.codeRun('console.log("Sum of 3 and 4 is " + (3 + 4))')
-    if (response.exitCode !== 0) {
-      console.error('Error running code:', response.exitCode, response.result)
-    } else {
-      console.log(response.result)
-    }
-  } catch (error) {
-    console.error('Sandbox flow error:', error)
-  } finally {
-    if (sandbox) await daytona.delete(sandbox)
-  }
-}
+Navigate to the `apps/docs` directory and run the following command:
 
-main().catch(console.error)
+```bash
+node tools/update-api-reference.js
 ```
 
----
+- **Input**: `dist/apps/api/openapi.3.1.0.json`
+- **Output**: `apps/docs/src/content/docs/en/tools/api.mdx`
+
+#### Update LLMs
+
+Update LLM-optimized documentation (llms.txt and llms-full.txt) from all documentation content by converting MDX/MD files to plain markdown and aggregating them into single files.
+
+Navigate to the `apps/docs` directory and run the following command:
+
+```bash
+node tools/update-llms.js
+```
+
+- **Input**: `.mdx` and `.md` files in `src/content/docs/en/`
+- **Output**: `dist/apps/docs/client/llms.txt` and `dist/apps/docs/client/llms-full.txt`
+
+#### Update search
+
+Update Algolia search indexes with the latest documentation content.
+
+Navigate to the `apps/docs` directory and run the following command:
+
+```bash
+node tools/update-search.js
+```
 
 ## Contributing
 
