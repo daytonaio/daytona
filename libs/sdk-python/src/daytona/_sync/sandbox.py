@@ -434,7 +434,7 @@ class Sandbox(SandboxDto):
             sandbox.set_autostop_interval(0)
             ```
         """
-        if not interval or interval < 0:
+        if interval < 0:
             raise DaytonaError("Auto-stop interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_autostop_interval(self.id, interval)
@@ -462,7 +462,7 @@ class Sandbox(SandboxDto):
             sandbox.set_auto_archive_interval(0)
             ```
         """
-        if not interval or interval < 0:
+        if interval < 0:
             raise DaytonaError("Auto-archive interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_auto_archive_interval(self.id, interval)
