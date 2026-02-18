@@ -280,6 +280,9 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 
 	rpcClient, err := client.Client()
 	if err != nil {
+		// Clean up the client before returning to avoid goroutine leaks and WaitGroup panics
+		client.Kill()
+
 		// Try to get detailed error information
 		pluginErr := detectPluginError(path)
 
@@ -306,6 +309,8 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
+		// Clean up the client before returning
+		client.Kill()
 		log.Errorf("Failed to dispense computer-use plugin: %v", err)
 		log.Info("Continuing without computer-use functionality...")
 		return nil, nil
@@ -313,6 +318,8 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 
 	impl, ok := raw.(computeruse.IComputerUse)
 	if !ok {
+		// Clean up the client before returning
+		client.Kill()
 		log.Errorf("Unexpected type from computer-use plugin")
 		log.Info("Continuing without computer-use functionality...")
 		return nil, nil
@@ -320,6 +327,8 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 
 	_, err = impl.Initialize()
 	if err != nil {
+		// Clean up the client before returning
+		client.Kill()
 		log.Errorf("Failed to initialize computer-use plugin: %v", err)
 		log.Info("Continuing without computer-use functionality...")
 		return nil, nil
