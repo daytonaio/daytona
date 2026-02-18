@@ -66,6 +66,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 // import { UpdateSandboxNetworkSettingsDto } from '../dto/update-sandbox-network-settings.dto'
 import { SshAccessDto, SshAccessValidationDto } from '../dto/ssh-access.dto'
+import { ListSandboxesQueryDto } from '../dto/list-sandboxes-query.dto'
 import { DeprecatedListSandboxesQueryDto } from '../dto/deprecated-list-sandboxes-query.dto'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { OrGuard } from '../../auth/or.guard'
@@ -197,7 +198,7 @@ export class SandboxController {
       order: sortDirection,
     } = queryParams
 
-    const result = await this.sandboxService.list_deprecated_v2(
+    const result = await this.sandboxService.findAllPaginatedDeprecated(
       authContext.organizationId,
       page,
       limit,
@@ -232,6 +233,34 @@ export class SandboxController {
       page: result.page,
       totalPages: result.totalPages,
     }
+  }
+
+  @Get('paginated/v2')
+  @ApiOperation({
+    summary: 'List sandboxes',
+    description: 'Basic filtering with cursor-based pagination. Newest first. Strongly consistent.',
+    operationId: 'listSandboxes_v2',
+  })
+  @ApiResponse({
+    status: 200,
+    type: PaginatedSandboxesDto,
+  })
+  async listSandboxes_v2(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Query() queryParams: ListSandboxesQueryDto,
+  ): Promise<PaginatedSandboxesDto> {
+    const { cursor, limit, states } = queryParams
+
+    return this.sandboxService.list(
+      {
+        organizationId: authContext.organizationId,
+        states,
+      },
+      {
+        cursor,
+        limit,
+      },
+    )
   }
 
   @Post()
