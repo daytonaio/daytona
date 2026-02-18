@@ -69,7 +69,6 @@ class FileSystem:
             sandbox.fs.create_folder("workspace/secrets", "700")
             ```
         """
-        print(f"Creating folder {path} with mode {mode}")
         self._api_client.create_folder(
             path=path,
             mode=mode,
