@@ -200,21 +200,9 @@ def list(labels, page:, limit:)
 
 ```
 
-Lists Sandboxes filtered by labels.
-
-**Parameters**:
-
-- `labels` _Hash\<String, String\>_ -
-- `page` _Integer, Nil_ -
-- `limit` _Integer, Nil_ -
-
-**Returns**:
-
-- `Daytona:PaginatedResource`
-
-**Raises**:
-
-- `Daytona:Sdk:Error` -
+Lists Sandboxes. When called with a {ListSandboxesParams} object, uses cursor-based
+pagination. When called with positional +labels+ and optional +page+/+limit+ args,
+falls back to the deprecated offset-based endpoint.
 
 #### start()
 

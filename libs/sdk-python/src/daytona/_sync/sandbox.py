@@ -6,7 +6,9 @@ from __future__ import annotations
 import time
 from typing import Callable
 
-from daytona_api_client import BuildInfo, DeprecatedPaginatedSandboxes, PortPreviewUrl, ResizeSandbox
+from daytona_api_client import BuildInfo, DeprecatedPaginatedSandboxes
+from daytona_api_client import PaginatedSandboxes as CursorPaginatedSandboxesApi
+from daytona_api_client import PortPreviewUrl, ResizeSandbox
 from daytona_api_client import Sandbox as SandboxDto
 from daytona_api_client import (
     SandboxApi,
@@ -712,8 +714,25 @@ class PaginatedSandboxes(DeprecatedPaginatedSandboxes):
         total (int): Total number of Sandboxes across all pages.
         page (int): Current page number.
         total_pages (int): Total number of pages available.
+
+    .. deprecated::
+        Use :class:`CursorPaginatedSandboxes` instead.
     """
 
     items: list[Sandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
+
+    model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)
+
+
+class CursorPaginatedSandboxes(CursorPaginatedSandboxesApi):
+    """Paginated list of Daytona Sandboxes using cursor-based pagination.
+
+    Attributes:
+        items (list[Sandbox]): List of Sandbox instances for the current page.
+        next_cursor (str | None): Cursor for the next page of results. None if there are no more results.
+    """
+
+    items: list[Sandbox]  # pyright: ignore[reportIncompatibleVariableOverride]
+    next_cursor: str | None
 
     model_config: ConfigDict = ConfigDict(arbitrary_types_allowed=True)

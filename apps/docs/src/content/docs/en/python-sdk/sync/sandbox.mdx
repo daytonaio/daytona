@@ -647,7 +647,7 @@ sandbox.refresh_activity()
 ## PaginatedSandboxes
 
 ```python
-class PaginatedSandboxes(PaginatedSandboxesDto)
+class PaginatedSandboxes(DeprecatedPaginatedSandboxes)
 ```
 
 Represents a paginated list of Daytona Sandboxes.
@@ -658,6 +658,30 @@ Represents a paginated list of Daytona Sandboxes.
 - `total` _int_ - Total number of Sandboxes across all pages.
 - `page` _int_ - Current page number.
 - `total_pages` _int_ - Total number of pages available.
+  
+  .. deprecated::
+  Use :class:`CursorPaginatedSandboxes` instead.
+
+##### items: `list[Sandbox]`
+
+```python
+items = None
+```
+
+pyright: ignore[reportIncompatibleVariableOverride]
+
+## CursorPaginatedSandboxes
+
+```python
+class CursorPaginatedSandboxes(CursorPaginatedSandboxesApi)
+```
+
+Paginated list of Daytona Sandboxes using cursor-based pagination.
+
+**Attributes**:
+
+- `items` _list[Sandbox]_ - List of Sandbox instances for the current page.
+- `next_cursor` _str | None_ - Cursor for the next page of results. None if there are no more results.
 
 ##### items: `list[Sandbox]`
 

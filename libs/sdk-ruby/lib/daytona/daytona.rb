@@ -101,28 +101,56 @@ module Daytona
       response.items.first
     end
 
-    # Lists Sandboxes filtered by labels.
+    # Lists Sandboxes. When called with a {ListSandboxesParams} object, uses cursor-based
+    # pagination. When called with positional +labels+ and optional +page+/+limit+ args,
+    # falls back to the deprecated offset-based endpoint.
     #
-    # @param labels [Hash<String, String>]
-    # @param page [Integer, Nil]
-    # @param limit [Integer, Nil]
-    # @return [Daytona::PaginatedResource]
-    # @raise [Daytona::Sdk::Error]
-    def list(labels = {}, page: nil, limit: nil)
-      raise Sdk::Error, 'page must be positive integer' if page && page < 1
+    # @overload list(params)
+    #   Returns a paginated list of Sandboxes using cursor-based pagination, ordered newest first.
+    #   @param params [Daytona::ListSandboxesParams] Cursor-based pagination parameters.
+    #   @return [Daytona::CursorPaginatedResource]
+    #
+    # @overload list(labels = nil, page: nil, limit: nil)
+    #   @deprecated Use the cursor-based overload instead. This overload uses offset-based
+    #     pagination against a deprecated API endpoint.
+    #   @param labels [Hash<String, String>, nil]
+    #   @param page [Integer, nil]
+    #   @param limit [Integer, nil]
+    #   @return [Daytona::PaginatedResource]
+    #   @raise [Daytona::Sdk::Error]
+    def list(labels = nil, page: nil, limit: nil)
+      if labels.is_a?(ListSandboxesParams)
+        params = labels
+        opts = {}
+        opts[:cursor] = params.cursor if params.cursor
+        opts[:limit] = params.limit if params.limit
+        opts[:states] = params.states if params.states
 
-      raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
+        response = sandbox_api.list_sandboxes_v2(opts)
 
-      response = sandbox_api.list_sandboxes_paginated_deprecated(labels: JSON.dump(labels), page:, limit:)
+        CursorPaginatedResource.new(
+          items: response
+            .items
+            .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) },
+          next_cursor: response.next_cursor
+        )
+      else
+        raise Sdk::Error, 'page must be positive integer' if page && page < 1
+        raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
 
-      PaginatedResource.new(
-        total: response.total,
-        page: response.page,
-        total_pages: response.total_pages,
-        items: response
-          .items
-          .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) }
-      )
+        response = sandbox_api.list_sandboxes_paginated_deprecated(
+          labels: JSON.dump(labels), page:, limit:
+        )
+
+        PaginatedResource.new(
+          total: response.total,
+          page: response.page,
+          total_pages: response.total_pages,
+          items: response
+            .items
+            .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) }
+        )
+      end
     end
 
     # Starts a Sandbox and waits for it to be ready.
