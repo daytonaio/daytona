@@ -21,11 +21,12 @@ import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticT
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
 import { useVoidInvoiceMutation } from '@/hooks/mutations/useVoidInvoiceMutation'
 import {
+  useFetchOwnerCheckoutUrlQuery,
+  useIsOwnerCheckoutUrlFetching,
   useOwnerBillingPortalUrlQuery,
   useOwnerInvoicesQuery,
   useOwnerWalletQuery,
 } from '@/hooks/queries/billingQueries'
-import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
 import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
@@ -38,7 +39,6 @@ const DEFAULT_PAGE_SIZE = 10
 
 const Wallet = () => {
   const { selectedOrganization } = useSelectedOrganization()
-  const { billingApi } = useApi()
   const { user } = useAuth()
   const [automaticTopUp, setAutomaticTopUp] = useState<AutomaticTopUp | undefined>(undefined)
   const [couponCode, setCouponCode] = useState<string>('')
@@ -54,6 +54,8 @@ const Wallet = () => {
   const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
 
+  const isCheckoutUrlLoading = useIsOwnerCheckoutUrlFetching()
+  const fetchCheckoutUrl = useFetchOwnerCheckoutUrlQuery()
   const wallet = walletQuery.data
   const billingPortalUrl = billingPortalUrlQuery.data
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
@@ -69,16 +71,15 @@ const Wallet = () => {
   }, [wallet])
 
   const handleUpdatePaymentMethod = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
     try {
-      const data = await billingApi.getOrganizationCheckoutUrl(selectedOrganization.id)
+      const data = await fetchCheckoutUrl()
       window.open(data, '_blank')
     } catch (error) {
-      console.error('Failed to fetch checkout url:', error)
+      toast.error('Failed to fetch checkout url', {
+        description: String(error),
+      })
     }
-  }, [billingApi, selectedOrganization])
+  }, [fetchCheckoutUrl])
 
   const handleSetAutomaticTopUp = useCallback(async () => {
     if (!selectedOrganization) {
@@ -353,12 +354,12 @@ const Wallet = () => {
                     )}
                   </div>
                   {!wallet.creditCardConnected ? (
-                    <Button variant="default" onClick={handleUpdatePaymentMethod}>
-                      Connect
+                    <Button variant="default" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
+                      {isCheckoutUrlLoading && <Spinner />} Connect
                     </Button>
                   ) : (
-                    <Button variant="secondary" onClick={handleUpdatePaymentMethod}>
-                      Update
+                    <Button variant="secondary" onClick={handleUpdatePaymentMethod} disabled={isCheckoutUrlLoading}>
+                      {isCheckoutUrlLoading && <Spinner />} Update
                     </Button>
                   )}
                 </div>
@@ -386,7 +387,6 @@ const Wallet = () => {
                       />
                       <Button
                         variant="secondary"
-                        className="min-w-[4.5rem]"
                         onClick={handleRedeemCoupon}
                         disabled={redeemCouponMutation.isPending}
                       >
@@ -493,7 +493,6 @@ const Wallet = () => {
                     <Button
                       onClick={handleSetAutomaticTopUp}
                       disabled={saveAutomaticTopUpDisabled || walletQuery.isLoading || !wallet}
-                      className="min-w-[4.5rem]"
                     >
                       {setAutomaticTopUpMutation.isPending && <Spinner />} Save
                     </Button>
