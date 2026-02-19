@@ -55,7 +55,7 @@ export class SandboxArchiveAction extends SandboxAction {
             // Only transition to ERROR if not already in ERROR state
             if (!isFromErrorState) {
               await this.updateSandboxState(
-                sandbox.id,
+                sandbox,
                 SandboxState.ERROR,
                 lockCode,
                 undefined,
@@ -92,7 +92,7 @@ export class SandboxArchiveAction extends SandboxAction {
               if (isFromErrorState) {
                 this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
               }
-              await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+              await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
               return DONT_SYNC_AGAIN
             default:
               await runnerAdapter.destroySandbox(sandbox.id)
@@ -113,7 +113,7 @@ export class SandboxArchiveAction extends SandboxAction {
           if (isFromErrorState) {
             this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
           }
-          await this.updateSandboxState(sandbox.id, SandboxState.ARCHIVED, lockCode, null)
+          await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
           return DONT_SYNC_AGAIN
         }
       }
