@@ -8918,6 +8918,7 @@ components:
       example:
         dashboardUrl: https://dashboard.example.com
         rateLimit: ""
+        analyticsApiUrl: https://analytics.example.com
         sshGatewayPublicKey: ssh-gateway-public-key
         billingApiUrl: https://billing.example.com
         linkedAccountsEnabled: true
@@ -8997,6 +8998,10 @@ components:
         billingApiUrl:
           description: Billing API URL
           example: https://billing.example.com
+          type: string
+        analyticsApiUrl:
+          description: Analytics API URL
+          example: https://analytics.example.com
           type: string
         sshGatewayCommand:
           description: SSH Gateway command

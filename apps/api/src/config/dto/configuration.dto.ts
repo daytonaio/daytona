@@ -219,6 +219,14 @@ export class ConfigurationDto {
   billingApiUrl?: string
 
   @ApiPropertyOptional({
+    description: 'Analytics API URL',
+    example: 'https://analytics.example.com',
+  })
+  @IsString()
+  @IsOptional()
+  analyticsApiUrl?: string
+
+  @ApiPropertyOptional({
     description: 'SSH Gateway command',
     example: 'ssh -p 2222 {{TOKEN}}@localhost',
   })
@@ -263,6 +271,10 @@ export class ConfigurationDto {
 
     if (configService.get('billingApiUrl')) {
       this.billingApiUrl = configService.get('billingApiUrl')
+    }
+
+    if (configService.get('analyticsApiUrl')) {
+      this.analyticsApiUrl = configService.get('analyticsApiUrl')
     }
 
     if (configService.get('posthog.apiKey')) {

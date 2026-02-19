@@ -6,17 +6,47 @@
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { UsageChart, UsageChartData } from '@/components/UsageChart'
+import { AggregatedUsageChart } from '@/components/spending/AggregatedUsageChart'
+import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useConfig } from '@/hooks/useConfig'
+import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/useAnalyticsUsage'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { useCallback, useEffect, useState } from 'react'
+import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
+import { DateRange } from 'react-day-picker'
+import { subDays } from 'date-fns'
+
+const analyticsQuickRanges: QuickRangesConfig = {
+  hours: [1, 6, 12, 24],
+  days: [7, 14, 30],
+}
 
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
+  const config = useConfig()
+  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
+  const analyticsAvailable = spendingEnabled && !!config.analyticsApiUrl
   const [currentOrganizationUsage, setCurrentOrganizationUsage] = useState<OrganizationUsage | null>(null)
   const [currentOrganizationUsageLoading, setCurrentOrganizationUsageLoading] = useState(true)
   const [pastOrganizationUsage, setPastOrganizationUsage] = useState<OrganizationUsage[]>([])
   const [pastOrganizationUsageLoading, setPastOrganizationUsageLoading] = useState(true)
+
+  const [analyticsDateRange, setAnalyticsDateRange] = useState<DateRange>(() => {
+    const now = new Date()
+    return { from: subDays(now, 30), to: now }
+  })
+
+  const analyticsParams = {
+    from: analyticsDateRange.from ?? subDays(new Date(), 30),
+    to: analyticsDateRange.to ?? new Date(),
+  }
+
+  const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams)
+  const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams)
 
   const fetchOrganizationUsage = useCallback(async () => {
     if (!selectedOrganization) {
@@ -63,8 +93,28 @@ const Spending = () => {
       </PageHeader>
 
       <PageContent size="full">
+        {analyticsAvailable && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <h2 className="text-lg font-semibold shrink-0">Resource Usage</h2>
+              <DateRangePicker
+                value={analyticsDateRange}
+                onChange={setAnalyticsDateRange}
+                quickRangesEnabled
+                quickRanges={analyticsQuickRanges}
+                timeSelection
+                defaultSelectedQuickRange="Last 30 days"
+                className="w-auto"
+              />
+            </div>
+
+            <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
+            <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
+          </div>
+        )}
+
         <UsageChart
-          title="Cost Breakdown"
+          title="Monthly Breakdown"
           usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
             convertUsageToChartData,
           )}

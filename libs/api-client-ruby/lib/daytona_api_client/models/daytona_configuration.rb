@@ -57,6 +57,9 @@ module DaytonaApiClient
     # Billing API URL
     attr_accessor :billing_api_url
 
+    # Analytics API URL
+    attr_accessor :analytics_api_url
+
     # SSH Gateway command
     attr_accessor :ssh_gateway_command
 
@@ -83,6 +86,7 @@ module DaytonaApiClient
         :'maintanance_mode' => :'maintananceMode',
         :'environment' => :'environment',
         :'billing_api_url' => :'billingApiUrl',
+        :'analytics_api_url' => :'analyticsApiUrl',
         :'ssh_gateway_command' => :'sshGatewayCommand',
         :'ssh_gateway_public_key' => :'sshGatewayPublicKey',
         :'rate_limit' => :'rateLimit'
@@ -116,6 +120,7 @@ module DaytonaApiClient
         :'maintanance_mode' => :'Boolean',
         :'environment' => :'String',
         :'billing_api_url' => :'String',
+        :'analytics_api_url' => :'String',
         :'ssh_gateway_command' => :'String',
         :'ssh_gateway_public_key' => :'String',
         :'rate_limit' => :'RateLimitConfig'
@@ -222,6 +227,10 @@ module DaytonaApiClient
 
       if attributes.key?(:'billing_api_url')
         self.billing_api_url = attributes[:'billing_api_url']
+      end
+
+      if attributes.key?(:'analytics_api_url')
+        self.analytics_api_url = attributes[:'analytics_api_url']
       end
 
       if attributes.key?(:'ssh_gateway_command')
@@ -436,6 +445,7 @@ module DaytonaApiClient
           maintanance_mode == o.maintanance_mode &&
           environment == o.environment &&
           billing_api_url == o.billing_api_url &&
+          analytics_api_url == o.analytics_api_url &&
           ssh_gateway_command == o.ssh_gateway_command &&
           ssh_gateway_public_key == o.ssh_gateway_public_key &&
           rate_limit == o.rate_limit
@@ -450,7 +460,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [version, posthog, oidc, linked_accounts_enabled, announcements, pylon_app_id, proxy_template_url, proxy_toolbox_url, default_snapshot, dashboard_url, max_auto_archive_interval, maintanance_mode, environment, billing_api_url, ssh_gateway_command, ssh_gateway_public_key, rate_limit].hash
+      [version, posthog, oidc, linked_accounts_enabled, announcements, pylon_app_id, proxy_template_url, proxy_toolbox_url, default_snapshot, dashboard_url, max_auto_archive_interval, maintanance_mode, environment, billing_api_url, analytics_api_url, ssh_gateway_command, ssh_gateway_public_key, rate_limit].hash
     end
 
     # Builds the object from hash
