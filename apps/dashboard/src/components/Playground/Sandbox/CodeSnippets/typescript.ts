@@ -222,7 +222,7 @@ export const TypeScriptSnippetGenerator: CodeSnippetGenerator = {
 async function main() {
 ${client}
 \ttry {
-${create}${codeRun}${shell}${fsOps}${gitOps}
+${create}${fsOps}${gitOps}${codeRun}${shell}
 \t} catch (error) {
 \t\tconsole.error("Sandbox flow error:", error)
 \t}

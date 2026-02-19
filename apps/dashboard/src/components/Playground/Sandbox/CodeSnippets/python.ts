@@ -217,6 +217,6 @@ export const PythonSnippetGenerator: CodeSnippetGenerator = {
     const fsOps = this.getFileSystemOps(p)
     const gitOps = this.getGitOps(p)
 
-    return `${imports}${config}\n${client}${resources}${params}\n${create}${codeRun}${shell}${fsOps}${gitOps}`
+    return `${imports}${config}\n${client}${resources}${params}\n${create}${fsOps}${gitOps}${codeRun}${shell}`
   },
 }
