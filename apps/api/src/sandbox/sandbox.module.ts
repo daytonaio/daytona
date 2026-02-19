@@ -55,6 +55,10 @@ import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
 import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
+import { Checkpoint } from './entities/checkpoint.entity'
+import { CheckpointService } from './services/checkpoint.service'
+import { CheckpointManager } from './managers/checkpoint.manager'
+import { CheckpointController } from './controllers/checkpoint.controller'
 
 @Module({
   imports: [
@@ -75,6 +79,7 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
       SshAccess,
       Region,
       Job,
+      Checkpoint,
     ]),
   ],
   controllers: [
@@ -82,6 +87,7 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     RunnerController,
     ToolboxController,
     SnapshotController,
+    CheckpointController,
     WorkspaceController,
     PreviewController,
     VolumeController,
@@ -112,6 +118,8 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     SandboxArchiveAction,
     JobService,
     JobStateHandlerService,
+    CheckpointService,
+    CheckpointManager,
     {
       provide: SandboxRepository,
       inject: [DataSource],

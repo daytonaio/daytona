@@ -22,6 +22,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { v4 as uuidv4 } from 'uuid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
+import { Checkpoint } from './checkpoint.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -215,6 +216,12 @@ export class Sandbox {
 
   @Column({ nullable: true })
   daemonVersion?: string
+
+  @ManyToOne(() => Checkpoint, (checkpoint) => checkpoint.sandboxes, {
+    nullable: true,
+  })
+  @JoinColumn()
+  checkpoint?: Checkpoint
 
   constructor(region: string, name?: string) {
     this.id = uuidv4()

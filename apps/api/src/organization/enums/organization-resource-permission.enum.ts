@@ -35,4 +35,8 @@ export enum OrganizationResourcePermission {
 
   // audit
   READ_AUDIT_LOGS = 'read:audit_logs',
+
+  // checkpoints
+  WRITE_CHECKPOINTS = 'write:checkpoints',
+  DELETE_CHECKPOINTS = 'delete:checkpoints',
 }

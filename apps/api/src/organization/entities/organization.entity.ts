@@ -77,6 +77,13 @@ export class Organization {
 
   @Column({
     type: 'int',
+    default: 500,
+    name: 'checkpoint_quota',
+  })
+  checkpointQuota: number
+
+  @Column({
+    type: 'int',
     nullable: true,
     name: 'authenticated_rate_limit',
   })

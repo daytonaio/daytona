@@ -79,6 +79,8 @@ import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
+import { CreateCheckpointDto } from '../dto/create-checkpoint.dto'
+import { CreateSandboxFromCheckpointDto } from '../dto/create-sandbox-from-checkpoint.dto'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -1259,6 +1261,54 @@ export class SandboxController {
   async getToolboxProxyUrl(@Param('sandboxId') sandboxId: string): Promise<ToolboxProxyUrlDto> {
     const url = await this.sandboxService.getToolboxProxyUrl(sandboxId)
     return new ToolboxProxyUrlDto(url)
+  }
+
+  @Post(':sandboxIdOrName/checkpoint')
+  @ApiOperation({
+    summary: 'Create a checkpoint from a sandbox',
+    operationId: 'createCheckpoint',
+  })
+  @ApiParam({
+    name: 'sandboxIdOrName',
+    description: 'ID or name of the sandbox',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Checkpoint creation has been initiated',
+    type: SandboxDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(SandboxAccessGuard)
+  async createCheckpoint(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Body() dto: CreateCheckpointDto,
+  ): Promise<SandboxDto> {
+    return this.sandboxService.createCheckpoint(sandboxIdOrName, authContext.organizationId, dto.name)
+  }
+
+  @Post('from-checkpoint')
+  @ApiOperation({
+    summary: 'Create a sandbox from a checkpoint',
+    operationId: 'createSandboxFromCheckpoint',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Sandbox creation from checkpoint has been initiated',
+    type: SandboxDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+  })
+  async createSandboxFromCheckpoint(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Body() dto: CreateSandboxFromCheckpointDto,
+  ): Promise<SandboxDto> {
+    return this.sandboxService.createFromCheckpoint(dto.checkpointId, authContext.organization, dto.name)
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox

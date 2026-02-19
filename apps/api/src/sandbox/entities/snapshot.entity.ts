@@ -19,6 +19,7 @@ import { SnapshotRunner } from './snapshot-runner.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { BuildInfo } from './build-info.entity'
 import { SnapshotRegion } from './snapshot-region.entity'
+import { Checkpoint } from './checkpoint.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -112,4 +113,10 @@ export class Snapshot {
     onDelete: 'CASCADE',
   })
   snapshotRegions: SnapshotRegion[]
+
+  @ManyToOne(() => Checkpoint, (checkpoint) => checkpoint.snapshots, {
+    nullable: true,
+  })
+  @JoinColumn()
+  checkpoint?: Checkpoint
 }
