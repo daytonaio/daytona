@@ -10,9 +10,10 @@ type CreateSessionRequest struct {
 } // @name CreateSessionRequest
 
 type SessionExecuteRequest struct {
-	Command  string `json:"command" validate:"required"`
-	RunAsync bool   `json:"runAsync" validate:"optional"`
-	Async    bool   `json:"async" validate:"optional"`
+	Command           string `json:"command" validate:"required"`
+	RunAsync          bool   `json:"runAsync" validate:"optional"`
+	Async             bool   `json:"async" validate:"optional"`
+	SuppressInputEcho bool   `json:"suppressInputEcho" validate:"optional"`
 } // @name SessionExecuteRequest
 
 type SessionSendInputRequest struct {

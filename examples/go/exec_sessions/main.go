@@ -64,7 +64,7 @@ func main() {
 
 	// Execute a first command in the session
 	log.Println("\nExecuting first command in session...")
-	cmd1, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, "export FOO=BAR", false)
+	cmd1, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, "export FOO=BAR", false, false)
 	if err != nil {
 		log.Fatalf("Failed to execute session command: %v", err)
 	}
@@ -79,7 +79,7 @@ func main() {
 
 	// Execute a second command to verify environment variable
 	log.Println("\nExecuting second command in session...")
-	cmd2, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, "echo $FOO", false)
+	cmd2, err := sandbox.Process.ExecuteSessionCommand(ctx, sessionID, "echo $FOO", false, false)
 	if err != nil {
 		log.Fatalf("Failed to execute second command: %v", err)
 	}
@@ -113,7 +113,7 @@ func main() {
 
 	log.Println("Executing long running command asynchronously...")
 	cmd := "counter=1; while (( counter <= 3 )); do echo \"Count: $counter\"; ((counter++)); sleep 1; done"
-	cmdResult, err := sandbox.Process.ExecuteSessionCommand(ctx, asyncSessionID, cmd, true)
+	cmdResult, err := sandbox.Process.ExecuteSessionCommand(ctx, asyncSessionID, cmd, true, false)
 	if err != nil {
 		log.Fatalf("Failed to execute async command: %v", err)
 	}

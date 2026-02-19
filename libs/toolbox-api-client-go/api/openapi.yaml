@@ -3144,6 +3144,7 @@ components:
     SessionExecuteRequest:
       example:
         async: true
+        suppressInputEcho: true
         command: command
         runAsync: true
       properties:
@@ -3152,6 +3153,8 @@ components:
         command:
           type: string
         runAsync:
+          type: boolean
+        suppressInputEcho:
           type: boolean
       required:
         - command

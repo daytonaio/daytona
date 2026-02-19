@@ -32,9 +32,10 @@ func (s *session) Dir(configDir string) string {
 }
 
 type Command struct {
-	Id       string `json:"id" validate:"required"`
-	Command  string `json:"command" validate:"required"`
-	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
+	Id                string `json:"id" validate:"required"`
+	Command           string `json:"command" validate:"required"`
+	ExitCode          *int   `json:"exitCode,omitempty" validate:"optional"`
+	SuppressInputEcho bool   `json:"suppressInputEcho" validate:"optional"`
 }
 
 func (c *Command) LogFilePath(sessionDir string) (string, string) {

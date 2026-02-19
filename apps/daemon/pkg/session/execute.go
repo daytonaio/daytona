@@ -19,7 +19,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
@@ -28,8 +28,9 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput 
 	cmdId := uuid.NewString()
 
 	command := &Command{
-		Id:      cmdId,
-		Command: cmd,
+		Id:                cmdId,
+		Command:           cmd,
+		SuppressInputEcho: suppressInputEcho,
 	}
 	session.commands.Set(cmdId, command)
 

@@ -184,7 +184,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(p \*ProcessService\) CreateSession\(ctx context.Context, sessionID string\) error](<#ProcessService.CreateSession>)
   - [func \(p \*ProcessService\) DeleteSession\(ctx context.Context, sessionID string\) error](<#ProcessService.DeleteSession>)
   - [func \(p \*ProcessService\) ExecuteCommand\(ctx context.Context, command string, opts ...func\(\*options.ExecuteCommand\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.ExecuteCommand>)
-  - [func \(p \*ProcessService\) ExecuteSessionCommand\(ctx context.Context, sessionID, command string, runAsync bool\) \(map\[string\]any, error\)](<#ProcessService.ExecuteSessionCommand>)
+  - [func \(p \*ProcessService\) ExecuteSessionCommand\(ctx context.Context, sessionID, command string, runAsync bool, suppressInputEcho bool\) \(map\[string\]any, error\)](<#ProcessService.ExecuteSessionCommand>)
   - [func \(p \*ProcessService\) GetPtySessionInfo\(ctx context.Context, sessionID string\) \(\*types.PtySessionInfo, error\)](<#ProcessService.GetPtySessionInfo>)
   - [func \(p \*ProcessService\) GetSession\(ctx context.Context, sessionID string\) \(map\[string\]any, error\)](<#ProcessService.GetSession>)
   - [func \(p \*ProcessService\) GetSessionCommand\(ctx context.Context, sessionID, commandID string\) \(map\[string\]any, error\)](<#ProcessService.GetSessionCommand>)
@@ -2820,7 +2820,7 @@ Returns \[types.ExecuteResponse\] containing the output and exit code, or an err
 ### func \(\*ProcessService\) ExecuteSessionCommand
 
 ```go
-func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool) (map[string]any, error)
+func (p *ProcessService) ExecuteSessionCommand(ctx context.Context, sessionID, command string, runAsync bool, suppressInputEcho bool) (map[string]any, error)
 ```
 
 ExecuteSessionCommand executes a command within a session.
@@ -2830,6 +2830,7 @@ Parameters:
 - sessionID: The session to execute the command in
 - command: The command to execute
 - runAsync: If true, return immediately without waiting for completion
+- suppressInputEcho: If true, suppress input echo
 
 When runAsync is true, use [ProcessService.GetSessionCommand](<#ProcessService.GetSessionCommand>) to check status and [ProcessService.GetSessionCommandLogs](<#ProcessService.GetSessionCommandLogs>) to retrieve output.
 

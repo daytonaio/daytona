@@ -3490,6 +3490,9 @@
         },
         "runAsync": {
           "type": "boolean"
+        },
+        "suppressInputEcho": {
+          "type": "boolean"
         }
       }
     },

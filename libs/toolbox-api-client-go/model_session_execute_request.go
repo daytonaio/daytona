@@ -21,9 +21,10 @@ var _ MappedNullable = &SessionExecuteRequest{}
 
 // SessionExecuteRequest struct for SessionExecuteRequest
 type SessionExecuteRequest struct {
-	Async    *bool  `json:"async,omitempty"`
-	Command  string `json:"command"`
-	RunAsync *bool  `json:"runAsync,omitempty"`
+	Async             *bool  `json:"async,omitempty"`
+	Command           string `json:"command"`
+	RunAsync          *bool  `json:"runAsync,omitempty"`
+	SuppressInputEcho *bool  `json:"suppressInputEcho,omitempty"`
 }
 
 type _SessionExecuteRequest SessionExecuteRequest
@@ -134,6 +135,38 @@ func (o *SessionExecuteRequest) SetRunAsync(v bool) {
 	o.RunAsync = &v
 }
 
+// GetSuppressInputEcho returns the SuppressInputEcho field value if set, zero value otherwise.
+func (o *SessionExecuteRequest) GetSuppressInputEcho() bool {
+	if o == nil || IsNil(o.SuppressInputEcho) {
+		var ret bool
+		return ret
+	}
+	return *o.SuppressInputEcho
+}
+
+// GetSuppressInputEchoOk returns a tuple with the SuppressInputEcho field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SessionExecuteRequest) GetSuppressInputEchoOk() (*bool, bool) {
+	if o == nil || IsNil(o.SuppressInputEcho) {
+		return nil, false
+	}
+	return o.SuppressInputEcho, true
+}
+
+// HasSuppressInputEcho returns a boolean if a field has been set.
+func (o *SessionExecuteRequest) HasSuppressInputEcho() bool {
+	if o != nil && !IsNil(o.SuppressInputEcho) {
+		return true
+	}
+
+	return false
+}
+
+// SetSuppressInputEcho gets a reference to the given bool and assigns it to the SuppressInputEcho field.
+func (o *SessionExecuteRequest) SetSuppressInputEcho(v bool) {
+	o.SuppressInputEcho = &v
+}
+
 func (o SessionExecuteRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -150,6 +183,9 @@ func (o SessionExecuteRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize["command"] = o.Command
 	if !IsNil(o.RunAsync) {
 		toSerialize["runAsync"] = o.RunAsync
+	}
+	if !IsNil(o.SuppressInputEcho) {
+		toSerialize["suppressInputEcho"] = o.SuppressInputEcho
 	}
 	return toSerialize, nil
 }

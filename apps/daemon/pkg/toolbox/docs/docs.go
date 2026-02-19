@@ -4022,6 +4022,9 @@ const docTemplate = `{
                 },
                 "runAsync": {
                     "type": "boolean"
+                },
+                "suppressInputEcho": {
+                    "type": "boolean"
                 }
             }
         },

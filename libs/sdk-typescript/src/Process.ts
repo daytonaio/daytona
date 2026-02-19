@@ -270,6 +270,7 @@ export class Process {
    * @param {SessionExecuteRequest} req - Command execution request containing:
    *                                     - command: The command to execute
    *                                     - runAsync: Whether to execute asynchronously
+   *                                     - suppressInputEcho: Whether to suppress input echo. Default is `false`.
    * @param {number} timeout - Timeout in seconds
    * @returns {Promise<SessionExecuteResponse>} Command execution results containing:
    *                                           - cmdId: Unique identifier for the executed command

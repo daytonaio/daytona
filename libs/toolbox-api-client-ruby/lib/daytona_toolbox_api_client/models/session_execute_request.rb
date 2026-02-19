@@ -21,12 +21,15 @@ module DaytonaToolboxApiClient
 
     attr_accessor :run_async
 
+    attr_accessor :suppress_input_echo
+
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'async' => :'async',
         :'command' => :'command',
-        :'run_async' => :'runAsync'
+        :'run_async' => :'runAsync',
+        :'suppress_input_echo' => :'suppressInputEcho'
       }
     end
 
@@ -45,7 +48,8 @@ module DaytonaToolboxApiClient
       {
         :'async' => :'Boolean',
         :'command' => :'String',
-        :'run_async' => :'Boolean'
+        :'run_async' => :'Boolean',
+        :'suppress_input_echo' => :'Boolean'
       }
     end
 
@@ -83,6 +87,10 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'run_async')
         self.run_async = attributes[:'run_async']
+      end
+
+      if attributes.key?(:'suppress_input_echo')
+        self.suppress_input_echo = attributes[:'suppress_input_echo']
       end
     end
 
@@ -123,7 +131,8 @@ module DaytonaToolboxApiClient
       self.class == o.class &&
           async == o.async &&
           command == o.command &&
-          run_async == o.run_async
+          run_async == o.run_async &&
+          suppress_input_echo == o.suppress_input_echo
     end
 
     # @see the `==` method
@@ -135,7 +144,7 @@ module DaytonaToolboxApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [async, command, run_async].hash
+      [async, command, run_async, suppress_input_echo].hash
     end
 
     # Builds the object from hash
