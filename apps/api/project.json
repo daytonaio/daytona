@@ -31,8 +31,7 @@
           "extractLicenses": true,
           "inspect": false
         }
-      },
-      "dependsOn": ["openapi"]
+      }
     },
     "openapi": {
       "executor": "nx:run-commands",
