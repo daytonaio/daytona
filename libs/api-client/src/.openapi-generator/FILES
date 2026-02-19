@@ -60,6 +60,7 @@ models/create-user.ts
 models/create-volume.ts
 models/create-workspace.ts
 models/daytona-configuration.ts
+models/deprecated-paginated-sandboxes.ts
 models/display-info-response.ts
 models/docker-registry.ts
 models/download-files.ts

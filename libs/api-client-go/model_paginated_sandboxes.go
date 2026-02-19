@@ -21,10 +21,10 @@ var _ MappedNullable = &PaginatedSandboxes{}
 
 // PaginatedSandboxes struct for PaginatedSandboxes
 type PaginatedSandboxes struct {
-	Items                []Sandbox `json:"items"`
-	Total                float32   `json:"total"`
-	Page                 float32   `json:"page"`
-	TotalPages           float32   `json:"totalPages"`
+	// List of results for the current page
+	Items []Sandbox `json:"items"`
+	// Cursor for the next page of results
+	NextCursor           NullableString `json:"nextCursor"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -34,12 +34,10 @@ type _PaginatedSandboxes PaginatedSandboxes
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPaginatedSandboxes(items []Sandbox, total float32, page float32, totalPages float32) *PaginatedSandboxes {
+func NewPaginatedSandboxes(items []Sandbox, nextCursor NullableString) *PaginatedSandboxes {
 	this := PaginatedSandboxes{}
 	this.Items = items
-	this.Total = total
-	this.Page = page
-	this.TotalPages = totalPages
+	this.NextCursor = nextCursor
 	return &this
 }
 
@@ -75,76 +73,30 @@ func (o *PaginatedSandboxes) SetItems(v []Sandbox) {
 	o.Items = v
 }
 
-// GetTotal returns the Total field value
-func (o *PaginatedSandboxes) GetTotal() float32 {
-	if o == nil {
-		var ret float32
+// GetNextCursor returns the NextCursor field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *PaginatedSandboxes) GetNextCursor() string {
+	if o == nil || o.NextCursor.Get() == nil {
+		var ret string
 		return ret
 	}
 
-	return o.Total
+	return *o.NextCursor.Get()
 }
 
-// GetTotalOk returns a tuple with the Total field value
+// GetNextCursorOk returns a tuple with the NextCursor field value
 // and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetTotalOk() (*float32, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *PaginatedSandboxes) GetNextCursorOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Total, true
+	return o.NextCursor.Get(), o.NextCursor.IsSet()
 }
 
-// SetTotal sets field value
-func (o *PaginatedSandboxes) SetTotal(v float32) {
-	o.Total = v
-}
-
-// GetPage returns the Page field value
-func (o *PaginatedSandboxes) GetPage() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.Page
-}
-
-// GetPageOk returns a tuple with the Page field value
-// and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetPageOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Page, true
-}
-
-// SetPage sets field value
-func (o *PaginatedSandboxes) SetPage(v float32) {
-	o.Page = v
-}
-
-// GetTotalPages returns the TotalPages field value
-func (o *PaginatedSandboxes) GetTotalPages() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalPages
-}
-
-// GetTotalPagesOk returns a tuple with the TotalPages field value
-// and a boolean to check if the value has been set.
-func (o *PaginatedSandboxes) GetTotalPagesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalPages, true
-}
-
-// SetTotalPages sets field value
-func (o *PaginatedSandboxes) SetTotalPages(v float32) {
-	o.TotalPages = v
+// SetNextCursor sets field value
+func (o *PaginatedSandboxes) SetNextCursor(v string) {
+	o.NextCursor.Set(&v)
 }
 
 func (o PaginatedSandboxes) MarshalJSON() ([]byte, error) {
@@ -158,9 +110,7 @@ func (o PaginatedSandboxes) MarshalJSON() ([]byte, error) {
 func (o PaginatedSandboxes) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["items"] = o.Items
-	toSerialize["total"] = o.Total
-	toSerialize["page"] = o.Page
-	toSerialize["totalPages"] = o.TotalPages
+	toSerialize["nextCursor"] = o.NextCursor.Get()
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -175,9 +125,7 @@ func (o *PaginatedSandboxes) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"items",
-		"total",
-		"page",
-		"totalPages",
+		"nextCursor",
 	}
 
 	allProperties := make(map[string]interface{})
@@ -208,9 +156,7 @@ func (o *PaginatedSandboxes) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "items")
-		delete(additionalProperties, "total")
-		delete(additionalProperties, "page")
-		delete(additionalProperties, "totalPages")
+		delete(additionalProperties, "nextCursor")
 		o.AdditionalProperties = additionalProperties
 	}
 

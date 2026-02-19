@@ -23,27 +23,15 @@ import type { Sandbox } from './sandbox'
  */
 export interface PaginatedSandboxes {
   /**
-   *
+   * List of results for the current page
    * @type {Array<Sandbox>}
    * @memberof PaginatedSandboxes
    */
   items: Array<Sandbox>
   /**
-   *
-   * @type {number}
+   * Cursor for the next page of results
+   * @type {string}
    * @memberof PaginatedSandboxes
    */
-  total: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedSandboxes
-   */
-  page: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedSandboxes
-   */
-  totalPages: number
+  nextCursor: string | null
 }

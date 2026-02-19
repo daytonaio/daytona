@@ -15,21 +15,17 @@ require 'time'
 
 module DaytonaApiClient
   class PaginatedSandboxes
+    # List of results for the current page
     attr_accessor :items
 
-    attr_accessor :total
-
-    attr_accessor :page
-
-    attr_accessor :total_pages
+    # Cursor for the next page of results
+    attr_accessor :next_cursor
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'items' => :'items',
-        :'total' => :'total',
-        :'page' => :'page',
-        :'total_pages' => :'totalPages'
+        :'next_cursor' => :'nextCursor'
       }
     end
 
@@ -47,15 +43,14 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'items' => :'Array<Sandbox>',
-        :'total' => :'Float',
-        :'page' => :'Float',
-        :'total_pages' => :'Float'
+        :'next_cursor' => :'String'
       }
     end
 
     # List of attributes with nullable: true
     def self.openapi_nullable
       Set.new([
+        :'next_cursor'
       ])
     end
 
@@ -83,22 +78,10 @@ module DaytonaApiClient
         self.items = nil
       end
 
-      if attributes.key?(:'total')
-        self.total = attributes[:'total']
+      if attributes.key?(:'next_cursor')
+        self.next_cursor = attributes[:'next_cursor']
       else
-        self.total = nil
-      end
-
-      if attributes.key?(:'page')
-        self.page = attributes[:'page']
-      else
-        self.page = nil
-      end
-
-      if attributes.key?(:'total_pages')
-        self.total_pages = attributes[:'total_pages']
-      else
-        self.total_pages = nil
+        self.next_cursor = nil
       end
     end
 
@@ -111,18 +94,6 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "items", items cannot be nil.')
       end
 
-      if @total.nil?
-        invalid_properties.push('invalid value for "total", total cannot be nil.')
-      end
-
-      if @page.nil?
-        invalid_properties.push('invalid value for "page", page cannot be nil.')
-      end
-
-      if @total_pages.nil?
-        invalid_properties.push('invalid value for "total_pages", total_pages cannot be nil.')
-      end
-
       invalid_properties
     end
 
@@ -131,9 +102,6 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @items.nil?
-      return false if @total.nil?
-      return false if @page.nil?
-      return false if @total_pages.nil?
       true
     end
 
@@ -147,45 +115,13 @@ module DaytonaApiClient
       @items = items
     end
 
-    # Custom attribute writer method with validation
-    # @param [Object] total Value to be assigned
-    def total=(total)
-      if total.nil?
-        fail ArgumentError, 'total cannot be nil'
-      end
-
-      @total = total
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] page Value to be assigned
-    def page=(page)
-      if page.nil?
-        fail ArgumentError, 'page cannot be nil'
-      end
-
-      @page = page
-    end
-
-    # Custom attribute writer method with validation
-    # @param [Object] total_pages Value to be assigned
-    def total_pages=(total_pages)
-      if total_pages.nil?
-        fail ArgumentError, 'total_pages cannot be nil'
-      end
-
-      @total_pages = total_pages
-    end
-
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
           items == o.items &&
-          total == o.total &&
-          page == o.page &&
-          total_pages == o.total_pages
+          next_cursor == o.next_cursor
     end
 
     # @see the `==` method
@@ -197,7 +133,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [items, total, page, total_pages].hash
+      [items, next_cursor].hash
     end
 
     # Builds the object from hash

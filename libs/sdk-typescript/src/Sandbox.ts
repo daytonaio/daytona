@@ -7,7 +7,6 @@ import {
   SandboxState,
   SandboxApi,
   Sandbox as SandboxDto,
-  PaginatedSandboxes as PaginatedSandboxesDto,
   PortPreviewUrl,
   SandboxVolume,
   BuildInfo,
@@ -17,6 +16,7 @@ import {
   SshAccessValidationDto,
   SignedPortPreviewUrl,
   ResizeSandbox,
+  DeprecatedPaginatedSandboxes,
 } from '@daytonaio/api-client'
 import { Resources } from './Daytona'
 import {
@@ -778,6 +778,21 @@ export class Sandbox implements SandboxDto {
   }
 }
 
-export interface PaginatedSandboxes extends Omit<PaginatedSandboxesDto, 'items'> {
+/**
+ * @deprecated Use {@link CursorPaginatedSandboxes} instead.
+ */
+export interface PaginatedSandboxes extends Omit<DeprecatedPaginatedSandboxes, 'items'> {
   items: Sandbox[]
+}
+
+/**
+ * Paginated list of Sandboxes using cursor-based pagination.
+ *
+ * @interface
+ * @property {Sandbox[]} items - List of Sandboxes for the current page.
+ * @property {string | null} nextCursor - Cursor for the next page of results. Null if there are no more results.
+ */
+export interface CursorPaginatedSandboxes {
+  items: Sandbox[]
+  nextCursor: string | null
 }

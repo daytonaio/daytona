@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Sequence
 from enum import Enum
 from typing import Annotated, Literal
 
@@ -184,3 +185,17 @@ class CreateSandboxFromSnapshotParams(CreateSandboxBaseParams):
     """
 
     snapshot: str | None = None
+
+
+class ListSandboxesParams(BaseModel):
+    """Parameters for listing Sandboxes using cursor-based pagination.
+
+    Attributes:
+        cursor (str | None): Pagination cursor from a previous response. Omit to start from the beginning.
+        limit (int | None): Maximum number of items per page.
+        states (Sequence[str] | None): List of states to filter by.
+    """
+
+    cursor: str | None = None
+    limit: int | None = None
+    states: Sequence[str] | None = None

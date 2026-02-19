@@ -40,7 +40,7 @@ var DeleteCmd = &cobra.Command{
 				var allSandboxes []apiclient.Sandbox
 
 				for {
-					sandboxBatch, res, err := apiClient.SandboxAPI.ListSandboxesPaginated(ctx).Page(page).Limit(limit).Execute()
+					sandboxBatch, res, err := apiClient.SandboxAPI.ListSandboxesPaginatedDeprecated(ctx).Page(page).Limit(limit).Execute()
 					if err != nil {
 						return apiclient_cli.HandleErrorResponse(res, err)
 					}

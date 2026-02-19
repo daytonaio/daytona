@@ -25,6 +25,7 @@ from daytona_api_client_async import (
 )
 from daytona_api_client_async import VolumesApi as VolumesApi
 from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
+from deprecated import deprecated
 from environs import Env
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -48,11 +49,12 @@ from ..common.daytona import (
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
+    ListSandboxesParams,
 )
 from ..common.errors import DaytonaError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
-from .sandbox import AsyncPaginatedSandboxes, AsyncSandbox
+from .sandbox import AsyncCursorPaginatedSandboxes, AsyncPaginatedSandboxes, AsyncSandbox
 from .snapshot import AsyncSnapshotService
 from .volume import AsyncVolumeService
 
@@ -658,12 +660,57 @@ class AsyncDaytona:
             raise DaytonaError(f"No sandbox found with labels {labels}")
         return sandboxes.items[0]
 
-    @intercept_errors(message_prefix="Failed to list sandboxes: ")
-    @with_instrumentation()
+    @overload
     async def list(
-        self, labels: dict[str, str] | None = None, page: int | None = None, limit: int | None = None
+        self,
+        params: ListSandboxesParams,
+    ) -> AsyncCursorPaginatedSandboxes:
+        """Returns a paginated list of Sandboxes with optional state filtering.
+
+        Uses cursor-based pagination, ordered newest first.
+
+        Args:
+            params.cursor (str | None): Pagination cursor from a previous response. Omit to start from the beginning.
+            params.limit (int | None): Maximum number of items per page.
+            params.states (list[str] | None): List of states to filter by.
+
+        Returns:
+            AsyncCursorPaginatedSandboxes: Cursor-paginated list of Sandbox instances.
+
+        Example:
+            ```python
+            # First page
+            page1 = await daytona.list(ListSandboxesParams(limit=10))
+            for sandbox in page1.items:
+                print(f"{sandbox.id}: {sandbox.state}")
+
+            # Next page
+            if page1.next_cursor:
+                page2 = await daytona.list(ListSandboxesParams(cursor=page1.next_cursor, limit=10))
+
+            # Filter by state
+            running = await daytona.list(ListSandboxesParams(limit=10, states=[SandboxState.STARTED]))
+            ```
+        """
+
+    @overload
+    @deprecated(
+        reason=(
+            "Use the cursor-based overload instead. "
+            "This overload uses offset-based pagination against a deprecated API endpoint."
+        )
+    )
+    async def list(
+        self,
+        labels: dict[str, str] | None = None,
+        page: int | None = None,
+        limit: int | None = None,
     ) -> AsyncPaginatedSandboxes:
         """Returns paginated list of Sandboxes filtered by labels.
+
+        .. deprecated::
+            Use the cursor-based overload instead. This overload uses offset-based pagination
+            against a deprecated API endpoint.
 
         Args:
             labels (dict[str, str] | None): Labels to filter Sandboxes.
@@ -680,15 +727,54 @@ class AsyncDaytona:
                 print(f"{sandbox.id}: {sandbox.state}")
             ```
         """
-        if page is not None and page < 1:
-            raise DaytonaError("page must be a positive integer")
 
+    @intercept_errors(message_prefix="Failed to list sandboxes: ")
+    @with_instrumentation()
+    async def list(  # pyright: ignore[reportInconsistentOverload]
+        self,
+        params_or_labels: ListSandboxesParams | dict[str, str] | None = None,
+        page: int | None = None,
+        limit: int | None = None,
+    ) -> AsyncPaginatedSandboxes | AsyncCursorPaginatedSandboxes:
         if limit is not None and limit < 1:
             raise DaytonaError("limit must be a positive integer")
 
-        response = await self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
+        if not isinstance(params_or_labels, ListSandboxesParams):
+            labels = params_or_labels
 
-        return AsyncPaginatedSandboxes(
+            if page is not None and page < 1:
+                raise DaytonaError("page must be a positive integer")
+
+            response = await self._sandbox_api.list_sandboxes_paginated_deprecated(
+                labels=json.dumps(labels), page=page, limit=limit
+            )
+
+            return AsyncPaginatedSandboxes(
+                items=[
+                    AsyncSandbox(
+                        sandbox,
+                        self._toolbox_api_client,
+                        self._sandbox_api,
+                        self._get_code_toolbox(
+                            self._validate_language_label(sandbox.labels.get("code-toolbox-language"))
+                        ),
+                        self._get_proxy_toolbox_url,
+                    )
+                    for sandbox in response.items
+                ],
+                total=response.total,
+                page=response.page,
+                total_pages=response.total_pages,
+            )
+
+        params = params_or_labels
+        response = await self._sandbox_api.list_sandboxes_v2(
+            cursor=params.cursor,
+            limit=params.limit,
+            states=list(params.states) if params.states else None,
+        )
+
+        return AsyncCursorPaginatedSandboxes(
             items=[
                 AsyncSandbox(
                     sandbox,
@@ -699,9 +785,7 @@ class AsyncDaytona:
                 )
                 for sandbox in response.items
             ],
-            total=response.total,
-            page=response.page,
-            total_pages=response.total_pages,
+            next_cursor=response.next_cursor,
         )
 
     def _validate_language_label(self, language: str | None = None) -> CodeLanguage:

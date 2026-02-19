@@ -715,6 +715,9 @@ func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels 
 
 // List retrieves sandboxes with optional label filtering and pagination.
 //
+// Deprecated: Use [Client.ListV2] instead. This method uses offset-based pagination against a
+// deprecated API endpoint.
+//
 // Parameters:
 //   - labels: Optional map of labels to filter sandboxes. Pass nil for no filtering.
 //   - page: Optional page number (1-indexed). Pass nil for the first page.
@@ -753,7 +756,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 	}
 
 	authCtx := c.getAuthContext(ctx)
-	request := c.apiClient.SandboxAPI.ListSandboxesPaginated(authCtx)
+	request := c.apiClient.SandboxAPI.ListSandboxesPaginatedDeprecated(authCtx)
 
 	// Add optional parameters
 	if labels != nil {
@@ -808,6 +811,101 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 		Total:      int(result.GetTotal()),
 		Page:       int(result.GetPage()),
 		TotalPages: int(result.GetTotalPages()),
+	}, nil
+}
+
+// ListV2 retrieves sandboxes with optional state filtering using cursor-based pagination.
+// Uses cursor-based pagination, ordered newest first.
+//
+// Parameters:
+//   - params: Optional [ListSandboxesParams] containing cursor, limit, and state filters. Pass nil for defaults.
+//   - params.cursor: Optional pagination cursor from a previous response. Pass nil to start from the beginning.
+//   - params.limit: Optional number of results per page. Pass nil for the default limit.
+//   - params.states: Optional list of sandbox states to filter by. Pass nil for no filtering.
+//
+// Example:
+//
+//	// First page
+//	result, err := client.ListV2(ctx, nil)
+//
+//	// Next page
+//	result2, err := client.ListV2(ctx, &daytona.ListSandboxesParams{Cursor: result.NextCursor})
+//
+//	// Filter by state
+//	states := []apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED}
+//	result, err := client.ListV2(ctx, &daytona.ListSandboxesParams{States: states})
+//
+// Returns a [CursorPaginatedSandboxes] containing the matching sandboxes and a cursor for the next page.
+func (c *Client) ListV2(ctx context.Context, params *ListSandboxesParams) (*CursorPaginatedSandboxes, error) {
+	return withInstrumentation(ctx, c.Otel, "Client", "ListV2", func(ctx context.Context) (*CursorPaginatedSandboxes, error) {
+		return c.doListV2(ctx, params)
+	})
+}
+
+func (c *Client) doListV2(ctx context.Context, params *ListSandboxesParams) (*CursorPaginatedSandboxes, error) {
+	authCtx := c.getAuthContext(ctx)
+	request := c.apiClient.SandboxAPI.ListSandboxesV2(authCtx)
+
+	if params != nil {
+		if params.Cursor != nil {
+			request = request.Cursor(*params.Cursor)
+		}
+		if params.Limit != nil {
+			request = request.Limit(float32(*params.Limit))
+		}
+		if params.States != nil {
+			stateStrings := make([]string, len(params.States))
+			for i, s := range params.States {
+				stateStrings[i] = string(s)
+			}
+			request = request.States(stateStrings)
+		}
+	}
+
+	result, httpResp, err := request.Execute()
+	if err != nil {
+		return nil, errors.ConvertAPIError(err, httpResp)
+	}
+
+	items := result.GetItems()
+	sandboxes := make([]*Sandbox, len(items))
+	for i := range items {
+		toolboxClient, err := c.createToolboxClient(ctx, items[i].GetId(), items[i].GetTarget())
+		if err != nil {
+			return nil, err
+		}
+
+		autoArchiveInterval := 0
+		if items[i].AutoArchiveInterval != nil {
+			autoArchiveInterval = int(*items[i].AutoArchiveInterval)
+		}
+
+		autoDeleteInterval := 0
+		if items[i].AutoDeleteInterval != nil {
+			autoDeleteInterval = int(*items[i].AutoDeleteInterval)
+		}
+
+		sandboxes[i] = NewSandbox(c,
+			toolboxClient,
+			items[i].GetId(),
+			items[i].GetName(),
+			items[i].GetState(),
+			items[i].GetTarget(),
+			autoArchiveInterval,
+			autoDeleteInterval,
+			items[i].GetNetworkBlockAll(),
+			items[i].NetworkAllowList,
+		)
+	}
+
+	var nextCursor *string
+	if nc, ok := result.GetNextCursorOk(); ok && nc != nil {
+		nextCursor = nc
+	}
+
+	return &CursorPaginatedSandboxes{
+		Items:      sandboxes,
+		NextCursor: nextCursor,
 	}, nil
 }
 

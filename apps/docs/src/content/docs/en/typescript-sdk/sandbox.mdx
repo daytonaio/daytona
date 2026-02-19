@@ -896,24 +896,36 @@ or encounters an error.
 **Throws**:
 
 - `DaytonaError` - If the sandbox fails to stop within the timeout period.
-## PaginatedSandboxes
+## CursorPaginatedSandboxes
 
-**Extends:**
+Paginated list of Sandboxes using cursor-based pagination.
 
 **Properties**:
 
-- `items` _Sandbox\[\]_
-- `page` _number_
-    - _Inherited from_: `PaginatedSandboxes.page`
-- `total` _number_
-    - _Inherited from_: `PaginatedSandboxes.total`
-- `totalPages` _number_
-    - _Inherited from_: `PaginatedSandboxes.totalPages`
+- `items` _Sandbox\[\]_ - List of Sandboxes for the current page.
+- `nextCursor` _string_ - Cursor for the next page of results. Null if there are no more results.
+## ~~PaginatedSandboxes~~
+
+### Deprecated
+
+**Properties**:
+
+- `~~items~~` _Sandbox\[\]_
+- `~~page~~` _number_
+    - _Inherited from_: `DeprecatedPaginatedSandboxes.page`
+- `~~total~~` _number_
+    - _Inherited from_: `DeprecatedPaginatedSandboxes.total`
+- `~~totalPages~~` _number_
+    - _Inherited from_: `DeprecatedPaginatedSandboxes.totalPages`
 
 
 
 
-- `Omit`\<`PaginatedSandboxesDto`, `"items"`\>
+Use CursorPaginatedSandboxes instead.
+
+**Extends:**
+
+- `Omit`\<`DeprecatedPaginatedSandboxes`, `"items"`\>
 ## SandboxCodeToolbox
 
 Interface defining methods that a code toolbox must implement
