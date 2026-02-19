@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { DebouncedInput } from './DebouncedInput'
+import { pluralize } from '@/lib/utils'
 
 interface SearchInputProps {
   placeholder?: string
@@ -15,6 +16,7 @@ interface SearchInputProps {
   showKeyboardShortcut?: boolean
   resultCount?: number
   entityName?: string
+  entityNamePlural?: string
   'data-testid'?: string
 }
 
@@ -25,20 +27,29 @@ export function SearchInput({
   className = '',
   showKeyboardShortcut = true,
   resultCount,
-  entityName = 'items',
+  entityName = 'item',
+  entityNamePlural,
   'data-testid': dataTestId,
 }: SearchInputProps) {
+  const platformKey = useMemo(() => {
+    if (typeof navigator === 'undefined' || !navigator.userAgent) return 'Ctrl+K'
+    return /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'
+  }, [])
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement
+        const searchInputs = document.querySelectorAll<HTMLInputElement>('[data-search-input]')
+        const searchInput = searchInputs[searchInputs.length - 1]
         if (searchInput) {
           searchInput.focus()
         }
       }
       if (e.key === 'Escape' && document.activeElement?.hasAttribute('data-search-input')) {
-        onChange('')
+        const hasOpenDialog = document.querySelector('[role="dialog"]')
+        if (!hasOpenDialog) {
+          onChange('')
+        }
       }
     }
 
@@ -69,17 +80,15 @@ export function SearchInput({
           </button>
         ) : showKeyboardShortcut ? (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-            <span className="hidden sm:inline">
-              {typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'}
-            </span>
+            <span className="hidden sm:inline">{platformKey}</span>
           </div>
         ) : null}
       </div>
       {value && resultCount !== undefined && (
         <div className="mt-2 text-sm text-muted-foreground">
           {resultCount === 0
-            ? `No ${entityName}s match your search.`
-            : `Found ${resultCount} ${entityName}${resultCount === 1 ? '' : 's'}`}
+            ? `No ${entityNamePlural ?? `${entityName}s`} match your search.`
+            : `Found ${pluralize(resultCount, entityName, entityNamePlural ?? `${entityName}s`)}`}
         </div>
       )}
     </div>

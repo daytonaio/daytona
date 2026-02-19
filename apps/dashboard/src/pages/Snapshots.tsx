@@ -92,11 +92,14 @@ const Snapshots: React.FC = () => {
   useEffect(() => {
     if (searchQuery !== prevSearchQueryRef.current) {
       prevSearchQueryRef.current = searchQuery
-      if (paginationParams.pageIndex > 0) {
-        setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-      }
+      setPaginationParams((prev) => {
+        if (prev.pageIndex > 0) {
+          return { ...prev, pageIndex: 0 }
+        }
+        return prev
+      })
     }
-  }, [searchQuery, paginationParams.pageIndex])
+  }, [searchQuery])
 
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {
