@@ -24,6 +24,7 @@ import { JobType } from '../enums/job-type.enum'
 import { JobStatus } from '../enums/job-status.enum'
 import { ResourceType } from '../enums/resource-type.enum'
 import { JobService } from '../services/job.service'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 import {
   CreateSandboxDTO,
   CreateBackupDTO,
@@ -45,8 +46,7 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   private runner: Runner
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Job)
     private readonly jobRepository: Repository<Job>,
     private readonly jobService: JobService,
