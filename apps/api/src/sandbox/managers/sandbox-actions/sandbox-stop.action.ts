@@ -11,8 +11,7 @@ import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
-import { Repository } from 'typeorm'
-import { InjectRepository } from '@nestjs/typeorm'
+import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 
 @Injectable()
@@ -20,8 +19,7 @@ export class SandboxStopAction extends SandboxAction {
   constructor(
     protected runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    protected sandboxRepository: Repository<Sandbox>,
+    protected sandboxRepository: SandboxRepository,
     protected redisLockProvider: RedisLockProvider,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)

@@ -35,7 +35,6 @@ import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
-import { Sandbox } from '../../sandbox/entities/sandbox.entity'
 import { Snapshot } from '../../sandbox/entities/snapshot.entity'
 import { Volume } from '../../sandbox/entities/volume.entity'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
@@ -47,6 +46,7 @@ import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updat
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { OrganizationService } from './organization.service'
+import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 
 @Injectable()
 export class OrganizationUsageService {
@@ -66,8 +66,7 @@ export class OrganizationUsageService {
     @InjectRedis() private readonly redis: Redis,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Volume)
