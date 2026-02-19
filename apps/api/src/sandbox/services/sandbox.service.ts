@@ -2019,8 +2019,6 @@ export class SandboxService {
     const sandboxToUpdate = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
-    const originalState = sandboxToUpdate.state
-    const originalRunnerId = sandboxToUpdate.runnerId
 
     const updateData: Partial<Sandbox> = Sandbox.getBackupStateUpdate(
       sandboxToUpdate,
@@ -2029,14 +2027,6 @@ export class SandboxService {
       backupRegistryId,
       backupErrorReason,
     )
-
-    if (sandboxToUpdate.state !== originalState) {
-      updateData.state = sandboxToUpdate.state
-    }
-
-    if (sandboxToUpdate.runnerId !== originalRunnerId) {
-      updateData.runnerId = sandboxToUpdate.runnerId
-    }
 
     await this.sandboxRepository.update(sandboxId, { updateData })
   }
