@@ -66,7 +66,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     const oldSandbox = { ...sandbox }
 
     Object.assign(sandbox, updateData)
-    this.applyBeforeUpdateLogic(sandbox)
+    this.applyBeforeUpdateLogic(sandbox, updateData)
 
     const result = await this.repository.update(id, updateData)
     if (!result.affected) {
@@ -120,7 +120,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       const oldSandbox = { ...sandbox }
 
       Object.assign(sandbox, updateData)
-      this.applyBeforeUpdateLogic(sandbox)
+      this.applyBeforeUpdateLogic(sandbox, updateData)
 
       await entityManager.update(Sandbox, id, updateData)
 
@@ -133,11 +133,12 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
 
   /**
    * Applies the necessary validations and changes in preparation for saving the sandbox changes to the database.
+   * Derived fields are written to both the in-memory entity and `updateData` so they are persisted.
    */
-  private applyBeforeUpdateLogic(updatedSandbox: Sandbox): void {
+  private applyBeforeUpdateLogic(updatedSandbox: Sandbox, updateData: Partial<Sandbox>): void {
     this.validateDesiredState(updatedSandbox)
-    this.updatePendingFlag(updatedSandbox)
-    this.handleDestroyedState(updatedSandbox)
+    this.updatePendingFlag(updatedSandbox, updateData)
+    this.handleDestroyedState(updatedSandbox, updateData)
   }
 
   /**
@@ -215,7 +216,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   /**
    * Sets the pending flag for specific combinations of state and desired state.
    */
-  private updatePendingFlag(sandbox: Sandbox): void {
+  private updatePendingFlag(sandbox: Sandbox, updateData: Partial<Sandbox>): void {
     if (!sandbox.pending && String(sandbox.state) !== String(sandbox.desiredState)) {
       sandbox.pending = true
     }
@@ -229,15 +230,18 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     ) {
       sandbox.pending = false
     }
+    updateData.pending = sandbox.pending
   }
 
   /**
    * Performs cleanup when a sandbox reaches destroyed state.
    */
-  private handleDestroyedState(sandbox: Sandbox): void {
+  private handleDestroyedState(sandbox: Sandbox, updateData: Partial<Sandbox>): void {
     if (sandbox.state === SandboxState.DESTROYED) {
       sandbox.runnerId = null
       sandbox.backupState = BackupState.NONE
+      updateData.runnerId = null
+      updateData.backupState = BackupState.NONE
     }
   }
 
