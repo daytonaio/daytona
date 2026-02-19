@@ -7,7 +7,6 @@ import { Injectable, Logger } from '@nestjs/common'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
-import { FindOptionsWhere } from 'typeorm'
 import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
@@ -32,7 +31,7 @@ export abstract class SandboxAction {
   abstract run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState>
 
   protected async updateSandboxState(
-    sandboxId: string,
+    sandbox: Sandbox,
     state: SandboxState,
     expectedLockCode: LockCode,
     runnerId?: string | null | undefined,
@@ -42,37 +41,25 @@ export abstract class SandboxAction {
     recoverable?: boolean,
   ) {
     //  check if the lock code is still valid
-    const lockKey = getStateChangeLockKey(sandboxId)
+    const lockKey = getStateChangeLockKey(sandbox.id)
     const currentLockCode = await this.redisLockProvider.getCode(lockKey)
 
     if (currentLockCode === null) {
       this.logger.warn(
-        `no lock code found - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+        `no lock code found - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
       )
       return
     }
 
     if (expectedLockCode.getCode() !== currentLockCode.getCode()) {
       this.logger.warn(
-        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandboxId} - state: ${state}`,
+        `lock code mismatch - state update action expired - skipping - sandboxId: ${sandbox.id} - state: ${state}`,
       )
       return
     }
 
-    const query: FindOptionsWhere<Sandbox> = {
-      id: sandboxId,
-    }
-    if (state !== SandboxState.ARCHIVED) {
-      query.pending = true
-    }
-    const sandbox = await this.sandboxRepository.findOneBy(query)
-    if (!sandbox) {
-      //  this should never happen
-      //  if it does, we need to log the error and return
-      //  this indicates a concurrency error and should be investigated
-      //  we don't to throw the error, just log it and return to avoid setting the error state
-      //  on the otherwise ready sandbox
-      const err = new Error(`sandbox ${sandboxId} is not in a pending state`)
+    if (state !== SandboxState.ARCHIVED && !sandbox.pending) {
+      const err = new Error(`sandbox ${sandbox.id} is not in a pending state`)
       this.logger.error(err)
       return
     }
@@ -117,6 +104,6 @@ export abstract class SandboxAction {
       updateData.recoverable = recoverable
     }
 
-    await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+    await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
   }
 }
