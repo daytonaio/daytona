@@ -113,6 +113,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { isInitialized: webhooksInitialized, openAppPortal } = useWebhooks()
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
   const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
+  const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
@@ -257,25 +258,33 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     signoutRedirect()
   }
 
+  const miscItems = useMemo(() => {
+    if (!playgroundEnabled) {
+      return []
+    }
+
+    return [
+      playgroundEnabled && {
+        icon: <Joystick size={16} strokeWidth={1.5} />,
+        label: 'Playground',
+        path: RoutePath.PLAYGROUND,
+      },
+    ]
+  }, [playgroundEnabled])
+
   const sidebarGroups: { label: string; items: SidebarItem[] }[] = useMemo(() => {
     return [
       { label: 'Sandboxes', items: sidebarItems },
       {
         label: 'Misc',
-        items: [
-          {
-            icon: <Joystick size={16} strokeWidth={1.5} />,
-            label: 'Playground',
-            path: RoutePath.PLAYGROUND,
-          },
-        ],
+        items: miscItems,
       },
       { label: 'Settings', items: settingsItems },
       { label: 'Billing', items: billingItems },
       { label: 'Infrastructure', items: infrastructureItems },
       { label: 'Experimental', items: experimentalItems },
     ].filter((group) => group.items.length > 0)
-  }, [sidebarItems, settingsItems, billingItems, infrastructureItems, experimentalItems])
+  }, [sidebarItems, settingsItems, billingItems, infrastructureItems, experimentalItems, miscItems])
 
   const commandItems = useMemo(() => {
     return sidebarGroups
