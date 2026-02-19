@@ -538,6 +538,7 @@ export class SandboxService {
       public: createSandboxDto.public || false,
       labels: createSandboxDto.labels || {},
       organizationId: organization.id,
+      createdAt: new Date(),
     }
 
     if (createSandboxDto.name) {
