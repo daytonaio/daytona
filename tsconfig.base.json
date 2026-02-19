@@ -18,7 +18,8 @@
       "@daytonaio/api-client": ["libs/api-client/src/index.ts"],
       "@daytonaio/runner-api-client": ["libs/runner-api-client/src/index.ts"],
       "@daytonaio/sdk": ["libs/sdk-typescript/src/index.ts"],
-      "@daytonaio/toolbox-api-client": ["libs/toolbox-api-client/src/index.ts"]
+      "@daytonaio/toolbox-api-client": ["libs/toolbox-api-client/src/index.ts"],
+      "@daytonaio/analytics-api-client": ["libs/analytics-api-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
