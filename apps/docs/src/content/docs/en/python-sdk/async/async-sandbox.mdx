@@ -653,15 +653,15 @@ class AsyncPaginatedSandboxes(DeprecatedPaginatedSandboxes)
 
 Represents a paginated list of Daytona Sandboxes.
 
+.. deprecated::
+Use :class:`AsyncCursorPaginatedSandboxes` instead.
+
 **Attributes**:
 
 - `items` _list[AsyncSandbox]_ - List of Sandbox instances in the current page.
 - `total` _int_ - Total number of Sandboxes across all pages.
 - `page` _int_ - Current page number.
 - `total_pages` _int_ - Total number of pages available.
-  
-  .. deprecated::
-  Use :class:`AsyncCursorPaginatedSandboxes` instead.
 
 ##### items: `list[AsyncSandbox]`
 

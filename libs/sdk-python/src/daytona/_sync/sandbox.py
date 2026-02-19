@@ -709,14 +709,14 @@ class Sandbox(SandboxDto):
 class PaginatedSandboxes(DeprecatedPaginatedSandboxes):
     """Represents a paginated list of Daytona Sandboxes.
 
+    .. deprecated::
+        Use :class:`CursorPaginatedSandboxes` instead.
+
     Attributes:
         items (list[Sandbox]): List of Sandbox instances in the current page.
         total (int): Total number of Sandboxes across all pages.
         page (int): Current page number.
         total_pages (int): Total number of pages available.
-
-    .. deprecated::
-        Use :class:`CursorPaginatedSandboxes` instead.
     """
 
     items: list[Sandbox]  # pyright: ignore[reportIncompatibleVariableOverride]

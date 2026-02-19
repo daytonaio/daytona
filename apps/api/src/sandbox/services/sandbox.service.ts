@@ -988,7 +988,7 @@ export class SandboxService {
     const hasMore = items.length > limit
     const returnItems = hasMore ? items.slice(0, limit) : items
 
-    const lastItem = returnItems[returnItems.length - 1]
+    const lastItem = returnItems.length > 0 ? returnItems[returnItems.length - 1] : undefined
     const nextCursor = lastItem
       ? Buffer.from(JSON.stringify({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })).toString('base64')
       : null

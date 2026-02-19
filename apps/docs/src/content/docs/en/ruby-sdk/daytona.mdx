@@ -195,14 +195,46 @@ Finds a Sandbox by its ID or labels.
 
 #### list()
 
+Lists Sandboxes. When called with a `ListSandboxesParams` object, uses cursor-based
+pagination. When called with positional `labels` and optional `page`/`limit` args,
+falls back to the deprecated offset-based endpoint.
+
 ```ruby
-def list(labels, page:, limit:)
+def list
 
 ```
 
-Lists Sandboxes. When called with a {ListSandboxesParams} object, uses cursor-based
-pagination. When called with positional +labels+ and optional +page+/+limit+ args,
-falls back to the deprecated offset-based endpoint.
+Returns a paginated list of Sandboxes using cursor-based pagination, ordered newest first.
+
+**Parameters**:
+
+- `params` _Daytona:ListSandboxesParams_ - Cursor-based pagination parameters.
+
+**Returns**:
+
+- `Daytona:CursorPaginatedResource`
+
+```ruby
+def list
+
+```
+
+**Deprecated**: Use the cursor-based overload instead. This overload uses offset-based
+pagination against a deprecated API endpoint.
+
+**Parameters**:
+
+- `labels` _Hash\<String, String\>, nil_ -
+- `page` _Integer, nil_ -
+- `limit` _Integer, nil_ -
+
+**Returns**:
+
+- `Daytona:PaginatedResource`
+
+**Raises**:
+
+- `Daytona:Sdk:Error` -
 
 #### start()
 
