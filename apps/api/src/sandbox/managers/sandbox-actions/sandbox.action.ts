@@ -4,11 +4,11 @@
  */
 
 import { Injectable, Logger } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
 import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { Sandbox } from '../../entities/sandbox.entity'
-import { Repository, FindOptionsWhere } from 'typeorm'
+import { FindOptionsWhere } from 'typeorm'
+import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { getStateChangeLockKey } from '../../utils/lock-key.util'
@@ -25,8 +25,7 @@ export abstract class SandboxAction {
   constructor(
     protected readonly runnerService: RunnerService,
     protected runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    protected readonly sandboxRepository: Repository<Sandbox>,
+    protected readonly sandboxRepository: SandboxRepository,
     protected readonly redisLockProvider: RedisLockProvider,
   ) {}
 
@@ -82,40 +81,42 @@ export abstract class SandboxAction {
       return
     }
 
-    sandbox.state = state
+    const updateData: Partial<Sandbox> = {
+      state,
+    }
 
     if (runnerId !== undefined) {
-      sandbox.runnerId = runnerId
+      updateData.runnerId = runnerId
     }
 
     if (errorReason !== undefined) {
-      sandbox.errorReason = errorReason
+      updateData.errorReason = errorReason
       if (state === SandboxState.ERROR) {
-        sandbox.recoverable = recoverable ?? false
+        updateData.recoverable = recoverable ?? false
       }
     }
 
     if (sandbox.state === SandboxState.ERROR && !sandbox.errorReason) {
-      sandbox.errorReason = 'Sandbox is in error state during update'
-      sandbox.recoverable = false
+      updateData.errorReason = 'Sandbox is in error state during update'
+      updateData.recoverable = false
     }
 
     if (daemonVersion !== undefined) {
-      sandbox.daemonVersion = daemonVersion
+      updateData.daemonVersion = daemonVersion
     }
 
-    if (sandbox.state == SandboxState.DESTROYED) {
-      sandbox.backupState = BackupState.NONE
+    if (state == SandboxState.DESTROYED) {
+      updateData.backupState = BackupState.NONE
     }
 
     if (backupState !== undefined) {
-      sandbox.setBackupState(backupState)
+      Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, backupState))
     }
 
     if (recoverable !== undefined) {
-      sandbox.recoverable = recoverable
+      updateData.recoverable = recoverable
     }
 
-    await this.sandboxRepository.save(sandbox)
+    await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
   }
 }
