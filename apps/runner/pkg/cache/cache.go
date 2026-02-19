@@ -20,7 +20,7 @@ type StatesCache struct {
 
 var statesCache *StatesCache
 
-func GetStatesCache(cacheRetentionDays int) *StatesCache {
+func GetStatesCache(ctx context.Context, cacheRetentionDays int) *StatesCache {
 	if cacheRetentionDays <= 0 {
 		cacheRetentionDays = 7
 	}
@@ -34,10 +34,9 @@ func GetStatesCache(cacheRetentionDays int) *StatesCache {
 	}
 
 	return &StatesCache{
-		ICache:             common_cache.NewMapCache[models.CachedStates](),
+		ICache:             common_cache.NewMapCache[models.CachedStates](ctx),
 		cacheRetentionDays: cacheRetentionDays,
 	}
-
 }
 
 func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
