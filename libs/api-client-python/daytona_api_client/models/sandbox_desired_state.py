@@ -30,6 +30,7 @@ class SandboxDesiredState(str, Enum):
     DESTROYED = 'destroyed'
     STARTED = 'started'
     STOPPED = 'stopped'
+    RESIZED = 'resized'
     ARCHIVED = 'archived'
 
     @classmethod

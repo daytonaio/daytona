@@ -6,6 +6,8 @@ require 'uri'
 
 module Daytona
   class Process # rubocop:disable Metrics/ClassLength
+    include Instrumentation
+
     # @return [Daytona::SandboxPythonCodeToolbox,
     attr_reader :code_toolbox
 
@@ -24,11 +26,13 @@ module Daytona
     # @param sandbox_id [String] The ID of the Sandbox
     # @param toolbox_api [DaytonaToolboxApiClient::ProcessApi] API client for Sandbox operations
     # @param get_preview_link [Proc] Function to get preview link for a port
-    def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:, otel_state: nil)
       @code_toolbox = code_toolbox
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
       @get_preview_link = get_preview_link
+      @otel_state = otel_state
     end
 
     # Execute a shell command in the Sandbox
@@ -448,7 +452,17 @@ module Daytona
       toolbox_api.get_pty_session(session_id)
     end
 
+    instrument :exec, :code_run, :create_session, :get_session, :get_session_command,
+               :execute_session_command, :get_session_command_logs, :get_session_command_logs_async,
+               :send_session_command_input, :list_sessions, :delete_session,
+               :create_pty_session, :connect_pty_session, :resize_pty_session,
+               :delete_pty_session, :list_pty_sessions, :get_pty_session_info,
+               component: 'Process'
+
     private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
 
     # Parse the output of a command to extract ExecutionArtifacts
     #

@@ -15,6 +15,8 @@ module Daytona
   # For other languages, use the `code_run` method from the `Process` interface,
   # or execute the appropriate command directly in the sandbox terminal.
   class CodeInterpreter
+    include Instrumentation
+
     WEBSOCKET_TIMEOUT_CODE = 4008
     WS_PORT = 2280
     private_constant :WS_PORT
@@ -22,10 +24,12 @@ module Daytona
     # @param sandbox_id [String]
     # @param toolbox_api [DaytonaToolboxApiClient::InterpreterApi]
     # @param get_preview_link [Proc]
-    def initialize(sandbox_id:, toolbox_api:, get_preview_link:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(sandbox_id:, toolbox_api:, get_preview_link:, otel_state: nil)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
       @get_preview_link = get_preview_link
+      @otel_state = otel_state
     end
 
     # Execute Python code in the sandbox.
@@ -288,7 +292,13 @@ module Daytona
       raise Sdk::Error, "Failed to delete interpreter context: #{e.message}"
     end
 
+    instrument :run_code, :create_context, :list_contexts, :delete_context,
+               component: 'CodeInterpreter'
+
     private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
 
     # @return [Hash<String, String>]
     def build_headers

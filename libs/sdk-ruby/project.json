@@ -19,8 +19,6 @@
         },
         "set-version"
       ],
-      "cache": true,
-      "inputs": ["default"],
       "outputs": ["{projectRoot}/**/*.gem"]
     },
     "set-version": {
@@ -30,7 +28,10 @@
         "command": "if [ -n \"$RUBYGEMS_PKG_VERSION\" ]; then sed -i \"s/VERSION = '[^']*'/VERSION = '$RUBYGEMS_PKG_VERSION'/\" lib/daytona/sdk/version.rb && echo \"Changed version to $RUBYGEMS_PKG_VERSION\"; else echo \"Using version from version.rb\"; fi"
       },
       "cache": true,
-      "inputs": [{ "env": "RUBYGEMS_PKG_VERSION" }, { "env": "VERSION" }],
+      "inputs": [
+        { "env": "RUBYGEMS_PKG_VERSION" },
+        { "env": "VERSION" }
+      ],
       "outputs": ["{projectRoot}/lib/daytona/sdk/version.rb"]
     },
     "lint": {
@@ -57,6 +58,7 @@
     },
     "docs": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/ruby-sdk/**/*"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "bash -O extglob -c 'rm -rf ../../apps/docs/src/content/docs/en/ruby-sdk/!(index.mdx)' && bundle exec ruby scripts/generate-docs.rb"

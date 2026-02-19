@@ -6,6 +6,8 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "inputs": ["goProduction", "^goProduction"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "commands": ["go mod download", "go build -v ./..."],
@@ -48,6 +50,9 @@
     },
     "fmt": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "command": "go fmt ./..."
@@ -70,6 +75,10 @@
     },
     "docs": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "outputs": [
+        "{workspaceRoot}/apps/docs/src/content/docs/en/go-sdk/**/*"
+      ],
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
@@ -83,6 +92,9 @@
     },
     "generate": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/**/*.go"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "command": "go generate ./..."
@@ -90,6 +102,9 @@
     },
     "set-version": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [{ "env": "VERSION" }],
+      "outputs": ["{projectRoot}/pkg/daytona/VERSION"],
       "options": {
         "cwd": "{projectRoot}",
         "commands": ["echo \"${VERSION:-v0.0.0-dev}\" > pkg/daytona/VERSION"],

@@ -128,7 +128,7 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @state.nil?
-      state_validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
+      state_validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing"])
       return false unless state_validator.valid?(@state)
       true
     end
@@ -136,7 +136,7 @@ module DaytonaApiClient
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] state Object to be assigned
     def state=(state)
-      validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"])
+      validator = EnumAttributeValidator.new('String', ["creating", "restoring", "destroyed", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing"])
       unless validator.valid?(state)
         fail ArgumentError, "invalid value for \"state\", must be one of #{validator.allowable_values}."
       end

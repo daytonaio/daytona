@@ -16,6 +16,43 @@
   > h5[id] {
     margin-top: 56px;
     margin-bottom: 16px;
+    position: relative;
+
+    .heading-anchor {
+      opacity: 0;
+      position: absolute;
+      right: 100%;
+      top: 52%;
+      transform: translateY(-50%);
+      padding-right: 0.25em;
+      font-size: 0.875em;
+      color: var(--secondary-text-color);
+      text-decoration: none;
+      transition: opacity 150ms ease, color 150ms ease;
+
+      @include for-hover-state {
+        &:hover {
+          color: var(--hover-color);
+        }
+      }
+
+      @include for-mobile-screen-sizes {
+        position: absolute;
+        right: 100%;
+        margin-right: 0.1em;
+        padding-right: 0;
+
+        &.visible {
+          opacity: 1;
+        }
+      }
+    }
+
+    @include for-hover-state {
+      &:hover .heading-anchor {
+        opacity: 1;
+      }
+    }
   }
 
   > p {

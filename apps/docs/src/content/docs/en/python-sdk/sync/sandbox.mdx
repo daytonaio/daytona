@@ -69,6 +69,7 @@ Initialize a new Sandbox instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to refresh sandbox data: ")
+@with_instrumentation()
 def refresh_data() -> None
 ```
 
@@ -87,6 +88,7 @@ print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 
 ```python
 @intercept_errors(message_prefix="Failed to get user home directory: ")
+@with_instrumentation()
 def get_user_home_dir() -> str
 ```
 
@@ -108,6 +110,7 @@ print(f"Sandbox user home: {user_home_dir}")
 
 ```python
 @intercept_errors(message_prefix="Failed to get working directory path: ")
+@with_instrumentation()
 def get_work_dir() -> str
 ```
 
@@ -129,6 +132,7 @@ print(f"Sandbox working directory: {work_dir}")
 #### Sandbox.create\_lsp\_server
 
 ```python
+@with_instrumentation()
 def create_lsp_server(language_id: LspLanguageId | LspLanguageIdLiteral,
                       path_to_project: str) -> LspServer
 ```
@@ -160,6 +164,7 @@ lsp = sandbox.create_lsp_server("python", "workspace/project")
 
 ```python
 @intercept_errors(message_prefix="Failed to set labels: ")
+@with_instrumentation()
 def set_labels(labels: dict[str, str]) -> dict[str, str]
 ```
 
@@ -192,9 +197,8 @@ print(f"Updated labels: {new_labels}")
 
 ```python
 @intercept_errors(message_prefix="Failed to start sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to start within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def start(timeout: float | None = 60)
 ```
 
@@ -222,9 +226,7 @@ print("Sandbox started successfully")
 
 ```python
 @intercept_errors(message_prefix="Failed to recover sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to recover within the {timeout} seconds timeout period"
-))
+@with_timeout()
 def recover(timeout: float | None = 60)
 ```
 
@@ -252,9 +254,8 @@ print("Sandbox recovered successfully")
 
 ```python
 @intercept_errors(message_prefix="Failed to stop sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to stop within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def stop(timeout: float | None = 60)
 ```
 
@@ -282,6 +283,7 @@ print("Sandbox stopped successfully")
 
 ```python
 @intercept_errors(message_prefix="Failed to remove sandbox: ")
+@with_instrumentation()
 def delete(timeout: float | None = 60) -> None
 ```
 
@@ -297,9 +299,8 @@ Deletes the Sandbox.
 ```python
 @intercept_errors(
     message_prefix="Failure during waiting for sandbox to start: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to become ready within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def wait_for_sandbox_start(timeout: float | None = 60) -> None
 ```
 
@@ -320,9 +321,8 @@ reaches the 'started' state, encounters an error or times out.
 ```python
 @intercept_errors(
     message_prefix="Failure during waiting for sandbox to stop: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to become stopped within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def wait_for_sandbox_stop(timeout: float | None = 60) -> None
 ```
 
@@ -344,6 +344,7 @@ Treats destroyed as stopped to cover ephemeral sandboxes that are automatically 
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
+@with_instrumentation()
 def set_autostop_interval(interval: int) -> None
 ```
 
@@ -377,6 +378,7 @@ sandbox.set_autostop_interval(0)
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
+@with_instrumentation()
 def set_auto_archive_interval(interval: int) -> None
 ```
 
@@ -408,6 +410,7 @@ sandbox.set_auto_archive_interval(0)
 
 ```python
 @intercept_errors(message_prefix="Failed to set auto-delete interval: ")
+@with_instrumentation()
 def set_auto_delete_interval(interval: int) -> None
 ```
 
@@ -437,6 +440,7 @@ sandbox.set_auto_delete_interval(-1)
 
 ```python
 @intercept_errors(message_prefix="Failed to get preview link: ")
+@with_instrumentation()
 def get_preview_link(port: int) -> PortPreviewUrl
 ```
 
@@ -503,6 +507,7 @@ Expires a signed preview URL for the sandbox at the specified port.
 
 ```python
 @intercept_errors(message_prefix="Failed to archive sandbox: ")
+@with_instrumentation()
 def archive() -> None
 ```
 
@@ -516,9 +521,8 @@ Sandbox must be stopped before archiving.
 
 ```python
 @intercept_errors(message_prefix="Failed to resize sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} failed to resize within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def resize(resources: Resources, timeout: float | None = 60) -> None
 ```
 
@@ -562,9 +566,8 @@ sandbox.resize(Resources(cpu=2, memory=4, disk=30))
 ```python
 @intercept_errors(
     message_prefix="Failure during waiting for resize to complete: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {cast('Sandbox', self).id} resize did not complete within the {timeout} seconds timeout period"
-))
+@with_timeout()
+@with_instrumentation()
 def wait_for_resize_complete(timeout: float | None = 60) -> None
 ```
 
@@ -584,6 +587,7 @@ the state is no longer 'resizing'.
 
 ```python
 @intercept_errors(message_prefix="Failed to create SSH access: ")
+@with_instrumentation()
 def create_ssh_access(expires_in_minutes: int | None = None) -> SshAccessDto
 ```
 
@@ -597,6 +601,7 @@ Creates an SSH access token for the sandbox.
 
 ```python
 @intercept_errors(message_prefix="Failed to revoke SSH access: ")
+@with_instrumentation()
 def revoke_ssh_access(token: str) -> None
 ```
 
@@ -610,6 +615,7 @@ Revokes an SSH access token for the sandbox.
 
 ```python
 @intercept_errors(message_prefix="Failed to validate SSH access: ")
+@with_instrumentation()
 def validate_ssh_access(token: str) -> SshAccessValidationDto
 ```
 

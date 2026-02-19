@@ -184,6 +184,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
+    otelEndpoint?: string,
+    skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
@@ -212,6 +214,9 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       networkBlockAll: sandbox.networkBlockAll,
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
+      authToken: sandbox.authToken,
+      otelEndpoint,
+      skipStart: skipStart,
     }
 
     const response = await this.sandboxApiClient.create(createSandboxDto)
@@ -227,9 +232,10 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
   async startSandbox(
     sandboxId: string,
+    authToken: string,
     metadata?: { [key: string]: string },
   ): Promise<StartSandboxResponse | undefined> {
-    const response = await this.sandboxApiClient.start(sandboxId, metadata)
+    const response = await this.sandboxApiClient.start(sandboxId, authToken, metadata)
 
     if (!response?.data?.daemonVersion) {
       return undefined

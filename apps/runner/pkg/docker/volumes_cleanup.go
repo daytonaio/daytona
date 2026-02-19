@@ -32,28 +32,39 @@ func (d *DockerClient) CleanupOrphanedVolumeMounts(ctx context.Context) {
 	}
 	d.lastVolumeCleanup = time.Now()
 
+	dryRun := d.volumeCleanupDryRun
+	log.Infof("Volume cleanup dry-run: %v", dryRun)
+
 	mountDirs, err := filepath.Glob(filepath.Join(getVolumeMountBasePath(), volumeMountPrefix+"*"))
 	if err != nil || len(mountDirs) == 0 {
 		return
 	}
 
-	inUse := d.getInUseVolumeMounts(ctx)
+	inUse, err := d.getInUseVolumeMounts(ctx)
+	if err != nil {
+		log.Errorf("Volume cleanup aborted: %v", err)
+		return
+	}
 
 	for _, dir := range mountDirs {
 		if !inUse[normalizePath(dir)] {
-			log.Infof("Cleaning orphaned volume mount: %s", dir)
-			d.unmountAndRemoveDir(dir)
+			if dryRun {
+				log.Infof("[DRY-RUN] Would clean orphaned volume mount: %s", dir)
+			} else {
+				log.Infof("Cleaning orphaned volume mount: %s", dir)
+				d.unmountAndRemoveDir(dir)
+			}
 		}
 	}
 }
 
-func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool {
+func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) (map[string]bool, error) {
 	inUse := make(map[string]bool)
 	prefix := filepath.Join(getVolumeMountBasePath(), volumeMountPrefix)
 
 	containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{All: true})
 	if err != nil {
-		return inUse
+		return nil, err
 	}
 
 	// Use Mounts from list response - avoids expensive ContainerInspect calls
@@ -66,7 +77,7 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) map[string]bool
 		}
 	}
 
-	return inUse
+	return inUse, nil
 }
 
 func (d *DockerClient) unmountAndRemoveDir(path string) {

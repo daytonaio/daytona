@@ -576,6 +576,11 @@ export class Image {
 
       // Check if the line contains a COPY command
       if (/^\s*COPY\s+(?!.*--from=)/i.test(line)) {
+        // Skip COPY instructions that use heredoc syntax (inline content, not file references)
+        if (line.includes('<<')) {
+          continue
+        }
+
         const importErrorPrefix = '"extractCopySources" is not supported: '
         const fg = dynamicRequire('fast-glob', importErrorPrefix)
 

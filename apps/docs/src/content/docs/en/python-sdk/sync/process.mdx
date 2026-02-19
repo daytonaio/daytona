@@ -31,6 +31,7 @@ Initialize a new Process instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to execute command: ")
+@with_instrumentation()
 def exec(command: str,
          cwd: str | None = None,
          env: dict[str, str] | None = None,
@@ -75,6 +76,7 @@ result = sandbox.process.exec("sleep 10", timeout=5)
 #### Process.code\_run
 
 ```python
+@with_instrumentation()
 def code_run(code: str,
              params: CodeRunParams | None = None,
              timeout: int | None = None) -> ExecuteResponse
@@ -154,6 +156,7 @@ if chart.type == ChartType.LINE and isinstance(chart, LineChart):
 
 ```python
 @intercept_errors(message_prefix="Failed to create session: ")
+@with_instrumentation()
 def create_session(session_id: str) -> None
 ```
 
@@ -212,6 +215,7 @@ for cmd in session.commands:
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command: ")
+@with_instrumentation()
 def get_session_command(session_id: str, command_id: str) -> Command
 ```
 
@@ -243,6 +247,7 @@ if cmd.exit_code == 0:
 
 ```python
 @intercept_errors(message_prefix="Failed to execute session command: ")
+@with_instrumentation()
 def execute_session_command(
         session_id: str,
         req: SessionExecuteRequest,
@@ -294,6 +299,7 @@ print(f"Command stderr: {result.stderr}")
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
+@with_instrumentation()
 def get_session_command_logs(session_id: str,
                              command_id: str) -> SessionCommandLogsResponse
 ```
@@ -330,18 +336,22 @@ print(f"Command stderr: {logs.stderr}")
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
 async def get_session_command_logs_async(
-        session_id: str, command_id: str, on_stdout: Callable[[str], None],
-        on_stderr: Callable[[str], None]) -> None
+        session_id: str, command_id: str, on_stdout: OutputHandler[str],
+        on_stderr: OutputHandler[str]) -> None
 ```
 
 Asynchronously retrieves and processes the logs for a command executed in a session as they become available.
+
+Accepts both sync and async callbacks. Async callbacks are awaited.
+Blocking synchronous operations inside callbacks may cause WebSocket
+disconnections — use async callbacks and async libraries to avoid this.
 
 **Arguments**:
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-- `on_stdout` _Callable[[str], None]_ - Callback function to handle stdout log chunks as they arrive.
-- `on_stderr` _Callable[[str], None]_ - Callback function to handle stderr log chunks as they arrive.
+- `on_stdout` _OutputHandler[str]_ - Callback function to handle stdout log chunks as they arrive.
+- `on_stderr` _OutputHandler[str]_ - Callback function to handle stderr log chunks as they arrive.
   
 
 **Example**:
@@ -375,6 +385,7 @@ Sends input data to a command executed in a session.
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
+@with_instrumentation()
 def list_sessions() -> list[Session]
 ```
 
@@ -398,6 +409,7 @@ for session in sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to delete session: ")
+@with_instrumentation()
 def delete_session(session_id: str) -> None
 ```
 
@@ -424,6 +436,7 @@ sandbox.process.delete_session("temp-session")
 
 ```python
 @intercept_errors(message_prefix="Failed to create PTY session: ")
+@with_instrumentation()
 def create_pty_session(id: str,
                        cwd: str | None = None,
                        envs: dict[str, str] | None = None,
@@ -458,6 +471,7 @@ The PTY session behaves like a real terminal, supporting features like command h
 
 ```python
 @intercept_errors(message_prefix="Failed to connect PTY session: ")
+@with_instrumentation()
 def connect_pty_session(session_id: str) -> PtyHandle
 ```
 
@@ -484,6 +498,7 @@ interact with a previously created terminal session.
 
 ```python
 @intercept_errors(message_prefix="Failed to list PTY sessions: ")
+@with_instrumentation()
 def list_pty_sessions() -> list[PtySessionInfo]
 ```
 
@@ -513,6 +528,7 @@ for session in sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to get PTY session info: ")
+@with_instrumentation()
 def get_pty_session_info(session_id: str) -> PtySessionInfo
 ```
 
@@ -553,6 +569,7 @@ print(f"Terminal Size: {session_info.cols}x{session_info.rows}")
 
 ```python
 @intercept_errors(message_prefix="Failed to kill PTY session: ")
+@with_instrumentation()
 def kill_pty_session(session_id: str) -> None
 ```
 
@@ -588,6 +605,7 @@ for pty_session in pty_sessions:
 
 ```python
 @intercept_errors(message_prefix="Failed to resize PTY session: ")
+@with_instrumentation()
 def resize_pty_session(session_id: str, pty_size: PtySize) -> PtySessionInfo
 ```
 
@@ -750,4 +768,17 @@ Demultiplex combined stdout/stderr log data.
 **Returns**:
 
   Tuple of (stdout_bytes, stderr_bytes)
+
+##### OutputHandler
+
+```python
+OutputHandler = Union[
+    Callable[[T], None],
+    Callable[[T], Awaitable[None]],
+]
+```
+
+Callback type that accepts both sync and async handlers.
+
+Blocking synchronous operations inside handlers may cause WebSocket disconnections.
 

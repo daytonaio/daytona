@@ -1,0 +1,6 @@
+# CODEOWNERS — Daytona
+# These owners are automatically requested for review on PRs that modify the listed files.
+
+# Security and compliance policies
+SECURITY.md          @aprojic
+CODE_OF_CONDUCT.md   @aprojic

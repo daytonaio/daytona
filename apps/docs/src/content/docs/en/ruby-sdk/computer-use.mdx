@@ -12,7 +12,7 @@ Initialize a new ComputerUse instance.
 #### new ComputerUse()
 
 ```ruby
-def initialize(sandbox_id:, toolbox_api:)
+def initialize(sandbox_id:, toolbox_api:, otel_state:)
 
 ```
 
@@ -22,6 +22,7 @@ Initialize a new ComputerUse instance.
 
 - `sandbox_id` _String_ - The ID of the sandbox
 - `toolbox_api` _DaytonaApiClient:ToolboxApi_ - API client for sandbox operations
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 
@@ -94,6 +95,17 @@ def display()
 **Returns**:
 
 - `Display` - Display operations interface
+
+#### recording()
+
+```ruby
+def recording()
+
+```
+
+**Returns**:
+
+- `Recording` - Screen recording operations interface
 
 #### start()
 

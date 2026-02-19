@@ -31,6 +31,11 @@ module Daytona
     # @return [String, nil] Daytona target
     attr_accessor :target
 
+    # Experimental configuration options
+    #
+    # @return [Hash, nil] Experimental configuration hash
+    attr_accessor :_experimental
+
     # Initializes a new Daytona::Config object.
     #
     # @param api_key [String, nil] Daytona API key. Defaults to ENV['DAYTONA_API_KEY'].
@@ -38,12 +43,14 @@ module Daytona
     # @param api_url [String, nil] Daytona API URL. Defaults to ENV['DAYTONA_API_URL'] or Daytona::Config::API_URL.
     # @param organization_id [String, nil] Daytona organization ID. Defaults to ENV['DAYTONA_ORGANIZATION_ID'].
     # @param target [String, nil] Daytona target. Defaults to ENV['DAYTONA_TARGET'].
-    def initialize(
+    # @param _experimental [Hash, nil] Experimental configuration options.
+    def initialize( # rubocop:disable Metrics/ParameterLists
       api_key: nil,
       jwt_token: nil,
       api_url: nil,
       organization_id: nil,
-      target: nil
+      target: nil,
+      _experimental: nil
     )
       # Load environment variables from .env and .env.local files
       # Files are loaded from the current working directory (where the code is executed)
@@ -54,6 +61,7 @@ module Daytona
       @api_url = api_url || ENV.fetch('DAYTONA_API_URL', API_URL)
       @target = target || ENV.fetch('DAYTONA_TARGET', nil)
       @organization_id = organization_id || ENV.fetch('DAYTONA_ORGANIZATION_ID', nil)
+      @_experimental = _experimental
     end
 
     private

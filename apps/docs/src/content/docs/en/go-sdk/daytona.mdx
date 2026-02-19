@@ -80,27 +80,29 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 - [type Client](<#Client>)
   - [func NewClient\(\) \(\*Client, error\)](<#NewClient>)
   - [func NewClientWithConfig\(config \*types.DaytonaConfig\) \(\*Client, error\)](<#NewClientWithConfig>)
+  - [func \(c \*Client\) Close\(ctx context.Context\) error](<#Client.Close>)
   - [func \(c \*Client\) Create\(ctx context.Context, params any, opts ...func\(\*options.CreateSandbox\)\) \(\*Sandbox, error\)](<#Client.Create>)
   - [func \(c \*Client\) FindOne\(ctx context.Context, sandboxIDOrName \*string, labels map\[string\]string\) \(\*Sandbox, error\)](<#Client.FindOne>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
-  - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
+  - [func NewCodeInterpreterService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*CodeInterpreterService](<#NewCodeInterpreterService>)
   - [func \(c \*CodeInterpreterService\) CreateContext\(ctx context.Context, cwd \*string\) \(map\[string\]any, error\)](<#CodeInterpreterService.CreateContext>)
   - [func \(c \*CodeInterpreterService\) DeleteContext\(ctx context.Context, contextID string\) error](<#CodeInterpreterService.DeleteContext>)
   - [func \(c \*CodeInterpreterService\) ListContexts\(ctx context.Context\) \(\[\]map\[string\]any, error\)](<#CodeInterpreterService.ListContexts>)
   - [func \(c \*CodeInterpreterService\) RunCode\(ctx context.Context, code string, opts ...func\(\*options.RunCode\)\) \(\*OutputChannels, error\)](<#CodeInterpreterService.RunCode>)
 - [type ComputerUseService](<#ComputerUseService>)
-  - [func NewComputerUseService\(toolboxClient \*toolbox.APIClient\) \*ComputerUseService](<#NewComputerUseService>)
+  - [func NewComputerUseService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ComputerUseService](<#NewComputerUseService>)
   - [func \(c \*ComputerUseService\) Display\(\) \*DisplayService](<#ComputerUseService.Display>)
   - [func \(c \*ComputerUseService\) GetStatus\(ctx context.Context\) \(map\[string\]any, error\)](<#ComputerUseService.GetStatus>)
   - [func \(c \*ComputerUseService\) Keyboard\(\) \*KeyboardService](<#ComputerUseService.Keyboard>)
   - [func \(c \*ComputerUseService\) Mouse\(\) \*MouseService](<#ComputerUseService.Mouse>)
+  - [func \(c \*ComputerUseService\) Recording\(\) \*RecordingService](<#ComputerUseService.Recording>)
   - [func \(c \*ComputerUseService\) Screenshot\(\) \*ScreenshotService](<#ComputerUseService.Screenshot>)
   - [func \(c \*ComputerUseService\) Start\(ctx context.Context\) error](<#ComputerUseService.Start>)
   - [func \(c \*ComputerUseService\) Stop\(ctx context.Context\) error](<#ComputerUseService.Stop>)
 - [type DisplayService](<#DisplayService>)
-  - [func NewDisplayService\(toolboxClient \*toolbox.APIClient\) \*DisplayService](<#NewDisplayService>)
+  - [func NewDisplayService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*DisplayService](<#NewDisplayService>)
   - [func \(d \*DisplayService\) GetInfo\(ctx context.Context\) \(map\[string\]any, error\)](<#DisplayService.GetInfo>)
   - [func \(d \*DisplayService\) GetWindows\(ctx context.Context\) \(map\[string\]any, error\)](<#DisplayService.GetWindows>)
 - [type DockerImage](<#DockerImage>)
@@ -126,7 +128,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(img \*DockerImage\) Workdir\(path string\) \*DockerImage](<#DockerImage.Workdir>)
 - [type DockerImageContext](<#DockerImageContext>)
 - [type FileSystemService](<#FileSystemService>)
-  - [func NewFileSystemService\(toolboxClient \*toolbox.APIClient\) \*FileSystemService](<#NewFileSystemService>)
+  - [func NewFileSystemService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*FileSystemService](<#NewFileSystemService>)
   - [func \(f \*FileSystemService\) CreateFolder\(ctx context.Context, path string, opts ...func\(\*options.CreateFolder\)\) error](<#FileSystemService.CreateFolder>)
   - [func \(f \*FileSystemService\) DeleteFile\(ctx context.Context, path string, recursive bool\) error](<#FileSystemService.DeleteFile>)
   - [func \(f \*FileSystemService\) DownloadFile\(ctx context.Context, remotePath string, localPath \*string\) \(\[\]byte, error\)](<#FileSystemService.DownloadFile>)
@@ -139,7 +141,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(f \*FileSystemService\) SetFilePermissions\(ctx context.Context, path string, opts ...func\(\*options.SetFilePermissions\)\) error](<#FileSystemService.SetFilePermissions>)
   - [func \(f \*FileSystemService\) UploadFile\(ctx context.Context, source any, destination string\) error](<#FileSystemService.UploadFile>)
 - [type GitService](<#GitService>)
-  - [func NewGitService\(toolboxClient \*toolbox.APIClient\) \*GitService](<#NewGitService>)
+  - [func NewGitService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*GitService](<#NewGitService>)
   - [func \(g \*GitService\) Add\(ctx context.Context, path string, files \[\]string\) error](<#GitService.Add>)
   - [func \(g \*GitService\) Branches\(ctx context.Context, path string\) \(\[\]string, error\)](<#GitService.Branches>)
   - [func \(g \*GitService\) Checkout\(ctx context.Context, path, name string\) error](<#GitService.Checkout>)
@@ -151,12 +153,12 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(g \*GitService\) Push\(ctx context.Context, path string, opts ...func\(\*options.GitPush\)\) error](<#GitService.Push>)
   - [func \(g \*GitService\) Status\(ctx context.Context, path string\) \(\*types.GitStatus, error\)](<#GitService.Status>)
 - [type KeyboardService](<#KeyboardService>)
-  - [func NewKeyboardService\(toolboxClient \*toolbox.APIClient\) \*KeyboardService](<#NewKeyboardService>)
+  - [func NewKeyboardService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*KeyboardService](<#NewKeyboardService>)
   - [func \(k \*KeyboardService\) Hotkey\(ctx context.Context, keys string\) error](<#KeyboardService.Hotkey>)
   - [func \(k \*KeyboardService\) Press\(ctx context.Context, key string, modifiers \[\]string\) error](<#KeyboardService.Press>)
   - [func \(k \*KeyboardService\) Type\(ctx context.Context, text string, delay \*int\) error](<#KeyboardService.Type>)
 - [type LspServerService](<#LspServerService>)
-  - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string\) \*LspServerService](<#NewLspServerService>)
+  - [func NewLspServerService\(toolboxClient \*toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel \*otelState\) \*LspServerService](<#NewLspServerService>)
   - [func \(l \*LspServerService\) Completions\(ctx context.Context, path string, position types.Position\) \(any, error\)](<#LspServerService.Completions>)
   - [func \(l \*LspServerService\) DidClose\(ctx context.Context, path string\) error](<#LspServerService.DidClose>)
   - [func \(l \*LspServerService\) DidOpen\(ctx context.Context, path string\) error](<#LspServerService.DidOpen>)
@@ -165,7 +167,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(l \*LspServerService\) Start\(ctx context.Context\) error](<#LspServerService.Start>)
   - [func \(l \*LspServerService\) Stop\(ctx context.Context\) error](<#LspServerService.Stop>)
 - [type MouseService](<#MouseService>)
-  - [func NewMouseService\(toolboxClient \*toolbox.APIClient\) \*MouseService](<#NewMouseService>)
+  - [func NewMouseService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*MouseService](<#NewMouseService>)
   - [func \(m \*MouseService\) Click\(ctx context.Context, x, y int, button \*string, double \*bool\) \(map\[string\]any, error\)](<#MouseService.Click>)
   - [func \(m \*MouseService\) Drag\(ctx context.Context, startX, startY, endX, endY int, button \*string\) \(map\[string\]any, error\)](<#MouseService.Drag>)
   - [func \(m \*MouseService\) GetPosition\(ctx context.Context\) \(map\[string\]any, error\)](<#MouseService.GetPosition>)
@@ -174,7 +176,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
 - [type OutputChannels](<#OutputChannels>)
 - [type PaginatedSandboxes](<#PaginatedSandboxes>)
 - [type ProcessService](<#ProcessService>)
-  - [func NewProcessService\(toolboxClient \*toolbox.APIClient\) \*ProcessService](<#NewProcessService>)
+  - [func NewProcessService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ProcessService](<#NewProcessService>)
   - [func \(p \*ProcessService\) CodeRun\(ctx context.Context, code string, opts ...func\(\*options.CodeRun\)\) \(\*types.ExecuteResponse, error\)](<#ProcessService.CodeRun>)
   - [func \(p \*ProcessService\) ConnectPty\(ctx context.Context, sessionID string\) \(\*PtyHandle, error\)](<#ProcessService.ConnectPty>)
   - [func \(p \*ProcessService\) CreatePty\(ctx context.Context, id string, opts ...func\(\*options.CreatePty\)\) \(\*PtyHandle, error\)](<#ProcessService.CreatePty>)
@@ -207,6 +209,14 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(h \*PtyHandle\) WaitForConnection\(ctx context.Context\) error](<#PtyHandle.WaitForConnection>)
   - [func \(h \*PtyHandle\) Write\(p \[\]byte\) \(n int, err error\)](<#PtyHandle.Write>)
 - [type PushAccessCredentials](<#PushAccessCredentials>)
+- [type RecordingService](<#RecordingService>)
+  - [func NewRecordingService\(toolboxClient \*toolbox.APIClient\) \*RecordingService](<#NewRecordingService>)
+  - [func \(r \*RecordingService\) Delete\(ctx context.Context, id string\) error](<#RecordingService.Delete>)
+  - [func \(r \*RecordingService\) Download\(ctx context.Context, id string, localPath string\) error](<#RecordingService.Download>)
+  - [func \(r \*RecordingService\) Get\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Get>)
+  - [func \(r \*RecordingService\) List\(ctx context.Context\) \(\*toolbox.ListRecordingsResponse, error\)](<#RecordingService.List>)
+  - [func \(r \*RecordingService\) Start\(ctx context.Context, label \*string\) \(\*toolbox.Recording, error\)](<#RecordingService.Start>)
+  - [func \(r \*RecordingService\) Stop\(ctx context.Context, id string\) \(\*toolbox.Recording, error\)](<#RecordingService.Stop>)
 - [type Sandbox](<#Sandbox>)
   - [func NewSandbox\(client \*Client, toolboxClient \*toolbox.APIClient, id string, name string, state apiclient.SandboxState, target string, autoArchiveInterval int, autoDeleteInterval int, networkBlockAll bool, networkAllowList \*string\) \*Sandbox](<#NewSandbox>)
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
@@ -216,6 +226,8 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
   - [func \(s \*Sandbox\) GetWorkingDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetWorkingDir>)
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
+  - [func \(s \*Sandbox\) Resize\(ctx context.Context, resources \*types.Resources\) error](<#Sandbox.Resize>)
+  - [func \(s \*Sandbox\) ResizeWithTimeout\(ctx context.Context, resources \*types.Resources, timeout time.Duration\) error](<#Sandbox.ResizeWithTimeout>)
   - [func \(s \*Sandbox\) SetAutoArchiveInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoArchiveInterval>)
   - [func \(s \*Sandbox\) SetAutoDeleteInterval\(ctx context.Context, intervalMinutes \*int\) error](<#Sandbox.SetAutoDeleteInterval>)
   - [func \(s \*Sandbox\) SetLabels\(ctx context.Context, labels map\[string\]string\) error](<#Sandbox.SetLabels>)
@@ -223,10 +235,11 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) StartWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StartWithTimeout>)
   - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
   - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StopWithTimeout>)
+  - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
 - [type ScreenshotService](<#ScreenshotService>)
-  - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient\) \*ScreenshotService](<#NewScreenshotService>)
+  - [func NewScreenshotService\(toolboxClient \*toolbox.APIClient, otel \*otelState\) \*ScreenshotService](<#NewScreenshotService>)
   - [func \(s \*ScreenshotService\) TakeFullScreen\(ctx context.Context, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeFullScreen>)
   - [func \(s \*ScreenshotService\) TakeRegion\(ctx context.Context, region types.ScreenshotRegion, showCursor \*bool\) \(\*types.ScreenshotResponse, error\)](<#ScreenshotService.TakeRegion>)
 - [type SnapshotService](<#SnapshotService>)
@@ -281,6 +294,9 @@ The Client is safe for concurrent use by multiple goroutines.
 ```go
 type Client struct {
 
+    // Otel holds OpenTelemetry state; nil when OTel is disabled.
+    Otel *otelState
+
     // Volume provides methods for managing persistent volumes.
     Volume *VolumeService
 
@@ -333,6 +349,15 @@ if err != nil {
 ```
 
 Returns an error if neither API key nor JWT token is provided, or if JWT token is provided without an organization ID.
+
+<a name="Client.Close"></a>
+### func \(\*Client\) Close
+
+```go
+func (c *Client) Close(ctx context.Context) error
+```
+
+Close shuts down the client and releases resources. When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers. It is safe to call Close even when OTel is not enabled.
 
 <a name="Client.Create"></a>
 ### func \(\*Client\) Create
@@ -503,7 +528,7 @@ type CodeInterpreterService struct {
 ### func NewCodeInterpreterService
 
 ```go
-func NewCodeInterpreterService(toolboxClient *toolbox.APIClient) *CodeInterpreterService
+func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState) *CodeInterpreterService
 ```
 
 NewCodeInterpreterService creates a new CodeInterpreterService.
@@ -643,7 +668,7 @@ Returns [OutputChannels](<#OutputChannels>) for receiving streamed output, or an
 
 ComputerUseService provides desktop automation operations for a sandbox.
 
-ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, and display management. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
+ComputerUseService enables GUI automation including mouse control, keyboard input, screenshots, display management, and screen recording. The desktop environment must be started before using these features. Access through \[Sandbox.ComputerUse\].
 
 Example:
 
@@ -679,7 +704,7 @@ type ComputerUseService struct {
 ### func NewComputerUseService
 
 ```go
-func NewComputerUseService(toolboxClient *toolbox.APIClient) *ComputerUseService
+func NewComputerUseService(toolboxClient *toolbox.APIClient, otel *otelState) *ComputerUseService
 ```
 
 NewComputerUseService creates a new ComputerUseService.
@@ -737,6 +762,17 @@ func (c *ComputerUseService) Mouse() *MouseService
 ```
 
 Mouse returns the [MouseService](<#MouseService>) for mouse operations.
+
+The service is lazily initialized on first access.
+
+<a name="ComputerUseService.Recording"></a>
+### func \(\*ComputerUseService\) Recording
+
+```go
+func (c *ComputerUseService) Recording() *RecordingService
+```
+
+Recording returns the [RecordingService](<#RecordingService>) for screen recording operations.
 
 The service is lazily initialized on first access.
 
@@ -807,7 +843,7 @@ type DisplayService struct {
 ### func NewDisplayService
 
 ```go
-func NewDisplayService(toolboxClient *toolbox.APIClient) *DisplayService
+func NewDisplayService(toolboxClient *toolbox.APIClient, otel *otelState) *DisplayService
 ```
 
 NewDisplayService creates a new DisplayService.
@@ -1303,7 +1339,7 @@ type FileSystemService struct {
 ### func NewFileSystemService
 
 ```go
-func NewFileSystemService(toolboxClient *toolbox.APIClient) *FileSystemService
+func NewFileSystemService(toolboxClient *toolbox.APIClient, otel *otelState) *FileSystemService
 ```
 
 NewFileSystemService creates a new FileSystemService with the provided toolbox client.
@@ -1683,7 +1719,7 @@ type GitService struct {
 ### func NewGitService
 
 ```go
-func NewGitService(toolboxClient *toolbox.APIClient) *GitService
+func NewGitService(toolboxClient *toolbox.APIClient, otel *otelState) *GitService
 ```
 
 NewGitService creates a new GitService with the provided toolbox client.
@@ -2018,7 +2054,7 @@ type KeyboardService struct {
 ### func NewKeyboardService
 
 ```go
-func NewKeyboardService(toolboxClient *toolbox.APIClient) *KeyboardService
+func NewKeyboardService(toolboxClient *toolbox.APIClient, otel *otelState) *KeyboardService
 ```
 
 NewKeyboardService creates a new KeyboardService.
@@ -2146,7 +2182,7 @@ type LspServerService struct {
 ### func NewLspServerService
 
 ```go
-func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string) *LspServerService
+func NewLspServerService(toolboxClient *toolbox.APIClient, languageID types.LspLanguageID, projectPath string, otel *otelState) *LspServerService
 ```
 
 NewLspServerService creates a new LspServerService.
@@ -2347,7 +2383,7 @@ type MouseService struct {
 ### func NewMouseService
 
 ```go
-func NewMouseService(toolboxClient *toolbox.APIClient) *MouseService
+func NewMouseService(toolboxClient *toolbox.APIClient, otel *otelState) *MouseService
 ```
 
 NewMouseService creates a new MouseService.
@@ -2545,7 +2581,7 @@ type ProcessService struct {
 ### func NewProcessService
 
 ```go
-func NewProcessService(toolboxClient *toolbox.APIClient) *ProcessService
+func NewProcessService(toolboxClient *toolbox.APIClient, otel *otelState) *ProcessService
 ```
 
 NewProcessService creates a new ProcessService with the provided toolbox client.
@@ -3366,6 +3402,185 @@ type PushAccessCredentials struct {
 }
 ```
 
+<a name="RecordingService"></a>
+## type RecordingService
+
+RecordingService provides screen recording operations.
+
+RecordingService enables starting, stopping, and managing screen recordings. Access through [ComputerUseService.Recording](<#ComputerUseService.Recording>).
+
+```go
+type RecordingService struct {
+    // contains filtered or unexported fields
+}
+```
+
+<a name="NewRecordingService"></a>
+### func NewRecordingService
+
+```go
+func NewRecordingService(toolboxClient *toolbox.APIClient) *RecordingService
+```
+
+NewRecordingService creates a new RecordingService.
+
+<a name="RecordingService.Delete"></a>
+### func \(\*RecordingService\) Delete
+
+```go
+func (r *RecordingService) Delete(ctx context.Context, id string) error
+```
+
+Delete deletes a recording by ID.
+
+Parameters:
+
+- id: The ID of the recording to delete
+
+Example:
+
+```
+err := cu.Recording().Delete(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Println("Recording deleted")
+```
+
+Returns an error if the deletion fails.
+
+<a name="RecordingService.Download"></a>
+### func \(\*RecordingService\) Download
+
+```go
+func (r *RecordingService) Download(ctx context.Context, id string, localPath string) error
+```
+
+Download downloads a recording file and saves it to a local path.
+
+The file is streamed directly to disk without loading the entire content into memory.
+
+Parameters:
+
+- id: The ID of the recording to download
+- localPath: Path to save the recording file locally
+
+Example:
+
+```
+err := cu.Recording().Download(ctx, recordingID, "local_recording.mp4")
+if err != nil {
+    return err
+}
+fmt.Println("Recording downloaded")
+```
+
+Returns an error if the download fails.
+
+<a name="RecordingService.Get"></a>
+### func \(\*RecordingService\) Get
+
+```go
+func (r *RecordingService) Get(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Get gets details of a specific recording by ID.
+
+Parameters:
+
+- id: The ID of the recording to retrieve
+
+Example:
+
+```
+recording, err := cu.Recording().Get(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording: %s\n", recording.GetFileName())
+fmt.Printf("Status: %s\n", recording.GetStatus())
+fmt.Printf("Duration: %v seconds\n", recording.GetDurationSeconds())
+```
+
+Returns \[toolbox.Recording\] with recording details.
+
+<a name="RecordingService.List"></a>
+### func \(\*RecordingService\) List
+
+```go
+func (r *RecordingService) List(ctx context.Context) (*toolbox.ListRecordingsResponse, error)
+```
+
+List lists all recordings \(active and completed\).
+
+Example:
+
+```
+recordings, err := cu.Recording().List(ctx)
+if err != nil {
+    return err
+}
+fmt.Printf("Found %d recordings\n", len(recordings.GetRecordings()))
+for _, rec := range recordings.GetRecordings() {
+    fmt.Printf("- %s: %s\n", rec.GetFileName(), rec.GetStatus())
+}
+```
+
+Returns \[toolbox.ListRecordingsResponse\] with all recordings.
+
+<a name="RecordingService.Start"></a>
+### func \(\*RecordingService\) Start
+
+```go
+func (r *RecordingService) Start(ctx context.Context, label *string) (*toolbox.Recording, error)
+```
+
+Start starts a new screen recording session.
+
+Parameters:
+
+- label: Optional custom label for the recording
+
+Example:
+
+```
+// Start a recording with a label
+recording, err := cu.Recording().Start(ctx, stringPtr("my-test-recording"))
+if err != nil {
+    return err
+}
+fmt.Printf("Recording started: %s\n", recording.GetId())
+fmt.Printf("File: %s\n", recording.GetFilePath())
+```
+
+Returns \[toolbox.Recording\] with recording details.
+
+<a name="RecordingService.Stop"></a>
+### func \(\*RecordingService\) Stop
+
+```go
+func (r *RecordingService) Stop(ctx context.Context, id string) (*toolbox.Recording, error)
+```
+
+Stop stops an active screen recording session.
+
+Parameters:
+
+- id: The ID of the recording to stop
+
+Example:
+
+```
+result, err := cu.Recording().Stop(ctx, recordingID)
+if err != nil {
+    return err
+}
+fmt.Printf("Recording stopped: %v seconds\n", result.GetDurationSeconds())
+fmt.Printf("Saved to: %s\n", result.GetFilePath())
+```
+
+Returns \[toolbox.Recording\] with recording details.
+
 <a name="Sandbox"></a>
 ## type Sandbox
 
@@ -3486,7 +3701,7 @@ err := sandbox.Delete(ctx)
 func (s *Sandbox) DeleteWithTimeout(ctx context.Context, timeout time.Duration) error
 ```
 
-DeleteWithTimeout deletes the sandbox with a custom timeout.
+DeleteWithTimeout deletes the sandbox with a custom timeout. 0 means no timeout.
 
 Example:
 
@@ -3576,6 +3791,45 @@ if err != nil {
     return err
 }
 fmt.Printf("Current state: %s\n", sandbox.State)
+```
+
+<a name="Sandbox.Resize"></a>
+### func \(\*Sandbox\) Resize
+
+```go
+func (s *Sandbox) Resize(ctx context.Context, resources *types.Resources) error
+```
+
+Resize resizes the sandbox resources with a default timeout of 60 seconds.
+
+Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started sandbox allows increasing CPU and memory. To resize disk or decrease resources, the sandbox must be stopped first.
+
+Example:
+
+```
+// Resize a started sandbox (CPU and memory can be increased)
+err := sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8})
+
+// Resize a stopped sandbox (CPU, memory, and disk can be changed)
+sandbox.Stop(ctx)
+err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4, Disk: 30})
+```
+
+<a name="Sandbox.ResizeWithTimeout"></a>
+### func \(\*Sandbox\) ResizeWithTimeout
+
+```go
+func (s *Sandbox) ResizeWithTimeout(ctx context.Context, resources *types.Resources, timeout time.Duration) error
+```
+
+ResizeWithTimeout resizes the sandbox resources with a custom timeout.
+
+Changes the CPU, memory, or disk allocation for the sandbox. Resizing a started sandbox allows increasing CPU and memory. To resize disk or decrease resources, the sandbox must be stopped first. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.ResizeWithTimeout(ctx, &types.Resources{CPU: 4, Memory: 8}, 2*time.Minute)
 ```
 
 <a name="Sandbox.SetAutoArchiveInterval"></a>
@@ -3684,7 +3938,7 @@ func (s *Sandbox) StartWithTimeout(ctx context.Context, timeout time.Duration) e
 
 StartWithTimeout starts the sandbox with a custom timeout.
 
-The method blocks until the sandbox reaches the "started" state or the timeout is exceeded.
+The method blocks until the sandbox reaches the "started" state or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
@@ -3721,12 +3975,29 @@ func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) er
 
 StopWithTimeout stops the sandbox with a custom timeout.
 
-The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded.
+The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
 ```
 err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
+```
+
+<a name="Sandbox.WaitForResize"></a>
+### func \(\*Sandbox\) WaitForResize
+
+```go
+func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) error
+```
+
+WaitForResize waits for the sandbox resize operation to complete.
+
+This method polls the sandbox state until it's no longer resizing, encounters an error state, or the timeout is exceeded. 0 means no timeout.
+
+Example:
+
+```
+err := sandbox.WaitForResize(ctx, 2*time.Minute)
 ```
 
 <a name="Sandbox.WaitForStart"></a>
@@ -3738,7 +4009,7 @@ func (s *Sandbox) WaitForStart(ctx context.Context, timeout time.Duration) error
 
 WaitForStart waits for the sandbox to reach the "started" state.
 
-This method polls the sandbox state until it's started, encounters an error state, or the timeout is exceeded.
+This method polls the sandbox state until it's started, encounters an error state, or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
@@ -3759,7 +4030,7 @@ func (s *Sandbox) WaitForStop(ctx context.Context, timeout time.Duration) error
 
 WaitForStop waits for the sandbox to reach the "stopped" state.
 
-This method polls the sandbox state until it's stopped or the timeout is exceeded.
+This method polls the sandbox state until it's stopped or the timeout is exceeded. 0 means no timeout.
 
 Example:
 
@@ -3784,7 +4055,7 @@ type ScreenshotService struct {
 ### func NewScreenshotService
 
 ```go
-func NewScreenshotService(toolboxClient *toolbox.APIClient) *ScreenshotService
+func NewScreenshotService(toolboxClient *toolbox.APIClient, otel *otelState) *ScreenshotService
 ```
 
 NewScreenshotService creates a new ScreenshotService.

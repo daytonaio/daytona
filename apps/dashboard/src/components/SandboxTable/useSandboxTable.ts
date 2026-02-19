@@ -39,6 +39,7 @@ interface UseSandboxTableProps {
   getWebTerminalUrl: (id: string) => Promise<string | null>
   handleCreateSshAccess: (id: string) => void
   handleRevokeSshAccess: (id: string) => void
+  handleScreenRecordings: (id: string) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -67,6 +68,7 @@ export function useSandboxTable({
   getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleScreenRecordings,
   pagination,
   pageCount,
   onPaginationChange,
@@ -122,6 +124,7 @@ export function useSandboxTable({
         handleRevokeSshAccess,
         handleRecover,
         getRegionName,
+        handleScreenRecordings,
       }),
     [
       handleStart,
@@ -137,6 +140,7 @@ export function useSandboxTable({
       handleRevokeSshAccess,
       handleRecover,
       getRegionName,
+      handleScreenRecordings,
     ],
   )
 

@@ -36,7 +36,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { Skeleton } from './ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -201,16 +201,14 @@ const getColumns = ({
         const fullDate = new Date(createdAt).toLocaleString()
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className="cursor-default">{relativeTime}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{fullDate}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="cursor-default">{relativeTime}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{fullDate}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -228,16 +226,14 @@ const getColumns = ({
         const fullDate = new Date(lastUsedAt).toLocaleString()
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className="cursor-default">{relativeTime}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{fullDate}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="cursor-default">{relativeTime}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{fullDate}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -256,16 +252,14 @@ const getColumns = ({
         const color = getExpiresAtColor(expiresAt)
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className={`cursor-default ${color}`}>{relativeTime}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{fullDate}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className={`cursor-default ${color}`}>{relativeTime}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{fullDate}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },

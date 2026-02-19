@@ -144,6 +144,9 @@ var PushCmd = &cobra.Command{
 		if diskFlag != 0 {
 			createSnapshot.SetDisk(diskFlag)
 		}
+		if regionIdFlag != "" {
+			createSnapshot.SetRegionId(regionIdFlag)
+		}
 
 		_, res, err = apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
 		if err != nil {

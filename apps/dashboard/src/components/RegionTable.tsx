@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { getRelativeTimeString } from '@/lib/utils'
 import { Region, RegionType } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -14,18 +16,16 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
-import { Button } from './ui/button'
+import { Copy, MapPinned, MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Pagination } from './Pagination'
-import { MapPinned, MoreHorizontal, Copy } from 'lucide-react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { getRelativeTimeString } from '@/lib/utils'
-import { TableEmptyState } from './TableEmptyState'
 import { toast } from 'sonner'
 import { DebouncedInput } from './DebouncedInput'
+import { Pagination } from './Pagination'
+import { TableEmptyState } from './TableEmptyState'
+import { Button } from './ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 interface DataTableProps {
   data: Region[]
@@ -248,16 +248,14 @@ const getColumns = ({
         const fullDate = new Date(createdAt).toLocaleString()
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <span className="cursor-default">{relativeTime}</span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{fullDate}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <span className="cursor-default">{relativeTime}</span>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{fullDate}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },

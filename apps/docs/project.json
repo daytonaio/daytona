@@ -13,7 +13,6 @@
     },
     "build": {
       "executor": "nx:run-commands",
-      "cache": true,
       "inputs": [
         "{projectRoot}/src/**/*",
         "{projectRoot}/public/**/*",
@@ -22,7 +21,8 @@
         "{projectRoot}/tailwind.config.*",
         "{projectRoot}/tools/**/*",
         "{workspaceRoot}/dist/apps/api/openapi.json",
-        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"
+        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
       ],
       "outputs": ["{workspaceRoot}/dist/apps/docs"],
       "options": {
@@ -47,6 +47,12 @@
     },
     "update-cli-reference": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/tools/**/*",
+        "{workspaceRoot}/dist/apps/cli/**/*"
+      ],
+      "outputs": ["{projectRoot}/src/content/docs/en/cli/**/*"],
       "options": {
         "cwd": "{projectRoot}/tools",
         "command": "node ./update-cli-reference.js"
@@ -54,6 +60,14 @@
     },
     "update-api-reference": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/tools/**/*",
+        "{workspaceRoot}/dist/apps/api/openapi.json",
+        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{projectRoot}/src/content/docs/en/api/**/*"],
       "options": {
         "cwd": "{projectRoot}/tools",
         "command": "node ./update-api-reference.js"

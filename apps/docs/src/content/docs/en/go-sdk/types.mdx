@@ -22,6 +22,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type ExecutionArtifacts](<#ExecutionArtifacts>)
 - [type ExecutionError](<#ExecutionError>)
 - [type ExecutionResult](<#ExecutionResult>)
+- [type ExperimentalConfig](<#ExperimentalConfig>)
 - [type FileDownloadRequest](<#FileDownloadRequest>)
 - [type FileDownloadResponse](<#FileDownloadResponse>)
 - [type FileInfo](<#FileInfo>)
@@ -143,6 +144,7 @@ type DaytonaConfig struct {
     OrganizationID string
     APIUrl         string
     Target         string
+    Experimental   *ExperimentalConfig
 }
 ```
 
@@ -195,6 +197,17 @@ type ExecutionResult struct {
     Stderr string
     Charts []Chart         // Optional charts from matplotlib
     Error  *ExecutionError // nil = success, non-nil = execution failed
+}
+```
+
+<a name="ExperimentalConfig"></a>
+## type ExperimentalConfig
+
+ExperimentalConfig holds experimental feature flags for the Daytona client.
+
+```go
+type ExperimentalConfig struct {
+    OtelEnabled bool // Enable OpenTelemetry tracing and metrics
 }
 ```
 

@@ -3,8 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
+import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
+import { Pagination } from '@/components/Pagination'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -14,15 +21,8 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
-import { Pagination } from '@/components/Pagination'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
-import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { MoreHorizontal } from 'lucide-react'
+import { useState } from 'react'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -204,16 +204,14 @@ const getColumns = ({
       header: 'Description',
       cell: ({ row }) => {
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="truncate max-w-md cursor-text">{row.original.description}</div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-[300px]">{row.original.description}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="truncate max-w-md cursor-text">{row.original.description}</div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="max-w-[300px]">{row.original.description}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -225,18 +223,16 @@ const getColumns = ({
       cell: ({ row }) => {
         const permissions = row.original.permissions.join(', ')
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
-              </TooltipTrigger>
-              {permissions && (
-                <TooltipContent>
-                  <p className="max-w-[300px]">{permissions}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
+            </TooltipTrigger>
+            {permissions && (
+              <TooltipContent>
+                <p className="max-w-[300px]">{permissions}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
         )
       },
     },

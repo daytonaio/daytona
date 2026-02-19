@@ -689,6 +689,339 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get sandbox logs
+    # Retrieve OTEL logs for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number (1-indexed) (default to 1)
+    # @option opts [Float] :limit Number of items per page (default to 100)
+    # @option opts [Array<String>] :severities Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+    # @option opts [String] :search Search in log body
+    # @return [PaginatedLogs]
+    def get_sandbox_logs(sandbox_id, from, to, opts = {})
+      data, _status_code, _headers = get_sandbox_logs_with_http_info(sandbox_id, from, to, opts)
+      data
+    end
+
+    # Get sandbox logs
+    # Retrieve OTEL logs for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number (1-indexed) (default to 1)
+    # @option opts [Float] :limit Number of items per page (default to 100)
+    # @option opts [Array<String>] :severities Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+    # @option opts [String] :search Search in log body
+    # @return [Array<(PaginatedLogs, Integer, Hash)>] PaginatedLogs data, response status code and response headers
+    def get_sandbox_logs_with_http_info(sandbox_id, from, to, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_logs ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox_logs"
+      end
+      # verify the required parameter 'from' is set
+      if @api_client.config.client_side_validation && from.nil?
+        fail ArgumentError, "Missing the required parameter 'from' when calling SandboxApi.get_sandbox_logs"
+      end
+      # verify the required parameter 'to' is set
+      if @api_client.config.client_side_validation && to.nil?
+        fail ArgumentError, "Missing the required parameter 'to' when calling SandboxApi.get_sandbox_logs"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/telemetry/logs'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'from'] = from
+      query_params[:'to'] = to
+      query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'severities'] = @api_client.build_collection_param(opts[:'severities'], :multi) if !opts[:'severities'].nil?
+      query_params[:'search'] = opts[:'search'] if !opts[:'search'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PaginatedLogs'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_logs",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get sandbox metrics
+    # Retrieve OTEL metrics for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Array<String>] :metric_names Filter by metric names
+    # @return [MetricsResponse]
+    def get_sandbox_metrics(sandbox_id, from, to, opts = {})
+      data, _status_code, _headers = get_sandbox_metrics_with_http_info(sandbox_id, from, to, opts)
+      data
+    end
+
+    # Get sandbox metrics
+    # Retrieve OTEL metrics for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Array<String>] :metric_names Filter by metric names
+    # @return [Array<(MetricsResponse, Integer, Hash)>] MetricsResponse data, response status code and response headers
+    def get_sandbox_metrics_with_http_info(sandbox_id, from, to, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_metrics ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox_metrics"
+      end
+      # verify the required parameter 'from' is set
+      if @api_client.config.client_side_validation && from.nil?
+        fail ArgumentError, "Missing the required parameter 'from' when calling SandboxApi.get_sandbox_metrics"
+      end
+      # verify the required parameter 'to' is set
+      if @api_client.config.client_side_validation && to.nil?
+        fail ArgumentError, "Missing the required parameter 'to' when calling SandboxApi.get_sandbox_metrics"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/telemetry/metrics'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'from'] = from
+      query_params[:'to'] = to
+      query_params[:'metricNames'] = @api_client.build_collection_param(opts[:'metric_names'], :multi) if !opts[:'metric_names'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'MetricsResponse'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_metrics",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_metrics\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get trace spans
+    # Retrieve all spans for a specific trace
+    # @param sandbox_id [String] ID of the sandbox
+    # @param trace_id [String] ID of the trace
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<TraceSpan>]
+    def get_sandbox_trace_spans(sandbox_id, trace_id, opts = {})
+      data, _status_code, _headers = get_sandbox_trace_spans_with_http_info(sandbox_id, trace_id, opts)
+      data
+    end
+
+    # Get trace spans
+    # Retrieve all spans for a specific trace
+    # @param sandbox_id [String] ID of the sandbox
+    # @param trace_id [String] ID of the trace
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Array<TraceSpan>, Integer, Hash)>] Array<TraceSpan> data, response status code and response headers
+    def get_sandbox_trace_spans_with_http_info(sandbox_id, trace_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_trace_spans ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox_trace_spans"
+      end
+      # verify the required parameter 'trace_id' is set
+      if @api_client.config.client_side_validation && trace_id.nil?
+        fail ArgumentError, "Missing the required parameter 'trace_id' when calling SandboxApi.get_sandbox_trace_spans"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/telemetry/traces/{traceId}'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s)).sub('{' + 'traceId' + '}', CGI.escape(trace_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Array<TraceSpan>'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_trace_spans",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_trace_spans\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get sandbox traces
+    # Retrieve OTEL traces for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number (1-indexed) (default to 1)
+    # @option opts [Float] :limit Number of items per page (default to 100)
+    # @return [PaginatedTraces]
+    def get_sandbox_traces(sandbox_id, from, to, opts = {})
+      data, _status_code, _headers = get_sandbox_traces_with_http_info(sandbox_id, from, to, opts)
+      data
+    end
+
+    # Get sandbox traces
+    # Retrieve OTEL traces for a sandbox within a time range
+    # @param sandbox_id [String] ID of the sandbox
+    # @param from [Time] Start of time range (ISO 8601)
+    # @param to [Time] End of time range (ISO 8601)
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @option opts [Float] :page Page number (1-indexed) (default to 1)
+    # @option opts [Float] :limit Number of items per page (default to 100)
+    # @return [Array<(PaginatedTraces, Integer, Hash)>] PaginatedTraces data, response status code and response headers
+    def get_sandbox_traces_with_http_info(sandbox_id, from, to, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.get_sandbox_traces ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling SandboxApi.get_sandbox_traces"
+      end
+      # verify the required parameter 'from' is set
+      if @api_client.config.client_side_validation && from.nil?
+        fail ArgumentError, "Missing the required parameter 'from' when calling SandboxApi.get_sandbox_traces"
+      end
+      # verify the required parameter 'to' is set
+      if @api_client.config.client_side_validation && to.nil?
+        fail ArgumentError, "Missing the required parameter 'to' when calling SandboxApi.get_sandbox_traces"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxId}/telemetry/traces'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'from'] = from
+      query_params[:'to'] = to
+      query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PaginatedTraces'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.get_sandbox_traces",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#get_sandbox_traces\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Get sandboxes for the authenticated runner
     # @param [Hash] opts the optional parameters
     # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
@@ -1024,7 +1357,7 @@ module DaytonaApiClient
         fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling SandboxApi.list_sandboxes_paginated, must be greater than or equal to 1.'
       end
 
-      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving"]
+      allowable_values = ["creating", "restoring", "destroying", "started", "stopped", "starting", "stopping", "error", "build_failed", "pending_build", "building_snapshot", "unknown", "pulling_snapshot", "archived", "archiving", "resizing"]
       if @api_client.config.client_side_validation && opts[:'states'] && !opts[:'states'].all? { |item| allowable_values.include?(item) }
         fail ArgumentError, "invalid value for \"states\", must include one of #{allowable_values}"
       end
@@ -1255,6 +1588,81 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:PUT, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: SandboxApi#replace_labels\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Resize sandbox resources
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param resize_sandbox [ResizeSandbox] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Sandbox]
+    def resize_sandbox(sandbox_id_or_name, resize_sandbox, opts = {})
+      data, _status_code, _headers = resize_sandbox_with_http_info(sandbox_id_or_name, resize_sandbox, opts)
+      data
+    end
+
+    # Resize sandbox resources
+    # @param sandbox_id_or_name [String] ID or name of the sandbox
+    # @param resize_sandbox [ResizeSandbox] 
+    # @param [Hash] opts the optional parameters
+    # @option opts [String] :x_daytona_organization_id Use with JWT to specify the organization ID
+    # @return [Array<(Sandbox, Integer, Hash)>] Sandbox data, response status code and response headers
+    def resize_sandbox_with_http_info(sandbox_id_or_name, resize_sandbox, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: SandboxApi.resize_sandbox ...'
+      end
+      # verify the required parameter 'sandbox_id_or_name' is set
+      if @api_client.config.client_side_validation && sandbox_id_or_name.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id_or_name' when calling SandboxApi.resize_sandbox"
+      end
+      # verify the required parameter 'resize_sandbox' is set
+      if @api_client.config.client_side_validation && resize_sandbox.nil?
+        fail ArgumentError, "Missing the required parameter 'resize_sandbox' when calling SandboxApi.resize_sandbox"
+      end
+      # resource path
+      local_var_path = '/sandbox/{sandboxIdOrName}/resize'.sub('{' + 'sandboxIdOrName' + '}', CGI.escape(sandbox_id_or_name.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+        header_params['Content-Type'] = content_type
+      end
+      header_params[:'X-Daytona-Organization-ID'] = opts[:'x_daytona_organization_id'] if !opts[:'x_daytona_organization_id'].nil?
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(resize_sandbox)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Sandbox'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"SandboxApi.resize_sandbox",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: SandboxApi#resize_sandbox\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

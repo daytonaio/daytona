@@ -15,6 +15,7 @@ from daytona_api_client_async import (
 )
 
 from .._utils.errors import intercept_errors
+from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
@@ -34,6 +35,7 @@ class AsyncSnapshotService:
         self.__default_region_id = default_region_id
 
     @intercept_errors(message_prefix="Failed to list snapshots: ")
+    @with_instrumentation()
     async def list(self, page: int | None = None, limit: int | None = None) -> PaginatedSnapshots:
         """Returns paginated list of Snapshots.
 
@@ -67,6 +69,7 @@ class AsyncSnapshotService:
         )
 
     @intercept_errors(message_prefix="Failed to delete snapshot: ")
+    @with_instrumentation()
     async def delete(self, snapshot: Snapshot) -> None:
         """Delete a Snapshot.
 
@@ -84,6 +87,7 @@ class AsyncSnapshotService:
         await self.__snapshots_api.remove_snapshot(snapshot.id)
 
     @intercept_errors(message_prefix="Failed to get snapshot: ")
+    @with_instrumentation()
     async def get(self, name: str) -> Snapshot:
         """Get a Snapshot by name.
 
@@ -103,9 +107,8 @@ class AsyncSnapshotService:
         return Snapshot.from_dto(await self.__snapshots_api.get_snapshot(name))
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
-    @with_timeout(
-        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
-    )
+    @with_timeout()
+    @with_instrumentation()
     async def create(
         self,
         params: CreateSnapshotParams,
@@ -204,6 +207,7 @@ class AsyncSnapshotService:
 
         return created_snapshot if isinstance(created_snapshot, Snapshot) else Snapshot.from_dto(created_snapshot)
 
+    @with_instrumentation()
     async def activate(self, snapshot: Snapshot) -> Snapshot:
         """Activate a snapshot.
         Args:
@@ -214,6 +218,7 @@ class AsyncSnapshotService:
         return Snapshot.from_dto(await self.__snapshots_api.activate_snapshot(snapshot.id))
 
     @staticmethod
+    @with_instrumentation()
     async def process_image_context(object_storage_api: ObjectStorageApi, image: Image) -> list[str]:
         """Processes the image context by uploading it to object storage.
         Args:

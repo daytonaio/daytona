@@ -7,62 +7,248 @@ import Label from '@components/Label.astro'
 
 Snapshots are sandbox templates created from [Docker](https://www.docker.com/) or [OCI](https://opencontainers.org/) compatible images. Sandboxes can use a [default snapshot](#default-snapshots) or custom snapshots to provide a consistent and reproducible sandbox environments for your dependencies, settings, and resources.
 
+Daytona supports running [Docker](#run-docker-in-a-sandbox) and [Kubernetes](#run-kubernetes-in-a-sandbox) workloads inside sandboxes using snapshots.
+
 ## Create Snapshots
 
-Daytona provides options to create snapshots using [public images](#using-public-images), [private images](#using-images-from-private-registries), [local images](#using-local-images), and the [declarative builder](#using-the-declarative-builder).
+Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
+
+Snapshots can be created using:
+
+- [public images](#using-public-images)
+- [local images](#using-local-images)
+- [images from private registries](#using-images-from-private-registries)
+- [the declarative builder](#using-the-declarative-builder)
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Enter the snapshot name, image (tag or digest), entrypoint, and resources
+3. Enter the **snapshot name**, **image** (tag or digest), **entrypoint**, and **resources**
 
-- **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI
-- **Image**: Base image for the snapshot. Must include either a tag (e.g., **`ubuntu:22.04`**) or a digest. The **`latest`** tag is not allowed.
+- **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI.
+- **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
-- **Resources** (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
+- [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
 
-:::note
-Since images tagged `latest` get frequent updates, only specific tags (e.g. `0.1.0`) are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
-:::
+<Tabs>
+<TabItem label="Python" icon="seti:python">
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#create), [TypeScript SDK](/docs/typescript-sdk/snapshot#create), and [Ruby SDK](/docs/ruby-sdk/snapshot#create) references:
+```python
+image = Image.debian_slim('3.12').pip_install('numpy')
+daytona.snapshot.create(
+    CreateSnapshotParams(name='my-awesome-snapshot', image=image),
+    on_logs=lambda chunk: print(chunk, end=""),
+)
+```
 
-> [**create (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotservicecreate)
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const image = Image.debianSlim('3.12').pipInstall('numpy');
+await daytona.snapshot.create({ name: 'my-awesome-snapshot', image: image }, { onLogs: console.log });
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+image = Image.debian_slim('3.12').pip_install('numpy')
+params = CreateSnapshotParams.new(name: 'my-awesome-snapshot', image: image)
+snapshot = daytona.snapshot.create(params) do |chunk|
+  print chunk
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create from Docker Hub image
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-awesome-snapshot",
+    Image: "python:3.11-slim",
+})
+if err != nil {
+    return err
+}
+
+// Stream build logs
+for log := range logChan {
+    fmt.Println(log)
+}
+
+// Create with custom image and resources
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-awesome-snapshot",
+    Image: image,
+    Resources: &types.Resources{CPU: 2, Memory: 4096},
+})
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --cpu 2 --memory 4
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-awesome-snapshot",
+    "imageName": "python:3.11-slim",
+    "cpu": 2,
+    "memory": 4
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
+
+> [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
 >
-> [**create (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
+> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Create)
+>
+> [**create (CLI)**](/docs/en/tools/cli/#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
 ### Using public images
 
-Daytona supports creating snapshots from public images from Docker Hub or other public container registries.
+Daytona supports creating snapshots from any publicly accessible image or container registry.
 
 1. Navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 2. Click the **Create Snapshot** button
-3. Enter the snapshot name and image tag or digest of any publicly accessible image from Docker Hub or from another public container registry.
+3. Enter the **snapshot name** and **image** (tag or digest) of any publicly accessible image or container registry
 
 Once the snapshot is pulled, validated, and has an `Active` state, it is ready to be used.
 
+<Tabs>
+<TabItem label="Python" icon="seti:python">
+
+```python
+daytona.snapshot.create(
+    CreateSnapshotParams(name='my-awesome-snapshot', image='python:3.11-slim'),
+    on_logs=lambda chunk: print(chunk, end=""),
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+await daytona.snapshot.create({ name: 'my-awesome-snapshot', image: 'python:3.11-slim' }, { onLogs: console.log });
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+params = CreateSnapshotParams.new(name: 'my-awesome-snapshot', image: 'python:3.11-slim')
+snapshot = daytona.snapshot.create(params) do |chunk|
+  print chunk
+end
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:  "my-awesome-snapshot",
+    Image: "python:3.11-slim",
+})
+if err != nil {
+    return err
+}
+
+// Stream build logs
+for log := range logChan {
+    fmt.Println(log)
+}
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-awesome-snapshot",
+    "imageName": "python:3.11-slim"
+  }'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
+
+> [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
+>
+> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Create)
+>
+> [**create (CLI)**](/docs/en/tools/cli#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
+
 ### Using local images
 
-Daytona supports creating snapshots from local images or from local Dockerfiles. To create a snapshot from a local image or from a local Dockerfile, use the [Daytona CLI](/docs/en/getting-started#cli).
+Daytona supports creating snapshots from local images or from local Dockerfiles. To create a snapshot from a local image or from a local Dockerfile, use the [Daytona CLI](/docs/en/tools/cli#daytona-snapshot).
 
-Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture. For more information, see the [CLI documentation](/docs/en/tools/cli#daytona-snapshot-push).
+Daytona expects the local image to be built for AMD64 architecture. Therefore, the `--platform=linux/amd64` flag is required when building the Docker image if your machine is running on a different architecture.
 
-1. Run **`docker images`** to ensure the image and tag you want to use is available
-2. Run **`daytona snapshot push <your_local_docker_image>`** to create a snapshot and push it to Daytona, e.g.:
+1. Ensure the image and tag you want to use is available
+
+```bash
+docker images
+```
+
+2. Create a snapshot and push it to Daytona:
 
 ```bash
 daytona snapshot push custom-alpine:3.21 --name alpine-minimal
 ```
 
 :::tip
-Use the flags `--cpu`, `--memory` and `--disk` to specify the resources you want the underlying Sandboxes to have.
-
-Example: `daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8` will create Alpine Sandboxes with 2 vCPU, 4GiB of memory and 8GiB of disk space.
+Use the flags `--cpu`, `--memory` and `--disk` to specify the [resources](/docs/en/sandboxes#resources) you want the underlying sandboxes to have. Example:
+<br />
+```bash
+daytona snapshot push custom-alpine:3.21 --name alpine-minimal --cpu 2 --memory 4 --disk 8
+``` 
 :::
 
-Alternatively, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the snapshot for you. The COPY/ADD commands will be automatically parsed and added to the context. To manually add files to the context, use the `--context` flag.
+Alternatively, use the `--dockerfile` flag under `create` to pass the path to the Dockerfile you want to use and Daytona will build the snapshot for you. The `COPY`/`ADD` commands will be automatically parsed and added to the context. To manually add files to the context, use the `--context` flag.
 
 ```bash
-daytona snapshot create data-analysis01 --dockerfile ./Dockerfile
+daytona snapshot create my-awesome-snapshot --dockerfile ./Dockerfile
 ```
 
 ```text
@@ -82,10 +268,10 @@ Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), 
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and private image tag or digest. When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
+6. Enter the **snapshot name** and private **image** (tag or digest). When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
 
 Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
 
@@ -95,7 +281,7 @@ Daytona supports creating snapshots from Docker Hub images.
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: `docker.io`
 - **Username**: Docker Hub username (the account with access to the image)
@@ -104,7 +290,7 @@ Daytona supports creating snapshots from Docker Hub images.
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, input the entire image name, including the registry location and project name (e.g. **`docker.io/<username>/<image>:<tag>`**)
 
 #### Google Artifact Registry
 
@@ -114,7 +300,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: base URL for your region (e.g., `https://us-central1-docker.pkg.dev` or `https://us-central1-docker.pkg.dev/your-org`).
 - **Username**: `_json_key`
@@ -124,7 +310,7 @@ To use an image from Google Artifact Registry, configure the registry using a [s
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`us-central1-docker.pkg.dev/<project>/<repo>/<image>:<tag>`**)
 
 #### GitHub Container Registry (GHCR)
 
@@ -132,7 +318,7 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
 2. Click the **Add Registry** button
-3. Enter the registry name, registry URL, username, password, and project (if applicable)
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
 
 - **Registry URL**: `ghcr.io`
 - **Username**: GitHub username (the account with access to the image)
@@ -140,17 +326,17 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 
 4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
 5. Click the **Create Snapshot** button
-6. Enter the snapshot name and image tag or digest. When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
 
 ### Using the declarative builder
 
-[Declarative Builder](/docs/declarative-builder) provides a code-first approach to define your snapshots.
+[Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
 
-### Snapshot resources
+### Resources
 
 Snapshots can be customized with specific resource requirements. By default, Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk**. For more information, see [sandbox resources](/docs/en/sandboxes#resources).
 
-To view your available resources and limits, see [limits](/docs/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
+To view your available resources and limits, see [limits](/docs/en/limits) or navigate to [Daytona Limits ↗](https://app.daytona.io/dashboard/limits).
 
 Snapshot resources can be customized using the `Resources` class.
 
@@ -170,7 +356,7 @@ daytona = Daytona()
 # Create a snapshot with custom resources
 daytona.snapshot.create(
   CreateSnapshotParams(
-    name="my-snapshot",
+    name="my-awesome-snapshot",
     image=Image.debian_slim("3.12"),
     resources=Resources(
       cpu=2,
@@ -193,7 +379,7 @@ const daytona = new Daytona()
 // Create a snapshot with custom resources
 await daytona.snapshot.create(
   {
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Image.debianSlim('3.13'),
     resources: {
       cpu: 2,
@@ -217,7 +403,7 @@ daytona = Daytona::Daytona.new
 # Create a snapshot with custom resources
 daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Daytona::Image.debian_slim('3.12'),
     resources: Daytona::Resources.new(
       cpu: 2,
@@ -230,24 +416,76 @@ daytona.snapshot.create(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Create a snapshot with custom resources
+image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
+snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+    Name:      "my-awesome-snapshot",
+    Image:     image,
+    Resources: &types.Resources{CPU: 2, Memory: 4, Disk: 8},
+})
+if err != nil {
+    return err
+}
+
+// Stream build logs
+for log := range logChan {
+    fmt.Println(log)
+}
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --cpu 2 --memory 4 --disk 8
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-awesome-snapshot",
+    "imageName": "python:3.11-slim",
+    "cpu": 2,
+    "memory": 4,
+    "disk": 8
+  }'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk), [TypeScript SDK](/docs/typescript-sdk), and [Ruby SDK](/docs/ruby-sdk) references:
+For more information, see the [Python SDK](/docs/en/python-sdk), [TypeScript SDK](/docs/en/typescript-sdk), [Ruby SDK](/docs/en/ruby-sdk), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Create), [CLI](/docs/en/tools/cli#daytona-snapshot-create), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
-> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+> [**CreateSnapshotParams (Python SDK)**](/docs/en/python-sdk/sync/snapshot#createsnapshotparams)
 >
-> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#create)
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#createsnapshotparams)
 >
-> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#create)
+> [**CreateSnapshotParams (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#create)
+>
+> [**CreateSnapshotParams (Go SDK)**](/docs/en/go-sdk/types#CreateSnapshotParams)
+>
+> [**create (CLI)**](/docs/en/tools/cli#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
-### Specifying Region
+### Regions
 
-When creating a Snapshot, you can specify the region in which it will be available. If not specified, the Snapshot will be created in your organization's default region. 
+When creating a snapshot, you can specify the [region](/docs/en/regions) in which it will be available. If not specified, the snapshot will be created in your organization's default region.
 
-When you later create a Sandbox from this Snapshot, you can use the Snapshot's region as the target region for the Sandbox.
+When you later create a sandbox from this snapshot, you can use the snapshot's region as the target region for the sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
+
 ```python
 from daytona import (
     Daytona,
@@ -260,7 +498,7 @@ daytona = Daytona()
 # Create a Snapshot in a specific region
 daytona.snapshot.create(
   CreateSnapshotParams(
-    name="my-snapshot",
+    name="my-awesome-snapshot",
     image=Image.debian_slim("3.12"),
     region_id="us",
   ),
@@ -268,8 +506,10 @@ daytona.snapshot.create(
 )
 
 ```
+
 </TabItem>
 <TabItem label="TypeScript" icon="seti:typescript">
+
 ```typescript
 import { Daytona, Image } from "@daytonaio/sdk";
 
@@ -278,7 +518,7 @@ const daytona = new Daytona();
 // Create a Snapshot in a specific region
 await daytona.snapshot.create(
   {
-    name: "my-snapshot",
+    name: "my-awesome-snapshot",
     image: Image.debianSlim("3.13"),
     regionId: "us",
   },
@@ -286,32 +526,61 @@ await daytona.snapshot.create(
 );
 ```
 
-  </TabItem>
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
 
-  <TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 require 'daytona'
 
 daytona = Daytona::Daytona.new
 
-# Create a Snapshot with custom resources
+# Create a Snapshot in a specific region
 daytona.snapshot.create(
   Daytona::CreateSnapshotParams.new(
-    name: 'my-snapshot',
+    name: 'my-awesome-snapshot',
     image: Daytona::Image.debian_slim('3.12'),
-    # All resource parameters are optional:
-    resources: Daytona::Resources.new(
-      cpu: 2,
-      memory: 4,
-      disk: 8
-    )
+    region_id: 'us'
   ),
   on_logs: proc { |chunk| puts chunk }
 )
 ```
 
-  </TabItem>
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot create my-awesome-snapshot --image python:3.11-slim --region us
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+    "name": "my-awesome-snapshot",
+    "imageName": "python:3.11-slim",
+    "regionId": "us"
+  }'
+```
+
+</TabItem>
 </Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [CLI](/docs/en/tools/cli#daytona-snapshot-create), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
+
+> [**create (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicecreate)
+>
+> [**create (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#create)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/snapshot/#create)
+>
+> [**create (CLI)**](/docs/en/tools/cli#daytona-snapshot-create)
+>
+> [**create (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots)
 
 ## Get a Snapshot by name
 
@@ -337,9 +606,8 @@ const snapshot = await daytona.snapshot.get('my-awesome-snapshot')
 console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`)
 ```
 
-  </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
 daytona = Daytona::Daytona.new
@@ -347,16 +615,39 @@ snapshot = daytona.snapshot.get('my-awesome-snapshot')
 puts "#{snapshot.name} (#{snapshot.image_name})"
 ```
 
-  </TabItem>
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+snapshot, err := client.Snapshots.Get(ctx, "my-awesome-snapshot")
+if err != nil {
+    return err
+}
+fmt.Printf("%s (%s)\n", snapshot.Name, snapshot.ImageName)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-awesome-snapshot \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotget), [TypeScript SDK](/docs/typescript-sdk/snapshot#get), and [Ruby SDK](/docs/ruby-sdk/snapshot#get) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceget), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#get), [Ruby SDK](/docs/en/ruby-sdk/snapshot#get), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Get), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**get (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceget)
 >
 > [**get (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#get)
 >
 > [**get (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#get)
+>
+> [**get (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Get)
+>
+> [**get (API)**](/docs/en/tools/api/#daytona/tag/snapshots/GET/snapshots/{snapshotName})
 
 ## List Snapshots
 
@@ -386,9 +677,8 @@ result.items.forEach(snapshot =>
 )
 ```
 
-  </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
 daytona = Daytona::Daytona.new
@@ -398,16 +688,54 @@ result.items.each do |snapshot|
 end
 ```
 
-  </TabItem>
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// List first page with default limit
+result, err := client.Snapshots.List(ctx, nil, nil)
+if err != nil {
+    return err
+}
+
+// List with pagination
+page, limit := 2, 10
+result, err := client.Snapshots.List(ctx, &page, &limit)
+fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.Total)
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+# List snapshots with pagination
+daytona snapshot list --page 2 --limit 10
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/snapshots?page=2&limit=10' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotlist), [TypeScript SDK](/docs/typescript-sdk/snapshot#list), and [Ruby SDK](/docs/ruby-sdk/snapshot#list) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot), [TypeScript SDK](/docs/en/typescript-sdk/snapshot), [Ruby SDK](/docs/en/ruby-sdk/snapshot), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.List), [CLI](/docs/en/tools/cli#daytona-snapshot-list), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references.
 
 > [**list (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicelist)
 >
 > [**list (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#list)
 >
 > [**list (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#list)
+>
+> [**list (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.List)
+>
+> [**list (CLI)**](/docs/en/tools/cli#daytona-snapshot-list)
+>
+> [**list (API)**](/docs/en/tools/api#daytona/tag/snapshots/GET/snapshots)
 
 ## Activate Snapshots
 
@@ -417,13 +745,51 @@ Snapshots automatically become inactive after 2 weeks of not being used. To acti
 2. Click the three dots at the end of the row for the snapshot you want to activate
 3. Click the **Activate** button
 
-For more information, see the [Python SDK](/docs/python-sdk/sync/snapshot#snapshotactivate), [TypeScript SDK](/docs/typescript-sdk/snapshot#activate), and [Ruby SDK](/docs/ruby-sdk/snapshot#activate) references:
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+daytona = Daytona()
+snapshot = daytona.snapshot.get("my-inactive-snapshot")
+activated_snapshot = daytona.snapshot.activate(snapshot)
+print(f"Snapshot {activated_snapshot.name} activated")
+```
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const daytona = new Daytona()
+const snapshot = await daytona.snapshot.get("my-inactive-snapshot")
+const activatedSnapshot = await daytona.snapshot.activate(snapshot)
+console.log(`Snapshot ${activatedSnapshot.name} activated`)
+```
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get('my-inactive-snapshot')
+activated_snapshot = daytona.snapshot.activate(snapshot)
+puts "Snapshot #{activated_snapshot.name} activated"
+```
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-inactive-snapshot/activate \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#activate), [Ruby SDK](/docs/en/ruby-sdk/snapshot#activate), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
 > [**activate (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotserviceactivate)
 >
 > [**activate (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#activate)
 >
 > [**activate (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#activate)
+>
+> [**activate (API)**](/docs/en/tools/api/#daytona/tag/snapshots/POST/snapshots/{snapshotName}/activate)
 
 ## Deactivate Snapshots
 
@@ -445,35 +811,71 @@ Daytona provides options to delete snapshots. Deleted snapshots cannot be recove
 <TabItem label="Python" icon="seti:python">
 ```python
 daytona = Daytona()
-daytona.snapshot.delete("my-awesome-snapshot")
+snapshot = daytona.snapshot.get("my-awesome-snapshot")
+daytona.snapshot.delete(snapshot)
 print("Snapshot deleted")
 ```
 </TabItem>
-
 <TabItem label="TypeScript" icon="seti:typescript">
 ```typescript
 const daytona = new Daytona()
-await daytona.snapshot.delete("my-awesome-snapshot")
+const snapshot = await daytona.snapshot.get("my-awesome-snapshot")
+await daytona.snapshot.delete(snapshot)
 console.log("Snapshot deleted")
 ```
 </TabItem>
-
-  <TabItem label="Ruby" icon="seti:ruby">
+<TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 daytona = Daytona::Daytona.new
-daytona.snapshot.delete('my-awesome-snapshot')
+snapshot = daytona.snapshot.get('my-awesome-snapshot')
+daytona.snapshot.delete(snapshot)
 puts 'Snapshot deleted'
 ```
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+```go
+snapshot, err := client.Snapshots.Get(ctx, "my-awesome-snapshot")
+if err != nil {
+    return err
+}
+err = client.Snapshots.Delete(ctx, snapshot)
+if err != nil {
+    return err
+}
+fmt.Println("Snapshot deleted")
+```
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona snapshot delete my-awesome-snapshot
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl https://app.daytona.io/api/snapshots/my-awesome-snapshot \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+</TabItem>
 </Tabs>
 
-For more information, see the [Python SDK](/docs/python-sdk/), [TypeScript SDK](/docs/typescript-sdk/), and [Ruby SDK](/docs/ruby-sdk/) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete), [TypeScript SDK](/docs/en/typescript-sdk/snapshot#delete), [Ruby SDK](/docs/en/ruby-sdk/snapshot#delete), [Go SDK](/docs/en/go-sdk/daytona#SnapshotService.Delete), [CLI](/docs/en/tools/cli#daytona-snapshot-delete), and [API](/docs/en/tools/api/#daytona/tag/snapshots) references:
 
-> [**delete (Python SDK)**](/docs/python-sdk/sync/snapshot#snapshotdelete)
+> [**delete (Python SDK)**](/docs/en/python-sdk/sync/snapshot#snapshotservicedelete)
 >
-> [**delete (TypeScript SDK)**](/docs/typescript-sdk/snapshot#delete)
+> [**delete (TypeScript SDK)**](/docs/en/typescript-sdk/snapshot#delete)
 >
-> [**delete (Ruby SDK)**](/docs/ruby-sdk/snapshot#delete)
+> [**delete (Ruby SDK)**](/docs/en/ruby-sdk/snapshot#delete)
+>
+> [**delete (Go SDK)**](/docs/en/go-sdk/daytona#SnapshotService.Delete)
+>
+> [**delete (CLI)**](/docs/en/tools/cli#daytona-snapshot-delete)
+>
+> [**delete (API)**](/docs/en/tools/api/#daytona/tag/snapshots/DELETE/snapshots/{snapshotName})
 
 ## Run Docker in a Sandbox
 
@@ -511,6 +913,165 @@ FROM ubuntu:22.04
 # Install Docker using the official install script
 RUN curl -fsSL https://get.docker.com | VERSION=28.3.3 sh -
 ```
+
+### Run Docker Compose in a Sandbox
+
+Docker Compose allows you to define and run multi-container applications. With Docker-in-Docker enabled in a Daytona Sandbox, you can use Docker Compose to orchestrate services like databases, caches, and application containers.
+
+First, create a Docker-in-Docker snapshot using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or [CLI](/docs/en/tools/cli#daytona-snapshot-create) with one of the [pre-built images](#using-pre-built-images) (e.g., `docker:28.3.3-dind`). Then use the following snippet to run Docker Compose services inside a sandbox:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+# Initialize the Daytona client
+daytona = Daytona()
+
+# Create a sandbox from a Docker-in-Docker snapshot
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(snapshot='docker-dind'))
+
+# Create a docker-compose.yml file
+compose_content = '''
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+'''
+sandbox.fs.upload_file(compose_content.encode(), 'docker-compose.yml')
+
+# Start Docker Compose services
+result = sandbox.process.exec('docker compose -p demo up -d')
+print(result.result)
+
+# Check running services
+result = sandbox.process.exec('docker compose -p demo ps')
+print(result.result)
+
+# Clean up
+sandbox.process.exec('docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+// Initialize the Daytona client
+const daytona = new Daytona()
+
+// Create a sandbox from a Docker-in-Docker snapshot
+const sandbox = await daytona.create({ snapshot: 'docker-dind' })
+
+// Create a docker-compose.yml file
+const composeContent = `
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+`
+await sandbox.fs.uploadFile(Buffer.from(composeContent), 'docker-compose.yml')
+
+// Start Docker Compose services
+let result = await sandbox.process.executeCommand('docker compose -p demo up -d')
+console.log(result.result)
+
+// Check running services
+result = await sandbox.process.executeCommand('docker compose -p demo ps')
+console.log(result.result)
+
+// Clean up
+await sandbox.process.executeCommand('docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+require 'daytona'
+
+# Initialize the Daytona client
+daytona = Daytona::Daytona.new
+
+# Create a sandbox from a Docker-in-Docker snapshot
+sandbox = daytona.create(Daytona::CreateSandboxFromSnapshotParams.new(snapshot: 'docker-dind'))
+
+# Create a docker-compose.yml file
+compose_content = <<~YAML
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+YAML
+sandbox.fs.upload_file(compose_content, 'docker-compose.yml')
+
+# Start Docker Compose services
+result = sandbox.process.exec(command: 'docker compose -p demo up -d')
+puts result.result
+
+# Check running services
+result = sandbox.process.exec(command: 'docker compose -p demo ps')
+puts result.result
+
+# Clean up
+sandbox.process.exec(command: 'docker compose -p demo down')
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/daytonaio/sdk-go/daytona"
+	"github.com/daytonaio/sdk-go/types"
+)
+
+func main() {
+	ctx := context.Background()
+
+	// Initialize the Daytona client
+	client, _ := daytona.NewDaytona(nil)
+
+	// Create a sandbox from a Docker-in-Docker snapshot
+	sandbox, _ := client.Create(ctx, &types.CreateSandboxFromSnapshotParams{
+		Snapshot: daytona.Ptr("docker-dind"),
+	}, nil)
+
+	// Create a docker-compose.yml file
+	composeContent := `
+services:
+  web:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+`
+	sandbox.Fs.UploadFile(ctx, []byte(composeContent), "docker-compose.yml")
+
+	// Start Docker Compose services
+	result, _ := sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo up -d", nil)
+	fmt.Println(result.Result)
+
+	// Check running services
+	result, _ = sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo ps", nil)
+	fmt.Println(result.Result)
+
+	// Clean up
+	sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo down", nil)
+}
+```
+
+</TabItem>
+</Tabs>
 
 ## Run Kubernetes in a Sandbox
 

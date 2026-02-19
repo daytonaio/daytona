@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common'
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
@@ -19,6 +26,8 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 
 @Injectable()
 export class VolumeService {
@@ -27,6 +36,7 @@ export class VolumeService {
   constructor(
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
+    private readonly sandboxRepository: SandboxRepository,
     private readonly organizationService: OrganizationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly configService: TypedConfigService,
@@ -134,6 +144,27 @@ export class VolumeService {
 
     if (volume.state !== VolumeState.READY) {
       throw new BadRequestError(`Volume must be in '${VolumeState.READY}' state in order to be deleted`)
+    }
+
+    // Check if any non-destroyed sandboxes are using this volume
+    const sandboxUsingVolume = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .where('sandbox.organizationId = :organizationId', {
+        organizationId: volume.organizationId,
+      })
+      .andWhere('sandbox.volumes @> :volFilter::jsonb', {
+        volFilter: JSON.stringify([{ volumeId }]),
+      })
+      .andWhere('sandbox.desiredState != :destroyed', {
+        destroyed: SandboxDesiredState.DESTROYED,
+      })
+      .select(['sandbox.id', 'sandbox.name'])
+      .getOne()
+
+    if (sandboxUsingVolume) {
+      throw new ConflictException(
+        `Volume cannot be deleted because it is in use by one or more sandboxes (e.g. ${sandboxUsingVolume.name})`,
+      )
     }
 
     // Update state to mark as deleting

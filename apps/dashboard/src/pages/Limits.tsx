@@ -26,7 +26,6 @@ import { RefreshCcw } from 'lucide-react'
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
-import { UserProfileIdentity } from './LinkedAccounts'
 
 export default function Limits() {
   const { user } = useAuth()
@@ -69,15 +68,6 @@ export default function Limits() {
       setSelectedRegionId(regionId)
     }
   }, [usageOverview, selectedOrganization?.defaultRegionId, selectedRegionId])
-
-  const githubConnected = useMemo(() => {
-    if (!user?.profile?.identities) {
-      return false
-    }
-    return (user.profile.identities as UserProfileIdentity[]).some(
-      (identity: UserProfileIdentity) => identity.provider === 'github',
-    )
-  }, [user])
 
   const currentRegionUsageOverview = useMemo<RegionUsageOverview | null>(() => {
     if (!usageOverview || !selectedRegionId) {
@@ -191,21 +181,28 @@ export default function Limits() {
 
                 <RateLimits
                   title="Rate Limits"
-                  description="How many requests you can make per minute."
+                  description="How many requests you can make."
                   className="border-t border-border"
                   rateLimits={[
                     {
                       value: selectedOrganization?.authenticatedRateLimit || config?.rateLimit?.authenticated?.limit,
                       label: 'General Requests',
+                      ttlSeconds:
+                        selectedOrganization?.authenticatedRateLimitTtlSeconds ?? config?.rateLimit?.authenticated?.ttl,
                     },
                     {
                       value: selectedOrganization?.sandboxCreateRateLimit || config?.rateLimit?.sandboxCreate?.limit,
                       label: 'Sandbox Creation',
+                      ttlSeconds:
+                        selectedOrganization?.sandboxCreateRateLimitTtlSeconds ?? config?.rateLimit?.sandboxCreate?.ttl,
                     },
                     {
                       value:
                         selectedOrganization?.sandboxLifecycleRateLimit || config?.rateLimit?.sandboxLifecycle?.limit,
                       label: 'Sandbox Lifecycle',
+                      ttlSeconds:
+                        selectedOrganization?.sandboxLifecycleRateLimitTtlSeconds ??
+                        config?.rateLimit?.sandboxLifecycle?.ttl,
                     },
                   ]}
                 />
@@ -221,8 +218,6 @@ export default function Limits() {
                   requirementsState={{
                     emailVerified: !!user?.profile?.email_verified,
                     creditCardLinked: !!wallet?.creditCardConnected,
-                    githubConnected: githubConnected,
-                    businessEmailVerified: !!organizationTier?.hasVerifiedBusinessEmail,
                   }}
                 />
 
@@ -255,6 +250,7 @@ interface LimitItem {
   value?: number | null
   unit?: string
   label: string
+  ttlSeconds?: number | null
 }
 
 function RateLimits({
@@ -281,14 +277,21 @@ function RateLimits({
       </div>
       <div className="grid grid-cols-1 gap-2 sm:gap-4 sm:grid-cols-3">
         {rateLimits.map(
-          ({ label, value, unit }) => value && <RateLimitItem key={label} label={label} value={value} unit={unit} />,
+          ({ label, value, unit, ttlSeconds }) =>
+            value && <RateLimitItem key={label} label={label} value={value} unit={unit} ttlSeconds={ttlSeconds} />,
         )}
       </div>
     </div>
   )
 }
 
-function RateLimitItem({ label, value, unit }: LimitItem) {
+function formatTtl(ttlSeconds?: number | null): string {
+  if (!ttlSeconds) return ' / min'
+  if (ttlSeconds % 60 === 0) return ` / ${ttlSeconds / 60}min`
+  return ` / ${ttlSeconds}s`
+}
+
+function RateLimitItem({ label, value, unit, ttlSeconds }: LimitItem) {
   if (!value) {
     return null
   }
@@ -297,7 +300,8 @@ function RateLimitItem({ label, value, unit }: LimitItem) {
     <div className="flex flex-col">
       <div className="text-muted-foreground text-xs">{label}</div>
       <div className="text-foreground text-sm font-medium">
-        {value?.toLocaleString()} {unit}
+        {value?.toLocaleString()}
+        {unit ? ` ${unit}` : formatTtl(ttlSeconds)}
       </div>
     </div>
   )

@@ -12,7 +12,7 @@ Service for managing Daytona Volumes. Can be used to list, get, create and delet
 #### new VolumeService()
 
 ```ruby
-def initialize(volumes_api)
+def initialize(volumes_api, otel_state:)
 
 ```
 
@@ -21,6 +21,7 @@ Service for managing Daytona Volumes. Can be used to list, get, create and delet
 **Parameters**:
 
 - `volumes_api` _DaytonaApiClient:VolumesApi_ -
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 

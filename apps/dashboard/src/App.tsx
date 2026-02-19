@@ -18,7 +18,7 @@ import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { BannerProvider } from './components/Banner'
-import { CommandPaletteProvider, useIsCommandPaletteEnabled } from './components/CommandPalette'
+import { CommandPaletteProvider } from './components/CommandPalette'
 import LoadingFallback from './components/LoadingFallback'
 import { Button } from './components/ui/button'
 import {
@@ -51,6 +51,7 @@ import Snapshots from './pages/Snapshots'
 import Spending from './pages/Spending'
 import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
+import Experimental from './pages/Experimental'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 
@@ -75,6 +76,7 @@ function App() {
   const config = useConfig()
   const location = useLocation()
   const posthog = usePostHog()
+
   const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
 
   useEffect(() => {
@@ -106,8 +108,6 @@ function App() {
       })
     }
   }, [location, posthog])
-
-  const cmdkEnabled = useIsCommandPaletteEnabled()
 
   if (authError) {
     return (
@@ -141,7 +141,7 @@ function App() {
                   <RegionsProvider>
                     <UserOrganizationInvitationsProvider>
                       <NotificationSocketProvider>
-                        <CommandPaletteProvider enableGlobalShortcut={cmdkEnabled}>
+                        <CommandPaletteProvider>
                           <BannerProvider>
                             <Dashboard />
                           </BannerProvider>
@@ -257,6 +257,14 @@ function App() {
         />
         <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
         <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+        <Route
+          path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
+          element={
+            <OwnerAccessOrganizationPageWrapper>
+              <Experimental />
+            </OwnerAccessOrganizationPageWrapper>
+          }
+        />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

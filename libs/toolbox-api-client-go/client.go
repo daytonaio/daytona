@@ -63,6 +63,8 @@ type APIClient struct {
 	PortAPI PortAPI
 
 	ProcessAPI ProcessAPI
+
+	ServerAPI ServerAPI
 }
 
 type service struct {
@@ -89,6 +91,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.LspAPI = (*LspAPIService)(&c.common)
 	c.PortAPI = (*PortAPIService)(&c.common)
 	c.ProcessAPI = (*ProcessAPIService)(&c.common)
+	c.ServerAPI = (*ServerAPIService)(&c.common)
 
 	return c
 }
@@ -507,10 +510,7 @@ func addFile(w *multipart.Writer, fieldName, path string) error {
 	if err != nil {
 		return err
 	}
-	err = file.Close()
-	if err != nil {
-		return err
-	}
+	defer file.Close()
 
 	part, err := w.CreateFormFile(fieldName, filepath.Base(path))
 	if err != nil {

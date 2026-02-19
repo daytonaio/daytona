@@ -4,15 +4,19 @@ require 'uri'
 
 module Daytona
   class SnapshotService
+    include Instrumentation
+
     SNAPSHOTS_FETCH_LIMIT = 200
 
     # @param snapshots_api [DaytonaApiClient::SnapshotsApi] The snapshots API client
     # @param object_storage_api [DaytonaApiClient::ObjectStorageApi] The object storage API client
     # @param default_region_id [String, nil] Default region ID for snapshot creation
-    def initialize(snapshots_api:, object_storage_api:, default_region_id: nil)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(snapshots_api:, object_storage_api:, default_region_id: nil, otel_state: nil)
       @snapshots_api = snapshots_api
       @object_storage_api = object_storage_api
       @default_region_id = default_region_id
+      @otel_state = otel_state
     end
 
     # List all Snapshots.
@@ -119,6 +123,8 @@ module Daytona
     # @return [Daytona::Snapshot]
     def activate(snapshot) = Snapshot.from_dto(snapshots_api.activate_snapshot(snapshot.id))
 
+    instrument :list, :delete, :get, :create, :activate, component: 'SnapshotService'
+
     # Processes the image context by uploading it to object storage
     #
     # @param image [Daytona::Image] The Image instance
@@ -155,6 +161,9 @@ module Daytona
 
     # @return [String, nil] Default region ID for snapshot creation
     attr_reader :default_region_id
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
 
     # Wait for snapshot to reach a terminal state (ACTIVE, ERROR, or BUILD_FAILED)
     # Optionally streams logs if on_logs callback is provided

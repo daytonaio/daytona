@@ -14,5 +14,42 @@
         }
       })
     }
+
+    const headings = document.querySelectorAll(
+      '.markdown-content h2[id], .markdown-content h3[id], .markdown-content h4[id], .markdown-content h5[id]'
+    )
+    const filteredHeadings = Array.from(headings).filter(
+      heading => !heading.closest('#scalar-container')
+    )
+
+    filteredHeadings.forEach(heading => {
+      const anchor = document.createElement('a')
+      anchor.href = `#${heading.id}`
+      anchor.className = 'heading-anchor'
+      anchor.setAttribute('aria-hidden', 'true')
+      anchor.textContent = '#'
+      heading.prepend(anchor)
+
+      heading.addEventListener('click', function (e) {
+        if (e.target === anchor) return
+        document.querySelectorAll('.heading-anchor.visible').forEach(a => {
+          if (a !== anchor) a.classList.remove('visible')
+        })
+        anchor.classList.toggle('visible')
+      })
+
+      anchor.addEventListener('click', function () {
+        anchor.classList.remove('visible')
+      })
+    })
+
+    document.addEventListener('click', function (e) {
+      const target = e.target as HTMLElement
+      if (!target.closest('h2, h3, h4, h5')) {
+        document.querySelectorAll('.heading-anchor.visible').forEach(a => {
+          a.classList.remove('visible')
+        })
+      }
+    })
   })
 </script>

@@ -52,7 +52,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus()
       error = STATUS_CODES[statusCode]
-      message = exception.message
+      const exceptionResponse = exception.getResponse()
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse
+      } else {
+        const responseMessage = (exceptionResponse as Record<string, unknown>).message
+        message = Array.isArray(responseMessage)
+          ? responseMessage.join(', ')
+          : (responseMessage as string) || exception.message
+      }
     } else {
       this.logger.error(exception)
       error = STATUS_CODES[HttpStatus.INTERNAL_SERVER_ERROR]

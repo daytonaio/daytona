@@ -672,6 +672,34 @@ paths:
       summary: Get region quota by sandbox ID
       tags:
         - organizations
+  /organizations/otel-config/by-sandbox-auth-token/{authToken}:
+    get:
+      operationId: getOrganizationOtelConfigBySandboxAuthToken
+      parameters:
+        - description: Sandbox Auth Token
+          explode: false
+          in: path
+          name: authToken
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtelConfig'
+          description: OTEL Config
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get organization OTEL config by sandbox auth token
+      tags:
+        - organizations
   /organizations/{organizationId}/sandbox-default-limited-network-egress:
     post:
       operationId: updateSandboxDefaultLimitedNetworkEgress
@@ -700,6 +728,44 @@ paths:
             - profile
             - email
       summary: Update sandbox default limited network egress
+      tags:
+        - organizations
+  /organizations/{organizationId}/experimental-config:
+    put:
+      operationId: updateExperimentalConfig
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              example:
+                otel:
+                  endpoint: http://otel-collector:4317
+                  headers:
+                    api-key: XXX
+              type: object
+        description: Experimental configuration as a JSON object. Set to null to clear
+          the configuration.
+        required: false
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update experimental configuration
       tags:
         - organizations
   /organizations/{organizationId}/roles:
@@ -3131,6 +3197,42 @@ paths:
             - profile
             - email
       summary: Update runner scheduling status
+      tags:
+        - runners
+  /runners/{id}/draining:
+    patch:
+      operationId: updateRunnerDraining
+      parameters:
+        - description: Runner ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update runner draining status
       tags:
         - runners
   /runners/by-sandbox/{sandboxId}:
@@ -7424,6 +7526,8 @@ paths:
       responses:
         '200':
           description: Volume has been marked for deletion
+        '409':
+          description: Volume is in use by one or more sandboxes
       security:
         - bearer: []
         - oauth2:
@@ -8036,6 +8140,34 @@ paths:
       summary: Update runner scheduling status
       tags:
         - admin
+  /admin/sandbox/{sandboxId}/recover:
+    post:
+      operationId: adminRecoverSandbox
+      parameters:
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Recovery initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Recover sandbox from error state as an admin
+      tags:
+        - admin
   /webhooks/organizations/{organizationId}/app-portal-access:
     post:
       operationId: WebhookController_getAppPortalAccess
@@ -8402,6 +8534,15 @@ paths:
         - audit
   /health:
     get:
+      operationId: HealthController_live
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      tags:
+        - Health
+  /health/ready:
+    get:
       operationId: HealthController_check
       parameters: []
       responses:
@@ -8419,6 +8560,282 @@ paths:
           description: The Health Check is not successful
       tags:
         - Health
+  /sandbox/{sandboxId}/telemetry/logs:
+    get:
+      description: Retrieve OTEL logs for a sandbox within a time range
+      operationId: getSandboxLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Start of time range (ISO 8601)
+          explode: true
+          in: query
+          name: from
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: End of time range (ISO 8601)
+          explode: true
+          in: query
+          name: to
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: Page number (1-indexed)
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            type: number
+          style: form
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            type: number
+          style: form
+        - description: 'Filter by severity levels (DEBUG, INFO, WARN, ERROR)'
+          explode: true
+          in: query
+          name: severities
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+        - description: Search in log body
+          explode: true
+          in: query
+          name: search
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLogs'
+          description: Paginated list of log entries
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox logs
+      tags:
+        - sandbox
+  /sandbox/{sandboxId}/telemetry/traces:
+    get:
+      description: Retrieve OTEL traces for a sandbox within a time range
+      operationId: getSandboxTraces
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Start of time range (ISO 8601)
+          explode: true
+          in: query
+          name: from
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: End of time range (ISO 8601)
+          explode: true
+          in: query
+          name: to
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: Page number (1-indexed)
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            default: 1
+            type: number
+          style: form
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            default: 100
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTraces'
+          description: Paginated list of trace summaries
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox traces
+      tags:
+        - sandbox
+  /sandbox/{sandboxId}/telemetry/traces/{traceId}:
+    get:
+      description: Retrieve all spans for a specific trace
+      operationId: getSandboxTraceSpans
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: ID of the trace
+          explode: false
+          in: path
+          name: traceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TraceSpan'
+                type: array
+          description: List of spans in the trace
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get trace spans
+      tags:
+        - sandbox
+  /sandbox/{sandboxId}/telemetry/metrics:
+    get:
+      description: Retrieve OTEL metrics for a sandbox within a time range
+      operationId: getSandboxMetrics
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the sandbox
+          explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Start of time range (ISO 8601)
+          explode: true
+          in: query
+          name: from
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: End of time range (ISO 8601)
+          explode: true
+          in: query
+          name: to
+          required: true
+          schema:
+            format: date-time
+            type: string
+          style: form
+        - description: Filter by metric names
+          explode: true
+          in: query
+          name: metricNames
+          required: false
+          schema:
+            items:
+              type: string
+            type: array
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+          description: Metrics time series data
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get sandbox metrics
+      tags:
+        - sandbox
 components:
   schemas:
     Announcement:
@@ -8953,6 +9370,7 @@ components:
     Organization:
       example:
         defaultRegionId: defaultRegionId
+        sandboxCreateRateLimitTtlSeconds: 3.616076749251911
         suspensionReason: suspensionReason
         sandboxLifecycleRateLimit: 7.061401241503109
         suspendedAt: 2000-01-23T04:56:07.000+00:00
@@ -8961,6 +9379,7 @@ components:
         authenticatedRateLimit: 5.637376656633329
         suspended: true
         sandboxCreateRateLimit: 2.3021358869347655
+        sandboxLifecycleRateLimitTtlSeconds: 2.027123023002322
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 6.027456183070403
         sandboxLimitedNetworkEgress: true
@@ -8969,7 +9388,9 @@ components:
         createdBy: createdBy
         name: name
         maxMemoryPerSandbox: 1.4658129805029452
+        authenticatedRateLimitTtlSeconds: 9.301444243932576
         id: id
+        experimentalConfig: '{}'
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -9036,10 +9457,27 @@ components:
           description: Sandbox lifecycle rate limit per minute
           nullable: true
           type: number
+        experimentalConfig:
+          description: Experimental configuration
+          type: object
+        authenticatedRateLimitTtlSeconds:
+          description: Authenticated rate limit TTL in seconds
+          nullable: true
+          type: number
+        sandboxCreateRateLimitTtlSeconds:
+          description: Sandbox create rate limit TTL in seconds
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimitTtlSeconds:
+          description: Sandbox lifecycle rate limit TTL in seconds
+          nullable: true
+          type: number
       required:
         - authenticatedRateLimit
+        - authenticatedRateLimitTtlSeconds
         - createdAt
         - createdBy
+        - experimentalConfig
         - id
         - maxCpuPerSandbox
         - maxDiskPerSandbox
@@ -9047,7 +9485,9 @@ components:
         - name
         - personal
         - sandboxCreateRateLimit
+        - sandboxCreateRateLimitTtlSeconds
         - sandboxLifecycleRateLimit
+        - sandboxLifecycleRateLimitTtlSeconds
         - sandboxLimitedNetworkEgress
         - suspended
         - suspendedAt
@@ -9144,11 +9584,14 @@ components:
     UpdateOrganizationQuota:
       example:
         snapshotQuota: 5.962133916683182
+        sandboxLifecycleRateLimitTtlSeconds: 7.386281948385884
         maxCpuPerSandbox: 0.8008281904610115
         maxDiskPerSandbox: 1.4658129805029452
+        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
         sandboxLifecycleRateLimit: 3.616076749251911
         maxMemoryPerSandbox: 6.027456183070403
         volumeQuota: 2.3021358869347655
+        authenticatedRateLimitTtlSeconds: 2.027123023002322
         maxSnapshotSize: 5.637376656633329
         authenticatedRateLimit: 7.061401241503109
         sandboxCreateRateLimit: 9.301444243932576
@@ -9180,14 +9623,26 @@ components:
         sandboxLifecycleRateLimit:
           nullable: true
           type: number
+        authenticatedRateLimitTtlSeconds:
+          nullable: true
+          type: number
+        sandboxCreateRateLimitTtlSeconds:
+          nullable: true
+          type: number
+        sandboxLifecycleRateLimitTtlSeconds:
+          nullable: true
+          type: number
       required:
         - authenticatedRateLimit
+        - authenticatedRateLimitTtlSeconds
         - maxCpuPerSandbox
         - maxDiskPerSandbox
         - maxMemoryPerSandbox
         - maxSnapshotSize
         - sandboxCreateRateLimit
+        - sandboxCreateRateLimitTtlSeconds
         - sandboxLifecycleRateLimit
+        - sandboxLifecycleRateLimitTtlSeconds
         - snapshotQuota
         - volumeQuota
       type: object
@@ -9215,7 +9670,7 @@ components:
       example:
         reason: reason
         until: 2000-01-23T04:56:07.000+00:00
-        suspensionCleanupGracePeriodHours: 0.8008281904610115
+        suspensionCleanupGracePeriodHours: 0.08008281904610115
       properties:
         reason:
           description: Suspension reason
@@ -9226,10 +9681,10 @@ components:
           type: string
         suspensionCleanupGracePeriodHours:
           description: Suspension cleanup grace period hours
+          minimum: 0
           type: number
       required:
         - reason
-        - suspensionCleanupGracePeriodHours
         - until
       type: object
     RegionQuota:
@@ -9256,6 +9711,26 @@ components:
         - totalCpuQuota
         - totalDiskQuota
         - totalMemoryQuota
+      type: object
+    OtelConfig:
+      example:
+        headers:
+          x-api-key: my-api-key
+        endpoint: endpoint
+      properties:
+        endpoint:
+          description: Endpoint
+          type: string
+        headers:
+          additionalProperties:
+            type: string
+          description: Headers
+          example:
+            x-api-key: my-api-key
+          nullable: true
+          type: object
+      required:
+        - endpoint
       type: object
     OrganizationSandboxDefaultLimitedNetworkEgress:
       example:
@@ -9868,6 +10343,7 @@ components:
         - destroyed
         - started
         - stopped
+        - resized
         - archived
       type: string
     SandboxVolume:
@@ -13888,6 +14364,298 @@ components:
         - page
         - total
         - totalPages
+      type: object
+    LogEntry:
+      example:
+        traceId: traceId
+        spanId: spanId
+        severityText: severityText
+        severityNumber: 0.8008281904610115
+        logAttributes:
+          key: logAttributes
+        body: body
+        serviceName: serviceName
+        resourceAttributes:
+          key: resourceAttributes
+        timestamp: timestamp
+      properties:
+        timestamp:
+          description: Timestamp of the log entry
+          type: string
+        body:
+          description: Log message body
+          type: string
+        severityText:
+          description: 'Severity level text (e.g., INFO, WARN, ERROR)'
+          type: string
+        severityNumber:
+          description: Severity level number
+          type: number
+        serviceName:
+          description: Service name that generated the log
+          type: string
+        resourceAttributes:
+          additionalProperties:
+            type: string
+          description: Resource attributes from OTEL
+          type: object
+        logAttributes:
+          additionalProperties:
+            type: string
+          description: Log-specific attributes
+          type: object
+        traceId:
+          description: Associated trace ID if available
+          type: string
+        spanId:
+          description: Associated span ID if available
+          type: string
+      required:
+        - body
+        - logAttributes
+        - resourceAttributes
+        - serviceName
+        - severityText
+        - timestamp
+      type: object
+    PaginatedLogs:
+      example:
+        total: 6.027456183070403
+        totalPages: 5.962133916683182
+        page: 1.4658129805029452
+        items:
+          - traceId: traceId
+            spanId: spanId
+            severityText: severityText
+            severityNumber: 0.8008281904610115
+            logAttributes:
+              key: logAttributes
+            body: body
+            serviceName: serviceName
+            resourceAttributes:
+              key: resourceAttributes
+            timestamp: timestamp
+          - traceId: traceId
+            spanId: spanId
+            severityText: severityText
+            severityNumber: 0.8008281904610115
+            logAttributes:
+              key: logAttributes
+            body: body
+            serviceName: serviceName
+            resourceAttributes:
+              key: resourceAttributes
+            timestamp: timestamp
+      properties:
+        items:
+          description: List of log entries
+          items:
+            $ref: '#/components/schemas/LogEntry'
+          type: array
+        total:
+          description: Total number of log entries matching the query
+          type: number
+        page:
+          description: Current page number
+          type: number
+        totalPages:
+          description: Total number of pages
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    TraceSummary:
+      example:
+        traceId: traceId
+        spanCount: 6.027456183070403
+        rootSpanName: rootSpanName
+        startTime: startTime
+        endTime: endTime
+        durationMs: 0.8008281904610115
+        statusCode: statusCode
+      properties:
+        traceId:
+          description: Unique trace identifier
+          type: string
+        rootSpanName:
+          description: Name of the root span
+          type: string
+        startTime:
+          description: Trace start time
+          type: string
+        endTime:
+          description: Trace end time
+          type: string
+        durationMs:
+          description: Total duration in milliseconds
+          type: number
+        spanCount:
+          description: Number of spans in this trace
+          type: number
+        statusCode:
+          description: Status code of the trace
+          type: string
+      required:
+        - durationMs
+        - endTime
+        - rootSpanName
+        - spanCount
+        - startTime
+        - traceId
+      type: object
+    PaginatedTraces:
+      example:
+        total: 1.4658129805029452
+        totalPages: 5.637376656633329
+        page: 5.962133916683182
+        items:
+          - traceId: traceId
+            spanCount: 6.027456183070403
+            rootSpanName: rootSpanName
+            startTime: startTime
+            endTime: endTime
+            durationMs: 0.8008281904610115
+            statusCode: statusCode
+          - traceId: traceId
+            spanCount: 6.027456183070403
+            rootSpanName: rootSpanName
+            startTime: startTime
+            endTime: endTime
+            durationMs: 0.8008281904610115
+            statusCode: statusCode
+      properties:
+        items:
+          description: List of trace summaries
+          items:
+            $ref: '#/components/schemas/TraceSummary'
+          type: array
+        total:
+          description: Total number of traces matching the query
+          type: number
+        page:
+          description: Current page number
+          type: number
+        totalPages:
+          description: Total number of pages
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    TraceSpan:
+      example:
+        traceId: traceId
+        spanId: spanId
+        spanAttributes:
+          key: spanAttributes
+        parentSpanId: parentSpanId
+        durationNs: 0.8008281904610115
+        statusMessage: statusMessage
+        spanName: spanName
+        timestamp: timestamp
+        statusCode: statusCode
+      properties:
+        traceId:
+          description: Trace identifier
+          type: string
+        spanId:
+          description: Span identifier
+          type: string
+        parentSpanId:
+          description: Parent span identifier
+          type: string
+        spanName:
+          description: Span name
+          type: string
+        timestamp:
+          description: Span start timestamp
+          type: string
+        durationNs:
+          description: Span duration in nanoseconds
+          type: number
+        spanAttributes:
+          additionalProperties:
+            type: string
+          description: Span attributes
+          type: object
+        statusCode:
+          description: Status code of the span
+          type: string
+        statusMessage:
+          description: Status message
+          type: string
+      required:
+        - durationNs
+        - spanAttributes
+        - spanId
+        - spanName
+        - timestamp
+        - traceId
+      type: object
+    MetricDataPoint:
+      example:
+        value: 0.8008281904610115
+        timestamp: timestamp
+      properties:
+        timestamp:
+          description: Timestamp of the data point
+          type: string
+        value:
+          description: Value at this timestamp
+          type: number
+      required:
+        - timestamp
+        - value
+      type: object
+    MetricSeries:
+      example:
+        metricName: metricName
+        dataPoints:
+          - value: 0.8008281904610115
+            timestamp: timestamp
+          - value: 0.8008281904610115
+            timestamp: timestamp
+      properties:
+        metricName:
+          description: Name of the metric
+          type: string
+        dataPoints:
+          description: Data points for this metric
+          items:
+            $ref: '#/components/schemas/MetricDataPoint'
+          type: array
+      required:
+        - dataPoints
+        - metricName
+      type: object
+    MetricsResponse:
+      example:
+        series:
+          - metricName: metricName
+            dataPoints:
+              - value: 0.8008281904610115
+                timestamp: timestamp
+              - value: 0.8008281904610115
+                timestamp: timestamp
+          - metricName: metricName
+            dataPoints:
+              - value: 0.8008281904610115
+                timestamp: timestamp
+              - value: 0.8008281904610115
+                timestamp: timestamp
+      properties:
+        series:
+          description: List of metric series
+          items:
+            $ref: '#/components/schemas/MetricSeries'
+          type: array
+      required:
+        - series
       type: object
     uploadFile_deprecated_request:
       properties:

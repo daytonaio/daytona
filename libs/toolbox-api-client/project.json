@@ -6,8 +6,6 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "inputs": ["default", "{projectRoot}/package.json"],
-      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/toolbox-api-client",
         "tsConfig": "{projectRoot}/tsconfig.lib.json",
@@ -19,11 +17,11 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "inputs": ["apiClient"],
       "outputs": ["{projectRoot}/src"],
       "options": {
         "commands": [
+          "rm -rf {projectRoot}/src",
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/toolbox-api-client/src"
         ],
         "parallel": false

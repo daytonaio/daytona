@@ -9,17 +9,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useLinkAccountMutation } from '@/hooks/mutations/useLinkAccountMutation'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUnlinkAccountMutation } from '@/hooks/mutations/useUnlinkAccountMutation'
 import { useAccountProvidersQuery } from '@/hooks/queries/useAccountProvidersQuery'
-import { useConfig } from '@/hooks/useConfig'
 import { handleApiError } from '@/lib/error-handling'
 import { ShieldCheck } from 'lucide-react'
-import { UserManager } from 'oidc-client-ts'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
-import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 
 export interface UserProfileIdentity {
@@ -37,21 +33,7 @@ interface AccountProvider {
 
 const LinkedAccounts: React.FC = () => {
   const { user } = useAuth()
-  const config = useConfig()
   const accountProvidersQuery = useAccountProvidersQuery()
-
-  const linkingUserManager = useMemo(() => {
-    return new UserManager({
-      authority: config.oidc.issuer,
-      client_id: config.oidc.clientId,
-      extraQueryParams: {
-        audience: config.oidc.audience,
-      },
-      scope: 'openid profile email offline_access',
-      redirect_uri: window.location.origin,
-      automaticSilentRenew: false,
-    })
-  }, [config.oidc.issuer, config.oidc.clientId, config.oidc.audience])
 
   const accountProviders = useMemo<AccountProvider[]>(() => {
     const identities = (user?.profile.identities as UserProfileIdentity[]) || []
@@ -67,6 +49,7 @@ const LinkedAccounts: React.FC = () => {
           isPrimary: Boolean(identity && user?.profile.sub === `${identity.provider}|${identity.userId}`),
         }
       })
+      .filter((provider) => provider.isLinked)
       .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary))
   }, [accountProvidersQuery.data, user])
 
@@ -74,7 +57,7 @@ const LinkedAccounts: React.FC = () => {
     <Card>
       <CardHeader className="p-4">
         <CardTitle>Linked Accounts</CardTitle>
-        <CardDescription>Link your accounts to your Daytona account for a seamless login.</CardDescription>
+        <CardDescription>View and manage accounts linked to your Daytona account.</CardDescription>
       </CardHeader>
       {accountProvidersQuery.isLoading ? (
         <CardContent className="flex flex-col gap-5">
@@ -85,7 +68,7 @@ const LinkedAccounts: React.FC = () => {
       ) : (
         <CardContent className="p-0">
           {accountProviders.map((provider) => (
-            <LinkedAccount key={provider.name} provider={provider} linkingUserManager={linkingUserManager} />
+            <LinkedAccount key={provider.name} provider={provider} />
           ))}
         </CardContent>
       )}
@@ -107,60 +90,9 @@ const ProviderSkeleton = () => {
 
 export default LinkedAccounts
 
-const LinkedAccount = ({
-  provider,
-  linkingUserManager,
-}: {
-  provider: AccountProvider
-  linkingUserManager: UserManager
-}) => {
-  const linkAccountMutation = useLinkAccountMutation()
+const LinkedAccount = ({ provider }: { provider: AccountProvider }) => {
   const unlinkAccountMutation = useUnlinkAccountMutation()
-  const { user, signinSilent } = useAuth()
-  const location = useLocation()
-
-  const locationPath = location.pathname + location.search
-
-  const handleLinkAccount = async () => {
-    if (!user?.profile.email_verified) {
-      toast.error('Please verify your email before linking an account')
-      return
-    }
-
-    try {
-      const userToLink = await linkingUserManager.signinPopup({
-        state: {
-          returnTo: locationPath,
-        },
-        extraQueryParams: {
-          connection: provider.name,
-          accountLinking: true,
-        },
-      })
-
-      const secondaryIdentity = (userToLink.profile.identities as UserProfileIdentity[])?.find(
-        (i) => i.provider === provider.name,
-      )
-
-      if (!secondaryIdentity) {
-        throw new Error('Failed to obtain account information')
-      }
-
-      await linkAccountMutation.mutateAsync({
-        provider: secondaryIdentity.provider,
-        userId: secondaryIdentity.userId,
-      })
-
-      toast.success(`Successfully linked account`)
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      const success = await signinSilent()
-      if (!success) {
-        window.location.reload()
-      }
-    } catch (error) {
-      handleApiError(error, 'Failed to link account')
-    }
-  }
+  const { signinSilent } = useAuth()
 
   const handleUnlinkAccount = async () => {
     if (provider.isPrimary) {
@@ -192,42 +124,29 @@ const LinkedAccount = ({
           <AccountProviderIcon provider={provider.name} className="h-4 w-4" />
           <div>{provider.displayName}</div>
           {provider.isPrimary && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Badge variant="outline" className="gap-1 text-xs">
-                    <ShieldCheck className="h-3 w-3" />
-                    Primary
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Primary accounts cannot be unlinked</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge variant="outline" className="gap-1 text-xs">
+                  <ShieldCheck className="h-3 w-3" />
+                  Primary
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Primary accounts cannot be unlinked</p>
+              </TooltipContent>
+            </Tooltip>
           )}
         </div>
         <p className="text-sm text-muted-foreground">
-          {provider.isLinked
-            ? provider.isPrimary
-              ? `This is your primary account used for authentication.`
-              : `Your ${provider.displayName} account is linked as a secondary login method.`
-            : `Link your ${provider.displayName} account for a seamless login.`}
+          {provider.isPrimary
+            ? `This is your primary account used for authentication.`
+            : `Your ${provider.displayName} account is linked as a secondary login method.`}
         </p>
       </div>
-      {provider.isLinked ? (
-        <Button
-          variant="outline"
-          onClick={handleUnlinkAccount}
-          disabled={unlinkAccountMutation.isPending || provider.isPrimary}
-        >
+      {!provider.isPrimary && (
+        <Button variant="outline" onClick={handleUnlinkAccount} disabled={unlinkAccountMutation.isPending}>
           {unlinkAccountMutation.isPending && <Spinner />}
           Unlink
-        </Button>
-      ) : (
-        <Button onClick={handleLinkAccount} disabled={linkAccountMutation.isPending}>
-          {linkAccountMutation.isPending && <Spinner />}
-          Link Account
         </Button>
       )}
     </div>

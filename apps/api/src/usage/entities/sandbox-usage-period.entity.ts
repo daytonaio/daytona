@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('sandbox_usage_periods')
+@Index('idx_sandbox_usage_periods_sandbox_end', ['sandboxId', 'endAt'])
 export class SandboxUsagePeriod {
   @PrimaryGeneratedColumn('uuid')
   id: string

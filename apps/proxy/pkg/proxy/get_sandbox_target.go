@@ -61,7 +61,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 		return nil, nil, fmt.Errorf("failed to get sandbox public status: %w", err)
 	}
 
-	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT {
+	if !*isPublic || targetPort == TERMINAL_PORT || targetPort == TOOLBOX_PORT || targetPort == RECORDING_DASHBOARD_PORT {
 		portFloat, err := strconv.ParseFloat(targetPort, 64)
 		if err != nil {
 			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to parse target port: %w", err)))
@@ -95,6 +95,9 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxId, targetPort)
+	if toolboxSubpathRequest {
+		targetURL = fmt.Sprintf("%s/sandboxes/%s/toolbox", runnerInfo.ApiUrl, sandboxId)
+	}
 
 	// Ensure path always has a leading slash but not duplicate slashes
 	if targetPath == "" {

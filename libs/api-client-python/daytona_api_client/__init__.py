@@ -111,12 +111,16 @@ from daytona_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequ
 from daytona_api_client.models.keyboard_press_request import KeyboardPressRequest
 from daytona_api_client.models.keyboard_type_request import KeyboardTypeRequest
 from daytona_api_client.models.list_branch_response import ListBranchResponse
+from daytona_api_client.models.log_entry import LogEntry
 from daytona_api_client.models.lsp_completion_params import LspCompletionParams
 from daytona_api_client.models.lsp_document_request import LspDocumentRequest
 from daytona_api_client.models.lsp_location import LspLocation
 from daytona_api_client.models.lsp_server_request import LspServerRequest
 from daytona_api_client.models.lsp_symbol import LspSymbol
 from daytona_api_client.models.match import Match
+from daytona_api_client.models.metric_data_point import MetricDataPoint
+from daytona_api_client.models.metric_series import MetricSeries
+from daytona_api_client.models.metrics_response import MetricsResponse
 from daytona_api_client.models.mouse_click_request import MouseClickRequest
 from daytona_api_client.models.mouse_click_response import MouseClickResponse
 from daytona_api_client.models.mouse_drag_request import MouseDragRequest
@@ -134,10 +138,13 @@ from daytona_api_client.models.organization_sandbox_default_limited_network_egre
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
 from daytona_api_client.models.organization_usage_overview import OrganizationUsageOverview
 from daytona_api_client.models.organization_user import OrganizationUser
+from daytona_api_client.models.otel_config import OtelConfig
 from daytona_api_client.models.paginated_audit_logs import PaginatedAuditLogs
 from daytona_api_client.models.paginated_jobs import PaginatedJobs
+from daytona_api_client.models.paginated_logs import PaginatedLogs
 from daytona_api_client.models.paginated_sandboxes import PaginatedSandboxes
 from daytona_api_client.models.paginated_snapshots import PaginatedSnapshots
+from daytona_api_client.models.paginated_traces import PaginatedTraces
 from daytona_api_client.models.poll_jobs_response import PollJobsResponse
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
@@ -193,6 +200,8 @@ from daytona_api_client.models.ssh_access_dto import SshAccessDto
 from daytona_api_client.models.ssh_access_validation_dto import SshAccessValidationDto
 from daytona_api_client.models.storage_access_dto import StorageAccessDto
 from daytona_api_client.models.toolbox_proxy_url import ToolboxProxyUrl
+from daytona_api_client.models.trace_span import TraceSpan
+from daytona_api_client.models.trace_summary import TraceSummary
 from daytona_api_client.models.update_docker_registry import UpdateDockerRegistry
 from daytona_api_client.models.update_job_status import UpdateJobStatus
 from daytona_api_client.models.update_organization_default_region import UpdateOrganizationDefaultRegion
@@ -309,12 +318,16 @@ __all__ = [
     "KeyboardPressRequest",
     "KeyboardTypeRequest",
     "ListBranchResponse",
+    "LogEntry",
     "LspCompletionParams",
     "LspDocumentRequest",
     "LspLocation",
     "LspServerRequest",
     "LspSymbol",
     "Match",
+    "MetricDataPoint",
+    "MetricSeries",
+    "MetricsResponse",
     "MouseClickRequest",
     "MouseClickResponse",
     "MouseDragRequest",
@@ -332,10 +345,13 @@ __all__ = [
     "OrganizationSuspension",
     "OrganizationUsageOverview",
     "OrganizationUser",
+    "OtelConfig",
     "PaginatedAuditLogs",
     "PaginatedJobs",
+    "PaginatedLogs",
     "PaginatedSandboxes",
     "PaginatedSnapshots",
+    "PaginatedTraces",
     "PollJobsResponse",
     "PortPreviewUrl",
     "Position",
@@ -391,6 +407,8 @@ __all__ = [
     "SshAccessValidationDto",
     "StorageAccessDto",
     "ToolboxProxyUrl",
+    "TraceSpan",
+    "TraceSummary",
     "UpdateDockerRegistry",
     "UpdateJobStatus",
     "UpdateOrganizationDefaultRegion",

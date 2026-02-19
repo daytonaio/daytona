@@ -6,7 +6,6 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/runner-api-client",
         "tsConfig": "libs/runner-api-client/tsconfig.lib.json",
@@ -17,11 +16,14 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
-      "cache": true,
-      "inputs": ["{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json"],
       "outputs": ["{projectRoot}/src"],
+      "inputs": [
+        "{workspaceRoot}/apps/runner/pkg/api/docs/swagger.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "options": {
         "commands": [
+          "rm -rf {projectRoot}/src",
           "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/runner/pkg/api/docs/swagger.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/runner-api-client/src"
         ],
         "parallel": false

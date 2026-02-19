@@ -12,6 +12,7 @@ from obstore.store import S3Store
 
 from .._utils.docs_ignore import docs_ignore
 from .._utils.environment import isolated_env
+from .._utils.otel_decorator import with_instrumentation
 
 
 class ObjectStorage:
@@ -43,6 +44,7 @@ class ObjectStorage:
                 session_token=aws_session_token,
             )
 
+    @with_instrumentation()
     def upload(self, path: str, organization_id: str, archive_base_path: str | None = None) -> str:
         """Uploads a file to the object storage service.
 

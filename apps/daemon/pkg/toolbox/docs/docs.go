@@ -464,6 +464,286 @@ const docTemplate = `{
                 }
             }
         },
+        "/computeruse/recordings": {
+            "get": {
+                "description": "Get a list of all recordings (active and completed)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "List all recordings",
+                "operationId": "ListRecordings",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ListRecordingsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/recordings/start": {
+            "post": {
+                "description": "Start a new screen recording session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Start a new recording",
+                "operationId": "StartRecording",
+                "parameters": [
+                    {
+                        "description": "Recording options",
+                        "name": "request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/StartRecordingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/Recording"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/recordings/stop": {
+            "post": {
+                "description": "Stop an active screen recording session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Stop a recording",
+                "operationId": "StopRecording",
+                "parameters": [
+                    {
+                        "description": "Recording ID to stop",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/StopRecordingRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Recording"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/recordings/{id}": {
+            "get": {
+                "description": "Get details of a specific recording by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Get recording details",
+                "operationId": "GetRecording",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recording ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Recording"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a recording file by ID",
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Delete a recording",
+                "operationId": "DeleteRecording",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recording ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/computeruse/recordings/{id}/download": {
+            "get": {
+                "description": "Download a recording by providing its ID",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "computer-use"
+                ],
+                "summary": "Download a recording",
+                "operationId": "DownloadRecording",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recording ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/computeruse/screenshot": {
             "get": {
                 "description": "Take a screenshot of the entire screen",
@@ -1510,6 +1790,41 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/GitStatus"
+                        }
+                    }
+                }
+            }
+        },
+        "/init": {
+            "post": {
+                "description": "Set the auth token and initialize telemetry for the toolbox server",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "Initialize toolbox server",
+                "operationId": "Initialize",
+                "parameters": [
+                    {
+                        "description": "Initialization request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InitializeRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     }
                 }
@@ -3003,6 +3318,17 @@ const docTemplate = `{
                 }
             }
         },
+        "InitializeRequest": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "InterpreterContext": {
             "type": "object",
             "required": [
@@ -3098,6 +3424,20 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/InterpreterContext"
+                    }
+                }
+            }
+        },
+        "ListRecordingsResponse": {
+            "type": "object",
+            "required": [
+                "recordings"
+            ],
+            "properties": {
+                "recordings": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Recording"
                     }
                 }
             }
@@ -3542,6 +3882,42 @@ const docTemplate = `{
                 }
             }
         },
+        "Recording": {
+            "type": "object",
+            "required": [
+                "fileName",
+                "filePath",
+                "id",
+                "startTime",
+                "status"
+            ],
+            "properties": {
+                "durationSeconds": {
+                    "type": "number"
+                },
+                "endTime": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "filePath": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "sizeBytes": {
+                    "type": "integer"
+                },
+                "startTime": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "ReplaceRequest": {
             "type": "object",
             "required": [
@@ -3683,6 +4059,14 @@ const docTemplate = `{
                 }
             }
         },
+        "StartRecordingRequest": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string"
+                }
+            }
+        },
         "Status": {
             "type": "string",
             "enum": [
@@ -3705,6 +4089,17 @@ const docTemplate = `{
                 "Copied",
                 "UpdatedButUnmerged"
             ]
+        },
+        "StopRecordingRequest": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
         },
         "UserHomeDirResponse": {
             "type": "object",

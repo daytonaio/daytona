@@ -67,8 +67,15 @@ export interface RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
+    otelEndpoint?: string,
+    skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined>
-  startSandbox(sandboxId: string, metadata?: { [key: string]: string }): Promise<StartSandboxResponse | undefined>
+  startSandbox(
+    sandboxId: string,
+    authToken: string,
+    metadata?: { [key: string]: string },
+    skipStart?: boolean,
+  ): Promise<StartSandboxResponse | undefined>
   stopSandbox(sandboxId: string): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   removeDestroyedSandbox(sandboxId: string): Promise<void>

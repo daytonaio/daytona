@@ -13,8 +13,10 @@
         "parallel": false
       },
       "dependsOn": ["set-version"],
-      "cache": true,
-      "inputs": ["default"],
+      "inputs": [
+        "default",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/**/*.gem"]
     },
     "set-version": {
@@ -36,6 +38,7 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/lib"],
       "options": {
         "commands": [
           "rm -rf libs/api-client-ruby/lib",
@@ -47,8 +50,10 @@
         "parallel": false
       },
       "cache": true,
-      "inputs": ["{workspaceRoot}/dist/apps/api/openapi.json"],
-      "outputs": ["{projectRoot}/**/*", "!{projectRoot}/**/*.gem"],
+      "inputs": [
+        "apiClient",
+        { "env": "DEFAULT_GEM_VERSION" }
+      ],
       "dependsOn": [
         {
           "target": "openapi",

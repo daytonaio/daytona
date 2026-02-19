@@ -27,7 +27,7 @@ type OrganizationSuspension struct {
 	// Suspension until
 	Until time.Time `json:"until"`
 	// Suspension cleanup grace period hours
-	SuspensionCleanupGracePeriodHours float32 `json:"suspensionCleanupGracePeriodHours"`
+	SuspensionCleanupGracePeriodHours *float32 `json:"suspensionCleanupGracePeriodHours,omitempty"`
 	AdditionalProperties              map[string]interface{}
 }
 
@@ -37,11 +37,10 @@ type _OrganizationSuspension OrganizationSuspension
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganizationSuspension(reason string, until time.Time, suspensionCleanupGracePeriodHours float32) *OrganizationSuspension {
+func NewOrganizationSuspension(reason string, until time.Time) *OrganizationSuspension {
 	this := OrganizationSuspension{}
 	this.Reason = reason
 	this.Until = until
-	this.SuspensionCleanupGracePeriodHours = suspensionCleanupGracePeriodHours
 	return &this
 }
 
@@ -101,28 +100,36 @@ func (o *OrganizationSuspension) SetUntil(v time.Time) {
 	o.Until = v
 }
 
-// GetSuspensionCleanupGracePeriodHours returns the SuspensionCleanupGracePeriodHours field value
+// GetSuspensionCleanupGracePeriodHours returns the SuspensionCleanupGracePeriodHours field value if set, zero value otherwise.
 func (o *OrganizationSuspension) GetSuspensionCleanupGracePeriodHours() float32 {
-	if o == nil {
+	if o == nil || IsNil(o.SuspensionCleanupGracePeriodHours) {
 		var ret float32
 		return ret
 	}
-
-	return o.SuspensionCleanupGracePeriodHours
+	return *o.SuspensionCleanupGracePeriodHours
 }
 
-// GetSuspensionCleanupGracePeriodHoursOk returns a tuple with the SuspensionCleanupGracePeriodHours field value
+// GetSuspensionCleanupGracePeriodHoursOk returns a tuple with the SuspensionCleanupGracePeriodHours field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *OrganizationSuspension) GetSuspensionCleanupGracePeriodHoursOk() (*float32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SuspensionCleanupGracePeriodHours) {
 		return nil, false
 	}
-	return &o.SuspensionCleanupGracePeriodHours, true
+	return o.SuspensionCleanupGracePeriodHours, true
 }
 
-// SetSuspensionCleanupGracePeriodHours sets field value
+// HasSuspensionCleanupGracePeriodHours returns a boolean if a field has been set.
+func (o *OrganizationSuspension) HasSuspensionCleanupGracePeriodHours() bool {
+	if o != nil && !IsNil(o.SuspensionCleanupGracePeriodHours) {
+		return true
+	}
+
+	return false
+}
+
+// SetSuspensionCleanupGracePeriodHours gets a reference to the given float32 and assigns it to the SuspensionCleanupGracePeriodHours field.
 func (o *OrganizationSuspension) SetSuspensionCleanupGracePeriodHours(v float32) {
-	o.SuspensionCleanupGracePeriodHours = v
+	o.SuspensionCleanupGracePeriodHours = &v
 }
 
 func (o OrganizationSuspension) MarshalJSON() ([]byte, error) {
@@ -137,7 +144,9 @@ func (o OrganizationSuspension) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["reason"] = o.Reason
 	toSerialize["until"] = o.Until
-	toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
+	if !IsNil(o.SuspensionCleanupGracePeriodHours) {
+		toSerialize["suspensionCleanupGracePeriodHours"] = o.SuspensionCleanupGracePeriodHours
+	}
 
 	for key, value := range o.AdditionalProperties {
 		toSerialize[key] = value
@@ -153,7 +162,6 @@ func (o *OrganizationSuspension) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"reason",
 		"until",
-		"suspensionCleanupGracePeriodHours",
 	}
 
 	allProperties := make(map[string]interface{})

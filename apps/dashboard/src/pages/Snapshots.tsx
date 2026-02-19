@@ -4,7 +4,8 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { SnapshotTable } from '@/components/SnapshotTable'
+import { CreateSnapshotDialog } from '@/components/snapshots/CreateSnapshotDialog'
+import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -14,49 +15,36 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { queryKeys } from '@/hooks/queries/queryKeys'
+import {
+  DEFAULT_SNAPSHOT_SORTING,
+  SnapshotQueryParams,
+  SnapshotSorting,
+  useSnapshotsQuery,
+} from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { handleApiError } from '@/lib/error-handling'
-import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
-import { Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { toast } from 'sonner'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useRegions } from '@/hooks/useRegions'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { getRegionFullDisplayName } from '@/lib/utils'
-
-const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { createBulkActionToast } from '@/lib/bulk-action-toast'
+import { handleApiError } from '@/lib/error-handling'
+import { pluralize } from '@/lib/utils'
+import { OrganizationRolePermissionsEnum, PaginatedSnapshots, SnapshotDto, SnapshotState } from '@daytonaio/api-client'
+import { useQueryClient } from '@tanstack/react-query'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
+  const queryClient = useQueryClient()
 
   const { snapshotApi } = useApi()
-  const { availableRegions: regions, loadingAvailableRegions: loadingRegions, getRegionName } = useRegions()
-  const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshots>({
-    items: [],
-    total: 0,
-    page: 1,
-    totalPages: 0,
-  })
+  const { getRegionName } = useRegions()
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
-  const [loadingTable, setLoadingTable] = useState(true)
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [newSnapshotName, setNewSnapshotName] = useState('')
-  const [newImageName, setNewImageName] = useState('')
-  const [newEntrypoint, setNewEntrypoint] = useState('')
-  const [loadingCreate, setLoadingCreate] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [cpu, setCpu] = useState<number | undefined>(undefined)
-  const [memory, setMemory] = useState<number | undefined>(undefined)
-  const [disk, setDisk] = useState<number | undefined>(undefined)
-  const [selectedRegionId, setSelectedRegionId] = useState<string | undefined>(undefined)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -65,78 +53,71 @@ const Snapshots: React.FC = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   })
 
-  const fetchSnapshots = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoadingTable(true)
-      }
-      try {
-        const response = (
-          await snapshotApi.getAllSnapshots(
-            selectedOrganization.id,
-            paginationParams.pageIndex + 1,
-            paginationParams.pageSize,
-          )
-        ).data
-        setSnapshotsData(response)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch snapshots')
-      } finally {
-        setLoadingTable(false)
-      }
+  const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
+
+  const queryParams = useMemo<SnapshotQueryParams>(
+    () => ({
+      page: paginationParams.pageIndex + 1,
+      pageSize: paginationParams.pageSize,
+      sorting,
+    }),
+    [paginationParams, sorting],
+  )
+
+  const baseQueryKey = useMemo(() => queryKeys.snapshots.all, [])
+
+  const queryKey = useMemo(
+    () => queryKeys.snapshots.list(selectedOrganization?.id ?? '', queryParams),
+    [selectedOrganization?.id, queryParams],
+  )
+
+  const {
+    data: snapshotsData,
+    isLoading: snapshotsDataIsLoading,
+    error: snapshotsDataError,
+  } = useSnapshotsQuery(queryParams)
+
+  useEffect(() => {
+    if (snapshotsDataError) {
+      handleApiError(snapshotsDataError, 'Failed to fetch snapshots')
+    }
+  }, [snapshotsDataError])
+
+  const updateSnapshotInCache = useCallback(
+    (snapshotId: string, updates: Partial<SnapshotDto>) => {
+      queryClient.setQueryData(queryKey, (oldData: PaginatedSnapshots | undefined) => {
+        if (!oldData) return oldData
+        return {
+          ...oldData,
+          items: oldData.items.map((snapshot) => (snapshot.id === snapshotId ? { ...snapshot, ...updates } : snapshot)),
+        }
+      })
     },
-    [snapshotApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
+    [queryClient, queryKey],
+  )
+
+  const markAllSnapshotQueriesAsStale = useCallback(
+    async (shouldRefetchActiveQueries = false) => {
+      queryClient.invalidateQueries({
+        queryKey: baseQueryKey,
+        refetchType: shouldRefetchActiveQueries ? 'active' : 'none',
+      })
+    },
+    [queryClient, baseQueryKey],
   )
 
   const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
     setPaginationParams({ pageIndex, pageSize })
   }, [])
 
-  useEffect(() => {
-    fetchSnapshots()
-  }, [fetchSnapshots])
+  const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
+    setSorting(newSorting)
+    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+  }, [])
 
   useEffect(() => {
-    const handleSnapshotCreatedEvent = (snapshot: SnapshotDto) => {
-      if (paginationParams.pageIndex === 0) {
-        setSnapshotsData((prev) => {
-          if (prev.items.some((i) => i.id === snapshot.id)) {
-            return prev
-          }
-          // Determine where the "unused" snapshots start
-          const firstUnusedIndex = prev.items.findIndex((i) => !i.lastUsedAt)
-          if (firstUnusedIndex === -1) {
-            // No unused snapshots yet; append to the end
-            const newSnapshots = [...prev.items, snapshot]
-            const newTotal = prev.total + 1
-            return {
-              ...prev,
-              items: newSnapshots.slice(0, paginationParams.pageSize),
-              total: newTotal,
-              totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-            }
-          }
-
-          // Insert within the unused section keeping newest-first (by createdAt)
-          const unusedSection = prev.items.slice(firstUnusedIndex)
-          const relativeIndex = unusedSection.findIndex((i) => i.createdAt <= snapshot.createdAt)
-          const insertIndex = firstUnusedIndex + (relativeIndex === -1 ? unusedSection.length : relativeIndex)
-
-          const newSnapshots = [...prev.items]
-          newSnapshots.splice(insertIndex, 0, snapshot)
-
-          const newTotal = prev.total + 1
-          return {
-            ...prev,
-            items: newSnapshots.slice(0, paginationParams.pageSize),
-            total: newTotal,
-            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-          }
-        })
-      }
+    const handleSnapshotCreatedEvent = () => {
+      markAllSnapshotQueriesAsStale(true)
     }
 
     const handleSnapshotStateUpdatedEvent = (data: {
@@ -144,24 +125,11 @@ const Snapshots: React.FC = () => {
       oldState: SnapshotState
       newState: SnapshotState
     }) => {
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === data.snapshot.id ? data.snapshot : i)),
-      }))
+      updateSnapshotInCache(data.snapshot.id, data.snapshot)
     }
 
-    const handleSnapshotRemovedEvent = (snapshotId: string) => {
-      setSnapshotsData((prev) => {
-        const newTotal = Math.max(0, prev.total - 1)
-        const newItems = prev.items.filter((i) => i.id !== snapshotId)
-
-        return {
-          ...prev,
-          items: newItems,
-          total: newTotal,
-          totalPages: Math.ceil(newTotal / paginationParams.pageSize),
-        }
-      })
+    const handleSnapshotRemovedEvent = () => {
+      markAllSnapshotQueriesAsStale(true)
     }
 
     if (!notificationSocket) {
@@ -177,121 +145,20 @@ const Snapshots: React.FC = () => {
       notificationSocket.off('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
       notificationSocket.off('snapshot.removed', handleSnapshotRemovedEvent)
     }
-  }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
+  }, [notificationSocket, markAllSnapshotQueriesAsStale, updateSnapshotInCache])
 
   useEffect(() => {
-    if (snapshotsData.items.length === 0 && paginationParams.pageIndex > 0) {
+    if (snapshotsData?.items.length === 0 && paginationParams.pageIndex > 0) {
       setPaginationParams((prev) => ({
         ...prev,
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [snapshotsData.items.length, paginationParams.pageIndex])
-
-  const validateSnapshotName = (name: string): string | null => {
-    if (name.includes(' ')) {
-      return 'Spaces are not allowed in snapshot names'
-    }
-
-    if (!IMAGE_NAME_REGEX.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, slashes and dashes'
-    }
-
-    return null
-  }
-
-  const validateImageName = (name: string): string | null => {
-    if (name.includes(' ')) {
-      return 'Spaces are not allowed in image names'
-    }
-
-    // Check for digest format (@sha256:hash)
-    if (name.includes('@sha256:')) {
-      const [imageName, digest] = name.split('@sha256:')
-      if (!imageName || !digest || !/^[a-f0-9]{64}$/.test(digest)) {
-        return 'Invalid digest format. Must be image@sha256:64_hex_characters'
-      }
-      if (imageName.includes(':')) {
-        return 'Image name cannot contain both a tag and a digest'
-      }
-      return null
-    }
-
-    // Handle tag format (only check if no digest is present)
-    if (!name.includes('@') && (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name))) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)'
-    }
-
-    if (name.endsWith(':latest')) {
-      return 'Images with tag ":latest" are not allowed'
-    }
-
-    if (!IMAGE_NAME_REGEX.test(name)) {
-      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
-    }
-
-    return null
-  }
-
-  const handleCreate = async () => {
-    const trimmedName = newSnapshotName.trim()
-    const trimmedImageName = newImageName.trim()
-    const trimmedEntrypoint = newEntrypoint.trim()
-
-    const nameValidationError = validateSnapshotName(trimmedName)
-    if (nameValidationError) {
-      toast.warning(nameValidationError)
-      return
-    }
-
-    const imageValidationError = validateImageName(trimmedImageName)
-    if (imageValidationError) {
-      toast.warning(imageValidationError)
-      return
-    }
-
-    setLoadingCreate(true)
-    try {
-      await snapshotApi.createSnapshot(
-        {
-          name: trimmedName,
-          imageName: trimmedImageName,
-          entrypoint: trimmedEntrypoint ? trimmedEntrypoint.split(' ') : undefined,
-          cpu,
-          memory,
-          disk,
-          regionId: selectedRegionId ?? undefined,
-        },
-        selectedOrganization?.id,
-      )
-      setShowCreateDialog(false)
-      setNewSnapshotName('')
-      setNewImageName('')
-      setNewEntrypoint('')
-      setSelectedRegionId(undefined)
-      toast.success(`Creating snapshot ${trimmedName}`)
-
-      if (paginationParams.pageIndex !== 0) {
-        setPaginationParams((prev) => ({
-          ...prev,
-          pageIndex: 0,
-        }))
-      }
-    } catch (error) {
-      handleApiError(error, 'Failed to create snapshot')
-    } finally {
-      setLoadingCreate(false)
-    }
-  }
+  }, [snapshotsData?.items.length, paginationParams.pageIndex])
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
 
     try {
       await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
@@ -300,11 +167,7 @@ const Snapshots: React.FC = () => {
       toast.success(`Deleting snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -312,23 +175,14 @@ const Snapshots: React.FC = () => {
 
   const handleActivate = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.PENDING } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.PENDING })
 
     try {
       await snapshotApi.activateSnapshot(snapshot.id, selectedOrganization?.id)
       toast.success(`Activating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to activate snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -336,23 +190,14 @@ const Snapshots: React.FC = () => {
 
   const handleDeactivate = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
-
-    // Optimistically update the snapshot state
-    setSnapshotsData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.INACTIVE } : i)),
-    }))
+    updateSnapshotInCache(snapshot.id, { state: SnapshotState.INACTIVE })
 
     try {
       await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
       toast.success(`Deactivating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to deactivate snapshot')
-      // Revert the optimistic update
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-      }))
+      updateSnapshotInCache(snapshot.id, { state: snapshot.state })
     } finally {
       setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
@@ -363,222 +208,136 @@ const Snapshots: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
-  const handleBulkDelete = async (snapshots: SnapshotDto[]) => {
-    setLoadingSnapshots((prev) => ({ ...prev, ...snapshots.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
+  const executeBulkAction = useCallback(
+    async ({
+      ids,
+      actionName,
+      optimisticState,
+      apiCall,
+      toastMessages,
+    }: {
+      ids: string[]
+      actionName: string
+      optimisticState: SnapshotState
+      apiCall: (id: string) => Promise<unknown>
+      toastMessages: {
+        successTitle: string
+        errorTitle: string
+        warningTitle: string
+        canceledTitle: string
+      }
+    }) => {
+      const previousStatesById = new Map((snapshotsData?.items ?? []).map((snapshot) => [snapshot.id, snapshot.state]))
 
-    for (const snapshot of snapshots) {
-      setSnapshotsData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
-      }))
+      let isCancelled = false
+      let processedCount = 0
+      let successCount = 0
+      let failureCount = 0
+
+      const totalLabel = pluralize(ids.length, 'snapshot', 'snapshots')
+      const onCancel = () => {
+        isCancelled = true
+      }
+
+      const bulkToast = createBulkActionToast(`${actionName} 0 of ${totalLabel}.`, {
+        action: { label: 'Cancel', onClick: onCancel },
+      })
 
       try {
-        await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
-        toast.success(`Deleting snapshot ${snapshot.name}`)
-      } catch (error) {
-        handleApiError(error, `Failed to delete snapshot ${snapshot.name}`)
+        for (const id of ids) {
+          if (isCancelled) break
 
-        setSnapshotsData((prev) => ({
-          ...prev,
-          items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
-        }))
+          processedCount += 1
+          bulkToast.loading(`${actionName} ${processedCount} of ${totalLabel}.`, {
+            action: { label: 'Cancel', onClick: onCancel },
+          })
 
-        if (snapshots.indexOf(snapshot) < snapshots.length - 1) {
-          const shouldContinue = window.confirm(
-            `Failed to delete snapshot ${snapshot.name}. Do you want to continue with the remaining snapshots?`,
-          )
+          setLoadingSnapshots((prev) => ({ ...prev, [id]: true }))
+          updateSnapshotInCache(id, { state: optimisticState })
 
-          if (!shouldContinue) {
-            break
+          try {
+            await apiCall(id)
+            successCount += 1
+          } catch (error) {
+            failureCount += 1
+            updateSnapshotInCache(id, { state: previousStatesById.get(id) })
+            console.error(`${actionName} snapshot failed`, id, error)
+          } finally {
+            setLoadingSnapshots((prev) => ({ ...prev, [id]: false }))
           }
         }
-      } finally {
-        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
+
+        await markAllSnapshotQueriesAsStale(true)
+        bulkToast.result({ successCount, failureCount }, toastMessages)
+      } catch (error) {
+        console.error(`${actionName} snapshots failed`, error)
+        bulkToast.error(`${actionName} snapshots failed.`)
       }
-    }
+
+      return { successCount, failureCount }
+    },
+    [snapshotsData?.items, updateSnapshotInCache, markAllSnapshotQueriesAsStale],
+  )
+
+  const handleBulkDelete = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Deleting',
+      optimisticState: SnapshotState.REMOVING,
+      apiCall: (id) => snapshotApi.removeSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deleted.`,
+        errorTitle: `Failed to delete ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to delete some snapshots.',
+        canceledTitle: 'Delete canceled.',
+      },
+    })
+
+  const handleBulkDeactivate = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Deactivating',
+      optimisticState: SnapshotState.INACTIVE,
+      apiCall: (id) => snapshotApi.deactivateSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deactivated.`,
+        errorTitle: `Failed to deactivate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to deactivate some snapshots.',
+        canceledTitle: 'Deactivate canceled.',
+      },
+    })
+
+  const handleBulkActivate = (snapshots: SnapshotDto[]) =>
+    executeBulkAction({
+      ids: snapshots.map((s) => s.id),
+      actionName: 'Activating',
+      optimisticState: SnapshotState.ACTIVE,
+      apiCall: (id) => snapshotApi.activateSnapshot(id, selectedOrganization?.id),
+      toastMessages: {
+        successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} activated.`,
+        errorTitle: `Failed to activate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
+        warningTitle: 'Failed to activate some snapshots.',
+        canceledTitle: 'Activate canceled.',
+      },
+    })
+
+  const dialogRef = useRef<{ open: () => void }>(null)
+
+  const handleCreateSnapshot = () => {
+    dialogRef.current?.open()
   }
 
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
-        <Dialog
-          open={showCreateDialog}
-          onOpenChange={(isOpen) => {
-            setShowCreateDialog(isOpen)
-            if (isOpen) {
-              return
-            }
-            setNewSnapshotName('')
-            setNewImageName('')
-            setNewEntrypoint('')
-            setCpu(undefined)
-            setMemory(undefined)
-            setDisk(undefined)
-            setSelectedRegionId(undefined)
-          }}
-        >
-          {writePermitted && (
-            <DialogTrigger asChild>
-              <Button variant="default" size="sm" disabled={loadingTable} className="ml-auto" title="Create Snapshot">
-                <Plus className="w-4 h-4" />
-                Create Snapshot
-              </Button>
-            </DialogTrigger>
-          )}
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Snapshot</DialogTitle>
-              <DialogDescription>
-                Register a new snapshot to be used for spinning up sandboxes in your organization.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              id="create-snapshot-form"
-              className="space-y-6 overflow-y-auto px-1 pb-1"
-              onSubmit={async (e) => {
-                e.preventDefault()
-                await handleCreate()
-              }}
-            >
-              <div className="space-y-3">
-                <Label htmlFor="name">Snapshot Name</Label>
-                <Input
-                  id="name"
-                  value={newSnapshotName}
-                  onChange={(e) => setNewSnapshotName(e.target.value)}
-                  placeholder="ubuntu-4vcpu-8ram-100gb"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  The name you will use in your client app (SDK, CLI) to reference the snapshot.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="name">Image</Label>
-                <Input
-                  id="name"
-                  value={newImageName}
-                  onChange={(e) => setNewImageName(e.target.value)}
-                  placeholder="ubuntu:22.04"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Must include either a tag (e.g., ubuntu:22.04) or a digest. The tag "latest" is not allowed.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="region-select">Region</Label>
-                <Select value={selectedRegionId} onValueChange={setSelectedRegionId}>
-                  <SelectTrigger className="h-8" id="region-select" disabled={loadingRegions} loading={loadingRegions}>
-                    <SelectValue placeholder={loadingRegions ? 'Loading regions...' : 'Select a region'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regions.map((region) => (
-                      <SelectItem key={region.id} value={region.id}>
-                        {getRegionFullDisplayName(region)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  The region where the snapshot will be available. If not specified, your organization's default region
-                  will be used.
-                </p>
-              </div>
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Resources</h3>
-                <div className="space-y-4 px-4 py-2">
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="cpu" className="w-32 flex-shrink-0">
-                      Compute (vCPU):
-                    </Label>
-                    <Input
-                      id="cpu"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="1"
-                      onChange={(e) => setCpu(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="memory" className="w-32 flex-shrink-0">
-                      Memory (GiB):
-                    </Label>
-                    <Input
-                      id="memory"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="1"
-                      onChange={(e) => setMemory(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Label htmlFor="disk" className="w-32 flex-shrink-0">
-                      Storage (GiB):
-                    </Label>
-                    <Input
-                      id="disk"
-                      type="number"
-                      className="w-full"
-                      min="1"
-                      placeholder="3"
-                      onChange={(e) => setDisk(parseInt(e.target.value) || undefined)}
-                    />
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
-                </p>
-              </div>
-              <div className="space-y-3">
-                <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
-                <Input
-                  id="entrypoint"
-                  value={newEntrypoint}
-                  onChange={(e) => setNewEntrypoint(e.target.value)}
-                  placeholder="sleep infinity"
-                />
-                <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
-                  have an entrypoint, 'sleep infinity' will be used as the default.
-                </p>
-              </div>
-            </form>
-            <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
-              {loadingCreate ? (
-                <Button type="button" variant="default" disabled>
-                  Creating...
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  form="create-snapshot-form"
-                  variant="default"
-                  disabled={
-                    !newSnapshotName.trim() ||
-                    !newImageName.trim() ||
-                    validateSnapshotName(newSnapshotName.trim()) !== null ||
-                    validateImageName(newImageName.trim()) !== null
-                  }
-                >
-                  Create
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {writePermitted && <CreateSnapshotDialog className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
       <PageContent size="full">
         <SnapshotTable
-          data={snapshotsData.items}
-          loading={loadingTable}
+          data={snapshotsData?.items ?? []}
+          loading={snapshotsDataIsLoading}
           loadingSnapshots={loadingSnapshots}
           getRegionName={getRegionName}
           onDelete={(snapshot) => {
@@ -586,15 +345,20 @@ const Snapshots: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           onBulkDelete={handleBulkDelete}
+          onBulkDeactivate={handleBulkDeactivate}
+          onBulkActivate={handleBulkActivate}
           onActivate={handleActivate}
           onDeactivate={handleDeactivate}
-          pageCount={snapshotsData.totalPages}
-          totalItems={snapshotsData.total}
+          onCreateSnapshot={handleCreateSnapshot}
+          pageCount={snapshotsData?.totalPages ?? 0}
+          totalItems={snapshotsData?.total ?? 0}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,
             pageSize: paginationParams.pageSize,
           }}
+          sorting={sorting}
+          onSortingChange={handleSortingChange}
         />
 
         {snapshotToDelete && (

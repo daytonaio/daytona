@@ -77,8 +77,11 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import {
   SANDBOX_LOOKUP_CACHE_TTL_MS,
+  SANDBOX_ORG_ID_CACHE_TTL_MS,
   sandboxLookupCacheKeyById,
   sandboxLookupCacheKeyByName,
+  sandboxOrgIdCacheKeyById,
+  sandboxOrgIdCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 
@@ -597,11 +600,7 @@ export class SandboxService {
       createSandboxDto.networkAllowList !== undefined ||
       organization.sandboxLimitedNetworkEgress
     ) {
-      const runner = await this.runnerService.findOne(warmPoolSandbox.runnerId)
-      if (!runner) {
-        throw new NotFoundException(`Runner with ID ${warmPoolSandbox.runnerId} not found`)
-      }
-
+      const runner = await this.runnerService.findOneOrFail(warmPoolSandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
       await runnerAdapter.updateNetworkSettings(
         warmPoolSandbox.id,
@@ -612,6 +611,14 @@ export class SandboxService {
     }
 
     const result = await this.sandboxRepository.save(warmPoolSandbox)
+
+    // Defensive invalidation of orgId cache since the sandbox moved from unassigned to a real organization
+    this.sandboxLookupCacheInvalidationService.invalidateOrgId({
+      sandboxId: warmPoolSandbox.id,
+      organizationId: organization.id,
+      name: warmPoolSandbox.name,
+      previousOrganizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+    })
 
     // Treat this as a newly started sandbox
     this.eventEmitter.emit(
@@ -1039,7 +1046,10 @@ export class SandboxService {
         ...(organizationId ? { organizationId: organizationId } : {}),
       },
       select: ['organizationId'],
-      loadEagerRelations: false,
+      cache: {
+        id: sandboxOrgIdCacheKeyById({ organizationId, sandboxId: sandboxIdOrName }),
+        milliseconds: SANDBOX_ORG_ID_CACHE_TTL_MS,
+      },
     })
 
     if (!sandbox && organizationId) {
@@ -1049,7 +1059,10 @@ export class SandboxService {
           organizationId: organizationId,
         },
         select: ['organizationId'],
-        loadEagerRelations: false,
+        cache: {
+          id: sandboxOrgIdCacheKeyByName({ organizationId, sandboxName: sandboxIdOrName }),
+          milliseconds: SANDBOX_ORG_ID_CACHE_TTL_MS,
+        },
       })
     }
 
@@ -1368,10 +1381,7 @@ export class SandboxService {
     if (!sandbox.runnerId) {
       throw new NotFoundException(`Sandbox with ID ${sandbox.id} does not have a runner`)
     }
-    const runner = await this.runnerRepository.findOneBy({ id: sandbox.runnerId })
-    if (!runner) {
-      throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
-    }
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     if (runner.apiVersion === '2') {
       // TODO: we need "recovering" state that can be set after calling recover
@@ -1513,10 +1523,7 @@ export class SandboxService {
         throw new BadRequestError('Sandbox has no runner assigned')
       }
 
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
-      if (!runner) {
-        throw new NotFoundException(`Runner with ID ${sandbox.runnerId} not found`)
-      }
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
       // Capture the previous state before transitioning to RESIZING (STARTED or STOPPED)
       const previousState =
@@ -1990,9 +1997,7 @@ export class SandboxService {
 
     // Get runner information if sandbox exists
     if (sshAccess.sandbox && sshAccess.sandbox.runnerId) {
-      const runner = await this.runnerRepository.findOne({
-        where: { id: sshAccess.sandbox.runnerId },
-      })
+      const runner = await this.runnerService.findOne(sshAccess.sandbox.runnerId)
 
       if (runner) {
         return {

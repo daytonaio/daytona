@@ -1,0 +1,26 @@
+dist:
+  name: daytona-otel-collector
+  description: Daytona OpenTelemetry Collector
+  output_path: dist/apps/otel-collector
+
+exporters:
+  - gomod: github.com/daytonaio/otel-collector/exporter v0.0.1
+    name: daytonaexporter
+    path: apps/otel-collector/exporter
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/exporter/clickhouseexporter v0.144.0
+    name: clickhouse
+
+receivers:
+  - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.144.0
+
+processors:
+  - gomod: go.opentelemetry.io/collector/processor/batchprocessor v0.144.0
+  - gomod: go.opentelemetry.io/collector/processor/memorylimiterprocessor v0.144.0
+
+extensions:
+  - gomod: go.opentelemetry.io/collector/extension/zpagesextension v0.144.0
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/extension/healthcheckv2extension v0.144.0
+
+replaces:
+  - github.com/daytonaio/daytona/libs/api-client-go => ../../../libs/api-client-go
+  - github.com/daytonaio/common-go => ../../../libs/common-go

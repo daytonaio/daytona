@@ -20,6 +20,7 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { v4 as uuidv4 } from 'uuid'
+import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 
@@ -43,6 +44,7 @@ import { BuildInfo } from './build-info.entity'
 @Index('sandbox_pending_idx', ['id'], {
   where: `"pending" = true`,
 })
+@Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
   @PrimaryGeneratedColumn('uuid')
@@ -295,7 +297,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
+        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
       case SandboxDesiredState.STOPPED:
         if (
           [
@@ -309,7 +311,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
+        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
       case SandboxDesiredState.ARCHIVED:
         if (
           [
@@ -322,7 +324,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
+        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
       case SandboxDesiredState.DESTROYED:
         if (
           [
@@ -338,7 +340,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new Error(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
+        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
     }
   }
 

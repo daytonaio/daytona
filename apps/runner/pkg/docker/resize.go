@@ -120,6 +120,16 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		return fmt.Errorf("failed to rename container: %w", err)
 	}
 
+	// Ensure the image is available for container recreation.
+	// If the image tag was pruned (e.g., declarative-build or backup snapshot),
+	// fall back to the image ID — Docker retains layers while the container exists.
+	imageRef := originalContainer.Config.Image
+	imageExists, _ := d.ImageExists(ctx, imageRef, true)
+	if !imageExists {
+		log.Warnf("Image %s not found by tag, falling back to image ID %s", imageRef, originalContainer.Image)
+		originalContainer.Config.Image = originalContainer.Image
+	}
+
 	// Create new container with new storage
 	newHostConfig := originalContainer.HostConfig
 	newStorageBytes := common.GBToBytes(newStorageGB)

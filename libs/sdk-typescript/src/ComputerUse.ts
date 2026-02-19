@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as pathe from 'pathe'
 import {
   ComputerUseApi,
   MousePositionResponse,
@@ -25,7 +26,11 @@ import {
   ProcessRestartResponse,
   ProcessLogsResponse,
   ProcessErrorsResponse,
+  Recording,
+  ListRecordingsResponse,
 } from '@daytonaio/toolbox-api-client'
+import { dynamicImport } from './utils/Import'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Interface for region coordinates used in screenshot operations
@@ -64,6 +69,7 @@ export class Mouse {
    * console.log(`Mouse is at: ${position.x}, ${position.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async getPosition(): Promise<MousePositionResponse> {
     const response = await this.apiClient.getMousePosition()
     return response.data
@@ -82,6 +88,7 @@ export class Mouse {
    * console.log(`Mouse moved to: ${result.x}, ${result.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async move(x: number, y: number): Promise<MousePositionResponse> {
     const request: MouseMoveRequest = { x, y }
     const response = await this.apiClient.moveMouse(request)
@@ -109,6 +116,7 @@ export class Mouse {
    * const rightClick = await sandbox.computerUse.mouse.click(100, 200, 'right');
    * ```
    */
+  @WithInstrumentation()
   public async click(x: number, y: number, button = 'left', double = false): Promise<MouseClickResponse> {
     const request: MouseClickRequest = { x, y, button, double }
     const response = await this.apiClient.click(request)
@@ -131,6 +139,7 @@ export class Mouse {
    * console.log(`Dragged from ${result.from.x},${result.from.y} to ${result.to.x},${result.to.y}`);
    * ```
    */
+  @WithInstrumentation()
   public async drag(
     startX: number,
     startY: number,
@@ -161,6 +170,7 @@ export class Mouse {
    * const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
    * ```
    */
+  @WithInstrumentation()
   public async scroll(x: number, y: number, direction: 'up' | 'down', amount = 1): Promise<boolean> {
     const request: MouseScrollRequest = { x, y, direction, amount }
     const response = await this.apiClient.scroll(request)
@@ -199,6 +209,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async type(text: string, delay?: number): Promise<void> {
     const request: KeyboardTypeRequest = { text, delay }
     await this.apiClient.typeText(request)
@@ -238,6 +249,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async press(key: string, modifiers: string[] = []): Promise<void> {
     const request: KeyboardPressRequest = { key, modifiers }
     await this.apiClient.pressKey(request)
@@ -276,6 +288,7 @@ export class Keyboard {
    * }
    * ```
    */
+  @WithInstrumentation()
   public async hotkey(keys: string): Promise<void> {
     const request: KeyboardHotkeyRequest = { keys }
     await this.apiClient.pressHotkey(request)
@@ -303,6 +316,7 @@ export class Screenshot {
    * const withCursor = await sandbox.computerUse.screenshot.takeFullScreen(true);
    * ```
    */
+  @WithInstrumentation()
   public async takeFullScreen(showCursor = false): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeScreenshot(showCursor)
     return response.data
@@ -322,6 +336,7 @@ export class Screenshot {
    * console.log(`Captured region: ${screenshot.region.width}x${screenshot.region.height}`);
    * ```
    */
+  @WithInstrumentation()
   public async takeRegion(region: ScreenshotRegion, showCursor = false): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeRegionScreenshot(
       region.height,
@@ -358,6 +373,7 @@ export class Screenshot {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async takeCompressed(options: ScreenshotOptions = {}): Promise<ScreenshotResponse> {
     const response = await this.apiClient.takeCompressedScreenshot(
       options.showCursor,
@@ -386,6 +402,7 @@ export class Screenshot {
    * console.log(`Compressed size: ${screenshot.size_bytes} bytes`);
    * ```
    */
+  @WithInstrumentation()
   public async takeCompressedRegion(
     region: ScreenshotRegion,
     options: ScreenshotOptions = {},
@@ -425,6 +442,7 @@ export class Display {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async getInfo(): Promise<DisplayInfoResponse> {
     const response = await this.apiClient.getDisplayInfo()
     return response.data
@@ -444,6 +462,7 @@ export class Display {
    * });
    * ```
    */
+  @WithInstrumentation()
   public async getWindows(): Promise<WindowsResponse> {
     const response = await this.apiClient.getWindows()
     return response.data
@@ -451,15 +470,149 @@ export class Display {
 }
 
 /**
+ * Recording operations for computer use functionality.
+ */
+export class RecordingService {
+  constructor(private readonly apiClient: ComputerUseApi) {}
+
+  /**
+   * Starts a new screen recording session
+   *
+   * @param {string} [label] - Optional custom label for the recording
+   * @returns {Promise<Recording>} Started recording details
+   *
+   * @example
+   * ```typescript
+   * // Start a recording with a label
+   * const recording = await sandbox.computerUse.recording.start('my-test-recording');
+   * console.log(`Recording started: ${recording.id}`);
+   * console.log(`File: ${recording.filePath}`);
+   * ```
+   */
+  @WithInstrumentation()
+  public async start(label?: string): Promise<Recording> {
+    return (await this.apiClient.startRecording({ label })).data
+  }
+
+  /**
+   * Stops an active screen recording session
+   *
+   * @param {string} id - The ID of the recording to stop
+   * @returns {Promise<Recording>} Stopped recording details
+   *
+   * @example
+   * ```typescript
+   * const result = await sandbox.computerUse.recording.stop(recording.id);
+   * console.log(`Recording stopped: ${result.durationSeconds} seconds`);
+   * console.log(`Saved to: ${result.filePath}`);
+   * ```
+   */
+  @WithInstrumentation()
+  public async stop(id: string): Promise<Recording> {
+    return (await this.apiClient.stopRecording({ id })).data
+  }
+
+  /**
+   * Lists all recordings (active and completed)
+   *
+   * @returns {Promise<ListRecordingsResponse>} List of all recordings
+   *
+   * @example
+   * ```typescript
+   * const recordings = await sandbox.computerUse.recording.list();
+   * console.log(`Found ${recordings.recordings.length} recordings`);
+   * recordings.recordings.forEach(rec => {
+   *   console.log(`- ${rec.fileName}: ${rec.status}`);
+   * });
+   * ```
+   */
+  @WithInstrumentation()
+  public async list(): Promise<ListRecordingsResponse> {
+    return (await this.apiClient.listRecordings()).data
+  }
+
+  /**
+   * Gets details of a specific recording by ID
+   *
+   * @param {string} id - The ID of the recording to retrieve
+   * @returns {Promise<Recording>} Recording details
+   *
+   * @example
+   * ```typescript
+   * const recording = await sandbox.computerUse.recording.get(recordingId);
+   * console.log(`Recording: ${recording.fileName}`);
+   * console.log(`Status: ${recording.status}`);
+   * console.log(`Duration: ${recording.durationSeconds} seconds`);
+   * ```
+   */
+  @WithInstrumentation()
+  public async get(id: string): Promise<Recording> {
+    return (await this.apiClient.getRecording(id)).data
+  }
+
+  /**
+   * Deletes a recording by ID
+   *
+   * @param {string} id - The ID of the recording to delete
+   *
+   * @example
+   * ```typescript
+   * await sandbox.computerUse.recording.delete(recordingId);
+   * console.log('Recording deleted');
+   * ```
+   */
+  @WithInstrumentation()
+  public async delete(id: string): Promise<void> {
+    await this.apiClient.deleteRecording(id)
+  }
+
+  /**
+   * Downloads a recording file and saves it to a local path
+   *
+   * The file is streamed directly to disk without loading the entire content into memory.
+   *
+   * @param {string} id - The ID of the recording to download
+   * @param {string} localPath - Path to save the recording file locally
+   *
+   * @example
+   * ```typescript
+   * // Download recording to file
+   * await sandbox.computerUse.recording.download(recordingId, 'local_recording.mp4');
+   * console.log('Recording downloaded');
+   * ```
+   */
+  @WithInstrumentation()
+  public async download(id: string, localPath: string): Promise<void> {
+    const response = await this.apiClient.downloadRecording(id, { responseType: 'stream' })
+    const importErrPrefix = 'Recording download failed: '
+    const fs = await dynamicImport('fs', importErrPrefix)
+    const stream = await dynamicImport('stream', importErrPrefix)
+    const util = await dynamicImport('util', importErrPrefix)
+    const pipeline = util.promisify(stream.pipeline)
+
+    // Create parent directory if it doesn't exist
+    const parentDir = pathe.dirname(localPath)
+    if (parentDir) {
+      await fs.promises.mkdir(parentDir, { recursive: true })
+    }
+
+    // Stream the download directly to file
+    const writer = fs.createWriteStream(localPath)
+    await pipeline(response.data as any, writer)
+  }
+}
+
+/**
  * Computer Use functionality for interacting with the desktop environment.
  *
- * Provides access to mouse, keyboard, screenshot, and display operations
+ * Provides access to mouse, keyboard, screenshot, display, and recording operations
  * for automating desktop interactions within a sandbox.
  *
  * @property {Mouse} mouse - Mouse operations interface
  * @property {Keyboard} keyboard - Keyboard operations interface
  * @property {Screenshot} screenshot - Screenshot operations interface
  * @property {Display} display - Display operations interface
+ * @property {RecordingService} recording - Screen recording operations interface
  *
  * @class
  */
@@ -468,12 +621,14 @@ export class ComputerUse {
   public readonly keyboard: Keyboard
   public readonly screenshot: Screenshot
   public readonly display: Display
+  public readonly recording: RecordingService
 
   constructor(private readonly apiClient: ComputerUseApi) {
     this.mouse = new Mouse(apiClient)
     this.keyboard = new Keyboard(apiClient)
     this.screenshot = new Screenshot(apiClient)
     this.display = new Display(apiClient)
+    this.recording = new RecordingService(apiClient)
   }
 
   /**
@@ -487,6 +642,7 @@ export class ComputerUse {
    * console.log('Computer use processes started:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async start(): Promise<ComputerUseStartResponse> {
     const response = await this.apiClient.startComputerUse()
     return response.data
@@ -503,6 +659,7 @@ export class ComputerUse {
    * console.log('Computer use processes stopped:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async stop(): Promise<ComputerUseStopResponse> {
     const response = await this.apiClient.stopComputerUse()
     return response.data
@@ -519,6 +676,7 @@ export class ComputerUse {
    * console.log('Computer use status:', status.status);
    * ```
    */
+  @WithInstrumentation()
   public async getStatus(): Promise<ComputerUseStatusResponse> {
     const response = await this.apiClient.getComputerUseStatus()
     return response.data
@@ -536,6 +694,7 @@ export class ComputerUse {
    * const noVncStatus = await sandbox.computerUse.getProcessStatus('novnc');
    * ```
    */
+  @WithInstrumentation()
   public async getProcessStatus(processName: string): Promise<ProcessStatusResponse> {
     const response = await this.apiClient.getProcessStatus(processName)
     return response.data
@@ -553,6 +712,7 @@ export class ComputerUse {
    * console.log('XFCE4 process restarted:', result.message);
    * ```
    */
+  @WithInstrumentation()
   public async restartProcess(processName: string): Promise<ProcessRestartResponse> {
     const response = await this.apiClient.restartProcess(processName)
     return response.data
@@ -570,6 +730,7 @@ export class ComputerUse {
    * console.log('NoVNC logs:', logsResp.logs);
    * ```
    */
+  @WithInstrumentation()
   public async getProcessLogs(processName: string): Promise<ProcessLogsResponse> {
     const response = await this.apiClient.getProcessLogs(processName)
     return response.data
@@ -587,6 +748,7 @@ export class ComputerUse {
    * console.log('X11VNC errors:', errorsResp.errors);
    * ```
    */
+  @WithInstrumentation()
   public async getProcessErrors(processName: string): Promise<ProcessErrorsResponse> {
     const response = await this.apiClient.getProcessErrors(processName)
     return response.data

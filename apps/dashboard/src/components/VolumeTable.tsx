@@ -3,8 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Loader2, AlertTriangle, MoreHorizontal, CheckCircle, Timer, HardDrive } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { DebouncedInput } from '@/components/DebouncedInput'
+import { Pagination } from '@/components/Pagination'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { getRelativeTimeString } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -19,18 +29,8 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { DebouncedInput } from '@/components/DebouncedInput'
-import { Pagination } from '@/components/Pagination'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getRelativeTimeString } from '@/lib/utils'
+import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { TableEmptyState } from './TableEmptyState'
 
 interface VolumeTableProps {
@@ -301,19 +301,17 @@ const getColumns = ({
 
         if (state === VolumeState.ERROR && !!volume.errorReason) {
           return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className={`flex items-center gap-2 ${color}`}>
-                    {getStateIcon(state)}
-                    {getStateLabel(state)}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-[300px]">{volume.errorReason}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className={`flex items-center gap-2 ${color}`}>
+                  {getStateIcon(state)}
+                  {getStateLabel(state)}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-[300px]">{volume.errorReason}</p>
+              </TooltipContent>
+            </Tooltip>
           )
         }
 

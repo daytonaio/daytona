@@ -25,6 +25,7 @@ from daytona_toolbox_api_client.api.interpreter_api import InterpreterApi
 from daytona_toolbox_api_client.api.lsp_api import LspApi
 from daytona_toolbox_api_client.api.port_api import PortApi
 from daytona_toolbox_api_client.api.process_api import ProcessApi
+from daytona_toolbox_api_client.api.server_api import ServerApi
 
 # import ApiClient
 from daytona_toolbox_api_client.api_response import ApiResponse
@@ -64,6 +65,7 @@ from daytona_toolbox_api_client.models.git_commit_response import GitCommitRespo
 from daytona_toolbox_api_client.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
 from daytona_toolbox_api_client.models.git_repo_request import GitRepoRequest
 from daytona_toolbox_api_client.models.git_status import GitStatus
+from daytona_toolbox_api_client.models.initialize_request import InitializeRequest
 from daytona_toolbox_api_client.models.interpreter_context import InterpreterContext
 from daytona_toolbox_api_client.models.is_port_in_use_response import IsPortInUseResponse
 from daytona_toolbox_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
@@ -71,6 +73,7 @@ from daytona_toolbox_api_client.models.keyboard_press_request import KeyboardPre
 from daytona_toolbox_api_client.models.keyboard_type_request import KeyboardTypeRequest
 from daytona_toolbox_api_client.models.list_branch_response import ListBranchResponse
 from daytona_toolbox_api_client.models.list_contexts_response import ListContextsResponse
+from daytona_toolbox_api_client.models.list_recordings_response import ListRecordingsResponse
 from daytona_toolbox_api_client.models.lsp_completion_params import LspCompletionParams
 from daytona_toolbox_api_client.models.lsp_document_request import LspDocumentRequest
 from daytona_toolbox_api_client.models.lsp_location import LspLocation
@@ -98,6 +101,7 @@ from daytona_toolbox_api_client.models.pty_create_response import PtyCreateRespo
 from daytona_toolbox_api_client.models.pty_list_response import PtyListResponse
 from daytona_toolbox_api_client.models.pty_resize_request import PtyResizeRequest
 from daytona_toolbox_api_client.models.pty_session_info import PtySessionInfo
+from daytona_toolbox_api_client.models.recording import Recording
 from daytona_toolbox_api_client.models.replace_request import ReplaceRequest
 from daytona_toolbox_api_client.models.replace_result import ReplaceResult
 from daytona_toolbox_api_client.models.screenshot_response import ScreenshotResponse
@@ -107,7 +111,9 @@ from daytona_toolbox_api_client.models.session import Session
 from daytona_toolbox_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_toolbox_api_client.models.session_execute_response import SessionExecuteResponse
 from daytona_toolbox_api_client.models.session_send_input_request import SessionSendInputRequest
+from daytona_toolbox_api_client.models.start_recording_request import StartRecordingRequest
 from daytona_toolbox_api_client.models.status import Status
+from daytona_toolbox_api_client.models.stop_recording_request import StopRecordingRequest
 from daytona_toolbox_api_client.models.user_home_dir_response import UserHomeDirResponse
 from daytona_toolbox_api_client.models.window_info import WindowInfo
 from daytona_toolbox_api_client.models.windows_response import WindowsResponse
@@ -133,6 +139,7 @@ __all__ = [
     "LspApi",
     "PortApi",
     "ProcessApi",
+    "ServerApi",
     "Command",
     "CompletionContext",
     "CompletionItem",
@@ -159,6 +166,7 @@ __all__ = [
     "GitGitDeleteBranchRequest",
     "GitRepoRequest",
     "GitStatus",
+    "InitializeRequest",
     "InterpreterContext",
     "IsPortInUseResponse",
     "KeyboardHotkeyRequest",
@@ -166,6 +174,7 @@ __all__ = [
     "KeyboardTypeRequest",
     "ListBranchResponse",
     "ListContextsResponse",
+    "ListRecordingsResponse",
     "LspCompletionParams",
     "LspDocumentRequest",
     "LspLocation",
@@ -193,6 +202,7 @@ __all__ = [
     "PtyListResponse",
     "PtyResizeRequest",
     "PtySessionInfo",
+    "Recording",
     "ReplaceRequest",
     "ReplaceResult",
     "ScreenshotResponse",
@@ -202,7 +212,9 @@ __all__ = [
     "SessionExecuteRequest",
     "SessionExecuteResponse",
     "SessionSendInputRequest",
+    "StartRecordingRequest",
     "Status",
+    "StopRecordingRequest",
     "UserHomeDirResponse",
     "WindowInfo",
     "WindowsResponse",

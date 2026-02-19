@@ -9,6 +9,7 @@ import { RECOVERY_ERROR_SUBSTRINGS } from '../../constants/errors-for-recovery'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SYNC_AGAIN, SyncState } from './sandbox.action'
+import { SANDBOX_BUILD_INFO_CACHE_TTL_MS } from '../../utils/sandbox-lookup-cache.util'
 import { SnapshotRunnerState } from '../../enums/snapshot-runner-state.enum'
 import { BackupState } from '../../enums/backup-state.enum'
 import { RunnerState } from '../../enums/runner-state.enum'
@@ -49,6 +50,12 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+    // Load buildInfo only for states that need it — avoids a JOIN+DISTINCT in the
+    // shared syncInstanceState query that stop/destroy/archive paths never use.
+    if ([SandboxState.PENDING_BUILD, SandboxState.BUILDING_SNAPSHOT, SandboxState.UNKNOWN].includes(sandbox.state)) {
+      await this.loadBuildInfo(sandbox)
+    }
+
     switch (sandbox.state) {
       case SandboxState.PULLING_SNAPSHOT: {
         if (!sandbox.runnerId) {
@@ -86,6 +93,22 @@ export class SandboxStartAction extends SandboxAction {
     }
 
     return DONT_SYNC_AGAIN
+  }
+
+  /**
+   * Loads the buildInfo relation for a sandbox.
+   * Uses QueryBuilder with getMany() to avoid the SELECT DISTINCT subquery
+   * that TypeORM generates when combining relations with findOne/LIMIT.
+   * Since sandbox.id is a PK and BuildInfo is @ManyToOne, at most one row is returned.
+   */
+  private async loadBuildInfo(sandbox: Sandbox): Promise<void> {
+    const [result] = await this.sandboxRepository
+      .createQueryBuilder('sandbox')
+      .leftJoinAndSelect('sandbox.buildInfo', 'buildInfo')
+      .where('sandbox.id = :id', { id: sandbox.id })
+      .cache(`sandbox:buildInfo:${sandbox.id}`, SANDBOX_BUILD_INFO_CACHE_TTL_MS)
+      .getMany()
+    sandbox.buildInfo = result?.buildInfo ?? null
   }
 
   private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(
@@ -180,7 +203,7 @@ export class SandboxStartAction extends SandboxAction {
 
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
-      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
+      const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
       if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox.id, targetSandboxState, lockCode, runner.id)
@@ -317,7 +340,7 @@ export class SandboxStartAction extends SandboxAction {
     sandbox: Sandbox,
     lockCode: LockCode,
   ): Promise<SyncState> {
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
     }
@@ -345,17 +368,18 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint = this.snapshotService.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
-    let metadata: { [key: string]: string } | undefined = undefined
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      }
+    const metadata = {
+      ...organization?.sandboxMetadata,
+      sandboxName: sandbox.name,
     }
 
-    const result = await runnerAdapter.createSandbox(sandbox, internalRegistry, entrypoint, metadata)
+    const result = await runnerAdapter.createSandbox(
+      sandbox,
+      internalRegistry,
+      entrypoint,
+      metadata,
+      this.configService.get('sandboxOtel.endpointUrl'),
+    )
 
     await this.updateSandboxState(
       sandbox.id,
@@ -379,7 +403,7 @@ export class SandboxStartAction extends SandboxAction {
     //  if it is, move sandbox to prevRunnerId, and set runnerId to null
     //  this will assign a new runner to the sandbox and restore the sandbox from the latest backup
     if (sandbox.runnerId) {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const originalRunnerId = sandbox.runnerId // Store original value
 
       const startScoreThreshold = this.configService.get('runnerScore.thresholds.start') || 0
@@ -459,7 +483,7 @@ export class SandboxStartAction extends SandboxAction {
       }
     } else {
       // if sandbox has runner, start sandbox
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
       if (runner.state !== RunnerState.READY) {
         return DONT_SYNC_AGAIN
@@ -467,15 +491,10 @@ export class SandboxStartAction extends SandboxAction {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      let metadata: { [key: string]: string } | undefined = undefined
-      if (organization) {
-        metadata = {
-          limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        }
-      }
+      const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
       try {
-        await runnerAdapter.startSandbox(sandbox.id, metadata)
+        await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)
       } catch (error) {
         // Check against a list of substrings that should trigger an automatic recovery
         if (error?.message) {
@@ -509,7 +528,7 @@ export class SandboxStartAction extends SandboxAction {
       return SYNC_AGAIN
     }
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
@@ -536,7 +555,7 @@ export class SandboxStartAction extends SandboxAction {
   //  used to check if sandbox is started on runner and update sandbox state accordingly
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
   private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
     const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
@@ -807,17 +826,18 @@ export class SandboxStartAction extends SandboxAction {
 
     sandbox.snapshot = validBackup
 
-    let metadata: { [key: string]: string } | undefined = undefined
-    if (organization) {
-      metadata = {
-        limitNetworkEgress: String(organization.sandboxLimitedNetworkEgress),
-        organizationId: organization.id,
-        organizationName: organization.name,
-        sandboxName: sandbox.name,
-      }
+    const metadata = {
+      ...organization?.sandboxMetadata,
+      sandboxName: sandbox.name,
     }
 
-    await runnerAdapter.createSandbox(sandbox, registry, undefined, metadata)
+    await runnerAdapter.createSandbox(
+      sandbox,
+      registry,
+      undefined,
+      metadata,
+      this.configService.get('sandboxOtel.endpointUrl'),
+    )
     return null
   }
 

@@ -33,6 +33,7 @@ Initializes a new FileSystem instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to create folder: ")
+@with_instrumentation()
 async def create_folder(path: str, mode: str) -> None
 ```
 
@@ -60,6 +61,7 @@ await sandbox.fs.create_folder("workspace/secrets", "700")
 
 ```python
 @intercept_errors(message_prefix="Failed to delete file: ")
+@with_instrumentation()
 async def delete_file(path: str, recursive: bool = False) -> None
 ```
 
@@ -147,6 +149,7 @@ print(f"Size of the downloaded file {local_path}: {size_mb} MB")
 
 ```python
 @intercept_errors(message_prefix="Failed to download files: ")
+@with_instrumentation()
 async def download_files(files: list[FileDownloadRequest],
                          timeout: int = 30 * 60) -> list[FileDownloadResponse]
 ```
@@ -189,6 +192,7 @@ for result in results:
 
 ```python
 @intercept_errors(message_prefix="Failed to find files: ")
+@with_instrumentation()
 async def find_files(path: str, pattern: str) -> list[Match]
 ```
 
@@ -224,6 +228,7 @@ for match in matches:
 
 ```python
 @intercept_errors(message_prefix="Failed to get file info: ")
+@with_instrumentation()
 async def get_file_info(path: str) -> FileInfo
 ```
 
@@ -268,6 +273,7 @@ if info.is_dir:
 
 ```python
 @intercept_errors(message_prefix="Failed to list files: ")
+@with_instrumentation()
 async def list_files(path: str) -> list[FileInfo]
 ```
 
@@ -305,6 +311,7 @@ print("Subdirectories:", ", ".join(d.name for d in dirs))
 
 ```python
 @intercept_errors(message_prefix="Failed to move files: ")
+@with_instrumentation()
 async def move_files(source: str, destination: str) -> None
 ```
 
@@ -344,6 +351,7 @@ await sandbox.fs.move_files(
 
 ```python
 @intercept_errors(message_prefix="Failed to replace in files: ")
+@with_instrumentation()
 async def replace_in_files(files: list[str], pattern: str,
                            new_value: str) -> list[ReplaceResult]
 ```
@@ -389,6 +397,7 @@ for result in results:
 
 ```python
 @intercept_errors(message_prefix="Failed to search files: ")
+@with_instrumentation()
 async def search_files(path: str, pattern: str) -> SearchFilesResponse
 ```
 
@@ -426,6 +435,7 @@ print(f"Found {len(result.files)} test files")
 
 ```python
 @intercept_errors(message_prefix="Failed to set file permissions: ")
+@with_instrumentation()
 async def set_file_permissions(path: str,
                                mode: str | None = None,
                                owner: str | None = None,
@@ -534,6 +544,7 @@ await sandbox.fs.upload_file("local_file.txt", "tmp/large_file.txt")
 
 ```python
 @intercept_errors(message_prefix="Failed to upload files: ")
+@with_instrumentation()
 async def upload_files(files: list[FileUpload],
                        timeout: int = 30 * 60) -> None
 ```

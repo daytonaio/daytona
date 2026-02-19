@@ -11,7 +11,7 @@ class AsyncComputerUse()
 
 Computer Use functionality for interacting with the desktop environment.
 
-Provides access to mouse, keyboard, screenshot, and display operations
+Provides access to mouse, keyboard, screenshot, display, and recording operations
 for automating desktop interactions within a sandbox.
 
 **Attributes**:
@@ -20,11 +20,13 @@ for automating desktop interactions within a sandbox.
 - `keyboard` _AsyncKeyboard_ - Keyboard operations interface.
 - `screenshot` _AsyncScreenshot_ - Screenshot operations interface.
 - `display` _AsyncDisplay_ - Display operations interface.
+- `recording` _AsyncRecordingService_ - Screen recording operations interface.
 
 #### AsyncComputerUse.start
 
 ```python
 @intercept_errors(message_prefix="Failed to start computer use: ")
+@with_instrumentation()
 async def start() -> ComputerUseStartResponse
 ```
 
@@ -46,6 +48,7 @@ print("Computer use processes started:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to stop computer use: ")
+@with_instrumentation()
 async def stop() -> ComputerUseStopResponse
 ```
 
@@ -67,6 +70,7 @@ print("Computer use processes stopped:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to get computer use status: ")
+@with_instrumentation()
 async def get_status() -> ComputerUseStatusResponse
 ```
 
@@ -88,6 +92,7 @@ print("Computer use status:", response.status)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process status: ")
+@with_instrumentation()
 async def get_process_status(process_name: str) -> ProcessStatusResponse
 ```
 
@@ -114,6 +119,7 @@ no_vnc_status = await sandbox.computer_use.get_process_status("novnc")
 
 ```python
 @intercept_errors(message_prefix="Failed to restart process: ")
+@with_instrumentation()
 async def restart_process(process_name: str) -> ProcessRestartResponse
 ```
 
@@ -140,6 +146,7 @@ print("XFCE4 process restarted:", result.message)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process logs: ")
+@with_instrumentation()
 async def get_process_logs(process_name: str) -> ProcessLogsResponse
 ```
 
@@ -166,6 +173,7 @@ print("NoVNC logs:", logs)
 
 ```python
 @intercept_errors(message_prefix="Failed to get process errors: ")
+@with_instrumentation()
 async def get_process_errors(process_name: str) -> ProcessErrorsResponse
 ```
 
@@ -201,6 +209,7 @@ Mouse operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to get mouse position: ")
+@with_instrumentation()
 async def get_position() -> MousePositionResponse
 ```
 
@@ -222,6 +231,7 @@ print(f"Mouse is at: {position.x}, {position.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to move mouse: ")
+@with_instrumentation()
 async def move(x: int, y: int) -> MousePositionResponse
 ```
 
@@ -249,6 +259,7 @@ print(f"Mouse moved to: {result.x}, {result.y}")
 
 ```python
 @intercept_errors(message_prefix="Failed to click mouse: ")
+@with_instrumentation()
 async def click(x: int,
                 y: int,
                 button: str = "left",
@@ -287,6 +298,7 @@ right_click = await sandbox.computer_use.mouse.click(100, 200, "right")
 
 ```python
 @intercept_errors(message_prefix="Failed to drag mouse: ")
+@with_instrumentation()
 async def drag(start_x: int,
                start_y: int,
                end_x: int,
@@ -321,6 +333,7 @@ print(f"Dragged from {result.from_x},{result.from_y} to {result.to_x},{result.to
 
 ```python
 @intercept_errors(message_prefix="Failed to scroll mouse: ")
+@with_instrumentation()
 async def scroll(x: int, y: int, direction: str, amount: int = 1) -> bool
 ```
 
@@ -361,6 +374,7 @@ Keyboard operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to type text: ")
+@with_instrumentation()
 async def type(text: str, delay: int | None = None) -> None
 ```
 
@@ -398,6 +412,7 @@ except Exception as e:
 
 ```python
 @intercept_errors(message_prefix="Failed to press key: ")
+@with_instrumentation()
 async def press(key: str, modifiers: list[str] | None = None) -> None
 ```
 
@@ -441,6 +456,7 @@ except Exception as e:
 
 ```python
 @intercept_errors(message_prefix="Failed to press hotkey: ")
+@with_instrumentation()
 async def hotkey(keys: str) -> None
 ```
 
@@ -493,6 +509,7 @@ Screenshot operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to take screenshot: ")
+@with_instrumentation()
 async def take_full_screen(show_cursor: bool = False) -> ScreenshotResponse
 ```
 
@@ -522,6 +539,7 @@ with_cursor = await sandbox.computer_use.screenshot.take_full_screen(True)
 
 ```python
 @intercept_errors(message_prefix="Failed to take region screenshot: ")
+@with_instrumentation()
 async def take_region(region: ScreenshotRegion,
                       show_cursor: bool = False) -> ScreenshotResponse
 ```
@@ -551,6 +569,7 @@ print(f"Captured region: {screenshot.region.width}x{screenshot.region.height}")
 
 ```python
 @intercept_errors(message_prefix="Failed to take compressed screenshot: ")
+@with_instrumentation()
 async def take_compressed(
         options: ScreenshotOptions | None = None) -> ScreenshotResponse
 ```
@@ -589,6 +608,7 @@ scaled = await sandbox.computer_use.screenshot.take_compressed(
 ```python
 @intercept_errors(
     message_prefix="Failed to take compressed region screenshot: ")
+@with_instrumentation()
 async def take_compressed_region(
         region: ScreenshotRegion,
         options: ScreenshotOptions | None = None) -> ScreenshotResponse
@@ -630,6 +650,7 @@ Display operations for computer use functionality.
 
 ```python
 @intercept_errors(message_prefix="Failed to get display info: ")
+@with_instrumentation()
 async def get_info() -> DisplayInfoResponse
 ```
 
@@ -654,6 +675,7 @@ for i, display in enumerate(info.displays):
 
 ```python
 @intercept_errors(message_prefix="Failed to get windows: ")
+@with_instrumentation()
 async def get_windows() -> WindowsResponse
 ```
 
@@ -671,6 +693,172 @@ windows = await sandbox.computer_use.display.get_windows()
 print(f"Found {windows.count} open windows:")
 for window in windows.windows:
     print(f"- {window.title} (ID: {window.id})")
+```
+
+## AsyncRecordingService
+
+```python
+class AsyncRecordingService()
+```
+
+Recording operations for computer use functionality.
+
+#### AsyncRecordingService.start
+
+```python
+@intercept_errors(message_prefix="Failed to start recording: ")
+@with_instrumentation()
+async def start(label: str | None = None) -> Recording
+```
+
+Starts a new screen recording session.
+
+**Arguments**:
+
+- `label` _str | None_ - Optional custom label for the recording.
+  
+
+**Returns**:
+
+- `Recording` - Recording start response.
+  
+
+**Example**:
+
+```python
+# Start a recording with a label
+recording = await sandbox.computer_use.recording.start("my-test-recording")
+print(f"Recording started: {recording.id}")
+print(f"File: {recording.file_path}")
+```
+
+#### AsyncRecordingService.stop
+
+```python
+@intercept_errors(message_prefix="Failed to stop recording: ")
+@with_instrumentation()
+async def stop(recording_id: str) -> Recording
+```
+
+Stops an active screen recording session.
+
+**Arguments**:
+
+- `recording_id` _str_ - The ID of the recording to stop.
+  
+
+**Returns**:
+
+- `Recording` - Recording stop response.
+  
+
+**Example**:
+
+```python
+result = await sandbox.computer_use.recording.stop(recording.id)
+print(f"Recording stopped: {result.duration_seconds} seconds")
+print(f"Saved to: {result.file_path}")
+```
+
+#### AsyncRecordingService.list
+
+```python
+@intercept_errors(message_prefix="Failed to list recordings: ")
+@with_instrumentation()
+async def list() -> ListRecordingsResponse
+```
+
+Lists all recordings (active and completed).
+
+**Returns**:
+
+- `ListRecordingsResponse` - List of all recordings.
+  
+
+**Example**:
+
+```python
+recordings = await sandbox.computer_use.recording.list()
+print(f"Found {len(recordings.recordings)} recordings")
+for rec in recordings.recordings:
+    print(f"- {rec.file_name}: {rec.status}")
+```
+
+#### AsyncRecordingService.get
+
+```python
+@intercept_errors(message_prefix="Failed to get recording: ")
+@with_instrumentation()
+async def get(recording_id: str) -> Recording
+```
+
+Gets details of a specific recording by ID.
+
+**Arguments**:
+
+- `recording_id` _str_ - The ID of the recording to retrieve.
+  
+
+**Returns**:
+
+- `Recording` - Recording details.
+  
+
+**Example**:
+
+```python
+recording = await sandbox.computer_use.recording.get(recording_id)
+print(f"Recording: {recording.file_name}")
+print(f"Status: {recording.status}")
+print(f"Duration: {recording.duration_seconds} seconds")
+```
+
+#### AsyncRecordingService.delete
+
+```python
+@intercept_errors(message_prefix="Failed to delete recording: ")
+@with_instrumentation()
+async def delete(recording_id: str) -> None
+```
+
+Deletes a recording by ID.
+
+**Arguments**:
+
+- `recording_id` _str_ - The ID of the recording to delete.
+  
+
+**Example**:
+
+```python
+await sandbox.computer_use.recording.delete(recording_id)
+print("Recording deleted")
+```
+
+#### AsyncRecordingService.download
+
+```python
+@intercept_errors(message_prefix="Failed to download recording: ")
+@with_instrumentation()
+async def download(recording_id: str, local_path: str) -> None
+```
+
+Downloads a recording file from the Sandbox and saves it to a local file.
+
+The file is streamed directly to disk without loading the entire content into memory.
+
+**Arguments**:
+
+- `recording_id` _str_ - The ID of the recording to download.
+- `local_path` _str_ - Path to save the recording file locally.
+  
+
+**Example**:
+
+```python
+# Download recording to file
+await sandbox.computer_use.recording.download(recording_id, "local_recording.mp4")
+print("Recording downloaded")
 ```
 
 ## ScreenshotRegion

@@ -47,8 +47,12 @@ class Organization(BaseModel):
     authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit per minute", serialization_alias="authenticatedRateLimit")
     sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit per minute", serialization_alias="sandboxCreateRateLimit")
     sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit per minute", serialization_alias="sandboxLifecycleRateLimit")
+    experimental_config: Dict[str, Any] = Field(description="Experimental configuration", serialization_alias="experimentalConfig")
+    authenticated_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Authenticated rate limit TTL in seconds", serialization_alias="authenticatedRateLimitTtlSeconds")
+    sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox create rate limit TTL in seconds", serialization_alias="sandboxCreateRateLimitTtlSeconds")
+    sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(description="Sandbox lifecycle rate limit TTL in seconds", serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit"]
+    __properties: ClassVar[List[str]] = ["id", "name", "createdBy", "personal", "createdAt", "updatedAt", "suspended", "suspendedAt", "suspensionReason", "suspendedUntil", "suspensionCleanupGracePeriodHours", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "sandboxLimitedNetworkEgress", "defaultRegionId", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "experimentalConfig", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -111,6 +115,21 @@ class Organization(BaseModel):
         if self.sandbox_lifecycle_rate_limit is None and "sandbox_lifecycle_rate_limit" in self.model_fields_set:
             _dict['sandboxLifecycleRateLimit'] = None
 
+        # set to None if authenticated_rate_limit_ttl_seconds (nullable) is None
+        # and model_fields_set contains the field
+        if self.authenticated_rate_limit_ttl_seconds is None and "authenticated_rate_limit_ttl_seconds" in self.model_fields_set:
+            _dict['authenticatedRateLimitTtlSeconds'] = None
+
+        # set to None if sandbox_create_rate_limit_ttl_seconds (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_create_rate_limit_ttl_seconds is None and "sandbox_create_rate_limit_ttl_seconds" in self.model_fields_set:
+            _dict['sandboxCreateRateLimitTtlSeconds'] = None
+
+        # set to None if sandbox_lifecycle_rate_limit_ttl_seconds (nullable) is None
+        # and model_fields_set contains the field
+        if self.sandbox_lifecycle_rate_limit_ttl_seconds is None and "sandbox_lifecycle_rate_limit_ttl_seconds" in self.model_fields_set:
+            _dict['sandboxLifecycleRateLimitTtlSeconds'] = None
+
         return _dict
 
     @classmethod
@@ -141,7 +160,11 @@ class Organization(BaseModel):
             "default_region_id": obj.get("defaultRegionId"),
             "authenticated_rate_limit": obj.get("authenticatedRateLimit"),
             "sandbox_create_rate_limit": obj.get("sandboxCreateRateLimit"),
-            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit")
+            "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
+            "experimental_config": obj.get("experimentalConfig"),
+            "authenticated_rate_limit_ttl_seconds": obj.get("authenticatedRateLimitTtlSeconds"),
+            "sandbox_create_rate_limit_ttl_seconds": obj.get("sandboxCreateRateLimitTtlSeconds"),
+            "sandbox_lifecycle_rate_limit_ttl_seconds": obj.get("sandboxLifecycleRateLimitTtlSeconds")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

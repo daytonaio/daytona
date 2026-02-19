@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -44,7 +45,18 @@ func (d *DockerClient) getContainerCreateConfig(ctx context.Context, sandboxDto 
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
 	}
 
+	if sandboxDto.OtelEndpoint != nil && *sandboxDto.OtelEndpoint != "" {
+		envVars = append(envVars, "DAYTONA_OTEL_ENDPOINT="+*sandboxDto.OtelEndpoint)
+	}
+
 	labels := make(map[string]string)
+	if len(sandboxDto.Volumes) > 0 {
+		volumeMountPaths := make([]string, len(sandboxDto.Volumes))
+		for i, v := range sandboxDto.Volumes {
+			volumeMountPaths[i] = v.MountPath
+		}
+		labels["daytona.volume_mount_paths"] = strings.Join(volumeMountPaths, ",")
+	}
 	if sandboxDto.Metadata != nil {
 		if orgID, ok := sandboxDto.Metadata["organizationId"]; ok && orgID != "" {
 			labels["daytona.organization_id"] = orgID
@@ -115,8 +127,13 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 
 	hostConfig := &container.HostConfig{
 		Privileged: true,
-		ExtraHosts: []string{"host.docker.internal:host-gateway"},
 		Binds:      binds,
+	}
+
+	if sandboxDto.OtelEndpoint != nil && strings.Contains(*sandboxDto.OtelEndpoint, "host.docker.internal") {
+		hostConfig.ExtraHosts = []string{
+			"host.docker.internal:host-gateway",
+		}
 	}
 
 	if !d.resourceLimitsDisabled {

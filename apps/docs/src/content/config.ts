@@ -323,6 +323,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/vnc-access', locale),
+          label: t('sidebarconfig.vncAccess'),
+          description: t('sidebarconfig.vncAccessDescription'),
+          attrs: {
+            icon: 'vnc.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/vpn-connections', locale),
           label: t('sidebarconfig.vpnConnection'),
           description: t('sidebarconfig.vpnConnectionDescription'),
@@ -541,12 +550,29 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/recursive-language-models', locale),
-          label: t('sidebarconfig.recursiveLms'),
+          href: localizePath('/docs/guides/rlm', locale),
+          label: t('sidebarconfig.rlm'),
           disablePagination: true,
           attrs: {
             icon: 'recursive-lm.svg',
           },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/rlm/recursive-language-models',
+            locale
+          ),
+          label: t('sidebarconfig.rlm'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath('/docs/guides/rlm/dspy-rlms', locale),
+          label: t('sidebarconfig.rlm'),
+          disablePagination: true,
+          hideInSidebar: true,
         },
       ],
     },
@@ -590,6 +616,23 @@ export const getSidebarConfig = (
           disablePagination: true,
           attrs: {
             icon: 'computer.svg',
+          },
+        },
+      ],
+    },
+    {
+      type: 'group',
+      label: t('sidebarconfig.experimental'),
+      homePageHref: localizePath('/docs', locale),
+      category: NavigationCategory.GENERAL,
+      entries: [
+        {
+          type: 'link',
+          href: localizePath('/docs/experimental/otel-collection', locale),
+          label: t('sidebarconfig.otelCollection'),
+          disablePagination: true,
+          attrs: {
+            icon: 'telemetry.svg',
           },
         },
       ],

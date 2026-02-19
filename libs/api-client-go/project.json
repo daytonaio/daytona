@@ -10,6 +10,7 @@
     },
     "build": {
       "executor": "@nx-go/nx-go:build",
+      "inputs": ["goProduction"],
       "options": {
         "main": "./{projectRoot}",
         "outputPath": "dist/libs/api-client-go"
@@ -21,19 +22,19 @@
     "generate:api-client": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{workspaceRoot}/dist/apps/api/openapi.json"],
+      "inputs": ["apiClient"],
       "outputs": [
-        "{projectRoot}/api",
-        "{projectRoot}/docs",
-        "{projectRoot}/model_*.go",
-        "{projectRoot}/api_*.go",
-        "{projectRoot}/client.go",
-        "{projectRoot}/configuration.go",
-        "{projectRoot}/response.go",
-        "{projectRoot}/utils.go"
+        "{projectRoot}/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{projectRoot}/api/openapi.yaml"
       ],
       "options": {
-        "command": "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
+        "commands": [
+          "rm -f {projectRoot}/*.go",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/api-client-go --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=disallowAdditionalPropertiesIfNotPresent=false,packageName=apiclient,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
+        ],
+        "parallel": false
       },
       "dependsOn": [
         {
@@ -54,11 +55,23 @@
     "check-version-env": {},
     "set-version": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/apps/cli/go.mod",
+        "{workspaceRoot}/libs/sdk-go/go.mod",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": [
+        "{workspaceRoot}/apps/cli/go.mod",
+        "{workspaceRoot}/libs/sdk-go/go.mod"
+      ],
       "options": {
         "cwd": "{workspaceRoot}",
         "commands": [
           "cd apps/cli && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
-          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
+          "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION",
+          "cd apps/otel-collector/exporter && go mod edit -require=github.com/daytonaio/daytona/libs/api-client-go@$VERSION"
         ],
         "parallel": false
       },

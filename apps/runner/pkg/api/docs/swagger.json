@@ -626,7 +626,7 @@
     "/sandboxes/{sandboxId}/start": {
       "post": {
         "description": "Start sandbox",
-        "produces": ["application/json", "application/json"],
+        "produces": ["application/json"],
         "tags": ["sandbox"],
         "summary": "Start sandbox",
         "operationId": "Start",
@@ -645,6 +645,12 @@
             "schema": {
               "type": "object"
             }
+          },
+          {
+            "type": "string",
+            "description": "Auth token",
+            "name": "token",
+            "in": "query"
           }
         ],
         "responses": {
@@ -1409,6 +1415,9 @@
       "type": "object",
       "required": ["id", "osUser", "snapshot", "userId"],
       "properties": {
+        "authToken": {
+          "type": "string"
+        },
         "cpuQuota": {
           "type": "integer",
           "minimum": 1
@@ -1454,8 +1463,14 @@
         "osUser": {
           "type": "string"
         },
+        "otelEndpoint": {
+          "type": "string"
+        },
         "registry": {
           "$ref": "#/definitions/RegistryDTO"
+        },
+        "skipStart": {
+          "type": "boolean"
         },
         "snapshot": {
           "type": "string"
@@ -1559,7 +1574,7 @@
     },
     "RecoverSandboxDTO": {
       "type": "object",
-      "required": ["errorReason", "osUser", "snapshot", "userId"],
+      "required": ["errorReason", "osUser", "userId"],
       "properties": {
         "backupErrorReason": {
           "type": "string"

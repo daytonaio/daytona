@@ -96,6 +96,27 @@ export class Organization {
   })
   sandboxLifecycleRateLimit: number | null
 
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'authenticated_rate_limit_ttl_seconds',
+  })
+  authenticatedRateLimitTtlSeconds: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'sandbox_create_rate_limit_ttl_seconds',
+  })
+  sandboxCreateRateLimitTtlSeconds: number | null
+
+  @Column({
+    type: 'int',
+    nullable: true,
+    name: 'sandbox_lifecycle_rate_limit_ttl_seconds',
+  })
+  sandboxLifecycleRateLimitTtlSeconds: number | null
+
   @OneToMany(() => RegionQuota, (quota) => quota.organization, {
     cascade: true,
     onDelete: 'CASCADE',
@@ -162,6 +183,22 @@ export class Organization {
     type: 'timestamp with time zone',
   })
   updatedAt: Date
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    name: 'experimentalConfig',
+  })
+  // configuration for experimental features
+  _experimentalConfig: Record<string, any> | null
+
+  get sandboxMetadata(): Record<string, string> {
+    return {
+      organizationId: this.id,
+      organizationName: this.name,
+      limitNetworkEgress: String(this.sandboxLimitedNetworkEgress),
+    }
+  }
 
   constructor(defaultRegionId?: string) {
     if (defaultRegionId) {

@@ -4,6 +4,7 @@
  */
 
 import { CompletionList, LspSymbol, LspApi } from '@daytonaio/toolbox-api-client'
+import { WithInstrumentation } from './utils/otel.decorator'
 
 /**
  * Supported language server types.
@@ -70,6 +71,7 @@ export class LspServer {
    * await lsp.start();  // Initialize the server
    * // Now ready for LSP operations
    */
+  @WithInstrumentation()
   public async start(): Promise<void> {
     await this.apiClient.start({
       languageId: this.languageId,
@@ -87,6 +89,7 @@ export class LspServer {
    * // When done with LSP features
    * await lsp.stop();  // Clean up resources
    */
+  @WithInstrumentation()
   public async stop(): Promise<void> {
     await this.apiClient.stop({
       languageId: this.languageId,
@@ -107,6 +110,7 @@ export class LspServer {
    * await lsp.didOpen('workspace/project/src/index.ts');
    * // Now can get completions, symbols, etc. for this file
    */
+  @WithInstrumentation()
   public async didOpen(path: string): Promise<void> {
     await this.apiClient.didOpen({
       languageId: this.languageId,
@@ -127,6 +131,7 @@ export class LspServer {
    * // When done editing a file
    * await lsp.didClose('workspace/project/src/index.ts');
    */
+  @WithInstrumentation()
   public async didClose(path: string): Promise<void> {
     await this.apiClient.didClose({
       languageId: this.languageId,
@@ -152,6 +157,7 @@ export class LspServer {
    *   console.log(`${symbol.kind} ${symbol.name}: ${symbol.location}`);
    * });
    */
+  @WithInstrumentation()
   public async documentSymbols(path: string): Promise<LspSymbol[]> {
     const response = await this.apiClient.documentSymbols(this.languageId, this.pathToProject, 'file://' + path)
     return response.data
@@ -168,6 +174,7 @@ export class LspServer {
    *
    * @deprecated Use `sandboxSymbols` instead. This method will be removed in a future version.
    */
+  @WithInstrumentation()
   public async workspaceSymbols(query: string): Promise<LspSymbol[]> {
     return await this.sandboxSymbols(query)
   }
@@ -188,6 +195,7 @@ export class LspServer {
    *   console.log(`${symbol.name} (${symbol.kind}) in ${symbol.location}`);
    * });
    */
+  @WithInstrumentation()
   public async sandboxSymbols(query: string): Promise<LspSymbol[]> {
     const response = await this.apiClient.workspaceSymbols(query, this.languageId, this.pathToProject)
     return response.data
@@ -220,6 +228,7 @@ export class LspServer {
    *   console.log(`${item.label} (${item.kind}): ${item.detail}`);
    * });
    */
+  @WithInstrumentation()
   public async completions(path: string, position: Position): Promise<CompletionList> {
     const response = await this.apiClient.completions({
       languageId: this.languageId,

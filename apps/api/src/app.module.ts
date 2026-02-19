@@ -41,6 +41,8 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { RegionModule } from './region/region.module'
 import { BodyParserErrorModule } from './common/modules/body-parser-error.module'
 import { AdminModule } from './admin/admin.module'
+import { ClickHouseModule } from './clickhouse/clickhouse.module'
+import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.module'
 
 @Module({
   imports: [
@@ -76,7 +78,7 @@ import { AdminModule } from './admin/admin.module'
           password: configService.getOrThrow('database.password'),
           database: configService.getOrThrow('database.database'),
           autoLoadEntities: true,
-          migrations: [join(__dirname, 'migrations/**/*{.ts,.js}')],
+          migrations: [join(__dirname, 'migrations/**/*-migration.{ts,js}')],
           migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
@@ -191,6 +193,8 @@ import { AdminModule } from './admin/admin.module'
     ObjectStorageModule,
     AuditModule,
     HealthModule,
+    ClickHouseModule,
+    SandboxTelemetryModule,
     OpenFeatureModule.forRoot({
       contextFactory: (request: ExecutionContext) => {
         const req = request.switchToHttp().getRequest()

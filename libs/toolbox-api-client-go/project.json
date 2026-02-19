@@ -6,6 +6,9 @@
   "targets": {
     "build": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["goProduction", "^goProduction"],
+      "outputs": [],
       "options": {
         "cwd": "{projectRoot}",
         "commands": ["go mod download", "go build -v ./..."],
@@ -36,11 +39,21 @@
     },
     "generate:api-client": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["apiClient"],
+      "outputs": [
+        "{projectRoot}/*.go",
+        "{projectRoot}/go.mod",
+        "{projectRoot}/go.sum",
+        "{projectRoot}/api/openapi.yaml"
+      ],
       "options": {
         "cwd": "{projectRoot}",
         "commands": [
+          "rm -f *.go",
           "yarn run openapi-generator-cli generate --git-repo-id=daytona/libs/toolbox-api-client-go --git-user-id=daytonaio -i ../../apps/daemon/pkg/toolbox/docs/swagger.json -g go --additional-properties=packageName=toolbox,moduleVersion=$DEFAULT_PACKAGE_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o ."
-        ]
+        ],
+        "parallel": false
       },
       "dependsOn": [
         {
@@ -52,6 +65,13 @@
     "check-version-env": {},
     "set-version": {
       "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/libs/sdk-go/go.mod",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{workspaceRoot}/libs/sdk-go/go.mod"],
       "options": {
         "cwd": "{workspaceRoot}",
         "command": "cd libs/sdk-go && go mod edit -require=github.com/daytonaio/daytona/libs/toolbox-api-client-go@$VERSION"

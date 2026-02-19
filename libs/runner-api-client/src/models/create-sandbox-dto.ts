@@ -27,6 +27,12 @@ import type { RegistryDTO } from './registry-dto'
 export interface CreateSandboxDTO {
   /**
    *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
+  authToken?: string
+  /**
+   *
    * @type {number}
    * @memberof CreateSandboxDTO
    */
@@ -93,10 +99,22 @@ export interface CreateSandboxDTO {
   osUser: string
   /**
    *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
+  otelEndpoint?: string
+  /**
+   *
    * @type {RegistryDTO}
    * @memberof CreateSandboxDTO
    */
   registry?: RegistryDTO
+  /**
+   *
+   * @type {boolean}
+   * @memberof CreateSandboxDTO
+   */
+  skipStart?: boolean
   /**
    *
    * @type {string}

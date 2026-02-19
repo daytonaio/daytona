@@ -46,6 +46,7 @@ import (
 //	)
 type CodeInterpreterService struct {
 	toolboxClient *toolbox.APIClient
+	otel          *otelState
 }
 
 // NewCodeInterpreterService creates a new CodeInterpreterService.
@@ -53,9 +54,10 @@ type CodeInterpreterService struct {
 // This is typically called internally by the SDK when creating a [Sandbox].
 // Users should access CodeInterpreterService through [Sandbox.CodeInterpreter]
 // rather than creating it directly.
-func NewCodeInterpreterService(toolboxClient *toolbox.APIClient) *CodeInterpreterService {
+func NewCodeInterpreterService(toolboxClient *toolbox.APIClient, otel *otelState) *CodeInterpreterService {
 	return &CodeInterpreterService{
 		toolboxClient: toolboxClient,
+		otel:          otel,
 	}
 }
 
@@ -110,142 +112,144 @@ type OutputChannels struct {
 //
 // Returns [OutputChannels] for receiving streamed output, or an error if connection fails.
 func (c *CodeInterpreterService) RunCode(ctx context.Context, code string, opts ...func(*options.RunCode)) (*OutputChannels, error) {
-	runOpts := options.Apply(opts...)
+	return withInstrumentation(ctx, c.otel, "CodeInterpreter", "RunCode", func(ctx context.Context) (*OutputChannels, error) {
+		runOpts := options.Apply(opts...)
 
-	// Extract values from options
-	contextID := runOpts.ContextID
-	env := runOpts.Env
-	timeout := runOpts.Timeout
+		// Extract values from options
+		contextID := runOpts.ContextID
+		env := runOpts.Env
+		timeout := runOpts.Timeout
 
-	// Create channels for output streaming
-	stdoutChan := make(chan *types.OutputMessage, 10)
-	stderrChan := make(chan *types.OutputMessage, 10)
-	errorChan := make(chan *types.ExecutionError, 10)
-	doneChan := make(chan *types.ExecutionResult, 1)
+		// Create channels for output streaming
+		stdoutChan := make(chan *types.OutputMessage, 10)
+		stderrChan := make(chan *types.OutputMessage, 10)
+		errorChan := make(chan *types.ExecutionError, 10)
+		doneChan := make(chan *types.ExecutionResult, 1)
 
-	channels := &OutputChannels{
-		Stdout: stdoutChan,
-		Stderr: stderrChan,
-		Errors: errorChan,
-		Done:   doneChan,
-	}
-
-	// Start goroutine to handle WebSocket communication
-	go func() {
-		defer close(stdoutChan)
-		defer close(stderrChan)
-		defer close(errorChan)
-		defer close(doneChan)
-
-		// Build WebSocket URL
-		baseURL := c.toolboxClient.GetConfig().Servers[0].URL
-		wsURL, err := c.buildWebSocketURL(baseURL, "/process/interpreter/execute")
-		if err != nil {
-			doneChan <- &types.ExecutionResult{
-				Error: &types.ExecutionError{
-					Name:  "ConnectionError",
-					Value: err.Error(),
-				},
-			}
-			return
+		channels := &OutputChannels{
+			Stdout: stdoutChan,
+			Stderr: stderrChan,
+			Errors: errorChan,
+			Done:   doneChan,
 		}
 
-		// Create WebSocket connection
-		headers := c.buildHeaders(c.toolboxClient)
-		conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsURL, headers)
-		if err != nil {
-			doneChan <- &types.ExecutionResult{
-				Error: &types.ExecutionError{
-					Name:  "ConnectionError",
-					Value: fmt.Sprintf("Failed to connect to WebSocket: %v", err),
-				},
-			}
-			return
-		}
-		defer conn.Close()
+		// Start goroutine to handle WebSocket communication
+		go func() {
+			defer close(stdoutChan)
+			defer close(stderrChan)
+			defer close(errorChan)
+			defer close(doneChan)
 
-		// Send execute request
-		executeReq := map[string]interface{}{
-			"code": code,
-		}
-		if contextID != "" {
-			executeReq["contextId"] = contextID
-		}
-		if env != nil {
-			executeReq["envs"] = env
-		}
-		if timeout != nil {
-			timeoutInt64 := int64(timeout.Seconds())
-			executeReq["timeout"] = &timeoutInt64
-		}
-
-		if err := conn.WriteJSON(executeReq); err != nil {
-			doneChan <- &types.ExecutionResult{
-				Error: &types.ExecutionError{
-					Name:  "ConnectionError",
-					Value: fmt.Sprintf("Failed to send execute request: %v", err),
-				},
-			}
-			return
-		}
-
-		// Read output messages from WebSocket
-		result := &types.ExecutionResult{}
-		var stdout, stderr strings.Builder
-
-		for {
-			var msg types.OutputMessage
-			err := conn.ReadJSON(&msg)
+			// Build WebSocket URL
+			baseURL := c.toolboxClient.GetConfig().Servers[0].URL
+			wsURL, err := c.buildWebSocketURL(baseURL, "/process/interpreter/execute")
 			if err != nil {
-				// Check if it's a normal WebSocket close
-				if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-					break
+				doneChan <- &types.ExecutionResult{
+					Error: &types.ExecutionError{
+						Name:  "ConnectionError",
+						Value: err.Error(),
+					},
 				}
-				// Check for custom timeout close code (4001)
-				if websocket.IsCloseError(err, 4001) {
+				return
+			}
+
+			// Create WebSocket connection
+			headers := c.buildHeaders(c.toolboxClient)
+			conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsURL, headers)
+			if err != nil {
+				doneChan <- &types.ExecutionResult{
+					Error: &types.ExecutionError{
+						Name:  "ConnectionError",
+						Value: fmt.Sprintf("Failed to connect to WebSocket: %v", err),
+					},
+				}
+				return
+			}
+			defer conn.Close()
+
+			// Send execute request
+			executeReq := map[string]interface{}{
+				"code": code,
+			}
+			if contextID != "" {
+				executeReq["contextId"] = contextID
+			}
+			if env != nil {
+				executeReq["envs"] = env
+			}
+			if timeout != nil {
+				timeoutInt64 := int64(timeout.Seconds())
+				executeReq["timeout"] = &timeoutInt64
+			}
+
+			if err := conn.WriteJSON(executeReq); err != nil {
+				doneChan <- &types.ExecutionResult{
+					Error: &types.ExecutionError{
+						Name:  "ConnectionError",
+						Value: fmt.Sprintf("Failed to send execute request: %v", err),
+					},
+				}
+				return
+			}
+
+			// Read output messages from WebSocket
+			result := &types.ExecutionResult{}
+			var stdout, stderr strings.Builder
+
+			for {
+				var msg types.OutputMessage
+				err := conn.ReadJSON(&msg)
+				if err != nil {
+					// Check if it's a normal WebSocket close
+					if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
+						break
+					}
+					// Check for custom timeout close code (4001)
+					if websocket.IsCloseError(err, 4001) {
+						result.Error = &types.ExecutionError{
+							Name:  "TimeoutError",
+							Value: "Execution timed out",
+						}
+						break
+					}
 					result.Error = &types.ExecutionError{
-						Name:  "TimeoutError",
-						Value: "Execution timed out",
+						Name:  "ConnectionError",
+						Value: fmt.Sprintf("Failed to read message: %v", err),
 					}
 					break
 				}
-				result.Error = &types.ExecutionError{
-					Name:  "ConnectionError",
-					Value: fmt.Sprintf("Failed to read message: %v", err),
+
+				// Send to channels based on message type
+				switch msg.Type {
+				case "stdout":
+					stdoutChan <- &msg
+					stdout.WriteString(msg.Text)
+
+				case "stderr":
+					stderrChan <- &msg
+					stderr.WriteString(msg.Text)
+
+				case "error":
+					execError := &types.ExecutionError{
+						Name:  msg.Name,
+						Value: msg.Value,
+					}
+					if msg.Traceback != "" {
+						execError.Traceback = &msg.Traceback
+					}
+					errorChan <- execError
+					result.Error = execError
 				}
-				break
 			}
 
-			// Send to channels based on message type
-			switch msg.Type {
-			case "stdout":
-				stdoutChan <- &msg
-				stdout.WriteString(msg.Text)
+			result.Stdout = stdout.String()
+			result.Stderr = stderr.String()
 
-			case "stderr":
-				stderrChan <- &msg
-				stderr.WriteString(msg.Text)
+			doneChan <- result
+		}()
 
-			case "error":
-				execError := &types.ExecutionError{
-					Name:  msg.Name,
-					Value: msg.Value,
-				}
-				if msg.Traceback != "" {
-					execError.Traceback = &msg.Traceback
-				}
-				errorChan <- execError
-				result.Error = execError
-			}
-		}
-
-		result.Stdout = stdout.String()
-		result.Stderr = stderr.String()
-
-		doneChan <- result
-	}()
-
-	return channels, nil
+		return channels, nil
+	})
 }
 
 // buildWebSocketURL converts an HTTP(S) URL to a WebSocket URL
@@ -306,24 +310,26 @@ func (c *CodeInterpreterService) buildHeaders(toolboxClient *toolbox.APIClient) 
 //
 // Returns context information including "id", "cwd", "language", "active", and "createdAt".
 func (c *CodeInterpreterService) CreateContext(ctx context.Context, cwd *string) (map[string]any, error) {
-	req := toolbox.NewCreateContextRequest()
-	if cwd != nil {
-		req.SetCwd(*cwd)
-	}
+	return withInstrumentation(ctx, c.otel, "CodeInterpreter", "CreateContext", func(ctx context.Context) (map[string]any, error) {
+		req := toolbox.NewCreateContextRequest()
+		if cwd != nil {
+			req.SetCwd(*cwd)
+		}
 
-	context, httpResp, err := c.toolboxClient.InterpreterAPI.CreateInterpreterContext(ctx).Request(*req).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+		context, httpResp, err := c.toolboxClient.InterpreterAPI.CreateInterpreterContext(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	return map[string]any{
-		"id":        context.GetId(),
-		"cwd":       context.GetCwd(),
-		"language":  context.GetLanguage(),
-		"active":    context.GetActive(),
-		"createdAt": context.GetCreatedAt(),
-	}, nil
+		// Convert to map for backward compatibility
+		return map[string]any{
+			"id":        context.GetId(),
+			"cwd":       context.GetCwd(),
+			"language":  context.GetLanguage(),
+			"active":    context.GetActive(),
+			"createdAt": context.GetCreatedAt(),
+		}, nil
+	})
 }
 
 // ListContexts returns all active execution contexts.
@@ -340,25 +346,27 @@ func (c *CodeInterpreterService) CreateContext(ctx context.Context, cwd *string)
 //
 // Returns a slice of context information maps.
 func (c *CodeInterpreterService) ListContexts(ctx context.Context) ([]map[string]any, error) {
-	resp, httpResp, err := c.toolboxClient.InterpreterAPI.ListInterpreterContexts(ctx).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
-
-	// Convert to map array for backward compatibility
-	contexts := resp.GetContexts()
-	result := make([]map[string]any, len(contexts))
-	for i, context := range contexts {
-		result[i] = map[string]any{
-			"id":        context.GetId(),
-			"cwd":       context.GetCwd(),
-			"language":  context.GetLanguage(),
-			"active":    context.GetActive(),
-			"createdAt": context.GetCreatedAt(),
+	return withInstrumentation(ctx, c.otel, "CodeInterpreter", "ListContexts", func(ctx context.Context) ([]map[string]any, error) {
+		resp, httpResp, err := c.toolboxClient.InterpreterAPI.ListInterpreterContexts(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
-	}
 
-	return result, nil
+		// Convert to map array for backward compatibility
+		contexts := resp.GetContexts()
+		result := make([]map[string]any, len(contexts))
+		for i, context := range contexts {
+			result[i] = map[string]any{
+				"id":        context.GetId(),
+				"cwd":       context.GetCwd(),
+				"language":  context.GetLanguage(),
+				"active":    context.GetActive(),
+				"createdAt": context.GetCreatedAt(),
+			}
+		}
+
+		return result, nil
+	})
 }
 
 // DeleteContext removes an execution context and releases its resources.
@@ -372,10 +380,12 @@ func (c *CodeInterpreterService) ListContexts(ctx context.Context) ([]map[string
 //
 // Returns an error if the context doesn't exist or deletion fails.
 func (c *CodeInterpreterService) DeleteContext(ctx context.Context, contextID string) error {
-	_, httpResp, err := c.toolboxClient.InterpreterAPI.DeleteInterpreterContext(ctx, contextID).Execute()
-	if err != nil {
-		return errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentationVoid(ctx, c.otel, "CodeInterpreter", "DeleteContext", func(ctx context.Context) error {
+		_, httpResp, err := c.toolboxClient.InterpreterAPI.DeleteInterpreterContext(ctx, contextID).Execute()
+		if err != nil {
+			return errors.ConvertToolboxError(err, httpResp)
+		}
 
-	return nil
+		return nil
+	})
 }

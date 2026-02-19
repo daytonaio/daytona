@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Pagination } from '@/components/Pagination'
+import { TableEmptyState } from '@/components/TableEmptyState'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { getRelativeTimeString } from '@/lib/utils'
 import { AuditLog } from '@daytonaio/api-client'
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 import { TextSearch } from 'lucide-react'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { TableEmptyState } from '@/components/TableEmptyState'
-import { Pagination } from '@/components/Pagination'
-import { getRelativeTimeString } from '@/lib/utils'
 
 interface Props {
   data: AuditLog[]
@@ -141,16 +141,14 @@ const getColumns = (): ColumnDef<AuditLog>[] => {
         const label = actorEmail || actorId
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="font-medium truncate w-fit max-w-full">{label}</div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{label}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="font-medium truncate w-fit max-w-full">{label}</div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{label}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -161,16 +159,14 @@ const getColumns = (): ColumnDef<AuditLog>[] => {
         const action = row.original.action
 
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="font-medium truncate w-fit max-w-full">{action}</div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{action}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="font-medium truncate w-fit max-w-full">{action}</div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{action}</p>
+            </TooltipContent>
+          </Tooltip>
         )
       },
     },
@@ -207,19 +203,17 @@ const getColumns = (): ColumnDef<AuditLog>[] => {
             {!errorMessage ? (
               <div className="text-sm text-muted-foreground truncate">{statusCode || '204'}</div>
             ) : (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="text-sm text-muted-foreground truncate">
-                      {statusCode || '500'}
-                      {` - ${errorMessage}`}
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{errorMessage}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-sm text-muted-foreground truncate">
+                    {statusCode || '500'}
+                    {` - ${errorMessage}`}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{errorMessage}</p>
+                </TooltipContent>
+              </Tooltip>
             )}
           </div>
         )

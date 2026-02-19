@@ -15,15 +15,14 @@ import {
 } from '@/lib/utils/sandbox'
 import { OrganizationRolePermissionsEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
 import { flexRender } from '@tanstack/react-table'
-import { CommandIcon, Container, XIcon } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { Container } from 'lucide-react'
+import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCommandPaletteActions } from '../CommandPalette'
 import { Pagination } from '../Pagination'
+import { SelectionToast } from '../SelectionToast'
 import { TableEmptyState } from '../TableEmptyState'
-import { Button } from '../ui/button'
-import { Separator } from '../ui/separator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { BulkAction, BulkActionAlertDialog } from './BulkActionAlertDialog'
 import { SandboxTableHeader } from './SandboxTableHeader'
@@ -55,6 +54,7 @@ export function SandboxTable({
   getWebTerminalUrl,
   handleCreateSshAccess,
   handleRevokeSshAccess,
+  handleScreenRecordings,
   handleRefresh,
   isRefreshing,
   onRowClick,
@@ -86,6 +86,7 @@ export function SandboxTable({
     getWebTerminalUrl,
     handleCreateSshAccess,
     handleRevokeSshAccess,
+    handleScreenRecordings,
     pagination,
     pageCount,
     onPaginationChange,
@@ -274,29 +275,12 @@ export function SandboxTable({
 
         <AnimatePresence>
           {hasSelection && (
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
-              animate={{ scale: 1, opacity: 1, y: 0, x: '-50%' }}
-              exit={{ scale: 0.9, opacity: 0, y: 20, x: '-50%' }}
-              className="bg-popover absolute bottom-5 left-1/2 -translate-x-1/2 z-50 gap-3 max-w-[90vw]"
-            >
-              <div className="bg-background text-foreground border border-border rounded-lg shadow-lg pl-3 pr-1 py-1 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-1">
-                  <div className="text-sm tabular-nums whitespace-nowrap">
-                    {selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
-                  </div>
-                  <Button variant="ghost" size="icon-sm" onClick={() => table.toggleAllRowsSelected(false)}>
-                    <XIcon className="size-3.5" />
-                  </Button>
-                </div>
-                <Separator orientation="vertical" className="h-5" />
-
-                <Button variant="ghost" size="sm" className="h-8" onClick={handleOpenCommandPalette}>
-                  <CommandIcon className="size-3.5" />
-                  <span className="text-sm">Actions</span>
-                </Button>
-              </div>
-            </motion.div>
+            <SelectionToast
+              className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+              selectedCount={selectedRows.length}
+              onClearSelection={() => table.resetRowSelection()}
+              onActionClick={handleOpenCommandPalette}
+            />
           )}
         </AnimatePresence>
       </div>

@@ -3,6 +3,7 @@ go 1.25.4
 use (
 	./apps/cli
 	./apps/daemon
+	./apps/otel-collector/exporter
 	./apps/proxy
 	./apps/runner
 	./apps/snapshot-manager

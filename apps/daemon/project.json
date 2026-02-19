@@ -20,6 +20,12 @@
     },
     "build": {
       "executor": "@nx-go/nx-go:build",
+      "inputs": [
+        "goProduction",
+        "^goProduction",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "options": {
         "main": "{projectRoot}/cmd/daemon/main.go",
         "outputPath": "dist/apps/daemon"
@@ -44,7 +50,12 @@
         "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=$VERSION'\""]
       },
       "dependsOn": ["prepare"],
-      "inputs": ["goProduction", "^goProduction", { "env": "VERSION" }]
+      "inputs": [
+        "goProduction",
+        "^goProduction",
+        { "env": "VERSION" },
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -80,7 +91,7 @@
       ],
       "options": {
         "cwd": "{projectRoot}/pkg/toolbox",
-        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g toolbox.go"
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
       }
     }
   }

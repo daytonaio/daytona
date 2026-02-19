@@ -105,6 +105,8 @@ Below is a full list of environment variables with their default values:
 
 | Variable                                   | Type    | Default Value                                        | Description                                                                                          |
 | ------------------------------------------ | ------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ENCRYPTION_KEY`                           | string  | `supersecretkey`                                     | Encryption key for sensitive data (User must override outside of Compose)                            |
+| `ENCRYPTION_SALT`                          | string  | `supersecretsalt`                                    | Encryption salt for sensitive data (User must override outside of Compose)                           |
 | `PORT`                                     | number  | `3000`                                               | API service port                                                                                     |
 | `DB_HOST`                                  | string  | `db`                                                 | PostgreSQL database hostname                                                                         |
 | `DB_PORT`                                  | number  | `5432`                                               | PostgreSQL database port                                                                             |
@@ -211,36 +213,45 @@ Below is a full list of environment variables with their default values:
 | `DEFAULT_REGION_ID`                        | string  | `us`                                                 | Default region ID                                                                                    |
 | `DEFAULT_REGION_NAME`                      | string  | `us`                                                 | Default region name                                                                                  |
 | `DEFAULT_REGION_ENFORCE_QUOTAS`            | boolean | `false`                                              | Enable region-based resource limits for default region                                               |
+| `OTEL_COLLECTOR_API_KEY`                   | string  | `otel_collector_api_key`                             | OpenTelemetry collector API key for authentication (only needed if otel collector is deployed)       |
+| `CLICKHOUSE_HOST`                          | string  | (empty)                                              | ClickHouse host for querying sandbox otel                                                            |
+| `CLICKHOUSE_DATABASE`                      | string  | `otel`                                               | ClickHouse database for querying sandbox otel                                                        |
+| `CLICKHOUSE_PORT`                          | number  | `8123`                                               | ClickHouse port                                                                                      |
+| `CLICKHOUSE_USERNAME`                      | string  | (empty)                                              | ClickHouse username                                                                                  |
+| `CLICKHOUSE_PASSWORD`                      | string  | (empty)                                              | ClickHouse password                                                                                  |
+| `CLICKHOUSE_PROTOCOL`                      | string  | `https`                                              | ClickHouse protocol (e.g., `http` or `https`)                                                        |
+| `SANDBOX_OTEL_ENDPOINT_URL`                | string  | (empty)                                              | OpenTelemetry endpoint URL for sandbox traces                                                        |
+| `HEALTH_CHECK_API_KEY`                     | string  | `supersecretkey`                                     | Authentication key for the readiness health-check route.                                             |
 
 ### Runner
 
-| Variable                                | Type    | Default Value                     | Description                                                    |
-| --------------------------------------- | ------- | --------------------------------- | -------------------------------------------------------------- |
-| `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                                |
-| `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                                |
-| `VERSION`                               | string  | `0.0.1`                           | Runner service version                                         |
-| `ENVIRONMENT`                           | string  | `development`                     | Application environment                                        |
-| `API_PORT`                              | number  | `3003`                            | Runner API service port                                        |
-| `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                                        |
-| `RESOURCE_LIMITS_DISABLED`              | boolean | `true`                            | Disable resource limits for sandboxes                          |
-| `AWS_ENDPOINT_URL`                      | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint                             |
-| `AWS_REGION`                            | string  | `us-east-1`                       | AWS region                                                     |
-| `AWS_ACCESS_KEY_ID`                     | string  | `minioadmin`                      | AWS access key ID                                              |
-| `AWS_SECRET_ACCESS_KEY`                 | string  | `minioadmin`                      | AWS secret access key                                          |
-| `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                                        |
-| `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                                |
-| `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                               |
-| `USE_SNAPSHOT_ENTRYPOINT`               | boolean | `false`                           | Use snapshot entrypoint for sandbox                            |
-| `RUNNER_DOMAIN`                         | string  | (none)                            | Runner domain name (hostname for runner URLs)                  |
-| `VOLUME_CLEANUP_INTERVAL_SEC`           | number  | `30`                              | Volume cleanup interval in seconds (minimum: 10s)              |
-| `COLLECTOR_WINDOW_SIZE`                 | number  | `60`                              | Metrics collector window size (number of samples)              |
-| `CPU_USAGE_SNAPSHOT_INTERVAL`           | string  | `5s`                              | CPU usage snapshot interval duration (minimum: 1s)             |
-| `ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL` | string  | `5s`                              | Allocated resources snapshot interval (minimum: 1s)            |
-| `POLL_TIMEOUT`                          | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)            |
-| `POLL_LIMIT`                            | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100)           |
-| `HEALTHCHECK_INTERVAL`                  | string  | `30s`                             | Interval between health checks (minimum: 10s)                  |
-| `HEALTHCHECK_TIMEOUT`                   | string  | `10s`                             | Health check timeout duration                                  |
-| `API_VERSION`                           | number  | `2`                               | Runner API version (default: 2)                                |
+| Variable                                | Type    | Default Value                     | Description                                          |
+| --------------------------------------- | ------- | --------------------------------- | ---------------------------------------------------- |
+| `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                      |
+| `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                      |
+| `VERSION`                               | string  | `0.0.1`                           | Runner service version                               |
+| `ENVIRONMENT`                           | string  | `development`                     | Application environment                              |
+| `API_PORT`                              | number  | `3003`                            | Runner API service port                              |
+| `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                              |
+| `RESOURCE_LIMITS_DISABLED`              | boolean | `true`                            | Disable resource limits for sandboxes                |
+| `AWS_ENDPOINT_URL`                      | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint                   |
+| `AWS_REGION`                            | string  | `us-east-1`                       | AWS region                                           |
+| `AWS_ACCESS_KEY_ID`                     | string  | `minioadmin`                      | AWS access key ID                                    |
+| `AWS_SECRET_ACCESS_KEY`                 | string  | `minioadmin`                      | AWS secret access key                                |
+| `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                              |
+| `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                      |
+| `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                     |
+| `USE_SNAPSHOT_ENTRYPOINT`               | boolean | `false`                           | Use snapshot entrypoint for sandbox                  |
+| `RUNNER_DOMAIN`                         | string  | (none)                            | Runner domain name (hostname for runner URLs)        |
+| `VOLUME_CLEANUP_INTERVAL_SEC`           | number  | `30`                              | Volume cleanup interval in seconds (minimum: 10s)    |
+| `COLLECTOR_WINDOW_SIZE`                 | number  | `60`                              | Metrics collector window size (number of samples)    |
+| `CPU_USAGE_SNAPSHOT_INTERVAL`           | string  | `5s`                              | CPU usage snapshot interval duration (minimum: 1s)   |
+| `ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL` | string  | `5s`                              | Allocated resources snapshot interval (minimum: 1s)  |
+| `POLL_TIMEOUT`                          | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)  |
+| `POLL_LIMIT`                            | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100) |
+| `HEALTHCHECK_INTERVAL`                  | string  | `30s`                             | Interval between health checks (minimum: 10s)        |
+| `HEALTHCHECK_TIMEOUT`                   | string  | `10s`                             | Health check timeout duration                        |
+| `API_VERSION`                           | number  | `2`                               | Runner API version (default: 2)                      |
 
 ### SSH Gateway
 

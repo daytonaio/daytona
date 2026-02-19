@@ -132,4 +132,28 @@ export interface Organization {
    * @memberof Organization
    */
   sandboxLifecycleRateLimit: number | null
+  /**
+   * Experimental configuration
+   * @type {object}
+   * @memberof Organization
+   */
+  experimentalConfig: object
+  /**
+   * Authenticated rate limit TTL in seconds
+   * @type {number}
+   * @memberof Organization
+   */
+  authenticatedRateLimitTtlSeconds: number | null
+  /**
+   * Sandbox create rate limit TTL in seconds
+   * @type {number}
+   * @memberof Organization
+   */
+  sandboxCreateRateLimitTtlSeconds: number | null
+  /**
+   * Sandbox lifecycle rate limit TTL in seconds
+   * @type {number}
+   * @memberof Organization
+   */
+  sandboxLifecycleRateLimitTtlSeconds: number | null
 }

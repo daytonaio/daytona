@@ -23,6 +23,7 @@ import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
+import { SnapshotFilters, SnapshotQueryParams, useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
@@ -36,7 +37,6 @@ import {
   useSandboxes,
 } from '@/hooks/useSandboxes'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getSnapshotsQueryKey, SnapshotFilters, SnapshotQueryParams, useSnapshots } from '@/hooks/useSnapshots'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
@@ -286,16 +286,11 @@ const Sandboxes: React.FC = () => {
     [snapshotFilters],
   )
 
-  const snapshotsQueryKey = useMemo<QueryKey>(
-    () => getSnapshotsQueryKey(selectedOrganization?.id, snapshotsQueryParams),
-    [selectedOrganization?.id, snapshotsQueryParams],
-  )
-
   const {
     data: snapshotsData,
     isLoading: snapshotsDataIsLoading,
     error: snapshotsDataError,
-  } = useSnapshots(snapshotsQueryKey, snapshotsQueryParams)
+  } = useSnapshotsQuery(snapshotsQueryParams)
 
   const snapshotsDataHasMore = useMemo(() => {
     return snapshotsData && snapshotsData.totalPages > 1
@@ -604,7 +599,7 @@ const Sandboxes: React.FC = () => {
           } catch (error) {
             failureCount += 1
             revertSandboxStateOptimisticUpdate(id, previousStatesById.get(id))
-            console.error(`Failed to ${actionName.toLowerCase()} sandbox`, id, error)
+            console.error(`${actionName} sandbox failed`, id, error)
           } finally {
             setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
             setTimeout(() => {
@@ -616,8 +611,8 @@ const Sandboxes: React.FC = () => {
         await markAllSandboxQueriesAsStale()
         bulkToast.result({ successCount, failureCount }, toastMessages)
       } catch (error) {
-        console.error(`Failed to ${actionName.toLowerCase()} sandboxes`, error)
-        bulkToast.error(`Failed to ${actionName.toLowerCase()} sandboxes.`)
+        console.error(`${actionName} sandboxes failed`, error)
+        bulkToast.error(`${actionName} sandboxes failed.`)
       }
 
       return { successCount, failureCount }
@@ -814,6 +809,26 @@ const Sandboxes: React.FC = () => {
     [getPortPreviewUrl],
   )
 
+  const handleScreenRecordings = async (id: string) => {
+    // Check if sandbox is started
+    const sandbox = sandboxesData?.items?.find((s) => s.id === id)
+    if (!sandbox || sandbox.state !== SandboxState.STARTED) {
+      toast.error('Sandbox must be started to access Screen Recordings')
+      return
+    }
+
+    setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
+    try {
+      const portPreviewUrl = await getPortPreviewUrl(id, 33333)
+      window.open(portPreviewUrl, '_blank')
+      toast.success('Opening Screen Recordings dashboard...')
+    } catch (error) {
+      handleApiError(error, 'Failed to open Screen Recordings')
+    } finally {
+      setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   const handleCreateSshAccess = async (id: string) => {
     setSandboxIsLoading((prev) => ({ ...prev, [id]: true }))
     try {
@@ -964,6 +979,7 @@ const Sandboxes: React.FC = () => {
           onFiltersChange={handleFiltersChange}
           handleRecover={handleRecover}
           getRegionName={getRegionName}
+          handleScreenRecordings={handleScreenRecordings}
         />
 
         {sandboxToDelete && (

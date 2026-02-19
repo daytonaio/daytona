@@ -36,9 +36,19 @@ const config: DaytonaConfig = {
     target: "us"
 };
 const daytona = new Daytona(config);
+```
 
+```ts
+// Disposes daytona and flushes traces when done
+await using daytona = new Daytona({
+  otelEnabled: true,
+});
 @class
 ```
+
+### Implements
+
+- `AsyncDisposable`
 
 ### Constructors
 
@@ -64,6 +74,24 @@ Creates a new Daytona client instance.
 - `DaytonaError` - When API key is missing
 
 ### Methods
+
+#### \[asyncDispose\]()
+
+```ts
+asyncDispose: Promise<void>
+```
+
+**Returns**:
+
+- `Promise<void>`
+
+##### Implementation of
+
+```ts
+AsyncDisposable.[asyncDispose]
+```
+
+***
 
 #### create()
 
@@ -424,6 +452,7 @@ Configuration options for initializing the Daytona client.
 
 **Properties**:
 
+- `\_experimental?` _Record\<string, any\>_ - Configuration for experimental features
 - `apiKey?` _string_ - API key for authentication with the Daytona API
 - `apiUrl?` _string_ - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
     if not set here and not set in environment variable DAYTONA_API_URL.

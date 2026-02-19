@@ -43,6 +43,7 @@ Service for managing Daytona Snapshots. Can be used to list, get, create and del
 
 ```python
 @intercept_errors(message_prefix="Failed to list snapshots: ")
+@with_instrumentation()
 def list(page: int | None = None,
          limit: int | None = None) -> PaginatedSnapshots
 ```
@@ -73,6 +74,7 @@ for snapshot in result.items:
 
 ```python
 @intercept_errors(message_prefix="Failed to delete snapshot: ")
+@with_instrumentation()
 def delete(snapshot: Snapshot) -> None
 ```
 
@@ -96,6 +98,7 @@ print("Snapshot deleted")
 
 ```python
 @intercept_errors(message_prefix="Failed to get snapshot: ")
+@with_instrumentation()
 def get(name: str) -> Snapshot
 ```
 
@@ -123,8 +126,8 @@ print(f"{snapshot.name} ({snapshot.image_name})")
 
 ```python
 @intercept_errors(message_prefix="Failed to create snapshot: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Failed to create snapshot within {timeout} seconds timeout period."))
+@with_timeout()
+@with_instrumentation()
 def create(params: CreateSnapshotParams,
            *,
            on_logs: Callable[[str], None] | None = None,
@@ -152,6 +155,7 @@ daytona.snapshot.create(
 #### SnapshotService.activate
 
 ```python
+@with_instrumentation()
 def activate(snapshot: Snapshot) -> Snapshot
 ```
 
@@ -169,6 +173,7 @@ Activate a snapshot.
 
 ```python
 @staticmethod
+@with_instrumentation()
 def process_image_context(object_storage_api: ObjectStorageApi,
                           image: Image) -> list[str]
 ```

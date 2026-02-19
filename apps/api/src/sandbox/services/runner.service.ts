@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -42,6 +42,10 @@ import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { Snapshot } from '../entities/snapshot.entity'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 
 @Injectable()
 export class RunnerService {
@@ -65,6 +69,8 @@ export class RunnerService {
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    @InjectRedis()
+    private readonly redis: Redis,
   ) {
     this.scoreConfig = this.getAvailabilityScoreConfig()
   }
@@ -120,6 +126,7 @@ export class RunnerService {
 
     try {
       const savedRunner = await this.runnerRepository.save(runner)
+      this.invalidateRunnerCache(savedRunner.id)
       return { runner: savedRunner, apiKey }
     } catch (error) {
       if (error.code === '23505') {
@@ -184,6 +191,20 @@ export class RunnerService {
     return runners.map(RunnerDto.fromRunner)
   }
 
+  async findDrainingPaginated(skip: number, take: number): Promise<Runner[]> {
+    return this.runnerRepository.find({
+      where: {
+        draining: true,
+        state: Not(RunnerState.DECOMMISSIONED),
+      },
+      order: {
+        id: 'ASC',
+      },
+      skip,
+      take,
+    })
+  }
+
   async findAllReady(): Promise<Runner[]> {
     return this.runnerRepository.find({
       where: {
@@ -193,15 +214,25 @@ export class RunnerService {
   }
 
   async findOne(id: string): Promise<Runner | null> {
-    return this.runnerRepository.findOneBy({ id })
+    return this.runnerRepository.findOne({
+      where: { id },
+      cache: {
+        id: runnerLookupCacheKeyById(id),
+        milliseconds: RUNNER_LOOKUP_CACHE_TTL_MS,
+      },
+    })
+  }
+
+  async findOneOrFail(id: string): Promise<Runner> {
+    const runner = await this.findOne(id)
+    if (!runner) {
+      throw new NotFoundException(`Runner with ID ${id} not found`)
+    }
+    return runner
   }
 
   async findOneFullOrFail(id: string): Promise<RunnerFullDto> {
-    const runner = await this.findOne(id)
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
-    }
-
+    const runner = await this.findOneOrFail(id)
     const region = await this.regionService.findOne(runner.region)
 
     return RunnerFullDto.fromRunner(runner, region?.regionType)
@@ -226,7 +257,10 @@ export class RunnerService {
   }
 
   async findBySandboxId(sandboxId: string): Promise<Runner | null> {
-    const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId, state: Not(SandboxState.DESTROYED) })
+    const sandbox = await this.sandboxRepository.findOne({
+      where: { id: sandboxId, state: Not(SandboxState.DESTROYED) },
+      select: ['runnerId'],
+    })
     if (!sandbox) {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
@@ -234,7 +268,7 @@ export class RunnerService {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
     }
 
-    return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
+    return this.findOne(sandbox.runnerId)
   }
 
   async getRegionId(runnerId: string): Promise<string> {
@@ -257,6 +291,7 @@ export class RunnerService {
     const runnerFilter: FindOptionsWhere<Runner> = {
       state: RunnerState.READY,
       unschedulable: Not(true),
+      draining: Not(true),
       availabilityScore: params.availabilityScoreThreshold
         ? MoreThanOrEqual(params.availabilityScoreThreshold)
         : MoreThanOrEqual(this.configService.getOrThrow('runnerScore.thresholds.availability')),
@@ -336,6 +371,7 @@ export class RunnerService {
       await em.delete(Runner, id)
       await this.eventEmitter.emitAsync(RunnerEvents.DELETED, new RunnerDeletedEvent(em, id))
     })
+    this.invalidateRunnerCache(id)
   }
 
   async updateRunnerHealth(
@@ -359,7 +395,7 @@ export class RunnerService {
     },
     appVersion?: string,
   ): Promise<void> {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    const runner = await this.findOne(runnerId)
     if (!runner) {
       this.logger.error(`Runner ${runnerId} not found when trying to update health`)
       return
@@ -420,7 +456,7 @@ export class RunnerService {
       })
     }
 
-    await this.runnerRepository.update(runnerId, updateData)
+    await this.updateRunner(runnerId, updateData)
     this.logger.debug(`Updated health for runner ${runnerId}`)
 
     this.eventEmitter.emit(
@@ -430,7 +466,7 @@ export class RunnerService {
   }
 
   private async updateRunnerState(runnerId: string, newState: RunnerState): Promise<void> {
-    const runner = await this.runnerRepository.findOne({ where: { id: runnerId } })
+    const runner = await this.findOne(runnerId)
     if (!runner) {
       this.logger.error(`Runner ${runnerId} not found when trying to update state`)
       return
@@ -442,7 +478,7 @@ export class RunnerService {
       return
     }
 
-    await this.runnerRepository.update(runnerId, {
+    await this.updateRunner(runnerId, {
       state: newState,
       lastChecked: new Date(),
     })
@@ -609,14 +645,86 @@ export class RunnerService {
     }
   }
 
-  async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
-    const runner = await this.runnerRepository.findOne({ where: { id } })
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-decommission-runners', waitForCompletion: true })
+  @LogExecution('check-decommission-runners')
+  @WithInstrumentation()
+  private async handleCheckDecommissionRunners() {
+    const lockKey = 'check-decommission-runners'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
     }
 
+    try {
+      const drainingRunners = await this.runnerRepository.find({
+        where: {
+          draining: true,
+          state: Not(RunnerState.DECOMMISSIONED),
+        },
+      })
+
+      this.logger.debug(`Checking ${drainingRunners.length} draining runners`)
+
+      await Promise.allSettled(
+        drainingRunners.map(async (runner) => {
+          try {
+            // Check if runner has any sandboxes with desiredState != DESTROYED
+            const nonDestroyedSandboxCount = await this.sandboxRepository.count({
+              where: {
+                runnerId: runner.id,
+                desiredState: Not(SandboxDesiredState.DESTROYED),
+              },
+            })
+
+            const redisKey = `runner:draining-check:${runner.id}`
+
+            if (nonDestroyedSandboxCount > 0) {
+              // Reset counter if there are non-destroyed sandboxes
+              await this.redis.set(redisKey, '0', 'EX', 600) // 10 minute TTL
+              this.logger.debug(
+                `Runner ${runner.id} has ${nonDestroyedSandboxCount} sandboxes with desiredState != DESTROYED, reset counter`,
+              )
+            } else {
+              // Increment counter
+              const currentCount = await this.redis.get(redisKey)
+              const count = currentCount ? parseInt(currentCount, 10) + 1 : 1
+
+              if (count >= 3) {
+                // Decommission the runner
+                await this.updateRunner(runner.id, {
+                  state: RunnerState.DECOMMISSIONED,
+                })
+                await this.redis.del(redisKey)
+                this.logger.log(`Runner ${runner.id} has been decommissioned after 3 successful draining checks`)
+              } else {
+                await this.redis.set(redisKey, count.toString(), 'EX', 600) // 10 minute TTL
+                this.logger.debug(
+                  `Runner ${runner.id} draining check passed (${count}/3), all sandboxes have desiredState = DESTROYED`,
+                )
+              }
+            }
+          } catch (e) {
+            this.logger.error(`Error checking draining runner ${runner.id}`, e)
+          }
+        }),
+      )
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  async updateSchedulingStatus(id: string, unschedulable: boolean): Promise<Runner> {
+    const runner = await this.findOneOrFail(id)
     runner.unschedulable = unschedulable
-    return this.runnerRepository.save(runner)
+    await this.runnerRepository.save(runner)
+    return runner
+  }
+
+  async updateDrainingStatus(id: string, draining: boolean): Promise<Runner> {
+    const runner = await this.findOneOrFail(id)
+    runner.draining = draining
+    await this.runnerRepository.save(runner)
+    return runner
   }
 
   async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
@@ -745,13 +853,32 @@ export class RunnerService {
       throw new BadRequestException('Initial runner not found')
     }
 
-    const runner = await this.runnerRepository.findOne({ where: { id: snapshot.initialRunnerId } })
+    return await this.findOneOrFail(snapshot.initialRunnerId)
+  }
 
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
+  private async updateRunner(
+    id: string,
+    data: Partial<Omit<Runner, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<UpdateResult> {
+    const result = await this.runnerRepository.update(id, data)
+    this.invalidateRunnerCache(id)
+    return result
+  }
+
+  private invalidateRunnerCache(runnerId: string): void {
+    const cache = this.dataSource.queryResultCache
+    if (!cache) {
+      return
     }
 
-    return runner
+    cache
+      .remove([runnerLookupCacheKeyById(runnerId)])
+      .then(() => this.logger.debug(`Invalidated runner lookup cache for ${runnerId}`))
+      .catch((error) =>
+        this.logger.warn(
+          `Failed to invalidate runner lookup cache for ${runnerId}: ${error instanceof Error ? error.message : String(error)}`,
+        ),
+      )
   }
 
   private calculateAvailabilityScore(runnerId: string, params: AvailabilityScoreParams): number {

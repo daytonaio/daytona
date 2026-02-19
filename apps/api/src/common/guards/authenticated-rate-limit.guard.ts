@@ -106,10 +106,23 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
                     ? orgLimits.sandboxLifecycle
                     : undefined
 
-            if (customLimit) {
+            const customTtlSeconds =
+              throttler.name === 'authenticated'
+                ? orgLimits.authenticatedTtlSeconds
+                : throttler.name === 'sandbox-create'
+                  ? orgLimits.sandboxCreateTtlSeconds
+                  : throttler.name === 'sandbox-lifecycle'
+                    ? orgLimits.sandboxLifecycleTtlSeconds
+                    : undefined
+
+            if (customLimit != null || customTtlSeconds != null) {
               const modifiedProps = {
                 ...requestProps,
-                limit: customLimit,
+                ...(customLimit != null && { limit: customLimit }),
+                ...(customTtlSeconds != null && {
+                  ttl: customTtlSeconds * 1000,
+                  blockDuration: customTtlSeconds * 1000,
+                }),
               }
               return super.handleRequest(modifiedProps)
             }
@@ -136,9 +149,14 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
     return user?.role === 'ssh-gateway' || user?.role === 'proxy' || user?.role === 'runner'
   }
 
-  private async getCachedOrganizationRateLimits(
-    organizationId: string,
-  ): Promise<{ authenticated: number | null; sandboxCreate: number | null; sandboxLifecycle: number | null } | null> {
+  private async getCachedOrganizationRateLimits(organizationId: string): Promise<{
+    authenticated: number | null
+    sandboxCreate: number | null
+    sandboxLifecycle: number | null
+    authenticatedTtlSeconds: number | null
+    sandboxCreateTtlSeconds: number | null
+    sandboxLifecycleTtlSeconds: number | null
+  } | null> {
     // If OrganizationService is not available (e.g., in UserModule), use default rate limits
     if (!this.organizationService) {
       return null
@@ -158,6 +176,9 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
           authenticated: organization.authenticatedRateLimit,
           sandboxCreate: organization.sandboxCreateRateLimit,
           sandboxLifecycle: organization.sandboxLifecycleRateLimit,
+          authenticatedTtlSeconds: organization.authenticatedRateLimitTtlSeconds,
+          sandboxCreateTtlSeconds: organization.sandboxCreateRateLimitTtlSeconds,
+          sandboxLifecycleTtlSeconds: organization.sandboxLifecycleRateLimitTtlSeconds,
         }
         await this.redis.set(cacheKey, JSON.stringify(limits), 'EX', 60)
         return limits

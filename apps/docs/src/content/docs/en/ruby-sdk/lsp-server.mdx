@@ -12,7 +12,7 @@ LspServer class for Daytona SDK.
 #### new LspServer()
 
 ```ruby
-def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:)
+def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:, otel_state:)
 
 ```
 
@@ -22,6 +22,7 @@ def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:)
 - `path_to_project` _String_ -
 - `toolbox_api` _DaytonaToolboxApiClient:LspApi_ -
 - `sandbox_id` _String_ -
+- `otel_state` _Daytona:OtelState, nil_ -
 
 **Returns**:
 

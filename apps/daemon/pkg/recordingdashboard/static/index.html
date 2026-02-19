@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen Recordings</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #0a0a0a;
+        color: #fafafa;
+        padding: 24px;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #262626;
+      }
+      h1 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #fafafa;
+      }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .refresh-info {
+        font-size: 12px;
+        color: #a3a3a3;
+      }
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s ease;
+      }
+      .btn:hover {
+        opacity: 0.9;
+      }
+      .btn-primary {
+        background: #fafafa;
+        color: #0a0a0a;
+      }
+      .btn-secondary {
+        background: #262626;
+        color: #fafafa;
+        border: 1px solid #404040;
+      }
+      .btn-secondary:hover {
+        background: #333;
+      }
+      .btn-danger {
+        background: #dc2626;
+        color: #fafafa;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: #a3a3a3;
+        padding: 6px 10px;
+      }
+      .btn-ghost:hover {
+        background: #262626;
+        color: #fafafa;
+      }
+      .btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .btn-icon {
+        padding: 6px 8px;
+        font-size: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #0a0a0a;
+        border: 1px solid #262626;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        text-align: left;
+        border-bottom: 1px solid #262626;
+      }
+      th {
+        background: #141414;
+        color: #a3a3a3;
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      tr:hover td {
+        background: #141414;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .actions {
+        display: flex;
+        gap: 4px;
+      }
+      .empty {
+        text-align: center;
+        padding: 48px 24px;
+        color: #a3a3a3;
+      }
+      .empty-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal.active {
+        display: flex;
+      }
+      .modal-content {
+        background: #141414;
+        border: 1px solid #262626;
+        padding: 20px;
+        border-radius: 12px;
+        max-width: 90%;
+        max-height: 90%;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #262626;
+      }
+      .modal-header h2 {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .close-btn {
+        background: #262626;
+        border: none;
+        color: #a3a3a3;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .close-btn:hover {
+        background: #333;
+        color: #fafafa;
+      }
+      video {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 8px;
+        background: #000;
+      }
+      .badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+      .badge-completed {
+        background: #166534;
+        color: #86efac;
+      }
+      .badge-recording {
+        background: #854d0e;
+        color: #fde047;
+      }
+      .badge-failed {
+        background: #991b1b;
+        color: #fca5a5;
+      }
+      .filename {
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+        font-size: 13px;
+        color: #e5e5e5;
+      }
+      .meta {
+        color: #a3a3a3;
+        font-size: 13px;
+      }
+      input[type='checkbox'] {
+        width: 16px;
+        height: 16px;
+        accent-color: #fafafa;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="header-left">
+          <h1>Screen Recordings</h1>
+          <span class="refresh-info">Auto-refresh: 5s</span>
+        </div>
+        <button class="btn btn-danger" id="deleteSelected" disabled onclick="deleteSelected()">Delete Selected</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 40px"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" /></th>
+            <th>Filename</th>
+            <th>Duration</th>
+            <th>Size</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th style="width: 120px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="recordingsBody">
+          <tr>
+            <td colspan="7" class="empty">
+              <div class="empty-icon">📹</div>
+              Loading...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal" id="videoModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="videoTitle">Video Playback</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <video id="videoPlayer" controls></video>
+      </div>
+    </div>
+
+    <script>
+      let recordings = []
+      let selectedIds = new Set()
+
+      async function loadRecordings() {
+        try {
+          const resp = await fetch('/api/recordings')
+          const data = await resp.json()
+          recordings = data.recordings || []
+          renderTable()
+        } catch (err) {
+          console.error('Failed to load recordings:', err)
+        }
+      }
+
+      function renderTable() {
+        const tbody = document.getElementById('recordingsBody')
+        if (recordings.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="7" class="empty"><div class="empty-icon">📹</div>No recordings yet</td></tr>'
+          return
+        }
+
+        tbody.innerHTML = recordings
+          .map((rec) => {
+            const duration = rec.durationSeconds ? rec.durationSeconds.toFixed(1) + 's' : '-'
+            const size = rec.sizeBytes ? formatBytes(rec.sizeBytes) : '-'
+            const date = new Date(rec.startTime).toLocaleString()
+            const checked = selectedIds.has(rec.id) ? 'checked' : ''
+            const badgeClass = 'badge-' + rec.status
+
+            return `<tr>
+                    <td><input type="checkbox" ${checked} onchange="toggleSelect('${rec.id}')"></td>
+                    <td class="filename">${rec.fileName}</td>
+                    <td class="meta">${duration}</td>
+                    <td class="meta">${size}</td>
+                    <td><span class="badge ${badgeClass}">${rec.status}</span></td>
+                    <td class="meta">${date}</td>
+                    <td class="actions">
+                        <button class="btn btn-ghost btn-icon" onclick="playVideo('${rec.fileName}')" ${rec.status !== 'completed' ? 'disabled' : ''} title="Play">▶</button>
+                        <button class="btn btn-ghost btn-icon" onclick="downloadVideo('${rec.fileName}')" ${rec.status !== 'completed' ? 'disabled' : ''} title="Download">⬇</button>
+                        <button class="btn btn-ghost btn-icon" onclick="deleteRecording('${rec.id}')" title="Delete">🗑</button>
+                    </td>
+                </tr>`
+          })
+          .join('')
+
+        updateDeleteButton()
+      }
+
+      function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B'
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
+      }
+
+      function toggleSelect(id) {
+        if (selectedIds.has(id)) {
+          selectedIds.delete(id)
+        } else {
+          selectedIds.add(id)
+        }
+        updateDeleteButton()
+      }
+
+      function toggleSelectAll() {
+        const selectAll = document.getElementById('selectAll').checked
+        selectedIds.clear()
+        if (selectAll) {
+          recordings.forEach((r) => selectedIds.add(r.id))
+        }
+        renderTable()
+      }
+
+      function updateDeleteButton() {
+        document.getElementById('deleteSelected').disabled = selectedIds.size === 0
+      }
+
+      function playVideo(filename) {
+        const video = document.getElementById('videoPlayer')
+        video.src = '/videos/' + filename
+        document.getElementById('videoTitle').textContent = filename
+        document.getElementById('videoModal').classList.add('active')
+        video.play()
+      }
+
+      function closeModal() {
+        const video = document.getElementById('videoPlayer')
+        video.pause()
+        video.src = ''
+        document.getElementById('videoModal').classList.remove('active')
+      }
+
+      function downloadVideo(filename) {
+        const a = document.createElement('a')
+        a.href = '/videos/' + filename
+        a.download = filename
+        a.click()
+      }
+
+      async function deleteRecording(id) {
+        if (!confirm('Delete this recording?')) return
+
+        try {
+          const resp = await fetch('/api/recordings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: [id] }),
+          })
+          if (resp.ok) {
+            selectedIds.delete(id)
+            loadRecordings()
+          }
+        } catch (err) {
+          alert('Failed to delete recording')
+        }
+      }
+
+      async function deleteSelected() {
+        if (!confirm('Delete ' + selectedIds.size + ' selected recording(s)?')) return
+
+        try {
+          const resp = await fetch('/api/recordings', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids: Array.from(selectedIds) }),
+          })
+          if (resp.ok) {
+            selectedIds.clear()
+            loadRecordings()
+          }
+        } catch (err) {
+          alert('Failed to delete recordings')
+        }
+      }
+
+      // Initial load and auto-refresh
+      loadRecordings()
+      setInterval(loadRecordings, 5000)
+
+      // Close modal on escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal()
+      })
+    </script>
+  </body>
+</html>

@@ -310,6 +310,13 @@ definitions:
       - currentBranch
       - fileStatus
     type: object
+  InitializeRequest:
+    properties:
+      token:
+        type: string
+    required:
+      - token
+    type: object
   InterpreterContext:
     properties:
       active:
@@ -375,6 +382,15 @@ definitions:
         type: array
     required:
       - contexts
+    type: object
+  ListRecordingsResponse:
+    properties:
+      recordings:
+        items:
+          $ref: '#/definitions/Recording'
+        type: array
+    required:
+      - recordings
     type: object
   LspCompletionParams:
     properties:
@@ -670,6 +686,31 @@ definitions:
       - lazyStart
       - rows
     type: object
+  Recording:
+    properties:
+      durationSeconds:
+        type: number
+      endTime:
+        type: string
+      fileName:
+        type: string
+      filePath:
+        type: string
+      id:
+        type: string
+      sizeBytes:
+        type: integer
+      startTime:
+        type: string
+      status:
+        type: string
+    required:
+      - fileName
+      - filePath
+      - id
+      - startTime
+      - status
+    type: object
   ReplaceRequest:
     properties:
       files:
@@ -762,6 +803,11 @@ definitions:
     required:
       - data
     type: object
+  StartRecordingRequest:
+    properties:
+      label:
+        type: string
+    type: object
   Status:
     enum:
       - Unmodified
@@ -782,6 +828,13 @@ definitions:
       - Renamed
       - Copied
       - UpdatedButUnmerged
+  StopRecordingRequest:
+    properties:
+      id:
+        type: string
+    required:
+      - id
+    type: object
   UserHomeDirResponse:
     properties:
       dir:
@@ -1134,6 +1187,192 @@ paths:
           schema:
             $ref: '#/definitions/ProcessStatusResponse'
       summary: Get specific process status
+      tags:
+        - computer-use
+  /computeruse/recordings:
+    get:
+      description: Get a list of all recordings (active and completed)
+      operationId: ListRecordings
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ListRecordingsResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all recordings
+      tags:
+        - computer-use
+  /computeruse/recordings/{id}:
+    delete:
+      description: Delete a recording file by ID
+      operationId: DeleteRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a recording
+      tags:
+        - computer-use
+    get:
+      description: Get details of a specific recording by ID
+      operationId: GetRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Recording'
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get recording details
+      tags:
+        - computer-use
+  /computeruse/recordings/{id}/download:
+    get:
+      description: Download a recording by providing its ID
+      operationId: DownloadRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          type: string
+      produces:
+        - application/octet-stream
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: file
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Download a recording
+      tags:
+        - computer-use
+  /computeruse/recordings/start:
+    post:
+      consumes:
+        - application/json
+      description: Start a new screen recording session
+      operationId: StartRecording
+      parameters:
+        - description: Recording options
+          in: body
+          name: request
+          schema:
+            $ref: '#/definitions/StartRecordingRequest'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Recording'
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '500':
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Start a new recording
+      tags:
+        - computer-use
+  /computeruse/recordings/stop:
+    post:
+      consumes:
+        - application/json
+      description: Stop an active screen recording session
+      operationId: StopRecording
+      parameters:
+        - description: Recording ID to stop
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/StopRecordingRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Recording'
+        '400':
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        '404':
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Stop a recording
       tags:
         - computer-use
   /computeruse/screenshot:
@@ -1837,6 +2076,29 @@ paths:
       summary: Get Git status
       tags:
         - git
+  /init:
+    post:
+      description: Set the auth token and initialize telemetry for the toolbox server
+      operationId: Initialize
+      parameters:
+        - description: Initialization request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/InitializeRequest'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Initialize toolbox server
+      tags:
+        - server
   /lsp/completions:
     post:
       consumes:

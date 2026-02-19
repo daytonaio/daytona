@@ -1,5 +1,6 @@
 .gitignore
 .npmignore
+.openapi-generator-ignore
 api.ts
 api/admin-api.ts
 api/api-keys-api.ts
@@ -87,12 +88,16 @@ models/keyboard-hotkey-request.ts
 models/keyboard-press-request.ts
 models/keyboard-type-request.ts
 models/list-branch-response.ts
+models/log-entry.ts
 models/lsp-completion-params.ts
 models/lsp-document-request.ts
 models/lsp-location.ts
 models/lsp-server-request.ts
 models/lsp-symbol.ts
 models/match.ts
+models/metric-data-point.ts
+models/metric-series.ts
+models/metrics-response.ts
 models/mouse-click-request.ts
 models/mouse-click-response.ts
 models/mouse-drag-request.ts
@@ -110,10 +115,13 @@ models/organization-suspension.ts
 models/organization-usage-overview.ts
 models/organization-user.ts
 models/organization.ts
+models/otel-config.ts
 models/paginated-audit-logs.ts
 models/paginated-jobs.ts
+models/paginated-logs.ts
 models/paginated-sandboxes.ts
 models/paginated-snapshots.ts
+models/paginated-traces.ts
 models/poll-jobs-response.ts
 models/port-preview-url.ts
 models/position.ts
@@ -169,6 +177,8 @@ models/ssh-access-dto.ts
 models/ssh-access-validation-dto.ts
 models/storage-access-dto.ts
 models/toolbox-proxy-url.ts
+models/trace-span.ts
+models/trace-summary.ts
 models/update-docker-registry.ts
 models/update-job-status.ts
 models/update-organization-default-region.ts

@@ -10,7 +10,7 @@ import { ArrowDown, ArrowUp } from 'lucide-react'
 import React from 'react'
 import { EllipsisWithTooltip } from '../EllipsisWithTooltip'
 import { Checkbox } from '../ui/checkbox'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SandboxState as SandboxStateComponent } from './SandboxState'
 import { SandboxTableActions } from './SandboxTableActions'
 
@@ -54,6 +54,7 @@ interface GetColumnsProps {
   handleRevokeSshAccess: (id: string) => void
   handleRecover: (id: string) => void
   getRegionName: (regionId: string) => string | undefined
+  handleScreenRecordings: (id: string) => void
 }
 
 export function getColumns({
@@ -70,6 +71,7 @@ export function getColumns({
   handleRevokeSshAccess,
   handleRecover,
   getRegionName,
+  handleScreenRecordings,
 }: GetColumnsProps): ColumnDef<Sandbox>[] {
   const handleOpenWebTerminal = async (sandboxId: string) => {
     const url = await getWebTerminalUrl(sandboxId)
@@ -248,24 +250,22 @@ export function getColumns({
 
         const labelCount = Object.keys(row.original.labels ?? {}).length
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                {labelCount > 0 ? (
-                  <div className="truncate w-fit bg-blue-100 rounded-sm text-blue-800 dark:bg-blue-950 dark:text-blue-200 px-1">
-                    {labelCount > 0 ? (labelCount === 1 ? '1 label' : `${labelCount} labels`) : '/'}
-                  </div>
-                ) : (
-                  <div className="truncate max-w-md text-muted-foreground/50">-</div>
-                )}
-              </TooltipTrigger>
-              {labels && (
-                <TooltipContent>
-                  <p className="max-w-[300px]">{labels}</p>
-                </TooltipContent>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              {labelCount > 0 ? (
+                <div className="truncate w-fit bg-blue-100 rounded-sm text-blue-800 dark:bg-blue-950 dark:text-blue-200 px-1">
+                  {labelCount > 0 ? (labelCount === 1 ? '1 label' : `${labelCount} labels`) : '/'}
+                </div>
+              ) : (
+                <div className="truncate max-w-md text-muted-foreground/50">-</div>
               )}
-            </Tooltip>
-          </TooltipProvider>
+            </TooltipTrigger>
+            {labels && (
+              <TooltipContent>
+                <p className="max-w-[300px]">{labels}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
         )
       },
       accessorFn: (row) => Object.entries(row.labels ?? {}).map(([key, value]) => `${key}: ${value}`),
@@ -325,6 +325,7 @@ export function getColumns({
             onCreateSshAccess={handleCreateSshAccess}
             onRevokeSshAccess={handleRevokeSshAccess}
             onRecover={handleRecover}
+            onScreenRecordings={handleScreenRecordings}
           />
         </div>
       ),

@@ -486,6 +486,10 @@ class Image(BaseModel):
 
             # Check if the line contains a COPY command (at the beginning of the line)
             if re.match(r"^\s*COPY\s+(?!.*--from=)", line, re.IGNORECASE):
+                # Skip COPY instructions that use heredoc syntax (inline content, not file references)
+                if "<<" in line:
+                    continue
+
                 # Extract the sources from the COPY command
                 command_parts = Image.__parse_copy_command(line)
 

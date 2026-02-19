@@ -379,6 +379,16 @@ export class SnapshotService {
       take: limitNum,
     })
 
+    // Filter out snapshot regions that are not available to the organization
+    const availableRegions = await this.organizationService.listAvailableRegions(organizationId)
+    const availableRegionIds = new Set(availableRegions.map((r) => r.id))
+
+    for (const snapshot of items) {
+      if (snapshot.snapshotRegions) {
+        snapshot.snapshotRegions = snapshot.snapshotRegions.filter((sr) => availableRegionIds.has(sr.regionId))
+      }
+    }
+
     return {
       items,
       total,
@@ -437,11 +447,7 @@ export class SnapshotService {
       throw new NotFoundException(`Snapshot ${snapshot.id} has no initial runner`)
     }
 
-    const runner = await this.runnerService.findOne(snapshot.initialRunnerId)
-    if (!runner) {
-      throw new NotFoundException(`Initial runner for snapshot ${snapshot.id} not found`)
-    }
-
+    const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     const region = await this.regionService.findOne(runner.region, true)
 
     if (!region) {

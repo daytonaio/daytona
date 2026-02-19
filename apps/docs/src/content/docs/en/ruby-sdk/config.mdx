@@ -12,7 +12,7 @@ Main class for a new Daytona::Config object.
 #### new Config()
 
 ```ruby
-def initialize(api_key:, jwt_token:, api_url:, organization_id:, target:)
+def initialize(api_key:, jwt_token:, api_url:, organization_id:, target:, _experimental:)
 
 ```
 
@@ -25,6 +25,7 @@ Initializes a new Daytona::Config object.
 - `api_url` _String, nil_ - Daytona API URL. Defaults to ENV['DAYTONA_API_URL'] or Daytona::Config::API_URL.
 - `organization_id` _String, nil_ - Daytona organization ID. Defaults to ENV['DAYTONA_ORGANIZATION_ID'].
 - `target` _String, nil_ - Daytona target. Defaults to ENV['DAYTONA_TARGET'].
+- `_experimental` _Hash, nil_ - Experimental configuration options.
 
 **Returns**:
 
@@ -161,3 +162,29 @@ Target environment for sandboxes
 **Returns**:
 
 - `String, nil` - Daytona target
+
+#### _experimental()
+
+```ruby
+def _experimental()
+
+```
+
+Experimental configuration options
+
+**Returns**:
+
+- `Hash, nil` - Experimental configuration hash
+
+#### _experimental=()
+
+```ruby
+def _experimental=(value)
+
+```
+
+Experimental configuration options
+
+**Returns**:
+
+- `Hash, nil` - Experimental configuration hash

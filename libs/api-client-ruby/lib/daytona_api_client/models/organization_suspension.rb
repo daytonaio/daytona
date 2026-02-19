@@ -88,8 +88,6 @@ module DaytonaApiClient
 
       if attributes.key?(:'suspension_cleanup_grace_period_hours')
         self.suspension_cleanup_grace_period_hours = attributes[:'suspension_cleanup_grace_period_hours']
-      else
-        self.suspension_cleanup_grace_period_hours = nil
       end
     end
 
@@ -106,8 +104,8 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "_until", _until cannot be nil.')
       end
 
-      if @suspension_cleanup_grace_period_hours.nil?
-        invalid_properties.push('invalid value for "suspension_cleanup_grace_period_hours", suspension_cleanup_grace_period_hours cannot be nil.')
+      if !@suspension_cleanup_grace_period_hours.nil? && @suspension_cleanup_grace_period_hours < 0
+        invalid_properties.push('invalid value for "suspension_cleanup_grace_period_hours", must be greater than or equal to 0.')
       end
 
       invalid_properties
@@ -119,7 +117,7 @@ module DaytonaApiClient
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @reason.nil?
       return false if @_until.nil?
-      return false if @suspension_cleanup_grace_period_hours.nil?
+      return false if !@suspension_cleanup_grace_period_hours.nil? && @suspension_cleanup_grace_period_hours < 0
       true
     end
 
@@ -148,6 +146,10 @@ module DaytonaApiClient
     def suspension_cleanup_grace_period_hours=(suspension_cleanup_grace_period_hours)
       if suspension_cleanup_grace_period_hours.nil?
         fail ArgumentError, 'suspension_cleanup_grace_period_hours cannot be nil'
+      end
+
+      if suspension_cleanup_grace_period_hours < 0
+        fail ArgumentError, 'invalid value for "suspension_cleanup_grace_period_hours", must be greater than or equal to 0.'
       end
 
       @suspension_cleanup_grace_period_hours = suspension_cleanup_grace_period_hours

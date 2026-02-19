@@ -6,7 +6,6 @@
 import { Invoice } from '@/billing-api/types/Invoice'
 import { AutomaticTopUp } from '@/billing-api/types/OrganizationWallet'
 import { InvoicesTable } from '@/components/Invoices'
-import { OrganizationEmailsTable } from '@/components/OrganizationEmails'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -16,24 +15,20 @@ import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
-import { useAddOrganizationEmailMutation } from '@/hooks/mutations/useAddOrganizationEmailMutation'
 import { useCreateInvoicePaymentUrlMutation } from '@/hooks/mutations/useCreateInvoicePaymentUrlMutation'
-import { useDeleteOrganizationEmailMutation } from '@/hooks/mutations/useDeleteOrganizationEmailMutation'
 import { useRedeemCouponMutation } from '@/hooks/mutations/useRedeemCouponMutation'
-import { useResendOrganizationEmailVerificationMutation } from '@/hooks/mutations/useResendOrganizationEmailVerificationMutation'
 import { useSetAutomaticTopUpMutation } from '@/hooks/mutations/useSetAutomaticTopUpMutation'
 import { useTopUpWalletMutation } from '@/hooks/mutations/useTopUpWalletMutation'
 import { useVoidInvoiceMutation } from '@/hooks/mutations/useVoidInvoiceMutation'
 import {
   useOwnerBillingPortalUrlQuery,
   useOwnerInvoicesQuery,
-  useOwnerOrganizationEmailsQuery,
   useOwnerWalletQuery,
 } from '@/hooks/queries/billingQueries'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatAmount } from '@/lib/utils'
-import { ArrowUpRight, CheckCircleIcon, CreditCardIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowUpRight, CheckCircleIcon, InfoIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { useAuth } from 'react-oidc-context'
@@ -57,18 +52,12 @@ const Wallet = () => {
   })
   const walletQuery = useOwnerWalletQuery({ refetchOnMount: 'always' })
   const billingPortalUrlQuery = useOwnerBillingPortalUrlQuery()
-  const organizationEmailsQuery = useOwnerOrganizationEmailsQuery()
   const invoicesQuery = useOwnerInvoicesQuery(invoicesPagination.pageIndex + 1, invoicesPagination.pageSize)
 
   const wallet = walletQuery.data
   const billingPortalUrl = billingPortalUrlQuery.data
-  const organizationEmails = organizationEmailsQuery.data
-
   const setAutomaticTopUpMutation = useSetAutomaticTopUpMutation()
   const redeemCouponMutation = useRedeemCouponMutation()
-  const addOrganizationEmailMutation = useAddOrganizationEmailMutation()
-  const deleteOrganizationEmailMutation = useDeleteOrganizationEmailMutation()
-  const resendOrganizationEmailVerificationMutation = useResendOrganizationEmailVerificationMutation()
   const topUpWalletMutation = useTopUpWalletMutation()
   const createInvoicePaymentUrlMutation = useCreateInvoicePaymentUrlMutation()
   const voidInvoiceMutation = useVoidInvoiceMutation()
@@ -161,66 +150,6 @@ const Wallet = () => {
     return true
   }, [setAutomaticTopUpMutation.isPending, wallet, automaticTopUp])
 
-  const handleDeleteEmail = useCallback(
-    async (email: string) => {
-      if (!selectedOrganization) {
-        return
-      }
-      try {
-        await deleteOrganizationEmailMutation.mutateAsync({
-          organizationId: selectedOrganization.id,
-          email,
-        })
-        toast.success('Email deleted successfully')
-      } catch (error) {
-        toast.error('Failed to delete email', {
-          description: String(error),
-        })
-      }
-    },
-    [selectedOrganization, deleteOrganizationEmailMutation],
-  )
-
-  const handleResendVerification = useCallback(
-    async (email: string) => {
-      if (!selectedOrganization) {
-        return
-      }
-      try {
-        await resendOrganizationEmailVerificationMutation.mutateAsync({
-          organizationId: selectedOrganization.id,
-          email,
-        })
-        toast.success('Verification email sent successfully')
-      } catch (error) {
-        toast.error('Failed to resend verification email', {
-          description: String(error),
-        })
-      }
-    },
-    [selectedOrganization, resendOrganizationEmailVerificationMutation],
-  )
-
-  const handleAddEmail = useCallback(
-    async (email: string) => {
-      if (!selectedOrganization) {
-        return
-      }
-      try {
-        await addOrganizationEmailMutation.mutateAsync({
-          organizationId: selectedOrganization.id,
-          email,
-        })
-        toast.success('Email added successfully. A verification email has been sent.')
-      } catch (error) {
-        toast.error('Failed to add email', {
-          description: String(error),
-        })
-      }
-    },
-    [selectedOrganization, addOrganizationEmailMutation],
-  )
-
   const handleTopUpWallet = useCallback(async () => {
     if (!selectedOrganization) {
       return
@@ -298,6 +227,8 @@ const Wallet = () => {
   )
 
   const isBillingLoading = walletQuery.isLoading && billingPortalUrlQuery.isLoading
+  const topUpEnabled =
+    wallet?.creditCardConnected && !topUpWalletMutation.isPending && (selectedPreset || oneTimeTopUpAmount)
 
   return (
     <PageLayout>
@@ -354,17 +285,10 @@ const Wallet = () => {
                     </AlertDescription>
                   </Alert>
                 )}
-                {!wallet.creditCardConnected && user.profile.email_verified && (
-                  <Alert variant="warning">
-                    <CreditCardIcon />
-                    <AlertTitle> Credit card not connected</AlertTitle>
-                    <AlertDescription>
-                      {selectedOrganization?.personal ? (
-                        <>Connect a credit card to receive an additional $100 of credits.</>
-                      ) : (
-                        <>Please connect your credit card to your account to continue using our service.</>
-                      )}
-                    </AlertDescription>
+                {!wallet.creditCardConnected && user.profile.email_verified && selectedOrganization?.personal && (
+                  <Alert variant="neutral">
+                    <SparklesIcon />
+                    <AlertDescription>Connect a credit card to receive an additional $100 of credits.</AlertDescription>
                   </Alert>
                 )}
               </>
@@ -648,16 +572,7 @@ const Wallet = () => {
                 <div className="text-sm text-muted-foreground">
                   You will be redirected to Stripe to complete the payment.
                 </div>
-                <Button
-                  onClick={handleTopUpWallet}
-                  disabled={
-                    walletQuery.isLoading ||
-                    !wallet ||
-                    topUpWalletMutation.isPending ||
-                    (selectedPreset === null && !oneTimeTopUpAmount)
-                  }
-                  size="sm"
-                >
+                <Button onClick={handleTopUpWallet} disabled={!topUpEnabled} size="sm">
                   {topUpWalletMutation.isPending && <Spinner />}
                   Top up
                 </Button>
@@ -688,26 +603,6 @@ const Wallet = () => {
             </Card>
           </>
         )}
-
-        {/* Organization Emails Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Billing emails</CardTitle>
-            <CardDescription>
-              Manage billing emails for your organization which recieve important billing notifications such as invoices
-              and credit depletion notices.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <OrganizationEmailsTable
-              data={organizationEmails ?? []}
-              loading={organizationEmailsQuery.isLoading}
-              handleDelete={handleDeleteEmail}
-              handleResendVerification={handleResendVerification}
-              handleAddEmail={handleAddEmail}
-            />
-          </CardContent>
-        </Card>
       </PageContent>
     </PageLayout>
   )

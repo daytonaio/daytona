@@ -31,12 +31,28 @@ jobs:
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           git diff --exit-code -- 'go.work*' '*/go.mod' '*/go.sum' || (echo "Go workspace files are not up to date! Please run 'go work sync' and commit the changes." && exit 1)
 
+  cli-docs:
+    name: CLI docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: yarn install --immutable
+      - name: Check CLI reference docs are up to date
+        run: |
+          cd apps/docs
+          node tools/update-cli-reference.js --local
+          git diff --exit-code -- src/content/docs/en/tools/cli.mdx || (echo "CLI reference docs on the docs site are out of sync! Please run 'cd apps/docs && node tools/update-cli-reference.js --local' and commit the changes." && exit 1)
+
   golangci:
     name: Go lint
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, libs/sdk-go]
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, libs/sdk-go, apps/otel-collector/exporter]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -171,6 +187,7 @@ jobs:
         run: |
           source "$(poetry env info --path)/bin/activate"
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
           yarn
           VERSION=0.0.0-dev yarn build --nxBail=true
 

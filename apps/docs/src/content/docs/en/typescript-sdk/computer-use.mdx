@@ -13,13 +13,14 @@ Computer Use functionality for interacting with the desktop environment.
 - `display` _Display_ - Display operations interface
 - `keyboard` _Keyboard_ - Keyboard operations interface
 - `mouse` _Mouse_ - Mouse operations interface
+- `recording` _RecordingService_ - Screen recording operations interface
 - `screenshot` _Screenshot_ - Screenshot operations interface
     
 
 
 
 
-Provides access to mouse, keyboard, screenshot, and display operations
+Provides access to mouse, keyboard, screenshot, display, and recording operations
 for automating desktop interactions within a sandbox.
 
 ### Constructors
@@ -625,6 +626,193 @@ const scrollUp = await sandbox.computerUse.mouse.scroll(100, 200, 'up', 3);
 
 // Scroll down
 const scrollDown = await sandbox.computerUse.mouse.scroll(100, 200, 'down', 5);
+```
+
+***
+
+
+## RecordingService
+
+Recording operations for computer use functionality.
+
+### Constructors
+
+#### new RecordingService()
+
+```ts
+new RecordingService(apiClient: ComputerUseApi): RecordingService
+```
+
+**Parameters**:
+
+- `apiClient` _ComputerUseApi_
+
+
+**Returns**:
+
+- `RecordingService`
+
+### Methods
+
+#### delete()
+
+```ts
+delete(id: string): Promise<void>
+```
+
+Deletes a recording by ID
+
+**Parameters**:
+
+- `id` _string_ - The ID of the recording to delete
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```typescript
+await sandbox.computerUse.recording.delete(recordingId);
+console.log('Recording deleted');
+```
+
+***
+
+#### download()
+
+```ts
+download(id: string, localPath: string): Promise<void>
+```
+
+Downloads a recording file and saves it to a local path
+
+The file is streamed directly to disk without loading the entire content into memory.
+
+**Parameters**:
+
+- `id` _string_ - The ID of the recording to download
+- `localPath` _string_ - Path to save the recording file locally
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```typescript
+// Download recording to file
+await sandbox.computerUse.recording.download(recordingId, 'local_recording.mp4');
+console.log('Recording downloaded');
+```
+
+***
+
+#### get()
+
+```ts
+get(id: string): Promise<Recording>
+```
+
+Gets details of a specific recording by ID
+
+**Parameters**:
+
+- `id` _string_ - The ID of the recording to retrieve
+
+
+**Returns**:
+
+- `Promise<Recording>` - Recording details
+
+**Example:**
+
+```typescript
+const recording = await sandbox.computerUse.recording.get(recordingId);
+console.log(`Recording: ${recording.fileName}`);
+console.log(`Status: ${recording.status}`);
+console.log(`Duration: ${recording.durationSeconds} seconds`);
+```
+
+***
+
+#### list()
+
+```ts
+list(): Promise<ListRecordingsResponse>
+```
+
+Lists all recordings (active and completed)
+
+**Returns**:
+
+- `Promise<ListRecordingsResponse>` - List of all recordings
+
+**Example:**
+
+```typescript
+const recordings = await sandbox.computerUse.recording.list();
+console.log(`Found ${recordings.recordings.length} recordings`);
+recordings.recordings.forEach(rec => {
+  console.log(`- ${rec.fileName}: ${rec.status}`);
+});
+```
+
+***
+
+#### start()
+
+```ts
+start(label?: string): Promise<Recording>
+```
+
+Starts a new screen recording session
+
+**Parameters**:
+
+- `label?` _string_ - Optional custom label for the recording
+
+
+**Returns**:
+
+- `Promise<Recording>` - Started recording details
+
+**Example:**
+
+```typescript
+// Start a recording with a label
+const recording = await sandbox.computerUse.recording.start('my-test-recording');
+console.log(`Recording started: ${recording.id}`);
+console.log(`File: ${recording.filePath}`);
+```
+
+***
+
+#### stop()
+
+```ts
+stop(id: string): Promise<Recording>
+```
+
+Stops an active screen recording session
+
+**Parameters**:
+
+- `id` _string_ - The ID of the recording to stop
+
+
+**Returns**:
+
+- `Promise<Recording>` - Stopped recording details
+
+**Example:**
+
+```typescript
+const result = await sandbox.computerUse.recording.stop(recording.id);
+console.log(`Recording stopped: ${result.durationSeconds} seconds`);
+console.log(`Saved to: ${result.filePath}`);
 ```
 
 ***

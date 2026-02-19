@@ -55,6 +55,7 @@ for volume in volumes:
 #### VolumeService.get
 
 ```python
+@with_instrumentation()
 def get(name: str, create: bool = False) -> Volume
 ```
 
@@ -82,6 +83,7 @@ print(f"{volume.name} ({volume.id})")
 #### VolumeService.create
 
 ```python
+@with_instrumentation()
 def create(name: str) -> Volume
 ```
 
@@ -108,6 +110,7 @@ print(f"{volume.name} ({volume.id}); state: {volume.state}")
 #### VolumeService.delete
 
 ```python
+@with_instrumentation()
 def delete(volume: Volume) -> None
 ```
 

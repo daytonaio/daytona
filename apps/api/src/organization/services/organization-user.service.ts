@@ -62,6 +62,12 @@ export class OrganizationUserService {
     })
   }
 
+  async exists(organizationId: string, userId: string): Promise<boolean> {
+    return this.organizationUserRepository.exists({
+      where: { organizationId, userId },
+    })
+  }
+
   async updateAccess(
     organizationId: string,
     userId: string,

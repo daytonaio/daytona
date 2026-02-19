@@ -8,6 +8,7 @@ api_interpreter.go
 api_lsp.go
 api_port.go
 api_process.go
+api_server.go
 client.go
 configuration.go
 go.mod
@@ -38,6 +39,7 @@ model_git_commit_response.go
 model_git_git_delete_branch_request.go
 model_git_repo_request.go
 model_git_status.go
+model_initialize_request.go
 model_interpreter_context.go
 model_is_port_in_use_response.go
 model_keyboard_hotkey_request.go
@@ -45,6 +47,7 @@ model_keyboard_press_request.go
 model_keyboard_type_request.go
 model_list_branch_response.go
 model_list_contexts_response.go
+model_list_recordings_response.go
 model_lsp_completion_params.go
 model_lsp_document_request.go
 model_lsp_location.go
@@ -72,6 +75,7 @@ model_pty_create_response.go
 model_pty_list_response.go
 model_pty_resize_request.go
 model_pty_session_info.go
+model_recording.go
 model_replace_request.go
 model_replace_result.go
 model_screenshot_response.go
@@ -80,7 +84,10 @@ model_search_files_response.go
 model_session.go
 model_session_execute_request.go
 model_session_execute_response.go
+model_session_send_input_request.go
+model_start_recording_request.go
 model_status.go
+model_stop_recording_request.go
 model_user_home_dir_response.go
 model_window_info.go
 model_windows_response.go

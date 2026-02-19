@@ -28,6 +28,7 @@ import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/organization-region.controller'
 import { Region } from '../region/entities/region.entity'
+import { EncryptionModule } from '../encryption/encryption.module'
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { Region } from '../region/entities/region.entity'
       RegionQuota,
       Region,
     ]),
+    EncryptionModule,
   ],
   controllers: [
     OrganizationController,

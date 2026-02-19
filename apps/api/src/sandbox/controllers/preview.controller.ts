@@ -9,7 +9,7 @@ import { SandboxService } from '../services/sandbox.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrganizationService } from '../../organization/services/organization.service'
+import { OrganizationUserService } from '../../organization/services/organization-user.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('preview')
@@ -20,7 +20,7 @@ export class PreviewController {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly sandboxService: SandboxService,
-    private readonly organizationService: OrganizationService,
+    private readonly organizationUserService: OrganizationUserService,
   ) {}
 
   @Get(':sandboxId/public')
@@ -141,9 +141,8 @@ export class PreviewController {
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
 
-    const organizations = await this.organizationService.findByUser(userId)
     const sandbox = await this.sandboxService.findOne(sandboxId)
-    const hasAccess = organizations.find((org) => org.id === sandbox.organizationId)
+    const hasAccess = await this.organizationUserService.exists(sandbox.organizationId, userId)
     if (!hasAccess) {
       await this.redis.setex(`preview:token:${sandboxId}:${userId}`, 3, '0')
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)

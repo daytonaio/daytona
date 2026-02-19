@@ -146,6 +146,9 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
+  healthCheck: {
+    apiKey: process.env.HEALTH_CHECK_API_KEY,
+  },
   sshGateway: {
     apiKey: process.env.SSH_GATEWAY_API_KEY,
     command: process.env.SSH_GATEWAY_COMMAND,
@@ -299,6 +302,24 @@ const configuration = {
   runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
   warmPool: {
     candidateLimit: parseInt(process.env.WARM_POOL_CANDIDATE_LIMIT || '300', 10),
+  },
+  sandboxOtel: {
+    endpointUrl: process.env.SANDBOX_OTEL_ENDPOINT_URL,
+  },
+  otelCollector: {
+    apiKey: process.env.OTEL_COLLECTOR_API_KEY,
+  },
+  clickhouse: {
+    host: process.env.CLICKHOUSE_HOST,
+    port: parseInt(process.env.CLICKHOUSE_PORT || '8123', 10),
+    database: process.env.CLICKHOUSE_DATABASE || 'otel',
+    username: process.env.CLICKHOUSE_USERNAME || 'default',
+    password: process.env.CLICKHOUSE_PASSWORD,
+    protocol: process.env.CLICKHOUSE_PROTOCOL || 'https',
+  },
+  encryption: {
+    key: process.env.ENCRYPTION_KEY,
+    salt: process.env.ENCRYPTION_SALT,
   },
 }
 

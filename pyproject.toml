@@ -44,7 +44,10 @@ exclude = [
     "libs/sdk-python/scripts",
     "libs/*api-client*",
     "apps",
-    "guides"
+    "guides",
+    ".nx",
+    "tmp",
+    "libs/sdk-python/src/daytona/_utils/otel_decorator.py"
 ]
 reportUnknownMemberType = "none"
 reportAny = "none"
@@ -92,5 +95,5 @@ ignore-paths = [
   "^.*/build/.*$",
   "^libs/.*api-client-python.*/.*$",
   "^node_modules/.*$",
-  "^.*/\\node_modules/.*$",
+  "^.*/\\node_modules/.*$"
 ]

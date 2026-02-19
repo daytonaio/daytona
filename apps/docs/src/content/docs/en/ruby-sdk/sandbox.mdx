@@ -12,7 +12,7 @@ Sandbox class for Daytona SDK.
 #### new Sandbox()
 
 ```ruby
-def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:)
+def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:, otel_state:)
 
 ```
 
@@ -762,6 +762,63 @@ Stops the Sandbox and waits for it to be stopped.
 **Parameters**:
 
 - `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s).
+
+**Returns**:
+
+- `void`
+
+#### resize()
+
+```ruby
+def resize(resources, timeout)
+
+```
+
+Resizes the Sandbox resources.
+
+Changes the CPU, memory, or disk allocation for the Sandbox. Resizing a started
+sandbox allows increasing CPU and memory. To resize disk or decrease resources,
+the sandbox must be stopped first.
+
+**Parameters**:
+
+- `resources` _Daytona:Resources_ - New resource configuration
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s)
+
+**Returns**:
+
+- `void`
+
+**Raises**:
+
+- `Sdk:Error` -
+
+**Examples:**
+
+```ruby
+sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8))
+
+```
+
+```ruby
+sandbox.stop
+sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4, disk: 30))
+
+```
+
+#### wait_for_resize_complete()
+
+```ruby
+def wait_for_resize_complete(_timeout)
+
+```
+
+Waits for the Sandbox resize operation to complete.
+Polls the Sandbox status until the state is no longer 'resizing'.
+
+**Parameters**:
+
+- `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s)
 
 **Returns**:
 

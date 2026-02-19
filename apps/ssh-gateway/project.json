@@ -7,6 +7,7 @@
   "targets": {
     "build": {
       "executor": "@nx-go/nx-go:build",
+      "inputs": ["goProduction"],
       "options": {
         "main": "github.com/daytonaio/ssh-gateway",
         "outputPath": "dist/apps/ssh-gateway"

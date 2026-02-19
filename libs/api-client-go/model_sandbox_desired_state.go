@@ -24,6 +24,7 @@ const (
 	SANDBOXDESIREDSTATE_DESTROYED SandboxDesiredState = "destroyed"
 	SANDBOXDESIREDSTATE_STARTED   SandboxDesiredState = "started"
 	SANDBOXDESIREDSTATE_STOPPED   SandboxDesiredState = "stopped"
+	SANDBOXDESIREDSTATE_RESIZED   SandboxDesiredState = "resized"
 	SANDBOXDESIREDSTATE_ARCHIVED  SandboxDesiredState = "archived"
 )
 
@@ -32,6 +33,7 @@ var AllowedSandboxDesiredStateEnumValues = []SandboxDesiredState{
 	"destroyed",
 	"started",
 	"stopped",
+	"resized",
 	"archived",
 }
 

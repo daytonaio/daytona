@@ -301,6 +301,220 @@ paths:
       summary: Get specific process status
       tags:
         - computer-use
+  /computeruse/recordings:
+    get:
+      description: Get a list of all recordings (active and completed)
+      operationId: ListRecordings
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRecordingsResponse'
+          description: OK
+        '500':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      summary: List all recordings
+      tags:
+        - computer-use
+  /computeruse/recordings/start:
+    post:
+      description: Start a new screen recording session
+      operationId: StartRecording
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartRecordingRequest'
+        description: Recording options
+        required: false
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recording'
+          description: Created
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        '500':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      summary: Start a new recording
+      tags:
+        - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/recordings/stop:
+    post:
+      description: Stop an active screen recording session
+      operationId: StopRecording
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StopRecordingRequest'
+        description: Recording ID to stop
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recording'
+          description: OK
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+      summary: Stop a recording
+      tags:
+        - computer-use
+      x-codegen-request-body-name: request
+  /computeruse/recordings/{id}:
+    delete:
+      description: Delete a recording file by ID
+      operationId: DeleteRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          content: {}
+          description: No Content
+        '400':
+          content:
+            '*/*':
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        '404':
+          content:
+            '*/*':
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        '500':
+          content:
+            '*/*':
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      summary: Delete a recording
+      tags:
+        - computer-use
+    get:
+      description: Get details of a specific recording by ID
+      operationId: GetRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Recording'
+          description: OK
+        '404':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        '500':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      summary: Get recording details
+      tags:
+        - computer-use
+  /computeruse/recordings/{id}/download:
+    get:
+      description: Download a recording by providing its ID
+      operationId: DownloadRecording
+      parameters:
+        - description: Recording ID
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        '404':
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Not Found
+        '500':
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      summary: Download a recording
+      tags:
+        - computer-use
   /computeruse/screenshot:
     get:
       description: Take a screenshot of the entire screen
@@ -1027,6 +1241,30 @@ paths:
       summary: Get Git status
       tags:
         - git
+  /init:
+    post:
+      description: Set the auth token and initialize telemetry for the toolbox server
+      operationId: Initialize
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/InitializeRequest'
+        description: Initialization request
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: OK
+      summary: Initialize toolbox server
+      tags:
+        - server
+      x-codegen-request-body-name: request
   /lsp/completions:
     post:
       description: Get code completion suggestions from the LSP server
@@ -1591,6 +1829,39 @@ paths:
       summary: Get session command details
       tags:
         - process
+  /process/session/{sessionId}/command/{commandId}/input:
+    post:
+      description: Send input data to a running command in a session for interactive
+        execution
+      operationId: SendInput
+      parameters:
+        - description: Session ID
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+        - description: Command ID
+          in: path
+          name: commandId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionSendInputRequest'
+        description: Input send request
+        required: true
+      responses:
+        '204':
+          content: {}
+          description: No Content
+      summary: Send input to command
+      tags:
+        - process
+      x-codegen-request-body-name: request
   /process/session/{sessionId}/command/{commandId}/logs:
     get:
       description: Get logs for a specific command within a session. Supports both
@@ -2169,6 +2440,15 @@ components:
         - currentBranch
         - fileStatus
       type: object
+    InitializeRequest:
+      example:
+        token: token
+      properties:
+        token:
+          type: string
+      required:
+        - token
+      type: object
     InterpreterContext:
       example:
         createdAt: createdAt
@@ -2268,6 +2548,33 @@ components:
           type: array
       required:
         - contexts
+      type: object
+    ListRecordingsResponse:
+      example:
+        recordings:
+          - fileName: fileName
+            durationSeconds: 0.8008281904610115
+            filePath: filePath
+            startTime: startTime
+            endTime: endTime
+            id: id
+            sizeBytes: 6
+            status: status
+          - fileName: fileName
+            durationSeconds: 0.8008281904610115
+            filePath: filePath
+            startTime: startTime
+            endTime: endTime
+            id: id
+            sizeBytes: 6
+            status: status
+      properties:
+        recordings:
+          items:
+            $ref: '#/components/schemas/Recording'
+          type: array
+      required:
+        - recordings
       type: object
     LspCompletionParams:
       example:
@@ -2710,6 +3017,40 @@ components:
         - lazyStart
         - rows
       type: object
+    Recording:
+      example:
+        fileName: fileName
+        durationSeconds: 0.8008281904610115
+        filePath: filePath
+        startTime: startTime
+        endTime: endTime
+        id: id
+        sizeBytes: 6
+        status: status
+      properties:
+        durationSeconds:
+          type: number
+        endTime:
+          type: string
+        fileName:
+          type: string
+        filePath:
+          type: string
+        id:
+          type: string
+        sizeBytes:
+          type: integer
+        startTime:
+          type: string
+        status:
+          type: string
+      required:
+        - fileName
+        - filePath
+        - id
+        - startTime
+        - status
+      type: object
     ReplaceRequest:
       example:
         newValue: newValue
@@ -2836,6 +3177,22 @@ components:
       required:
         - cmdId
       type: object
+    SessionSendInputRequest:
+      example:
+        data: data
+      properties:
+        data:
+          type: string
+      required:
+        - data
+      type: object
+    StartRecordingRequest:
+      example:
+        label: label
+      properties:
+        label:
+          type: string
+      type: object
     Status:
       enum:
         - Unmodified
@@ -2856,6 +3213,15 @@ components:
         - Renamed
         - Copied
         - UpdatedButUnmerged
+    StopRecordingRequest:
+      example:
+        id: id
+      properties:
+        id:
+          type: string
+      required:
+        - id
+      type: object
     UserHomeDirResponse:
       example:
         dir: dir

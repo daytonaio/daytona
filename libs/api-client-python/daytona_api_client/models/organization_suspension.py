@@ -19,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,7 +31,7 @@ class OrganizationSuspension(BaseModel):
     """ # noqa: E501
     reason: StrictStr = Field(description="Suspension reason")
     until: datetime = Field(description="Suspension until")
-    suspension_cleanup_grace_period_hours: Union[StrictFloat, StrictInt] = Field(description="Suspension cleanup grace period hours", serialization_alias="suspensionCleanupGracePeriodHours")
+    suspension_cleanup_grace_period_hours: Optional[Union[Annotated[float, Field(strict=True, ge=0)], Annotated[int, Field(strict=True, ge=0)]]] = Field(default=None, description="Suspension cleanup grace period hours", serialization_alias="suspensionCleanupGracePeriodHours")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["reason", "until", "suspensionCleanupGracePeriodHours"]
 

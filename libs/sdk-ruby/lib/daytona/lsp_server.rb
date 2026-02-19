@@ -2,6 +2,8 @@
 
 module Daytona
   class LspServer
+    include Instrumentation
+
     module Language
       ALL = [
         JAVASCRIPT = :javascript,
@@ -31,11 +33,13 @@ module Daytona
     # @param path_to_project [String]
     # @param toolbox_api [DaytonaToolboxApiClient::LspApi]
     # @param sandbox_id [String]
-    def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(language_id:, path_to_project:, toolbox_api:, sandbox_id:, otel_state: nil)
       @language_id = language_id
       @path_to_project = path_to_project
       @toolbox_api = toolbox_api
       @sandbox_id = sandbox_id
+      @otel_state = otel_state
     end
 
     # Gets completion suggestions at a position in a file
@@ -114,7 +118,14 @@ module Daytona
       )
     end
 
+    instrument :completions, :did_close, :did_open, :document_symbols, :sandbox_symbols,
+               :start, :stop,
+               component: 'LspServer'
+
     private
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
 
     # Convert path to file uri.
     #

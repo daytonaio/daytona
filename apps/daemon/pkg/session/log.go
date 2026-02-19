@@ -51,9 +51,13 @@ func (s *SessionService) GetSessionCommandLogs(sessionId, commandId string, requ
 			return nil, common_errors.NewBadRequestError(err)
 		}
 		defer logFile.Close()
-		ReadLog(request, responseWriter, opts.Follow, logFile, util.ReadLogWithExitCode, exitCodeFilePath, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+		ReadLog(request, responseWriter, opts.Follow, logFile, util.ReadLogWithExitCode, exitCodeFilePath, func(conn *websocket.Conn, messages chan []byte, errors chan error, pongCh <-chan []byte) {
 			var buffer []byte
 			for {
+				// Priority: always flush pending pong responses before writing data.
+				// This ensures keepalive pongs are never delayed by data writes.
+				writePendingPongs(conn, pongCh)
+
 				select {
 				case <-session.ctx.Done():
 					// Flush any remaining bytes in buffer before closing
@@ -72,6 +76,11 @@ func (s *SessionService) GetSessionCommandLogs(sessionId, commandId string, requ
 					}
 					conn.Close()
 					return
+				case pong := <-pongCh:
+					// Pong arrived while waiting for data — write it immediately
+					if err := conn.WriteControl(websocket.PongMessage, pong, time.Now().Add(time.Second)); err != nil {
+						log.Trace("failed to write pong: ", err)
+					}
 				case msg := <-messages:
 					if opts.IsCombinedOutput {
 						// Process chunks with buffering to handle prefixes split across chunks
@@ -129,13 +138,30 @@ func (s *SessionService) GetSessionCommandLogs(sessionId, commandId string, requ
 }
 
 // ReadLog reads from the logReader and writes to the websocket.
-// TLogData is the type of the message to be read from the logReader
-func ReadLog[TLogData any](request *http.Request, responseWriter http.ResponseWriter, follow bool, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, string, chan TLogData, chan error), exitCodeFilePath string, wsWriteFunc func(*websocket.Conn, chan TLogData, chan error)) {
+// TLogData is the type of the message to be read from the logReader.
+// The wsWriteFunc callback receives a pongCh that carries queued pong payloads;
+// the callback must drain it (via writePendingPongs) before each data write to
+// give keepalive pongs priority over log data.
+func ReadLog[TLogData any](request *http.Request, responseWriter http.ResponseWriter, follow bool, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, string, chan TLogData, chan error), exitCodeFilePath string, wsWriteFunc func(*websocket.Conn, chan TLogData, chan error, <-chan []byte)) {
 	ws, err := util.UpgradeToWebSocket(responseWriter, request)
 	if err != nil {
 		log.Error(err)
 		return
 	}
+
+	// Pong channel: the PingHandler queues pong payloads here instead of
+	// writing to the conn directly. The single writer goroutine (wsWriteFunc)
+	// drains this channel before each data write, giving pongs priority and
+	// eliminating write-mutex contention that causes "keepalive ping timeout".
+	pongCh := make(chan []byte, 10)
+	ws.SetPingHandler(func(message string) error {
+		select {
+		case pongCh <- []byte(message):
+		default:
+			log.Warn("pong channel full, dropping pong response")
+		}
+		return nil
+	})
 
 	defer func() {
 		closeErr := websocket.CloseNormalClosure
@@ -155,7 +181,7 @@ func ReadLog[TLogData any](request *http.Request, responseWriter http.ResponseWr
 
 	defer cancel()
 	go readFunc(ctx, logReader, follow, exitCodeFilePath, msgChannel, errChannel)
-	go wsWriteFunc(ws, msgChannel, errChannel)
+	go wsWriteFunc(ws, msgChannel, errChannel, pongCh)
 
 	readErr := make(chan error)
 	go func() {
@@ -184,6 +210,25 @@ func ReadLog[TLogData any](request *http.Request, responseWriter http.ResponseWr
 			if err != nil {
 				return
 			}
+		}
+	}
+}
+
+// writePendingPongs drains all queued pong responses and writes them to the
+// connection. This MUST be called from the single writer goroutine (wsWriteFunc)
+// before each data write so that keepalive pongs are never delayed by log data.
+// Because only one goroutine writes to the conn, WriteControl acquires the
+// gorilla/websocket write mutex instantly — no contention, no silent drops.
+func writePendingPongs(conn *websocket.Conn, pongCh <-chan []byte) {
+	for {
+		select {
+		case pongData := <-pongCh:
+			if err := conn.WriteControl(websocket.PongMessage, pongData, time.Now().Add(time.Second)); err != nil {
+				log.Trace("failed to write pong: ", err)
+				return
+			}
+		default:
+			return
 		}
 	}
 }

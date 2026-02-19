@@ -6,6 +6,7 @@
   "targets": {
     "docs": {
       "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/typescript-sdk/**/*"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "npm run docs"
@@ -13,8 +14,6 @@
     },
     "build": {
       "executor": "@nx/js:tsc",
-      "inputs": ["default", "{projectRoot}/package.json"],
-      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/libs/sdk-typescript",
         "tsConfig": "{projectRoot}/tsconfig.lib.json",

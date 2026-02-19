@@ -87,7 +87,7 @@ export interface RecoverSandboxDTO {
    * @type {string}
    * @memberof RecoverSandboxDTO
    */
-  snapshot: string
+  snapshot?: string
   /**
    *
    * @type {number}

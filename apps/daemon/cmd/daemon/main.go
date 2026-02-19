@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"syscall"
 	"time"
@@ -18,6 +19,8 @@ import (
 
 	"github.com/daytonaio/daemon/cmd/daemon/config"
 	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/recording"
+	"github.com/daytonaio/daemon/pkg/recordingdashboard"
 	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
@@ -50,16 +53,22 @@ func main() {
 
 	initLogs(logWriter)
 
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Errorf("failed to get user home directory: %w", err))
+	}
+
+	configDir := filepath.Join(homeDir, ".daytona")
+	err = os.MkdirAll(configDir, 0755)
+	if err != nil {
+		panic(fmt.Errorf("failed to create config directory: %w", err))
+	}
+
 	// If workdir in image is not set, use user home as workdir
 	if c.UserHomeAsWorkDir {
-		homeDir, err := os.UserHomeDir()
+		err = os.Chdir(homeDir)
 		if err != nil {
-			log.Warnf("failed to get home directory: %v", err)
-		} else {
-			err = os.Chdir(homeDir)
-			if err != nil {
-				log.Warnf("failed to change working directory to home directory: %v", err)
-			}
+			log.Warnf("failed to change working directory to home directory: %v", err)
 		}
 	}
 
@@ -113,11 +122,21 @@ func main() {
 		panic(fmt.Errorf("failed to get current working directory: %w", err))
 	}
 
-	toolBoxServer := &toolbox.Server{
+	recordingsDir := c.RecordingsDir
+	if recordingsDir == "" {
+		recordingsDir = filepath.Join(configDir, "recordings")
+	}
+	recordingService := recording.NewRecordingService(recordingsDir)
+
+	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
 		WorkDir:                              workDir,
+		ConfigDir:                            configDir,
+		OtelEndpoint:                         c.OtelEndpoint,
+		SandboxId:                            c.SandboxId,
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
-	}
+		RecordingService:                     recordingService,
+	})
 
 	// Start the toolbox server in a go routine
 	go func() {
@@ -130,6 +149,13 @@ func main() {
 	// Start terminal server
 	go func() {
 		if err := terminal.StartTerminalServer(22222); err != nil {
+			errChan <- err
+		}
+	}()
+
+	// Start recording dashboard server
+	go func() {
+		if err := recordingdashboard.NewDashboardServer(recordingService).Start(); err != nil {
 			errChan <- err
 		}
 	}()

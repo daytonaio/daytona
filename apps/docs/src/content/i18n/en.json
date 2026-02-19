@@ -97,6 +97,8 @@
   "sidebarconfig.networkLimits": "Network Limits",
   "sidebarconfig.networkLimitsDescription": "Network egress limits for Daytona Sandboxes.",
   "sidebarconfig.sshAccess": "SSH Access",
+  "sidebarconfig.vncAccess": "VNC Access",
+  "sidebarconfig.vncAccessDescription": "VNC access to Daytona Sandboxes.",
   "sidebarconfig.vpnConnection": "VPN Connections",
   "sidebarconfig.vpnConnectionDescription": "Connect Daytona Sandboxes to VPN networks.",
   "sidebarconfig.sshAccessDescription": "SSH access to Daytona Sandboxes.",
@@ -138,7 +140,11 @@
   "sidebarconfig.googleAdk": "Google ADK",
   "sidebarconfig.lettacode": "Letta Code",
   "sidebarconfig.trlGrpo": "TRL",
+  "sidebarconfig.rlm": "RLMs",
   "sidebarconfig.recursiveLms": "RLMs",
+  "sidebarconfig.dspyRlms": "RLMs via DSPy",
   "sidebarconfig.pty": "Pseudo Terminal (PTY)",
-  "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK."
+  "sidebarconfig.ptyDescription": "Learn how to manage PTY sessions in your Sandboxes using the Daytona SDK.",
+  "sidebarconfig.experimental": "Experimental",
+  "sidebarconfig.otelCollection": "OpenTelemetry Collection"
 }

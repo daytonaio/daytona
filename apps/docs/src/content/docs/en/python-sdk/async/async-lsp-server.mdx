@@ -32,6 +32,7 @@ Initializes a new LSP server instance.
 
 ```python
 @intercept_errors(message_prefix="Failed to start LSP server: ")
+@with_instrumentation()
 async def start() -> None
 ```
 
@@ -52,6 +53,7 @@ await lsp.start()  # Initialize the server
 
 ```python
 @intercept_errors(message_prefix="Failed to stop LSP server: ")
+@with_instrumentation()
 async def stop() -> None
 ```
 
@@ -71,6 +73,7 @@ await lsp.stop()  # Clean up resources
 
 ```python
 @intercept_errors(message_prefix="Failed to open file: ")
+@with_instrumentation()
 async def did_open(path: str) -> None
 ```
 
@@ -98,6 +101,7 @@ await lsp.did_open("workspace/project/src/index.ts")
 
 ```python
 @intercept_errors(message_prefix="Failed to close file: ")
+@with_instrumentation()
 async def did_close(path: str) -> None
 ```
 
@@ -123,6 +127,7 @@ await lsp.did_close("workspace/project/src/index.ts")
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from document: ")
+@with_instrumentation()
 async def document_symbols(path: str) -> list[LspSymbol]
 ```
 
@@ -158,6 +163,7 @@ for symbol in symbols:
     reason=
     "Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
 )
+@with_instrumentation()
 async def workspace_symbols(query: str) -> list[LspSymbol]
 ```
 
@@ -177,6 +183,7 @@ in the Sandbox.
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
+@with_instrumentation()
 async def sandbox_symbols(query: str) -> list[LspSymbol]
 ```
 
@@ -210,6 +217,7 @@ for symbol in symbols:
 
 ```python
 @intercept_errors(message_prefix="Failed to get completions: ")
+@with_instrumentation()
 async def completions(path: str,
                       position: LspCompletionPosition) -> CompletionList
 ```

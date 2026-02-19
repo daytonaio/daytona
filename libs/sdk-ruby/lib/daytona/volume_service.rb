@@ -2,11 +2,15 @@
 
 module Daytona
   class VolumeService
+    include Instrumentation
+
     # Service for managing Daytona Volumes. Can be used to list, get, create and delete Volumes.
     #
     # @param volumes_api [DaytonaApiClient::VolumesApi]
-    def initialize(volumes_api)
+    # @param otel_state [Daytona::OtelState, nil]
+    def initialize(volumes_api, otel_state: nil)
       @volumes_api = volumes_api
+      @otel_state = otel_state
     end
 
     # Create new Volume.
@@ -41,9 +45,14 @@ module Daytona
       volumes_api.list_volumes.map { |volume| Volume.new(volume) }
     end
 
+    instrument :create, :delete, :get, :list, component: 'VolumeService'
+
     private
 
     # @return [DaytonaApiClient::VolumesApi]
     attr_reader :volumes_api
+
+    # @return [Daytona::OtelState, nil]
+    attr_reader :otel_state
   end
 end

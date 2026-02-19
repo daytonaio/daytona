@@ -1,0 +1,582 @@
+{
+  "name": "Daytona Sandbox Resource Monitoring - Multi-Service",
+  "description": "Comprehensive CPU, Memory, and Disk monitoring for Daytona Sandboxes",
+  "permissions": "PUBLIC_READ_WRITE",
+  "pages": [
+    {
+      "name": "Resource Overview",
+      "description": "High-level overview of all Daytona Sandbox",
+      "widgets": [
+        {
+          "title": "Sandbox Count",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 2,
+            "height": 2
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT uniqueCount(service.name) as 'Active Sandboxes' FROM Metric WHERE service.name LIKE 'sandbox-%' SINCE 5 minutes ago"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Critical Services",
+          "layout": {
+            "column": 3,
+            "row": 1,
+            "width": 2,
+            "height": 2
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT uniqueCount(service.name) as 'Over Threshold' FROM Metric WHERE daytona.sandbox.cpu.utilization > 80 OR daytona.sandbox.memory.utilization > 80 OR daytona.sandbox.filesystem.utilization > 80 SINCE 5 minutes ago"
+              }
+            ],
+            "thresholds": [
+              {
+                "alertSeverity": "WARNING",
+                "value": 1
+              },
+              {
+                "alertSeverity": "CRITICAL",
+                "value": 3
+              }
+            ]
+          }
+        },
+        {
+          "title": "Services Resource Overview",
+          "layout": {
+            "column": 5,
+            "row": 1,
+            "width": 8,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(service.name) as 'Service', latest(daytona.sandbox.cpu.utilization) as 'CPU %', latest(daytona.sandbox.cpu.`limit`) as 'CPU Cores', latest(daytona.sandbox.memory.utilization) as 'Memory %', latest(daytona.sandbox.memory.usage) / 1073741824 as 'Memory Used (GB)', latest(daytona.sandbox.memory.`limit`) / 1073741824 as 'Memory Limit (GB)', latest(daytona.sandbox.filesystem.utilization) as 'Disk %', latest(daytona.sandbox.filesystem.usage) / 1073741824 as 'Disk Used (GB)', latest(daytona.sandbox.filesystem.total) / 1073741824 as 'Disk Total (GB)' FROM Metric FACET service.name SINCE 5 minutes ago LIMIT 100"
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU Utilization by Service",
+          "layout": {
+            "column": 1,
+            "row": 3,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.cpu.utilization) as 'CPU %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Memory Utilization by Service",
+          "layout": {
+            "column": 1,
+            "row": 6,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.memory.utilization) as 'Memory %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Disk Utilization by Service",
+          "layout": {
+            "column": 1,
+            "row": 9,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.filesystem.utilization) as 'Disk %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Top CPU Consumers",
+          "layout": {
+            "column": 5,
+            "row": 5,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.cpu.utilization) as 'Avg CPU %' FROM Metric FACET service.name SINCE 1 hour ago LIMIT 10"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Top Memory Consumers",
+          "layout": {
+            "column": 9,
+            "row": 5,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.memory.utilization) as 'Avg Memory %' FROM Metric FACET service.name SINCE 1 hour ago LIMIT 10"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Top Disk Consumers",
+          "layout": {
+            "column": 5,
+            "row": 8,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.bar"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.filesystem.utilization) as 'Avg Disk %' FROM Metric FACET service.name SINCE 1 hour ago LIMIT 10"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Services Over Threshold",
+          "layout": {
+            "column": 9,
+            "row": 8,
+            "width": 4,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(service.name) as 'Service', latest(daytona.sandbox.cpu.utilization) as 'CPU %', latest(daytona.sandbox.memory.utilization) as 'Memory %', latest(daytona.sandbox.filesystem.utilization) as 'Disk %' FROM Metric WHERE daytona.sandbox.cpu.utilization > 80 OR daytona.sandbox.memory.utilization > 80 OR daytona.sandbox.filesystem.utilization > 80 FACET service.name SINCE 5 minutes ago"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Resource Pressure Score",
+          "layout": {
+            "column": 5,
+            "row": 11,
+            "width": 8,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT (average(daytona.sandbox.cpu.utilization) * 0.33) + (average(daytona.sandbox.memory.utilization) * 0.33) + (average(daytona.sandbox.filesystem.utilization) * 0.34) as 'Resource Pressure Score' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "CPU Details",
+      "description": "Detailed CPU metrics",
+      "widgets": [
+        {
+          "title": "CPU Utilization Timeseries",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 8,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.cpu.utilization) as 'CPU %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Current CPU by Service",
+          "layout": {
+            "column": 9,
+            "row": 1,
+            "width": 4,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.cpu.utilization) as 'CPU %' FROM Metric FACET service.name SINCE 1 minute ago"
+              }
+            ],
+            "thresholds": [
+              {
+                "alertSeverity": "WARNING",
+                "value": 70
+              },
+              {
+                "alertSeverity": "CRITICAL",
+                "value": 85
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU Limit by Service",
+          "layout": {
+            "column": 1,
+            "row": 5,
+            "width": 6,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.cpu.`limit`) as 'CPU Cores Limit', average(daytona.sandbox.cpu.utilization) as 'Avg CPU %', max(daytona.sandbox.cpu.utilization) as 'Peak CPU %' FROM Metric FACET service.name SINCE 1 hour ago"
+              }
+            ]
+          }
+        },
+        {
+          "title": "CPU Usage Heatmap",
+          "layout": {
+            "column": 7,
+            "row": 5,
+            "width": 6,
+            "height": 3
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.heatmap"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT histogram(daytona.sandbox.cpu.utilization, 10, 10) FROM Metric FACET service.name SINCE 1 hour ago"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Memory Details",
+      "description": "Detailed memory metrics",
+      "widgets": [
+        {
+          "title": "Memory Utilization Timeseries",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 8,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.memory.utilization) as 'Memory %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Current Memory by Service",
+          "layout": {
+            "column": 9,
+            "row": 1,
+            "width": 4,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.memory.utilization) as 'Memory %' FROM Metric FACET service.name SINCE 1 minute ago"
+              }
+            ],
+            "thresholds": [
+              {
+                "alertSeverity": "WARNING",
+                "value": 80
+              },
+              {
+                "alertSeverity": "CRITICAL",
+                "value": 90
+              }
+            ]
+          }
+        },
+        {
+          "title": "Memory Usage in GB",
+          "layout": {
+            "column": 1,
+            "row": 5,
+            "width": 6,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.area"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.memory.usage) / 1073741824 as 'Used GB' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Memory Limits and Usage",
+          "layout": {
+            "column": 7,
+            "row": 5,
+            "width": 6,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.memory.usage) / 1073741824 as 'Used (GB)', latest(daytona.sandbox.memory.`limit`) / 1073741824 as 'Limit (GB)', average(daytona.sandbox.memory.utilization) as 'Avg %', max(daytona.sandbox.memory.utilization) as 'Peak %' FROM Metric FACET service.name SINCE 1 hour ago"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disk Details",
+      "description": "Detailed filesystem/disk metrics",
+      "widgets": [
+        {
+          "title": "Disk Utilization Timeseries",
+          "layout": {
+            "column": 1,
+            "row": 1,
+            "width": 8,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.line"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.filesystem.utilization) as 'Disk %' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ],
+            "yAxisLeft": {
+              "max": 100,
+              "min": 0
+            }
+          }
+        },
+        {
+          "title": "Current Disk by Service",
+          "layout": {
+            "column": 9,
+            "row": 1,
+            "width": 4,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.billboard"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.filesystem.utilization) as 'Disk %' FROM Metric FACET service.name SINCE 1 minute ago"
+              }
+            ],
+            "thresholds": [
+              {
+                "alertSeverity": "WARNING",
+                "value": 75
+              },
+              {
+                "alertSeverity": "CRITICAL",
+                "value": 85
+              }
+            ]
+          }
+        },
+        {
+          "title": "Disk Usage in GB",
+          "layout": {
+            "column": 1,
+            "row": 5,
+            "width": 6,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.area"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT average(daytona.sandbox.filesystem.usage) / 1073741824 as 'Used GB', average(daytona.sandbox.filesystem.total) / 1073741824 as 'Total GB' FROM Metric FACET service.name TIMESERIES AUTO"
+              }
+            ]
+          }
+        },
+        {
+          "title": "Disk Space Breakdown",
+          "layout": {
+            "column": 7,
+            "row": 5,
+            "width": 6,
+            "height": 4
+          },
+          "linkedEntityGuids": null,
+          "visualization": {
+            "id": "viz.table"
+          },
+          "rawConfiguration": {
+            "nrqlQueries": [
+              {
+                "accountIds": [],
+                "query": "SELECT latest(daytona.sandbox.filesystem.usage) / 1073741824 as 'Used (GB)', latest(daytona.sandbox.filesystem.available) / 1073741824 as 'Available (GB)', latest(daytona.sandbox.filesystem.total) / 1073741824 as 'Total (GB)', average(daytona.sandbox.filesystem.utilization) as 'Avg %', max(daytona.sandbox.filesystem.utilization) as 'Peak %' FROM Metric FACET service.name SINCE 1 hour ago"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

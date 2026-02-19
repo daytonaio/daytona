@@ -12,6 +12,7 @@ import axios from 'axios'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxService } from './sandbox.service'
+import { RunnerService } from './runner.service'
 
 @Injectable()
 export class ToolboxService {
@@ -20,10 +21,9 @@ export class ToolboxService {
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
-    @InjectRepository(Runner)
-    private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxService: SandboxService,
+    private readonly runnerService: RunnerService,
   ) {}
 
   async forwardRequestToRunner(sandboxId: string, method: string, path: string, data?: any): Promise<any> {
@@ -95,13 +95,7 @@ export class ToolboxService {
         throw new NotFoundException('Sandbox not found')
       }
 
-      const runner = await this.runnerRepository.findOne({
-        where: { id: sandbox.runnerId },
-      })
-
-      if (!runner) {
-        throw new NotFoundException('Runner not found for the sandbox')
-      }
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
       if (sandbox.state !== SandboxState.STARTED) {
         throw new BadRequestException('Sandbox is not running')

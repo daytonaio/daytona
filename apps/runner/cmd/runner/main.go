@@ -86,20 +86,22 @@ func main() {
 	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
-		ApiClient:                cli,
-		StatesCache:              statesCache,
-		LogWriter:                os.Stdout,
-		AWSRegion:                cfg.AWSRegion,
-		AWSEndpointUrl:           cfg.AWSEndpointUrl,
-		AWSAccessKeyId:           cfg.AWSAccessKeyId,
-		AWSSecretAccessKey:       cfg.AWSSecretAccessKey,
-		DaemonPath:               daemonPath,
-		ComputerUsePluginPath:    pluginPath,
-		NetRulesManager:          netRulesManager,
-		ResourceLimitsDisabled:   cfg.ResourceLimitsDisabled,
-		UseSnapshotEntrypoint:    cfg.UseSnapshotEntrypoint,
-		VolumeCleanupIntervalSec: cfg.VolumeCleanupIntervalSec,
-		BackupTimeoutMin:         cfg.BackupTimeoutMin,
+		ApiClient:                 cli,
+		StatesCache:               statesCache,
+		LogWriter:                 os.Stdout,
+		AWSRegion:                 cfg.AWSRegion,
+		AWSEndpointUrl:            cfg.AWSEndpointUrl,
+		AWSAccessKeyId:            cfg.AWSAccessKeyId,
+		AWSSecretAccessKey:        cfg.AWSSecretAccessKey,
+		DaemonPath:                daemonPath,
+		ComputerUsePluginPath:     pluginPath,
+		NetRulesManager:           netRulesManager,
+		ResourceLimitsDisabled:    cfg.ResourceLimitsDisabled,
+		UseSnapshotEntrypoint:     cfg.UseSnapshotEntrypoint,
+		VolumeCleanupIntervalSec:  cfg.VolumeCleanupIntervalSec,
+		VolumeCleanupDryRun:       cfg.VolumeCleanupDryRun,
+		BackupTimeoutMin:          cfg.BackupTimeoutMin,
+		InitializeDaemonTelemetry: cfg.InitializeDaemonTelemetry,
 	})
 
 	// Start Docker events monitor

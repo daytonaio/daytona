@@ -237,6 +237,91 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states-errored-draining' })
+  @TrackJobExecution()
+  @LogExecution('check-backup-states-errored-draining')
+  @WithInstrumentation()
+  async checkBackupStatesForErroredDraining(): Promise<void> {
+    const lockKey = 'check-backup-states-errored-draining'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 10)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoin('runner', 'r', 'r.id = sandbox.runnerId')
+        .where('sandbox.state = :error', { error: SandboxState.ERROR })
+        .andWhere('sandbox.backupState IN (:...backupStates)', {
+          backupStates: [BackupState.PENDING, BackupState.IN_PROGRESS],
+        })
+        .andWhere('r.state = :ready', { ready: RunnerState.READY })
+        .andWhere('r."draining" = true')
+        .addOrderBy('sandbox.lastBackupAt', 'ASC', 'NULLS FIRST')
+        .addOrderBy('sandbox.createdAt', 'ASC')
+        .take(100)
+        .getMany()
+
+      await Promise.allSettled(
+        sandboxes.map(async (s) => {
+          const lockKey = `sandbox-backup-${s.id}`
+          const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+          if (!hasLock) {
+            return
+          }
+
+          try {
+            const sandbox = await this.sandboxRepository.findOneByOrFail({
+              id: s.id,
+            })
+
+            try {
+              switch (sandbox.backupState) {
+                case BackupState.PENDING: {
+                  await this.handlePendingBackup(sandbox)
+                  break
+                }
+                case BackupState.IN_PROGRESS: {
+                  await this.checkBackupProgress(sandbox)
+                  break
+                }
+              }
+            } catch (error) {
+              const errorRetryKey = `${lockKey}-error-retry`
+              const errorRetryCount = await this.redis.get(errorRetryKey)
+              if (!errorRetryCount) {
+                await this.redis.setex(errorRetryKey, 300, '1')
+              } else if (parseInt(errorRetryCount) > 10) {
+                this.logger.error(
+                  `Error processing backup for errored sandbox ${sandbox.id} on draining runner:`,
+                  fromAxiosError(error),
+                )
+                await this.sandboxService.updateSandboxBackupState(
+                  sandbox.id,
+                  BackupState.ERROR,
+                  undefined,
+                  undefined,
+                  fromAxiosError(error).message,
+                )
+              } else {
+                await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
+              }
+            }
+          } catch (error) {
+            this.logger.error(`Error processing backup for errored sandbox ${s.id} on draining runner:`, error)
+          } finally {
+            await this.redisLockProvider.unlock(lockKey)
+          }
+        }),
+      )
+    } catch (error) {
+      this.logger.error(`Error processing backups for errored sandboxes on draining runners: `, error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   @TrackJobExecution()
   @LogExecution('sync-stop-state-create-backups')
@@ -289,15 +374,16 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
       return
     }
 
-    // Allow backups for STARTED sandboxes or STOPPED sandboxes with runnerId
+    // Allow backups for STARTED sandboxes, STOPPED/ERROR sandboxes with runnerId, or ARCHIVING sandboxes
     if (
       !(
         sandbox.state === SandboxState.STARTED ||
         sandbox.state === SandboxState.ARCHIVING ||
-        (sandbox.state === SandboxState.STOPPED && sandbox.runnerId)
+        (sandbox.state === SandboxState.STOPPED && sandbox.runnerId) ||
+        (sandbox.state === SandboxState.ERROR && sandbox.runnerId)
       )
     ) {
-      throw new BadRequestError('Sandbox must be started or stopped with assigned runner to create a backup')
+      throw new BadRequestError('Sandbox must be started, stopped, or errored with assigned runner to create a backup')
     }
 
     if (sandbox.backupState === BackupState.IN_PROGRESS || sandbox.backupState === BackupState.PENDING) {
@@ -324,7 +410,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
     try {
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       // Get sandbox info from runner
@@ -398,7 +484,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
         throw new Error('Registry not found')
       }
 
-      const runner = await this.runnerService.findOne(sandbox.runnerId)
+      const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       //  check if backup is already in progress on the runner

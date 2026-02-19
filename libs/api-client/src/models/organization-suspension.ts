@@ -35,5 +35,5 @@ export interface OrganizationSuspension {
    * @type {number}
    * @memberof OrganizationSuspension
    */
-  suspensionCleanupGracePeriodHours: number
+  suspensionCleanupGracePeriodHours?: number
 }

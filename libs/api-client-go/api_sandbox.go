@@ -160,6 +160,67 @@ type SandboxAPI interface {
 	GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
+		GetSandboxLogs Get sandbox logs
+
+		Retrieve OTEL logs for a sandbox within a time range
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPIGetSandboxLogsRequest
+	*/
+	GetSandboxLogs(ctx context.Context, sandboxId string) SandboxAPIGetSandboxLogsRequest
+
+	// GetSandboxLogsExecute executes the request
+	//  @return PaginatedLogs
+	GetSandboxLogsExecute(r SandboxAPIGetSandboxLogsRequest) (*PaginatedLogs, *http.Response, error)
+
+	/*
+		GetSandboxMetrics Get sandbox metrics
+
+		Retrieve OTEL metrics for a sandbox within a time range
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPIGetSandboxMetricsRequest
+	*/
+	GetSandboxMetrics(ctx context.Context, sandboxId string) SandboxAPIGetSandboxMetricsRequest
+
+	// GetSandboxMetricsExecute executes the request
+	//  @return MetricsResponse
+	GetSandboxMetricsExecute(r SandboxAPIGetSandboxMetricsRequest) (*MetricsResponse, *http.Response, error)
+
+	/*
+		GetSandboxTraceSpans Get trace spans
+
+		Retrieve all spans for a specific trace
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@param traceId ID of the trace
+		@return SandboxAPIGetSandboxTraceSpansRequest
+	*/
+	GetSandboxTraceSpans(ctx context.Context, sandboxId string, traceId string) SandboxAPIGetSandboxTraceSpansRequest
+
+	// GetSandboxTraceSpansExecute executes the request
+	//  @return []TraceSpan
+	GetSandboxTraceSpansExecute(r SandboxAPIGetSandboxTraceSpansRequest) ([]TraceSpan, *http.Response, error)
+
+	/*
+		GetSandboxTraces Get sandbox traces
+
+		Retrieve OTEL traces for a sandbox within a time range
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@return SandboxAPIGetSandboxTracesRequest
+	*/
+	GetSandboxTraces(ctx context.Context, sandboxId string) SandboxAPIGetSandboxTracesRequest
+
+	// GetSandboxTracesExecute executes the request
+	//  @return PaginatedTraces
+	GetSandboxTracesExecute(r SandboxAPIGetSandboxTracesRequest) (*PaginatedTraces, *http.Response, error)
+
+	/*
 		GetSandboxesForRunner Get sandboxes for the authenticated runner
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1488,6 +1549,630 @@ func (a *SandboxAPIService) GetSandboxExecute(r SandboxAPIGetSandboxRequest) (*S
 
 	if r.verbose != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxLogsRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	from                   *time.Time
+	to                     *time.Time
+	xDaytonaOrganizationID *string
+	page                   *float32
+	limit                  *float32
+	severities             *[]string
+	search                 *string
+}
+
+// Start of time range (ISO 8601)
+func (r SandboxAPIGetSandboxLogsRequest) From(from time.Time) SandboxAPIGetSandboxLogsRequest {
+	r.from = &from
+	return r
+}
+
+// End of time range (ISO 8601)
+func (r SandboxAPIGetSandboxLogsRequest) To(to time.Time) SandboxAPIGetSandboxLogsRequest {
+	r.to = &to
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxLogsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxLogsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Page number (1-indexed)
+func (r SandboxAPIGetSandboxLogsRequest) Page(page float32) SandboxAPIGetSandboxLogsRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r SandboxAPIGetSandboxLogsRequest) Limit(limit float32) SandboxAPIGetSandboxLogsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter by severity levels (DEBUG, INFO, WARN, ERROR)
+func (r SandboxAPIGetSandboxLogsRequest) Severities(severities []string) SandboxAPIGetSandboxLogsRequest {
+	r.severities = &severities
+	return r
+}
+
+// Search in log body
+func (r SandboxAPIGetSandboxLogsRequest) Search(search string) SandboxAPIGetSandboxLogsRequest {
+	r.search = &search
+	return r
+}
+
+func (r SandboxAPIGetSandboxLogsRequest) Execute() (*PaginatedLogs, *http.Response, error) {
+	return r.ApiService.GetSandboxLogsExecute(r)
+}
+
+/*
+GetSandboxLogs Get sandbox logs
+
+Retrieve OTEL logs for a sandbox within a time range
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIGetSandboxLogsRequest
+*/
+func (a *SandboxAPIService) GetSandboxLogs(ctx context.Context, sandboxId string) SandboxAPIGetSandboxLogsRequest {
+	return SandboxAPIGetSandboxLogsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PaginatedLogs
+func (a *SandboxAPIService) GetSandboxLogsExecute(r SandboxAPIGetSandboxLogsRequest) (*PaginatedLogs, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PaginatedLogs
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxLogs")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/telemetry/logs"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.from == nil {
+		return localVarReturnValue, nil, reportError("from is required and must be specified")
+	}
+	if r.to == nil {
+		return localVarReturnValue, nil, reportError("to is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
+	}
+	if r.severities != nil {
+		t := *r.severities
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "severities", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "severities", t, "form", "multi")
+		}
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxMetricsRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	from                   *time.Time
+	to                     *time.Time
+	xDaytonaOrganizationID *string
+	metricNames            *[]string
+}
+
+// Start of time range (ISO 8601)
+func (r SandboxAPIGetSandboxMetricsRequest) From(from time.Time) SandboxAPIGetSandboxMetricsRequest {
+	r.from = &from
+	return r
+}
+
+// End of time range (ISO 8601)
+func (r SandboxAPIGetSandboxMetricsRequest) To(to time.Time) SandboxAPIGetSandboxMetricsRequest {
+	r.to = &to
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxMetricsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxMetricsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Filter by metric names
+func (r SandboxAPIGetSandboxMetricsRequest) MetricNames(metricNames []string) SandboxAPIGetSandboxMetricsRequest {
+	r.metricNames = &metricNames
+	return r
+}
+
+func (r SandboxAPIGetSandboxMetricsRequest) Execute() (*MetricsResponse, *http.Response, error) {
+	return r.ApiService.GetSandboxMetricsExecute(r)
+}
+
+/*
+GetSandboxMetrics Get sandbox metrics
+
+Retrieve OTEL metrics for a sandbox within a time range
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIGetSandboxMetricsRequest
+*/
+func (a *SandboxAPIService) GetSandboxMetrics(ctx context.Context, sandboxId string) SandboxAPIGetSandboxMetricsRequest {
+	return SandboxAPIGetSandboxMetricsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return MetricsResponse
+func (a *SandboxAPIService) GetSandboxMetricsExecute(r SandboxAPIGetSandboxMetricsRequest) (*MetricsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *MetricsResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxMetrics")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/telemetry/metrics"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.from == nil {
+		return localVarReturnValue, nil, reportError("from is required and must be specified")
+	}
+	if r.to == nil {
+		return localVarReturnValue, nil, reportError("to is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	if r.metricNames != nil {
+		t := *r.metricNames
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "metricNames", s.Index(i).Interface(), "form", "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "metricNames", t, "form", "multi")
+		}
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxTraceSpansRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	traceId                string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxTraceSpansRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxTraceSpansRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r SandboxAPIGetSandboxTraceSpansRequest) Execute() ([]TraceSpan, *http.Response, error) {
+	return r.ApiService.GetSandboxTraceSpansExecute(r)
+}
+
+/*
+GetSandboxTraceSpans Get trace spans
+
+Retrieve all spans for a specific trace
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@param traceId ID of the trace
+	@return SandboxAPIGetSandboxTraceSpansRequest
+*/
+func (a *SandboxAPIService) GetSandboxTraceSpans(ctx context.Context, sandboxId string, traceId string) SandboxAPIGetSandboxTraceSpansRequest {
+	return SandboxAPIGetSandboxTraceSpansRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		traceId:    traceId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []TraceSpan
+func (a *SandboxAPIService) GetSandboxTraceSpansExecute(r SandboxAPIGetSandboxTraceSpansRequest) ([]TraceSpan, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []TraceSpan
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxTraceSpans")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/telemetry/traces/{traceId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"traceId"+"}", url.PathEscape(parameterValueToString(r.traceId, "traceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type SandboxAPIGetSandboxTracesRequest struct {
+	ctx                    context.Context
+	ApiService             SandboxAPI
+	sandboxId              string
+	from                   *time.Time
+	to                     *time.Time
+	xDaytonaOrganizationID *string
+	page                   *float32
+	limit                  *float32
+}
+
+// Start of time range (ISO 8601)
+func (r SandboxAPIGetSandboxTracesRequest) From(from time.Time) SandboxAPIGetSandboxTracesRequest {
+	r.from = &from
+	return r
+}
+
+// End of time range (ISO 8601)
+func (r SandboxAPIGetSandboxTracesRequest) To(to time.Time) SandboxAPIGetSandboxTracesRequest {
+	r.to = &to
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r SandboxAPIGetSandboxTracesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIGetSandboxTracesRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Page number (1-indexed)
+func (r SandboxAPIGetSandboxTracesRequest) Page(page float32) SandboxAPIGetSandboxTracesRequest {
+	r.page = &page
+	return r
+}
+
+// Number of items per page
+func (r SandboxAPIGetSandboxTracesRequest) Limit(limit float32) SandboxAPIGetSandboxTracesRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r SandboxAPIGetSandboxTracesRequest) Execute() (*PaginatedTraces, *http.Response, error) {
+	return r.ApiService.GetSandboxTracesExecute(r)
+}
+
+/*
+GetSandboxTraces Get sandbox traces
+
+Retrieve OTEL traces for a sandbox within a time range
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return SandboxAPIGetSandboxTracesRequest
+*/
+func (a *SandboxAPIService) GetSandboxTraces(ctx context.Context, sandboxId string) SandboxAPIGetSandboxTracesRequest {
+	return SandboxAPIGetSandboxTracesRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return PaginatedTraces
+func (a *SandboxAPIService) GetSandboxTracesExecute(r SandboxAPIGetSandboxTracesRequest) (*PaginatedTraces, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *PaginatedTraces
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SandboxAPIService.GetSandboxTraces")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/sandbox/{sandboxId}/telemetry/traces"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.from == nil {
+		return localVarReturnValue, nil, reportError("from is required and must be specified")
+	}
+	if r.to == nil {
+		return localVarReturnValue, nil, reportError("to is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "form", "")
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "form", "")
+	} else {
+		var defaultValue float32 = 1
+		r.page = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue float32 = 100
+		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

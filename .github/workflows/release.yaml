@@ -22,7 +22,7 @@ env:
 
 jobs:
   publish:
-    runs-on: release-runner
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
 
     steps:
       - name: Checkout code
@@ -110,7 +110,7 @@ jobs:
 
   build_projects:
     needs: publish
-    runs-on: release-runner
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
 
     steps:
       - name: Checkout code
@@ -218,9 +218,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: release-runner
+          - runner: [self-hosted, Linux, X64, github-actions-runner-amd64]
             arch: amd64
-          - runner: ['self-hosted', 'ARM64']
+          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
             arch: arm64
 
     steps:
@@ -318,7 +318,7 @@ jobs:
 
   sync_gosum:
     needs: build_projects
-    runs-on: release-runner
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
 
     steps:
       - name: Checkout code
@@ -349,10 +349,10 @@ jobs:
         run: |
           git checkout -b sync-gosum-${{ inputs.version }}
           GONOSUMDB=github.com/daytonaio/daytona go work sync
-          if git diff --quiet -- go.work.sum **/go.sum; then
+          if git diff --quiet -- **/go.sum; then
             echo "No go.sum changes detected; skipping commit and PR creation."
           else
-            git add go.work.sum **/go.sum
+            git add **/go.sum
             git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
             git push origin sync-gosum-${{ inputs.version }}
             gh pr create \
