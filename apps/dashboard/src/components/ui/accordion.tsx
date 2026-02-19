@@ -17,11 +17,17 @@ const AccordionItem = ({ className, ...props }: React.ComponentProps<typeof Acco
 
 const AccordionTrigger = ({
   className,
+  headerClassName,
   children,
   icon,
+  right,
   ...props
-}: React.ComponentProps<typeof AccordionPrimitive.Trigger> & { icon?: React.ReactNode }) => (
-  <AccordionPrimitive.Header className="flex">
+}: React.ComponentProps<typeof AccordionPrimitive.Trigger> & {
+  icon?: React.ReactNode
+  headerClassName?: string
+  right?: React.ReactNode
+}) => (
+  <AccordionPrimitive.Header className={cn('flex items-center', headerClassName)}>
     <AccordionPrimitive.Trigger
       className={cn(
         'flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180',
@@ -30,8 +36,9 @@ const AccordionTrigger = ({
       {...props}
     >
       {children}
-      {icon || <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
+      {icon === null ? null : icon || <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />}
     </AccordionPrimitive.Trigger>
+    {right}
   </AccordionPrimitive.Header>
 )
 
