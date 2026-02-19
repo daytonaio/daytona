@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect } from 'react'
 import { Search, X } from 'lucide-react'
 import { DebouncedInput } from './DebouncedInput'
 import { pluralize } from '@/lib/utils'
@@ -13,7 +13,6 @@ interface SearchInputProps {
   value: string
   onChange: (value: string) => void
   className?: string
-  showKeyboardShortcut?: boolean
   resultCount?: number
   entityName?: string
   entityNamePlural?: string
@@ -25,26 +24,13 @@ export function SearchInput({
   value,
   onChange,
   className = '',
-  showKeyboardShortcut = true,
   resultCount,
   entityName = 'item',
   entityNamePlural,
   'data-testid': dataTestId,
 }: SearchInputProps) {
-  const platformKey = useMemo(() => {
-    if (typeof navigator === 'undefined' || !navigator.userAgent) return 'Ctrl+K'
-    return /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'
-  }, [])
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        const searchInputs = document.querySelectorAll<HTMLInputElement>('[data-search-input]')
-        const searchInput = searchInputs[searchInputs.length - 1]
-        if (searchInput) {
-          searchInput.focus()
-        }
-      }
       if (e.key === 'Escape' && document.activeElement?.hasAttribute('data-search-input')) {
         const hasOpenDialog = document.querySelector('[role="dialog"]')
         if (!hasOpenDialog) {
@@ -65,11 +51,11 @@ export function SearchInput({
           placeholder={placeholder}
           value={value}
           onChange={(inputValue) => onChange(String(inputValue))}
-          className={`pl-10 ${value ? 'pr-10' : showKeyboardShortcut ? 'pr-16' : 'pr-3'}`}
+          className={`pl-10 ${value ? 'pr-10' : 'pr-3'}`}
           data-search-input
           data-testid={dataTestId}
         />
-        {value ? (
+        {value && (
           <button
             type="button"
             onClick={() => onChange('')}
@@ -78,11 +64,7 @@ export function SearchInput({
           >
             <X className="h-4 w-4" />
           </button>
-        ) : showKeyboardShortcut ? (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-            <span className="hidden sm:inline">{platformKey}</span>
-          </div>
-        ) : null}
+        )}
       </div>
       {value && resultCount !== undefined && (
         <div className="mt-2 text-sm text-muted-foreground">
