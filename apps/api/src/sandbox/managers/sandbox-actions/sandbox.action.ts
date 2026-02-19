@@ -106,7 +106,7 @@ export abstract class SandboxAction {
       updateData.daemonVersion = daemonVersion
     }
 
-    if (sandbox.state == SandboxState.DESTROYED) {
+    if (state == SandboxState.DESTROYED) {
       updateData.backupState = BackupState.NONE
     }
 
