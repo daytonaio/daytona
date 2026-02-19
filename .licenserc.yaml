@@ -19,6 +19,7 @@ header:
   paths-ignore:
     - 'libs/**'
     - '!libs/computer-use/**'
+    - '!libs/common-go/**'
     - 'apps/api/src/generate-openapi.ts'
     - 'apps/runner/pkg/api/docs/docs.go'
     - 'examples/**'
