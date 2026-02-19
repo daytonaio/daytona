@@ -8,38 +8,49 @@ import (
 	"errors"
 	"time"
 
-	cmap "github.com/orcaman/concurrent-map/v2"
+	"github.com/jellydator/ttlcache/v3"
 )
 
 type MapCache[T any] struct {
-	cacheMap cmap.ConcurrentMap[string, T]
+	ttlCache *ttlcache.Cache[string, T]
 }
 
 func (c *MapCache[T]) Set(ctx context.Context, key string, value T, expiration time.Duration) error {
-	c.cacheMap.Set(key, value)
+	c.ttlCache.Set(key, value, expiration)
 	return nil
 }
 
 func (c *MapCache[T]) Has(ctx context.Context, key string) (bool, error) {
-	_, ok := c.cacheMap.Get(key)
-	return ok, nil
+	return c.ttlCache.Has(key), nil
 }
 
 func (c *MapCache[T]) Get(ctx context.Context, key string) (*T, error) {
-	value, ok := c.cacheMap.Get(key)
-	if !ok {
+	item := c.ttlCache.Get(key)
+	if item == nil {
 		return nil, errors.New("key not found")
 	}
+
+	value := item.Value()
 	return &value, nil
 }
 
 func (c *MapCache[T]) Delete(ctx context.Context, key string) error {
-	c.cacheMap.Remove(key)
+	c.ttlCache.Delete(key)
 	return nil
 }
 
-func NewMapCache[T any]() *MapCache[T] {
-	return &MapCache[T]{
-		cacheMap: cmap.New[T](),
+func (c *MapCache[T]) start(ctx context.Context) {
+	go c.ttlCache.Start()
+	<-ctx.Done()
+	c.ttlCache.Stop()
+}
+
+func NewMapCache[T any](ctx context.Context) *MapCache[T] {
+	cache := &MapCache[T]{
+		ttlCache: ttlcache.New[string, T](),
 	}
+
+	go cache.start(ctx)
+
+	return cache
 }

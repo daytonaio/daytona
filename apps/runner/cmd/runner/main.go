@@ -83,7 +83,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	statesCache := cache.GetStatesCache(cfg.CacheRetentionDays)
+	statesCache := cache.GetStatesCache(ctx, cfg.CacheRetentionDays)
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:                 cli,

@@ -4,7 +4,7 @@ go 1.25.4
 
 require (
 	github.com/gin-gonic/gin v1.10.1
-	github.com/orcaman/concurrent-map/v2 v2.0.1
+	github.com/jellydator/ttlcache/v3 v3.4.0
 	github.com/redis/go-redis/v9 v9.10.0
 	github.com/sirupsen/logrus v1.9.3
 	go.opentelemetry.io/contrib/bridges/otellogrus v0.13.0
@@ -64,6 +64,7 @@ require (
 	golang.org/x/arch v0.20.0 // indirect
 	golang.org/x/crypto v0.47.0 // indirect
 	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect

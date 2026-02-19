@@ -77,7 +77,7 @@ func createTracesExporter(
 		}
 		cache = redisCache
 	} else {
-		cache = common_cache.NewMapCache[apiclient.OtelConfig]()
+		cache = common_cache.NewMapCache[apiclient.OtelConfig](ctx)
 	}
 
 	resolver := config.NewResolver(cache, set.Logger, apiClient, c.CacheTTL)
@@ -131,7 +131,7 @@ func createMetricsExporter(
 		}
 		cache = redisCache
 	} else {
-		cache = common_cache.NewMapCache[apiclient.OtelConfig]()
+		cache = common_cache.NewMapCache[apiclient.OtelConfig](ctx)
 	}
 	resolver := config.NewResolver(cache, set.Logger, apiClient, c.CacheTTL)
 
@@ -184,7 +184,7 @@ func createLogsExporter(
 		}
 		cache = redisCache
 	} else {
-		cache = common_cache.NewMapCache[apiclient.OtelConfig]()
+		cache = common_cache.NewMapCache[apiclient.OtelConfig](ctx)
 	}
 	resolver := config.NewResolver(cache, set.Logger, apiClient, c.CacheTTL)
 
