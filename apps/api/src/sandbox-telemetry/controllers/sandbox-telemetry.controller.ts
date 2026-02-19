@@ -17,11 +17,12 @@ import { PaginatedTracesDto } from '../dto/paginated-traces.dto'
 import { TraceSpanDto } from '../dto/trace-span.dto'
 import { MetricsResponseDto } from '../dto/metrics-response.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { AnalyticsApiDisabledGuard } from '../guards/analytics-api-disabled.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard, AnalyticsApiDisabledGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxTelemetryController {

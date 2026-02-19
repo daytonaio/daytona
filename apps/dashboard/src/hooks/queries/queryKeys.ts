@@ -69,4 +69,13 @@ export const queryKeys = {
     traceSpans: (sandboxId: string, traceId: string) =>
       [...queryKeys.telemetry.all, sandboxId, 'traces', traceId] as const,
   },
+  analytics: {
+    all: ['analytics'] as const,
+    aggregatedUsage: (organizationId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, 'aggregated-usage', params] as const,
+    sandboxesUsage: (organizationId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, 'sandboxes-usage', params] as const,
+    sandboxUsagePeriods: (organizationId: string, sandboxId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, sandboxId, 'usage-periods', params] as const,
+  },
 } as const

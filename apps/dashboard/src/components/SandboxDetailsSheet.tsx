@@ -15,8 +15,10 @@ import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
 import { TimestampTooltip } from './TimestampTooltip'
 import { LogsTab, TracesTab, MetricsTab } from './telemetry'
+import { SandboxSpendingTab } from './spending'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { FeatureFlags } from '@/enums/FeatureFlags'
+import { useConfig } from '@/hooks/useConfig'
 
 interface SandboxDetailsSheetProps {
   sandbox: Sandbox | null
@@ -51,6 +53,9 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
   const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
+  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
+  const config = useConfig()
+  const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
 
   // TODO: uncomment when we enable the terminal tab
   // useEffect(() => {
@@ -191,6 +196,14 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
               >
                 Metrics
               </TabsTrigger>
+              {spendingTabAvailable && (
+                <TabsTrigger
+                  value="spending"
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+                >
+                  Spending
+                </TabsTrigger>
+              )}
             </TabsList>
           )}
 
@@ -329,6 +342,12 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
           <TabsContent value="metrics" className="flex-1 min-h-0 overflow-hidden">
             <MetricsTab sandboxId={sandbox.id} />
           </TabsContent>
+
+          {spendingTabAvailable && (
+            <TabsContent value="spending" className="flex-1 min-h-0 overflow-hidden">
+              <SandboxSpendingTab sandboxId={sandbox.id} />
+            </TabsContent>
+          )}
         </Tabs>
       </SheetContent>
     </Sheet>
