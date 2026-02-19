@@ -33,10 +33,12 @@ func GetStatesCache(ctx context.Context, cacheRetentionDays int) *StatesCache {
 		return statesCache
 	}
 
-	return &StatesCache{
+	statesCache = &StatesCache{
 		ICache:             common_cache.NewMapCache[models.CachedStates](ctx),
 		cacheRetentionDays: cacheRetentionDays,
 	}
+
+	return statesCache
 }
 
 func (sc *StatesCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
