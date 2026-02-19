@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 
 function PlaygroundLayout({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -13,9 +14,9 @@ function PlaygroundLayout({ children, className }: { children: React.ReactNode; 
 
 function PlaygroundLayoutSidebar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="overflow-auto bg-sidebar/20 p-4 border-r border-border hidden lg:block scrollbar-sm">
-      {children}
-    </div>
+    <ScrollArea fade="mask" className="bg-sidebar/20 border-r border-border hidden lg:flex h-full overflow-hidden">
+      <div className="p-4">{children}</div>
+    </ScrollArea>
   )
 }
 
