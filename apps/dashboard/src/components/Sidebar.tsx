@@ -190,11 +190,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       // }
     }
 
-    arr.push({
-      icon: <Joystick size={16} strokeWidth={1.5} />,
-      label: 'Playground',
-      path: RoutePath.PLAYGROUND,
-    })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, webhooksInitialized, openAppPortal])
 
@@ -265,6 +260,16 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const sidebarGroups: { label: string; items: SidebarItem[] }[] = useMemo(() => {
     return [
       { label: 'Sandboxes', items: sidebarItems },
+      {
+        label: 'Misc',
+        items: [
+          {
+            icon: <Joystick size={16} strokeWidth={1.5} />,
+            label: 'Playground',
+            path: RoutePath.PLAYGROUND,
+          },
+        ],
+      },
       { label: 'Settings', items: settingsItems },
       { label: 'Billing', items: billingItems },
       { label: 'Infrastructure', items: infrastructureItems },
