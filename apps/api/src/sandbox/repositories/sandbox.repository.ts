@@ -19,6 +19,7 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { SandboxLookupCacheInvalidationService } from '../services/sandbox-lookup-cache-invalidation.service'
+import { SandboxError } from '../../exceptions/sandbox-error.exception'
 
 @Injectable()
 export class SandboxRepository extends BaseRepository<Sandbox> {
@@ -167,7 +168,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
         ) {
           break
         }
-        throw new Error(`Sandbox ${sandbox.id} is not in a valid state to be started. State: ${sandbox.state}`)
+        throw new SandboxError(`Sandbox ${sandbox.id} is not in a valid state to be started. State: ${sandbox.state}`)
       case SandboxDesiredState.STOPPED:
         if (
           [
@@ -180,7 +181,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
         ) {
           break
         }
-        throw new Error(`Sandbox ${sandbox.id} is not in a valid state to be stopped. State: ${sandbox.state}`)
+        throw new SandboxError(`Sandbox ${sandbox.id} is not in a valid state to be stopped. State: ${sandbox.state}`)
       case SandboxDesiredState.ARCHIVED:
         if (
           [
@@ -193,7 +194,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
         ) {
           break
         }
-        throw new Error(`Sandbox ${sandbox.id} is not in a valid state to be archived. State: ${sandbox.state}`)
+        throw new SandboxError(`Sandbox ${sandbox.id} is not in a valid state to be archived. State: ${sandbox.state}`)
       case SandboxDesiredState.DESTROYED:
         if (
           [
@@ -209,7 +210,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
         ) {
           break
         }
-        throw new Error(`Sandbox ${sandbox.id} is not in a valid state to be destroyed. State: ${sandbox.state}`)
+        throw new SandboxError(`Sandbox ${sandbox.id} is not in a valid state to be destroyed. State: ${sandbox.state}`)
     }
   }
 
