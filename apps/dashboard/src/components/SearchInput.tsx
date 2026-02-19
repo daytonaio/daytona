@@ -75,7 +75,7 @@ export function SearchInput({
       {value && resultCount !== undefined && (
         <div className="mt-2 text-sm text-muted-foreground">
           {resultCount === 0
-            ? `No ${entityName} match your search.`
+            ? `No ${entityName}s match your search.`
             : `Found ${resultCount} ${entityName}${resultCount === 1 ? '' : 's'}`}
         </div>
       )}
