@@ -4,10 +4,11 @@
  */
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Switch } from '@/components/ui/switch'
 import { SandboxParametersSections } from '@/enums/Playground'
+import { usePlayground } from '@/hooks/usePlayground'
 import { cn } from '@/lib/utils'
 import { BoltIcon, FolderIcon, GitBranchIcon, SquareTerminalIcon } from 'lucide-react'
-import { useState } from 'react'
 import SandboxFileSystem from './FileSystem'
 import SandboxGitOperations from './GitOperations'
 import SandboxManagementParameters from './Management'
@@ -28,9 +29,8 @@ const sectionIcons = {
 }
 
 const SandboxParameters = ({ className }: { className?: string }) => {
-  const [openedParametersSections, setOpenedParametersSections] = useState<SandboxParametersSections[]>([
-    SandboxParametersSections.SANDBOX_MANAGEMENT,
-  ])
+  const { openedParametersSections, setOpenedParametersSections, enabledSections, enableSection, disableSection } =
+    usePlayground()
 
   // TODO - Currently, snapshot selection is not supported in the Playground, so we are using empty array and false for loading. We keep to code commented to enable it in future if requested by users.
   // const { snapshotApi } = useApi()
@@ -55,25 +55,49 @@ const SandboxParameters = ({ className }: { className?: string }) => {
       <Accordion
         type="multiple"
         value={openedParametersSections}
-        onValueChange={(parametersSections) =>
-          setOpenedParametersSections(parametersSections as SandboxParametersSections[])
-        }
+        onValueChange={(sections) => setOpenedParametersSections(sections as SandboxParametersSections[])}
       >
         {sandboxParametersSectionsData.map((section) => {
-          const isCollapsed = !openedParametersSections.includes(section.value as SandboxParametersSections)
+          const isManagement = section.value === SandboxParametersSections.SANDBOX_MANAGEMENT
+          const isEnabled = enabledSections.includes(section.value as SandboxParametersSections)
+          const isExpanded = openedParametersSections.includes(section.value as SandboxParametersSections)
           return (
             <AccordionItem
               key={section.value}
               value={section.value}
               className="border px-2 last:border-b first:rounded-t-lg last:rounded-b-lg border-t-0 first:border-t"
             >
-              <AccordionTrigger className="font-semibold text-muted-foreground hover:no-underline dark:bg-muted/50 bg-muted/80 hover:text-primary py-3 border-b border-b-transparent data-[state=open]:border-b-border -mx-2 px-3">
+              <AccordionTrigger
+                headerClassName={cn(
+                  'font-semibold text-muted-foreground dark:bg-muted/50 bg-muted/80 border-b -mx-2 px-3',
+                  {
+                    'border-b-border': isExpanded,
+                    'border-b-transparent': !isExpanded,
+                    'opacity-80': !isEnabled && !isManagement,
+                  },
+                )}
+                className="hover:no-underline hover:text-primary py-3"
+                right={
+                  !isManagement ? (
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={(checked) =>
+                        checked
+                          ? enableSection(section.value as SandboxParametersSections)
+                          : disableSection(section.value as SandboxParametersSections)
+                      }
+                      size="sm"
+                      className="ml-3"
+                    />
+                  ) : undefined
+                }
+              >
                 <div className="flex items-center gap-2 [&_svg]:size-4 text-sm font-medium">
                   {sectionIcons[section.value]} {section.label}
                 </div>
               </AccordionTrigger>
               <AccordionContent className="py-3 px-1">
-                {!isCollapsed && (
+                {isExpanded && (
                   <div className="space-y-4">
                     {section.value === SandboxParametersSections.FILE_SYSTEM && <SandboxFileSystem />}
                     {section.value === SandboxParametersSections.GIT_OPERATIONS && <SandboxGitOperations />}

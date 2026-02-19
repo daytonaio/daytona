@@ -12,6 +12,7 @@ import {
   MouseScrollDirection,
   PlaygroundActions,
   ProcessCodeExecutionActions,
+  SandboxParametersSections,
   ScreenshotActions,
   ScreenshotFormatOption,
 } from '@/enums/Playground'
@@ -296,6 +297,13 @@ export interface IPlaygroundContext {
   runningActionMethod: RunningActionMethodName
   actionRuntimeError: ActionRuntimeError
   getSandboxParametersInfo: () => SandboxParametersInfo
+  openedParametersSections: SandboxParametersSections[]
+  setOpenedParametersSections: React.Dispatch<React.SetStateAction<SandboxParametersSections[]>>
+  enabledSections: SandboxParametersSections[]
+  enableSection: (section: SandboxParametersSections) => void
+  disableSection: (section: SandboxParametersSections) => void
+  pendingScrollSection: SandboxParametersSections | null
+  clearPendingScrollSection: () => void
 }
 
 export const PlaygroundContext = createContext<IPlaygroundContext | null>(null)

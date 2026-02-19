@@ -25,7 +25,12 @@ import {
   ValidatePlaygroundActionWithParams,
   VNCInteractionOptionsParams,
 } from '@/contexts/PlaygroundContext'
-import { MouseButton, MouseScrollDirection, ScreenshotFormatOption } from '@/enums/Playground'
+import {
+  MouseButton,
+  MouseScrollDirection,
+  SandboxParametersSections,
+  ScreenshotFormatOption,
+} from '@/enums/Playground'
 import { getLanguageCodeToRun, objectHasAnyValue } from '@/lib/playground'
 import {
   CreateSandboxBaseParams,
@@ -35,7 +40,39 @@ import {
 } from '@daytonaio/sdk'
 import { useCallback, useState } from 'react'
 
+const PARAM_SECTION_MAP: Partial<Record<keyof SandboxParams, SandboxParametersSections>> = {
+  listFilesParams: SandboxParametersSections.FILE_SYSTEM,
+  createFolderParams: SandboxParametersSections.FILE_SYSTEM,
+  deleteFileParams: SandboxParametersSections.FILE_SYSTEM,
+  gitCloneParams: SandboxParametersSections.GIT_OPERATIONS,
+  gitStatusParams: SandboxParametersSections.GIT_OPERATIONS,
+  gitBranchesParams: SandboxParametersSections.GIT_OPERATIONS,
+  codeRunParams: SandboxParametersSections.PROCESS_CODE_EXECUTION,
+  shellCommandRunParams: SandboxParametersSections.PROCESS_CODE_EXECUTION,
+}
+
 export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [openedParametersSections, setOpenedParametersSections] = useState<SandboxParametersSections[]>([
+    SandboxParametersSections.SANDBOX_MANAGEMENT,
+  ])
+  const [enabledSections, setEnabledSections] = useState<SandboxParametersSections[]>([
+    SandboxParametersSections.SANDBOX_MANAGEMENT,
+  ])
+  const [pendingScrollSection, setPendingScrollSection] = useState<SandboxParametersSections | null>(null)
+
+  const enableSection = useCallback((section: SandboxParametersSections) => {
+    setEnabledSections((prev) => (prev.includes(section) ? prev : [...prev, section]))
+    setOpenedParametersSections((prev) => (prev.includes(section) ? prev : [...prev, section]))
+    setPendingScrollSection(section)
+  }, [])
+
+  const disableSection = useCallback((section: SandboxParametersSections) => {
+    setEnabledSections((prev) => prev.filter((s) => s !== section))
+    setOpenedParametersSections((prev) => prev.filter((s) => s !== section))
+  }, [])
+
+  const clearPendingScrollSection = useCallback(() => setPendingScrollSection(null), [])
+
   const [sandboxParametersState, setSandboxParametersState] = useState<SandboxParams>({
     snapshotName: SANDBOX_SNAPSHOT_DEFAULT_VALUE,
     resources: {
@@ -242,12 +279,18 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setPlaygroundActionParamValue(actionParamsKey, newState as PlaygroundActionParams[typeof actionParamsKey])
       if (!actionFormData.onChangeParamsValidationDisabled)
         validatePlaygroundActionWithParams(actionFormData, newState as typeof actionFormData.parametersState)
+
+      // Auto-enable the section that owns this param if it's currently disabled
+      const section = PARAM_SECTION_MAP[actionParamsKey as keyof SandboxParams]
+      if (section && !enabledSections.includes(section)) enableSection(section)
     },
     [
       setPlaygroundActionParamValue,
       validatePlaygroundActionWithParams,
       sandboxParametersState,
       VNCInteractionOptionsParamsState,
+      enabledSections,
+      enableSection,
     ],
   )
 
@@ -349,6 +392,13 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         runningActionMethod,
         actionRuntimeError,
         getSandboxParametersInfo,
+        openedParametersSections,
+        setOpenedParametersSections,
+        enabledSections,
+        enableSection,
+        disableSection,
+        pendingScrollSection,
+        clearPendingScrollSection,
       }}
     >
       {children}

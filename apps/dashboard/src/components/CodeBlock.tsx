@@ -13,6 +13,7 @@ interface CodeBlockProps {
   language: string
   showCopy?: boolean
   codeAreaClassName?: string
+  className?: string
 }
 
 interface HighlightProps {
@@ -30,11 +31,11 @@ const oneDark = {
   },
 }
 
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, codeAreaClassName }) => {
+const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true, codeAreaClassName, className }) => {
   const { theme } = useTheme()
 
   return (
-    <div className="relative rounded-lg">
+    <div className={cn('relative rounded-lg', className)}>
       <Highlight
         theme={(theme === 'dark' ? oneDark : themes.oneLight) as PrismTheme}
         code={code.trim()}
