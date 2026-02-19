@@ -37,7 +37,7 @@ export function SearchInput({
           searchInput.focus()
         }
       }
-      if (e.key === 'Escape' && document.activeElement?.getAttribute('data-search-input') !== null) {
+      if (e.key === 'Escape' && document.activeElement?.hasAttribute('data-search-input')) {
         onChange('')
       }
     }
@@ -60,6 +60,7 @@ export function SearchInput({
         />
         {value ? (
           <button
+            type="button"
             onClick={() => onChange('')}
             className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Clear search"
@@ -68,7 +69,9 @@ export function SearchInput({
           </button>
         ) : showKeyboardShortcut ? (
           <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-            <span className="hidden sm:inline">{navigator.platform.includes('Mac') ? '⌘K' : 'Ctrl+K'}</span>
+            <span className="hidden sm:inline">
+              {typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent) ? '⌘K' : 'Ctrl+K'}
+            </span>
           </div>
         ) : null}
       </div>
