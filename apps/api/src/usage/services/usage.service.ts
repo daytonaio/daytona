@@ -55,7 +55,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
           await this.createUsagePeriod(event)
           break
         }
-        case SandboxState.STOPPED:
+        case SandboxState.STOPPING:
           await this.closeUsagePeriod(event.sandbox.id)
           await this.createUsagePeriod(event, true)
           break
@@ -150,7 +150,12 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
           usagePeriod.endAt = closeTime
           await transactionalEntityManager.save(usagePeriod)
 
-          if (sandbox && (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.STOPPED)) {
+          if (
+            sandbox &&
+            (sandbox.state === SandboxState.STARTED ||
+              sandbox.state === SandboxState.STOPPED ||
+              sandbox.state === SandboxState.STOPPING)
+          ) {
             // Create new usage period
             const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
             newUsagePeriod.startAt = closeTime
