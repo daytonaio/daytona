@@ -4,7 +4,6 @@
  */
 
 import {
-  BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
@@ -20,9 +19,9 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { v4 as uuidv4 } from 'uuid'
-import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
+import { nanoid } from 'nanoid'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -80,21 +79,21 @@ export class Sandbox {
     enum: SandboxClass,
     default: SandboxClass.SMALL,
   })
-  class: SandboxClass
+  class = SandboxClass.SMALL
 
   @Column({
     type: 'enum',
     enum: SandboxState,
     default: SandboxState.UNKNOWN,
   })
-  state: SandboxState
+  state = SandboxState.UNKNOWN
 
   @Column({
     type: 'enum',
     enum: SandboxDesiredState,
     default: SandboxDesiredState.STARTED,
   })
-  desiredState: SandboxDesiredState
+  desiredState = SandboxDesiredState.STARTED
 
   @Column({ nullable: true })
   snapshot?: string
@@ -106,19 +105,19 @@ export class Sandbox {
   errorReason?: string
 
   @Column({ default: false })
-  recoverable: boolean
+  recoverable = false
 
   @Column({
     type: 'jsonb',
     default: {},
   })
-  env: { [key: string]: string }
+  env: { [key: string]: string } = {}
 
   @Column({ default: false })
-  public: boolean
+  public = false
 
   @Column({ default: false })
-  networkBlockAll: boolean
+  networkBlockAll = false
 
   @Column({ nullable: true })
   networkAllowList?: string
@@ -140,7 +139,7 @@ export class Sandbox {
     enum: BackupState,
     default: BackupState.NONE,
   })
-  backupState: BackupState
+  backupState = BackupState.NONE
 
   @Column({
     type: 'text',
@@ -155,25 +154,25 @@ export class Sandbox {
   existingBackupSnapshots: Array<{
     snapshotName: string
     createdAt: Date
-  }>
+  }> = []
 
   @Column({ type: 'int', default: 2 })
-  cpu: number
+  cpu = 2
 
   @Column({ type: 'int', default: 0 })
-  gpu: number
+  gpu = 0
 
   @Column({ type: 'int', default: 4 })
-  mem: number
+  mem = 4
 
   @Column({ type: 'int', default: 10 })
-  disk: number
+  disk = 10
 
   @Column({
     type: 'jsonb',
     default: [],
   })
-  volumes: SandboxVolume[]
+  volumes: SandboxVolume[] = []
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
@@ -191,23 +190,23 @@ export class Sandbox {
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated
   //  if set to 0, auto stop will be disabled
   @Column({ default: 15 })
-  autoStopInterval?: number
+  autoStopInterval = 15
 
   //  this is the interval in minutes after which a continuously stopped workspace will be automatically archived
   @Column({ default: 7 * 24 * 60 })
-  autoArchiveInterval?: number
+  autoArchiveInterval = 7 * 24 * 60
 
   //  this is the interval in minutes after which a continuously stopped workspace will be automatically deleted
   //  if set to negative value, auto delete will be disabled
   //  if set to 0, sandbox will be immediately deleted upon stopping
   @Column({ default: -1 })
-  autoDeleteInterval?: number
+  autoDeleteInterval = -1
 
   @Column({ default: false })
-  pending?: boolean
+  pending = false
 
   @Column({ default: () => 'MD5(random()::text)' })
-  authToken: string
+  authToken = nanoid(32).toLocaleLowerCase()
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
@@ -225,56 +224,69 @@ export class Sandbox {
     this.region = region
   }
 
-  public setBackupState(
-    state: BackupState,
+  /**
+   * Helper method that returns the update data needed for a backup state update.
+   */
+  static getBackupStateUpdate(
+    sandbox: Sandbox,
+    backupState: BackupState,
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
-  ) {
-    this.backupState = state
-    switch (state) {
+  ): Partial<Sandbox> {
+    const update: Partial<Sandbox> = {
+      backupState,
+    }
+    switch (backupState) {
       case BackupState.NONE:
-        this.backupSnapshot = null
+        update.backupSnapshot = null
         break
       case BackupState.COMPLETED: {
         const now = new Date()
-        this.lastBackupAt = now
-        this.existingBackupSnapshots = [
-          ...this.existingBackupSnapshots,
+        update.lastBackupAt = now
+        update.existingBackupSnapshots = [
+          ...sandbox.existingBackupSnapshots,
           {
-            snapshotName: this.backupSnapshot,
+            snapshotName: sandbox.backupSnapshot,
             createdAt: now,
           },
         ]
-        this.backupErrorReason = null
+        update.backupErrorReason = null
         break
       }
     }
     if (backupSnapshot !== undefined) {
-      this.backupSnapshot = backupSnapshot
+      update.backupSnapshot = backupSnapshot
     }
     if (backupRegistryId !== undefined) {
-      this.backupRegistryId = backupRegistryId
+      update.backupRegistryId = backupRegistryId
     }
     if (backupErrorReason !== undefined) {
-      this.backupErrorReason = backupErrorReason
+      update.backupErrorReason = backupErrorReason
+    }
+    return update
+  }
+
+  /**
+   * Helper method that returns the update data needed for a soft delete operation.
+   */
+  static getSoftDeleteUpdate(sandbox: Sandbox): Partial<Sandbox> {
+    return {
+      pending: true,
+      desiredState: SandboxDesiredState.DESTROYED,
+      backupState: BackupState.NONE,
+      name: 'DESTROYED_' + sandbox.name + '_' + Date.now(),
     }
   }
 
-  public applyDesiredDestroyedState(): void {
-    this.pending = true
-    this.desiredState = SandboxDesiredState.DESTROYED
-    this.backupState = BackupState.NONE
-    this.name = 'DESTROYED_' + this.name + '_' + Date.now()
+  /**
+   * Asserts that the current entity state is valid.
+   */
+  assertValid(): void {
+    this.validateDesiredStateTransition()
   }
 
-  @BeforeUpdate()
-  updateLastActivityAt() {
-    this.lastActivityAt = new Date()
-  }
-
-  @BeforeUpdate()
-  validateDesiredState() {
+  private validateDesiredStateTransition(): void {
     switch (this.desiredState) {
       case SandboxDesiredState.STARTED:
         if (
@@ -297,7 +309,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
+        throw new Error(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
       case SandboxDesiredState.STOPPED:
         if (
           [
@@ -311,7 +323,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
+        throw new Error(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
       case SandboxDesiredState.ARCHIVED:
         if (
           [
@@ -324,7 +336,7 @@ export class Sandbox {
         ) {
           break
         }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
+        throw new Error(`Sandbox ${this.id} is not in a valid state to be archived. State: ${this.state}`)
       case SandboxDesiredState.DESTROYED:
         if (
           [
@@ -340,32 +352,43 @@ export class Sandbox {
         ) {
           break
         }
-        throw new SandboxError(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
+        throw new Error(`Sandbox ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
     }
   }
 
-  @BeforeUpdate()
-  updatePendingFlag() {
+  /**
+   * Enforces domain invariants on the current entity state.
+   *
+   * @returns Additional field changes that invariant enforcement produced.
+   */
+  enforceInvariants(): Partial<Sandbox> {
+    const changes = this.getInvariantChanges()
+    Object.assign(this, changes)
+    return changes
+  }
+
+  private getInvariantChanges(): Partial<Sandbox> {
+    const changes: Partial<Sandbox> = {}
+
     if (!this.pending && String(this.state) !== String(this.desiredState)) {
-      this.pending = true
+      changes.pending = true
     }
     if (this.pending && String(this.state) === String(this.desiredState)) {
-      this.pending = false
+      changes.pending = false
     }
     if (
       this.state === SandboxState.ERROR ||
       this.state === SandboxState.BUILD_FAILED ||
       this.desiredState === SandboxDesiredState.ARCHIVED
     ) {
-      this.pending = false
+      changes.pending = false
     }
-  }
 
-  @BeforeUpdate()
-  handleDestroyedState() {
     if (this.state === SandboxState.DESTROYED) {
-      this.runnerId = null
-      this.backupState = BackupState.NONE
+      changes.runnerId = null
+      changes.backupState = BackupState.NONE
     }
+
+    return changes
   }
 }
