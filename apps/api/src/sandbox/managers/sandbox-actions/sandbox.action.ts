@@ -64,7 +64,11 @@ export abstract class SandboxAction {
       return
     }
 
-    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
+    if (
+      sandbox.state === state &&
+      (runnerId === undefined || sandbox.runnerId === runnerId) &&
+      (errorReason === undefined || sandbox.errorReason === errorReason)
+    ) {
       return
     }
 
