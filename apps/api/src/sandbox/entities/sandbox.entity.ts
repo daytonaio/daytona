@@ -104,7 +104,7 @@ export class Sandbox {
   @Column({ nullable: true })
   errorReason?: string
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   recoverable = false
 
   @Column({
@@ -113,10 +113,10 @@ export class Sandbox {
   })
   env: { [key: string]: string } = {}
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   public = false
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   networkBlockAll = false
 
   @Column({ nullable: true })
@@ -189,23 +189,23 @@ export class Sandbox {
 
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated
   //  if set to 0, auto stop will be disabled
-  @Column({ default: 15 })
+  @Column({ default: 15, type: 'int' })
   autoStopInterval = 15
 
   //  this is the interval in minutes after which a continuously stopped workspace will be automatically archived
-  @Column({ default: 7 * 24 * 60 })
+  @Column({ default: 7 * 24 * 60, type: 'int' })
   autoArchiveInterval = 7 * 24 * 60
 
   //  this is the interval in minutes after which a continuously stopped workspace will be automatically deleted
   //  if set to negative value, auto delete will be disabled
   //  if set to 0, sandbox will be immediately deleted upon stopping
-  @Column({ default: -1 })
+  @Column({ default: -1, type: 'int' })
   autoDeleteInterval = -1
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   pending = false
 
-  @Column({ default: () => 'MD5(random()::text)' })
+  @Column({ default: () => 'MD5(random()::text)', type: 'text' })
   authToken = nanoid(32).toLocaleLowerCase()
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
