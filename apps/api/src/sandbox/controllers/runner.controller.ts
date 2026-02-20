@@ -314,7 +314,7 @@ export class RunnerController {
   })
   @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, SandboxAccessGuard]))
   @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
-  async getRunnerBySandboxId(@Param('sandboxId', ParseUUIDPipe) sandboxId: string): Promise<RunnerFullDto> {
+  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
 
     if (!runner) {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, HttpCode, NotFoundException, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common'
+import { Controller, HttpCode, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Audit } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -50,7 +50,7 @@ export class AdminSandboxController {
     targetIdFromRequest: (req) => req.params.sandboxId,
     targetIdFromResult: (result: SandboxDto) => result?.id,
   })
-  async recoverSandbox(@Param('sandboxId', ParseUUIDPipe) sandboxId: string): Promise<SandboxDto> {
+  async recoverSandbox(@Param('sandboxId') sandboxId: string): Promise<SandboxDto> {
     const organization = await this.organizationService.findBySandboxId(sandboxId)
     if (!organization) {
       throw new NotFoundException('Sandbox not found')
