@@ -134,8 +134,8 @@ export function getColumns({
           <div className="w-full truncate flex items-center gap-2 group/copy-button">
             <span className="truncate block">{displayName}</span>
             <CopyButton
-              value={row.original.id}
-              tooltipText="Copy UUID"
+              value={displayName}
+              tooltipText="Copy name"
               size="icon-xs"
               autoHide
               onClick={(e) => {
@@ -158,8 +158,18 @@ export function getColumns({
       accessorKey: 'id',
       cell: ({ row }) => {
         return (
-          <div className="w-full truncate">
+          <div className="w-full truncate flex items-center gap-2 group/copy-button">
             <span className="truncate block">{row.original.id}</span>
+            <CopyButton
+              value={row.original.id}
+              tooltipText="Copy UUID"
+              size="icon-xs"
+              autoHide
+              onClick={(e) => {
+                e.stopPropagation()
+                toast.success('Copied to clipboard')
+              }}
+            />
           </div>
         )
       },
