@@ -41,6 +41,18 @@ export interface AuditLog {
    * @type {string}
    * @memberof AuditLog
    */
+  actorApiKeyPrefix?: string
+  /**
+   *
+   * @type {string}
+   * @memberof AuditLog
+   */
+  actorApiKeySuffix?: string
+  /**
+   *
+   * @type {string}
+   * @memberof AuditLog
+   */
   organizationId?: string
   /**
    *

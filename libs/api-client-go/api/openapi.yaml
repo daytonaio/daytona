@@ -14255,6 +14255,7 @@ components:
       type: object
     AuditLog:
       example:
+        actorApiKeyPrefix: actorApiKeyPrefix
         metadata:
           key: ''
         targetId: targetId
@@ -14269,6 +14270,7 @@ components:
         actorId: actorId
         action: action
         id: id
+        actorApiKeySuffix: actorApiKeySuffix
         statusCode: 0.8008281904610115
       properties:
         id:
@@ -14276,6 +14278,10 @@ components:
         actorId:
           type: string
         actorEmail:
+          type: string
+        actorApiKeyPrefix:
+          type: string
+        actorApiKeySuffix:
           type: string
         organizationId:
           type: string
@@ -14315,7 +14321,8 @@ components:
         totalPages: 5.962133916683182
         page: 1.4658129805029452
         items:
-          - metadata:
+          - actorApiKeyPrefix: actorApiKeyPrefix
+            metadata:
               key: ''
             targetId: targetId
             errorMessage: errorMessage
@@ -14329,8 +14336,10 @@ components:
             actorId: actorId
             action: action
             id: id
+            actorApiKeySuffix: actorApiKeySuffix
             statusCode: 0.8008281904610115
-          - metadata:
+          - actorApiKeyPrefix: actorApiKeyPrefix
+            metadata:
               key: ''
             targetId: targetId
             errorMessage: errorMessage
@@ -14344,6 +14353,7 @@ components:
             actorId: actorId
             action: action
             id: id
+            actorApiKeySuffix: actorApiKeySuffix
             statusCode: 0.8008281904610115
       properties:
         items:
