@@ -348,6 +348,15 @@ export const getSidebarConfig = (
             icon: 'globe.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/playground', locale),
+          label: t('sidebarconfig.playground'),
+          description: t('sidebarconfig.playgroundDescription'),
+          attrs: {
+            icon: 'playground.svg',
+          },
+        },
       ],
     },
     {
