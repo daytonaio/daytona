@@ -14,13 +14,13 @@ import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constant
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
-import { Sandbox } from '../../sandbox/entities/sandbox.entity'
 import { SandboxUsagePeriodArchive } from '../entities/sandbox-usage-period-archive.entity'
 import { TrackableJobExecutions } from '../../common/interfaces/trackable-job-executions'
 import { TrackJobExecution } from '../../common/decorators/track-job-execution.decorator'
 import { setTimeout as sleep } from 'timers/promises'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { SandboxRepository } from '../../sandbox/repositories/sandbox.repository'
 
 @Injectable()
 export class UsageService implements TrackableJobExecutions, OnApplicationShutdown {
@@ -31,8 +31,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     @InjectRepository(SandboxUsagePeriod)
     private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
     private readonly redisLockProvider: RedisLockProvider,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
   ) {}
 
   async onApplicationShutdown() {

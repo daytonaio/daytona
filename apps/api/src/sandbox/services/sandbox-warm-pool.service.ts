@@ -8,6 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
 import { WarmPool } from '../entities/warm-pool.entity'
@@ -51,8 +52,7 @@ export class SandboxWarmPoolService {
   constructor(
     @InjectRepository(WarmPool)
     private readonly warmPoolRepository: Repository<WarmPool>,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Runner)

@@ -4,8 +4,6 @@
  */
 
 import { Injectable, NotFoundException, HttpException, BadRequestException, Logger } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { Runner } from '../entities/runner.entity'
 import axios from 'axios'
@@ -13,14 +11,14 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxService } from './sandbox.service'
 import { RunnerService } from './runner.service'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class ToolboxService {
   private readonly logger = new Logger(ToolboxService.name)
 
   constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly sandboxService: SandboxService,
     private readonly runnerService: RunnerService,
@@ -109,7 +107,7 @@ export class ToolboxService {
       // redis for cooldown period - 10 seconds
       // prevents database flooding when multiple requests are made at the same time
       if (acquired) {
-        await this.sandboxService.updateById(sandboxId, { lastActivityAt: new Date() })
+        await this.sandboxService.updateLastActivityAt(sandboxId, new Date())
       }
     }
   }
