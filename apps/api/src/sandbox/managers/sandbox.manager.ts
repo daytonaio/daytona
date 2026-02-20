@@ -636,7 +636,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       },
       take: 100,
       order: {
-        lastActivityAt: 'ASC',
+        updatedAt: 'ASC',
       },
     })
 
