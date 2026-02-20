@@ -289,7 +289,7 @@ func run() int {
 	select {
 	case err := <-apiServerErrChan:
 		logger.Error("API server error", "error", err)
-		return 2
+		return 1
 	case <-interruptChannel:
 		logger.Info("Signal received, shutting down")
 		apiServer.Stop()

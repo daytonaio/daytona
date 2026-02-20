@@ -25,7 +25,7 @@ import (
 // Returns the logger (either the original or a new one with OTEL support) and a logger provider.
 func InitLogger(ctx context.Context, logger *slog.Logger, config Config) (*slog.Logger, *otellog.LoggerProvider, error) {
 	if logger == nil {
-		return nil, nil, errors.New("logger cannot be nil")
+		return logger, nil, errors.New("logger cannot be nil")
 	}
 
 	hostname, err := os.Hostname()
