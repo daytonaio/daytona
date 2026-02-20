@@ -81,6 +81,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     if (!result.affected) {
       throw new NotFoundException('Sandbox not found after update')
     }
+    sandbox.updatedAt = new Date()
 
     this.emitUpdateEvents(sandbox, previousSandbox)
     this.invalidateLookupCache(sandbox, previousSandbox)
@@ -132,6 +133,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       const invariantChanges = sandbox.enforceInvariants()
 
       await entityManager.update(Sandbox, id, { ...updateData, ...invariantChanges })
+      sandbox.updatedAt = new Date()
 
       this.emitUpdateEvents(sandbox, previousSandbox)
       this.invalidateLookupCache(sandbox, previousSandbox)
