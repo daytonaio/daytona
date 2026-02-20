@@ -3,23 +3,18 @@ title: "プロセス"
 hideTitleOnPage: true
 ---
 
-
-## CodeRunParams
+## CodeRunParams \{#coderunparams\}
 
 コード実行用のパラメータ。
 
 **プロパティ**:
 
-- `argv?` _string\[\]_ - コマンドライン引数
-- `env?` _Record\<string, string\>_ - 環境変数
-    
+* `argv?` *string[]* - コマンドライン引数
+* `env?` *Record&lt;string, string&gt;* - 環境変数
 
+### コンストラクタ \{#constructors\}
 
-
-
-### コンストラクタ
-
-#### new CodeRunParams()
+#### new CodeRunParams() \{#new-coderunparams\}
 
 ```ts
 new CodeRunParams(): CodeRunParams
@@ -27,40 +22,40 @@ new CodeRunParams(): CodeRunParams
 
 **戻り値**:
 
-- `CodeRunParams`
-## プロセス
+* `CodeRunParams`
 
-サンドボックス内でのプロセスおよびコード実行を扱います。
+## プロセス \{#process\}
 
-### コンストラクタ
+サンドボックス内のプロセスおよびコード実行を扱います。
 
-#### new Process()
+### コンストラクタ \{#constructors\}
+
+#### new Process() \{#new-process\}
 
 ```ts
 new Process(
-   sandboxId: string, 
    clientConfig: Configuration, 
    codeToolbox: SandboxCodeToolbox, 
-   toolboxApi: ToolboxApi, 
-   getRootDir: () => Promise<string>): Process
+   apiClient: ProcessApi, 
+   getPreviewToken: () => Promise<string>, 
+   ensureToolboxUrl: () => Promise<void>): Process
 ```
 
 **パラメータ**:
 
-- `sandboxId` _string_
-- `clientConfig` _Configuration_
-- `codeToolbox` _SandboxCodeToolbox_
-- `toolboxApi` _ToolboxApi_
-- `getRootDir` _\(\) =\> Promise\<string\>_
-
+* `clientConfig` *Configuration*
+* `codeToolbox` *SandboxCodeToolbox*
+* `apiClient` *ProcessApi*
+* `getPreviewToken` *() =&gt; Promise&lt;string&gt;*
+* `ensureToolboxUrl` *() =&gt; Promise&lt;void&gt;*
 
 **戻り値**:
 
-- `Process`
+* `Process`
 
-### メソッド
+### メソッド \{#methods\}
 
-#### codeRun()
+#### codeRun() \{#coderun\}
 
 ```ts
 codeRun(
@@ -73,22 +68,21 @@ timeout?: number): Promise<ExecuteResponse>
 
 **パラメータ**:
 
-- `code` _string_ - 実行するコード
-- `params?` _CodeRunParams_ - コード実行用のパラメータ
-- `timeout?` _number_ - 実行完了を待機する最大時間（秒）
-
+* `code` *string* - 実行するコード
+* `params?` *CodeRunParams* - コード実行用パラメータ
+* `timeout?` *number* - 実行完了を待つ最大時間（秒）
 
 **戻り値**:
 
-- `Promise<ExecuteResponse>` - 以下を含むコード実行結果:
-    - exitCode: 実行の終了ステータス
-    - result: コードの標準出力
-    - artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
+* `Promise<ExecuteResponse>` - 次を含むコード実行結果:
+  * exitCode: 実行の終了ステータス
+  * result: コードの標準出力
+  * artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
 
 **例:**
 
 ```ts
-// TypeScript コードを実行
+// TypeScript のコードを実行
 const response = await process.codeRun(`
   const x = 10;
   const y = 20;
@@ -98,7 +92,7 @@ console.log(response.artifacts.stdout);  // 出力: Sum: 30
 ```
 
 ```ts
-// matplotlib を用いた Python コードを実行
+// matplotlib を使用して Python のコードを実行
 const response = await process.codeRun(`
 import matplotlib.pyplot as plt
 import numpy as np
@@ -138,24 +132,126 @@ if (response.artifacts?.charts) {
 
 ***
 
-#### createSession()
+#### connectPty() \{#connectpty\}
+
+```ts
+connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle>
+```
+
+サンドボックス内の既存の PTY セッションに接続します。
+
+既存の PTY セッションへの WebSocket 接続を確立し、既に作成済みのターミナルセッションと対話できるようにします。
+
+**パラメーター**:
+
+* `sessionId` *string* - 接続する PTY セッションの ID
+* `options?` *PtyConnectOptions* - データハンドラーを含む接続オプション
+
+**戻り値**:
+
+* `Promise<PtyHandle>` - セッション管理用の PTY ハンドル
+
+**例:**
+
+```ts
+// 既存のPTYセッションに接続
+const handle = await process.connectPty('my-session', {
+  onData: (data) => {
+    // ターミナル出力を処理
+    const text = new TextDecoder().decode(data);
+    process.stdout.write(text);
+  },
+});
+
+// 接続が確立されるまで待機
+await handle.waitForConnection();
+
+// 既存のセッションにコマンドを送信
+await handle.sendInput('pwd\n');
+await handle.sendInput('ls -la\n');
+await handle.sendInput('exit\n');
+
+// 完了を待機
+const result = await handle.wait();
+console.log(`セッションが終了しました。終了コード: ${result.exitCode}`);
+
+// クリーンアップ
+await handle.disconnect();
+```
+
+***
+
+#### createPty() \{#createpty\}
+
+```ts
+createPty(options?: PtyCreateOptions & PtyConnectOptions): Promise<PtyHandle>
+```
+
+サンドボックス内で新しい PTY（擬似端末）セッションを作成します。
+
+コマンドの実行やユーザー入力の処理が可能な対話型ターミナルセッションを作成します。
+この PTY セッションは実際のターミナルと同様に動作し、コマンド履歴などの機能をサポートします。
+
+**パラメータ**:
+
+* `options?` *PtyCreateOptions &amp; PtyConnectOptions* - 作成および接続オプションを含む PTY セッションの構成
+
+**戻り値**:
+
+* `Promise<PtyHandle>` - セッション管理用の PTY ハンドル
+
+**例:**
+
+```ts
+// カスタム設定でPTYセッションを作成
+const ptyHandle = await process.createPty({
+  id: 'my-interactive-session',
+  cwd: '/workspace',
+  envs: { TERM: 'xterm-256color', LANG: 'en_US.UTF-8' },
+  cols: 120,
+  rows: 30,
+  onData: (data) => {
+    // ターミナル出力を処理
+    const text = new TextDecoder().decode(data);
+    process.stdout.write(text);
+  },
+});
+
+// 接続が確立されるまで待機
+await ptyHandle.waitForConnection();
+
+// ターミナルにコマンドを送信
+await ptyHandle.sendInput('ls -la\n');
+await ptyHandle.sendInput('echo "Hello, PTY!"\n');
+await ptyHandle.sendInput('exit\n');
+
+// 完了を待機して結果を取得
+const result = await ptyHandle.wait();
+console.log(`PTYセッションが終了コード ${result.exitCode} で完了しました`);
+
+// クリーンアップ
+await ptyHandle.disconnect();
+```
+
+***
+
+#### createSession() \{#createsession\}
 
 ```ts
 createSession(sessionId: string): Promise<void>
 ```
 
-サンドボックス内に新しい長時間実行のバックグラウンドセッションを作成します。
+サンドボックス内に新しい長時間稼働のバックグラウンドセッションを作成します。
 
-セッションはコマンド間で状態を保持するバックグラウンドプロセスであり、関連する複数のコマンドや永続的な環境設定が必要なシナリオに最適です。長時間実行のコマンドを実行し、プロセスの状態を監視できます。
+セッションはコマンド間で状態を維持するバックグラウンドプロセスで、複数の関連コマンドの実行や恒常的な環境セットアップが必要なシナリオに最適です。長時間実行のコマンドを動かし、プロセスの状態を監視できます。
 
-**パラメータ**:
+**パラメーター**:
 
-- `sessionId` _string_ - 新しいセッションの一意の識別子
-
+* `sessionId` *string* - 新規セッションの一意の識別子
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -170,22 +266,21 @@ await process.deleteSession(sessionId);
 
 ***
 
-#### deleteSession()
+#### deleteSession() \{#deletesession\}
 
 ```ts
 deleteSession(sessionId: string): Promise<void>
 ```
 
-サンドボックスからセッションを削除します。
+サンドボックスのセッションを削除します。
 
-**パラメータ**:
+**パラメーター**:
 
-- `sessionId` _string_ - 削除するセッションの一意の識別子
-
+* `sessionId` *string* - 削除するセッションの一意の識別子
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
@@ -196,7 +291,7 @@ await process.deleteSession('my-session');
 
 ***
 
-#### executeCommand()
+#### executeCommand() \{#executecommand\}
 
 ```ts
 executeCommand(
@@ -206,45 +301,43 @@ executeCommand(
 timeout?: number): Promise<ExecuteResponse>
 ```
 
-サンドボックスでシェルコマンドを実行します。
+サンドボックス内でシェルコマンドを実行します。
 
-**Parameters**:
+**パラメーター**:
 
-- `command` _string_ - 実行するシェルコマンド
-- `cwd?` _string_ - コマンド実行時の作業ディレクトリ。未指定の場合はサンドボックスのルートディレクトリを使用します。
-    既定値はユーザーのルートディレクトリです。
-- `env?` _Record\<string, string\>_ - コマンドに設定する環境変数
-- `timeout?` _number_ - コマンドの完了を待機する最大時間（秒）。0 は無期限に待機します。
+* `command` *string* - 実行するシェルコマンド
+* `cwd?` *string* - コマンド実行時の作業ディレクトリ。未指定の場合はサンドボックスの作業ディレクトリを使用します。
+* `env?` *Record&lt;string, string&gt;* - コマンドに設定する環境変数
+* `timeout?` *number* - コマンドの完了を待機する最大時間（秒）。0 は無期限に待機します。
 
+**戻り値**:
 
-**Returns**:
+* `Promise<ExecuteResponse>` - コマンド実行結果を返します。内容:
+  * exitCode: コマンドの終了ステータス
+  * result: コマンドの標準出力
+  * artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
 
-- `Promise<ExecuteResponse>` - コマンド実行結果。以下を含む:
-    - exitCode: コマンドの終了ステータス
-    - result: コマンドの標準出力
-    - artifacts: ExecutionArtifacts オブジェクト（`stdout`（result と同じ）と `charts`（matplotlib のチャートメタデータ）を含む）
-
-**Examples:**
+**例:**
 
 ```ts
-// Simple command
+// シンプルなコマンド
 const response = await process.executeCommand('echo "Hello"');
-console.log(response.artifacts.stdout);  // Prints: Hello
+console.log(response.artifacts.stdout);  // 出力: Hello
 ```
 
 ```ts
-// Command with working directory
+// 作業ディレクトリを指定したコマンド
 const result = await process.executeCommand('ls', 'workspace/src');
 ```
 
 ```ts
-// Command with timeout
+// タイムアウト付きコマンド
 const result = await process.executeCommand('sleep 10', undefined, 5);
 ```
 
 ***
 
-#### executeSessionCommand()
+#### executeSessionCommand() \{#executesessioncommand\}
 
 ```ts
 executeSessionCommand(
@@ -253,45 +346,88 @@ executeSessionCommand(
 timeout?: number): Promise<SessionExecuteResponse>
 ```
 
-既存のセッションでコマンドを実行します。
+既存のセッション内でコマンドを実行します。
 
-**Parameters**:
+**パラメーター**:
 
-- `sessionId` _string_ - 使用するセッションの一意の識別子
-- `req` _SessionExecuteRequest_ - コマンド実行リクエスト。以下を含む:
-    - command: 実行するコマンド
-    - runAsync: 非同期で実行するかどうか
-- `timeout?` _number_ - タイムアウト（秒）
+* `sessionId` *string* - 使用するセッションの一意の識別子
+* `req` *SessionExecuteRequest* - 次を含むコマンド実行リクエスト:
+  * command: 実行するコマンド
+  * runAsync: 非同期で実行するかどうか
+  * suppressInputEcho: 入力エコーを抑制するかどうか。デフォルトは `false`。
+* `timeout?` *number* - タイムアウト（秒）
 
+**戻り値**:
 
-**Returns**:
+* `Promise<SessionExecuteResponse>` - 次を含むコマンド実行結果:
+  * cmdId: 実行されたコマンドの一意の識別子
+  * output: 結合されたコマンド出力（stdout と stderr）（同期実行時）
+  * stdout: コマンドの標準出力
+  * stderr: コマンドの標準エラー出力
+  * exitCode: コマンドの終了コード（同期実行時）
 
-- `Promise<SessionExecuteResponse>` - コマンド実行結果。以下を含む:
-    - cmdId: 実行されたコマンドの一意の識別子
-    - output: コマンド出力（同期実行の場合）
-    - exitCode: コマンドの終了ステータス（同期実行の場合）
-
-**Example:**
+**例:**
 
 ```ts
-// Execute commands in sequence, maintaining state
+// 状態を維持しながらコマンドを順に実行
 const sessionId = 'my-session';
 
-// Change directory
+// ディレクトリを変更
 await process.executeSessionCommand(sessionId, {
   command: 'cd /home/daytona'
 });
 
-// Run command in new directory
+// 新しいディレクトリでコマンドを実行
 const result = await process.executeSessionCommand(sessionId, {
   command: 'pwd'
 });
-console.log(result.output);  // Prints: /home/daytona
+console.log('[STDOUT]:', result.stdout);
+console.log('[STDERR]:', result.stderr);
 ```
 
 ***
 
-#### getSession()
+#### getPtySessionInfo() \{#getptysessioninfo\}
+
+```ts
+getPtySessionInfo(sessionId: string): Promise<PtySessionInfo>
+```
+
+特定の PTY セッションに関する詳細情報を取得します。
+
+PTY セッションの現在の状態、設定、メタデータを含む網羅的な情報を取得します。
+
+**パラメータ**:
+
+* `sessionId` *string* - 情報を取得する PTY セッションの ID
+
+**戻り値**:
+
+* `Promise<PtySessionInfo>` - PTY セッション情報
+
+**スロー**:
+
+PTY セッションが存在しない場合
+
+**例:**
+
+```ts
+// 特定のPTYセッションの詳細を取得
+const session = await process.getPtySessionInfo('my-session');
+
+console.log(`セッションID: ${session.id}`);
+console.log(`アクティブ: ${session.active}`);
+console.log(`作業ディレクトリ: ${session.cwd}`);
+console.log(`ターミナルサイズ: ${session.cols}x${session.rows}`);
+
+if (session.processId) {
+  console.log(`プロセスID: ${session.processId}`);
+}
+```
+
+***
+
+#### getSession() \{#getsession\}
 
 ```ts
 getSession(sessionId: string): Promise<Session>
@@ -299,18 +435,17 @@ getSession(sessionId: string): Promise<Session>
 
 サンドボックス内のセッションを取得します。
 
-**Parameters**:
+**パラメーター**:
 
-- `sessionId` _string_ - 取得するセッションの一意の識別子
+* `sessionId` *string* - 取得するセッションの一意の識別子
 
+**戻り値**:
 
-**Returns**:
+* `Promise<Session>` - 次の情報を含むセッション情報:
+  * sessionId: セッションの一意の識別子
+  * commands: セッションで実行されたコマンドの一覧
 
-- `Promise<Session>` - セッション情報。以下を含む:
-    - sessionId: セッションの一意の識別子
-    - commands: セッション内で実行されたコマンドの一覧
-
-**Example:**
+**例:**
 
 ```ts
 const session = await process.getSession('my-session');
@@ -321,28 +456,27 @@ session.commands.forEach(cmd => {
 
 ***
 
-#### getSessionCommand()
+#### getSessionCommand() \{#getsessioncommand\}
 
 ```ts
 getSessionCommand(sessionId: string, commandId: string): Promise<Command>
 ```
 
-セッションで実行された特定のコマンドに関する情報を取得します。
+セッション内で実行された特定のコマンドの情報を取得します。
 
-**Parameters**:
+**パラメーター**:
 
-- `sessionId` _string_ - セッションの一意の識別子
-- `commandId` _string_ - コマンドの一意の識別子
+* `sessionId` *string* - セッションの一意の識別子
+* `commandId` *string* - コマンドの一意の識別子
 
+**戻り値**:
 
-**Returns**:
+* `Promise<Command>` - 次を含むコマンド情報:
+  * id: コマンドの一意の識別子
+  * command: 実行されたコマンド文字列
+  * exitCode: コマンドの終了コード（完了している場合）
 
-- `Promise<Command>` - コマンド情報。以下を含む:
-    - id: コマンドの一意の識別子
-    - command: 実行されたコマンド文字列
-    - exitCode: コマンドの終了ステータス（完了している場合）
-
-**Example:**
+**例:**
 
 ```ts
 const cmd = await process.getSessionCommand('my-session', 'cmd-123');
@@ -353,74 +487,154 @@ if (cmd.exitCode === 0) {
 
 ***
 
-#### getSessionCommandLogs()
+#### getSessionCommandLogs() \{#getsessioncommandlogs\}
 
-##### Call Signature
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
-getSessionCommandLogs(sessionId: string, commandId: string): Promise<string>
+getSessionCommandLogs(sessionId: string, commandId: string): Promise<SessionCommandLogsResponse>
 ```
 
-セッションで実行されたコマンドのログを取得します。
+セッション内で実行されたコマンドのログを取得します。
 
-**Parameters**:
+**パラメータ**:
 
-- `sessionId` _string_ - セッションの一意の識別子
-- `commandId` _string_ - コマンドの一意の識別子
+* `sessionId` *string* - セッションの一意の識別子
+* `commandId` *string* - コマンドの一意の識別子
 
-**Returns**:
+**戻り値**:
 
-- `Promise<string>` - コマンドのログ
+* `Promise<SessionCommandLogsResponse>` - コマンドのログ。output（stdout と stderr の合成）、stdout、stderr を含みます
 
-**Example:**
+**例:**
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
-console.log('Command output:', logs);
+console.log('[STDOUT]:', logs.stdout);
+console.log('[STDERR]:', logs.stderr);
 ```
 
-##### Call Signature
+##### 呼び出しシグネチャ \{#call-signature\}
 
 ```ts
 getSessionCommandLogs(
    sessionId: string, 
    commandId: string, 
-onLogs: (chunk: string) => void): Promise<void>
+   onStdout: (chunk: string) => void, 
+onStderr: (chunk: string) => void): Promise<void>
 ```
 
-セッションで実行されたコマンドのログを、利用可能になり次第、非同期で取得・処理します。
+セッション内で実行されたコマンドのログを、利用可能になり次第、非同期で取得・処理します。
 
 **パラメーター**:
 
-- `sessionId` _string_ - セッションの一意の識別子
-- `commandId` _string_ - コマンドの一意の識別子
-- `onLogs` _\(chunk: string\) =\> void_ - 各ログチャンクを処理するコールバック関数
+* `sessionId` *string* - セッションの一意の識別子
+* `commandId` *string* - コマンドの一意の識別子
+* `onStdout` *(chunk: string) =&gt; void* - stdoutのログチャンクを処理するコールバック関数
+* `onStderr` *(chunk: string) =&gt; void* - stderrのログチャンクを処理するコールバック関数
 
 **戻り値**:
 
-- `Promise<void>`
+* `Promise<void>`
 
 **例:**
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-  console.log('Log chunk:', chunk);
+  console.log('[STDOUT]:', chunk);
+}, (chunk) => {
+  console.log('[STDERR]:', chunk);
 });
 ```
 
 ***
 
-#### listSessions()
+#### killPtySession() \{#killptysession\}
+
+```ts
+killPtySession(sessionId: string): Promise<void>
+```
+
+PTY セッションを終了し、関連するプロセスを停止します。
+
+PTY セッションを強制的に終了し、関連するすべてのリソースをクリーンアップします。
+これにより、すべてのアクティブな接続が閉じられ、基盤となるシェルプロセスが強制終了されます。
+
+**パラメーター**:
+
+* `sessionId` *string* - 強制終了する PTY セッションの ID
+
+**返り値**:
+
+* `Promise<void>`
+
+**スロー**:
+
+PTY セッションが存在しない、または強制終了できない場合
+
+##### 注意 \{#note\}
+
+この操作は取り消せません。ターミナルセッション内で保存していない作業は失われます。
+
+**例:**
+
+```ts
+// 特定のPTYセッションを終了
+await process.killPtySession('my-session');
+
+// セッションがもはやアクティブでないことを確認
+try {
+  const info = await process.getPtySessionInfo('my-session');
+  console.log(`セッションは存在していますがアクティブ状態: ${info.active}`);
+} catch (error) {
+  console.log('セッションは完全に削除されました');
+}
+```
+
+***
+
+#### listPtySessions() \{#listptysessions\}
+
+```ts
+listPtySessions(): Promise<PtySessionInfo[]>
+```
+
+サンドボックス内のすべての PTY セッションを一覧表示します。
+
+このサンドボックスで作成された、アクティブ・非アクティブを含むすべての PTY セッションの情報を取得します。
+
+**戻り値**:
+
+* `Promise<PtySessionInfo[]>` - PTY セッション情報の配列
+
+**例:**
+
+```ts
+// すべてのPTYセッションを一覧表示
+const sessions = await process.listPtySessions();
+
+for (const session of sessions) {
+  console.log(`セッションID: ${session.id}`);
+  console.log(`アクティブ: ${session.active}`);
+  console.log(`作成日時: ${session.createdAt}`);
+  }
+  console.log('---');
+}
+```
+
+***
+
+#### listSessions() \{#listsessions\}
 
 ```ts
 listSessions(): Promise<Session[]>
 ```
 
-サンドボックス内のすべてのアクティブなセッションを一覧表示します。
+サンドボックス内のアクティブなセッションをすべて一覧します。
 
 **戻り値**:
 
-- `Promise<Session[]>` - アクティブなセッションの配列
+* `Promise<Session[]>` - アクティブなセッションの配列
 
 **例:**
 
@@ -432,4 +646,125 @@ sessions.forEach(session => {
     console.log(`- ${cmd.command} (${cmd.exitCode})`);
   });
 });
+```
+
+***
+
+#### resizePtySession() \{#resizeptysession\}
+
+```ts
+resizePtySession(
+   sessionId: string, 
+   cols: number, 
+rows: number): Promise<PtySessionInfo>
+```
+
+PTY セッションのターミナルサイズを変更します。
+
+アクティブな PTY セッションのターミナルサイズを変更します。これは、クライアントのターミナルがリサイズされた場合や、出力要件に応じて表示を調整する必要がある場合に便利です。
+
+**Parameters**:
+
+* `sessionId` *string* - 変更する PTY セッションの ID
+* `cols` *number* - 新しいターミナルの列数
+* `rows` *number* - 新しいターミナルの行数
+
+**Returns**:
+
+* `Promise<PtySessionInfo>` - 新しいターミナルサイズを反映した更新後のセッション情報
+
+**Throws**:
+
+PTY セッションが存在しない、またはリサイズに失敗した場合
+
+##### 注意 \{#note\}
+
+リサイズ操作はシェルプロセスに SIGWINCH シグナルを送信し、
+ターミナルアプリケーションが新しいサイズに適応できるようにします。
+
+**例:**
+
+```ts
+// PTYセッションをより大きなターミナルにリサイズする
+const updatedInfo = await process.resizePtySession('my-session', 150, 40);
+console.log(`ターミナルが ${updatedInfo.cols}x${updatedInfo.rows} にリサイズされました`);
+
+// PtyHandleのresizeメソッドも使用できます
+await ptyHandle.resize(150, 40); // cols, rows
+```
+
+***
+
+#### sendSessionCommandInput() \{#sendsessioncommandinput\}
+
+```ts
+sendSessionCommandInput(
+   sessionId: string, 
+   commandId: string, 
+data: string): Promise<void>
+```
+
+セッション内で実行されているコマンドに入力データを送信します。
+
+**パラメーター**:
+
+* `sessionId` *string* - セッションの一意の識別子
+* `commandId` *string* - コマンドの一意の識別子
+* `data` *string* - 送信する入力データ
+
+**戻り値**:
+
+* `Promise<void>`
+
+***
+
+## SessionCommandLogsResponse \{#sessioncommandlogsresponse\}
+
+**プロパティ**:
+
+* `output?` *string*
+* `stderr?` *string*
+* `stdout?` *string*
+
+## SessionExecuteResponse \{#sessionexecuteresponse\}
+
+**拡張:**
+
+**プロパティ**:
+
+* `cmdId` *string*
+  * *継承元*: `SessionExecuteResponse.cmdId`
+
+* `exitCode?` *number*
+  * *継承元*: `SessionExecuteResponse.exitCode`
+
+* `output?` *string*
+  * *継承元*: `SessionExecuteResponse.output`
+
+* `stderr?` *string*
+
+* `stdout?` *string*
+
+* `SessionExecuteResponse`
+
+## MAX_PREFIX_LEN \{#max_prefix_len\}
+
+```ts
+const MAX_PREFIX_LEN: number;
+```
+
+***
+
+## STDERR_PREFIX_BYTES \{#stderr_prefix_bytes\}
+
+```ts
+const STDERR_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
+```
+
+***
+
+## STDOUT_PREFIX_BYTES \{#stdout_prefix_bytes\}
+
+```ts
+const STDOUT_PREFIX_BYTES: Uint8Array<ArrayBuffer>;
 ```
