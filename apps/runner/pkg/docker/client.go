@@ -35,9 +35,9 @@ type DockerClientConfig struct {
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
-	logger := slog.Default().With(slog.String("component", "docker"))
+	logger := slog.Default().With(slog.String("component", "docker-client"))
 	if config.Logger != nil {
-		logger = config.Logger.With(slog.String("component", "docker"))
+		logger = config.Logger.With(slog.String("component", "docker-client"))
 	}
 
 	if config.DaemonStartTimeoutSec <= 0 {

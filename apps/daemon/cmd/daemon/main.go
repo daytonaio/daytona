@@ -31,6 +31,10 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	logLevel := log.ParseLogLevel(os.Getenv("LOG_LEVEL"))
 
 	// Create the console handler with tint for colored output
@@ -55,8 +59,13 @@ func main() {
 	// Check if user wants to read entrypoint logs
 	args := os.Args[1:]
 	if len(args) == 2 && args[0] == "entrypoint" && args[1] == "logs" {
-		util.ReadEntrypointLogs(c.EntrypointLogFilePath)
-		return
+		err := util.ReadEntrypointLogs(c.EntrypointLogFilePath)
+		if err != nil {
+			logger.Error("Failed to read entrypoint logs", "error", err)
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err.Error())
+			return 1
+		}
+		return 0
 	}
 
 	var logWriter io.Writer
@@ -81,14 +90,14 @@ func main() {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		logger.Error("Failed to get user home directory", "error", err)
-		return
+		return 2
 	}
 
 	configDir := filepath.Join(homeDir, ".daytona")
 	err = os.MkdirAll(configDir, 0755)
 	if err != nil {
 		logger.Error("Failed to create config directory", "path", configDir, "error", err)
-		return
+		return 2
 	}
 
 	// If workdir in image is not set, use user home as workdir
@@ -149,7 +158,7 @@ func main() {
 	workDir, err := os.Getwd()
 	if err != nil {
 		logger.Error("Failed to get current working directory", "error", err)
-		return
+		return 2
 	}
 
 	recordingsDir := c.RecordingsDir
@@ -270,4 +279,5 @@ func main() {
 	}
 
 	logger.Info("Shutdown complete")
+	return 0
 }

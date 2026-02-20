@@ -35,6 +35,10 @@ import (
 )
 
 func main() {
+	os.Exit(run())
+}
+
+func run() int {
 	// Init slog logger
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
 		NoColor:    !isatty.IsTerminal(os.Stdout.Fd()),
@@ -47,7 +51,7 @@ func main() {
 	cfg, err := config.GetConfig()
 	if err != nil {
 		logger.Error("Failed to get config", "error", err)
-		return
+		return 2
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -67,7 +71,7 @@ func main() {
 		newLogger, lp, err := telemetry.InitLogger(ctx, logger, telemetryConfig)
 		if err != nil {
 			logger.ErrorContext(ctx, "Failed to initialize logger", "error", err)
-			return
+			return 2
 		}
 		defer telemetry.ShutdownLogger(logger, lp)
 
@@ -90,7 +94,7 @@ func main() {
 		tp, err := telemetry.InitTracer(ctx, telemetryConfig, &filters.NotFoundExporterFilter{})
 		if err != nil {
 			logger.ErrorContext(ctx, "Failed to initialize tracer", "error", err)
-			return
+			return 2
 		}
 		defer telemetry.ShutdownTracer(logger, tp)
 	}
@@ -102,7 +106,7 @@ func main() {
 	)
 	if err != nil {
 		logger.Error("Error creating Docker client", "error", err)
-		return
+		return 2
 	}
 
 	// Initialize net rules manager
@@ -110,26 +114,26 @@ func main() {
 	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent)
 	if err != nil {
 		logger.Error("Failed to initialize net rules manager", "error", err)
-		return
+		return 2
 	}
 
 	// Start net rules manager
 	if err = netRulesManager.Start(); err != nil {
 		logger.Error("Failed to start net rules manager", "error", err)
-		return
+		return 2
 	}
 	defer netRulesManager.Stop()
 
 	daemonPath, err := daemon.WriteStaticBinary("daemon-amd64")
 	if err != nil {
 		logger.Error("Error writing daemon binary", "error", err)
-		return
+		return 2
 	}
 
 	pluginPath, err := daemon.WriteStaticBinary("daytona-computer-use")
 	if err != nil {
 		logger.Error("Error writing plugin binary", "error", err)
-		return
+		return 2
 	}
 
 	statesCache := cache.GetStatesCache(ctx, cfg.CacheRetentionDays)
@@ -227,7 +231,7 @@ func main() {
 		})
 		if err != nil {
 			logger.Error("Failed to create healthcheck service", "error", err)
-			return
+			return 2
 		}
 
 		go func() {
@@ -242,7 +246,7 @@ func main() {
 		})
 		if err != nil {
 			logger.Error("Failed to create executor service", "error", err)
-			return
+			return 2
 		}
 
 		pollerService, err := poller.NewService(&poller.PollerServiceConfig{
@@ -253,7 +257,7 @@ func main() {
 		})
 		if err != nil {
 			logger.Error("Failed to create poller service", "error", err)
-			return
+			return 2
 		}
 
 		go func() {
@@ -285,10 +289,11 @@ func main() {
 	select {
 	case err := <-apiServerErrChan:
 		logger.Error("API server error", "error", err)
-		return
+		return 2
 	case <-interruptChannel:
 		logger.Info("Signal received, shutting down")
 		apiServer.Stop()
 		logger.Info("Shutdown complete")
+		return 143 // SIGTERM
 	}
 }
