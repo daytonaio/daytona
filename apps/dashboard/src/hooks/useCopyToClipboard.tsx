@@ -5,9 +5,8 @@
 
 'use client'
 
-import { toast } from 'sonner'
-
 import { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 type CopyFn = (text: string) => Promise<boolean>
 

@@ -66,6 +66,8 @@ body {
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 91%;
     --sidebar-ring: 0 0% 59.8%;
+
+    --code-background: 0 0% 97%;
   }
 
   .dark {
@@ -121,6 +123,8 @@ body {
     --sidebar-accent-foreground: 0 0% 95.9%;
     --sidebar-border: 0 0% 15.9%;
     --sidebar-ring: 0 0% 59.8%;
+
+    --code-background: 0 0% 6%;
   }
 
   .slide-in-from-right {

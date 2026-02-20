@@ -69,4 +69,13 @@ export const queryKeys = {
     traceSpans: (sandboxId: string, traceId: string) =>
       [...queryKeys.telemetry.all, sandboxId, 'traces', traceId] as const,
   },
+  sandbox: {
+    all: ['sandbox'] as const,
+    session: (scope: string) => [...queryKeys.sandbox.all, scope] as const,
+    currentId: (scope: string) => [...queryKeys.sandbox.all, scope, 'current-id'] as const,
+    instance: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id] as const,
+    terminalUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'terminal-url'] as const,
+    vncStatus: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-status'] as const,
+    vncUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-url'] as const,
+  },
 } as const
