@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { FC, ReactNode } from 'react'
-import { PostHogProvider } from 'posthog-js/react'
 import { useConfig } from '@/hooks/useConfig'
+import { PostHogProvider } from 'posthog-js/react'
+import { FC, ReactNode } from 'react'
 
 interface PostHogProviderWrapperProps {
   children: ReactNode
@@ -28,11 +28,13 @@ export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ childr
       apiKey={config.posthog.apiKey}
       options={{
         api_host: config.posthog.host,
+        opt_out_capturing_by_default: true,
         cookieless_mode: 'on_reject',
+        persistence: 'localStorage',
         person_profiles: 'always',
-        autocapture: false, // ignore default frontend events
-        capture_pageview: false, // initial pageview (handled in App.tsx)
-        capture_pageleave: true, // end of session
+        autocapture: false,
+        capture_pageview: false,
+        capture_pageleave: true,
       }}
     >
       {children}
