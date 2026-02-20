@@ -19,13 +19,14 @@ import (
 	"net/url"
 )
 
+
 type RegionsAPI interface {
 
 	/*
-		ListSharedRegions List all shared regions
+	ListSharedRegions List all shared regions
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return RegionsAPIListSharedRegionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return RegionsAPIListSharedRegionsRequest
 	*/
 	ListSharedRegions(ctx context.Context) RegionsAPIListSharedRegionsRequest
 
@@ -38,7 +39,7 @@ type RegionsAPI interface {
 type RegionsAPIService service
 
 type RegionsAPIListSharedRegionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService RegionsAPI
 }
 
@@ -49,25 +50,24 @@ func (r RegionsAPIListSharedRegionsRequest) Execute() ([]Region, *http.Response,
 /*
 ListSharedRegions List all shared regions
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return RegionsAPIListSharedRegionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return RegionsAPIListSharedRegionsRequest
 */
 func (a *RegionsAPIService) ListSharedRegions(ctx context.Context) RegionsAPIListSharedRegionsRequest {
 	return RegionsAPIListSharedRegionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Region
+//  @return []Region
 func (a *RegionsAPIService) ListSharedRegionsExecute(r RegionsAPIListSharedRegionsRequest) ([]Region, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Region
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Region
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RegionsAPIService.ListSharedRegions")

@@ -5,6 +5,7 @@ package controllers
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -412,4 +413,40 @@ func InspectSnapshotInRegistry(ctx *gin.Context) {
 		Hash:   dto.HashWithoutPrefix(digest.Digest),
 		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
 	})
+}
+
+// CreateSnapshot godoc
+//
+//	@Tags			snapshots
+//	@Summary		Create a snapshot from a sandbox
+//	@Description	Create a snapshot by committing a sandbox container and pushing to the registry. The operation runs asynchronously and returns 202 immediately.
+//	@Accept			json
+//	@Produce		json
+//	@Param			request	body		dto.CreateSnapshotDTO	true	"Create snapshot request"
+//	@Success		202		{string}	string					"Snapshot creation started"
+//	@Failure		400		{object}	common_errors.ErrorResponse
+//	@Failure		401		{object}	common_errors.ErrorResponse
+//	@Failure		404		{object}	common_errors.ErrorResponse
+//	@Failure		500		{object}	common_errors.ErrorResponse
+//	@Router			/snapshots/create [post]
+//
+//	@id				CreateSnapshot
+func CreateSnapshot(ctx *gin.Context) {
+	var request dto.CreateSnapshotDTO
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	go func() {
+		_, err := runner.Docker.CreateSnapshot(context.Background(), request)
+		if err != nil {
+			log.Errorf("Create snapshot %s failed: %v", request.Name, err)
+		}
+	}()
+
+	ctx.JSON(http.StatusAccepted, "Snapshot creation started")
 }

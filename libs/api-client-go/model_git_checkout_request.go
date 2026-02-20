@@ -21,8 +21,8 @@ var _ MappedNullable = &GitCheckoutRequest{}
 
 // GitCheckoutRequest struct for GitCheckoutRequest
 type GitCheckoutRequest struct {
-	Path                 string `json:"path"`
-	Branch               string `json:"branch"`
+	Path string `json:"path"`
+	Branch string `json:"branch"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -96,7 +96,7 @@ func (o *GitCheckoutRequest) SetBranch(v string) {
 }
 
 func (o GitCheckoutRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -129,10 +129,10 @@ func (o *GitCheckoutRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -194,3 +194,5 @@ func (v *NullableGitCheckoutRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

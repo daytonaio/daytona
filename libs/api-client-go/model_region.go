@@ -38,7 +38,7 @@ type Region struct {
 	// SSH Gateway URL for the region
 	SshGatewayUrl NullableString `json:"sshGatewayUrl,omitempty"`
 	// Snapshot Manager URL for the region
-	SnapshotManagerUrl   NullableString `json:"snapshotManagerUrl,omitempty"`
+	SnapshotManagerUrl NullableString `json:"snapshotManagerUrl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -146,7 +146,6 @@ func (o *Region) HasOrganizationId() bool {
 func (o *Region) SetOrganizationId(v string) {
 	o.OrganizationId.Set(&v)
 }
-
 // SetOrganizationIdNil sets the value for OrganizationId to be an explicit nil
 func (o *Region) SetOrganizationIdNil() {
 	o.OrganizationId.Set(nil)
@@ -261,7 +260,6 @@ func (o *Region) HasProxyUrl() bool {
 func (o *Region) SetProxyUrl(v string) {
 	o.ProxyUrl.Set(&v)
 }
-
 // SetProxyUrlNil sets the value for ProxyUrl to be an explicit nil
 func (o *Region) SetProxyUrlNil() {
 	o.ProxyUrl.Set(nil)
@@ -304,7 +302,6 @@ func (o *Region) HasSshGatewayUrl() bool {
 func (o *Region) SetSshGatewayUrl(v string) {
 	o.SshGatewayUrl.Set(&v)
 }
-
 // SetSshGatewayUrlNil sets the value for SshGatewayUrl to be an explicit nil
 func (o *Region) SetSshGatewayUrlNil() {
 	o.SshGatewayUrl.Set(nil)
@@ -347,7 +344,6 @@ func (o *Region) HasSnapshotManagerUrl() bool {
 func (o *Region) SetSnapshotManagerUrl(v string) {
 	o.SnapshotManagerUrl.Set(&v)
 }
-
 // SetSnapshotManagerUrlNil sets the value for SnapshotManagerUrl to be an explicit nil
 func (o *Region) SetSnapshotManagerUrlNil() {
 	o.SnapshotManagerUrl.Set(nil)
@@ -359,7 +355,7 @@ func (o *Region) UnsetSnapshotManagerUrl() {
 }
 
 func (o Region) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -410,10 +406,10 @@ func (o *Region) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -482,3 +478,5 @@ func (v *NullableRegion) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

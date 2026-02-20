@@ -26,7 +26,7 @@ type LspDocumentRequest struct {
 	// Path to the project
 	PathToProject string `json:"pathToProject"`
 	// Document URI
-	Uri                  string `json:"uri"`
+	Uri string `json:"uri"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -125,7 +125,7 @@ func (o *LspDocumentRequest) SetUri(v string) {
 }
 
 func (o LspDocumentRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -160,10 +160,10 @@ func (o *LspDocumentRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -226,3 +226,5 @@ func (v *NullableLspDocumentRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type DockerRegistryAPI interface {
 
 	/*
-		CreateRegistry Create registry
+	CreateRegistry Create registry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return DockerRegistryAPICreateRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DockerRegistryAPICreateRegistryRequest
 	*/
 	CreateRegistry(ctx context.Context) DockerRegistryAPICreateRegistryRequest
 
@@ -35,11 +36,11 @@ type DockerRegistryAPI interface {
 	CreateRegistryExecute(r DockerRegistryAPICreateRegistryRequest) (*DockerRegistry, *http.Response, error)
 
 	/*
-		DeleteRegistry Delete registry
+	DeleteRegistry Delete registry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id ID of the docker registry
-		@return DockerRegistryAPIDeleteRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id ID of the docker registry
+	@return DockerRegistryAPIDeleteRegistryRequest
 	*/
 	DeleteRegistry(ctx context.Context, id string) DockerRegistryAPIDeleteRegistryRequest
 
@@ -47,11 +48,11 @@ type DockerRegistryAPI interface {
 	DeleteRegistryExecute(r DockerRegistryAPIDeleteRegistryRequest) (*http.Response, error)
 
 	/*
-		GetRegistry Get registry
+	GetRegistry Get registry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id ID of the docker registry
-		@return DockerRegistryAPIGetRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id ID of the docker registry
+	@return DockerRegistryAPIGetRegistryRequest
 	*/
 	GetRegistry(ctx context.Context, id string) DockerRegistryAPIGetRegistryRequest
 
@@ -60,10 +61,10 @@ type DockerRegistryAPI interface {
 	GetRegistryExecute(r DockerRegistryAPIGetRegistryRequest) (*DockerRegistry, *http.Response, error)
 
 	/*
-		GetTransientPushAccess Get temporary registry access for pushing snapshots
+	GetTransientPushAccess Get temporary registry access for pushing snapshots
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return DockerRegistryAPIGetTransientPushAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DockerRegistryAPIGetTransientPushAccessRequest
 	*/
 	GetTransientPushAccess(ctx context.Context) DockerRegistryAPIGetTransientPushAccessRequest
 
@@ -72,10 +73,10 @@ type DockerRegistryAPI interface {
 	GetTransientPushAccessExecute(r DockerRegistryAPIGetTransientPushAccessRequest) (*RegistryPushAccessDto, *http.Response, error)
 
 	/*
-		ListRegistries List registries
+	ListRegistries List registries
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return DockerRegistryAPIListRegistriesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return DockerRegistryAPIListRegistriesRequest
 	*/
 	ListRegistries(ctx context.Context) DockerRegistryAPIListRegistriesRequest
 
@@ -84,11 +85,11 @@ type DockerRegistryAPI interface {
 	ListRegistriesExecute(r DockerRegistryAPIListRegistriesRequest) ([]DockerRegistry, *http.Response, error)
 
 	/*
-		SetDefaultRegistry Set default registry
+	SetDefaultRegistry Set default registry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id ID of the docker registry
-		@return DockerRegistryAPISetDefaultRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id ID of the docker registry
+	@return DockerRegistryAPISetDefaultRegistryRequest
 	*/
 	SetDefaultRegistry(ctx context.Context, id string) DockerRegistryAPISetDefaultRegistryRequest
 
@@ -97,11 +98,11 @@ type DockerRegistryAPI interface {
 	SetDefaultRegistryExecute(r DockerRegistryAPISetDefaultRegistryRequest) (*DockerRegistry, *http.Response, error)
 
 	/*
-		UpdateRegistry Update registry
+	UpdateRegistry Update registry
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id ID of the docker registry
-		@return DockerRegistryAPIUpdateRegistryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id ID of the docker registry
+	@return DockerRegistryAPIUpdateRegistryRequest
 	*/
 	UpdateRegistry(ctx context.Context, id string) DockerRegistryAPIUpdateRegistryRequest
 
@@ -114,9 +115,9 @@ type DockerRegistryAPI interface {
 type DockerRegistryAPIService service
 
 type DockerRegistryAPICreateRegistryRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
-	createDockerRegistry   *CreateDockerRegistry
+	ctx context.Context
+	ApiService DockerRegistryAPI
+	createDockerRegistry *CreateDockerRegistry
 	xDaytonaOrganizationID *string
 }
 
@@ -138,25 +139,24 @@ func (r DockerRegistryAPICreateRegistryRequest) Execute() (*DockerRegistry, *htt
 /*
 CreateRegistry Create registry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DockerRegistryAPICreateRegistryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return DockerRegistryAPICreateRegistryRequest
 */
 func (a *DockerRegistryAPIService) CreateRegistry(ctx context.Context) DockerRegistryAPICreateRegistryRequest {
 	return DockerRegistryAPICreateRegistryRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return DockerRegistry
+//  @return DockerRegistry
 func (a *DockerRegistryAPIService) CreateRegistryExecute(r DockerRegistryAPICreateRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *DockerRegistry
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *DockerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.CreateRegistry")
@@ -233,9 +233,9 @@ func (a *DockerRegistryAPIService) CreateRegistryExecute(r DockerRegistryAPICrea
 }
 
 type DockerRegistryAPIDeleteRegistryRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
-	id                     string
+	ctx context.Context
+	ApiService DockerRegistryAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -252,24 +252,24 @@ func (r DockerRegistryAPIDeleteRegistryRequest) Execute() (*http.Response, error
 /*
 DeleteRegistry Delete registry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id ID of the docker registry
-	@return DockerRegistryAPIDeleteRegistryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id ID of the docker registry
+ @return DockerRegistryAPIDeleteRegistryRequest
 */
 func (a *DockerRegistryAPIService) DeleteRegistry(ctx context.Context, id string) DockerRegistryAPIDeleteRegistryRequest {
 	return DockerRegistryAPIDeleteRegistryRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *DockerRegistryAPIService) DeleteRegistryExecute(r DockerRegistryAPIDeleteRegistryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.DeleteRegistry")
@@ -333,9 +333,9 @@ func (a *DockerRegistryAPIService) DeleteRegistryExecute(r DockerRegistryAPIDele
 }
 
 type DockerRegistryAPIGetRegistryRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
-	id                     string
+	ctx context.Context
+	ApiService DockerRegistryAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -352,27 +352,26 @@ func (r DockerRegistryAPIGetRegistryRequest) Execute() (*DockerRegistry, *http.R
 /*
 GetRegistry Get registry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id ID of the docker registry
-	@return DockerRegistryAPIGetRegistryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id ID of the docker registry
+ @return DockerRegistryAPIGetRegistryRequest
 */
 func (a *DockerRegistryAPIService) GetRegistry(ctx context.Context, id string) DockerRegistryAPIGetRegistryRequest {
 	return DockerRegistryAPIGetRegistryRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return DockerRegistry
+//  @return DockerRegistry
 func (a *DockerRegistryAPIService) GetRegistryExecute(r DockerRegistryAPIGetRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *DockerRegistry
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *DockerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.GetRegistry")
@@ -445,10 +444,10 @@ func (a *DockerRegistryAPIService) GetRegistryExecute(r DockerRegistryAPIGetRegi
 }
 
 type DockerRegistryAPIGetTransientPushAccessRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
+	ctx context.Context
+	ApiService DockerRegistryAPI
 	xDaytonaOrganizationID *string
-	regionId               *string
+	regionId *string
 }
 
 // Use with JWT to specify the organization ID
@@ -470,25 +469,24 @@ func (r DockerRegistryAPIGetTransientPushAccessRequest) Execute() (*RegistryPush
 /*
 GetTransientPushAccess Get temporary registry access for pushing snapshots
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DockerRegistryAPIGetTransientPushAccessRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return DockerRegistryAPIGetTransientPushAccessRequest
 */
 func (a *DockerRegistryAPIService) GetTransientPushAccess(ctx context.Context) DockerRegistryAPIGetTransientPushAccessRequest {
 	return DockerRegistryAPIGetTransientPushAccessRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return RegistryPushAccessDto
+//  @return RegistryPushAccessDto
 func (a *DockerRegistryAPIService) GetTransientPushAccessExecute(r DockerRegistryAPIGetTransientPushAccessRequest) (*RegistryPushAccessDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *RegistryPushAccessDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *RegistryPushAccessDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.GetTransientPushAccess")
@@ -563,8 +561,8 @@ func (a *DockerRegistryAPIService) GetTransientPushAccessExecute(r DockerRegistr
 }
 
 type DockerRegistryAPIListRegistriesRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
+	ctx context.Context
+	ApiService DockerRegistryAPI
 	xDaytonaOrganizationID *string
 }
 
@@ -581,25 +579,24 @@ func (r DockerRegistryAPIListRegistriesRequest) Execute() ([]DockerRegistry, *ht
 /*
 ListRegistries List registries
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return DockerRegistryAPIListRegistriesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return DockerRegistryAPIListRegistriesRequest
 */
 func (a *DockerRegistryAPIService) ListRegistries(ctx context.Context) DockerRegistryAPIListRegistriesRequest {
 	return DockerRegistryAPIListRegistriesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []DockerRegistry
+//  @return []DockerRegistry
 func (a *DockerRegistryAPIService) ListRegistriesExecute(r DockerRegistryAPIListRegistriesRequest) ([]DockerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []DockerRegistry
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []DockerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.ListRegistries")
@@ -671,9 +668,9 @@ func (a *DockerRegistryAPIService) ListRegistriesExecute(r DockerRegistryAPIList
 }
 
 type DockerRegistryAPISetDefaultRegistryRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
-	id                     string
+	ctx context.Context
+	ApiService DockerRegistryAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -690,27 +687,26 @@ func (r DockerRegistryAPISetDefaultRegistryRequest) Execute() (*DockerRegistry, 
 /*
 SetDefaultRegistry Set default registry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id ID of the docker registry
-	@return DockerRegistryAPISetDefaultRegistryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id ID of the docker registry
+ @return DockerRegistryAPISetDefaultRegistryRequest
 */
 func (a *DockerRegistryAPIService) SetDefaultRegistry(ctx context.Context, id string) DockerRegistryAPISetDefaultRegistryRequest {
 	return DockerRegistryAPISetDefaultRegistryRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return DockerRegistry
+//  @return DockerRegistry
 func (a *DockerRegistryAPIService) SetDefaultRegistryExecute(r DockerRegistryAPISetDefaultRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *DockerRegistry
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *DockerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.SetDefaultRegistry")
@@ -783,10 +779,10 @@ func (a *DockerRegistryAPIService) SetDefaultRegistryExecute(r DockerRegistryAPI
 }
 
 type DockerRegistryAPIUpdateRegistryRequest struct {
-	ctx                    context.Context
-	ApiService             DockerRegistryAPI
-	id                     string
-	updateDockerRegistry   *UpdateDockerRegistry
+	ctx context.Context
+	ApiService DockerRegistryAPI
+	id string
+	updateDockerRegistry *UpdateDockerRegistry
 	xDaytonaOrganizationID *string
 }
 
@@ -808,27 +804,26 @@ func (r DockerRegistryAPIUpdateRegistryRequest) Execute() (*DockerRegistry, *htt
 /*
 UpdateRegistry Update registry
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id ID of the docker registry
-	@return DockerRegistryAPIUpdateRegistryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id ID of the docker registry
+ @return DockerRegistryAPIUpdateRegistryRequest
 */
 func (a *DockerRegistryAPIService) UpdateRegistry(ctx context.Context, id string) DockerRegistryAPIUpdateRegistryRequest {
 	return DockerRegistryAPIUpdateRegistryRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return DockerRegistry
+//  @return DockerRegistry
 func (a *DockerRegistryAPIService) UpdateRegistryExecute(r DockerRegistryAPIUpdateRegistryRequest) (*DockerRegistry, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *DockerRegistry
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *DockerRegistry
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DockerRegistryAPIService.UpdateRegistry")

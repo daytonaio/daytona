@@ -13,8 +13,8 @@ package apiclient
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
+	"fmt"
 )
 
 // checks if the CreateApiKey type satisfies the MappedNullable interface at compile time
@@ -27,7 +27,7 @@ type CreateApiKey struct {
 	// The list of organization resource permissions assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key expires
-	ExpiresAt            NullableTime `json:"expiresAt,omitempty"`
+	ExpiresAt NullableTime `json:"expiresAt,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -132,7 +132,6 @@ func (o *CreateApiKey) HasExpiresAt() bool {
 func (o *CreateApiKey) SetExpiresAt(v time.Time) {
 	o.ExpiresAt.Set(&v)
 }
-
 // SetExpiresAtNil sets the value for ExpiresAt to be an explicit nil
 func (o *CreateApiKey) SetExpiresAtNil() {
 	o.ExpiresAt.Set(nil)
@@ -144,7 +143,7 @@ func (o *CreateApiKey) UnsetExpiresAt() {
 }
 
 func (o CreateApiKey) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -180,10 +179,10 @@ func (o *CreateApiKey) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -246,3 +245,5 @@ func (v *NullableCreateApiKey) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

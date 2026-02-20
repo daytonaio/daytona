@@ -14,6 +14,7 @@ index.ts
 models/build-snapshot-request-dto.ts
 models/create-backup-dto.ts
 models/create-sandbox-dto.ts
+models/create-snapshot-dto.ts
 models/dto-volume-dto.ts
 models/enums-backup-state.ts
 models/enums-sandbox-state.ts

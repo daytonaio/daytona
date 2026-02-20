@@ -19,6 +19,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
+import { CheckpointService } from './checkpoint.service'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -36,6 +37,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly checkpointService: CheckpointService,
   ) {}
 
   /**
@@ -81,6 +83,9 @@ export class JobStateHandlerService {
         break
       case JobType.RECOVER_SANDBOX:
         await this.handleRecoverSandboxJobCompletion(job)
+        break
+      case JobType.CREATE_CHECKPOINT:
+        await this.handleCreateCheckpointJobCompletion(job)
         break
       default:
         break
@@ -516,6 +521,73 @@ export class JobStateHandlerService {
       }
     } catch (error) {
       this.logger.error(`Error handling RESIZE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
+    }
+  }
+
+  private async handleCreateCheckpointJobCompletion(job: Job): Promise<void> {
+    const sandboxId = job.resourceId
+    if (!sandboxId) return
+
+    try {
+      const sandbox = await this.sandboxRepository.findOne({
+        where: { id: sandboxId },
+      })
+      if (!sandbox) {
+        this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_CHECKPOINT job ${job.id}`)
+        return
+      }
+
+      let checkpointName: string | undefined
+      if (job.payload) {
+        try {
+          const payload = typeof job.payload === 'string' ? JSON.parse(job.payload) : job.payload
+          if (payload.name) {
+            checkpointName = payload.name
+          }
+        } catch {
+          // Use defaults
+        }
+      }
+
+      const creatingCheckpoints = await this.checkpointService.getCreatingCheckpoints()
+      const checkpoint = creatingCheckpoints.find(
+        (cp) => cp.originSandboxId === sandboxId && (!checkpointName || cp.name === checkpointName),
+      )
+
+      if (job.status === JobStatus.COMPLETED) {
+        this.logger.debug(`CREATE_CHECKPOINT job ${job.id} completed successfully for sandbox ${sandboxId}`)
+
+        const metadata = job.getResultMetadata()
+        const snapshotPath = metadata?.snapshotPath || metadata?.SnapshotPath
+        const sizeBytes = metadata?.sizeBytes || metadata?.SizeBytes
+
+        if (checkpoint) {
+          await this.checkpointService.markActive(
+            checkpoint.id,
+            snapshotPath,
+            sandbox.runnerId,
+            sizeBytes ? Number(sizeBytes) : undefined,
+          )
+        } else {
+          this.logger.warn(
+            `No CREATING checkpoint found for sandbox ${sandboxId} and name ${checkpointName}, skipping`,
+          )
+        }
+
+        sandbox.pending = false
+        await this.sandboxRepository.save(sandbox)
+      } else if (job.status === JobStatus.FAILED) {
+        this.logger.error(`CREATE_CHECKPOINT job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
+
+        if (checkpoint) {
+          await this.checkpointService.markError(checkpoint.id, job.errorMessage || 'Job failed')
+        }
+
+        sandbox.pending = false
+        await this.sandboxRepository.save(sandbox)
+      }
+    } catch (error) {
+      this.logger.error(`Error handling CREATE_CHECKPOINT job completion for sandbox ${sandboxId}:`, error)
     }
   }
 }

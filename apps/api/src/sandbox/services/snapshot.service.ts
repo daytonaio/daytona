@@ -26,6 +26,7 @@ import { Organization } from '../../organization/entities/organization.entity'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Sandbox } from '../entities/sandbox.entity'
+import { Checkpoint } from '../entities/checkpoint.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../../organization/events/organization-suspended-snapshot-deactivated.event'
@@ -205,6 +206,83 @@ export class SnapshotService {
           throw new ConflictException(
             `Snapshot with name "${createSnapshotDto.name}" already exists for this organization`,
           )
+        }
+        throw error
+      }
+    } catch (error) {
+      await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
+      throw error
+    }
+  }
+
+  /**
+   * Creates a snapshot from a checkpoint. Used when promoting a checkpoint to a distributed snapshot.
+   * The checkpoint image is already in the registry, so this creates a Snapshot entity
+   * that will go through the standard snapshot lifecycle (PENDING -> PULLING -> ACTIVE).
+   */
+  async createFromCheckpoint(checkpoint: Checkpoint, snapshotName: string): Promise<Snapshot> {
+    if (!checkpoint.ref) {
+      throw new BadRequestException('Checkpoint must have a ref to be promoted to a snapshot')
+    }
+
+    const organization = await this.organizationService.findOne(checkpoint.organizationId)
+    if (!organization) {
+      throw new NotFoundException('Organization not found')
+    }
+
+    const regionId = await this.getValidatedOrDefaultRegionId(organization)
+
+    let pendingSnapshotCountIncrement: number | undefined
+
+    try {
+      const nameValidationError = this.validateSnapshotName(snapshotName)
+      if (nameValidationError) {
+        throw new BadRequestException(nameValidationError)
+      }
+
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const newSnapshotCount = 1
+      const { pendingSnapshotCountIncremented } = await this.validateOrganizationQuotas(
+        organization,
+        newSnapshotCount,
+        checkpoint.cpu,
+        checkpoint.mem,
+        checkpoint.disk,
+      )
+
+      if (pendingSnapshotCountIncremented) {
+        pendingSnapshotCountIncrement = newSnapshotCount
+      }
+
+      try {
+        const snapshotId = uuidv4()
+
+        const snapshot = this.snapshotRepository.create({
+          id: snapshotId,
+          organizationId: organization.id,
+          name: snapshotName,
+          imageName: checkpoint.ref,
+          ref: checkpoint.ref,
+          state: SnapshotState.PENDING,
+          size: checkpoint.size,
+          cpu: checkpoint.cpu,
+          mem: checkpoint.mem,
+          disk: checkpoint.disk,
+          gpu: checkpoint.gpu,
+          initialRunnerId: checkpoint.initialRunnerId,
+          checkpoint: checkpoint,
+          snapshotRegions: [{ snapshotId, regionId }],
+        })
+
+        const savedSnapshot = await this.snapshotRepository.save(snapshot)
+
+        this.eventEmitter.emit(SnapshotEvents.CREATED, new SnapshotCreatedEvent(savedSnapshot))
+
+        return savedSnapshot
+      } catch (error) {
+        if (error.code === '23505') {
+          throw new ConflictException(`Snapshot with name "${snapshotName}" already exists for this organization`)
         }
         throw error
       }

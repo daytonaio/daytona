@@ -108,6 +108,19 @@ export interface RunnerAdapter {
   recoverSandbox(sandbox: Sandbox): Promise<void>
 
   resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
+
+  createCheckpoint(
+    sandboxId: string,
+    checkpointName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<void>
+
+  removeCheckpoint(checkpointRef: string): Promise<void>
+
+  getCheckpointInfo(checkpointRef: string): Promise<RunnerSnapshotInfo>
+
+  inspectCheckpointInRegistry(checkpointRef: string, registry?: DockerRegistry): Promise<SnapshotDigestResponse>
 }
 
 @Injectable()

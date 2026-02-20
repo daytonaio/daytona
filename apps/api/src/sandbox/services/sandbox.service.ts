@@ -81,6 +81,9 @@ import {
   sandboxLookupCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
+import { CheckpointService } from './checkpoint.service'
+import { CheckpointState } from '../enums/checkpoint-state.enum'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -114,6 +117,8 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    private readonly dockerRegistryService: DockerRegistryService,
+    private readonly checkpointService: CheckpointService,
   ) {}
 
   /**
@@ -780,6 +785,149 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
     return sandbox
+  }
+
+  async createCheckpoint(
+    sandboxIdOrName: string,
+    organizationId: string,
+    checkpointName: string,
+  ): Promise<SandboxDto> {
+    const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    if (sandbox.pending) {
+      throw new SandboxError('Sandbox state change in progress')
+    }
+
+    if (![SandboxState.STARTED, SandboxState.STOPPED].includes(sandbox.state)) {
+      throw new SandboxError('Sandbox must be started or stopped to create a checkpoint')
+    }
+
+    if (!sandbox.runnerId) {
+      throw new SandboxError('Sandbox has no runner assigned')
+    }
+
+    const runner = await this.runnerRepository.findOne({
+      where: { id: sandbox.runnerId },
+    })
+
+    if (!runner) {
+      throw new SandboxError('Runner not found')
+    }
+
+    const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(runner.region)
+    if (!internalRegistry) {
+      throw new SandboxError('No internal registry available')
+    }
+
+    const checkpoint = await this.checkpointService.createPending(sandbox, checkpointName, sandbox.runnerId)
+
+    sandbox.pending = true
+    await this.sandboxRepository.saveWhere(sandbox, { pending: false })
+
+    try {
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      await runnerAdapter.createCheckpoint(sandbox.id, checkpointName, organizationId, internalRegistry)
+
+      sandbox.checkpoint = checkpoint
+      sandbox.pending = false
+      await this.sandboxRepository.save(sandbox)
+
+      return SandboxDto.fromSandbox(sandbox)
+    } catch (error) {
+      sandbox.pending = false
+      await this.sandboxRepository.save(sandbox)
+      await this.checkpointService.markError(checkpoint.id, error.message || 'Failed to create checkpoint')
+      throw error
+    }
+  }
+
+  async createFromCheckpoint(
+    checkpointId: string,
+    organization: Organization,
+    name?: string,
+  ): Promise<SandboxDto> {
+    let pendingCpuIncrement: number | undefined
+    let pendingMemoryIncrement: number | undefined
+    let pendingDiskIncrement: number | undefined
+
+    const checkpoint = await this.checkpointService.getCheckpoint(checkpointId, organization.id)
+
+    if (checkpoint.state !== CheckpointState.ACTIVE) {
+      throw new BadRequestError(`Checkpoint is not active (state: ${checkpoint.state})`)
+    }
+
+    if (!checkpoint.ref) {
+      throw new BadRequestError('Checkpoint has no image ref')
+    }
+
+    const regionId = checkpoint.region
+
+    try {
+      this.organizationService.assertOrganizationIsNotSuspended(organization)
+
+      const { pendingCpuIncremented, pendingMemoryIncremented, pendingDiskIncremented } =
+        await this.validateOrganizationQuotas(organization, regionId, checkpoint.cpu, checkpoint.mem, checkpoint.disk)
+
+      if (pendingCpuIncremented) {
+        pendingCpuIncrement = checkpoint.cpu
+      }
+      if (pendingMemoryIncremented) {
+        pendingMemoryIncrement = checkpoint.mem
+      }
+      if (pendingDiskIncremented) {
+        pendingDiskIncrement = checkpoint.disk
+      }
+
+      const sandboxClass = checkpoint.class
+
+      const runner = await this.runnerService.getRandomAvailableRunner({
+        regions: [regionId],
+        sandboxClass,
+        snapshotRef: checkpoint.ref,
+      })
+
+      const sandbox = new Sandbox(regionId, name)
+      sandbox.organizationId = organization.id
+      sandbox.class = sandboxClass
+      sandbox.snapshot = checkpoint.ref
+      sandbox.checkpoint = checkpoint
+      sandbox.osUser = checkpoint.osUser
+      sandbox.env = checkpoint.env || {}
+      sandbox.labels = checkpoint.labels || {}
+      sandbox.cpu = checkpoint.cpu
+      sandbox.gpu = checkpoint.gpu
+      sandbox.mem = checkpoint.mem
+      sandbox.disk = checkpoint.disk
+      sandbox.public = checkpoint.public
+      sandbox.networkBlockAll = checkpoint.networkBlockAll
+      sandbox.networkAllowList = checkpoint.networkAllowList
+      sandbox.autoStopInterval = checkpoint.autoStopInterval
+      sandbox.autoArchiveInterval = checkpoint.autoArchiveInterval
+      sandbox.autoDeleteInterval = checkpoint.autoDeleteInterval
+      sandbox.volumes = checkpoint.volumes || []
+      sandbox.runnerId = runner.id
+      sandbox.pending = true
+
+      await this.sandboxRepository.insert(sandbox)
+
+      this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(sandbox))
+
+      return SandboxDto.fromSandbox(sandbox)
+    } catch (error) {
+      await this.rollbackPendingUsage(
+        organization.id,
+        regionId,
+        pendingCpuIncrement,
+        pendingMemoryIncrement,
+        pendingDiskIncrement,
+      )
+
+      if (error.code === '23505') {
+        throw new ConflictException(`Sandbox with that name already exists`)
+      }
+
+      throw error
+    }
   }
 
   async findAllDeprecated(

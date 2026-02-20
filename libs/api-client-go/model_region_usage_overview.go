@@ -21,13 +21,13 @@ var _ MappedNullable = &RegionUsageOverview{}
 
 // RegionUsageOverview struct for RegionUsageOverview
 type RegionUsageOverview struct {
-	RegionId             string  `json:"regionId"`
-	TotalCpuQuota        float32 `json:"totalCpuQuota"`
-	CurrentCpuUsage      float32 `json:"currentCpuUsage"`
-	TotalMemoryQuota     float32 `json:"totalMemoryQuota"`
-	CurrentMemoryUsage   float32 `json:"currentMemoryUsage"`
-	TotalDiskQuota       float32 `json:"totalDiskQuota"`
-	CurrentDiskUsage     float32 `json:"currentDiskUsage"`
+	RegionId string `json:"regionId"`
+	TotalCpuQuota float32 `json:"totalCpuQuota"`
+	CurrentCpuUsage float32 `json:"currentCpuUsage"`
+	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
+	CurrentMemoryUsage float32 `json:"currentMemoryUsage"`
+	TotalDiskQuota float32 `json:"totalDiskQuota"`
+	CurrentDiskUsage float32 `json:"currentDiskUsage"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -226,7 +226,7 @@ func (o *RegionUsageOverview) SetCurrentDiskUsage(v float32) {
 }
 
 func (o RegionUsageOverview) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -269,10 +269,10 @@ func (o *RegionUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -339,3 +339,5 @@ func (v *NullableRegionUsageOverview) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

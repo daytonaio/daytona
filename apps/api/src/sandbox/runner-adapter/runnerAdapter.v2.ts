@@ -527,4 +527,151 @@ export class RunnerAdapterV2 implements RunnerAdapter {
 
     this.logger.debug(`Created RESIZE_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
+
+  async createCheckpoint(
+    sandboxId: string,
+    checkpointName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    const payload: any = {
+      sandboxId,
+      name: checkpointName,
+      organizationId,
+    }
+
+    if (registry) {
+      payload.registry = {
+        project: registry.project,
+        url: registry.url.replace(/^(https?:\/\/)/, ''),
+        username: registry.username,
+        password: registry.password,
+      }
+    }
+
+    await this.jobService.createJob(
+      null,
+      JobType.CREATE_CHECKPOINT,
+      this.runner.id,
+      ResourceType.CHECKPOINT,
+      sandboxId,
+      payload,
+    )
+
+    this.logger.debug(`Created CREATE_CHECKPOINT job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
+
+  async removeCheckpoint(checkpointRef: string): Promise<void> {
+    await this.jobService.createJob(
+      null,
+      JobType.REMOVE_CHECKPOINT,
+      this.runner.id,
+      ResourceType.CHECKPOINT,
+      checkpointRef,
+    )
+
+    this.logger.debug(`Created REMOVE_CHECKPOINT job for ${checkpointRef} on runner ${this.runner.id}`)
+  }
+
+  async getCheckpointInfo(checkpointRef: string): Promise<RunnerSnapshotInfo> {
+    const latestJob = await this.jobRepository.findOne({
+      where: [
+        {
+          runnerId: this.runner.id,
+          resourceType: ResourceType.CHECKPOINT,
+          resourceId: checkpointRef,
+          type: Not(JobType.INSPECT_CHECKPOINT_IN_REGISTRY),
+        },
+      ],
+      order: { createdAt: 'DESC' },
+    })
+
+    if (!latestJob) {
+      throw new Error(`Checkpoint ${checkpointRef} not found on runner ${this.runner.id}`)
+    }
+
+    const metadata = latestJob.getResultMetadata()
+
+    switch (latestJob.status) {
+      case JobStatus.COMPLETED:
+        if (latestJob.type === JobType.CREATE_CHECKPOINT) {
+          return {
+            name: latestJob.resourceId,
+            sizeGB: metadata?.sizeGB,
+            entrypoint: metadata?.entrypoint,
+            cmd: metadata?.cmd,
+            hash: metadata?.hash,
+          }
+        }
+        throw new Error(
+          `Checkpoint ${checkpointRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
+        )
+      case JobStatus.FAILED:
+        throw new Error(`Checkpoint ${checkpointRef} failed on runner ${this.runner.id}`)
+      default:
+        throw new Error(
+          `Checkpoint ${checkpointRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
+        )
+    }
+  }
+
+  async inspectCheckpointInRegistry(
+    checkpointRef: string,
+    registry?: DockerRegistry,
+  ): Promise<SnapshotDigestResponse> {
+    const payload: InspectSnapshotInRegistryRequest = {
+      snapshot: checkpointRef,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    const job = await this.jobService.createJob(
+      null,
+      JobType.INSPECT_CHECKPOINT_IN_REGISTRY,
+      this.runner.id,
+      ResourceType.CHECKPOINT,
+      checkpointRef,
+      payload,
+    )
+
+    this.logger.debug(
+      `Created INSPECT_CHECKPOINT_IN_REGISTRY job for ${checkpointRef} on runner ${this.runner.id}`,
+    )
+
+    const waitTimeout = 30 * 1000
+    const pollInterval = 1000
+    const startTime = Date.now()
+
+    while (Date.now() - startTime < waitTimeout) {
+      const updatedJob = await this.jobRepository.findOne({
+        where: { id: job.id },
+      })
+
+      if (!updatedJob) {
+        throw new Error(`Job ${job.id} not found`)
+      }
+
+      if (updatedJob.status === JobStatus.COMPLETED) {
+        const metadata = updatedJob.getResultMetadata()
+        return {
+          hash: metadata?.hash,
+          sizeGB: metadata?.sizeGB,
+        }
+      }
+
+      if (updatedJob.status === JobStatus.FAILED) {
+        throw new Error(updatedJob.errorMessage || `Inspect checkpoint in registry failed for ${checkpointRef}`)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, pollInterval))
+    }
+
+    throw new Error(`Timeout waiting for INSPECT_CHECKPOINT_IN_REGISTRY job for ${checkpointRef}`)
+  }
 }

@@ -24,7 +24,7 @@ type SnapshotManagerCredentials struct {
 	// Snapshot Manager username for the region
 	Username string `json:"username"`
 	// Snapshot Manager password for the region
-	Password             string `json:"password"`
+	Password string `json:"password"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -98,7 +98,7 @@ func (o *SnapshotManagerCredentials) SetPassword(v string) {
 }
 
 func (o SnapshotManagerCredentials) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,10 +131,10 @@ func (o *SnapshotManagerCredentials) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -196,3 +196,5 @@ func (v *NullableSnapshotManagerCredentials) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

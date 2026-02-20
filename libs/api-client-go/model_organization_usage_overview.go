@@ -21,11 +21,11 @@ var _ MappedNullable = &OrganizationUsageOverview{}
 
 // OrganizationUsageOverview struct for OrganizationUsageOverview
 type OrganizationUsageOverview struct {
-	RegionUsage          []RegionUsageOverview `json:"regionUsage"`
-	TotalSnapshotQuota   float32               `json:"totalSnapshotQuota"`
-	CurrentSnapshotUsage float32               `json:"currentSnapshotUsage"`
-	TotalVolumeQuota     float32               `json:"totalVolumeQuota"`
-	CurrentVolumeUsage   float32               `json:"currentVolumeUsage"`
+	RegionUsage []RegionUsageOverview `json:"regionUsage"`
+	TotalSnapshotQuota float32 `json:"totalSnapshotQuota"`
+	CurrentSnapshotUsage float32 `json:"currentSnapshotUsage"`
+	TotalVolumeQuota float32 `json:"totalVolumeQuota"`
+	CurrentVolumeUsage float32 `json:"currentVolumeUsage"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -174,7 +174,7 @@ func (o *OrganizationUsageOverview) SetCurrentVolumeUsage(v float32) {
 }
 
 func (o OrganizationUsageOverview) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -213,10 +213,10 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -281,3 +281,5 @@ func (v *NullableOrganizationUsageOverview) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

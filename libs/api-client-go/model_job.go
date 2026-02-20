@@ -40,7 +40,7 @@ type Job struct {
 	// The creation timestamp of the job
 	CreatedAt string `json:"createdAt"`
 	// The last update timestamp of the job
-	UpdatedAt            *string `json:"updatedAt,omitempty"`
+	UpdatedAt *string `json:"updatedAt,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -342,7 +342,7 @@ func (o *Job) SetUpdatedAt(v string) {
 }
 
 func (o Job) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -395,10 +395,10 @@ func (o *Job) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -468,3 +468,5 @@ func (v *NullableJob) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

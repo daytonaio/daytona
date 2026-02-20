@@ -31,6 +31,7 @@ import {
   ToolboxApi,
   UpdateNetworkSettingsDTO,
   RecoverSandboxDTO,
+  CheckpointsApi,
 } from '@daytonaio/runner-api-client'
 import { Sandbox } from '../entities/sandbox.entity'
 import { BuildInfo } from '../entities/build-info.entity'
@@ -50,6 +51,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   private snapshotApiClient: SnapshotsApi
   private runnerApiClient: DefaultApi
   private toolboxApiClient: ToolboxApi
+  private checkpointApiClient: CheckpointsApi
 
   private convertSandboxState(state: EnumsSandboxState): SandboxState {
     switch (state) {
@@ -426,5 +428,65 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
     await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
+  }
+
+  async createCheckpoint(
+    sandboxId: string,
+    checkpointName: string,
+    organizationId: string,
+    registry?: DockerRegistry,
+  ): Promise<void> {
+    const request = {
+      sandboxId,
+      name: checkpointName,
+      organizationId,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    }
+
+    await this.snapshotApiClient.createCheckpoint(request)
+  }
+
+  async removeCheckpoint(checkpointRef: string): Promise<void> {
+    await this.snapshotApiClient.removeSnapshot(checkpointRef)
+  }
+
+  async getCheckpointInfo(checkpointRef: string): Promise<RunnerSnapshotInfo> {
+    const response = await this.snapshotApiClient.getSnapshotInfo(checkpointRef)
+    return {
+      name: response.data.name || '',
+      sizeGB: response.data.sizeGB,
+      entrypoint: response.data.entrypoint,
+      cmd: response.data.cmd,
+      hash: response.data.hash,
+    }
+  }
+
+  async inspectCheckpointInRegistry(
+    checkpointRef: string,
+    registry?: DockerRegistry,
+  ): Promise<SnapshotDigestResponse> {
+    const response = await this.snapshotApiClient.inspectSnapshotInRegistry({
+      snapshot: checkpointRef,
+      registry: registry
+        ? {
+            project: registry.project,
+            url: registry.url.replace(/^(https?:\/\/)/, ''),
+            username: registry.username,
+            password: registry.password,
+          }
+        : undefined,
+    })
+
+    return {
+      hash: response.data.hash,
+      sizeGB: response.data.sizeGB,
+    }
   }
 }

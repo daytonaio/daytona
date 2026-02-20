@@ -51,6 +51,15 @@ export interface JobTypeMap {
   [JobType.CREATE_CHECKPOINT]: {
     resourceType: [ResourceType.CHECKPOINT]
   }
+  [JobType.REMOVE_CHECKPOINT]: {
+    resourceType: [ResourceType.CHECKPOINT]
+  }
+  [JobType.GET_CHECKPOINT_INFO]: {
+    resourceType: [ResourceType.CHECKPOINT]
+  }
+  [JobType.INSPECT_CHECKPOINT_IN_REGISTRY]: {
+    resourceType: [ResourceType.CHECKPOINT]
+  }
 }
 
 /**

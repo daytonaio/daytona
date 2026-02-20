@@ -150,6 +150,12 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, err
 		resultMetadata, err = e.inspectSnapshotInRegistry(ctx, job)
 	case apiclient.JOBTYPE_RECOVER_SANDBOX:
 		resultMetadata, err = e.recoverSandbox(ctx, job)
+	case apiclient.JOBTYPE_CREATE_CHECKPOINT:
+		resultMetadata, err = e.createCheckpoint(ctx, job)
+	case apiclient.JOBTYPE_REMOVE_CHECKPOINT:
+		resultMetadata, err = e.removeCheckpoint(ctx, job)
+	case apiclient.JOBTYPE_INSPECT_CHECKPOINT_IN_REGISTRY:
+		resultMetadata, err = e.inspectCheckpointInRegistry(ctx, job)
 	default:
 		err = fmt.Errorf("unknown job type: %s", job.GetType())
 	}

@@ -1051,6 +1051,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/snapshots/create": {
+            "post": {
+                "description": "Create a snapshot by committing a sandbox container and pushing to the registry. The operation runs asynchronously and returns 202 immediately.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Create a snapshot from a sandbox",
+                "operationId": "CreateSnapshot",
+                "parameters": [
+                    {
+                        "description": "Create snapshot request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateSnapshotDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Snapshot creation started",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/snapshots/exists": {
             "get": {
                 "description": "Check if a specified snapshot exists locally",
@@ -1589,6 +1648,33 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.VolumeDTO"
                     }
+                }
+            }
+        },
+        "CreateSnapshotDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "organizationId",
+                "sandboxId"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "organizationId": {
+                    "type": "string"
+                },
+                "registry": {
+                    "description": "Registry to push the snapshot to",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/RegistryDTO"
+                        }
+                    ]
+                },
+                "sandboxId": {
+                    "type": "string"
                 }
             }
         },

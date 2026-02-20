@@ -94,3 +94,4 @@ func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient
 		SizeGB: float64(digest.Size) / (1024 * 1024 * 1024),
 	}, nil
 }
+

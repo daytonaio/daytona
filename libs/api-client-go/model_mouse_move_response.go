@@ -24,7 +24,7 @@ type MouseMoveResponse struct {
 	// The actual X coordinate where the mouse cursor ended up
 	X float32 `json:"x"`
 	// The actual Y coordinate where the mouse cursor ended up
-	Y                    float32 `json:"y"`
+	Y float32 `json:"y"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -98,7 +98,7 @@ func (o *MouseMoveResponse) SetY(v float32) {
 }
 
 func (o MouseMoveResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,10 +131,10 @@ func (o *MouseMoveResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -196,3 +196,5 @@ func (v *NullableMouseMoveResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
