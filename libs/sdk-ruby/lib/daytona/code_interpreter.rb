@@ -119,9 +119,15 @@ module Daytona
       ws.on :message do |msg|
         message_mutex.synchronize { last_message_time = Time.now }
 
-        puts "[DEBUG] Received message (length=#{msg.data.length}): #{msg.data.inspect[0..200]}" if ENV['DEBUG']
+        data = msg.data.to_s
+        puts "[DEBUG] Received message type=#{msg.type} (length=#{data.length}): #{data.inspect[0..200]}" if ENV['DEBUG']
 
-        interpreter.send(:handle_message, msg.data, result, on_stdout, on_stderr, on_error, completion_queue)
+        if msg.type == :close
+          ws.close
+          completion_queue.push({ type: :close })
+        else
+          interpreter.send(:handle_message, data, result, on_stdout, on_stderr, on_error, completion_queue)
+        end
       end
 
       ws.on :error do |e|
@@ -315,7 +321,7 @@ module Daytona
     # @param completion_queue [Queue, nil] Queue to signal completion
     # @return [void]
     def handle_message(data, result, on_stdout, on_stderr, on_error, completion_queue = nil) # rubocop:disable Metrics/AbcSize, Metrics/ParameterLists
-      # Empty messages are just keepalives or noise, ignore them
+      # Empty messages are keepalives/noise and should not imply completion.
       if data.nil? || data.empty?
         puts '[DEBUG] Received empty message, ignoring' if ENV['DEBUG']
         return
