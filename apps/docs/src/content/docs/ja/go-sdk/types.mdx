@@ -1,0 +1,592 @@
+---
+title: "型"
+hideTitleOnPage: true
+---
+
+{/* このコードは gomarkdoc によって生成されました。編集しないでください。*/}
+
+# 型 \{#types\}
+
+```go
+import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+```
+
+## 索引 \{#index\}
+
+* [type Chart](#Chart)
+* [type ChartType](#ChartType)
+* [type CodeLanguage](#CodeLanguage)
+* [type CodeRunParams](#CodeRunParams)
+* [type CreateSnapshotParams](#CreateSnapshotParams)
+* [type DaytonaConfig](#DaytonaConfig)
+* [type ExecuteResponse](#ExecuteResponse)
+* [type ExecutionArtifacts](#ExecutionArtifacts)
+* [type ExecutionError](#ExecutionError)
+* [type ExecutionResult](#ExecutionResult)
+* [type ExperimentalConfig](#ExperimentalConfig)
+* [type FileDownloadRequest](#FileDownloadRequest)
+* [type FileDownloadResponse](#FileDownloadResponse)
+* [type FileInfo](#FileInfo)
+* [type FileStatus](#FileStatus)
+* [type FileUpload](#FileUpload)
+* [type GitCommitResponse](#GitCommitResponse)
+* [type GitStatus](#GitStatus)
+* [type ImageParams](#ImageParams)
+* [type LspLanguageID](#LspLanguageID)
+* [type OutputMessage](#OutputMessage)
+* [type PaginatedSnapshots](#PaginatedSnapshots)
+* [type Position](#Position)
+* [type PtyResult](#PtyResult)
+* [type PtySessionInfo](#PtySessionInfo)
+* [type PtySize](#PtySize)
+* [type Resources](#Resources)
+* [type SandboxBaseParams](#SandboxBaseParams)
+* [type ScreenshotOptions](#ScreenshotOptions)
+* [type ScreenshotRegion](#ScreenshotRegion)
+* [type ScreenshotResponse](#ScreenshotResponse)
+* [type Snapshot](#Snapshot)
+* [type SnapshotParams](#SnapshotParams)
+* [type Volume](#Volume)
+* [type VolumeMount](#VolumeMount)
+
+<a name="Chart" />
+
+## type Chart \{#type-chart\}
+
+Chart 型はチャートを表します
+
+```go
+type Chart struct {
+    Type     ChartType
+    Title    string
+    Elements any
+    PNG      *string // オプションのbase64エンコードされたPNG表現
+}
+```
+
+<a name="ChartType" />
+
+## type ChartType \{#type-charttype\}
+
+```go
+type ChartType string
+```
+
+<a name="ChartTypeLine" />
+
+```go
+const (
+    ChartTypeLine           ChartType = "line"
+    ChartTypeScatter        ChartType = "scatter"
+    ChartTypeBar            ChartType = "bar"
+    ChartTypePie            ChartType = "pie"
+    ChartTypeBoxAndWhisker  ChartType = "box_and_whisker"
+    ChartTypeCompositeChart ChartType = "composite_chart"
+    ChartTypeUnknown        ChartType = "unknown"
+)
+```
+
+<a name="CodeLanguage" />
+
+## type CodeLanguage \{#type-codelanguage\}
+
+CodeLanguage
+
+```go
+type CodeLanguage string
+```
+
+<a name="CodeLanguagePython" />
+
+```go
+const (
+    CodeLanguagePython     CodeLanguage = "python"
+    CodeLanguageJavaScript CodeLanguage = "javascript"
+    CodeLanguageTypeScript CodeLanguage = "typescript"
+)
+```
+
+<a name="CodeRunParams" />
+
+## type CodeRunParams \{#type-coderunparams\}
+
+CodeRunParams はコード実行用のパラメータを表します
+
+```go
+type CodeRunParams struct {
+    Argv []string
+    Env  map[string]string
+}
+```
+
+<a name="CreateSnapshotParams" />
+
+## type CreateSnapshotParams \{#type-createsnapshotparams\}
+
+CreateSnapshotParams は、スナップショットを作成するためのパラメータを表す型です
+
+```go
+type CreateSnapshotParams struct {
+    Name           string
+    Image          any // string または *Image
+    Resources      *Resources
+    Entrypoint     []string
+    SkipValidation *bool
+}
+```
+
+<a name="DaytonaConfig" />
+
+## type DaytonaConfig \{#type-daytonaconfig\}
+
+DaytonaConfig は Daytona クライアントの設定を表します。フィールドが nil の場合、クライアントは環境変数またはデフォルト値を使用します。
+
+```go
+type DaytonaConfig struct {
+    APIKey         string
+    JWTToken       string
+    OrganizationID string
+    APIUrl         string
+    Target         string
+    Experimental   *ExperimentalConfig
+}
+```
+
+<a name="ExecuteResponse" />
+
+## type ExecuteResponse \{#type-executeresponse\}
+
+ExecuteResponse は、コマンド実行に対する応答を表します
+
+```go
+type ExecuteResponse struct {
+    ExitCode  int
+    Result    string
+    Artifacts *ExecutionArtifacts // アーティファクトが利用できない場合は nil
+}
+```
+
+<a name="ExecutionArtifacts" />
+
+## type ExecutionArtifacts \{#type-executionartifacts\}
+
+ExecutionArtifacts は、実行結果の出力アーティファクトを表します
+
+```go
+type ExecutionArtifacts struct {
+    Stdout string
+    Charts []Chart
+}
+```
+
+<a name="ExecutionError" />
+
+## type ExecutionError \{#type-executionerror\}
+
+ExecutionError はコード実行時のエラーを表します
+
+```go
+type ExecutionError struct {
+    Name      string
+    Value     string
+    Traceback *string // オプションのスタックトレース; 利用不可の場合はnil
+}
+```
+
+<a name="ExecutionResult" />
+
+## type ExecutionResult \{#type-executionresult\}
+
+ExecutionResult はコードインタープリタの実行結果を表します
+
+```go
+type ExecutionResult struct {
+    Stdout string
+    Stderr string
+    Charts []Chart         // Optional charts from matplotlib
+    Error  *ExecutionError // nil = 成功、nil以外 = 実行失敗
+}
+```
+
+<a name="ExperimentalConfig" />
+
+## type ExperimentalConfig \{#type-experimentalconfig\}
+
+ExperimentalConfig 型は、Daytona クライアント向けの実験的機能フラグを保持します。
+
+```go
+type ExperimentalConfig struct {
+    OtelEnabled bool // OpenTelemetryのトレーシングとメトリクスを有効化
+}
+```
+
+<a name="FileDownloadRequest" />
+
+## type FileDownloadRequest \{#type-filedownloadrequest\}
+
+FileDownloadRequest
+
+```go
+type FileDownloadRequest struct {
+    Source      string
+    Destination *string // nil = メモリにダウンロード ([]byte を返す)、nil 以外 = ファイルパスに保存
+}
+```
+
+<a name="FileDownloadResponse" />
+
+## type FileDownloadResponse \{#type-filedownloadresponse\}
+
+FileDownloadResponse はファイルダウンロードのレスポンスを表します
+
+```go
+type FileDownloadResponse struct {
+    Source string
+    Result any     // []byte または string (パス)
+    Error  *string // nil = 成功、nil 以外 = エラーメッセージ
+}
+```
+
+<a name="FileInfo" />
+
+## type FileInfo \{#type-fileinfo\}
+
+FileInfo はファイルのメタデータを表します。
+
+```go
+type FileInfo struct {
+    Name         string
+    Size         int64
+    Mode         string
+    ModifiedTime time.Time
+    IsDirectory  bool
+}
+```
+
+<a name="FileStatus" />
+
+## type FileStatus \{#type-filestatus\}
+
+FileStatus は Git におけるファイルの状態を表します
+
+```go
+type FileStatus struct {
+    Path   string
+    Status string
+}
+```
+
+<a name="FileUpload" />
+
+## type FileUpload \{#type-fileupload\}
+
+FileUpload は、アップロード対象のファイルを表します
+
+```go
+type FileUpload struct {
+    Source      any // []byte または string (パス)
+    Destination string
+}
+```
+
+<a name="GitCommitResponse" />
+
+## type GitCommitResponse \{#type-gitcommitresponse\}
+
+GitCommitResponse
+
+```go
+type GitCommitResponse struct {
+    SHA string
+}
+```
+
+<a name="GitStatus" />
+
+## type GitStatus \{#type-gitstatus\}
+
+GitStatus は Git リポジトリの状態を表します
+
+```go
+type GitStatus struct {
+    CurrentBranch   string
+    Ahead           int
+    Behind          int
+    BranchPublished bool
+    FileStatus      []FileStatus
+}
+```
+
+<a name="ImageParams" />
+
+## type ImageParams \{#type-imageparams\}
+
+ImageParams は、イメージからサンドボックスを作成する際に使用するパラメータを表します
+
+```go
+type ImageParams struct {
+    SandboxBaseParams
+    Image     any // string または *Image
+    Resources *Resources
+}
+```
+
+<a name="LspLanguageID" />
+
+## 型: LspLanguageID \{#type-lsplanguageid\}
+
+```go
+type LspLanguageID string
+```
+
+<a name="LspLanguagePython" />
+
+```go
+const (
+    LspLanguagePython     LspLanguageID = "python"
+    LspLanguageJavaScript LspLanguageID = "javascript"
+    LspLanguageTypeScript LspLanguageID = "typescript"
+)
+```
+
+<a name="OutputMessage" />
+
+## type OutputMessage \{#type-outputmessage\}
+
+OutputMessage は出力メッセージを表す型です
+
+```go
+type OutputMessage struct {
+    Type      string `json:"type"`
+    Text      string `json:"text"`
+    Name      string `json:"name"`
+    Value     string `json:"value"`
+    Traceback string `json:"traceback"`
+}
+```
+
+<a name="PaginatedSnapshots" />
+
+## type PaginatedSnapshots \{#type-paginatedsnapshots\}
+
+PaginatedSnapshots は、ページネーションされたスナップショットのリストを表します。
+
+```go
+type PaginatedSnapshots struct {
+    Items      []*Snapshot
+    Total      int
+    Page       int
+    TotalPages int
+}
+```
+
+<a name="Position" />
+
+## type Position \{#type-position\}
+
+Position はドキュメント内の位置を表す型です
+
+```go
+type Position struct {
+    Line      int // 0始まり
+    Character int // 0始まり
+}
+```
+
+<a name="PtyResult" />
+
+## type PtyResult \{#type-ptyresult\}
+
+PtyResult は、PTY セッションの終了情報を表します
+
+```go
+type PtyResult struct {
+    ExitCode *int    // nil = プロセス実行中、非nil = 終了コード
+    Error    *string // nil = 成功、非nil = エラーメッセージ
+}
+```
+
+<a name="PtySessionInfo" />
+
+## type PtySessionInfo \{#type-ptysessioninfo\}
+
+PtySessionInfo は PTY セッション情報を表す型です。
+
+```go
+type PtySessionInfo struct {
+    ID        string
+    Active    bool
+    CWD       string // 現在の作業ディレクトリ; 利用できない場合は空になる可能性があります
+    Cols      int
+    Rows      int
+    ProcessID *int // Process ID; may be nil if unavailable
+    CreatedAt time.Time
+}
+```
+
+<a name="PtySize" />
+
+## type PtySize \{#type-ptysize\}
+
+PtySize はターミナルの画面サイズ（縦横）を表します
+
+```go
+type PtySize struct {
+    Rows int
+    Cols int
+}
+```
+
+<a name="Resources" />
+
+## type Resources \{#type-resources\}
+
+Resources はサンドボックスのリソース割り当てを表します。
+
+```go
+type Resources struct {
+    CPU    int
+    GPU    int
+    Memory int
+    Disk   int
+}
+```
+
+<a name="SandboxBaseParams" />
+
+## type SandboxBaseParams \{#type-sandboxbaseparams\}
+
+SandboxBaseParams には、サンドボックスを作成するための共通パラメータが含まれます。
+
+```go
+type SandboxBaseParams struct {
+    Name                string
+    User                string
+    Language            CodeLanguage
+    EnvVars             map[string]string
+    Labels              map[string]string
+    Public              bool
+    AutoStopInterval    *int // nil = 自動停止なし、0 = 即座に停止
+    AutoArchiveInterval *int // nil = 自動アーカイブなし、0 = 即座にアーカイブ
+    AutoDeleteInterval  *int // nil = 自動削除なし、0 = 即座に削除
+    Volumes             []VolumeMount
+    NetworkBlockAll     bool
+    NetworkAllowList    *string
+    Ephemeral           bool
+}
+```
+
+<a name="ScreenshotOptions" />
+
+## type ScreenshotOptions \{#type-screenshotoptions\}
+
+```go
+type ScreenshotOptions struct {
+    ShowCursor *bool    // nil = デフォルト、true = 表示、false = 非表示
+    Format     *string  // nil = デフォルト形式 (PNG)、または "jpeg"、"webp" など
+    Quality    *int     // nil = デフォルト品質、JPEG/WebP の場合は 0-100
+    Scale      *float64 // nil = 1.0、スクリーンショットのスケール係数
+}
+```
+
+<a name="ScreenshotRegion" />
+
+## type ScreenshotRegion \{#type-screenshotregion\}
+
+ScreenshotRegion はスクリーンショットの領域を表します
+
+```go
+type ScreenshotRegion struct {
+    X      int
+    Y      int
+    Width  int
+    Height int
+}
+```
+
+<a name="ScreenshotResponse" />
+
+## type ScreenshotResponse \{#type-screenshotresponse\}
+
+```go
+type ScreenshotResponse struct {
+    Image     string // Base64エンコードされた画像データ
+    Width     int
+    Height    int
+    SizeBytes *int // サイズ(バイト単位)
+}
+```
+
+<a name="Snapshot" />
+
+## type Snapshot \{#type-snapshot\}
+
+Snapshot 型は Daytona のスナップショットを表します
+
+```go
+type Snapshot struct {
+    ID             string     `json:"id"`
+    OrganizationID string     `json:"organizationId,omitempty"`
+    General        bool       `json:"general"`
+    Name           string     `json:"name"`
+    ImageName      string     `json:"imageName,omitempty"`
+    State          string     `json:"state"`
+    Size           *float64   `json:"size,omitempty"`
+    Entrypoint     []string   `json:"entrypoint,omitempty"`
+    CPU            int        `json:"cpu"`
+    GPU            int        `json:"gpu"`
+    Memory         int        `json:"mem"` // APIは "memory" ではなく "mem" を使用します
+    Disk           int        `json:"disk"`
+    ErrorReason    *string    `json:"errorReason,omitempty"` // nil = 成功、非nil = スナップショット失敗時のエラー理由
+    SkipValidation bool       `json:"skipValidation"`
+    CreatedAt      time.Time  `json:"createdAt"`
+    UpdatedAt      time.Time  `json:"updatedAt"`
+    LastUsedAt     *time.Time `json:"lastUsedAt,omitempty"`
+}
+```
+
+<a name="SnapshotParams" />
+
+## type SnapshotParams \{#type-snapshotparams\}
+
+SnapshotParams 型は、スナップショットからサンドボックスを作成する際に使用するパラメータを表します
+
+```go
+type SnapshotParams struct {
+    SandboxBaseParams
+    Snapshot string
+}
+```
+
+<a name="Volume" />
+
+## type Volume \{#type-volume\}
+
+Volume は Daytona のボリューム型を表します
+
+```go
+type Volume struct {
+    ID             string    `json:"id"`
+    Name           string    `json:"name"`
+    OrganizationID string    `json:"organizationId"`
+    State          string    `json:"state"`
+    ErrorReason    *string   `json:"errorReason,omitempty"`
+    CreatedAt      time.Time `json:"createdAt"`
+    UpdatedAt      time.Time `json:"updatedAt"`
+    LastUsedAt     time.Time `json:"lastUsedAt,omitempty"`
+}
+```
+
+<a name="VolumeMount" />
+
+## type VolumeMount \{#type-volumemount\}
+
+VolumeMount はボリュームのマウント設定を表します
+
+```go
+type VolumeMount struct {
+    VolumeID  string
+    MountPath string
+    Subpath   *string // ボリューム内のオプションのサブパス; nil = ボリューム全体をマウント
+}
+```
