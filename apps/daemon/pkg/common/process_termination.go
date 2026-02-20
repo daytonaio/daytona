@@ -50,11 +50,10 @@ func TerminateProcessTreeGracefully(ctx context.Context, proc *os.Process, grace
 	if isGroupLeader {
 		// Kill entire process group
 		return syscall.Kill(-pid, syscall.SIGKILL)
-	} else {
-		// Walk tree and kill each process
-		_ = signalProcessTree(pid, syscall.SIGKILL)
-		return proc.Kill()
 	}
+	// Walk tree and kill each process
+	_ = signalProcessTree(pid, syscall.SIGKILL)
+	return proc.Kill()
 }
 
 // isProcessGroupLeader checks if a process is a process group leader (PGID == PID)
@@ -78,16 +77,12 @@ func signalProcessTree(pid int, sig syscall.Signal) error {
 		return err
 	}
 
-	// Recursively signal all descendants
 	for _, child := range descendants {
 		childPid := int(child.Pid)
+		// Recurse depth-first before signaling this child
 		_ = signalProcessTree(childPid, sig)
-	}
-
-	// Signal all direct children
-	for _, child := range descendants {
 		// Convert to OS process to send custom signal
-		childProc, err := os.FindProcess(int(child.Pid))
+		childProc, err := os.FindProcess(childPid)
 		if err == nil {
 			_ = childProc.Signal(sig)
 		}
@@ -109,17 +104,9 @@ func waitForTermination(ctx context.Context, pid int, timeout, interval time.Dur
 		case <-timeoutCtx.Done():
 			return false
 		case <-ticker.C:
-			parent, err := process.NewProcess(int32(pid))
+			_, err := process.NewProcess(int32(pid))
 			if err != nil {
 				// Process doesn't exist anymore
-				return true
-			}
-			children, err := parent.Children()
-			if err != nil {
-				// Unable to enumerate children - likely process is dying/dead
-				return true
-			}
-			if len(children) == 0 {
 				return true
 			}
 		}

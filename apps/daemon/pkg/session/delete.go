@@ -20,9 +20,11 @@ func (s *SessionService) Delete(ctx context.Context, sessionId string) error {
 		return common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	// Terminate process group first with signals (SIGTERM -> SIGKILL)
+	// Terminate process group first with signals (SIGTERM -> SIGKILL).
+	// Use context.Background() so a disconnected HTTP client does not cancel
+	// the grace period and force an immediate SIGKILL.
 	if session.cmd != nil {
-		err := common.TerminateProcessTreeGracefully(ctx, session.cmd.Process, s.terminationGracePeriod, s.terminationCheckInterval)
+		err := common.TerminateProcessTreeGracefully(context.Background(), session.cmd.Process, s.terminationGracePeriod, s.terminationCheckInterval)
 		if err != nil {
 			log.Errorf("Failed to terminate session %s: %v", session.id, err)
 			// Continue with cleanup even if termination fails

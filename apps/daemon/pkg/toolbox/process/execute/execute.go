@@ -52,7 +52,7 @@ func (ec *ExecuteController) ExecuteCommand(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, cmdParts[0], cmdParts[1:]...)
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 	if request.Cwd != nil {
 		cmd.Dir = *request.Cwd
 	}
@@ -96,34 +96,13 @@ func (ec *ExecuteController) ExecuteCommand(c *gin.Context) {
 		<-done // Wait for process cleanup
 		c.AbortWithError(http.StatusRequestTimeout, errors.New("Command execution timed out after "+timeout.String()+". The timeout can be increased by adjusting the timeout parameter in the request."))
 		return
-	case err := <-done:
+	case <-done:
 		// Command completed normally
 		output := outputBuf.Bytes()
-		if err != nil {
-			if exitError, ok := err.(*exec.ExitError); ok {
-				exitCode := exitError.ExitCode()
-				c.JSON(http.StatusOK, ExecuteResponse{
-					ExitCode: exitCode,
-					Result:   string(output),
-				})
-				return
-			}
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: -1,
-				Result:   string(output),
-			})
-			return
+		exitCode := -1
+		if cmd.ProcessState != nil {
+			exitCode = cmd.ProcessState.ExitCode()
 		}
-
-		if cmd.ProcessState == nil {
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: -1,
-				Result:   string(output),
-			})
-			return
-		}
-
-		exitCode := cmd.ProcessState.ExitCode()
 		c.JSON(http.StatusOK, ExecuteResponse{
 			ExitCode: exitCode,
 			Result:   string(output),

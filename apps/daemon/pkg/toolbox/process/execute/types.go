@@ -5,7 +5,7 @@ package execute
 
 type ExecuteRequest struct {
 	Command string `json:"command" validate:"required"`
-	// Timeout in seconds, defaults to 10 seconds
+	// Timeout in seconds, defaults to 360 seconds (6 minutes)
 	Timeout *uint32 `json:"timeout,omitempty" validate:"optional"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty" validate:"optional"`
