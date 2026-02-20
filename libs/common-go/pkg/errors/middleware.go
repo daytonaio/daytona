@@ -116,6 +116,15 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 					Path:       ctx.Request.URL.Path,
 					Method:     ctx.Request.Method,
 				}
+			case *UnprocessableEntityError:
+				errorResponse = ErrorResponse{
+					StatusCode: http.StatusUnprocessableEntity,
+					Message:    err.Err.Error(),
+					Code:       "UNPROCESSABLE_ENTITY",
+					Timestamp:  time.Now(),
+					Path:       ctx.Request.URL.Path,
+					Method:     ctx.Request.Method,
+				}
 			default:
 				errorResponse = defaultErrorHandler(ctx, err)
 			}
