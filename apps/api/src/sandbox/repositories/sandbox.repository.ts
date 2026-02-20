@@ -36,6 +36,9 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     if (!sandbox.updatedAt) {
       sandbox.updatedAt = now
     }
+    if (!sandbox.lastActivityAt) {
+      sandbox.lastActivityAt = now
+    }
 
     sandbox.assertValid()
     sandbox.enforceInvariants()
@@ -65,6 +68,10 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     raw = false,
   ): Promise<Sandbox | void> {
     const { updateData, entity } = params
+
+    if (updateData.state && !updateData.lastActivityAt) {
+      updateData.lastActivityAt = new Date()
+    }
 
     if (raw) {
       await this.repository.update(id, updateData)
@@ -113,6 +120,10 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     },
   ): Promise<Sandbox> {
     const { updateData, whereCondition } = params
+
+    if (updateData.state && !updateData.lastActivityAt) {
+      updateData.lastActivityAt = new Date()
+    }
 
     return this.manager.transaction(async (entityManager) => {
       const whereClause = {
