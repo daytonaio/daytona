@@ -306,13 +306,22 @@ class AsyncDaytona:
         if self._tracer_provider is not None:
             self._tracer_provider.shutdown()
 
-        # Close the main API client
+        # Close the main API client and immediately null out the underlying session
+        # references so any concurrent request() call in the generated REST client
+        # sees None and creates a fresh session instead of hitting an AssertionError
+        # on a dead aiohttp connector (assert self._connector is not None).
         if hasattr(self, "_api_client") and self._api_client:
             await self._api_client.close()
+            if hasattr(self._api_client, "rest_client"):
+                self._api_client.rest_client.pool_manager = None
+                self._api_client.rest_client.retry_client = None
 
-        # Close the toolbox API client
+        # Same treatment for the toolbox API client
         if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
             await self._toolbox_api_client.close()
+            if hasattr(self._toolbox_api_client, "rest_client"):
+                self._toolbox_api_client.rest_client.pool_manager = None
+                self._toolbox_api_client.rest_client.retry_client = None
 
     @overload
     async def create(
