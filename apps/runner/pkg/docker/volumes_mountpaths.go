@@ -65,6 +65,10 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			continue
 		}
 
+		// Track if directory existed before we create it
+		_, statErr := os.Stat(runnerVolumeMountPath)
+		dirExisted := statErr == nil
+
 		err := os.MkdirAll(runnerVolumeMountPath, 0755)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
@@ -75,12 +79,25 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
 		err = cmd.Run()
 		if err != nil {
+			if !dirExisted {
+				os.Remove(runnerVolumeMountPath)
+			}
 			return nil, fmt.Errorf("failed to mount S3 volume %s (subpath: %s) to %s: %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath, err)
 		}
 
 		// Wait for FUSE mount to be fully ready before proceeding
 		err = d.waitForMountReady(ctx, runnerVolumeMountPath)
 		if err != nil {
+			if !dirExisted {
+				umountErr := exec.Command("umount", runnerVolumeMountPath).Run()
+				if umountErr != nil {
+					log.Warnf("Failed to unmount %s during cleanup: %v", runnerVolumeMountPath, umountErr)
+				}
+				removeErr := os.Remove(runnerVolumeMountPath)
+				if removeErr != nil {
+					log.Warnf("Failed to remove mount directory %s during cleanup: %v", runnerVolumeMountPath, removeErr)
+				}
+			}
 			return nil, fmt.Errorf("mount %s not ready after mounting: %s", runnerVolumeMountPath, err)
 		}
 
