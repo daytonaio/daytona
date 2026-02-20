@@ -67,7 +67,7 @@ type ApiServer struct {
 	router      *gin.Engine
 }
 
-func (a *ApiServer) Start() error {
+func (a *ApiServer) Start(ctx context.Context) error {
 	docs.SwaggerInfo.Description = "Daytona Runner API"
 	docs.SwaggerInfo.Title = "Daytona Runner API"
 	docs.SwaggerInfo.BasePath = "/"
@@ -133,8 +133,8 @@ func (a *ApiServer) Start() error {
 
 	snapshotController := protected.Group("/snapshots")
 	{
-		snapshotController.POST("/pull", controllers.PullSnapshot)
-		snapshotController.POST("/build", controllers.BuildSnapshot)
+		snapshotController.POST("/pull", controllers.PullSnapshot(ctx))
+		snapshotController.POST("/build", controllers.BuildSnapshot(ctx))
 		snapshotController.POST("/tag", controllers.TagImage)
 		snapshotController.GET("/exists", controllers.SnapshotExists)
 		snapshotController.GET("/info", controllers.GetSnapshotInfo)

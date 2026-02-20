@@ -4,7 +4,6 @@
 package runner
 
 import (
-	"context"
 	"log"
 
 	"github.com/daytonaio/runner/internal/metrics"
@@ -16,7 +15,6 @@ import (
 )
 
 type RunnerInstanceConfig struct {
-	Ctx                context.Context
 	StatesCache        *cache.StatesCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
@@ -27,7 +25,6 @@ type RunnerInstanceConfig struct {
 }
 
 type Runner struct {
-	Ctx                context.Context
 	StatesCache        *cache.StatesCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
@@ -50,7 +47,6 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 
 		runner = &Runner{
-			Ctx:                config.Ctx,
 			StatesCache:        config.StatesCache,
 			SnapshotErrorCache: config.SnapshotErrorCache,
 			Docker:             config.Docker,

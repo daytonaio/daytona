@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 
+	"context"
+
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
@@ -88,38 +90,40 @@ func TagImage(ctx *gin.Context) {
 //	@Router			/snapshots/pull [post]
 //
 //	@id				PullSnapshot
-func PullSnapshot(ctx *gin.Context) {
-	var request dto.PullSnapshotRequestDTO
-	err := ctx.ShouldBindJSON(&request)
-	if err != nil {
-		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-		return
-	}
-
-	runner := runner.GetInstance(nil)
-
-	err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
-	if err != nil {
-		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
-	}
-
-	go func() {
-		err := runner.Docker.PullSnapshot(runner.Ctx, request)
+func PullSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		var request dto.PullSnapshotRequestDTO
+		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			log.Debugf("Pull snapshot %s failed: %v", request.Snapshot, err)
-			err = runner.SnapshotErrorCache.SetError(request.Snapshot, err.Error())
-			if err != nil {
-				log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
-			}
-		} else {
-			err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
-			if err != nil {
-				log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
-			}
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+			return
 		}
-	}()
 
-	ctx.JSON(http.StatusAccepted, "Snapshot pull started")
+		runner := runner.GetInstance(nil)
+
+		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+		if err != nil {
+			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+		}
+
+		go func() {
+			err := runner.Docker.PullSnapshot(generalCtx, request)
+			if err != nil {
+				log.Debugf("Pull snapshot %s failed: %v", request.Snapshot, err)
+				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
+				if err != nil {
+					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+				}
+			} else {
+				err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+				if err != nil {
+					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+				}
+			}
+		}()
+
+		ctx.JSON(http.StatusAccepted, "Snapshot pull started")
+	}
 }
 
 // BuildSnapshot godoc
@@ -138,42 +142,44 @@ func PullSnapshot(ctx *gin.Context) {
 //	@Router			/snapshots/build [post]
 //
 //	@id				BuildSnapshot
-func BuildSnapshot(ctx *gin.Context) {
-	var request dto.BuildSnapshotRequestDTO
-	err := ctx.ShouldBindJSON(&request)
-	if err != nil {
-		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-		return
-	}
-
-	if !strings.Contains(request.Snapshot, ":") || strings.HasSuffix(request.Snapshot, ":") {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot name must include a valid tag")))
-		return
-	}
-
-	runner := runner.GetInstance(nil)
-	err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
-	if err != nil {
-		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
-	}
-
-	go func() {
-		err := runner.Docker.BuildSnapshot(runner.Ctx, request)
+func BuildSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		var request dto.BuildSnapshotRequestDTO
+		err := ctx.ShouldBindJSON(&request)
 		if err != nil {
-			log.Debugf("Build snapshot %s failed: %v", request.Snapshot, err)
-			err = runner.SnapshotErrorCache.SetError(request.Snapshot, err.Error())
-			if err != nil {
-				log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
-			}
-		} else {
-			err = runner.SnapshotErrorCache.RemoveError(request.Snapshot)
-			if err != nil {
-				log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
-			}
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+			return
 		}
-	}()
 
-	ctx.JSON(http.StatusAccepted, "Snapshot build started")
+		if !strings.Contains(request.Snapshot, ":") || strings.HasSuffix(request.Snapshot, ":") {
+			ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot name must include a valid tag")))
+			return
+		}
+
+		runner := runner.GetInstance(nil)
+		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+		if err != nil {
+			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+		}
+
+		go func() {
+			err := runner.Docker.BuildSnapshot(generalCtx, request)
+			if err != nil {
+				log.Debugf("Build snapshot %s failed: %v", request.Snapshot, err)
+				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
+				if err != nil {
+					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+				}
+			} else {
+				err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+				if err != nil {
+					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+				}
+			}
+		}()
+
+		ctx.JSON(http.StatusAccepted, "Snapshot build started")
+	}
 }
 
 // SnapshotExists godoc
@@ -243,7 +249,7 @@ func RemoveSnapshot(ctx *gin.Context) {
 		return
 	}
 
-	err = runner.SnapshotErrorCache.RemoveError(snapshot)
+	err = runner.SnapshotErrorCache.RemoveError(ctx.Request.Context(), snapshot)
 	if err != nil {
 		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", snapshot, err)
 	}
@@ -393,7 +399,7 @@ func GetSnapshotInfo(ctx *gin.Context) {
 	}
 
 	if !exists {
-		errReason, err := runner.SnapshotErrorCache.GetError(snapshot)
+		errReason, err := runner.SnapshotErrorCache.GetError(ctx.Request.Context(), snapshot)
 		if err == nil && errReason != nil {
 			ctx.Error(common_errors.NewUnprocessableEntityError(errors.New(*errReason)))
 			return

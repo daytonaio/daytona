@@ -158,7 +158,6 @@ func main() {
 	metricsCollector.Start(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		Ctx:                ctx,
 		StatesCache:        statesCache,
 		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, 10*time.Minute),
 		Docker:             dockerClient,
@@ -227,7 +226,7 @@ func main() {
 	apiServerErrChan := make(chan error)
 
 	go func() {
-		err := apiServer.Start()
+		err := apiServer.Start(ctx)
 		apiServerErrChan <- err
 	}()
 
