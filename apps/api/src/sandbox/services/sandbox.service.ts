@@ -462,22 +462,26 @@ export class SandboxService {
       }
 
       if (!createSandboxDto.volumes || createSandboxDto.volumes.length === 0) {
-        const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
-          organizationId: organization.id,
-          snapshot: snapshotIdOrName,
-          target: regionId,
-          class: createSandboxDto.class,
-          cpu: cpu,
-          mem: mem,
-          disk: disk,
-          gpu: gpu,
-          osUser: createSandboxDto.user,
-          env: createSandboxDto.env,
-          state: SandboxState.STARTED,
-        })
+        const skipWarmPool = (await this.redis.exists(`warm-pool:skip:${snapshotIdOrName}`)) === 1
 
-        if (warmPoolSandbox) {
-          return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
+        if (!skipWarmPool) {
+          const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
+            organizationId: organization.id,
+            snapshot: snapshotIdOrName,
+            target: regionId,
+            class: createSandboxDto.class,
+            cpu: cpu,
+            mem: mem,
+            disk: disk,
+            gpu: gpu,
+            osUser: createSandboxDto.user,
+            env: createSandboxDto.env,
+            state: SandboxState.STARTED,
+          })
+
+          if (warmPoolSandbox) {
+            return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization)
+          }
         }
       } else {
         const volumeIdOrNames = createSandboxDto.volumes.map((v) => v.volumeId)
