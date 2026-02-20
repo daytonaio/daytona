@@ -7,17 +7,15 @@ import (
 	"context"
 	"io"
 
-	"github.com/daytonaio/runner/internal/util"
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/pkg/api/dto"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/pkg/jsonmessage"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) PushImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
-	log.Infof("Pushing image %s...", imageName)
+	d.logger.InfoContext(ctx, "Pushing image", "imageName", imageName)
 
 	responseBody, err := d.apiClient.ImagePush(ctx, imageName, image.PushOptions{
 		RegistryAuth: getRegistryAuth(reg),
@@ -27,12 +25,12 @@ func (d *DockerClient) PushImage(ctx context.Context, imageName string, reg *dto
 	}
 	defer responseBody.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&util.DebugLogWriter{}), 0, true, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&log.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
 		return err
 	}
 
-	log.Infof("Image %s pushed successfully", imageName)
+	d.logger.InfoContext(ctx, "Image pushed successfully", "imageName", imageName)
 
 	return nil
 }

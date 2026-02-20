@@ -4,27 +4,27 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 )
 
-func ReadEntrypointLogs(entrypointLogFilePath string) {
+func ReadEntrypointLogs(entrypointLogFilePath string) error {
 	if entrypointLogFilePath == "" {
-		fmt.Fprintln(os.Stderr, "Error: Entrypoint log file path is not configured")
-		os.Exit(1)
+		return errors.New("entrypoint log file path is not configured")
 	}
 
 	logFile, err := os.Open(entrypointLogFilePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Failed to open entrypoint log file at %s: %v\n", entrypointLogFilePath, err)
-		os.Exit(1)
+		return fmt.Errorf("failed to open entrypoint log file at %s: %w", entrypointLogFilePath, err)
 	}
 	defer logFile.Close()
 
 	_, err = io.Copy(os.Stdout, logFile)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: Failed to read entrypoint log file: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to read entrypoint log file: %w", err)
 	}
+
+	return nil
 }

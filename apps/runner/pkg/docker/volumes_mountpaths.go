@@ -16,10 +16,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/runner/cmd/runner/config"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
-	log "github.com/sirupsen/logrus"
 )
 
 const volumeMountPrefix = "daytona-volume-"
@@ -60,7 +59,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		}
 
 		if d.isDirectoryMounted(runnerVolumeMountPath) {
-			log.Infof("volume %s (subpath: %s) is already mounted to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
+			d.logger.InfoContext(ctx, "volume is already mounted", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "runnerVolumeMountPath", runnerVolumeMountPath)
 			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 			continue
 		}
@@ -70,7 +69,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounting S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
+		d.logger.InfoContext(ctx, "mounting S3 volume", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "runnerVolumeMountPath", runnerVolumeMountPath)
 
 		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
 		err = cmd.Run()
@@ -84,7 +83,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			return nil, fmt.Errorf("mount %s not ready after mounting: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s (subpath: %s) to %s", volumeIdPrefixed, subpathStr, runnerVolumeMountPath)
+		d.logger.InfoContext(ctx, "mounted S3 volume", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "runnerVolumeMountPath", runnerVolumeMountPath)
 
 		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 	}
@@ -141,7 +140,7 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 			// Try to read directory to ensure it's fully operational
 			_, err = os.ReadDir(path)
 			if err == nil {
-				log.Infof("mount %s is ready after %d attempts", path, i+1)
+				d.logger.InfoContext(ctx, "mount is ready", "path", path, "attempts", i+1)
 				return nil
 			}
 		}
@@ -190,8 +189,8 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *
 		cmd.Env = append(cmd.Env, "AWS_REGION="+d.awsRegion)
 	}
 
-	cmd.Stderr = io.Writer(&util.ErrorLogWriter{})
-	cmd.Stdout = io.Writer(&util.InfoLogWriter{})
+	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
+	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
 
 	return cmd
 }

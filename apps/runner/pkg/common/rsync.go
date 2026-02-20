@@ -6,11 +6,10 @@ package common
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // RsyncCopy copies files from srcPath to destPath using rsync with full attribute preservation.
@@ -19,8 +18,8 @@ import (
 //
 // The timeout parameter specifies how long to wait for the rsync operation to complete.
 // Trailing slashes are automatically added to paths to ensure contents are copied, not directories.
-func RsyncCopy(ctx context.Context, srcPath, destPath string) error {
-	log.Debugf("rsync copy from %s to %s", srcPath, destPath)
+func RsyncCopy(ctx context.Context, logger *slog.Logger, srcPath, destPath string) error {
+	logger.DebugContext(ctx, "rsync copy", "source", srcPath, "destination", destPath)
 
 	// Use rsync with -aAX flags:
 	// -a = archive mode (preserves permissions, ownership, timestamps, symlinks, devices)
@@ -36,18 +35,18 @@ func RsyncCopy(ctx context.Context, srcPath, destPath string) error {
 	rsyncCmd.Stdout = &rsyncOut
 	rsyncCmd.Stderr = &rsyncErr
 
-	log.Debug("Starting rsync...")
+	logger.DebugContext(ctx, "Starting rsync...")
 	if err := rsyncCmd.Run(); err != nil {
 		if errMsg := rsyncErr.String(); errMsg != "" {
-			log.Errorf("rsync stderr: %s", errMsg)
+			logger.ErrorContext(ctx, "rsync stderr", "stderr", errMsg)
 		}
 		return fmt.Errorf("rsync failed: %w", err)
 	}
 
 	if outMsg := rsyncOut.String(); outMsg != "" {
-		log.Debugf("rsync output: %s", outMsg)
+		logger.DebugContext(ctx, "rsync output", "output", outMsg)
 	}
 
-	log.Info("Successfully completed rsync copy")
+	logger.InfoContext(ctx, "Successfully completed rsync copy")
 	return nil
 }

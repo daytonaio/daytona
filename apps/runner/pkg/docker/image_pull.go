@@ -10,17 +10,15 @@ import (
 	"io"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/internal/constants"
-	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
 
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
@@ -43,7 +41,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		}
 	}
 
-	log.Infof("Pulling image %s...", imageName)
+	d.logger.InfoContext(ctx, "Pulling image", "imageName", imageName)
 
 	sandboxIdValue := ctx.Value(constants.ID_KEY)
 
@@ -61,12 +59,12 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 	defer responseBody.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&util.DebugLogWriter{}), 0, true, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&log.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
 		return err
 	}
 
-	log.Infof("Image %s pulled successfully", imageName)
+	d.logger.InfoContext(ctx, "Image pulled successfully", "imageName", imageName)
 
 	return nil
 }

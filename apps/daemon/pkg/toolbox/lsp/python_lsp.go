@@ -6,12 +6,11 @@ package lsp
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 
 	"github.com/sourcegraph/jsonrpc2"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type PythonLSPServer struct {
@@ -33,9 +32,9 @@ func (s *PythonLSPServer) Initialize(pathToProject string) error {
 	}
 
 	handler := jsonrpc2.HandlerWithError(func(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) (interface{}, error) {
-		log.Debugf("Received request: %s", req.Method)
+		s.logger.Debug("Received request", "method", req.Method)
 		if req.Params != nil {
-			log.Debugf("Params: %+v", req.Params)
+			s.logger.Debug("Request params", "params", req.Params)
 		}
 		return nil, nil
 	})
@@ -103,10 +102,11 @@ func (s *PythonLSPServer) Shutdown() error {
 	return nil
 }
 
-func NewPythonLSPServer() *PythonLSPServer {
+func NewPythonLSPServer(logger *slog.Logger) *PythonLSPServer {
 	return &PythonLSPServer{
 		LSPServerAbstract: &LSPServerAbstract{
 			languageId: "python",
+			logger:     logger.With(slog.String("component", "python_lsp_server")),
 		},
 	}
 }

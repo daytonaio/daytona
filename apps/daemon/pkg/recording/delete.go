@@ -5,7 +5,6 @@ package recording
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -30,7 +29,7 @@ func (s *RecordingService) DeleteRecording(id string) error {
 		return fmt.Errorf("failed to delete recording file: %w", err)
 	}
 
-	log.Debugf("Deleted recording %s at %s", id, recording.FilePath)
+	s.logger.Debug("Deleted recording", "id", id, "filePath", recording.FilePath)
 
 	return nil
 }

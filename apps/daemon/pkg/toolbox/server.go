@@ -10,6 +10,7 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -26,13 +27,13 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
-	"github.com/daytonaio/daemon/pkg/toolbox/middlewares"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
+	sloggin "github.com/samber/slog-gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 	otellog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -43,11 +44,10 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type ServerConfig struct {
+	Logger                               *slog.Logger
 	WorkDir                              string
 	ConfigDir                            string
 	ComputerUse                          computeruse.IComputerUse
@@ -60,6 +60,7 @@ type ServerConfig struct {
 
 func NewServer(config ServerConfig) *server {
 	return &server{
+		logger:                               config.Logger.With(slog.String("component", "toolbox_server")),
 		WorkDir:                              config.WorkDir,
 		SandboxId:                            config.SandboxId,
 		otelEndpoint:                         config.OtelEndpoint,
@@ -75,6 +76,7 @@ type server struct {
 	WorkDir                              string
 	ComputerUse                          computeruse.IComputerUse
 	SandboxId                            string
+	logger                               *slog.Logger
 	otelEndpoint                         *string
 	authToken                            string
 	telemetry                            Telemetry
@@ -115,7 +117,7 @@ func (s *server) Start() error {
 		otelgin.Middleware(otelServiceName, otelgin.WithTracerProvider(s.telemetry.TracerProvider))(ctx)
 		ctx.Next()
 	})
-	r.Use(middlewares.LoggingMiddleware())
+	r.Use(sloggin.New(s.logger))
 	errMiddleware := common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -123,7 +125,7 @@ func (s *server) Start() error {
 		}
 	})
 
-	noTelemetryRouter.Use(middlewares.LoggingMiddleware())
+	noTelemetryRouter.Use(sloggin.New(s.logger))
 	r.Use(errMiddleware)
 	noTelemetryRouter.Use(errMiddleware)
 	binding.Validator = new(DefaultValidator)
@@ -164,11 +166,12 @@ func (s *server) Start() error {
 		fsController.DELETE("/", fs.DeleteFile)
 	}
 
+	processLogger := s.logger.With(slog.String("component", "process_controller"))
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand)
+		processController.POST("/execute", process.ExecuteCommand(processLogger))
 
-		sessionController := session.NewSessionController(s.configDir, s.WorkDir, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
+		sessionController := session.NewSessionController(s.logger, s.configDir, s.WorkDir, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
@@ -182,7 +185,7 @@ func (s *server) Start() error {
 		}
 
 		// PTY endpoints
-		ptyController := pty.NewPTYController(s.WorkDir)
+		ptyController := pty.NewPTYController(s.logger, s.WorkDir)
 		ptyGroup := processController.Group("/pty")
 		{
 			ptyGroup.GET("", ptyController.ListPTYSessions)
@@ -194,7 +197,7 @@ func (s *server) Start() error {
 		}
 
 		// Interpreter endpoints
-		interpreterController := interpreter.NewInterpreterController(s.WorkDir)
+		interpreterController := interpreter.NewInterpreterController(s.logger, s.WorkDir)
 		interpreterGroup := processController.Group("/interpreter")
 		{
 			interpreterGroup.POST("/context", interpreterController.CreateContext)
@@ -220,19 +223,20 @@ func (s *server) Start() error {
 		gitController.POST("/push", git.PushChanges)
 	}
 
+	lspLogger := s.logger.With(slog.String("component", "lsp_service"))
 	lspController := r.Group("/lsp")
 	{
 		//	server process
-		lspController.POST("/start", lsp.Start)
-		lspController.POST("/stop", lsp.Stop)
+		lspController.POST("/start", lsp.Start(lspLogger))
+		lspController.POST("/stop", lsp.Stop(lspLogger))
 
 		//	lsp operations
-		lspController.POST("/completions", lsp.Completions)
-		lspController.POST("/did-open", lsp.DidOpen)
-		lspController.POST("/did-close", lsp.DidClose)
+		lspController.POST("/completions", lsp.Completions(lspLogger))
+		lspController.POST("/did-open", lsp.DidOpen(lspLogger))
+		lspController.POST("/did-close", lsp.DidClose(lspLogger))
 
-		lspController.GET("/document-symbols", lsp.DocumentSymbols)
-		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols)
+		lspController.GET("/document-symbols", lsp.DocumentSymbols(lspLogger))
+		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols(lspLogger))
 	}
 
 	// Initialize plugin-based computer use
@@ -242,10 +246,10 @@ func (s *server) Start() error {
 		pluginPath = path.Join(s.configDir, "daytona-computer-use")
 	}
 	var err error
-	s.ComputerUse, err = manager.GetComputerUse(pluginPath)
+	s.ComputerUse, err = manager.GetComputerUse(s.logger, pluginPath)
 	if err != nil {
-		log.Errorf("Failed to initialize computer-use plugin: %v", err)
-		log.Info("Continuing without computer-use functionality...")
+		s.logger.Error("Computer-Use error", "error", err)
+		s.logger.Info("Continuing without computer-use functionality...")
 	}
 
 	// Always register computer-use endpoints, but handle the case when plugin is nil

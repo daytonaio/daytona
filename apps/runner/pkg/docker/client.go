@@ -4,20 +4,19 @@
 package docker
 
 import (
-	"io"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/client"
-	log "github.com/sirupsen/logrus"
 )
 
 type DockerClientConfig struct {
 	ApiClient                 client.APIClient
+	Logger                    *slog.Logger
 	StatesCache               *cache.StatesCache
-	LogWriter                 io.Writer
 	AWSRegion                 string
 	AWSEndpointUrl            string
 	AWSAccessKeyId            string
@@ -36,25 +35,30 @@ type DockerClientConfig struct {
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
+	logger := slog.Default().With(slog.String("component", "docker-client"))
+	if config.Logger != nil {
+		logger = config.Logger.With(slog.String("component", "docker-client"))
+	}
+
 	if config.DaemonStartTimeoutSec <= 0 {
-		log.Warnf("Invalid DaemonStartTimeoutSec value: %d. Using default value: 60 seconds", config.DaemonStartTimeoutSec)
+		logger.Warn("Invalid daemon start timeout value. Using default value of 60 seconds")
 		config.DaemonStartTimeoutSec = 60
 	}
 
 	if config.SandboxStartTimeoutSec <= 0 {
-		log.Warnf("Invalid SandboxStartTimeoutSec value: %d. Using default value: 30 seconds", config.SandboxStartTimeoutSec)
+		logger.Warn("Invalid sandbox start timeout value. Using default value of 30 seconds")
 		config.SandboxStartTimeoutSec = 30
 	}
 
 	if config.BackupTimeoutMin <= 0 {
-		log.Warnf("Invalid BackupTimeoutMin value: %d. Using default value: 60 minutes", config.BackupTimeoutMin)
+		logger.Warn("Invalid backup timeout value. Using default value of 60 minutes")
 		config.BackupTimeoutMin = 60
 	}
 
 	return &DockerClient{
 		apiClient:                 config.ApiClient,
+		logger:                    logger,
 		statesCache:               config.StatesCache,
-		logWriter:                 config.LogWriter,
 		awsRegion:                 config.AWSRegion,
 		awsEndpointUrl:            config.AWSEndpointUrl,
 		awsAccessKeyId:            config.AWSAccessKeyId,
@@ -80,8 +84,8 @@ func (d *DockerClient) ApiClient() client.APIClient {
 
 type DockerClient struct {
 	apiClient                 client.APIClient
+	logger                    *slog.Logger
 	statesCache               *cache.StatesCache
-	logWriter                 io.Writer
 	awsRegion                 string
 	awsEndpointUrl            string
 	awsAccessKeyId            string

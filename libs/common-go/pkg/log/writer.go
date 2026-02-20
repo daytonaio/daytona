@@ -1,36 +1,29 @@
-// Copyright 2025 Daytona Platforms Inc.
-// SPDX-License-Identifier: AGPL-3.0
+// Copyright Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
 
-package util
+package log
 
 import (
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 )
 
 type DebugLogWriter struct{}
 
 func (w *DebugLogWriter) Write(p []byte) (n int, err error) {
-	log.Debug(string(p))
+	slog.Debug(string(p))
 	return len(p), nil
 }
 
 type InfoLogWriter struct{}
 
 func (w *InfoLogWriter) Write(p []byte) (n int, err error) {
-	log.Info(string(p))
-	return len(p), nil
-}
-
-type TraceLogWriter struct{}
-
-func (w *TraceLogWriter) Write(p []byte) (n int, err error) {
-	log.Trace(string(p))
+	slog.Info(string(p))
 	return len(p), nil
 }
 
 type ErrorLogWriter struct{}
 
 func (w *ErrorLogWriter) Write(p []byte) (n int, err error) {
-	log.Error(string(p))
+	slog.Error(string(p))
 	return len(p), nil
 }

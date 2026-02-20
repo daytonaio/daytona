@@ -10,7 +10,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
 )
 
 // attachWebSocket connects a new WebSocket client to the PTY session
@@ -24,7 +23,7 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 	// Register client FIRST so it can receive PTY output via broadcast
 	s.clients.Set(cl.id, cl)
 	count := s.clients.Count()
-	log.Infof("Client %s attached to PTY session %s (clients=%d)", cl.id, s.info.ID, count)
+	s.logger.Debug("Client attached to PTY session", "clientId", cl.id, "sessionId", s.info.ID, "clientCount", count)
 
 	// Start PTY data flow - writer (PTY -> this client)
 	go s.clientWriter(cl)
@@ -47,7 +46,7 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 	cl.close()
 
 	remaining := s.clients.Count()
-	log.Infof("Client %s detached from PTY session %s (clients=%d)", cl.id, s.info.ID, remaining)
+	s.logger.Debug("Client detached from PTY session", "clientId", cl.id, "sessionId", s.info.ID, "clientCount", remaining)
 }
 
 // clientWriter sends PTY output to a specific WebSocket client
@@ -77,7 +76,7 @@ func (s *PTYSession) clientReader(cl *wsClient) {
 		_, data, err := conn.ReadMessage()
 		if err != nil {
 			if !websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway) {
-				log.Debug("ws read error:", err)
+				s.logger.Debug("ws read error", "error", err)
 			}
 			return
 		}
