@@ -1,0 +1,253 @@
+---
+title: "Daytona"
+hideTitleOnPage: true
+---
+
+## Daytona \{#daytona\}
+
+Daytona SDK の Daytona クラスです。
+
+### コンストラクター \{#constructors\}
+
+#### new Daytona() \{#new-daytona\}
+
+```ruby
+def initialize(config)
+
+```
+
+**パラメーター**:
+
+* `config` *Daytona:Config* - 設定オプション。デフォルト値は Daytona::Config.new
+
+**戻り値**:
+
+* `Daytona` - 新しい Daytona のインスタンス
+
+### メソッド \{#methods\}
+
+#### config() \{#config\}
+
+```ruby
+def config()
+
+```
+
+**戻り値**:
+
+* `Daytona:Config`
+
+#### api_client() \{#api_client\}
+
+```ruby
+def api_client()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient`
+
+#### sandbox_api() \{#sandbox_api\}
+
+```ruby
+def sandbox_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:SandboxApi`
+
+#### volume() \{#volume\}
+
+```ruby
+def volume()
+
+```
+
+**戻り値**:
+
+* `Daytona:VolumeService`
+
+#### object_storage_api() \{#object_storage_api\}
+
+```ruby
+def object_storage_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:ObjectStorageApi`
+
+#### snapshots_api() \{#snapshots_api\}
+
+```ruby
+def snapshots_api()
+
+```
+
+**戻り値**:
+
+* `DaytonaApiClient:SnapshotsApi`
+
+#### snapshot() \{#snapshot\}
+
+```ruby
+def snapshot()
+
+```
+
+**戻り値**:
+
+* `Daytona:SnapshotService`
+
+#### close() \{#close\}
+
+```ruby
+def close()
+
+```
+
+OTel プロバイダーをシャットダウンし、保留中のテレメトリデータをすべてフラッシュします。
+
+**戻り値**:
+
+* `void`
+
+#### create() \{#create\}
+
+```ruby
+def create(params, on_snapshot_create_logs:)
+
+```
+
+指定されたパラメータでサンドボックスを作成します
+
+**パラメーター**:
+
+* `params` *Daytona:CreateSandboxFromSnapshotParams, Daytona:CreateSandboxFromImageParams, Nil* - サンドボックス作成用のパラメータ
+
+**戻り値**:
+
+* `Daytona:Sandbox` - 作成されたサンドボックス
+
+**例外**:
+
+* `Daytona:Sdk:Error` - auto&#95;stop&#95;interval または auto&#95;archive&#95;interval が負の値の場合
+
+#### delete() \{#delete\}
+
+```ruby
+def delete(sandbox)
+
+```
+
+サンドボックスを削除します。
+
+**パラメータ**:
+
+* `sandbox` *Daytona:Sandbox* -
+
+**戻り値**:
+
+* `void`
+
+#### get() \{#get\}
+
+```ruby
+def get(id)
+
+```
+
+ID で指定されたサンドボックスを取得します。
+
+**パラメーター**:
+
+* `id` *String* -
+
+**戻り値**:
+
+* `Daytona:Sandbox`
+
+#### find_one() \{#find_one\}
+
+```ruby
+def find_one(id:, labels:)
+
+```
+
+ID またはラベルでサンドボックスを検索します。
+
+**パラメータ**:
+
+* `id` *String, Nil* -
+* `labels` *Hash&lt;String, String&gt;* -
+
+**戻り値**:
+
+* `Daytona:Sandbox`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` -
+
+#### list() \{#list\}
+
+```ruby
+def list(labels, page:, limit:)
+
+```
+
+ラベルでフィルタリングされたサンドボックスを一覧表示します。
+
+**パラメーター**:
+
+* `labels` *Hash&lt;String, String&gt;* -
+* `page` *Integer, Nil* -
+* `limit` *Integer, Nil* -
+
+**戻り値**:
+
+* `Daytona:PaginatedResource`
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` -
+
+#### start() \{#start\}
+
+```ruby
+def start(sandbox, timeout)
+
+```
+
+サンドボックスを起動し、準備が完了するまで待機します。
+
+**パラメータ**:
+
+* `sandbox` *Daytona:Sandbox* -
+* `timeout` *Numeric* - 最大待機時間（秒）。指定しない場合は 60 秒です。
+
+**戻り値**:
+
+* `void`
+
+#### stop() \{#stop\}
+
+```ruby
+def stop(sandbox, timeout)
+
+```
+
+サンドボックスを停止し、停止されるまで待機します。
+
+**パラメーター**:
+
+* `sandbox` *Daytona:Sandbox* -
+* `timeout` *Numeric* - 最大待機時間（秒）。省略時は 60 秒です。
+
+**戻り値**:
+
+* `void`
