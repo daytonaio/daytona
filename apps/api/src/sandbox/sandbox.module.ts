@@ -55,6 +55,12 @@ import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
 import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
+import { SandboxAccessGuard } from './guards/sandbox-access.guard'
+import { RunnerAccessGuard } from './guards/runner-access.guard'
+import { RegionRunnerAccessGuard } from './guards/region-runner-access.guard'
+import { RegionSandboxAccessGuard } from './guards/region-sandbox-access.guard'
+import { ProxyGuard } from './guards/proxy.guard'
+import { SshGatewayGuard } from './guards/ssh-gateway.guard'
 
 @Module({
   imports: [
@@ -112,6 +118,12 @@ import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup
     SandboxArchiveAction,
     JobService,
     JobStateHandlerService,
+    SandboxAccessGuard,
+    RunnerAccessGuard,
+    RegionRunnerAccessGuard,
+    RegionSandboxAccessGuard,
+    ProxyGuard,
+    SshGatewayGuard,
     {
       provide: SandboxRepository,
       inject: [DataSource],

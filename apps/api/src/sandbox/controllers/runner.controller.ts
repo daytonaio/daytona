@@ -33,13 +33,13 @@ import {
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { ProxyGuard } from '../../auth/proxy.guard'
+import { ProxyGuard } from '../guards/proxy.guard'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { SshGatewayGuard } from '../../auth/ssh-gateway.guard'
+import { SshGatewayGuard } from '../guards/ssh-gateway.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrGuard } from '../../auth/or.guard'
 import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
@@ -47,6 +47,7 @@ import { RunnerContextDecorator } from '../../common/decorators/runner-context.d
 import { RunnerContext } from '../../common/interfaces/runner-context.interface'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { RunnerAccessGuard } from '../guards/runner-access.guard'
+import { RegionRunnerAccessGuard } from '../guards/region-runner-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
@@ -54,7 +55,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
-import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
+import { RegionSandboxAccessGuard } from '../guards/region-sandbox-access.guard'
 import { RunnerFullDto } from '../dto/runner-full.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
@@ -176,8 +177,8 @@ export class RunnerController {
     description: 'Runner ID',
     type: String,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RunnerAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionRunnerAccessGuard]))
+  @RequiredApiRole([SystemRole.ADMIN])
   async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findOneOrFail(id)
     return RunnerFullDto.fromRunner(runner)
@@ -312,8 +313,8 @@ export class RunnerController {
     status: 200,
     type: RunnerFullDto,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, SandboxAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway', 'region-proxy', 'region-ssh-gateway'])
+  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionSandboxAccessGuard]))
+  @RequiredApiRole([SystemRole.ADMIN])
   async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findBySandboxId(sandboxId)
 

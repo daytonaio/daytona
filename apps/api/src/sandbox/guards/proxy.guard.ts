@@ -4,8 +4,8 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
-import { getAuthContext } from './get-auth-context'
-import { isProxyContext } from '../common/interfaces/proxy-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
+import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
 
 @Injectable()
 export class ProxyGuard implements CanActivate {
