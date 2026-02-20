@@ -1,18 +1,20 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-package process
+package execute
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"net/http"
 	"os/exec"
+	"syscall"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // ExecuteCommand godoc
@@ -27,7 +29,7 @@ import (
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand
-func ExecuteCommand(c *gin.Context) {
+func (ec *ExecuteController) ExecuteCommand(c *gin.Context) {
 	var request ExecuteRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.AbortWithError(http.StatusBadRequest, errors.New("command is required"))
@@ -40,65 +42,72 @@ func ExecuteCommand(c *gin.Context) {
 		return
 	}
 
-	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-	if request.Cwd != nil {
-		cmd.Dir = *request.Cwd
-	}
-
 	// set maximum execution time
 	timeout := 360 * time.Second
 	if request.Timeout != nil && *request.Timeout > 0 {
 		timeout = time.Duration(*request.Timeout) * time.Second
 	}
 
-	timeoutReached := false
-	timer := time.AfterFunc(timeout, func() {
-		timeoutReached = true
-		if cmd.Process != nil {
-			// kill the process group
-			err := cmd.Process.Kill()
-			if err != nil {
-				log.Error(err)
-				return
-			}
-		}
-	})
-	defer timer.Stop()
+	// Create a context with timeout
+	ctx, cancel := context.WithTimeout(c.Request.Context(), timeout)
+	defer cancel()
 
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if timeoutReached {
-			c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
-			return
-		}
-		if exitError, ok := err.(*exec.ExitError); ok {
-			exitCode := exitError.ExitCode()
-			c.JSON(http.StatusOK, ExecuteResponse{
-				ExitCode: exitCode,
-				Result:   string(output),
-			})
-			return
-		}
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+	if request.Cwd != nil {
+		cmd.Dir = *request.Cwd
+	}
+
+	// Set up process group so we can kill all child processes on timeout
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
+	var outputBuf bytes.Buffer
+	cmd.Stdout = &outputBuf
+	cmd.Stderr = &outputBuf
+
+	if err := cmd.Start(); err != nil {
 		c.JSON(http.StatusOK, ExecuteResponse{
 			ExitCode: -1,
-			Result:   string(output),
+			Result:   err.Error(),
 		})
 		return
 	}
 
-	if cmd.ProcessState == nil {
+	// Wait for command
+	done := make(chan error, 1)
+	go func() {
+		done <- cmd.Wait()
+	}()
+
+	// Wait for either completion or context timeout
+	select {
+	case <-ctx.Done():
+		// Context timed out - gracefully terminate the process tree
+		err := common.TerminateProcessTreeGracefully(
+			context.Background(),
+			cmd.Process,
+			ec.terminationGracePeriod,
+			ec.terminationCheckInterval,
+		)
+		if err != nil {
+			log.Errorf("Failed to terminate process group: %v", err)
+		}
+		<-done // Wait for process cleanup
+		c.AbortWithError(http.StatusRequestTimeout, errors.New("Command execution timed out after "+timeout.String()+". The timeout can be increased by adjusting the timeout parameter in the request."))
+		return
+	case <-done:
+		// Command completed normally
+		output := outputBuf.Bytes()
+		exitCode := -1
+		if cmd.ProcessState != nil {
+			exitCode = cmd.ProcessState.ExitCode()
+		}
 		c.JSON(http.StatusOK, ExecuteResponse{
-			ExitCode: -1,
+			ExitCode: exitCode,
 			Result:   string(output),
 		})
-		return
 	}
-
-	exitCode := cmd.ProcessState.ExitCode()
-	c.JSON(http.StatusOK, ExecuteResponse{
-		ExitCode: exitCode,
-		Result:   string(output),
-	})
 }
 
 // parseCommand splits a command string properly handling quotes

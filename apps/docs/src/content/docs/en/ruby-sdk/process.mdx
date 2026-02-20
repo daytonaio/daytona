@@ -90,7 +90,7 @@ Execute a shell command in the Sandbox
 - `command` _String_ - Shell command to execute
 - `cwd` _String, nil_ - Working directory for command execution. If not specified, uses the sandbox working directory
 - `env` _Hash\<String, String\>, nil_ - Environment variables to set for the command
-- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely
+- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
 **Returns**:
 
@@ -125,7 +125,7 @@ Execute code in the Sandbox using the appropriate language runtime
 
 - `code` _String_ - Code to execute
 - `params` _CodeRunParams, nil_ - Parameters for code execution
-- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the code to complete. 0 means wait indefinitely
+- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the code to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
 **Returns**:
 
