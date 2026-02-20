@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -92,19 +92,6 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_SANDBOX job ${job.id}`)
-        return
-      }
-
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for CREATE_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
-        )
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
@@ -125,8 +112,17 @@ export class JobStateHandlerService {
         updateData.recoverable = recoverable
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData,
+        whereCondition: { desiredState: SandboxDesiredState.STARTED },
+      })
     } catch (error) {
+      if (error instanceof ConflictException) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} not found or not in desired state STARTED for CREATE_SANDBOX job ${job.id}`,
+        )
+        return
+      }
       this.logger.error(`Error handling CREATE_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
@@ -136,19 +132,6 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for START_SANDBOX job ${job.id}`)
-        return
-      }
-
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for START_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
-        )
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
@@ -167,8 +150,17 @@ export class JobStateHandlerService {
         updateData.recoverable = recoverable
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData,
+        whereCondition: { desiredState: SandboxDesiredState.STARTED },
+      })
     } catch (error) {
+      if (error instanceof ConflictException) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} not found or not in desired state STARTED for START_SANDBOX job ${job.id}`,
+        )
+        return
+      }
       this.logger.error(`Error handling START_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
@@ -178,19 +170,6 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for STOP_SANDBOX job ${job.id}`)
-        return
-      }
-
-      if (sandbox.desiredState !== SandboxDesiredState.STOPPED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STOPPED for STOP_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
-        )
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
@@ -205,8 +184,17 @@ export class JobStateHandlerService {
         updateData.recoverable = recoverable
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData,
+        whereCondition: { desiredState: SandboxDesiredState.STOPPED },
+      })
     } catch (error) {
+      if (error instanceof ConflictException) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} not found or not in desired state STOPPED for STOP_SANDBOX job ${job.id}`,
+        )
+        return
+      }
       this.logger.error(`Error handling STOP_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
@@ -216,16 +204,6 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for DESTROY_SANDBOX job ${job.id}`)
-        return
-      }
-      if (sandbox.desiredState !== SandboxDesiredState.DESTROYED) {
-        // Don't log anything because sandboxes can be destroyed on runners when archiving or moving to a new runner
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
@@ -242,8 +220,15 @@ export class JobStateHandlerService {
         updateData.recoverable = recoverable
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData,
+        whereCondition: { desiredState: SandboxDesiredState.DESTROYED },
+      })
     } catch (error) {
+      if (error instanceof ConflictException) {
+        // Don't log — sandboxes can be destroyed on runners when archiving or moving to a new runner
+        return
+      }
       this.logger.error(`Error handling DESTROY_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
@@ -420,19 +405,6 @@ export class JobStateHandlerService {
     if (!sandboxId) return
 
     try {
-      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
-      if (!sandbox) {
-        this.logger.warn(`Sandbox ${sandboxId} not found for RECOVER_SANDBOX job ${job.id}`)
-        return
-      }
-
-      if (sandbox.desiredState !== SandboxDesiredState.STARTED) {
-        this.logger.error(
-          `Sandbox ${sandboxId} is not in desired state STARTED for RECOVER_SANDBOX job ${job.id}. Desired state: ${sandbox.desiredState}`,
-        )
-        return
-      }
-
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
@@ -447,8 +419,17 @@ export class JobStateHandlerService {
         updateData.errorReason = job.errorMessage || 'Failed to recover sandbox'
       }
 
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+      await this.sandboxRepository.updateWhere(sandboxId, {
+        updateData,
+        whereCondition: { desiredState: SandboxDesiredState.STARTED },
+      })
     } catch (error) {
+      if (error instanceof ConflictException) {
+        this.logger.warn(
+          `Sandbox ${sandboxId} not found or not in desired state STARTED for RECOVER_SANDBOX job ${job.id}`,
+        )
+        return
+      }
       this.logger.error(`Error handling RECOVER_SANDBOX job completion for sandbox ${sandboxId}:`, error)
     }
   }
