@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,6 +16,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { cn, pluralize } from '@/lib/utils'
+import { DeletePrerequisite, DeletePrerequisiteItem, parseDeleteErrors } from '@/components/DeletePrerequisiteItem'
+import { Spinner } from '@/components/ui/spinner'
+import React, { useState } from 'react'
 
 interface DeleteAccountDialogProps {
   onDeleteAccount: () => Promise<{ success: boolean; reasons: string[] }>
@@ -28,19 +32,21 @@ const CONFIRM_TEXT = 'DELETE'
 export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onDeleteAccount, loading }) => {
   const [open, setOpen] = useState(false)
   const [confirmText, setConfirmText] = useState('')
-  const [errorReasons, setErrorReasons] = useState<string[]>([])
+  const [prerequisites, setPrerequisites] = useState<DeletePrerequisite[]>([])
 
   const handleDeleteAccount = async () => {
-    setErrorReasons([])
+    setPrerequisites([])
     const result = await onDeleteAccount()
     if (result.success) {
       setOpen(false)
       setConfirmText('')
-      setErrorReasons([])
+      setPrerequisites([])
     } else {
-      setErrorReasons(result.reasons)
+      setPrerequisites(parseDeleteErrors(result.reasons))
     }
   }
+
+  const hasBlockers = prerequisites.length > 0
 
   return (
     <Dialog
@@ -49,7 +55,7 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onDele
         setOpen(isOpen)
         if (!isOpen) {
           setConfirmText('')
-          setErrorReasons([])
+          setPrerequisites([])
         }
       }}
     >
@@ -58,65 +64,74 @@ export const DeleteAccountDialog: React.FC<DeleteAccountDialogProps> = ({ onDele
           Delete Account
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Delete Account</DialogTitle>
+          <DialogTitle className={cn('flex items-center gap-2', hasBlockers && 'text-destructive')}>
+            {hasBlockers ? 'Cannot Delete Account' : 'Delete Account'}
+          </DialogTitle>
           <DialogDescription>
-            This will permanently delete your account and all associated data including sandboxes, snapshots, and
-            organizations you created. This action cannot be undone.
+            {hasBlockers
+              ? 'We found active resources or requirements that must be resolved before deletion can proceed.'
+              : 'This will permanently delete your account and all associated data including sandboxes, snapshots, and organizations you created. This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
-        {errorReasons.length > 0 && (
-          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-foreground">
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              {errorReasons.map((reason, index) => (
-                <li key={`${reason}-${index}`}>{reason}</li>
-              ))}
-            </ul>
+
+        {hasBlockers ? (
+          <div className="-mx-6 border-y">
+            {prerequisites.map((prereq, i) => (
+              <React.Fragment key={prereq.id}>
+                {i > 0 && <Separator />}
+                <DeletePrerequisiteItem prereq={prereq} />
+              </React.Fragment>
+            ))}
           </div>
-        )}
-        <form
-          id="delete-account-form"
-          className="space-y-6 overflow-y-auto px-1 pb-1"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            await handleDeleteAccount()
-          }}
-        >
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="confirm-action">
-                Please type <span className="font-bold cursor-text select-all">{CONFIRM_TEXT}</span> to confirm
-              </Label>
-              <Input
-                id="confirm-action"
-                value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
-                placeholder={CONFIRM_TEXT}
-              />
+        ) : (
+          <form
+            id="delete-account-form"
+            className="space-y-6 overflow-y-auto px-1 pb-1"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              await handleDeleteAccount()
+            }}
+          >
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="confirm-action">
+                  Please type <span className="font-bold cursor-text select-all">{CONFIRM_TEXT}</span> to confirm
+                </Label>
+                <Input
+                  id="confirm-action"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder={CONFIRM_TEXT}
+                />
+              </div>
             </div>
-          </div>
-        </form>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" disabled={loading}>
-              Cancel
-            </Button>
-          </DialogClose>
-          {loading ? (
-            <Button type="button" variant="destructive" disabled>
-              Deleting...
-            </Button>
-          ) : (
+          </form>
+        )}
+
+        <DialogFooter className="sm:justify-between items-center">
+          {hasBlockers && (
+            <p className="text-sm text-muted-foreground">
+              {pluralize(prerequisites.length, 'issue', 'issues')} preventing deletion.
+            </p>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary" disabled={loading}>
+                Cancel
+              </Button>
+            </DialogClose>
             <Button
-              type="submit"
-              form="delete-account-form"
+              type={hasBlockers ? 'button' : 'submit'}
+              form={hasBlockers ? undefined : 'delete-account-form'}
               variant="destructive"
-              disabled={confirmText !== CONFIRM_TEXT}
+              disabled={hasBlockers || confirmText !== CONFIRM_TEXT || loading}
             >
+              {loading && <Spinner />}
               Delete Account
             </Button>
-          )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
