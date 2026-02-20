@@ -13,25 +13,23 @@ import (
 type SnapshotErrorCache struct {
 	common_cache.ICache[string]
 	retention time.Duration
-	ctx       context.Context
 }
 
 func NewSnapshotErrorCache(ctx context.Context, retention time.Duration) *SnapshotErrorCache {
 	return &SnapshotErrorCache{
 		ICache:    common_cache.NewMapCache[string](ctx),
 		retention: retention,
-		ctx:       ctx,
 	}
 }
 
-func (c *SnapshotErrorCache) SetError(snapshot string, errReason string) error {
-	return c.Set(c.ctx, snapshot, errReason, c.retention)
+func (c *SnapshotErrorCache) SetError(ctx context.Context, snapshot string, errReason string) error {
+	return c.Set(ctx, snapshot, errReason, c.retention)
 }
 
-func (c *SnapshotErrorCache) GetError(snapshot string) (*string, error) {
-	return c.Get(c.ctx, snapshot)
+func (c *SnapshotErrorCache) GetError(ctx context.Context, snapshot string) (*string, error) {
+	return c.Get(ctx, snapshot)
 }
 
-func (c *SnapshotErrorCache) RemoveError(snapshot string) error {
-	return c.Delete(c.ctx, snapshot)
+func (c *SnapshotErrorCache) RemoveError(ctx context.Context, snapshot string) error {
+	return c.Delete(ctx, snapshot)
 }
