@@ -1,27 +1,38 @@
 ---
-title: API Keys
+title: API キー
 ---
 
-DaytonaのAPIキーは、[Daytona API](/docs/ja/tools/api)へのリクエストを認証するために使用します。
+Daytona の API キーは、[Daytona API](/docs/ja/tools/api) へのリクエストを認証するために使用します。
 
-[Configuration](/docs/ja/configuration)ページでは、`DAYTONA_API_KEY` 環境変数の設定方法を説明しています。
+## API キーを作成する \{#create-an-api-key\}
 
-APIキーを管理するには、Dashboardの[Keys](https://app.daytona.io/dashboard/keys)セクションに移動します。`Create Key` をクリックして新しいキーを作成し、クリップボードにコピーします。
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) にアクセスします
+2. **Create Key** ボタンをクリックします
+3. API キーの名前を入力し、有効期限を設定し、[権限を選択します](#permissions--scopes)
+4. **Create** ボタンをクリックして API キーを作成します
+5. API キーをクリップボードにコピーします
 
-## 権限
+アプリケーションで API キーを使用するには、`DAYTONA_API_KEY` 環境変数を設定します。
 
-新しいAPIキーを追加する際、キーに付与する権限のセットを選択するよう求められます:
+Daytona では、環境を設定する方法が複数用意されています。[コード内](/docs/ja/configuration#configuration-in-code)、[環境変数](/docs/ja/configuration#environment-variables)、[.env ファイル](/docs/ja/configuration#env-file)、および [デフォルト値](/docs/ja/configuration#default-values) を利用できます。
 
-| 権限 | 説明 |
-|------------|-------------|
-| **`Sandboxes`** | サンドボックスの作成および管理を許可します |
-| **`Snapshots`** | スナップショットの作成および管理を許可します |
-| **`Registries`** | レジストリの作成および管理を許可します |
-| **`Volumes`** | ボリュームの作成および管理を許可します |
+## 権限とスコープ \{#permissions-scopes\}
 
-各権限には細かなスコープがあります:
-
-- `write:*` は作成および更新
-- `delete:*` はリソースの削除
-
-例: `write:sandboxes`, `delete:sandboxes`
+| リソース   | スコープ                 | 説明                      |
+| ---------- | ----------------------- | ------------------------- |
+| Sandboxes  | **`write:sandboxes`**   | サンドボックスを作成/変更 |
+|            | **`delete:sandboxes`**  | サンドボックスを削除      |
+| Snapshots  | **`write:snapshots`**   | スナップショットを作成/変更 |
+|            | **`delete:snapshots`**  | スナップショットを削除    |
+| Registries | **`write:registries`**  | レジストリを作成/変更     |
+|            | **`delete:registries`** | レジストリを削除          |
+| Volumes    | **`read:volumes`**      | ボリュームを閲覧          |
+|            | **`write:volumes`**     | ボリュームを作成/変更     |
+|            | **`delete:volumes`**    | ボリュームを削除          |
+| Audit      | **`read:audit_logs`**   | 監査ログを閲覧            |
+| Regions    | **`write:regions`**     | リージョンを作成/変更     |
+|            | **`delete:regions`**    | リージョンを削除          |
+| Runners    | **`read:runners`**      | ランナーを閲覧            |
+|            | **`write:runners`**     | ランナーを作成/変更       |
+|            | **`delete:runners`**    | ランナーを削除            |
+|            | `delete:runners`        | ランナーを削除            |
