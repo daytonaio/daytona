@@ -3,12 +3,56 @@ title: "エラー"
 hideTitleOnPage: true
 ---
 
-## DaytonaError
+## DaytonaError \{#daytonaerror\}
 
 ```python
 class DaytonaError(Exception)
 ```
 
-Daytona SDKの基底エラー。
+Daytona SDK の基底エラー。
 
+**属性**:
 
+* `message` *str* - エラーメッセージ
+* `status_code` *int | None* - 利用可能な場合の HTTP ステータスコード
+* `headers` *dict[str, Any]* - レスポンスヘッダー
+
+#### DaytonaError.**init** \{#daytonaerror__init__\}
+
+```python
+def __init__(message: str,
+             status_code: int | None = None,
+             headers: Mapping[str, Any] | None = None)
+```
+
+Daytona の初期化エラー。
+
+**引数**:
+
+* `message` *str* - エラーメッセージ
+* `status_code` *int | None* - 利用可能な場合の HTTP ステータスコード
+* `headers` *Mapping[str, Any] | None* - 利用可能な場合のレスポンスヘッダー
+
+## DaytonaNotFoundError \{#daytonanotfounderror\}
+
+```python
+class DaytonaNotFoundError(DaytonaError)
+```
+
+リソースが見つからない場合のエラーです。
+
+## DaytonaRateLimitError \{#daytonaratelimiterror\}
+
+```python
+class DaytonaRateLimitError(DaytonaError)
+```
+
+レート制限を超過した場合に発生するエラー。
+
+## DaytonaTimeoutError \{#daytonatimeouterror\}
+
+```python
+class DaytonaTimeoutError(DaytonaError)
+```
+
+タイムアウト発生時のエラーです。
