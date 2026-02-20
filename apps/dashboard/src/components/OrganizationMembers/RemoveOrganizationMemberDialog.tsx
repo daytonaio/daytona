@@ -40,7 +40,10 @@ export const RemoveOrganizationMemberDialog: React.FC<RemoveOrganizationMemberDi
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Remove Member</DialogTitle>
-          <DialogDescription>Are you sure you want to remove this member from the organization?</DialogDescription>
+          <DialogDescription>
+            Are you sure you want to remove this member from the organization? Any API keys they have created will
+            become ineffective.
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
