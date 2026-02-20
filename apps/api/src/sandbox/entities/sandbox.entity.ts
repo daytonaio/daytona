@@ -221,6 +221,7 @@ export class Sandbox {
     // Set name - use provided name or fallback to ID
     this.name = name || this.id
     this.region = region
+    this.authToken = uuidv4().replace(/-/g, '')
   }
 
   /**

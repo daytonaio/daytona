@@ -29,14 +29,15 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   }
 
   async insert(sandbox: Sandbox): Promise<Sandbox> {
-    const result = await this.repository.insert(sandbox)
-
-    const insertedSandbox = await this.findOneBy({ id: result.identifiers[0].id })
-    if (!insertedSandbox) {
-      throw new NotFoundException('Sandbox not found after insert')
+    const now = new Date()
+    if (!sandbox.createdAt) {
+      sandbox.createdAt = now
     }
-
-    return insertedSandbox
+    if (!sandbox.updatedAt) {
+      sandbox.updatedAt = now
+    }
+    await this.repository.insert(sandbox)
+    return sandbox
   }
 
   /**
