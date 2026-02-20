@@ -12,6 +12,8 @@ export const collections = {
         licence: z.string().optional(),
         distribution: z.string().optional(),
         hideTitleOnPage: z.boolean().optional(),
+        llmUrl: z.string().optional(),
+        toolboxLlmUrl: z.string().optional(),
       }),
     }),
   }),
