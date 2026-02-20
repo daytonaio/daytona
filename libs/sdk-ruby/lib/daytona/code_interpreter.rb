@@ -315,9 +315,11 @@ module Daytona
     # @param completion_queue [Queue, nil] Queue to signal completion
     # @return [void]
     def handle_message(data, result, on_stdout, on_stderr, on_error, completion_queue = nil) # rubocop:disable Metrics/AbcSize, Metrics/ParameterLists
-      # Empty messages are just keepalives or noise, ignore them
+      # Empty messages signal that the server has finished sending output.
+      # Treat this as execution completion.
       if data.nil? || data.empty?
-        puts '[DEBUG] Received empty message, ignoring' if ENV['DEBUG']
+        puts '[DEBUG] Received empty message - execution complete' if ENV['DEBUG']
+        completion_queue&.push({ type: :completed })
         return
       end
 
