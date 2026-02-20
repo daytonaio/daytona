@@ -92,8 +92,12 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
         ? addHours(suspendedAtDate, suspension.suspensionCleanupGracePeriodHours ?? 0)
         : null
 
+      const cleanupDatePassed = cleanupDate !== null && cleanupDate <= new Date()
+
       const cleanupText = cleanupDate
-        ? `Sandboxes will be stopped ${formatDistanceToNow(cleanupDate, { addSuffix: true })}`
+        ? cleanupDatePassed
+          ? 'Sandboxes will be stopped'
+          : `Sandboxes will be stopped ${formatDistanceToNow(cleanupDate, { addSuffix: true })}`
         : 'Sandboxes will be stopped soon'
 
       addBanner({
@@ -118,8 +122,11 @@ export function useSuspensionBanner(suspension?: Suspension | null) {
       ? addHours(suspendedAtDate, suspension.suspensionCleanupGracePeriodHours ?? 0)
       : null
 
+    const cleanupDatePassed = cleanupDate !== null && cleanupDate <= new Date()
     const cleanupText = cleanupDate
-      ? `Sandboxes will be stopped ${formatDistanceToNow(cleanupDate, { addSuffix: true })}`
+      ? cleanupDatePassed
+        ? 'Sandboxes will be stopped'
+        : `Sandboxes will be stopped ${formatDistanceToNow(cleanupDate, { addSuffix: true })}`
       : 'Sandboxes will be stopped soon'
 
     addBanner({
