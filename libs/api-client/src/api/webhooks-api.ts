@@ -47,7 +47,7 @@ export const WebhooksApiAxiosParamCreator = function (configuration?: Configurat
   return {
     /**
      *
-     * @summary Get Svix Consumer App Portal access URL for an organization
+     * @summary Get Svix Consumer App Portal access for an organization
      * @param {string} organizationId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -336,7 +336,7 @@ export const WebhooksApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @summary Get Svix Consumer App Portal access URL for an organization
+     * @summary Get Svix Consumer App Portal access for an organization
      * @param {string} organizationId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -523,7 +523,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
   return {
     /**
      *
-     * @summary Get Svix Consumer App Portal access URL for an organization
+     * @summary Get Svix Consumer App Portal access for an organization
      * @param {string} organizationId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -637,7 +637,7 @@ export const WebhooksApiFactory = function (configuration?: Configuration, baseP
 export class WebhooksApi extends BaseAPI {
   /**
    *
-   * @summary Get Svix Consumer App Portal access URL for an organization
+   * @summary Get Svix Consumer App Portal access for an organization
    * @param {string} organizationId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
