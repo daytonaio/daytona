@@ -51,7 +51,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
    * @param id - The ID of the sandbox to update.
    * @param params.updateData - The partial data to update.
    *
-   * @returns void
+   * @returns `void` because a raw update is performed.
    */
   async update(id: string, params: { updateData: Partial<Sandbox> }, raw: true): Promise<void>
   /**
@@ -163,7 +163,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
    */
   private invalidateLookupCache(
     updatedSandbox: Sandbox,
-    previousSandbox: Pick<Sandbox, 'organizationId' | 'name'>,
+    previousSandbox: Pick<Sandbox, 'organizationId' | 'name' | 'authToken'>,
   ): void {
     try {
       this.sandboxLookupCacheInvalidationService.invalidate({
@@ -175,7 +175,19 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       })
     } catch (error) {
       this.logger.warn(
-        `Failed to enqueue sandbox lookup cache invalidation for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to enqueue sandbox lookup cache invalidation (id, organizationId, name) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
+    try {
+      if (updatedSandbox.authToken !== previousSandbox.authToken) {
+        this.sandboxLookupCacheInvalidationService.invalidate({
+          authToken: updatedSandbox.authToken,
+        })
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Failed to enqueue sandbox lookup cache invalidation (authToken) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
   }

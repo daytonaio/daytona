@@ -107,7 +107,7 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
   /**
    * Inserts a new entity into the database.
    *
-   * Must use {@link Repository.insert} to insert the entity into the database.
+   * Uses {@link Repository.insert} to insert the entity into the database.
    *
    * @returns The inserted entity.
    */
@@ -116,7 +116,7 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
   /**
    * Partially updates an entity in the database.
    *
-   * Must use {@link Repository.update} to update the entity in the database.
+   * Uses {@link Repository.update} to update the entity in the database.
    *
    * @param id - The ID of the entity to update.
    * @param params.updateData - The partial data to update.
