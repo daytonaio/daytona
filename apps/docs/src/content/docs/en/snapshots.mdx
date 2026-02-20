@@ -9,6 +9,25 @@ Snapshots are sandbox templates created from [Docker](https://www.docker.com/) o
 
 Daytona supports running [Docker](#run-docker-in-a-sandbox) and [Kubernetes](#run-kubernetes-in-a-sandbox) workloads inside sandboxes using snapshots.
 
+## Snapshot lifecycle
+
+Throughout the snapshot lifecycle, a snapshot can have the following states:
+
+| **State**          | **Description**                                 |
+| ------------------ | ----------------------------------------------- |
+| **`pending`**      | Snapshot creation requested                     |
+| **`building`**     | Snapshot is being built                         |
+| **`pulling`**      | Snapshot image is being pulled from a registry  |
+| **`active`**       | Snapshot is ready to use for creating sandboxes |
+| **`inactive`**     | Snapshot is deactivated                         |
+| **`error`**        | Snapshot creation failed                        |
+| **`build_failed`** | Snapshot build process failed                   |
+| **`removing`**     | Snapshot is being deleted                       |
+
+:::note
+Inactive snapshots cannot be used to create sandboxes. They must be explicitly [re-activated](#activate-snapshots) before use. When activated, the snapshot returns to `pending` state and is re-processed before becoming `active` again.
+:::
+
 ## Create Snapshots
 
 Daytona provides methods to create snapshots using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) or programmatically using the Daytona [Python](/docs/en/python-sdk/sync/snapshot), [TypeScript](/docs/en/typescript-sdk/snapshot), [Ruby](/docs/en/ruby-sdk/snapshot), [Go](/docs/en/go-sdk/daytona#SnapshotService) **SDKs**, [CLI](/docs/en/tools/cli#daytona-snapshot), or [API](/docs/en/tools/api#daytona/tag/snapshots).
