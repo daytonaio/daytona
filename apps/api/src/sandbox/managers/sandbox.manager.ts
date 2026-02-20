@@ -704,13 +704,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  async syncInstanceState(sandboxId: string, startedAt = new Date()): Promise<void> {
-    // If syncing for longer than 10 seconds, return
-    // The sandbox will be continued in the next cron run
-    // This prevents endless loops of syncing the same sandbox
-    if (new Date().getTime() - startedAt.getTime() > 10000) {
-      return
-    }
+  async syncInstanceState(sandboxId: string): Promise<void> {
+    const startedAt = new Date()
 
     //  generate a random lock code to prevent race condition if sandbox action continues
     //  after the lock expires
@@ -723,68 +718,81 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       return
     }
 
-    const sandbox = await this.sandboxRepository.findOneOrFail({
-      where: { id: sandboxId },
-    })
-
-    if (
-      [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
-        sandbox.state,
-      )
-    ) {
-      // Allow ERROR → ARCHIVED transition (e.g., during runner draining)
-      if (!(sandbox.state === SandboxState.ERROR && sandbox.desiredState === SandboxDesiredState.ARCHIVED)) {
-        await this.redisLockProvider.unlock(lockKey)
-        return
-      }
-    }
-
-    //  prevent potential race condition, or SYNC_AGAIN loop bug
-    //  this should never happen
-    if (String(sandbox.state) === String(sandbox.desiredState)) {
-      this.logger.warn(`Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`)
-      await this.redisLockProvider.unlock(lockKey)
-      return
-    }
-
-    let syncState = DONT_SYNC_AGAIN
-
     try {
-      switch (sandbox.desiredState) {
-        case SandboxDesiredState.STARTED: {
-          syncState = await this.sandboxStartAction.run(sandbox, lockCode)
+      const sandbox = await this.sandboxRepository.findOneOrFail({
+        where: { id: sandboxId },
+      })
+
+      // Loop to handle SYNC_AGAIN without releasing the lock or re-fetching.
+      // The sandbox entity is mutated in-place by repository.update() on each iteration,
+      // and the lock guarantees no concurrent modification.
+      while (true) {
+        if (new Date().getTime() - startedAt.getTime() > 10000) {
           break
         }
-        case SandboxDesiredState.STOPPED: {
-          syncState = await this.sandboxStopAction.run(sandbox, lockCode)
+
+        if (
+          [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
+            sandbox.state,
+          )
+        ) {
+          // Allow ERROR → ARCHIVED transition (e.g., during runner draining)
+          if (!(sandbox.state === SandboxState.ERROR && sandbox.desiredState === SandboxDesiredState.ARCHIVED)) {
+            break
+          }
+        }
+
+        if (String(sandbox.state) === String(sandbox.desiredState)) {
+          if (sandbox.state !== (sandbox.desiredState as unknown)) {
+            this.logger.warn(
+              `Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`,
+            )
+          }
           break
         }
-        case SandboxDesiredState.DESTROYED: {
-          syncState = await this.sandboxDestroyAction.run(sandbox, lockCode)
+
+        let syncState = DONT_SYNC_AGAIN
+
+        try {
+          switch (sandbox.desiredState) {
+            case SandboxDesiredState.STARTED: {
+              syncState = await this.sandboxStartAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.STOPPED: {
+              syncState = await this.sandboxStopAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.DESTROYED: {
+              syncState = await this.sandboxDestroyAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.ARCHIVED: {
+              syncState = await this.sandboxArchiveAction.run(sandbox, lockCode)
+              break
+            }
+          }
+        } catch (error) {
+          this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
+
+          const { recoverable, errorReason } = sanitizeSandboxError(error)
+
+          const updateData: Partial<Sandbox> = {
+            state: SandboxState.ERROR,
+            errorReason,
+            recoverable,
+          }
+
+          await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
           break
         }
-        case SandboxDesiredState.ARCHIVED: {
-          syncState = await this.sandboxArchiveAction.run(sandbox, lockCode)
+
+        if (syncState !== SYNC_AGAIN) {
           break
         }
       }
-    } catch (error) {
-      this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
-
-      const { recoverable, errorReason } = sanitizeSandboxError(error)
-
-      const updateData: Partial<Sandbox> = {
-        state: SandboxState.ERROR,
-        errorReason,
-        recoverable,
-      }
-
-      await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
-    }
-
-    await this.redisLockProvider.unlock(lockKey)
-    if (syncState === SYNC_AGAIN) {
-      this.syncInstanceState(sandboxId, startedAt)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
