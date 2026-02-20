@@ -71,10 +71,14 @@ const Wallet = () => {
   }, [wallet])
 
   const handleUpdatePaymentMethod = useCallback(async () => {
+    const newWindow = window.open('', '_blank')
     try {
       const data = await fetchCheckoutUrl()
-      window.open(data, '_blank')
+      if (newWindow) {
+        newWindow.location.href = data
+      }
     } catch (error) {
+      newWindow?.close()
       toast.error('Failed to fetch checkout url', {
         description: String(error),
       })
@@ -160,13 +164,17 @@ const Wallet = () => {
       return
     }
 
+    const newWindow = window.open('', '_blank')
     try {
       const result = await topUpWalletMutation.mutateAsync({
         organizationId: selectedOrganization.id,
         amountCents: amount * 100,
       })
-      window.open(result.url, '_blank')
+      if (newWindow) {
+        newWindow.location.href = result.url
+      }
     } catch (error) {
+      newWindow?.close()
       toast.error('Failed to initiate top-up', {
         description: String(error),
       })
@@ -180,13 +188,17 @@ const Wallet = () => {
       }
 
       if (invoice.paymentStatus === 'pending' && invoice.totalDueAmountCents > 0) {
+        const newWindow = window.open('', '_blank')
         try {
           const result = await createInvoicePaymentUrlMutation.mutateAsync({
             organizationId: selectedOrganization.id,
             invoiceId: invoice.id,
           })
-          window.open(result.url, '_blank')
+          if (newWindow) {
+            newWindow.location.href = result.url
+          }
         } catch (error) {
+          newWindow?.close()
           toast.error('Failed to open invoice', {
             description: String(error),
           })
