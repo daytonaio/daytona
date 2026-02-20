@@ -548,7 +548,7 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RESIZE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RESIZE, defaultValue: true }] })
   @Audit({
     action: AuditAction.RESIZE,
     targetType: AuditTarget.SANDBOX,
