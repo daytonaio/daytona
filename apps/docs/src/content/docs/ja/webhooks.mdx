@@ -1,108 +1,302 @@
 ---
 title: Webhooks
-description: 自動化・監視・連携のために、リアルタイムでDaytonaのイベントをアプリケーションに接続するWebhooks。
+description: Webhooks を使用すると、Daytona のイベントをアプリケーションとリアルタイムに連携でき、自動化・監視・インテグレーションを実現できます。
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Webhooksは、特定のイベントが発生した際に、Daytonaが指定したエンドポイントへ送信するHTTPコールバックです。
-いわば「逆方向のAPIコール」です。アプリケーション側がDaytonaに更新を問い合わせるのではなく、重要なイベントが発生するとDaytonaが能動的にアプリケーションへ通知します。
-
-## ユースケース
+Webhooks は、特定のイベントが発生したときに、Daytona がユーザーが指定したエンドポイントに送信する HTTP コールバックです。
+アプリケーション側から Daytona に更新を問い合わせるのではなく、重要な出来事が起きたタイミングで Daytona からアプリケーションに通知してくれる「逆方向の API コール」のようなものと考えてください。
 
 Webhooks により、強力な自動化と統合が可能になります。
 
-- **リアルタイム通知**: サンドボックスの作成・起動・停止時に即時にアラートを受け取る
-- **自動化ワークフロー**: スナップショット作成時にデプロイメントパイプラインを起動する
-- **監視と分析**: 組織全体の利用傾向やリソース消費を追跡する
-- **統合**: Daytona を Slack、Discord、カスタムアプリケーションなどの既存ツールと連携する
-- **監査とコンプライアンス**: 重要な変更の詳細なログを保持する
+* **リアルタイム通知**: サンドボックスの作成・起動・停止時に即時にアラートを受け取る
+* **自動化ワークフロー**: スナップショット作成時にデプロイメントパイプラインを起動する
+* **監視と分析**: 組織全体の利用傾向やリソース消費を追跡する
+* **統合**: Daytona を Slack、Discord、カスタムアプリケーションなどの既存ツールと連携する
+* **監査とコンプライアンス**: 重要な変更の詳細なログを保持する
 
----
+## Webhooks へのアクセス \{#accessing-webhooks\}
 
-## はじめに
+Daytona では、Webhook エンドポイントへのアクセスおよび管理のための Webhook 管理インターフェースを提供しています。
 
-### Webhooks へのアクセス
-
-ダッシュボードのサイドバーに **Webhooks** が表示されていない場合は、[support@daytona.io](mailto:support@daytona.io) までご連絡のうえ、組織向けに Webhooks の有効化をリクエストしてください。アクセス申請の際は、組織設定で確認できる組織 ID を併せてご提供ください。
-
-組織で Webhooks が有効化されたら:
-
-1. [Daytona Dashboard](https://app.daytona.io/dashboard) にアクセスします
-2. 左サイドバーの **Webhooks** をクリックします
-3. Webhook の管理インターフェースにアクセスできます
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーの **Webhooks** をクリックします
 
 :::note
-Webhooks は、組織の管理者および適切な権限を持つメンバーが利用できます。
+Webhooks は、組織の管理者および適切な権限を持つメンバーが利用できます。**Webhooks** が [Daytona Dashboard ↗](https://app.daytona.io/dashboard) に表示されていない場合は、[support@daytona.io](mailto:support@daytona.io) までご連絡のうえ、組織向けに Webhooks の有効化をリクエストしてください。アクセス申請の際は、組織設定で確認できる組織 ID を併せてご提供ください。
 :::
 
----
+## Webhook エンドポイントを作成する \{#create-webhook-endpoints\}
 
-## Webhookエンドポイントの管理
+Daytona は Webhook 管理インターフェースを提供しており、Webhook エンドポイントを作成できます。
 
-### エンドポイントの作成
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) に移動します
+2. サイドバーで **Webhooks** をクリックします
+3. **Add Endpoint** をクリックします
+4. エンドポイントを設定します:
 
-Webhookイベントの受信を開始するには:
+* **Endpoint URL**: イベントを受信する HTTPS エンドポイント
+* **Description**: このエンドポイントの説明
+* **Subscribe to events**: 受信するイベントを選択
 
-1. Webhookダッシュボードの**Endpoints**タブに移動します
-2. **Add Endpoint**をクリックします
-3. エンドポイントを設定します:
-   - **Endpoint URL**: イベントを受信するHTTPSエンドポイント
-   - **Description**: このエンドポイントの説明
-   - **Subscribe to events**: 受信するイベントを選択
+5. **Create** をクリックします
 
-### エンドポイントのテスト
+新しい Webhook エンドポイントが作成され、エンドポイントの詳細ページに自動的に移動します。ここからテストイベントを送信して、エンドポイントをテストできます。
 
-運用開始前に、Webhookエンドポイントをテストします:
+## Webhook エンドポイントをテストする \{#test-webhook-endpoints\}
 
-1. **Endpoints**リストからWebhooksを選択します
-2. **Testing**タブに移動します
-3. テストイベントを設定して送信します
-4. エンドポイントがテストペイロードを正しく受信していることを確認します
-5. アプリケーションがWebhookの形式を正しく処理できることを確認します
+Daytona では webhook エンドポイントを検証するためのテストインターフェースを提供しています。テストイベントを設定してエンドポイントに送信し、テストペイロードを正しく受信できているかを確認できます。
 
----
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. **Endpoints** リストから webhook エンドポイントを選択します
+4. **Testing** タブを開きます
+5. イベントタイプを選択し、**Send Example** をクリックします
+6. エンドポイントがテストペイロードを正しく受信していることを確認します
+7. アプリケーションが webhook フォーマットを正しく処理できていることを確認します
 
-## 利用可能なイベント
+## Webhook エンドポイントを編集する \{#edit-webhook-endpoints\}
+
+Daytona には、Webhook エンドポイントを編集するための Webhook 管理インターフェースが用意されています。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. **Endpoints** リストから Webhook エンドポイントを選択します
+4. 更新したい項目の横にある **Edit** をクリックします
+5. エンドポイントの詳細を編集します
+6. **Save** をクリックします
+
+## Webhook エンドポイントの削除 \{#delete-webhook-endpoints\}
+
+Daytona では、Webhook エンドポイントを削除するための Webhook 管理インターフェースを提供しています。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーの **Webhooks** をクリックします
+3. **Endpoints** リストから Webhook エンドポイントを 1 つ選択します
+4. 三点リーダーメニュー（**⋮**）をクリックします
+5. **Delete** をクリックします
+6. 削除を確認します
+
+## Webhook イベント \{#webhook-events\}
 
 Daytona は、インフラストラクチャ リソース全体のライフサイクルイベントについて Webhook を送信します。特定のイベントタイプに購読することも、すべてのイベントを受け取ってアプリケーション内でフィルタリングすることもできます。
 
-##### イベントカテゴリ
+詳しくは、[API](/docs/ja/tools/api/#daytona/tag/webhooks) リファレンスを参照してください。
 
-- サンドボックスのライフサイクルイベント
-- スナップショットのライフサイクルイベント
-- ボリュームのライフサイクルイベント
+> [**Webhook メッセージを送信する (API)**](/docs/ja/tools/api/#daytona/tag/webhooks/POST/webhooks/organizations/\{organizationId}/send)
+>
+> [**Webhook メッセージの配信試行を取得する (API)**](/docs/ja/tools/api/#daytona/tag/webhooks/GET/webhooks/organizations/\{organizationId}/messages/\{messageId}/attempts)
 
----
+### サンドボックスイベント \{#sandbox-events\}
 
-## Webhook ペイロード形式
+| Event Type                  | Description                        |
+| --------------------------- | ---------------------------------- |
+| **`sandbox.created`**       | 新しいサンドボックスが作成されました |
+| **`sandbox.state.updated`** | サンドボックスの状態が変更されました |
 
-すべての Webhook イベントは一貫した構造に従います。
+### スナップショットイベント \{#snapshot-events\}
 
-```json
-{
-  "event": "event.type",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "data": {
-    // イベント固有のデータ
-  }
-}
-```
+| Event Type                   | Description                           |
+| ---------------------------- | ------------------------------------- |
+| **`snapshot.created`**       | 新しいスナップショットが作成されました |
+| **`snapshot.state.updated`** | スナップショットの状態が変更されました |
+| **`snapshot.removed`**       | スナップショットが削除されました       |
+
+### ボリュームイベント \{#volume-events\}
+
+| Event Type                 | Description                   |
+| -------------------------- | ----------------------------- |
+| **`volume.created`**       | 新しいボリュームが作成された   |
+| **`volume.state.updated`** | ボリュームの状態が変更された   |
+
+## Webhook ペイロード形式 \{#webhook-payload-format\}
+
+すべての Webhook ペイロードは、共通フィールドとイベント固有データを含む、統一された形式の JSON オブジェクトです。
 
 **共通フィールド:**
 
-- `event`: イベントの種類（例: "sandbox.created"）
-- `timestamp`: イベント発生時刻（ISO 8601）
-- `data`: 関連情報を含むイベント固有のペイロード
+| Field           | Type   | Description                                                |
+| --------------- | ------ | ---------------------------------------------------------- |
+| **`event`**     | string | イベント種別を表す識別子（例: `sandbox.created`）         |
+| **`timestamp`** | string | イベントが発生した時刻を示す ISO 8601 形式のタイムスタンプ |
 
----
+### **`sandbox.created`** \{#sandboxcreated\}
 
-## 監視とアクティビティ
+新しいサンドボックスが作成された際に送信されます。
 
-### アクティビティ
+```json
+{
+  "event": "sandbox.created",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "sandbox123",
+  "organizationId": "org123",
+  "state": "started",
+  "class": "small",
+  "createdAt": "2025-12-19T10:30:00.000Z"
+}
+```
 
-**アクティビティ** タブでは、配信統計、イベント量の推移、パフォーマンス指標など、Webhook のアクティビティを可視化して確認でき、Webhook 連携の健全性の監視に役立ちます。
+| Field                | Type   | Description                                 |
+| -------------------- | ------ | ------------------------------------------- |
+| **`id`**             | string | サンドボックス ID                                  |
+| **`organizationId`** | string | 組織 ID                                       |
+| **`state`**          | string | サンドボックスの状態                                  |
+| **`class`**          | string | サンドボックスのクラス（`small`、`medium`、`large` のいずれか） |
+| **`createdAt`**      | string | サンドボックスが作成された時刻を示す ISO 8601 形式のタイムスタンプ      |
 
-### イベントログ
+### **`sandbox.state.updated`** \{#sandboxstateupdated\}
 
-**ログ** タブには、トラブルシューティングおよび監視のために、イベント履歴、配信ステータス、再試行情報など、Webhook 配信に関する詳細が表示されます。
+サンドボックスの状態が変更されるときに送信されます。
+
+```json
+{
+  "event": "sandbox.state.updated",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "sandbox123",
+  "organizationId": "org123",
+  "oldState": "started",
+  "newState": "stopped",
+  "updatedAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                            |
+| -------------------- | ------ | -------------------------------------- |
+| **`id`**             | string | サンドボックス ID                             |
+| **`organizationId`** | string | 組織 ID                                  |
+| **`oldState`**       | string | 変更前のサンドボックスの状態                         |
+| **`newState`**       | string | 変更後のサンドボックスの状態                         |
+| **`updatedAt`**      | string | サンドボックスが最後に更新された日時を表す ISO 8601 タイムスタンプ |
+
+### **`snapshot.created`** \{#snapshotcreated\}
+
+新しいスナップショットが作成されると送信されます。
+
+```json
+{
+  "event": "snapshot.created",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "snapshot123",
+  "name": "my-snapshot",
+  "organizationId": "org123",
+  "state": "active",
+  "createdAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                        |
+| -------------------- | ------ | ---------------------------------- |
+| **`id`**             | string | スナップショット ID                        |
+| **`name`**           | string | スナップショット名                          |
+| **`organizationId`** | string | 組織 ID                              |
+| **`state`**          | string | スナップショットの状態                        |
+| **`createdAt`**      | string | スナップショットが作成された時刻の ISO 8601 タイムスタンプ |
+
+### **`snapshot.state.updated`** \{#snapshotstateupdated\}
+
+スナップショットの状態が変更された際に送信されます。
+
+```json
+{
+  "event": "snapshot.state.updated",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "snapshot123",
+  "name": "my-snapshot",
+  "organizationId": "org123",
+  "oldState": "building",
+  "newState": "active",
+  "updatedAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                      |
+| -------------------- | ------ | -------------------------------- |
+| **`id`**             | string | スナップショット ID                      |
+| **`name`**           | string | スナップショット名                        |
+| **`organizationId`** | string | 組織 ID                            |
+| **`oldState`**       | string | 以前のスナップショットの状態                   |
+| **`newState`**       | string | 新しいスナップショットの状態                   |
+| **`updatedAt`**      | string | スナップショットが最後に更新された時刻（ISO 8601 形式） |
+
+### **`snapshot.removed`** \{#snapshotremoved\}
+
+スナップショットが削除されたときに送信されます。
+
+```json
+{
+  "event": "snapshot.removed",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "snapshot123",
+  "name": "my-snapshot",
+  "organizationId": "org123",
+  "removedAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                             |
+| -------------------- | ------ | --------------------------------------- |
+| **`id`**             | string | スナップショット ID                             |
+| **`name`**           | string | スナップショット名                               |
+| **`organizationId`** | string | 組織 ID                                   |
+| **`removedAt`**      | string | スナップショットが削除された時刻を表す ISO 8601 形式のタイムスタンプ |
+
+### **`volume.created`** \{#volumecreated\}
+
+新しいボリュームが作成された際に送信されます。
+
+```json
+{
+  "event": "volume.created",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "vol-12345678",
+  "name": "my-volume",
+  "organizationId": "org123",
+  "state": "ready",
+  "createdAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                          |
+| -------------------- | ------ | ------------------------------------ |
+| **`id`**             | string | ボリューム ID                             |
+| **`name`**           | string | ボリューム名                               |
+| **`organizationId`** | string | 組織 ID                                |
+| **`state`**          | string | ボリュームの状態                             |
+| **`createdAt`**      | string | ボリュームが作成された日時を表す ISO 8601 形式のタイムスタンプ |
+
+### **`volume.state.updated`** \{#volumestateupdated\}
+
+ボリュームの状態が変更された場合に送信されます。
+
+```json
+{
+  "event": "volume.state.updated",
+  "timestamp": "2025-12-19T10:30:00.000Z",
+  "id": "vol-12345678",
+  "name": "my-volume",
+  "organizationId": "org123",
+  "oldState": "creating",
+  "newState": "ready",
+  "updatedAt": "2025-12-19T10:30:00.000Z"
+}
+```
+
+| Field                | Type   | Description                             |
+| -------------------- | ------ | --------------------------------------- |
+| **`id`**             | string | ボリューム ID                                |
+| **`name`**           | string | ボリューム名                                  |
+| **`organizationId`** | string | 組織 ID                                   |
+| **`oldState`**       | string | 変更前のボリュームの状態                            |
+| **`newState`**       | string | 変更後のボリュームの状態                            |
+| **`updatedAt`**      | string | ボリュームが最後に更新された日時を示す ISO 8601 形式のタイムスタンプ |
+
+## Webhook ログ \{#webhook-logs\}
+
+Daytona では、Webhook ログを確認するための Webhook 管理インターフェースを提供しています。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/dashboard) にアクセスします
+2. サイドバーで **Webhooks** をクリックします
+3. サイドバーで **Logs** をクリックします
+
+ログページには、メッセージログ、イベントタイプ、メッセージ ID、タイムスタンプなど、Webhook の配信に関する詳細な情報が表示されます。
