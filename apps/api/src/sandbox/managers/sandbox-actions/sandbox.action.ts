@@ -64,10 +64,6 @@ export abstract class SandboxAction {
       return
     }
 
-    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
-      return
-    }
-
     const updateData: Partial<Sandbox> = {
       state,
     }
