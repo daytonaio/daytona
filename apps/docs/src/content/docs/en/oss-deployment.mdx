@@ -225,33 +225,34 @@ Below is a full list of environment variables with their default values:
 
 ### Runner
 
-| Variable                                | Type    | Default Value                     | Description                                          |
-| --------------------------------------- | ------- | --------------------------------- | ---------------------------------------------------- |
-| `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                      |
-| `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                      |
-| `VERSION`                               | string  | `0.0.1`                           | Runner service version                               |
-| `ENVIRONMENT`                           | string  | `development`                     | Application environment                              |
-| `API_PORT`                              | number  | `3003`                            | Runner API service port                              |
-| `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                              |
-| `RESOURCE_LIMITS_DISABLED`              | boolean | `true`                            | Disable resource limits for sandboxes                |
-| `AWS_ENDPOINT_URL`                      | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint                   |
-| `AWS_REGION`                            | string  | `us-east-1`                       | AWS region                                           |
-| `AWS_ACCESS_KEY_ID`                     | string  | `minioadmin`                      | AWS access key ID                                    |
-| `AWS_SECRET_ACCESS_KEY`                 | string  | `minioadmin`                      | AWS secret access key                                |
-| `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                              |
-| `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                      |
-| `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                     |
-| `USE_SNAPSHOT_ENTRYPOINT`               | boolean | `false`                           | Use snapshot entrypoint for sandbox                  |
-| `RUNNER_DOMAIN`                         | string  | (none)                            | Runner domain name (hostname for runner URLs)        |
-| `VOLUME_CLEANUP_INTERVAL`               | number  | `30s`                             | Volume cleanup interval in seconds (minimum: 10s)    |
-| `COLLECTOR_WINDOW_SIZE`                 | number  | `60`                              | Metrics collector window size (number of samples)    |
-| `CPU_USAGE_SNAPSHOT_INTERVAL`           | string  | `5s`                              | CPU usage snapshot interval duration (minimum: 1s)   |
-| `ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL` | string  | `5s`                              | Allocated resources snapshot interval (minimum: 1s)  |
-| `POLL_TIMEOUT`                          | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)  |
-| `POLL_LIMIT`                            | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100) |
-| `HEALTHCHECK_INTERVAL`                  | string  | `30s`                             | Interval between health checks (minimum: 10s)        |
-| `HEALTHCHECK_TIMEOUT`                   | string  | `10s`                             | Health check timeout duration                        |
-| `API_VERSION`                           | number  | `2`                               | Runner API version (default: 2)                      |
+| Variable                                | Type    | Default Value                     | Description                                           |
+| --------------------------------------- | ------- | --------------------------------- | ----------------------------------------------------- |
+| `DAYTONA_API_URL`                       | string  | `http://api:3000/api`             | Daytona API URL                                       |
+| `DAYTONA_RUNNER_TOKEN`                  | string  | `secret_api_token`                | Runner API authentication token                       |
+| `VERSION`                               | string  | `0.0.1`                           | Runner service version                                |
+| `ENVIRONMENT`                           | string  | `development`                     | Application environment                               |
+| `API_PORT`                              | number  | `3003`                            | Runner API service port                               |
+| `LOG_FILE_PATH`                         | string  | `/home/daytona/runner/runner.log` | Path to runner log file                               |
+| `RESOURCE_LIMITS_DISABLED`              | boolean | `true`                            | Disable resource limits for sandboxes                 |
+| `AWS_ENDPOINT_URL`                      | string  | `http://minio:9000`               | AWS S3-compatible storage endpoint                    |
+| `AWS_REGION`                            | string  | `us-east-1`                       | AWS region                                            |
+| `AWS_ACCESS_KEY_ID`                     | string  | `minioadmin`                      | AWS access key ID                                     |
+| `AWS_SECRET_ACCESS_KEY`                 | string  | `minioadmin`                      | AWS secret access key                                 |
+| `AWS_DEFAULT_BUCKET`                    | string  | `daytona`                         | AWS default bucket name                               |
+| `DAEMON_START_TIMEOUT_SEC`              | number  | `60`                              | Daemon start timeout in seconds                       |
+| `SANDBOX_START_TIMEOUT_SEC`             | number  | `30`                              | Sandbox start timeout in seconds                      |
+| `USE_SNAPSHOT_ENTRYPOINT`               | boolean | `false`                           | Use snapshot entrypoint for sandbox                   |
+| `RUNNER_DOMAIN`                         | string  | (none)                            | Runner domain name (hostname for runner URLs)         |
+| `VOLUME_CLEANUP_INTERVAL`               | number  | `30s`                             | Volume cleanup interval in seconds (minimum: 10s)     |
+| `COLLECTOR_WINDOW_SIZE`                 | number  | `60`                              | Metrics collector window size (number of samples)     |
+| `CPU_USAGE_SNAPSHOT_INTERVAL`           | string  | `5s`                              | CPU usage snapshot interval duration (minimum: 1s)    |
+| `ALLOCATED_RESOURCES_SNAPSHOT_INTERVAL` | string  | `5s`                              | Allocated resources snapshot interval (minimum: 1s)   |
+| `POLL_TIMEOUT`                          | string  | `30s`                             | Poller service timeout duration (e.g., `30s`, `1m`)   |
+| `POLL_LIMIT`                            | number  | `10`                              | Maximum poll attempts per request (min: 1, max: 100)  |
+| `HEALTHCHECK_INTERVAL`                  | string  | `30s`                             | Interval between health checks (minimum: 10s)         |
+| `HEALTHCHECK_TIMEOUT`                   | string  | `10s`                             | Health check timeout duration                         |
+| `API_VERSION`                           | number  | `2`                               | Runner API version (default: 2)                       |
+| `SNAPSHOT_ERROR_CACHE_RETENTION`        | string  | `10m`                             | Snapshot error cache retention duration (minimum: 5m) |
 
 ### SSH Gateway
 

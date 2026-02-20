@@ -159,7 +159,7 @@ func main() {
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
 		StatesCache:        statesCache,
-		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, 10*time.Minute),
+		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
 		Docker:             dockerClient,
 		SandboxService:     sandboxService,
 		MetricsCollector:   metricsCollector,
