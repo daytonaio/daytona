@@ -12,9 +12,6 @@ import {
   sandboxOrgIdCacheKeyById,
   sandboxOrgIdCacheKeyByName,
 } from '../utils/sandbox-lookup-cache.util'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { OnEvent } from '@nestjs/event-emitter'
-import { SandboxStartedEvent } from '../events/sandbox-started.event'
 
 type InvalidateSandboxLookupCacheArgs =
   | {
@@ -154,12 +151,5 @@ export class SandboxLookupCacheInvalidationService {
           `Failed to invalidate sandbox orgId cache for ${args.sandboxId}: ${error instanceof Error ? error.message : String(error)}`,
         ),
       )
-  }
-
-  @OnEvent(SandboxEvents.STARTED)
-  private _handleSandboxStarted(event: SandboxStartedEvent): void {
-    this.invalidate({
-      authToken: event.sandbox.authToken,
-    })
   }
 }
