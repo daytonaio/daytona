@@ -40,6 +40,7 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { SnapshotLookupCacheInvalidationService } from '../services/snapshot-lookup-cache-invalidation.service'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
@@ -72,6 +73,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
     private readonly snapshotService: SnapshotService,
+    private readonly snapshotLookupCacheInvalidationService: SnapshotLookupCacheInvalidationService,
   ) {}
 
   async onApplicationShutdown() {
@@ -640,7 +642,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         syncState = SYNC_AGAIN
       } else {
         const message = error.message || String(error)
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, message)
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, message)
       }
     }
 
@@ -710,7 +712,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
+      await this.updateSnapshotState(snapshot, SnapshotState.ERROR, 'Timeout processing snapshot on initial runner')
       return DONT_SYNC_AGAIN
     }
 
@@ -724,7 +726,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     if (snapshot.ref && snapshotRunner) {
       if (snapshotRunner.state === SnapshotRunnerState.READY) {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+        await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
         return DONT_SYNC_AGAIN
       } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
         await this.snapshotRunnerRepository.delete(snapshotRunner.id)
@@ -798,7 +800,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     } else {
       await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.READY)
     }
-    await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
+    await this.updateSnapshotState(snapshot, SnapshotState.ACTIVE)
 
     // Best effort removal of old snapshot from transient registry
     const transientRegistry = await this.dockerRegistryService.findTransientRegistryBySnapshotImageName(
@@ -826,7 +828,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.updatedAt.getTime() > timeoutMs) {
       await this.updateSnapshotState(
-        snapshot.id,
+        snapshot,
         SnapshotState.ERROR,
         'Timeout processing snapshot pull on initial runner',
       )
@@ -879,7 +881,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
     } catch (err) {
       if (err.code !== 'ECONNRESET') {
-        await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, err.message)
+        await this.updateSnapshotState(snapshot, SnapshotState.ERROR, err.message)
         throw err
       }
       // TODO: check if retry
@@ -913,7 +915,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       this.logger.error(`Error building snapshot ${snapshot.name}: ${fromAxiosError(err)}`)
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
     }
   }
 
@@ -952,7 +954,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     if (snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+      await this.updateSnapshotState(snapshot, SnapshotState.BUILDING)
       await this.runnerService.createSnapshotRunnerEntry(
         initialRunner.id,
         snapshot.buildInfo.snapshotRef,
@@ -989,7 +991,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         await this.snapshotRepository.save(snapshot)
       }
 
-      await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+      await this.updateSnapshotState(snapshot, SnapshotState.PULLING)
       await this.runnerService.createSnapshotRunnerEntry(
         initialRunner.id,
         snapshot.ref,
@@ -1001,7 +1003,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     return SYNC_AGAIN
   }
 
-  private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
+  private async updateSnapshotState(snapshot: Snapshot, state: SnapshotState, errorReason?: string) {
     const partialUpdate: Partial<Snapshot> = {
       state,
     }
@@ -1012,14 +1014,20 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     const result = await this.snapshotRepository.update(
       {
-        id: snapshotId,
+        id: snapshot.id,
       },
       partialUpdate,
     )
 
     if (!result.affected) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot with ID ${snapshot.id} not found`)
     }
+
+    this.snapshotLookupCacheInvalidationService.invalidate({
+      snapshotId: snapshot.id,
+      organizationId: snapshot.organizationId,
+      name: snapshot.name,
+    })
   }
 
   @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-buildinfo-snapshot-runners' })
@@ -1109,6 +1117,14 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       // Deactivate the snapshots
       const snapshotIds = oldSnapshots.map((snapshot) => snapshot.id)
       await this.snapshotRepository.update({ id: In(snapshotIds) }, { state: SnapshotState.INACTIVE })
+
+      for (const snapshot of oldSnapshots) {
+        this.snapshotLookupCacheInvalidationService.invalidate({
+          snapshotId: snapshot.id,
+          organizationId: snapshot.organizationId,
+          name: snapshot.name,
+        })
+      }
 
       // Get internal names of deactivated snapshots
       const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
@@ -1217,7 +1233,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       if (sizeGB > MAX_SIZE_GB) {
         await this.updateSnapshotState(
-          snapshot.id,
+          snapshot,
           SnapshotState.ERROR,
           `Snapshot size (${sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
         )

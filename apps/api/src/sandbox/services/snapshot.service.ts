@@ -49,6 +49,11 @@ import { SnapshotCreatedEvent } from '../events/snapshot-created.event'
 import { RunnerService } from './runner.service'
 import { RegionService } from '../../region/services/region.service'
 import { TypedConfigService } from '../../config/typed-config.service'
+import {
+  SNAPSHOT_LOOKUP_CACHE_TTL_MS,
+  snapshotLookupCacheKeyByName,
+  snapshotLookupCacheKeyByNameGeneral,
+} from '../utils/snapshot-lookup-cache.util'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -412,12 +417,20 @@ export class SnapshotService {
   async getSnapshotByName(snapshotName: string, organizationId: string): Promise<Snapshot> {
     const snapshot = await this.snapshotRepository.findOne({
       where: { name: snapshotName, organizationId },
+      cache: {
+        id: snapshotLookupCacheKeyByName({ organizationId, snapshotName }),
+        milliseconds: SNAPSHOT_LOOKUP_CACHE_TTL_MS,
+      },
     })
 
     if (!snapshot) {
       //  check if the snapshot is general
       const generalSnapshot = await this.snapshotRepository.findOne({
         where: { name: snapshotName, general: true },
+        cache: {
+          id: snapshotLookupCacheKeyByNameGeneral({ snapshotName }),
+          milliseconds: SNAPSHOT_LOOKUP_CACHE_TTL_MS,
+        },
       })
       if (generalSnapshot) {
         return generalSnapshot
