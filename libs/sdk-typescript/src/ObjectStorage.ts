@@ -50,6 +50,8 @@ export class ObjectStorage {
         sessionToken: config.sessionToken,
       },
       forcePathStyle: true,
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     })
   }
 
