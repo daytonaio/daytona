@@ -501,24 +501,21 @@ func (s *Sandbox) doSetLabels(ctx context.Context, labels map[string]string) err
 	return s.RefreshData(ctx)
 }
 
-// GetPreviewLink returns a URL for accessing a port on the sandbox.
+// GetPreviewLink returns a preview link for accessing a port on the sandbox.
 //
-// The preview URL allows external access to services running on the specified
-// port within the sandbox.
+// The returned PreviewLink contains both the URL and an authentication token.
+// For private sandboxes, the token must be sent via the
+// "x-daytona-preview-token" request header.
 //
 // Example:
 //
-//	// Start a web server on port 3000 in the sandbox
-//	sandbox.Process.ExecuteCommand(ctx, "python -m http.server 3000 &")
-//
-//	// Get the preview URL
-//	url, err := sandbox.GetPreviewLink(ctx, 3000)
+//	preview, err := sandbox.GetPreviewLink(ctx, 3000)
 //	if err != nil {
 //	    return err
 //	}
-//	fmt.Printf("Access at: %s\n", url)
-func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error) {
-	return withInstrumentation(ctx, s.otel, "Sandbox", "GetPreviewLink", func(ctx context.Context) (string, error) {
+//	fmt.Printf("URL: %s\nToken: %s\n", preview.URL, preview.Token)
+func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewLink, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetPreviewLink", func(ctx context.Context) (*types.PreviewLink, error) {
 		result, httpResp, err := s.client.apiClient.SandboxAPI.GetPortPreviewUrl(
 			s.client.getAuthContext(ctx),
 			s.ID,
@@ -526,10 +523,13 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error) 
 		).Execute()
 
 		if err != nil {
-			return "", s.client.handleAPIError(err, httpResp)
+			return nil, s.client.handleAPIError(err, httpResp)
 		}
 
-		return result.GetUrl(), nil
+		return &types.PreviewLink{
+			URL:   result.GetUrl(),
+			Token: result.GetToken(),
+		}, nil
 	})
 }
 
