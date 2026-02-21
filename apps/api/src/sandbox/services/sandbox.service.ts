@@ -1698,13 +1698,25 @@ export class SandboxService {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const twoWeeksAgo = new Date()
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14)
+
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} destroyed sandboxes`)
+    const desiredDestroyedSandboxes = await this.sandboxRepository.delete({
+      desiredState: SandboxDesiredState.DESTROYED,
+      updatedAt: LessThan(twoWeeksAgo),
+    })
+
+    const totalAffected = destroyedSandboxes.affected + desiredDestroyedSandboxes.affected
+
+    if (totalAffected > 0) {
+      this.logger.debug(
+        `Cleaned up ${destroyedSandboxes.affected} destroyed sandboxes and ${desiredDestroyedSandboxes.affected} desired-destroyed sandboxes`,
+      )
     }
   }
 
@@ -1715,14 +1727,14 @@ export class SandboxService {
     const twentyFourHoursAgo = new Date()
     twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24)
 
-    const destroyedSandboxs = await this.sandboxRepository.delete({
+    const destroyedSandboxes = await this.sandboxRepository.delete({
       state: SandboxState.BUILD_FAILED,
       desiredState: SandboxDesiredState.DESTROYED,
       updatedAt: LessThan(twentyFourHoursAgo),
     })
 
-    if (destroyedSandboxs.affected > 0) {
-      this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    if (destroyedSandboxes.affected > 0) {
+      this.logger.debug(`Cleaned up ${destroyedSandboxes.affected} build failed sandboxes`)
     }
   }
 
