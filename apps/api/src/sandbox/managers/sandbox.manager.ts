@@ -150,6 +150,10 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           desiredState: SandboxDesiredState.STOPPED,
           pending: Not(true),
           lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
+          snapshot: Raw(
+            (alias) =>
+              `(${alias} IS NULL OR NOT EXISTS (SELECT 1 FROM snapshot s WHERE (s."name" = ${alias} OR CAST(s."id" AS TEXT) = ${alias}) AND s."runnerClass" IN ('linux-exp', 'windows-exp', 'android-exp')))`,
+          ),
         },
         order: {
           lastBackupAt: 'ASC',

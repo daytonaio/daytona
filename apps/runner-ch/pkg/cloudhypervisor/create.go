@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -724,10 +725,36 @@ func (c *Client) createFromWarmSnapshot(ctx context.Context, opts CreateOptions)
 	log.Infof("Creating sandbox %s from warm snapshot %s (instant restore)", opts.SandboxId, opts.Snapshot)
 
 	// Step 1: Create sandbox directory and CoW disk overlay
+	// For warm snapshots, the overlay must be at least as large as the backing file
+	// since the memory state references sectors from the original disk size
 	goldenDisk := filepath.Join(snapshotDir, "disk.qcow2")
+
+	// Get the backing file's virtual size to ensure overlay is large enough
+	sizeCmd := fmt.Sprintf(`qemu-img info --output=json "%s" | jq -r '.["virtual-size"]'`, goldenDisk)
+	sizeOutput, err := c.runShellScript(ctx, sizeCmd)
+	if err != nil {
+		c.cleanupSandbox(ctx, opts.SandboxId)
+		return nil, fmt.Errorf("failed to get snapshot disk size: %w", err)
+	}
+
+	// Parse the size and convert to GB (round up)
+	var backingFileSizeGB int64 = int64(opts.StorageGB)
+	if sizeStr := strings.TrimSpace(sizeOutput); sizeStr != "" && sizeStr != "null" {
+		if sizeBytes, parseErr := strconv.ParseInt(sizeStr, 10, 64); parseErr == nil {
+			backingFileSizeGB = (sizeBytes + (1 << 30) - 1) / (1 << 30) // Round up to GB
+		}
+	}
+
+	// Use the larger of backing file size or requested size
+	diskSizeGB := backingFileSizeGB
+	if int64(opts.StorageGB) > diskSizeGB {
+		diskSizeGB = int64(opts.StorageGB)
+	}
+	log.Infof("Creating CoW overlay: backing file=%dGB, requested=%dGB, using=%dGB", backingFileSizeGB, opts.StorageGB, diskSizeGB)
+
 	createDiskCmd := fmt.Sprintf(
 		`mkdir -p "%s" && qemu-img create -f qcow2 -F qcow2 -b "%s" "%s" %dG`,
-		sandboxDir, goldenDisk, diskPath, opts.StorageGB)
+		sandboxDir, goldenDisk, diskPath, diskSizeGB)
 
 	if _, err := c.runShellScript(ctx, createDiskCmd); err != nil {
 		c.cleanupSandbox(ctx, opts.SandboxId)

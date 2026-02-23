@@ -91,22 +91,51 @@ func (c *Client) CreateSnapshotFromVM(ctx context.Context, opts SnapshotOptions)
 		return "", fmt.Errorf("failed to create snapshot: %w", err)
 	}
 
-	// Resume if we paused it
+	// Flatten disk image to snapshot WHILE VM IS STILL PAUSED
+	// Critical: using plain 'cp' would preserve the backing file reference,
+	// creating a chain dependency that causes I/O errors during restore.
+	// qemu-img convert flattens all layers into a standalone image.
+	//
+	// Two-step process to bypass Cloud Hypervisor's file lock:
+	// 1. Copy the qcow2 overlay file (cp ignores file locks)
+	// 2. Convert the copy to flatten the backing chain
+	// 3. Remove the temporary copy
+	diskPath := c.getDiskPath(opts.SandboxId)
+	snapshotDiskPath := filepath.Join(snapshotPath, "disk.qcow2")
+	tempDiskPath := filepath.Join(snapshotPath, "disk.qcow2.tmp")
+
+	log.Infof("Flattening disk to snapshot (this may take a moment for large disks)")
+
+	// Step 1: Copy the overlay file (bypasses CH's file lock)
+	copyCmd := fmt.Sprintf("cp '%s' '%s'", diskPath, tempDiskPath)
+	if err := c.runCommand(ctx, "sh", "-c", copyCmd); err != nil {
+		log.Errorf("Failed to copy disk overlay: %v", err)
+		_ = c.runCommand(ctx, "rm", "-rf", snapshotPath)
+		if !wasPaused {
+			_, _ = c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.resume", nil)
+		}
+		return "", fmt.Errorf("failed to copy disk overlay: %w", err)
+	}
+
+	// Step 2: Convert the copy to flatten the backing chain
+	convertCmd := fmt.Sprintf("qemu-img convert -O qcow2 '%s' '%s' && rm -f '%s'", tempDiskPath, snapshotDiskPath, tempDiskPath)
+	if err := c.runCommand(ctx, "sh", "-c", convertCmd); err != nil {
+		// Disk copy is required - cleanup and return error
+		log.Errorf("Failed to flatten disk to snapshot: %v", err)
+		_ = c.runCommand(ctx, "rm", "-rf", snapshotPath)
+		// Resume VM before returning error
+		if !wasPaused {
+			_, _ = c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.resume", nil)
+		}
+		return "", fmt.Errorf("failed to flatten disk to snapshot: %w", err)
+	}
+
+	// Resume VM after disk flatten is complete
 	if !wasPaused {
 		log.Infof("Resuming VM after snapshot")
 		if _, err := c.apiRequest(ctx, opts.SandboxId, http.MethodPut, "vm.resume", nil); err != nil {
 			log.Warnf("Failed to resume VM after snapshot: %v", err)
 		}
-	}
-
-	// Copy disk image to snapshot
-	diskPath := c.getDiskPath(opts.SandboxId)
-	snapshotDiskPath := filepath.Join(snapshotPath, "disk.qcow2")
-
-	log.Infof("Copying disk to snapshot")
-	if err := c.runCommand(ctx, "cp", diskPath, snapshotDiskPath); err != nil {
-		log.Warnf("Failed to copy disk to snapshot: %v", err)
-		// Continue - snapshot might still be useful for memory state
 	}
 
 	log.Infof("Snapshot %s created successfully at %s", opts.Name, snapshotPath)

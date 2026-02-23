@@ -443,13 +443,19 @@ export class JobStateHandlerService {
           return
         }
 
-        // Create Snapshot entity
+        // Create Snapshot entity with resources from source sandbox
         const snapshot = new Snapshot()
         snapshot.organizationId = sandbox.organizationId
         snapshot.name = snapshotName
         snapshot.imageName = snapshotPath || snapshotName
         snapshot.ref = snapshotPath || snapshotName
         snapshot.runnerClass = runner.class
+        snapshot.state = SnapshotState.ACTIVE // Mark as active since it's ready to use
+        // Copy resource specifications from source sandbox
+        snapshot.cpu = sandbox.cpu
+        snapshot.mem = sandbox.mem
+        snapshot.disk = sandbox.disk
+        snapshot.gpu = sandbox.gpu
 
         await this.snapshotRepository.save(snapshot)
         this.logger.log(`Created snapshot entity ${snapshot.id} with name ${snapshotName}`)

@@ -282,6 +282,22 @@ export class SandboxService {
       throw new SandboxError('Ephemeral sandboxes cannot be archived')
     }
 
+    if (sandbox.snapshot) {
+      const snapshotFilter: FindOptionsWhere<Snapshot>[] = [{ name: sandbox.snapshot }]
+      if (isValidUuid(sandbox.snapshot)) {
+        snapshotFilter.push({ id: sandbox.snapshot })
+      }
+      const snapshot = await this.snapshotRepository.findOne({ where: snapshotFilter })
+      if (
+        snapshot &&
+        (snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL)
+      ) {
+        throw new SandboxError('Archiving is not supported for this runner class')
+      }
+    }
+
     sandbox.state = SandboxState.ARCHIVING
     sandbox.desiredState = SandboxDesiredState.ARCHIVED
     await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: SandboxState.STOPPED })
@@ -405,6 +421,14 @@ export class SandboxService {
         if (createSandboxDto.gpu) {
           gpu = createSandboxDto.gpu
         }
+      }
+
+      // For VM snapshots (LINUX_EXPERIMENTAL), disk size must be at least the snapshot's disk size
+      // because the VM memory state references disk sectors from the original size
+      if (snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL && disk < snapshot.disk) {
+        throw new BadRequestError(
+          `Disk size (${disk}GB) cannot be smaller than snapshot disk size (${snapshot.disk}GB) for VM snapshots`,
+        )
       }
 
       this.organizationService.assertOrganizationIsNotSuspended(organization)
@@ -1828,6 +1852,22 @@ export class SandboxService {
 
   async setAutoArchiveInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
+
+    if (sandbox.snapshot) {
+      const snapshotFilter: FindOptionsWhere<Snapshot>[] = [{ name: sandbox.snapshot }]
+      if (isValidUuid(sandbox.snapshot)) {
+        snapshotFilter.push({ id: sandbox.snapshot })
+      }
+      const snapshot = await this.snapshotRepository.findOne({ where: snapshotFilter })
+      if (
+        snapshot &&
+        (snapshot.runnerClass === RunnerClass.WINDOWS_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.LINUX_EXPERIMENTAL ||
+          snapshot.runnerClass === RunnerClass.ANDROID_EXPERIMENTAL)
+      ) {
+        throw new SandboxError('Auto-archiving is not supported for this runner class')
+      }
+    }
 
     sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
     await this.sandboxRepository.save(sandbox)
