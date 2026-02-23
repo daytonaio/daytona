@@ -25,13 +25,6 @@
       "inputs": [{ "env": "RUBYGEMS_PKG_VERSION" }, { "env": "VERSION" }],
       "outputs": ["{projectRoot}/lib/daytona_toolbox_api_client/version.rb"]
     },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "bundle exec rubocop"
-      }
-    },
     "generate:api-client": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/lib"],

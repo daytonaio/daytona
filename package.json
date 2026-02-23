@@ -300,14 +300,14 @@
     "includedScripts": []
   },
   "lint-staged": {
-    "*.{ts,tsx,astro}": [
+    "!(libs/*api-client*/**/*)*.{ts,tsx,astro}": [
       "eslint --cache --fix",
       "prettier --write"
     ],
     "!(libs/*api-client-go*/**/*)*.go": [
       "gofmt -w"
     ],
-    "*.rb": [
+    "!(libs/*api-client-ruby*/**/*)*.rb": [
       "rubocop -a --fail-level fatal"
     ],
     "*.{mdx,md}": [
