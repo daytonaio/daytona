@@ -69,7 +69,11 @@ export function capitalize(value: string) {
 }
 
 export function getMaskedToken(token: string) {
-  return `${token.substring(0, 3)}********************${token.slice(-3)}`
+  return getMaskedTokenFromParts(token.substring(0, 3), token.slice(-3))
+}
+
+export function getMaskedTokenFromParts(prefix: string, suffix: string) {
+  return `${prefix}********************${suffix}`
 }
 
 export function formatDuration(minutes: number): string {

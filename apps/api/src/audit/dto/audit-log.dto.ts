@@ -18,6 +18,12 @@ export class AuditLogDto {
   actorEmail: string
 
   @ApiPropertyOptional()
+  actorApiKeyPrefix?: string
+
+  @ApiPropertyOptional()
+  actorApiKeySuffix?: string
+
+  @ApiPropertyOptional()
   organizationId?: string
 
   @ApiProperty()
@@ -58,6 +64,8 @@ export class AuditLogDto {
       id: auditLog.id,
       actorId: auditLog.actorId,
       actorEmail: auditLog.actorEmail,
+      actorApiKeyPrefix: auditLog.actorApiKeyPrefix,
+      actorApiKeySuffix: auditLog.actorApiKeySuffix,
       organizationId: auditLog.organizationId,
       action: auditLog.action,
       targetType: auditLog.targetType,
