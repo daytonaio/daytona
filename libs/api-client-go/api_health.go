@@ -19,13 +19,14 @@ import (
 	"net/url"
 )
 
+
 type HealthAPI interface {
 
 	/*
-		HealthControllerCheck Method for HealthControllerCheck
+	HealthControllerCheck Method for HealthControllerCheck
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return HealthAPIHealthControllerCheckRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return HealthAPIHealthControllerCheckRequest
 	*/
 	HealthControllerCheck(ctx context.Context) HealthAPIHealthControllerCheckRequest
 
@@ -34,10 +35,10 @@ type HealthAPI interface {
 	HealthControllerCheckExecute(r HealthAPIHealthControllerCheckRequest) (*HealthControllerCheck200Response, *http.Response, error)
 
 	/*
-		HealthControllerLive Method for HealthControllerLive
+	HealthControllerLive Method for HealthControllerLive
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return HealthAPIHealthControllerLiveRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return HealthAPIHealthControllerLiveRequest
 	*/
 	HealthControllerLive(ctx context.Context) HealthAPIHealthControllerLiveRequest
 
@@ -49,7 +50,7 @@ type HealthAPI interface {
 type HealthAPIService service
 
 type HealthAPIHealthControllerCheckRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService HealthAPI
 }
 
@@ -60,25 +61,24 @@ func (r HealthAPIHealthControllerCheckRequest) Execute() (*HealthControllerCheck
 /*
 HealthControllerCheck Method for HealthControllerCheck
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return HealthAPIHealthControllerCheckRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return HealthAPIHealthControllerCheckRequest
 */
 func (a *HealthAPIService) HealthControllerCheck(ctx context.Context) HealthAPIHealthControllerCheckRequest {
 	return HealthAPIHealthControllerCheckRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return HealthControllerCheck200Response
+//  @return HealthControllerCheck200Response
 func (a *HealthAPIService) HealthControllerCheckExecute(r HealthAPIHealthControllerCheckRequest) (*HealthControllerCheck200Response, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *HealthControllerCheck200Response
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HealthControllerCheck200Response
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthAPIService.HealthControllerCheck")
@@ -138,8 +138,8 @@ func (a *HealthAPIService) HealthControllerCheckExecute(r HealthAPIHealthControl
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -157,7 +157,7 @@ func (a *HealthAPIService) HealthControllerCheckExecute(r HealthAPIHealthControl
 }
 
 type HealthAPIHealthControllerLiveRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService HealthAPI
 }
 
@@ -168,22 +168,22 @@ func (r HealthAPIHealthControllerLiveRequest) Execute() (*http.Response, error) 
 /*
 HealthControllerLive Method for HealthControllerLive
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return HealthAPIHealthControllerLiveRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return HealthAPIHealthControllerLiveRequest
 */
 func (a *HealthAPIService) HealthControllerLive(ctx context.Context) HealthAPIHealthControllerLiveRequest {
 	return HealthAPIHealthControllerLiveRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *HealthAPIService) HealthControllerLiveExecute(r HealthAPIHealthControllerLiveRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "HealthAPIService.HealthControllerLive")

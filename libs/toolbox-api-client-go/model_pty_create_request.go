@@ -19,13 +19,13 @@ var _ MappedNullable = &PtyCreateRequest{}
 
 // PtyCreateRequest struct for PtyCreateRequest
 type PtyCreateRequest struct {
-	Cols *int32             `json:"cols,omitempty"`
-	Cwd  *string            `json:"cwd,omitempty"`
+	Cols *int32 `json:"cols,omitempty"`
+	Cwd *string `json:"cwd,omitempty"`
 	Envs *map[string]string `json:"envs,omitempty"`
-	Id   *string            `json:"id,omitempty"`
+	Id *string `json:"id,omitempty"`
 	// Don't start PTY until first client connects
-	LazyStart *bool  `json:"lazyStart,omitempty"`
-	Rows      *int32 `json:"rows,omitempty"`
+	LazyStart *bool `json:"lazyStart,omitempty"`
+	Rows *int32 `json:"rows,omitempty"`
 }
 
 // NewPtyCreateRequest instantiates a new PtyCreateRequest object
@@ -238,7 +238,7 @@ func (o *PtyCreateRequest) SetRows(v int32) {
 }
 
 func (o PtyCreateRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -303,3 +303,5 @@ func (v *NullablePtyCreateRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

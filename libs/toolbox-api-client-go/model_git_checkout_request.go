@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,7 +22,7 @@ var _ MappedNullable = &GitCheckoutRequest{}
 // GitCheckoutRequest struct for GitCheckoutRequest
 type GitCheckoutRequest struct {
 	Branch string `json:"branch"`
-	Path   string `json:"path"`
+	Path string `json:"path"`
 }
 
 type _GitCheckoutRequest GitCheckoutRequest
@@ -95,7 +95,7 @@ func (o *GitCheckoutRequest) SetPath(v string) {
 }
 
 func (o GitCheckoutRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -123,10 +123,10 @@ func (o *GitCheckoutRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -182,3 +182,5 @@ func (v *NullableGitCheckoutRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

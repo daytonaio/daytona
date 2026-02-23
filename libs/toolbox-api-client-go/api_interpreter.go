@@ -19,15 +19,16 @@ import (
 	"strings"
 )
 
+
 type InterpreterAPI interface {
 
 	/*
-		CreateInterpreterContext Create a new interpreter context
+	CreateInterpreterContext Create a new interpreter context
 
-		Creates a new isolated interpreter context with optional working directory and language
+	Creates a new isolated interpreter context with optional working directory and language
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InterpreterAPICreateInterpreterContextRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InterpreterAPICreateInterpreterContextRequest
 	*/
 	CreateInterpreterContext(ctx context.Context) InterpreterAPICreateInterpreterContextRequest
 
@@ -36,13 +37,13 @@ type InterpreterAPI interface {
 	CreateInterpreterContextExecute(r InterpreterAPICreateInterpreterContextRequest) (*InterpreterContext, *http.Response, error)
 
 	/*
-		DeleteInterpreterContext Delete an interpreter context
+	DeleteInterpreterContext Delete an interpreter context
 
-		Deletes an interpreter context and shuts down its worker process
+	Deletes an interpreter context and shuts down its worker process
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Context ID
-		@return InterpreterAPIDeleteInterpreterContextRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Context ID
+	@return InterpreterAPIDeleteInterpreterContextRequest
 	*/
 	DeleteInterpreterContext(ctx context.Context, id string) InterpreterAPIDeleteInterpreterContextRequest
 
@@ -51,12 +52,12 @@ type InterpreterAPI interface {
 	DeleteInterpreterContextExecute(r InterpreterAPIDeleteInterpreterContextRequest) (map[string]string, *http.Response, error)
 
 	/*
-		ExecuteInterpreterCode Execute code in an interpreter context
+	ExecuteInterpreterCode Execute code in an interpreter context
 
-		Executes code in a specified context (or default context if not specified) via WebSocket streaming
+	Executes code in a specified context (or default context if not specified) via WebSocket streaming
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InterpreterAPIExecuteInterpreterCodeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InterpreterAPIExecuteInterpreterCodeRequest
 	*/
 	ExecuteInterpreterCode(ctx context.Context) InterpreterAPIExecuteInterpreterCodeRequest
 
@@ -64,12 +65,12 @@ type InterpreterAPI interface {
 	ExecuteInterpreterCodeExecute(r InterpreterAPIExecuteInterpreterCodeRequest) (*http.Response, error)
 
 	/*
-		ListInterpreterContexts List all user-created interpreter contexts
+	ListInterpreterContexts List all user-created interpreter contexts
 
-		Returns information about all user-created interpreter contexts (excludes default context)
+	Returns information about all user-created interpreter contexts (excludes default context)
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InterpreterAPIListInterpreterContextsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InterpreterAPIListInterpreterContextsRequest
 	*/
 	ListInterpreterContexts(ctx context.Context) InterpreterAPIListInterpreterContextsRequest
 
@@ -82,9 +83,9 @@ type InterpreterAPI interface {
 type InterpreterAPIService service
 
 type InterpreterAPICreateInterpreterContextRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InterpreterAPI
-	request    *CreateContextRequest
+	request *CreateContextRequest
 }
 
 // Context configuration
@@ -102,25 +103,24 @@ CreateInterpreterContext Create a new interpreter context
 
 Creates a new isolated interpreter context with optional working directory and language
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InterpreterAPICreateInterpreterContextRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InterpreterAPICreateInterpreterContextRequest
 */
 func (a *InterpreterAPIService) CreateInterpreterContext(ctx context.Context) InterpreterAPICreateInterpreterContextRequest {
 	return InterpreterAPICreateInterpreterContextRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return InterpreterContext
+//  @return InterpreterContext
 func (a *InterpreterAPIService) CreateInterpreterContextExecute(r InterpreterAPICreateInterpreterContextRequest) (*InterpreterContext, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *InterpreterContext
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *InterpreterContext
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InterpreterAPIService.CreateInterpreterContext")
@@ -185,8 +185,8 @@ func (a *InterpreterAPIService) CreateInterpreterContextExecute(r InterpreterAPI
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
@@ -196,8 +196,8 @@ func (a *InterpreterAPIService) CreateInterpreterContextExecute(r InterpreterAPI
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -215,9 +215,9 @@ func (a *InterpreterAPIService) CreateInterpreterContextExecute(r InterpreterAPI
 }
 
 type InterpreterAPIDeleteInterpreterContextRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InterpreterAPI
-	id         string
+	id string
 }
 
 func (r InterpreterAPIDeleteInterpreterContextRequest) Execute() (map[string]string, *http.Response, error) {
@@ -229,27 +229,26 @@ DeleteInterpreterContext Delete an interpreter context
 
 Deletes an interpreter context and shuts down its worker process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Context ID
-	@return InterpreterAPIDeleteInterpreterContextRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Context ID
+ @return InterpreterAPIDeleteInterpreterContextRequest
 */
 func (a *InterpreterAPIService) DeleteInterpreterContext(ctx context.Context, id string) InterpreterAPIDeleteInterpreterContextRequest {
 	return InterpreterAPIDeleteInterpreterContextRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]string
+//  @return map[string]string
 func (a *InterpreterAPIService) DeleteInterpreterContextExecute(r InterpreterAPIDeleteInterpreterContextRequest) (map[string]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]string
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InterpreterAPIService.DeleteInterpreterContext")
@@ -310,8 +309,8 @@ func (a *InterpreterAPIService) DeleteInterpreterContextExecute(r InterpreterAPI
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
@@ -321,8 +320,8 @@ func (a *InterpreterAPIService) DeleteInterpreterContextExecute(r InterpreterAPI
 				newErr.error = err.Error()
 				return localVarReturnValue, localVarHTTPResponse, newErr
 			}
-			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-			newErr.model = v
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -340,7 +339,7 @@ func (a *InterpreterAPIService) DeleteInterpreterContextExecute(r InterpreterAPI
 }
 
 type InterpreterAPIExecuteInterpreterCodeRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InterpreterAPI
 }
 
@@ -353,22 +352,22 @@ ExecuteInterpreterCode Execute code in an interpreter context
 
 Executes code in a specified context (or default context if not specified) via WebSocket streaming
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InterpreterAPIExecuteInterpreterCodeRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InterpreterAPIExecuteInterpreterCodeRequest
 */
 func (a *InterpreterAPIService) ExecuteInterpreterCode(ctx context.Context) InterpreterAPIExecuteInterpreterCodeRequest {
 	return InterpreterAPIExecuteInterpreterCodeRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *InterpreterAPIService) ExecuteInterpreterCodeExecute(r InterpreterAPIExecuteInterpreterCodeRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InterpreterAPIService.ExecuteInterpreterCode")
@@ -428,7 +427,7 @@ func (a *InterpreterAPIService) ExecuteInterpreterCodeExecute(r InterpreterAPIEx
 }
 
 type InterpreterAPIListInterpreterContextsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InterpreterAPI
 }
 
@@ -441,25 +440,24 @@ ListInterpreterContexts List all user-created interpreter contexts
 
 Returns information about all user-created interpreter contexts (excludes default context)
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InterpreterAPIListInterpreterContextsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InterpreterAPIListInterpreterContextsRequest
 */
 func (a *InterpreterAPIService) ListInterpreterContexts(ctx context.Context) InterpreterAPIListInterpreterContextsRequest {
 	return InterpreterAPIListInterpreterContextsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ListContextsResponse
+//  @return ListContextsResponse
 func (a *InterpreterAPIService) ListInterpreterContextsExecute(r InterpreterAPIListInterpreterContextsRequest) (*ListContextsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ListContextsResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListContextsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InterpreterAPIService.ListInterpreterContexts")

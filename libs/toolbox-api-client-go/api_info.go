@@ -18,15 +18,16 @@ import (
 	"net/url"
 )
 
+
 type InfoAPI interface {
 
 	/*
-		GetUserHomeDir Get user home directory
+	GetUserHomeDir Get user home directory
 
-		Get the current user home directory path.
+	Get the current user home directory path.
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InfoAPIGetUserHomeDirRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InfoAPIGetUserHomeDirRequest
 	*/
 	GetUserHomeDir(ctx context.Context) InfoAPIGetUserHomeDirRequest
 
@@ -35,12 +36,12 @@ type InfoAPI interface {
 	GetUserHomeDirExecute(r InfoAPIGetUserHomeDirRequest) (*UserHomeDirResponse, *http.Response, error)
 
 	/*
-		GetVersion Get version
+	GetVersion Get version
 
-		Get the current daemon version
+	Get the current daemon version
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InfoAPIGetVersionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InfoAPIGetVersionRequest
 	*/
 	GetVersion(ctx context.Context) InfoAPIGetVersionRequest
 
@@ -49,12 +50,12 @@ type InfoAPI interface {
 	GetVersionExecute(r InfoAPIGetVersionRequest) (map[string]string, *http.Response, error)
 
 	/*
-		GetWorkDir Get working directory
+	GetWorkDir Get working directory
 
-		Get the current working directory path. This is default directory used for running commands.
+	Get the current working directory path. This is default directory used for running commands.
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return InfoAPIGetWorkDirRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return InfoAPIGetWorkDirRequest
 	*/
 	GetWorkDir(ctx context.Context) InfoAPIGetWorkDirRequest
 
@@ -67,7 +68,7 @@ type InfoAPI interface {
 type InfoAPIService service
 
 type InfoAPIGetUserHomeDirRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InfoAPI
 }
 
@@ -80,25 +81,24 @@ GetUserHomeDir Get user home directory
 
 Get the current user home directory path.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InfoAPIGetUserHomeDirRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InfoAPIGetUserHomeDirRequest
 */
 func (a *InfoAPIService) GetUserHomeDir(ctx context.Context) InfoAPIGetUserHomeDirRequest {
 	return InfoAPIGetUserHomeDirRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return UserHomeDirResponse
+//  @return UserHomeDirResponse
 func (a *InfoAPIService) GetUserHomeDirExecute(r InfoAPIGetUserHomeDirRequest) (*UserHomeDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *UserHomeDirResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *UserHomeDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoAPIService.GetUserHomeDir")
@@ -167,7 +167,7 @@ func (a *InfoAPIService) GetUserHomeDirExecute(r InfoAPIGetUserHomeDirRequest) (
 }
 
 type InfoAPIGetVersionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InfoAPI
 }
 
@@ -180,25 +180,24 @@ GetVersion Get version
 
 Get the current daemon version
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InfoAPIGetVersionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InfoAPIGetVersionRequest
 */
 func (a *InfoAPIService) GetVersion(ctx context.Context) InfoAPIGetVersionRequest {
 	return InfoAPIGetVersionRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]string
+//  @return map[string]string
 func (a *InfoAPIService) GetVersionExecute(r InfoAPIGetVersionRequest) (map[string]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]string
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoAPIService.GetVersion")
@@ -267,7 +266,7 @@ func (a *InfoAPIService) GetVersionExecute(r InfoAPIGetVersionRequest) (map[stri
 }
 
 type InfoAPIGetWorkDirRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService InfoAPI
 }
 
@@ -280,25 +279,24 @@ GetWorkDir Get working directory
 
 Get the current working directory path. This is default directory used for running commands.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return InfoAPIGetWorkDirRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return InfoAPIGetWorkDirRequest
 */
 func (a *InfoAPIService) GetWorkDir(ctx context.Context) InfoAPIGetWorkDirRequest {
 	return InfoAPIGetWorkDirRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return WorkDirResponse
+//  @return WorkDirResponse
 func (a *InfoAPIService) GetWorkDirExecute(r InfoAPIGetWorkDirRequest) (*WorkDirResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *WorkDirResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *WorkDirResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "InfoAPIService.GetWorkDir")

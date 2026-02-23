@@ -21,9 +21,9 @@ type SandboxClass string
 
 // List of SandboxClass
 const (
-	SANDBOXCLASS_SMALL  SandboxClass = "small"
+	SANDBOXCLASS_SMALL SandboxClass = "small"
 	SANDBOXCLASS_MEDIUM SandboxClass = "medium"
-	SANDBOXCLASS_LARGE  SandboxClass = "large"
+	SANDBOXCLASS_LARGE SandboxClass = "large"
 )
 
 // All allowed values of SandboxClass enum
@@ -111,3 +111,4 @@ func (v *NullableSandboxClass) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

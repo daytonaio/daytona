@@ -44,7 +44,7 @@ type RunnerHealthMetrics struct {
 	// Total RAM in GiB on the runner
 	MemoryGiB float32 `json:"memoryGiB"`
 	// Total disk space in GiB on the runner
-	DiskGiB              float32 `json:"diskGiB"`
+	DiskGiB float32 `json:"diskGiB"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -368,7 +368,7 @@ func (o *RunnerHealthMetrics) SetDiskGiB(v float32) {
 }
 
 func (o RunnerHealthMetrics) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -421,10 +421,10 @@ func (o *RunnerHealthMetrics) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -496,3 +496,5 @@ func (v *NullableRunnerHealthMetrics) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

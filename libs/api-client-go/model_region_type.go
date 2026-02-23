@@ -21,9 +21,9 @@ type RegionType string
 
 // List of RegionType
 const (
-	REGIONTYPE_SHARED    RegionType = "shared"
+	REGIONTYPE_SHARED RegionType = "shared"
 	REGIONTYPE_DEDICATED RegionType = "dedicated"
-	REGIONTYPE_CUSTOM    RegionType = "custom"
+	REGIONTYPE_CUSTOM RegionType = "custom"
 )
 
 // All allowed values of RegionType enum
@@ -111,3 +111,4 @@ func (v *NullableRegionType) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

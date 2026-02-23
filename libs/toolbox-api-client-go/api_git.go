@@ -18,15 +18,16 @@ import (
 	"net/url"
 )
 
+
 type GitAPI interface {
 
 	/*
-		AddFiles Add files to Git staging
+	AddFiles Add files to Git staging
 
-		Add files to the Git staging area
+	Add files to the Git staging area
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIAddFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIAddFilesRequest
 	*/
 	AddFiles(ctx context.Context) GitAPIAddFilesRequest
 
@@ -34,12 +35,12 @@ type GitAPI interface {
 	AddFilesExecute(r GitAPIAddFilesRequest) (*http.Response, error)
 
 	/*
-		CheckoutBranch Checkout branch or commit
+	CheckoutBranch Checkout branch or commit
 
-		Switch to a different branch or commit in the Git repository
+	Switch to a different branch or commit in the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPICheckoutBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPICheckoutBranchRequest
 	*/
 	CheckoutBranch(ctx context.Context) GitAPICheckoutBranchRequest
 
@@ -47,12 +48,12 @@ type GitAPI interface {
 	CheckoutBranchExecute(r GitAPICheckoutBranchRequest) (*http.Response, error)
 
 	/*
-		CloneRepository Clone a Git repository
+	CloneRepository Clone a Git repository
 
-		Clone a Git repository to the specified path
+	Clone a Git repository to the specified path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPICloneRepositoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPICloneRepositoryRequest
 	*/
 	CloneRepository(ctx context.Context) GitAPICloneRepositoryRequest
 
@@ -60,12 +61,12 @@ type GitAPI interface {
 	CloneRepositoryExecute(r GitAPICloneRepositoryRequest) (*http.Response, error)
 
 	/*
-		CommitChanges Commit changes
+	CommitChanges Commit changes
 
-		Commit staged changes to the Git repository
+	Commit staged changes to the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPICommitChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPICommitChangesRequest
 	*/
 	CommitChanges(ctx context.Context) GitAPICommitChangesRequest
 
@@ -74,12 +75,12 @@ type GitAPI interface {
 	CommitChangesExecute(r GitAPICommitChangesRequest) (*GitCommitResponse, *http.Response, error)
 
 	/*
-		CreateBranch Create a new branch
+	CreateBranch Create a new branch
 
-		Create a new branch in the Git repository
+	Create a new branch in the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPICreateBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPICreateBranchRequest
 	*/
 	CreateBranch(ctx context.Context) GitAPICreateBranchRequest
 
@@ -87,12 +88,12 @@ type GitAPI interface {
 	CreateBranchExecute(r GitAPICreateBranchRequest) (*http.Response, error)
 
 	/*
-		DeleteBranch Delete a branch
+	DeleteBranch Delete a branch
 
-		Delete a branch from the Git repository
+	Delete a branch from the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIDeleteBranchRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIDeleteBranchRequest
 	*/
 	DeleteBranch(ctx context.Context) GitAPIDeleteBranchRequest
 
@@ -100,12 +101,12 @@ type GitAPI interface {
 	DeleteBranchExecute(r GitAPIDeleteBranchRequest) (*http.Response, error)
 
 	/*
-		GetCommitHistory Get commit history
+	GetCommitHistory Get commit history
 
-		Get the commit history of the Git repository
+	Get the commit history of the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIGetCommitHistoryRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIGetCommitHistoryRequest
 	*/
 	GetCommitHistory(ctx context.Context) GitAPIGetCommitHistoryRequest
 
@@ -114,12 +115,12 @@ type GitAPI interface {
 	GetCommitHistoryExecute(r GitAPIGetCommitHistoryRequest) ([]GitCommitInfo, *http.Response, error)
 
 	/*
-		GetStatus Get Git status
+	GetStatus Get Git status
 
-		Get the Git status of the repository at the specified path
+	Get the Git status of the repository at the specified path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIGetStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIGetStatusRequest
 	*/
 	GetStatus(ctx context.Context) GitAPIGetStatusRequest
 
@@ -128,12 +129,12 @@ type GitAPI interface {
 	GetStatusExecute(r GitAPIGetStatusRequest) (*GitStatus, *http.Response, error)
 
 	/*
-		ListBranches List branches
+	ListBranches List branches
 
-		Get a list of all branches in the Git repository
+	Get a list of all branches in the Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIListBranchesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIListBranchesRequest
 	*/
 	ListBranches(ctx context.Context) GitAPIListBranchesRequest
 
@@ -142,12 +143,12 @@ type GitAPI interface {
 	ListBranchesExecute(r GitAPIListBranchesRequest) (*ListBranchResponse, *http.Response, error)
 
 	/*
-		PullChanges Pull changes from remote
+	PullChanges Pull changes from remote
 
-		Pull changes from the remote Git repository
+	Pull changes from the remote Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIPullChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIPullChangesRequest
 	*/
 	PullChanges(ctx context.Context) GitAPIPullChangesRequest
 
@@ -155,12 +156,12 @@ type GitAPI interface {
 	PullChangesExecute(r GitAPIPullChangesRequest) (*http.Response, error)
 
 	/*
-		PushChanges Push changes to remote
+	PushChanges Push changes to remote
 
-		Push local changes to the remote Git repository
+	Push local changes to the remote Git repository
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return GitAPIPushChangesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return GitAPIPushChangesRequest
 	*/
 	PushChanges(ctx context.Context) GitAPIPushChangesRequest
 
@@ -172,9 +173,9 @@ type GitAPI interface {
 type GitAPIService service
 
 type GitAPIAddFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitAddRequest
+	request *GitAddRequest
 }
 
 // Add files request
@@ -192,22 +193,22 @@ AddFiles Add files to Git staging
 
 Add files to the Git staging area
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIAddFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIAddFilesRequest
 */
 func (a *GitAPIService) AddFiles(ctx context.Context) GitAPIAddFilesRequest {
 	return GitAPIAddFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) AddFilesExecute(r GitAPIAddFilesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.AddFiles")
@@ -272,9 +273,9 @@ func (a *GitAPIService) AddFilesExecute(r GitAPIAddFilesRequest) (*http.Response
 }
 
 type GitAPICheckoutBranchRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitCheckoutRequest
+	request *GitCheckoutRequest
 }
 
 // Checkout request
@@ -292,22 +293,22 @@ CheckoutBranch Checkout branch or commit
 
 Switch to a different branch or commit in the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPICheckoutBranchRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPICheckoutBranchRequest
 */
 func (a *GitAPIService) CheckoutBranch(ctx context.Context) GitAPICheckoutBranchRequest {
 	return GitAPICheckoutBranchRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) CheckoutBranchExecute(r GitAPICheckoutBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.CheckoutBranch")
@@ -372,9 +373,9 @@ func (a *GitAPIService) CheckoutBranchExecute(r GitAPICheckoutBranchRequest) (*h
 }
 
 type GitAPICloneRepositoryRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitCloneRequest
+	request *GitCloneRequest
 }
 
 // Clone repository request
@@ -392,22 +393,22 @@ CloneRepository Clone a Git repository
 
 Clone a Git repository to the specified path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPICloneRepositoryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPICloneRepositoryRequest
 */
 func (a *GitAPIService) CloneRepository(ctx context.Context) GitAPICloneRepositoryRequest {
 	return GitAPICloneRepositoryRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) CloneRepositoryExecute(r GitAPICloneRepositoryRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.CloneRepository")
@@ -472,9 +473,9 @@ func (a *GitAPIService) CloneRepositoryExecute(r GitAPICloneRepositoryRequest) (
 }
 
 type GitAPICommitChangesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitCommitRequest
+	request *GitCommitRequest
 }
 
 // Commit request
@@ -492,25 +493,24 @@ CommitChanges Commit changes
 
 Commit staged changes to the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPICommitChangesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPICommitChangesRequest
 */
 func (a *GitAPIService) CommitChanges(ctx context.Context) GitAPICommitChangesRequest {
 	return GitAPICommitChangesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return GitCommitResponse
+//  @return GitCommitResponse
 func (a *GitAPIService) CommitChangesExecute(r GitAPICommitChangesRequest) (*GitCommitResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *GitCommitResponse
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GitCommitResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.CommitChanges")
@@ -584,9 +584,9 @@ func (a *GitAPIService) CommitChangesExecute(r GitAPICommitChangesRequest) (*Git
 }
 
 type GitAPICreateBranchRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitBranchRequest
+	request *GitBranchRequest
 }
 
 // Create branch request
@@ -604,22 +604,22 @@ CreateBranch Create a new branch
 
 Create a new branch in the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPICreateBranchRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPICreateBranchRequest
 */
 func (a *GitAPIService) CreateBranch(ctx context.Context) GitAPICreateBranchRequest {
 	return GitAPICreateBranchRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) CreateBranchExecute(r GitAPICreateBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.CreateBranch")
@@ -684,9 +684,9 @@ func (a *GitAPIService) CreateBranchExecute(r GitAPICreateBranchRequest) (*http.
 }
 
 type GitAPIDeleteBranchRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitGitDeleteBranchRequest
+	request *GitGitDeleteBranchRequest
 }
 
 // Delete branch request
@@ -704,22 +704,22 @@ DeleteBranch Delete a branch
 
 Delete a branch from the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIDeleteBranchRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIDeleteBranchRequest
 */
 func (a *GitAPIService) DeleteBranch(ctx context.Context) GitAPIDeleteBranchRequest {
 	return GitAPIDeleteBranchRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) DeleteBranchExecute(r GitAPIDeleteBranchRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.DeleteBranch")
@@ -784,9 +784,9 @@ func (a *GitAPIService) DeleteBranchExecute(r GitAPIDeleteBranchRequest) (*http.
 }
 
 type GitAPIGetCommitHistoryRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	path       *string
+	path *string
 }
 
 // Repository path
@@ -804,25 +804,24 @@ GetCommitHistory Get commit history
 
 Get the commit history of the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIGetCommitHistoryRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIGetCommitHistoryRequest
 */
 func (a *GitAPIService) GetCommitHistory(ctx context.Context) GitAPIGetCommitHistoryRequest {
 	return GitAPIGetCommitHistoryRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []GitCommitInfo
+//  @return []GitCommitInfo
 func (a *GitAPIService) GetCommitHistoryExecute(r GitAPIGetCommitHistoryRequest) ([]GitCommitInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []GitCommitInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []GitCommitInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.GetCommitHistory")
@@ -895,9 +894,9 @@ func (a *GitAPIService) GetCommitHistoryExecute(r GitAPIGetCommitHistoryRequest)
 }
 
 type GitAPIGetStatusRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	path       *string
+	path *string
 }
 
 // Repository path
@@ -915,25 +914,24 @@ GetStatus Get Git status
 
 Get the Git status of the repository at the specified path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIGetStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIGetStatusRequest
 */
 func (a *GitAPIService) GetStatus(ctx context.Context) GitAPIGetStatusRequest {
 	return GitAPIGetStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return GitStatus
+//  @return GitStatus
 func (a *GitAPIService) GetStatusExecute(r GitAPIGetStatusRequest) (*GitStatus, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *GitStatus
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GitStatus
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.GetStatus")
@@ -1006,9 +1004,9 @@ func (a *GitAPIService) GetStatusExecute(r GitAPIGetStatusRequest) (*GitStatus, 
 }
 
 type GitAPIListBranchesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	path       *string
+	path *string
 }
 
 // Repository path
@@ -1026,25 +1024,24 @@ ListBranches List branches
 
 Get a list of all branches in the Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIListBranchesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIListBranchesRequest
 */
 func (a *GitAPIService) ListBranches(ctx context.Context) GitAPIListBranchesRequest {
 	return GitAPIListBranchesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ListBranchResponse
+//  @return ListBranchResponse
 func (a *GitAPIService) ListBranchesExecute(r GitAPIListBranchesRequest) (*ListBranchResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ListBranchResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ListBranchResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.ListBranches")
@@ -1117,9 +1114,9 @@ func (a *GitAPIService) ListBranchesExecute(r GitAPIListBranchesRequest) (*ListB
 }
 
 type GitAPIPullChangesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitRepoRequest
+	request *GitRepoRequest
 }
 
 // Pull request
@@ -1137,22 +1134,22 @@ PullChanges Pull changes from remote
 
 Pull changes from the remote Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIPullChangesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIPullChangesRequest
 */
 func (a *GitAPIService) PullChanges(ctx context.Context) GitAPIPullChangesRequest {
 	return GitAPIPullChangesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) PullChangesExecute(r GitAPIPullChangesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.PullChanges")
@@ -1217,9 +1214,9 @@ func (a *GitAPIService) PullChangesExecute(r GitAPIPullChangesRequest) (*http.Re
 }
 
 type GitAPIPushChangesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService GitAPI
-	request    *GitRepoRequest
+	request *GitRepoRequest
 }
 
 // Push request
@@ -1237,22 +1234,22 @@ PushChanges Push changes to remote
 
 Push local changes to the remote Git repository
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return GitAPIPushChangesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return GitAPIPushChangesRequest
 */
 func (a *GitAPIService) PushChanges(ctx context.Context) GitAPIPushChangesRequest {
 	return GitAPIPushChangesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *GitAPIService) PushChangesExecute(r GitAPIPushChangesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "GitAPIService.PushChanges")

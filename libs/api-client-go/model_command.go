@@ -26,7 +26,7 @@ type Command struct {
 	// The command that was executed
 	Command string `json:"command"`
 	// The exit code of the command
-	ExitCode             *float32 `json:"exitCode,omitempty"`
+	ExitCode *float32 `json:"exitCode,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -132,7 +132,7 @@ func (o *Command) SetExitCode(v float32) {
 }
 
 func (o Command) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -168,10 +168,10 @@ func (o *Command) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -234,3 +234,5 @@ func (v *NullableCommand) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

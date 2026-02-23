@@ -21,14 +21,14 @@ type SnapshotState string
 
 // List of SnapshotState
 const (
-	SNAPSHOTSTATE_BUILDING     SnapshotState = "building"
-	SNAPSHOTSTATE_PENDING      SnapshotState = "pending"
-	SNAPSHOTSTATE_PULLING      SnapshotState = "pulling"
-	SNAPSHOTSTATE_ACTIVE       SnapshotState = "active"
-	SNAPSHOTSTATE_INACTIVE     SnapshotState = "inactive"
-	SNAPSHOTSTATE_ERROR        SnapshotState = "error"
+	SNAPSHOTSTATE_BUILDING SnapshotState = "building"
+	SNAPSHOTSTATE_PENDING SnapshotState = "pending"
+	SNAPSHOTSTATE_PULLING SnapshotState = "pulling"
+	SNAPSHOTSTATE_ACTIVE SnapshotState = "active"
+	SNAPSHOTSTATE_INACTIVE SnapshotState = "inactive"
+	SNAPSHOTSTATE_ERROR SnapshotState = "error"
 	SNAPSHOTSTATE_BUILD_FAILED SnapshotState = "build_failed"
-	SNAPSHOTSTATE_REMOVING     SnapshotState = "removing"
+	SNAPSHOTSTATE_REMOVING SnapshotState = "removing"
 )
 
 // All allowed values of SnapshotState enum
@@ -121,3 +121,4 @@ func (v *NullableSnapshotState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+

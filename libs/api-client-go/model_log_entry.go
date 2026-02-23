@@ -38,7 +38,7 @@ type LogEntry struct {
 	// Associated trace ID if available
 	TraceId *string `json:"traceId,omitempty"`
 	// Associated span ID if available
-	SpanId               *string `json:"spanId,omitempty"`
+	SpanId *string `json:"spanId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -308,7 +308,7 @@ func (o *LogEntry) SetSpanId(v string) {
 }
 
 func (o LogEntry) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -358,10 +358,10 @@ func (o *LogEntry) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -430,3 +430,5 @@ func (v *NullableLogEntry) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

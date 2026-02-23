@@ -25,7 +25,7 @@ type UpdateRegion struct {
 	// SSH Gateway URL for the region
 	SshGatewayUrl NullableString `json:"sshGatewayUrl,omitempty"`
 	// Snapshot Manager URL for the region
-	SnapshotManagerUrl   NullableString `json:"snapshotManagerUrl,omitempty"`
+	SnapshotManagerUrl NullableString `json:"snapshotManagerUrl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -80,7 +80,6 @@ func (o *UpdateRegion) HasProxyUrl() bool {
 func (o *UpdateRegion) SetProxyUrl(v string) {
 	o.ProxyUrl.Set(&v)
 }
-
 // SetProxyUrlNil sets the value for ProxyUrl to be an explicit nil
 func (o *UpdateRegion) SetProxyUrlNil() {
 	o.ProxyUrl.Set(nil)
@@ -123,7 +122,6 @@ func (o *UpdateRegion) HasSshGatewayUrl() bool {
 func (o *UpdateRegion) SetSshGatewayUrl(v string) {
 	o.SshGatewayUrl.Set(&v)
 }
-
 // SetSshGatewayUrlNil sets the value for SshGatewayUrl to be an explicit nil
 func (o *UpdateRegion) SetSshGatewayUrlNil() {
 	o.SshGatewayUrl.Set(nil)
@@ -166,7 +164,6 @@ func (o *UpdateRegion) HasSnapshotManagerUrl() bool {
 func (o *UpdateRegion) SetSnapshotManagerUrl(v string) {
 	o.SnapshotManagerUrl.Set(&v)
 }
-
 // SetSnapshotManagerUrlNil sets the value for SnapshotManagerUrl to be an explicit nil
 func (o *UpdateRegion) SetSnapshotManagerUrlNil() {
 	o.SnapshotManagerUrl.Set(nil)
@@ -178,7 +175,7 @@ func (o *UpdateRegion) UnsetSnapshotManagerUrl() {
 }
 
 func (o UpdateRegion) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -262,3 +259,5 @@ func (v *NullableUpdateRegion) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

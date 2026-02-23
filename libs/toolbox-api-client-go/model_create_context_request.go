@@ -19,7 +19,7 @@ var _ MappedNullable = &CreateContextRequest{}
 
 // CreateContextRequest struct for CreateContextRequest
 type CreateContextRequest struct {
-	Cwd      *string `json:"cwd,omitempty"`
+	Cwd *string `json:"cwd,omitempty"`
 	Language *string `json:"language,omitempty"`
 }
 
@@ -105,7 +105,7 @@ func (o *CreateContextRequest) SetLanguage(v string) {
 }
 
 func (o CreateContextRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,3 +158,5 @@ func (v *NullableCreateContextRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

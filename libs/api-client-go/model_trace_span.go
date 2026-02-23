@@ -38,7 +38,7 @@ type TraceSpan struct {
 	// Status code of the span
 	StatusCode *string `json:"statusCode,omitempty"`
 	// Status message
-	StatusMessage        *string `json:"statusMessage,omitempty"`
+	StatusMessage *string `json:"statusMessage,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -308,7 +308,7 @@ func (o *TraceSpan) SetStatusMessage(v string) {
 }
 
 func (o TraceSpan) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -358,10 +358,10 @@ func (o *TraceSpan) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -430,3 +430,5 @@ func (v *NullableTraceSpan) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

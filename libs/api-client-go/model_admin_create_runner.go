@@ -22,8 +22,8 @@ var _ MappedNullable = &AdminCreateRunner{}
 // AdminCreateRunner struct for AdminCreateRunner
 type AdminCreateRunner struct {
 	RegionId string `json:"regionId"`
-	Name     string `json:"name"`
-	ApiKey   string `json:"apiKey"`
+	Name string `json:"name"`
+	ApiKey string `json:"apiKey"`
 	// The api version of the runner to create
 	ApiVersion string `json:"apiVersion" validate:"regexp=^(0|2)$"`
 	// The domain of the runner
@@ -37,7 +37,7 @@ type AdminCreateRunner struct {
 	// The memory capacity of the runner in GiB
 	MemoryGiB *float32 `json:"memoryGiB,omitempty"`
 	// The disk capacity of the runner in GiB
-	DiskGiB              *float32 `json:"diskGiB,omitempty"`
+	DiskGiB *float32 `json:"diskGiB,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -353,7 +353,7 @@ func (o *AdminCreateRunner) SetDiskGiB(v float32) {
 }
 
 func (o AdminCreateRunner) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -408,10 +408,10 @@ func (o *AdminCreateRunner) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -481,3 +481,5 @@ func (v *NullableAdminCreateRunner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

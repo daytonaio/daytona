@@ -21,19 +21,19 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	MaxCpuPerSandbox                    NullableFloat32 `json:"maxCpuPerSandbox"`
-	MaxMemoryPerSandbox                 NullableFloat32 `json:"maxMemoryPerSandbox"`
-	MaxDiskPerSandbox                   NullableFloat32 `json:"maxDiskPerSandbox"`
-	SnapshotQuota                       NullableFloat32 `json:"snapshotQuota"`
-	MaxSnapshotSize                     NullableFloat32 `json:"maxSnapshotSize"`
-	VolumeQuota                         NullableFloat32 `json:"volumeQuota"`
-	AuthenticatedRateLimit              NullableFloat32 `json:"authenticatedRateLimit"`
-	SandboxCreateRateLimit              NullableFloat32 `json:"sandboxCreateRateLimit"`
-	SandboxLifecycleRateLimit           NullableFloat32 `json:"sandboxLifecycleRateLimit"`
-	AuthenticatedRateLimitTtlSeconds    NullableFloat32 `json:"authenticatedRateLimitTtlSeconds"`
-	SandboxCreateRateLimitTtlSeconds    NullableFloat32 `json:"sandboxCreateRateLimitTtlSeconds"`
+	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox"`
+	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
+	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox"`
+	SnapshotQuota NullableFloat32 `json:"snapshotQuota"`
+	MaxSnapshotSize NullableFloat32 `json:"maxSnapshotSize"`
+	VolumeQuota NullableFloat32 `json:"volumeQuota"`
+	AuthenticatedRateLimit NullableFloat32 `json:"authenticatedRateLimit"`
+	SandboxCreateRateLimit NullableFloat32 `json:"sandboxCreateRateLimit"`
+	SandboxLifecycleRateLimit NullableFloat32 `json:"sandboxLifecycleRateLimit"`
+	AuthenticatedRateLimitTtlSeconds NullableFloat32 `json:"authenticatedRateLimitTtlSeconds"`
+	SandboxCreateRateLimitTtlSeconds NullableFloat32 `json:"sandboxCreateRateLimitTtlSeconds"`
 	SandboxLifecycleRateLimitTtlSeconds NullableFloat32 `json:"sandboxLifecycleRateLimitTtlSeconds"`
-	AdditionalProperties                map[string]interface{}
+	AdditionalProperties map[string]interface{}
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -380,7 +380,7 @@ func (o *UpdateOrganizationQuota) SetSandboxLifecycleRateLimitTtlSeconds(v float
 }
 
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -433,10 +433,10 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -508,3 +508,5 @@ func (v *NullableUpdateOrganizationQuota) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

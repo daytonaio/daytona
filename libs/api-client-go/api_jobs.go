@@ -20,14 +20,15 @@ import (
 	"strings"
 )
 
+
 type JobsAPI interface {
 
 	/*
-		GetJob Get job details
+	GetJob Get job details
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param jobId ID of the job
-		@return JobsAPIGetJobRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param jobId ID of the job
+	@return JobsAPIGetJobRequest
 	*/
 	GetJob(ctx context.Context, jobId string) JobsAPIGetJobRequest
 
@@ -36,12 +37,12 @@ type JobsAPI interface {
 	GetJobExecute(r JobsAPIGetJobRequest) (*Job, *http.Response, error)
 
 	/*
-		ListJobs List jobs for the runner
+	ListJobs List jobs for the runner
 
-		Returns a paginated list of jobs for the runner, optionally filtered by status.
+	Returns a paginated list of jobs for the runner, optionally filtered by status.
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return JobsAPIListJobsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return JobsAPIListJobsRequest
 	*/
 	ListJobs(ctx context.Context) JobsAPIListJobsRequest
 
@@ -50,12 +51,12 @@ type JobsAPI interface {
 	ListJobsExecute(r JobsAPIListJobsRequest) (*PaginatedJobs, *http.Response, error)
 
 	/*
-		PollJobs Long poll for jobs
+	PollJobs Long poll for jobs
 
-		Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
+	Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return JobsAPIPollJobsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return JobsAPIPollJobsRequest
 	*/
 	PollJobs(ctx context.Context) JobsAPIPollJobsRequest
 
@@ -64,11 +65,11 @@ type JobsAPI interface {
 	PollJobsExecute(r JobsAPIPollJobsRequest) (*PollJobsResponse, *http.Response, error)
 
 	/*
-		UpdateJobStatus Update job status
+	UpdateJobStatus Update job status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param jobId ID of the job
-		@return JobsAPIUpdateJobStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param jobId ID of the job
+	@return JobsAPIUpdateJobStatusRequest
 	*/
 	UpdateJobStatus(ctx context.Context, jobId string) JobsAPIUpdateJobStatusRequest
 
@@ -81,9 +82,9 @@ type JobsAPI interface {
 type JobsAPIService service
 
 type JobsAPIGetJobRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService JobsAPI
-	jobId      string
+	jobId string
 }
 
 func (r JobsAPIGetJobRequest) Execute() (*Job, *http.Response, error) {
@@ -93,27 +94,26 @@ func (r JobsAPIGetJobRequest) Execute() (*Job, *http.Response, error) {
 /*
 GetJob Get job details
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param jobId ID of the job
-	@return JobsAPIGetJobRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param jobId ID of the job
+ @return JobsAPIGetJobRequest
 */
 func (a *JobsAPIService) GetJob(ctx context.Context, jobId string) JobsAPIGetJobRequest {
 	return JobsAPIGetJobRequest{
 		ApiService: a,
-		ctx:        ctx,
-		jobId:      jobId,
+		ctx: ctx,
+		jobId: jobId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Job
+//  @return Job
 func (a *JobsAPIService) GetJobExecute(r JobsAPIGetJobRequest) (*Job, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Job
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Job
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsAPIService.GetJob")
@@ -183,12 +183,12 @@ func (a *JobsAPIService) GetJobExecute(r JobsAPIGetJobRequest) (*Job, *http.Resp
 }
 
 type JobsAPIListJobsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService JobsAPI
-	page       *float32
-	limit      *float32
-	status     *JobStatus
-	offset     *float32
+	page *float32
+	limit *float32
+	status *JobStatus
+	offset *float32
 }
 
 // Page number of the results
@@ -224,25 +224,24 @@ ListJobs List jobs for the runner
 
 Returns a paginated list of jobs for the runner, optionally filtered by status.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return JobsAPIListJobsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return JobsAPIListJobsRequest
 */
 func (a *JobsAPIService) ListJobs(ctx context.Context) JobsAPIListJobsRequest {
 	return JobsAPIListJobsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedJobs
+//  @return PaginatedJobs
 func (a *JobsAPIService) ListJobsExecute(r JobsAPIListJobsRequest) (*PaginatedJobs, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedJobs
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedJobs
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsAPIService.ListJobs")
@@ -329,10 +328,10 @@ func (a *JobsAPIService) ListJobsExecute(r JobsAPIListJobsRequest) (*PaginatedJo
 }
 
 type JobsAPIPollJobsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService JobsAPI
-	timeout    *float32
-	limit      *float32
+	timeout *float32
+	limit *float32
 }
 
 // Timeout in seconds for long polling (default: 30, max: 60)
@@ -356,25 +355,24 @@ PollJobs Long poll for jobs
 
 Long poll endpoint for runners to fetch pending jobs. Returns immediately if jobs are available, otherwise waits up to timeout seconds.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return JobsAPIPollJobsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return JobsAPIPollJobsRequest
 */
 func (a *JobsAPIService) PollJobs(ctx context.Context) JobsAPIPollJobsRequest {
 	return JobsAPIPollJobsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PollJobsResponse
+//  @return PollJobsResponse
 func (a *JobsAPIService) PollJobsExecute(r JobsAPIPollJobsRequest) (*PollJobsResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PollJobsResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PollJobsResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsAPIService.PollJobs")
@@ -449,9 +447,9 @@ func (a *JobsAPIService) PollJobsExecute(r JobsAPIPollJobsRequest) (*PollJobsRes
 }
 
 type JobsAPIUpdateJobStatusRequest struct {
-	ctx             context.Context
-	ApiService      JobsAPI
-	jobId           string
+	ctx context.Context
+	ApiService JobsAPI
+	jobId string
 	updateJobStatus *UpdateJobStatus
 }
 
@@ -467,27 +465,26 @@ func (r JobsAPIUpdateJobStatusRequest) Execute() (*Job, *http.Response, error) {
 /*
 UpdateJobStatus Update job status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param jobId ID of the job
-	@return JobsAPIUpdateJobStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param jobId ID of the job
+ @return JobsAPIUpdateJobStatusRequest
 */
 func (a *JobsAPIService) UpdateJobStatus(ctx context.Context, jobId string) JobsAPIUpdateJobStatusRequest {
 	return JobsAPIUpdateJobStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		jobId:      jobId,
+		ctx: ctx,
+		jobId: jobId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Job
+//  @return Job
 func (a *JobsAPIService) UpdateJobStatusExecute(r JobsAPIUpdateJobStatusRequest) (*Job, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Job
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Job
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "JobsAPIService.UpdateJobStatus")

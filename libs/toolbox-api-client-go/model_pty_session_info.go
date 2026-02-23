@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -21,15 +21,15 @@ var _ MappedNullable = &PtySessionInfo{}
 
 // PtySessionInfo struct for PtySessionInfo
 type PtySessionInfo struct {
-	Active    bool              `json:"active"`
-	Cols      int32             `json:"cols"`
-	CreatedAt string            `json:"createdAt"`
-	Cwd       string            `json:"cwd"`
-	Envs      map[string]string `json:"envs"`
-	Id        string            `json:"id"`
+	Active bool `json:"active"`
+	Cols int32 `json:"cols"`
+	CreatedAt string `json:"createdAt"`
+	Cwd string `json:"cwd"`
+	Envs map[string]string `json:"envs"`
+	Id string `json:"id"`
 	// Whether this session uses lazy start
-	LazyStart bool  `json:"lazyStart"`
-	Rows      int32 `json:"rows"`
+	LazyStart bool `json:"lazyStart"`
+	Rows int32 `json:"rows"`
 }
 
 type _PtySessionInfo PtySessionInfo
@@ -252,7 +252,7 @@ func (o *PtySessionInfo) SetRows(v int32) {
 }
 
 func (o PtySessionInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -292,10 +292,10 @@ func (o *PtySessionInfo) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -351,3 +351,5 @@ func (v *NullablePtySessionInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

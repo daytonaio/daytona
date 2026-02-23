@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -21,11 +21,11 @@ var _ MappedNullable = &GitCommitRequest{}
 
 // GitCommitRequest struct for GitCommitRequest
 type GitCommitRequest struct {
-	AllowEmpty *bool  `json:"allow_empty,omitempty"`
-	Author     string `json:"author"`
-	Email      string `json:"email"`
-	Message    string `json:"message"`
-	Path       string `json:"path"`
+	AllowEmpty *bool `json:"allow_empty,omitempty"`
+	Author string `json:"author"`
+	Email string `json:"email"`
+	Message string `json:"message"`
+	Path string `json:"path"`
 }
 
 type _GitCommitRequest GitCommitRequest
@@ -180,7 +180,7 @@ func (o *GitCommitRequest) SetPath(v string) {
 }
 
 func (o GitCommitRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -215,10 +215,10 @@ func (o *GitCommitRequest) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -274,3 +274,5 @@ func (v *NullableGitCommitRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+
