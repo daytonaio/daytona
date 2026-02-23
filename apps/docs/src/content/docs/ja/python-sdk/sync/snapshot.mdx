@@ -3,108 +3,112 @@ title: "スナップショット"
 hideTitleOnPage: true
 ---
 
-## スナップショット
+## スナップショット \{#snapshot\}
 
 ```python
-class Snapshot(SnapshotDto)
+class Snapshot(SyncSnapshotDto)
 ```
 
-事前に構成されたサンドボックスである Daytona のスナップショットを表します。
+事前構成済みのサンドボックスである Daytona のスナップショットを表します。
 
 **属性**:
 
-- `id` _StrictStr_ - スナップショットの一意の識別子。
-- `organization_id` _Optional[StrictStr]_ - スナップショットの組織ID。
-- `general` _Optional[bool]_ - スナップショットが汎用かどうか。
-- `name` _StrictStr_ - スナップショット名。
-- `image_name` _StrictStr_ - スナップショットのイメージ名。
-- `state` _StrictStr_ - スナップショットの状態。
-- `size` _Optional[Union[StrictFloat, StrictInt]]_ - スナップショットのサイズ。
-- `entrypoint` _Optional[List[str]]_ - スナップショットのエントリポイント。
-- `cpu` _Union[StrictFloat, StrictInt]_ - スナップショットの CPU。
-- `gpu` _Union[StrictFloat, StrictInt]_ - スナップショットの GPU。
-- `mem` _Union[StrictFloat, StrictInt]_ - スナップショットのメモリ（GiB）。
-- `disk` _Union[StrictFloat, StrictInt]_ - スナップショットのディスク（GiB）。
-- `error_reason` _Optional[StrictStr]_ - スナップショットのエラー理由。
-- `created_at` _StrictStr_ - スナップショットの作成時刻。
-- `updated_at` _StrictStr_ - スナップショットの最終更新時刻。
-- `last_used_at` _StrictStr_ - スナップショットの最終使用時刻。
+* `id` *str* - スナップショットの一意の識別子。
+* `organization_id` *str | None* - スナップショットの所属組織の ID。
+* `general` *bool* - スナップショットが汎用スナップショットかどうか。
+* `name` *str* - スナップショットの名前。
+* `image_name` *str* - スナップショットのイメージ名。
+* `state` *str* - スナップショットの状態。
+* `size` *float | int | None* - スナップショットのサイズ。
+* `entrypoint` *list[str] | None* - スナップショットのエントリポイント。
+* `cpu` *float | int* - スナップショットに割り当てられた CPU。
+* `gpu` *float | int* - スナップショットに割り当てられた GPU。
+* `mem` *float | int* - スナップショットに割り当てられたメモリ（GiB 単位）。
+* `disk` *float | int* - スナップショットに割り当てられたディスク（GiB 単位）。
+* `error_reason` *str | None* - スナップショットのエラー理由（原因）。
+* `created_at` *str* - スナップショットが作成されたタイムスタンプ。
+* `updated_at` *str* - スナップショットが最後に更新されたタイムスタンプ。
+* `last_used_at` *str* - スナップショットが最後に使用されたタイムスタンプ。
 
-
-## SnapshotService
+## スナップショットサービス \{#snapshotservice\}
 
 ```python
 class SnapshotService()
 ```
 
-Daytonaのスナップショットを管理するサービス。スナップショットの一覧、取得、作成、削除に使用できます。
+Daytonaのスナップショットを管理するサービス。スナップショットの一覧表示、取得、作成、削除に利用できます。
 
-#### SnapshotService.list
+#### SnapshotService.list \{#snapshotservicelist\}
 
 ```python
-@intercept_errors(message_prefix="Failed to list snapshots: ")
-def list() -> List[Snapshot]
+@intercept_errors(message_prefix="スナップショットの一覧取得に失敗しました: ")
+@with_instrumentation()
+def list(page: int | None = None,
+         limit: int | None = None) -> PaginatedSnapshots
 ```
 
-すべてのスナップショットを一覧します。
+スナップショットのページ分割された一覧を返します。
 
-**Returns**:
+**引数**:
 
-- `List[Snapshot]` - すべてのスナップショットのリスト。
-  
+* `page` *int | None* - ページ番号（1から開始）。
+* `limit` *int | None* - 1ページあたりの最大件数。
 
-**Example**:
+**戻り値**:
+
+* `PaginatedSnapshots` - ページ分割されたスナップショットの一覧。
+
+**例**:
 
 ```python
 daytona = Daytona()
-snapshots = daytona.snapshot.list()
-for snapshot in snapshots:
+result = daytona.snapshot.list(page=2, limit=10)
+for snapshot in result.items:
     print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### SnapshotService.delete
+#### SnapshotService.delete \{#snapshotservicedelete\}
 
 ```python
-@intercept_errors(message_prefix="Failed to delete snapshot: ")
+@intercept_errors(message_prefix="スナップショットの削除に失敗しました: ")
+@with_instrumentation()
 def delete(snapshot: Snapshot) -> None
 ```
 
 スナップショットを削除します。
 
-**Arguments**:
+**引数**:
 
-- `snapshot` _Snapshot_ - 削除するスナップショット。
-  
+* `snapshot` *スナップショット* - 削除するスナップショット。
 
-**Example**:
+**例**:
 
 ```python
 daytona = Daytona()
 snapshot = daytona.snapshot.get("test-snapshot")
 daytona.snapshot.delete(snapshot)
-print("Snapshot deleted")
+print("スナップショットが削除されました")
 ```
 
-#### SnapshotService.get
+#### SnapshotService.get \{#snapshotserviceget\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get snapshot: ")
+@intercept_errors(message_prefix="スナップショットの取得に失敗しました: ")
+@with_instrumentation()
 def get(name: str) -> Snapshot
 ```
 
-名前でスナップショットを取得します。
+名前を指定してスナップショットを取得します。
 
-**Arguments**:
+**引数**:
 
-- `name` _str_ - 取得するスナップショットの名前。
-  
+* `name` *str* - 取得するスナップショットの名前。
 
-**Returns**:
+**戻り値**:
 
-- `Snapshot` - 取得したスナップショットオブジェクト。
-  
+* `Snapshot` - スナップショットのオブジェクト。
 
-**Example**:
+**例**:
 
 ```python
 daytona = Daytona()
@@ -112,27 +116,27 @@ snapshot = daytona.snapshot.get("test-snapshot-name")
 print(f"{snapshot.name} ({snapshot.image_name})")
 ```
 
-#### SnapshotService.create
+#### SnapshotService.create \{#snapshotservicecreate\}
 
 ```python
 @intercept_errors(message_prefix="Failed to create snapshot: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Failed to create snapshot within {timeout} seconds timeout period."))
+@with_timeout()
+@with_instrumentation()
 def create(params: CreateSnapshotParams,
            *,
-           on_logs: Callable[[str], None] = None,
-           timeout: Optional[float] = 0) -> Snapshot
+           on_logs: Callable[[str], None] | None = None,
+           timeout: float | None = 0) -> Snapshot
 ```
 
-指定されたImage定義から新しいスナップショットを作成し、登録します。
+指定された Image 定義から新しいスナップショットを作成して登録します。
 
-**Arguments**:
+**引数**:
 
-- `params` _CreateSnapshotParams_ - スナップショット作成用のパラメータ。
-- `on_logs` _Callable[[str], None]_ - スナップショット作成時のログを処理するコールバック関数。
-- `timeout` _Optional[float]_ - 既定ではタイムアウトなし。タイムアウト秒数（0は無制限）。
+* `params` *CreateSnapshotParams* - スナップショット作成用のパラメータ。
+* `on_logs` *Callable[[str], None]* - スナップショット作成時のログを処理するコールバック関数。
+* `timeout` *float | None* - 既定値はタイムアウトなし。秒で指定（0 はタイムアウトなし）。
 
-**Example**:
+**例**:
 
 ```python
 image = Image.debianSlim('3.12').pipInstall('numpy')
@@ -142,54 +146,72 @@ daytona.snapshot.create(
 )
 ```
 
-#### SnapshotService.activate
+#### SnapshotService.activate \{#snapshotserviceactivate\}
 
 ```python
+@with_instrumentation()
 def activate(snapshot: Snapshot) -> Snapshot
 ```
 
-スナップショットをアクティブ化します。
+スナップショットを有効化します。
 
-**Arguments**:
+**引数**:
 
-- `snapshot` _Snapshot_ - 対象のスナップショットインスタンス。
+* `snapshot` *スナップショット* - スナップショットのインスタンス。
 
-**Returns**:
+**戻り値**:
 
-- `Snapshot` - アクティブ化されたスナップショットインスタンス。
+* `Snapshot` - 有効化されたスナップショットのインスタンス。
 
-#### SnapshotService.process\_image\_context
+#### SnapshotService.process_image_context \{#snapshotserviceprocess_image_context\}
 
 ```python
 @staticmethod
+@with_instrumentation()
 def process_image_context(object_storage_api: ObjectStorageApi,
-                          image: Image) -> List[str]
+                          image: Image) -> list[str]
 ```
 
-イメージのコンテキストをオブジェクトストレージにアップロードして処理します。
+画像のコンテキストをオブジェクトストレージにアップロードして処理します。
 
-**Arguments**:
+**引数**:
 
-- `image` _Image_ - Imageインスタンス。
+* `image` *Image* - Image インスタンス。
 
-**Returns**:
+**返り値**:
 
-- `List[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
+* `list[str]` - オブジェクトストレージに保存されたコンテキストハッシュのリスト。
 
-## CreateSnapshotParams
+## ページ分割されたスナップショット \{#paginatedsnapshots\}
+
+```python
+class PaginatedSnapshots(PaginatedSnapshotsDto)
+```
+
+Daytona のスナップショットのページネートされたリストを表します。
+
+**属性**:
+
+* `items` *list[Snapshot]* - 現在のページに含まれるスナップショットインスタンスの一覧。
+* `total` *int* - すべてのページを通したスナップショットの総数。
+* `page` *int* - 現在のページ番号。
+* `total_pages` *int* - 利用可能なページ総数。
+
+## CreateSnapshotParams \{#createsnapshotparams\}
 
 ```python
 class CreateSnapshotParams(BaseModel)
 ```
 
-新規スナップショット作成用のパラメータ。
+新しいスナップショットを作成するためのパラメータ。
 
 **属性**:
 
-- `name` _Optional[str]_ - スナップショット名。
-- `image` _Union[str, Image]_ - スナップショットのイメージ。文字列が指定された場合は、
+* `name` *str* - スナップショットの名前。
+* `image` *str | Image* - スナップショットのイメージ。文字列が指定された場合は、
   いずれかのレジストリで利用可能である必要があります。Image インスタンスが指定された場合は、
-  Daytona で新しいイメージを作成するために使用されます。
-- `resources` _Optional[Resources]_ - スナップショットのリソース。
-- `entrypoint` _Optional[List[str]]_ - スナップショットのエントリポイント。
-
+  Daytona 上で新しいイメージを作成する際に使用されます。
+* `resources` *Resources | None* - スナップショットのリソース。
+* `entrypoint` *list[str] | None* - スナップショットのエントリポイント。
+* `region_id` *str | None* - スナップショットを利用可能にするリージョンの ID。
+  指定しない場合は、組織のデフォルトリージョンが使用されます。
