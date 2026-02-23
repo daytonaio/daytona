@@ -44,6 +44,9 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     sandbox.enforceInvariants()
 
     await this.repository.insert(sandbox)
+
+    this.invalidateLookupCacheOnInsert(sandbox)
+
     return sandbox
   }
 
@@ -96,7 +99,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     sandbox.updatedAt = new Date()
 
     this.emitUpdateEvents(sandbox, previousSandbox)
-    this.invalidateLookupCache(sandbox, previousSandbox)
+    this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
 
     return sandbox
   }
@@ -152,16 +155,33 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       sandbox.updatedAt = new Date()
 
       this.emitUpdateEvents(sandbox, previousSandbox)
-      this.invalidateLookupCache(sandbox, previousSandbox)
+      this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
 
       return sandbox
     })
   }
 
   /**
+   * Invalidates the sandbox lookup cache for the inserted sandbox.
+   */
+  private invalidateLookupCacheOnInsert(sandbox: Sandbox): void {
+    try {
+      this.sandboxLookupCacheInvalidationService.invalidateOrgId({
+        sandboxId: sandbox.id,
+        organizationId: sandbox.organizationId,
+        name: sandbox.name,
+      })
+    } catch (error) {
+      this.logger.warn(
+        `Failed to enqueue sandbox lookup cache invalidation on insert (id, organizationId, name) for ${sandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  }
+
+  /**
    * Invalidates the sandbox lookup cache for the updated sandbox.
    */
-  private invalidateLookupCache(
+  private invalidateLookupCacheOnUpdate(
     updatedSandbox: Sandbox,
     previousSandbox: Pick<Sandbox, 'organizationId' | 'name' | 'authToken'>,
   ): void {
@@ -175,7 +195,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       })
     } catch (error) {
       this.logger.warn(
-        `Failed to enqueue sandbox lookup cache invalidation (id, organizationId, name) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to enqueue sandbox lookup cache invalidation on update (id, organizationId, name) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
 
@@ -187,7 +207,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       }
     } catch (error) {
       this.logger.warn(
-        `Failed to enqueue sandbox lookup cache invalidation (authToken) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to enqueue sandbox lookup cache invalidation on update (authToken) for ${updatedSandbox.id}: ${error instanceof Error ? error.message : String(error)}`,
       )
     }
   }
