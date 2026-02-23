@@ -13,6 +13,8 @@ COPY . .
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
 
+ENV GONOSUMDB=github.com/daytonaio/daytona
+
 RUN yarn
 
 RUN yarn nx build proxy --configuration=production --nxBail=true
