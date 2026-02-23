@@ -3,18 +3,17 @@ title: "ObjectStorage"
 hideTitleOnPage: true
 ---
 
-
-## ObjectStorage
+## ObjectStorage \{#objectstorage\}
 
 オブジェクトストレージサービスとやり取りするための ObjectStorage クラス。
 
-### Param
+### Param \{#param\}
 
 オブジェクトストレージサービスの構成。
 
-### Constructors
+### Constructors \{#constructors\}
 
-#### new ObjectStorage()
+#### new ObjectStorage() \{#new-objectstorage\}
 
 ```ts
 new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
@@ -22,16 +21,15 @@ new ObjectStorage(config: ObjectStorageConfig): ObjectStorage
 
 **Parameters**:
 
-- `config` _ObjectStorageConfig_
-
+* `config` *ObjectStorageConfig*
 
 **Returns**:
 
-- `ObjectStorage`
+* `ObjectStorage`
 
-### Methods
+### Methods \{#methods\}
 
-#### upload()
+#### upload() \{#upload\}
 
 ```ts
 upload(
@@ -44,25 +42,24 @@ archiveBasePath: string): Promise<string>
 
 **Parameters**:
 
-- `path` _string_ - アップロード対象のファイルまたはディレクトリのパス。
-- `organizationId` _string_ - アップロードに使用する組織ID。
-- `archiveBasePath` _string_ - アーカイブで使用するベースパス。
-
+* `path` *string* - アップロード対象のファイルまたはディレクトリのパス。
+* `organizationId` *string* - アップロードに使用する組織ID。
+* `archiveBasePath` *string* - アーカイブで使用するベースパス。
 
 **Returns**:
 
-- `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ値。
+* `Promise<string>` - アップロードされたファイルまたはディレクトリのハッシュ値。
+
 ***
 
-
-## ObjectStorageConfig
+## ObjectStorageConfig \{#objectstorageconfig\}
 
 ObjectStorage クラスの設定。
 
 **プロパティ**:
 
-- `accessKeyId` _string_ - オブジェクトストレージサービスのアクセスキー ID。
-- `bucketName?` _string_ - 使用するバケット名。
-- `endpointUrl` _string_ - オブジェクトストレージサービスのエンドポイント URL。
-- `secretAccessKey` _string_ - オブジェクトストレージサービスのシークレットアクセスキー。
-- `sessionToken?` _string_ - オブジェクトストレージサービスのセッショントークン（一時的な認証情報で使用）。
+* `accessKeyId` *string* - オブジェクトストレージサービスのアクセスキー ID。
+* `bucketName?` *string* - 使用するバケット名。
+* `endpointUrl` *string* - オブジェクトストレージサービスのエンドポイント URL。
+* `secretAccessKey` *string* - オブジェクトストレージサービスのシークレットアクセスキー。
+* `sessionToken?` *string* - オブジェクトストレージサービスのセッショントークン（一時的な認証情報で使用）。
