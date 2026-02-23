@@ -131,7 +131,7 @@ jobs:
           python-version: '3.12'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.5'
       - name: Install Ruby dependencies
         run: |
           bundle install
