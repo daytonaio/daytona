@@ -24,7 +24,7 @@ The interface plane provides client interfaces for users and agents to interact 
 
 ### Control plane
 
-The control plane is the central coordination layer of the Daytona platform. It receives all client requests, manages the full sandbox lifecycle from creation to destruction, schedules sandboxes onto runners, and continuously reconciles desired state against actual state across the infrastructure. It uses PostgreSQL for persistence, Redis for distributed locking and caching, and runs background jobs to enforce lifecycle policies and detect runner health issues.
+The control plane is the central coordination layer of the Daytona platform. It receives all client requests, manages the full sandbox lifecycle from creation to destruction, schedules sandboxes onto runners, and continuously reconciles desired state against actual state across the infrastructure. It uses PostgreSQL for persistence and Redis for distributed locking and caching.
 
 The control plane includes the following components:
 
@@ -37,7 +37,7 @@ The control plane includes the following components:
 
 The API provides a RESTful interface for interacting with Daytona platform, including managing authentication, sandbox lifecycle, resource allocation. 
 
-Daytona API is a platform-level interface for managing authentication, sandbox lifecycle, snapshots, volumes, and resource allocation across runners. Toolbox API runs inside each sandbox and provides direct access to the sandbox environment: file system and Git operations, process and code execution, computer use, log streaming, and terminal sessions.
+Daytona API is a platform-level interface for managing authentication, sandbox lifecycle, snapshots, volumes, and resource allocation. Toolbox API runs inside each sandbox and provides direct access to the sandbox environment: file system and Git operations, process and code execution, computer use, log streaming, and terminal sessions.
 
 Authentication is handled OpenID Connect (OIDC) with JWT tokens for interactive user sessions, and API keys with bearer tokens for programmatic access. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary.
 
@@ -47,21 +47,17 @@ To interact with sandboxes from the API, see the [API](/docs/en/tools/api) and [
 
 The proxy routes external traffic to the correct sandbox using host-based routing. Each sandbox is reachable at `{port}-{sandboxId}.{proxy-domain}`, where the port maps to a service running inside the sandbox. The proxy resolves the target runner for a given sandbox, injects authentication headers, and forwards the request. It supports both HTTP and WebSocket protocols.
 
-Public sandboxes allow unauthenticated access to application ports, while internal ports always require authentication. For private sandboxes, the proxy supports multiple authentication methods: bearer tokens in the Authorization header, preview tokens in a custom header, query parameter tokens, signed preview URL tokens with expiration, and secure cookies scoped per sandbox. The proxy tracks sandbox activity by updating the last-activity timestamp on each request, which feeds into the automated lifecycle management ([auto-stop](/docs/en/sandboxes#auto-stop-interval)) timer.
+Public sandboxes allow unauthenticated access to application ports, while internal ports always require authentication. For private sandboxes, the proxy supports multiple authentication methods: bearer tokens in the Authorization header, preview tokens in a custom header, query parameter tokens, signed preview URL tokens with expiration, and secure cookies scoped per sandbox.
 
 #### Snapshot builder
 
-The snapshot builder is part of the API process and orchestrates the creation of sandbox [snapshots](/docs/en/snapshots) from a Dockerfile or a pre-built image from a [container registry](#container-registry). It coordinates with runners to build or pull images, which are then pushed to an internal snapshot registry that implements the OCI distribution specification. All images are built for the `linux/amd64` platform. Build logs are stored and can be streamed in real time.
+The snapshot builder is part of the API process and orchestrates the creation of sandbox [snapshots](/docs/en/snapshots) from a Dockerfile or a pre-built image from a [container registry](#container-registry). It coordinates with runners to build or pull images, which are then pushed to an internal snapshot registry that implements the OCI distribution specification.
 
 Daytona maintains a warm pool of pre-created sandboxes using [default snapshots](/docs/en/snapshots#default-snapshots). When a sandbox request matches a warm pool configuration, an already-running sandbox is assigned instead of cold-booting a new one, reducing creation time to milliseconds.
-
-Built images are propagated to runners across regions, with the system pushing to all organization-specific runners and a subset of shared runners. The warm pool is continuously topped up by a background job that monitors pool levels and creates replacement sandboxes when assigned sandboxes leave the pool.
 
 #### Sandbox manager
 
 The sandbox manager schedules sandboxes onto runners, reconciles desired and actual state, and enforces lifecycle policies. It continuously compares each sandbox's desired state against its actual state and triggers the appropriate action: creating, stopping, archiving, or destroying sandboxes as needed.
-
-Runner selection scores available runners based on resource usage and active sandbox count, then distributes load across top candidates. Runners that become unresponsive are detected via periodic health checks and marked accordingly.
 
 Sandbox lifecycle policies enforce [auto-stop](/docs/en/sandboxes#auto-stop-interval), [auto-archive](/docs/en/sandboxes#auto-archive-interval), and [auto-delete](/docs/en/sandboxes#auto-delete-interval) intervals based on the last activity timestamp. Archived sandboxes can be restored to any available runner from their backup snapshot.
 
@@ -83,19 +79,13 @@ Runners are machines that power Daytona's compute plane, providing the underlyin
 
 Each sandbox runs as an isolated container with its own Linux namespaces for processes, network, filesystem mounts, and inter-process communication. The base snapshot image provides a shared read-only filesystem layer, and each sandbox gets its own copy-on-write layer for runtime changes, ensuring sandboxes cannot modify each other's filesystems or the underlying snapshot.
 
-Resource isolation is enforced per sandbox:
-
-- **CPU and memory**: cgroups quotas limit CPU time and memory usage per sandbox, swap is disabled, preventing sandboxes from consuming swap space
-- **Disk**: XFS project quotas enforce per-sandbox disk limits on runners using XFS-backed storage
-- **Network**: per-sandbox iptables chains control egress traffic: network policies support full egress blocking or allow-list rules by CIDR
-
 Runners report health metrics to the control plane at regular intervals. These metrics are used by the [sandbox manager](#sandbox-manager) for scheduling decisions. Backups are performed by committing the sandbox to a snapshot image, allowing archived sandboxes to be restored on any available runner.
 
 #### Snapshot store
 
-The snapshot store is an internal OCI-compliant registry that stores sandbox snapshot images using the OCI Distribution specification. Runners pull snapshot images from this store when creating new sandboxes. The store uses S3-compatible object storage as its backend. This is the internal registry where built and pulled snapshot images are stored; it is distinct from the external [container registries](#container-registry) used as image sources. 
+The snapshot store is an internal OCI-compliant registry that stores sandbox snapshot images using the OCI distribution specification. Runners pull snapshot images from this store when creating new sandboxes. The store uses S3-compatible object storage as its backend. This is the internal registry where built and pulled snapshot images are stored; it is distinct from the external [container registries](#container-registry) used as image sources.
 
-The snapshot store implements the full Docker Registry V2 API, supporting manifest operations, blob storage, catalog listing, and tag management. When a snapshot is built or pulled on one runner, the resulting image is pushed to this store, from which other runners in the same region can pull it on demand.
+The snapshot store implements the full Docker registry V2 API, supporting manifest operations, blob storage, catalog listing, and tag management. When a snapshot is built or pulled on one runner, the resulting image is pushed to this store, from which other runners in the same region can pull it on demand.
 
 #### Volumes (S3 object store)
 
