@@ -71,7 +71,6 @@ declarative_image = Daytona::Image
 # Create a new Sandbox with the declarative image and stream the build logs
 sandbox = daytona.create(
   Daytona::CreateSandboxFromImageParams.new(image: declarative_image),
-  timeout: 0,
   on_snapshot_create_logs: proc { |chunk| puts chunk }
 )
 ```
@@ -81,19 +80,25 @@ sandbox = daytona.create(
 
 ```go
 // Define a declarative image with python packages
-declarativeImage := daytona.DebianSlim("3.12").
+version := "3.12"
+declarativeImage := daytona.DebianSlim(&version).
   PipInstall([]string{"requests", "pytest"}).
   Workdir("/home/daytona")
 
 // Create a new sandbox with the declarative image and stream the build logs
-sandbox, err := client.Create(&types.CreateSandboxFromImageParams{
+logChan := make(chan string)
+go func() {
+  for log := range logChan {
+    fmt.Print(log)
+  }
+}()
+
+sandbox, err := client.Create(ctx, types.ImageParams{
   Image: declarativeImage,
-}, &types.CreateOptions{
-  Timeout: 0,
-  OnSnapshotCreateLogs: func(chunk string) {
-    fmt.Print(chunk)
-  },
-})
+}, options.WithTimeout(0), options.WithLogChannel(logChan))
+if err != nil {
+  // handle error
+}
 ```
 
 </TabItem>
@@ -219,24 +224,30 @@ sandbox = daytona.create(
 // Create a python data science image
 snapshotName := "data-science-snapshot"
 
-image := daytona.DebianSlim("3.12").
+version := "3.12"
+image := daytona.DebianSlim(&version).
   PipInstall([]string{"pandas", "numpy"}).
   Workdir("/home/daytona")
 
 // Create the snapshot and stream the build logs
-client.Snapshot.Create(&types.CreateSnapshotParams{
+_, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
   Name:  snapshotName,
   Image: image,
-}, &types.CreateSnapshotOptions{
-  OnLogs: func(chunk string) {
-    fmt.Print(chunk)
-  },
 })
+if err != nil {
+  // handle error
+}
+for log := range logChan {
+  fmt.Print(log)
+}
 
 // Create a new sandbox using the pre-built snapshot
-sandbox, err := client.Create(&types.CreateSandboxFromSnapshotParams{
+sandbox, err := client.Create(ctx, types.SnapshotParams{
   Snapshot: snapshotName,
 })
+if err != nil {
+  // handle error
+}
 ```
 
 </TabItem>
@@ -304,7 +315,8 @@ image = Daytona::Image.debian_slim('3.12')
 image := daytona.Base("python:3.12-slim-bookworm")
 
 // Use a Debian slim image with Python 3.12
-image := daytona.DebianSlim("3.12")
+version := "3.12"
+image := daytona.DebianSlim(&version)
 ```
 
 </TabItem>
@@ -379,15 +391,16 @@ image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject
 
 ```go
 // Add pip packages
-image := daytona.DebianSlim("3.12").PipInstall([]string{"requests", "pandas"})
+version := "3.12"
+image := daytona.DebianSlim(&version).PipInstall([]string{"requests", "pandas"})
 
 // Install from requirements.txt
-image := daytona.DebianSlim("3.12").
+image := daytona.DebianSlim(&version).
   AddLocalFile("requirements.txt", "/tmp/requirements.txt").
   Run("pip install -r /tmp/requirements.txt")
 
 // Install from pyproject.toml (with optional dependencies)
-image := daytona.DebianSlim("3.12").
+image := daytona.DebianSlim(&version).
   AddLocalFile("pyproject.toml", "/tmp/pyproject.toml").
   Run("pip install /tmp[dev]")
 ```
@@ -460,10 +473,11 @@ image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/s
 
 ```go
 // Add a local file
-image := daytona.DebianSlim("3.12").AddLocalFile("package.json", "/home/daytona/package.json")
+version := "3.12"
+image := daytona.DebianSlim(&version).AddLocalFile("package.json", "/home/daytona/package.json")
 
 // Add a local directory
-image := daytona.DebianSlim("3.12").AddLocalDir("src", "/home/daytona/src")
+image := daytona.DebianSlim(&version).AddLocalDir("src", "/home/daytona/src")
 ```
 
 </TabItem>
@@ -519,7 +533,7 @@ const image = Image.debianSlim('3.12').workdir('/home/daytona')
 
 ```ruby
 # Set environment variables
-image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
+image = Daytona::Image.debian_slim('3.12').env({ 'PROJECT_ROOT' => '/home/daytona' })
 
 # Set working directory
 image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
@@ -530,10 +544,11 @@ image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
 
 ```go
 // Set environment variables
-image := daytona.DebianSlim("3.12").Env("PROJECT_ROOT", "/home/daytona")
+version := "3.12"
+image := daytona.DebianSlim(&version).Env("PROJECT_ROOT", "/home/daytona")
 
 // Set working directory
-image := daytona.DebianSlim("3.12").Workdir("/home/daytona")
+image := daytona.DebianSlim(&version).Workdir("/home/daytona")
 ```
 
 </TabItem>
@@ -621,16 +636,17 @@ image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
 
 ```go
 // Run shell commands during build
-image := daytona.DebianSlim("3.12").
+version := "3.12"
+image := daytona.DebianSlim(&version).
   Run("apt-get update && apt-get install -y git").
   Run("groupadd -r daytona && useradd -r -g daytona -m daytona").
   Run("mkdir -p /home/daytona/workspace")
 
 // Set entrypoint
-image := daytona.DebianSlim("3.12").Entrypoint([]string{"/bin/bash"})
+image := daytona.DebianSlim(&version).Entrypoint([]string{"/bin/bash"})
 
 // Set default command
-image := daytona.DebianSlim("3.12").Cmd([]string{"/bin/bash"})
+image := daytona.DebianSlim(&version).Cmd([]string{"/bin/bash"})
 ```
 
 </TabItem>
@@ -713,14 +729,19 @@ image = Daytona::Image.from_dockerfile('app/Dockerfile').pip_install(['numpy'])
 <TabItem label="Go" icon="seti:go">
 
 ```go
-// Note: The Go SDK does not support arbitrary Dockerfile commands
-// Use the Run() method for shell commands instead
-
-// Use an existing Dockerfile
-image := daytona.FromDockerfile("Dockerfile")
+// Note: In Go, FromDockerfile takes the Dockerfile content as a string
+content, err := os.ReadFile("Dockerfile")
+if err != nil {
+  // handle error
+}
+image := daytona.FromDockerfile(string(content))
 
 // Extend an existing Dockerfile with additional commands
-image := daytona.FromDockerfile("app/Dockerfile").
+content, err = os.ReadFile("app/Dockerfile")
+if err != nil {
+  // handle error
+}
+image := daytona.FromDockerfile(string(content)).
   PipInstall([]string{"numpy"})
 ```
 
