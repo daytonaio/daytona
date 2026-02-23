@@ -142,7 +142,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
       (error) => {
         const errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         const statusCode = error.response?.data?.statusCode || error.response?.status || error.status
-        const code = error.response?.data?.code || ''
+        const code = error.response?.data?.code || (error as any).code || (error as any).cause?.code || ''
 
         throw new RunnerApiError(String(errorMessage), statusCode, code)
       },
