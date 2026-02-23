@@ -121,8 +121,8 @@ module Daytona
         total_pages: response.total_pages,
         items: response
                 .items
-                  .map do |sandbox_dto|
-                    to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+                .map do |sandbox_dto|
+                  to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
         end
       )
     end
