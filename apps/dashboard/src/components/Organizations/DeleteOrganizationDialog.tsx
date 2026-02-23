@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { DeletePrerequisite, DeletePrerequisiteItem, parseDeleteErrors } from '@/components/DeletePrerequisiteItem'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,9 +18,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { cn, pluralize } from '@/lib/utils'
-import { DeletePrerequisite, DeletePrerequisiteItem, parseDeleteErrors } from '@/components/DeletePrerequisiteItem'
 import { Spinner } from '@/components/ui/spinner'
+import { cn, pluralize } from '@/lib/utils'
 import React, { useState } from 'react'
 
 interface DeleteOrganizationDialogProps {
@@ -69,7 +69,7 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className={cn('flex items-center gap-2', hasBlockers && 'text-destructive')}>
+          <DialogTitle className={cn('flex items-center gap-2')}>
             {hasBlockers ? 'Cannot Delete Organization' : 'Delete Organization'}
           </DialogTitle>
           <DialogDescription>
