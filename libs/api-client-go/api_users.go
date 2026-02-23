@@ -35,6 +35,17 @@ type UsersAPI interface {
 	CreateUserExecute(r UsersAPICreateUserRequest) (*http.Response, error)
 
 	/*
+	DeleteAuthenticatedUser Delete authenticated user account
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIDeleteAuthenticatedUserRequest
+	*/
+	DeleteAuthenticatedUser(ctx context.Context) UsersAPIDeleteAuthenticatedUserRequest
+
+	// DeleteAuthenticatedUserExecute executes the request
+	DeleteAuthenticatedUserExecute(r UsersAPIDeleteAuthenticatedUserRequest) (*http.Response, error)
+
+	/*
 	EnrollInSmsMfa Enroll in SMS MFA
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -232,7 +243,7 @@ func (a *UsersAPIService) CreateUserExecute(r UsersAPICreateUserRequest) (*http.
 }
 
 type UsersAPIDeleteAuthenticatedUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -243,22 +254,22 @@ func (r UsersAPIDeleteAuthenticatedUserRequest) Execute() (*http.Response, error
 /*
 DeleteAuthenticatedUser Delete authenticated user account
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIDeleteAuthenticatedUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIDeleteAuthenticatedUserRequest
 */
 func (a *UsersAPIService) DeleteAuthenticatedUser(ctx context.Context) UsersAPIDeleteAuthenticatedUserRequest {
 	return UsersAPIDeleteAuthenticatedUserRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) DeleteAuthenticatedUserExecute(r UsersAPIDeleteAuthenticatedUserRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.DeleteAuthenticatedUser")

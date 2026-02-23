@@ -1425,17 +1425,17 @@ paths:
       operationId: deleteAuthenticatedUser
       parameters: []
       responses:
-        '204':
+        "204":
           description: Account deleted successfully
       security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Delete authenticated user account
       tags:
-        - users
+      - users
     get:
       operationId: getAuthenticatedUser
       parameters: []
