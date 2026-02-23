@@ -32,6 +32,10 @@
         {
           "target": "openapi",
           "projects": "runner"
+        },
+        {
+          "target": "generate:api-client",
+          "projects": "api-client"
         }
       ]
     }

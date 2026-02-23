@@ -54,13 +54,7 @@
           "NODE_OPTIONS": "--require tsconfig-paths/register",
           "SKIP_CONNECTIONS": "true"
         }
-      },
-      "dependsOn": [
-        {
-          "target": "generate:api-client",
-          "projects": "runner-api-client"
-        }
-      ]
+      }
     },
     "serve": {
       "executor": "@nx/js:node",
