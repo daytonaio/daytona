@@ -274,7 +274,15 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+All resource parameters are optional and must be integers. If not specified, Daytona will use the default values listed below.
+
+| **Resource** | **Unit** | **Default** | **Minimum** | **Maximum** |
+| ------------ | -------- | ----------- | ----------- | ----------- |
+| CPU          | vCPU     | **`1`**     | **`1`**     | **`4`**     |
+| Memory       | GiB      | **`1`**     | **`1`**     | **`8`**     |
+| Disk         | GiB      | **`3`**     | **`1`**     | **`10`**    |
+
+Maximum values are per-sandbox limits set at the [organization](/docs/en/organizations) level. Contact [support@daytona.io](mailto:support@daytona.io) to increase limits.
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
 
