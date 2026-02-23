@@ -60,6 +60,7 @@ vitest.config.*.timestamp*
 .tmp/
 .env.local
 apps/runner-win/.env
+apps/daemon/daemon-amd64
 
 # Python package metadata
 *.egg-info/
