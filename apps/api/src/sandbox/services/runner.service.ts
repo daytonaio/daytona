@@ -23,7 +23,6 @@ import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { Sandbox } from '../entities/sandbox.entity'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
@@ -46,6 +45,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
+import { SandboxRepository } from '../repositories/sandbox.repository'
 
 @Injectable()
 export class RunnerService {
@@ -57,8 +57,7 @@ export class RunnerService {
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
+    private readonly sandboxRepository: SandboxRepository,
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly redisLockProvider: RedisLockProvider,

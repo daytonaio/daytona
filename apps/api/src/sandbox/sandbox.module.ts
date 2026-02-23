@@ -23,7 +23,6 @@ import { SnapshotService } from './services/snapshot.service'
 import { SnapshotManager } from './managers/snapshot.manager'
 import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
-import { SandboxSubscriber } from './subscribers/sandbox.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
 import { OrganizationModule } from '../organization/organization.module'
 import { SandboxWarmPoolService } from './services/sandbox-warm-pool.service'
@@ -61,6 +60,7 @@ import { RegionRunnerAccessGuard } from './guards/region-runner-access.guard'
 import { RegionSandboxAccessGuard } from './guards/region-sandbox-access.guard'
 import { ProxyGuard } from './guards/proxy.guard'
 import { SshGatewayGuard } from './guards/ssh-gateway.guard'
+import { EventEmitter2 } from '@nestjs/event-emitter'
 
 @Module({
   imports: [
@@ -104,7 +104,6 @@ import { SshGatewayGuard } from './guards/ssh-gateway.guard'
     ProxyCacheInvalidationService,
     SandboxLookupCacheInvalidationService,
     SnapshotManager,
-    SandboxSubscriber,
     RedisLockProvider,
     SnapshotSubscriber,
     VolumeService,
@@ -126,8 +125,12 @@ import { SshGatewayGuard } from './guards/ssh-gateway.guard'
     SshGatewayGuard,
     {
       provide: SandboxRepository,
-      inject: [DataSource],
-      useFactory: (dataSource: DataSource) => new SandboxRepository(dataSource),
+      inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
+      useFactory: (
+        dataSource: DataSource,
+        eventEmitter: EventEmitter2,
+        sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+      ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
   ],
   exports: [

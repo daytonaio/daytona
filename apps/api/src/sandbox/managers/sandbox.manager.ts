@@ -121,15 +121,21 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 return
               }
 
+              let updateData: Partial<Sandbox> = {}
+
+              //  if auto-delete interval is 0, delete the sandbox immediately
+              if (sandbox.autoDeleteInterval === 0) {
+                updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+              } else {
+                updateData.pending = true
+                updateData.desiredState = SandboxDesiredState.STOPPED
+              }
+
               try {
-                //  if auto-delete interval is 0, delete the sandbox immediately
-                if (sandbox.autoDeleteInterval === 0) {
-                  sandbox.applyDesiredDestroyedState()
-                } else {
-                  sandbox.pending = true
-                  sandbox.desiredState = SandboxDesiredState.STOPPED
-                }
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData,
+                  whereCondition: { pending: false, state: sandbox.state },
+                })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
@@ -181,8 +187,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           }
 
           try {
-            sandbox.desiredState = SandboxDesiredState.ARCHIVED
-            await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+            const updateData: Partial<Sandbox> = {
+              desiredState: SandboxDesiredState.ARCHIVED,
+            }
+            await this.sandboxRepository.updateWhere(sandbox.id, {
+              updateData,
+              whereCondition: { pending: false, state: sandbox.state },
+            })
+
             this.syncInstanceState(sandbox.id).catch(this.logger.error)
           } catch (error) {
             this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
@@ -238,8 +250,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               }
 
               try {
-                sandbox.applyDesiredDestroyedState()
-                await this.sandboxRepository.saveWhere(sandbox, { pending: false, state: sandbox.state })
+                const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
+                await this.sandboxRepository.updateWhere(sandbox.id, {
+                  updateData,
+                  whereCondition: { pending: false, state: sandbox.state },
+                })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
               } catch (error) {
@@ -371,8 +386,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           this.logger.warn(
             `Setting desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId} (previous desired state: ${sandbox.desiredState})`,
           )
-          sandbox.desiredState = SandboxDesiredState.ARCHIVED
-          await this.sandboxRepository.saveWhere(sandbox, { state: SandboxState.ERROR })
+          const updateData: Partial<Sandbox> = {
+            desiredState: SandboxDesiredState.ARCHIVED,
+          }
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData,
+            whereCondition: { state: SandboxState.ERROR },
+          })
         } catch (e) {
           this.logger.error(
             `Failed to set desired state to ARCHIVED for errored sandbox ${sandbox.id} on draining runner ${runnerId}`,
@@ -504,10 +524,17 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     // Update the sandbox to use the new runner; roll back on failure
     try {
-      await this.sandboxRepository.update(sandbox.id, {
+      const updateData: Partial<Sandbox> = {
         prevRunnerId: sandbox.runnerId,
         runnerId: newRunnerId,
-      })
+      }
+      await this.sandboxRepository.update(
+        sandbox.id,
+        {
+          updateData,
+        },
+        true,
+      )
     } catch (e) {
       this.logger.error(`Failed to update sandbox ${sandbox.id} runnerId to ${newRunnerId}, rolling back`, e)
 
@@ -677,92 +704,96 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  async syncInstanceState(sandboxId: string, startedAt = new Date()): Promise<void> {
-    // If syncing for longer than 10 seconds, return
-    // The sandbox will be continued in the next cron run
-    // This prevents endless loops of syncing the same sandbox
-    if (new Date().getTime() - startedAt.getTime() > 10000) {
-      return
-    }
+  /**
+   * Sync the state of a sandbox.
+   *
+   * Loop to handle SYNC_AGAIN without releasing the lock or re-fetching.
+   * The sandbox entity is mutated in-place by repository.update() on each iteration,
+   * and the lock guarantees no concurrent modification.
+   */
+  async syncInstanceState(sandboxId: string): Promise<void> {
+    // Track the start time of the sync operation.
+    const startedAt = new Date()
 
-    //  generate a random lock code to prevent race condition if sandbox action continues
-    //  after the lock expires
+    // Generate a random lock code to prevent race condition if sandbox action continues after the lock expires.
     const lockCode = new LockCode(randomUUID())
 
-    //  prevent syncState cron from running multiple instances of the same sandbox
+    // Prevent syncState cron from running multiple instances of the same sandbox.
     const lockKey = getStateChangeLockKey(sandboxId)
     const acquired = await this.redisLockProvider.lock(lockKey, 30, lockCode)
     if (!acquired) {
       return
     }
 
-    const sandbox = await this.sandboxRepository.findOneOrFail({
-      where: { id: sandboxId },
-    })
-
-    if (
-      [SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(
-        sandbox.state,
-      )
-    ) {
-      // Allow ERROR → ARCHIVED transition (e.g., during runner draining)
-      if (!(sandbox.state === SandboxState.ERROR && sandbox.desiredState === SandboxDesiredState.ARCHIVED)) {
-        await this.redisLockProvider.unlock(lockKey)
-        return
-      }
-    }
-
-    //  prevent potential race condition, or SYNC_AGAIN loop bug
-    //  this should never happen
-    if (String(sandbox.state) === String(sandbox.desiredState)) {
-      this.logger.warn(`Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`)
-      await this.redisLockProvider.unlock(lockKey)
-      return
-    }
-
-    let syncState = DONT_SYNC_AGAIN
-
     try {
-      switch (sandbox.desiredState) {
-        case SandboxDesiredState.STARTED: {
-          syncState = await this.sandboxStartAction.run(sandbox, lockCode)
-          break
-        }
-        case SandboxDesiredState.STOPPED: {
-          syncState = await this.sandboxStopAction.run(sandbox, lockCode)
-          break
-        }
-        case SandboxDesiredState.DESTROYED: {
-          syncState = await this.sandboxDestroyAction.run(sandbox, lockCode)
-          break
-        }
-        case SandboxDesiredState.ARCHIVED: {
-          syncState = await this.sandboxArchiveAction.run(sandbox, lockCode)
-          break
-        }
-      }
-    } catch (error) {
-      this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
-
-      const sandbox = await this.sandboxRepository.findOneBy({
-        id: sandboxId,
+      const sandbox = await this.sandboxRepository.findOneOrFail({
+        where: { id: sandboxId },
       })
-      if (!sandbox) {
-        //  edge case where sandbox is deleted while desired state is being processed
-        return
+
+      while (new Date().getTime() - startedAt.getTime() <= 10000) {
+        if (
+          [SandboxState.DESTROYED, SandboxState.BUILD_FAILED, SandboxState.RESIZING].includes(sandbox.state) ||
+          (sandbox.state === SandboxState.ERROR && sandbox.desiredState !== SandboxDesiredState.ARCHIVED)
+        ) {
+          // Break sync loop if sandbox reaches a terminal state.
+          // However, should allow ERROR → ARCHIVED transition (e.g., during runner draining).
+          break
+        }
+
+        if (String(sandbox.state) === String(sandbox.desiredState)) {
+          this.logger.warn(
+            `Sandbox ${sandboxId} is already in the desired state ${sandbox.desiredState}, skipping sync`,
+          )
+          // Break sync loop if sandbox is already in the desired state.
+          break
+        }
+
+        // Rely on the sandbox action to return SYNC_AGAIN or DONT_SYNC_AGAIN to continue/break the sync loop.
+        let syncState = DONT_SYNC_AGAIN
+
+        try {
+          switch (sandbox.desiredState) {
+            case SandboxDesiredState.STARTED: {
+              syncState = await this.sandboxStartAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.STOPPED: {
+              syncState = await this.sandboxStopAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.DESTROYED: {
+              syncState = await this.sandboxDestroyAction.run(sandbox, lockCode)
+              break
+            }
+            case SandboxDesiredState.ARCHIVED: {
+              syncState = await this.sandboxArchiveAction.run(sandbox, lockCode)
+              break
+            }
+          }
+        } catch (error) {
+          this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
+
+          const { recoverable, errorReason } = sanitizeSandboxError(error)
+
+          const updateData: Partial<Sandbox> = {
+            state: SandboxState.ERROR,
+            errorReason,
+            recoverable,
+          }
+
+          await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+
+          // Break sync loop since sandbox is in error state.
+          break
+        }
+
+        // Break sync loop if sandbox action returned DONT_SYNC_AGAIN.
+        if (syncState !== SYNC_AGAIN) {
+          break
+        }
       }
-      sandbox.state = SandboxState.ERROR
-
-      const { recoverable, errorReason } = sanitizeSandboxError(error)
-      sandbox.errorReason = errorReason
-      sandbox.recoverable = recoverable
-
-      await this.sandboxRepository.save(sandbox)
-    }
-
-    await this.redisLockProvider.unlock(lockKey)
-    if (syncState === SYNC_AGAIN) {
-      this.syncInstanceState(sandboxId, startedAt)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
     }
   }
 
