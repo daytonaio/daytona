@@ -37,9 +37,9 @@ The control plane includes the following components:
 
 The API provides a RESTful interface for interacting with Daytona platform, including managing authentication, sandbox lifecycle, resource allocation. 
 
-Daytona API is a platform-level interface for managing authentication, sandbox lifecycle, snapshots, volumes, and resource allocation across runners. Toolbox API runs inside each sandbox and provides direct access to the sandbox environment: file system operations, process execution, Git, language server protocol, and terminal sessions.
+Daytona API is a platform-level interface for managing authentication, sandbox lifecycle, snapshots, volumes, and resource allocation across runners. Toolbox API runs inside each sandbox and provides direct access to the sandbox environment: file system and Git operations, process and code execution, computer use, log streaming, and terminal sessions.
 
-Authentication is handled through two mechanisms: OpenID Connect (OIDC) with JWT tokens for interactive user sessions, and API keys with bearer tokens for programmatic access. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary.
+Authentication is handled OpenID Connect (OIDC) with JWT tokens for interactive user sessions, and API keys with bearer tokens for programmatic access. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary.
 
 To interact with sandboxes from the API, see the [API](/docs/en/tools/api) and [Toolbox API](/docs/en/tools/api#daytona-toolbox) references.
 
@@ -47,11 +47,11 @@ To interact with sandboxes from the API, see the [API](/docs/en/tools/api) and [
 
 The proxy routes external traffic to the correct sandbox using host-based routing. Each sandbox is reachable at `{port}-{sandboxId}.{proxy-domain}`, where the port maps to a service running inside the sandbox. The proxy resolves the target runner for a given sandbox, injects authentication headers, and forwards the request. It supports both HTTP and WebSocket protocols.
 
-Public sandboxes allow unauthenticated access to application ports, while internal ports always require authentication. For private sandboxes, the proxy supports multiple authentication methods: bearer tokens in the Authorization header, preview tokens in a custom header, query parameter tokens, signed preview URL tokens with expiration, and secure cookies scoped per sandbox. The proxy tracks sandbox activity by updating the last-activity timestamp on each request, which feeds into the [auto-stop](/docs/en/sandboxes#auto-stop-interval) timer.
+Public sandboxes allow unauthenticated access to application ports, while internal ports always require authentication. For private sandboxes, the proxy supports multiple authentication methods: bearer tokens in the Authorization header, preview tokens in a custom header, query parameter tokens, signed preview URL tokens with expiration, and secure cookies scoped per sandbox. The proxy tracks sandbox activity by updating the last-activity timestamp on each request, which feeds into the automated lifecycle management ([auto-stop](/docs/en/sandboxes#auto-stop-interval)) timer.
 
 #### Snapshot builder
 
-The snapshot builder is part of the API process and orchestrates the creation of sandbox [snapshots](/docs/en/snapshots) from a Dockerfile or a pre-built image from a container registry. It coordinates with runners to build or pull images, which are then pushed to an internal snapshot registry that implements the OCI distribution specification. All images are built for the `linux/amd64` platform. Build logs are stored and can be streamed in real time.
+The snapshot builder is part of the API process and orchestrates the creation of sandbox [snapshots](/docs/en/snapshots) from a Dockerfile or a pre-built image from a [container registry](#container-registry). It coordinates with runners to build or pull images, which are then pushed to an internal snapshot registry that implements the OCI distribution specification. All images are built for the `linux/amd64` platform. Build logs are stored and can be streamed in real time.
 
 Daytona maintains a warm pool of pre-created sandboxes using [default snapshots](/docs/en/snapshots#default-snapshots). When a sandbox request matches a warm pool configuration, an already-running sandbox is assigned instead of cold-booting a new one, reducing creation time to milliseconds.
 
