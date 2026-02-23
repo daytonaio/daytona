@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState } from 'react'
+import { DeletePrerequisite, DeletePrerequisiteItem, parseDeleteErrors } from '@/components/DeletePrerequisiteItem'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -17,6 +17,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { cn, pluralize } from '@/lib/utils'
+import React, { useState } from 'react'
 
 interface DeleteOrganizationDialogProps {
   organizationName: string
@@ -31,19 +35,21 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
 }) => {
   const [open, setOpen] = useState(false)
   const [confirmName, setConfirmName] = useState('')
-  const [errorReasons, setErrorReasons] = useState<string[]>([])
+  const [prerequisites, setPrerequisites] = useState<DeletePrerequisite[]>([])
 
   const handleDeleteOrganization = async () => {
-    setErrorReasons([])
+    setPrerequisites([])
     const result = await onDeleteOrganization()
     if (result.success) {
       setOpen(false)
       setConfirmName('')
-      setErrorReasons([])
+      setPrerequisites([])
     } else {
-      setErrorReasons(result.reasons)
+      setPrerequisites(parseDeleteErrors(result.reasons))
     }
   }
+
+  const hasBlockers = prerequisites.length > 0
 
   return (
     <Dialog
@@ -52,7 +58,7 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
         setOpen(isOpen)
         if (!isOpen) {
           setConfirmName('')
-          setErrorReasons([])
+          setPrerequisites([])
         }
       }}
     >
@@ -61,64 +67,74 @@ export const DeleteOrganizationDialog: React.FC<DeleteOrganizationDialogProps> =
           Delete Organization
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Delete Organization</DialogTitle>
+          <DialogTitle className={cn('flex items-center gap-2')}>
+            {hasBlockers ? 'Cannot Delete Organization' : 'Delete Organization'}
+          </DialogTitle>
           <DialogDescription>
-            This will permanently delete all associated data. This action cannot be undone.
+            {hasBlockers
+              ? 'We found active resources or requirements that must be resolved before deletion can proceed.'
+              : 'This will permanently delete all associated data. This action cannot be undone.'}
           </DialogDescription>
         </DialogHeader>
-        {errorReasons.length > 0 && (
-          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive-foreground">
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              {errorReasons.map((reason, index) => (
-                <li key={`${reason}-${index}`}>{reason}</li>
-              ))}
-            </ul>
+
+        {hasBlockers ? (
+          <div className="-mx-6 border-y">
+            {prerequisites.map((prereq, i) => (
+              <React.Fragment key={prereq.id}>
+                {i > 0 && <Separator />}
+                <DeletePrerequisiteItem prereq={prereq} />
+              </React.Fragment>
+            ))}
           </div>
-        )}
-        <form
-          id="delete-organization-form"
-          className="space-y-6 overflow-y-auto px-1 pb-1"
-          onSubmit={async (e) => {
-            e.preventDefault()
-            await handleDeleteOrganization()
-          }}
-        >
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="confirm-action">
-                Please type <span className="font-bold cursor-text select-all">{organizationName}</span> to confirm
-              </Label>
-              <Input
-                id="confirm-action"
-                value={confirmName}
-                onChange={(e) => setConfirmName(e.target.value)}
-                placeholder={organizationName}
-              />
+        ) : (
+          <form
+            id="delete-organization-form"
+            className="space-y-6 overflow-y-auto px-1 pb-1"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              await handleDeleteOrganization()
+            }}
+          >
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="confirm-action">
+                  Please type <span className="font-bold cursor-text select-all">{organizationName}</span> to confirm
+                </Label>
+                <Input
+                  id="confirm-action"
+                  value={confirmName}
+                  onChange={(e) => setConfirmName(e.target.value)}
+                  placeholder={organizationName}
+                />
+              </div>
             </div>
-          </div>
-        </form>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary" disabled={loading}>
-              Cancel
-            </Button>
-          </DialogClose>
-          {loading ? (
-            <Button type="button" variant="destructive" disabled>
-              Deleting...
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              form="delete-organization-form"
-              variant="destructive"
-              disabled={confirmName !== organizationName}
-            >
-              Delete
-            </Button>
+          </form>
+        )}
+
+        <DialogFooter className="sm:justify-between">
+          {hasBlockers && (
+            <p className="text-sm text-muted-foreground">
+              {pluralize(prerequisites.length, 'issue', 'issues')} preventing deletion.
+            </p>
           )}
+          <div className="flex gap-2 ml-auto">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary" disabled={loading}>
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type={hasBlockers ? 'button' : 'submit'}
+              form={hasBlockers ? undefined : 'delete-organization-form'}
+              variant="destructive"
+              disabled={hasBlockers || confirmName !== organizationName || loading}
+            >
+              {loading && <Spinner />}
+              Delete Organization
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
