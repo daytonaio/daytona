@@ -600,6 +600,15 @@ export const getSidebarConfig = (
             icon: 'log.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/security-exhibit', locale),
+          label: t('sidebarconfig.securityExhibit'),
+          description: t('sidebarconfig.securityExhibitDescription'),
+          attrs: {
+            icon: 'security.svg',
+          },
+        },
       ],
     },
     {

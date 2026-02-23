@@ -1,0 +1,188 @@
+---
+title: Security Exhibit
+---
+
+The security exhibit outlines the technical and organizational security measures Daytona maintains to protect customer data processed through its platform. It covers Daytona's information security program, compliance posture, incident management procedures, and business continuity practices.
+
+:::note
+This security exhibit supplements the Daytona [Terms of Service](https://www.daytona.io/terms-of-service) and [Data Processing Agreement](https://www.daytona.io/dpa), collectively the "Agreement", between Daytona Platforms, Inc. ("Daytona") and Customer ("Customer"). In the event of any conflict between this exhibit and the agreement, the agreement shall control.
+:::
+
+## Information Security Program
+
+Daytona maintains a comprehensive information security program designed to protect Customer data processed through its secure runtime platform. The program is aligned with industry-standard frameworks including SOC 2, ISO 27001, and incorporates controls specific to AI agent infrastructure and ephemeral compute environments.
+
+### Security policies
+
+Daytona maintains a suite of information security policies that are reviewed at least annually and updated as needed by the Chief Trust Officer. These policies are approved by executive leadership and are made available to all Daytona personnel. Policies cover, at minimum: acceptable use, access control, data classification, incident response, vulnerability management, change management, and business continuity.
+
+### Security training
+
+All Daytona personnel with access to Customer data or production systems complete mandatory security awareness training during onboarding and annually thereafter. Training covers phishing recognition, secure coding practices, data handling procedures, incident reporting, and compliance obligations. Completion is tracked and verified.
+
+### Personnel security
+
+Background checks are conducted on all Daytona personnel who have access to Customer data or production systems, in accordance with applicable law. All such personnel are bound by confidentiality agreements. Offboarding procedures include timely revocation of all access credentials and return of company assets.
+
+### Access control
+
+Access to Customer data and production systems is governed by the principle of least privilege and role-based access control (RBAC). Access is granted only upon documented business need and approved by management. Access reviews are conducted quarterly. Multi-factor authentication (MFA) is enforced for all Daytona personnel with access to production infrastructure, administrative consoles, and source code repositories.
+
+### Data storage and classification
+
+Daytona classifies data according to sensitivity levels: Public, Internal, Confidential, and Restricted. Customer data is classified as Confidential at minimum. Data retention and destruction follow documented policies. Customer data is stored in the geographic region specified by the Customer's configuration where supported. Daytona does not use Customer Content to train models or improve services.
+
+### Sandbox isolation
+
+Daytona's core architecture isolates each sandbox using container and/or microVM technology, ensuring that one Customer's runtime environment cannot interact with another's. Isolation controls include: dedicated namespaces per sandbox, network segmentation preventing lateral movement between sandboxes, resource quotas (CPU, memory, storage, network bandwidth), read-only root filesystems where applicable, and configurable network allow-lists with network-level firewall rules.
+
+### Ephemeral sandbox supported
+
+Daytona sandboxes can be configured as ephemeral, meaning they are automatically deleted once stopped. When ephemeral mode is enabled, all associated compute, memory, and local storage are reclaimed upon sandbox termination, and any session-scoped credentials or tokens are revoked. This reduces the attack surface by ensuring no persistent runtime state accumulates between sessions. For non-ephemeral sandboxes, Daytona provides configurable auto-stop and auto-delete intervals to manage sandbox lifecycle and minimize exposure of idle environments.
+
+### Encryption
+
+Encryption StandardsIn transit: TLS 1.2+ for all external and internal communications
+At rest: AES-256 or equivalent across all storage systems
+Key management: Infrastructure provider KMS with automatic rotation
+
+### Authentication and access
+
+Daytona provides identity and access management through Auth0, supporting authentication via Google and GitHub identity providers. Multi-factor authentication (MFA) is enforced for all Daytona personnel with administrative access. Daytona implements session management controls including configurable session timeouts and token revocation capabilities. Enterprise customers requiring SAML 2.0 or OIDC-based Single Sign-On (SSO) integration should contact Daytona to discuss available options.
+
+### Backup and recovery
+
+Critical Daytona platform data (control plane, configuration, metadata) is backed up regularly with a defined recovery point objective (RPO) and recovery time objective (RTO). Backups are encrypted at rest and stored in a geographically separate location from the primary infrastructure. Backup restoration procedures are tested at least annually.
+
+### Vulnerability management
+
+Daytona performs automated vulnerability scanning of its infrastructure and applications on at least a monthly basis. Identified vulnerabilities are triaged and remediated according to the following target timelines:
+
+| **Severity** | **Target** | **Example**                |
+| ------------ | ---------- | -------------------------- |
+| Critical     | 24 hours   | RCE, privilege escalation  |
+| High         | 7 days     | Auth bypass, data exposure |
+| Medium       | 30 days    | XSS, misconfigurations     |
+| Low          | 90 days    | Informational findings     |
+
+### Network security
+
+Daytona implements defense-in-depth network security controls including: network segmentation between sandbox traffic, control plane, and management interfaces; firewall rules reviewed at least annually; DDoS mitigation at the infrastructure edge; and intrusion detection and monitoring for anomalous network activity. Sandbox network access can be restricted using configurable allow-lists and network block policies.
+
+### Secure development lifecycle
+
+Daytona follows a secure software development lifecycle (SDLC) that includes: security requirements analysis during design, peer code review for all changes, automated static analysis and dependency scanning in CI/CD, container image scanning that blocks critical and high vulnerabilities, and separation of development, staging, and production environments.
+
+### Change management
+
+All changes to production systems follow a documented change management process that includes: description and risk assessment of the change, peer review and approval, testing in non-production environments, and rollback procedures. Emergency changes follow an expedited process with retroactive documentation and review.
+
+### Third-party risk management
+
+Daytona evaluates the security posture of third-party vendors and sub-processors before engagement and on an ongoing basis. Evaluation criteria include: security certifications, data handling practices, incident response capabilities, and contractual security obligations. Sub-processors are contractually required to maintain security controls substantially similar to those described in this Exhibit and the DPA.
+
+### Patch management
+
+Daytona applies security patches to operating systems, libraries, and application dependencies in accordance with its vulnerability management SLAs. Critical patches are tested and deployed within 24 hours. Automated dependency monitoring tracks new CVEs affecting the Daytona stack.
+
+### Audit logging and monitoring
+
+Daytona maintains comprehensive audit logs of administrative actions, authentication events, access to Customer data, and system-level events. Logs are stored securely, protected against tampering, and retained for a minimum of 12 months. Security events are monitored and alerted upon in real time. Log access is restricted to authorized security personnel.
+
+### Container and runtime security
+
+:::note
+Daytona uses Sysbox as its container runtime to provide VM-level isolation without hardware virtualization overhead.
+:::
+
+Sysbox enforces Linux user-namespaces on all sandboxes, ensuring that the root user inside a sandbox maps to a fully unprivileged user on the host. Each sandbox receives exclusive user-ID and group-ID mappings, so a process escaping one sandbox has no permissions to access other sandboxes or host resources.
+
+Additional Sysbox security controls include: partial virtualization of procfs and sysfs to hide host information and prevent modification of system-wide kernel settings, immutable initial mounts that prevent sandbox processes from weakening container isolation even with root capabilities, and selective syscall interception that blocks dangerous operations while preserving compatibility with system-level workloads such as Docker-in-Docker.
+
+Container images are built from minimal base images and scanned for vulnerabilities in CI/CD pipelines, and runtime threat detection monitors for anomalous process behavior.
+
+### Penetration testing
+
+Daytona completes penetration testing at least annually, conducted by a recognized independent third party. Testing scope includes the Daytona platform, APIs, sandbox isolation mechanisms, and control plane. A summary of test results and remediation status is available to Customers upon request.
+
+## Compliance and certifications
+
+Daytona pursues and maintains industry-recognized compliance certifications to demonstrate its commitment to security and data protection.
+
+| **Framework** | **Status**  | **Details**                                                      |
+| ------------- | ----------- | ---------------------------------------------------------------- |
+| SOC 2 Type I  | Achieved    | Completed; report available under NDA via Trust Center.          |
+| SOC 2 Type II | In progress | Audit period underway                                            |
+| ISO 27001     | In progress | Certification in progress                                        |
+| HIPAA BAA     | Available   | Business Associate Agreements available for qualifying customers |
+
+Copies of current certifications and audit reports are available to Customers upon written request, subject to reasonable confidentiality obligations, consistent with the DPA (Section 10).
+
+## Assessments, audits, and remediation
+
+### Assessment obligations
+
+Daytona shall maintain its security program and submit to independent third-party audits at least annually to verify compliance with this Exhibit and applicable security standards. Daytona will provide copies of audit reports and certifications upon reasonable written request, subject to confidentiality obligations as set forth in the Agreement.
+
+### Remediation
+
+Where assessments or audits identify material deficiencies, Daytona shall prepare a remediation plan and address findings within timeframes consistent with the vulnerability severity levels defined in Section 1.11.
+
+### Secure disposal
+
+Upon termination of the Agreement or at Customer's request, Daytona shall securely delete or return Customer data in accordance with the DPA (Section 8). Deletion is performed using methods that render data unrecoverable, including cryptographic erasure of encrypted storage volumes. Daytona will certify deletion upon request.
+
+## Security incident management
+
+### Incident response procedures
+
+Daytona maintains a documented incident response plan that defines roles, responsibilities, escalation procedures, and communication protocols. The plan is tested at least annually through tabletop exercises. Incidents are classified by severity and handled by a dedicated incident response team.
+
+### Notification
+
+In the event of a Security Incident involving Customer data, Daytona shall notify the affected Customer without undue delay, consistent with the DPA (Section 15). Notification shall include, to the extent known: the nature and scope of the incident, the types of data affected, steps taken to contain and remediate, recommended Customer actions, and a point of contact for further communication. Notification may be delayed at the request of law enforcement or where delay is reasonably necessary to investigate and remediate.
+
+### Incident remediation
+
+Daytona shall cooperate fully to investigate and remedy any harm or potential harm caused by a Security Incident. The Customer shall be informed of the response plan. Any liability arising from a Security Incident shall be subject to the limitation of liability provisions set forth in the Agreement ([Terms of Service](https://www.daytona.io/terms-of-service), section 15), including the aggregate liability cap and exclusion of indirect, incidental, special, consequential, or punitive damages. Each Party is solely responsible for any regulatory fines imposed directly on it by a supervisory authority, subject to the provisions of the [Data Processing Agreement](https://www.daytona.io/dpa) (section 12).
+
+## Business community
+
+Daytona maintains a Business Continuity Plan (BCP) and Disaster Recovery Plan (DRP) that are reviewed and tested at least annually. The plans address: critical system recovery priorities and RTOs, data backup and restoration procedures, communication protocols during disruptions, alternative processing capabilities, and lessons-learned reviews following any activation of the BCP/DRP.
+
+## Termination obligations
+
+Upon termination or expiration of the Agreement, Daytona shall: cease all processing of Customer data except as required to complete termination; return or delete Customer data at Customer's election, in accordance with the DPA (Section 8); certify deletion upon written request; and continue to protect any Customer data lawfully retained in accordance with this Exhibit and the Agreement.
+
+## Contact and sub-processors
+
+### Security contacts
+
+| **Team**                  | **Email**                                         |
+| ------------------------- | ------------------------------------------------- |
+| Security                  | [security@daytona.io](mailto:security@daytona.io) |
+| Privacy contact           | [privacy@daytona.io](mailto:privacy@daytona.io)   |
+| Trust center              | [trust.daytona.io](https://trust.daytona.io)      |
+| Data Processing Agreement | [daytona.io/dpa](https://www.daytona.io/dpa)      |
+| General Support           | [support@daytona.io](mailto:support@daytona.io)   |
+
+### Sub-processors
+
+Daytona maintains and updates a record of sub-processors that process Customer data. The current sub-processor list is published as Exhibit C of Daytona's [Data Processing Agreement](https://www.daytona.io/dpa).
+
+| **Sub-processor** | **Service**            | **Location** |
+| ----------------- | ---------------------- | ------------ |
+| Stripe            | Payment processing     | USA          |
+| Lago              | Billing infrastructure | USA          |
+| AWS               | Cloud infrastructure   | USA          |
+| OVH SAS           | Cloud infrastructure   | France       |
+| Latitude          | Cloud infrastructure   | Brazil       |
+| Leaseweb          | Cloud infrastructure   | USA          |
+| Hetzner           | Cloud infrastructure   | Germany      |
+| PostHog           | Analytics              | USA          |
+| Auth0             | Identity services      | USA          |
+| Customer.io       | Customer communication | USA          |
+| Pylon             | Customer support       | USA          |
+| Slack             | Customer collaboration | USA          |
+
+Daytona will notify Customer of any material changes to its sub-processor list. If Customer reasonably objects to the appointment of a new sub-processor based on data protection concerns, the parties will discuss such concerns in good faith. If no resolution is reached, Customer may terminate the Agreement for convenience as its sole and exclusive remedy, consistent with the [DPA](https://www.daytona.io/dpa) (section 14).

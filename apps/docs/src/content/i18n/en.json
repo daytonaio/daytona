@@ -110,6 +110,8 @@
   "sidebarconfig.customDomainAuthenticationDescription": "Customize the preview proxy with your own domain and logic.",
   "sidebarconfig.auditLogs": "Audit Logs",
   "sidebarconfig.auditLogsDescription": "Monitor and track activities across your Daytona organization.",
+  "sidebarconfig.securityExhibit": "Security Exhibit",
+  "sidebarconfig.securityExhibitDescription": "Technical and organizational security measures Daytona maintains to protect customer data processed through its platform.",
   "sidebarconfig.webhooks": "Webhooks",
   "sidebarconfig.webhooksDescription": "Receive real-time notifications when events occur in your Daytona organization.",
   "sidebarconfig.regions": "Regions",
