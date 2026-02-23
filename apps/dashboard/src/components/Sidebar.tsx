@@ -116,6 +116,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
   const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
+  const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
@@ -166,14 +167,22 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
 
     // Add Webhooks link if webhooks are initialized
     if (webhooksInitialized) {
-      arr.push({
-        icon: <Mail size={16} strokeWidth={1.5} />,
-        label: 'Webhooks',
-        path: '#webhooks' as any, // This will be handled by onClick
-        onClick: () => {
-          window.open(webhooksAccess.data?.url, '_blank', 'noopener,noreferrer')
-        },
-      })
+      if (webhooksEnabled) {
+        arr.push({
+          icon: <Mail size={16} strokeWidth={1.5} />,
+          label: 'Webhooks',
+          path: RoutePath.WEBHOOKS,
+        })
+      } else {
+        arr.push({
+          icon: <Mail size={16} strokeWidth={1.5} />,
+          label: 'Webhooks',
+          path: '#webhooks' as any, // This will be handled by onClick
+          onClick: () => {
+            window.open(webhooksAccess.data?.url, '_blank', 'noopener,noreferrer')
+          },
+        })
+      }
     }
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
@@ -201,6 +210,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     selectedOrganization?.personal,
     webhooksInitialized,
     webhooksAccess.data?.url,
+    webhooksEnabled,
   ])
 
   const experimentalItems = useMemo(() => {
