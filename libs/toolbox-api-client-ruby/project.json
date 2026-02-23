@@ -46,10 +46,7 @@
         "parallel": false
       },
       "cache": true,
-      "inputs": [
-        "apiClient",
-        { "env": "DEFAULT_GEM_VERSION" }
-      ],
+      "inputs": ["apiClient", { "env": "DEFAULT_GEM_VERSION" }],
       "dependsOn": [
         {
           "target": "openapi",
@@ -60,14 +57,6 @@
           "projects": "api-client-ruby"
         }
       ]
-    },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["bundle exec rubocop -a --fail-level=E", "prettier --write \"**/*.yml\""],
-        "parallel": false
-      }
     },
     "publish": {
       "executor": "nx:run-commands",

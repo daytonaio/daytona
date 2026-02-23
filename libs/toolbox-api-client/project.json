@@ -33,12 +33,6 @@
         }
       ]
     },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "cd {projectRoot} && prettier --write \"**/*.{ts,json}\" --config ../../.prettierrc"
-      }
-    },
     "set-version": {
       "executor": "nx:run-commands",
       "options": {

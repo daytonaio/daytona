@@ -46,12 +46,6 @@
     "tidy": {
       "executor": "@nx-go/nx-go:tidy"
     },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.yaml\""
-      }
-    },
     "check-version-env": {},
     "set-version": {
       "executor": "nx:run-commands",
@@ -62,10 +56,7 @@
         { "env": "VERSION" },
         { "dependentTasksOutputFiles": "**/*", "transitive": true }
       ],
-      "outputs": [
-        "{workspaceRoot}/apps/cli/go.mod",
-        "{workspaceRoot}/libs/sdk-go/go.mod"
-      ],
+      "outputs": ["{workspaceRoot}/apps/cli/go.mod", "{workspaceRoot}/libs/sdk-go/go.mod"],
       "options": {
         "cwd": "{workspaceRoot}",
         "commands": [
