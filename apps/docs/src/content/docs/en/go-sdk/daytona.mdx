@@ -222,7 +222,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) Archive\(ctx context.Context\) error](<#Sandbox.Archive>)
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
-  - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(string, error\)](<#Sandbox.GetPreviewLink>)
+  - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(\*types.PreviewLink, error\)](<#Sandbox.GetPreviewLink>)
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
   - [func \(s \*Sandbox\) GetWorkingDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetWorkingDir>)
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
@@ -3714,25 +3714,21 @@ err := sandbox.DeleteWithTimeout(ctx, 2*time.Minute)
 ### func \(\*Sandbox\) GetPreviewLink
 
 ```go
-func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (string, error)
+func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewLink, error)
 ```
 
-GetPreviewLink returns a URL for accessing a port on the sandbox.
+GetPreviewLink returns a preview link for accessing a port on the sandbox.
 
-The preview URL allows external access to services running on the specified port within the sandbox.
+The returned PreviewLink contains both the URL and an authentication token. For private sandboxes, the token must be sent via the "x\-daytona\-preview\-token" request header.
 
 Example:
 
 ```
-// Start a web server on port 3000 in the sandbox
-sandbox.Process.ExecuteCommand(ctx, "python -m http.server 3000 &")
-
-// Get the preview URL
-url, err := sandbox.GetPreviewLink(ctx, 3000)
+preview, err := sandbox.GetPreviewLink(ctx, 3000)
 if err != nil {
     return err
 }
-fmt.Printf("Access at: %s\n", url)
+fmt.Printf("URL: %s\nToken: %s\n", preview.URL, preview.Token)
 ```
 
 <a name="Sandbox.GetUserHomeDir"></a>

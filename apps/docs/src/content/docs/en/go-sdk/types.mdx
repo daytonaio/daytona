@@ -35,6 +35,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type OutputMessage](<#OutputMessage>)
 - [type PaginatedSnapshots](<#PaginatedSnapshots>)
 - [type Position](<#Position>)
+- [type PreviewLink](<#PreviewLink>)
 - [type PtyResult](<#PtyResult>)
 - [type PtySessionInfo](<#PtySessionInfo>)
 - [type PtySize](<#PtySize>)
@@ -371,6 +372,18 @@ Position represents a position in a document
 type Position struct {
     Line      int // zero-based
     Character int // zero-based
+}
+```
+
+<a name="PreviewLink"></a>
+## type PreviewLink
+
+PreviewLink contains the URL and authentication token for a sandbox preview.
+
+```go
+type PreviewLink struct {
+    URL   string
+    Token string
 }
 ```
 

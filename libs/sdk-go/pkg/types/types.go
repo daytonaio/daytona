@@ -294,3 +294,9 @@ type Chart struct {
 	Elements any
 	PNG      *string // Optional base64-encoded PNG representation
 }
+
+// PreviewLink contains the URL and authentication token for a sandbox preview.
+type PreviewLink struct {
+	URL   string
+	Token string
+}
