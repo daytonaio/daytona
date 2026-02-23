@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface Url
  */
 export interface Url {
-  /**
-   * URL response
-   * @type {string}
-   * @memberof Url
-   */
-  url: string
+    /**
+     * URL response
+     * @type {string}
+     * @memberof Url
+     */
+    'url': string;
 }
+

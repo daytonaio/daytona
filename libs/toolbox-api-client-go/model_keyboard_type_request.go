@@ -20,8 +20,8 @@ var _ MappedNullable = &KeyboardTypeRequest{}
 // KeyboardTypeRequest struct for KeyboardTypeRequest
 type KeyboardTypeRequest struct {
 	// milliseconds between keystrokes
-	Delay *int32  `json:"delay,omitempty"`
-	Text  *string `json:"text,omitempty"`
+	Delay *int32 `json:"delay,omitempty"`
+	Text *string `json:"text,omitempty"`
 }
 
 // NewKeyboardTypeRequest instantiates a new KeyboardTypeRequest object
@@ -106,7 +106,7 @@ func (o *KeyboardTypeRequest) SetText(v string) {
 }
 
 func (o KeyboardTypeRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -159,3 +159,5 @@ func (v *NullableKeyboardTypeRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

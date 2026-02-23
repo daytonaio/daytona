@@ -12,32 +12,36 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { JobStatus } from './job-status'
+import type { JobStatus } from './job-status';
 
 /**
- *
+ * 
  * @export
  * @interface UpdateJobStatus
  */
 export interface UpdateJobStatus {
-  /**
-   * The new status of the job
-   * @type {JobStatus}
-   * @memberof UpdateJobStatus
-   */
-  status: JobStatus
-  /**
-   * Error message if the job failed
-   * @type {string}
-   * @memberof UpdateJobStatus
-   */
-  errorMessage?: string
-  /**
-   * Result metadata for the job
-   * @type {string}
-   * @memberof UpdateJobStatus
-   */
-  resultMetadata?: string
+    /**
+     * The new status of the job
+     * @type {JobStatus}
+     * @memberof UpdateJobStatus
+     */
+    'status': JobStatus;
+    /**
+     * Error message if the job failed
+     * @type {string}
+     * @memberof UpdateJobStatus
+     */
+    'errorMessage'?: string;
+    /**
+     * Result metadata for the job
+     * @type {string}
+     * @memberof UpdateJobStatus
+     */
+    'resultMetadata'?: string;
 }
+
+
+

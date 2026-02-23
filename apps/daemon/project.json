@@ -91,7 +91,7 @@
       ],
       "options": {
         "cwd": "{projectRoot}/pkg/toolbox",
-        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go && prettier --write \"**/*.{yaml,html,json}\""
       }
     }
   }

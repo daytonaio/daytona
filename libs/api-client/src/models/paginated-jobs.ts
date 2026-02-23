@@ -12,38 +12,40 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { Job } from './job'
+import type { Job } from './job';
 
 /**
- *
+ * 
  * @export
  * @interface PaginatedJobs
  */
 export interface PaginatedJobs {
-  /**
-   *
-   * @type {Array<Job>}
-   * @memberof PaginatedJobs
-   */
-  items: Array<Job>
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedJobs
-   */
-  total: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedJobs
-   */
-  page: number
-  /**
-   *
-   * @type {number}
-   * @memberof PaginatedJobs
-   */
-  totalPages: number
+    /**
+     * 
+     * @type {Array<Job>}
+     * @memberof PaginatedJobs
+     */
+    'items': Array<Job>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedJobs
+     */
+    'total': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedJobs
+     */
+    'page': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof PaginatedJobs
+     */
+    'totalPages': number;
 }
+

@@ -20,7 +20,7 @@ var _ MappedNullable = &WorkDirResponse{}
 
 // WorkDirResponse struct for WorkDirResponse
 type WorkDirResponse struct {
-	Dir                  *string `json:"dir,omitempty"`
+	Dir *string `json:"dir,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -76,7 +76,7 @@ func (o *WorkDirResponse) SetDir(v string) {
 }
 
 func (o WorkDirResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -152,3 +152,5 @@ func (v *NullableWorkDirResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

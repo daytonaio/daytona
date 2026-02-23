@@ -12,26 +12,28 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { MetricDataPoint } from './metric-data-point'
+import type { MetricDataPoint } from './metric-data-point';
 
 /**
- *
+ * 
  * @export
  * @interface MetricSeries
  */
 export interface MetricSeries {
-  /**
-   * Name of the metric
-   * @type {string}
-   * @memberof MetricSeries
-   */
-  metricName: string
-  /**
-   * Data points for this metric
-   * @type {Array<MetricDataPoint>}
-   * @memberof MetricSeries
-   */
-  dataPoints: Array<MetricDataPoint>
+    /**
+     * Name of the metric
+     * @type {string}
+     * @memberof MetricSeries
+     */
+    'metricName': string;
+    /**
+     * Data points for this metric
+     * @type {Array<MetricDataPoint>}
+     * @memberof MetricSeries
+     */
+    'dataPoints': Array<MetricDataPoint>;
 }
+

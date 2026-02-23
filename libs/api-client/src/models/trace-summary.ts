@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,52 +12,55 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface TraceSummary
  */
 export interface TraceSummary {
-  /**
-   * Unique trace identifier
-   * @type {string}
-   * @memberof TraceSummary
-   */
-  traceId: string
-  /**
-   * Name of the root span
-   * @type {string}
-   * @memberof TraceSummary
-   */
-  rootSpanName: string
-  /**
-   * Trace start time
-   * @type {string}
-   * @memberof TraceSummary
-   */
-  startTime: string
-  /**
-   * Trace end time
-   * @type {string}
-   * @memberof TraceSummary
-   */
-  endTime: string
-  /**
-   * Total duration in milliseconds
-   * @type {number}
-   * @memberof TraceSummary
-   */
-  durationMs: number
-  /**
-   * Number of spans in this trace
-   * @type {number}
-   * @memberof TraceSummary
-   */
-  spanCount: number
-  /**
-   * Status code of the trace
-   * @type {string}
-   * @memberof TraceSummary
-   */
-  statusCode?: string
+    /**
+     * Unique trace identifier
+     * @type {string}
+     * @memberof TraceSummary
+     */
+    'traceId': string;
+    /**
+     * Name of the root span
+     * @type {string}
+     * @memberof TraceSummary
+     */
+    'rootSpanName': string;
+    /**
+     * Trace start time
+     * @type {string}
+     * @memberof TraceSummary
+     */
+    'startTime': string;
+    /**
+     * Trace end time
+     * @type {string}
+     * @memberof TraceSummary
+     */
+    'endTime': string;
+    /**
+     * Total duration in milliseconds
+     * @type {number}
+     * @memberof TraceSummary
+     */
+    'durationMs': number;
+    /**
+     * Number of spans in this trace
+     * @type {number}
+     * @memberof TraceSummary
+     */
+    'spanCount': number;
+    /**
+     * Status code of the trace
+     * @type {string}
+     * @memberof TraceSummary
+     */
+    'statusCode'?: string;
 }
+

@@ -12,263 +12,266 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { BuildInfo } from './build-info'
+import type { BuildInfo } from './build-info';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxDesiredState } from './sandbox-desired-state'
+import type { SandboxDesiredState } from './sandbox-desired-state';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxInfo } from './sandbox-info'
+import type { SandboxInfo } from './sandbox-info';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxState } from './sandbox-state'
+import type { SandboxState } from './sandbox-state';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxVolume } from './sandbox-volume'
+import type { SandboxVolume } from './sandbox-volume';
 
 /**
- *
+ * 
  * @export
  * @interface Workspace
  */
 export interface Workspace {
-  /**
-   * The ID of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  id: string
-  /**
-   * The organization ID of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  organizationId: string
-  /**
-   * The name of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  name: string
-  /**
-   * The snapshot used for the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  snapshot?: string
-  /**
-   * The user associated with the project
-   * @type {string}
-   * @memberof Workspace
-   */
-  user: string
-  /**
-   * Environment variables for the sandbox
-   * @type {{ [key: string]: string; }}
-   * @memberof Workspace
-   */
-  env: { [key: string]: string }
-  /**
-   * Labels for the sandbox
-   * @type {{ [key: string]: string; }}
-   * @memberof Workspace
-   */
-  labels: { [key: string]: string }
-  /**
-   * Whether the sandbox http preview is public
-   * @type {boolean}
-   * @memberof Workspace
-   */
-  public: boolean
-  /**
-   * Whether to block all network access for the sandbox
-   * @type {boolean}
-   * @memberof Workspace
-   */
-  networkBlockAll: boolean
-  /**
-   * Comma-separated list of allowed CIDR network addresses for the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  networkAllowList?: string
-  /**
-   * The target environment for the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  target: string
-  /**
-   * The CPU quota for the sandbox
-   * @type {number}
-   * @memberof Workspace
-   */
-  cpu: number
-  /**
-   * The GPU quota for the sandbox
-   * @type {number}
-   * @memberof Workspace
-   */
-  gpu: number
-  /**
-   * The memory quota for the sandbox
-   * @type {number}
-   * @memberof Workspace
-   */
-  memory: number
-  /**
-   * The disk quota for the sandbox
-   * @type {number}
-   * @memberof Workspace
-   */
-  disk: number
-  /**
-   * The state of the sandbox
-   * @type {SandboxState}
-   * @memberof Workspace
-   */
-  state?: SandboxState
-  /**
-   * The desired state of the sandbox
-   * @type {SandboxDesiredState}
-   * @memberof Workspace
-   */
-  desiredState?: SandboxDesiredState
-  /**
-   * The error reason of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  errorReason?: string
-  /**
-   * Whether the sandbox error is recoverable.
-   * @type {boolean}
-   * @memberof Workspace
-   */
-  recoverable?: boolean
-  /**
-   * The state of the backup
-   * @type {string}
-   * @memberof Workspace
-   */
-  backupState?: WorkspaceBackupStateEnum
-  /**
-   * The creation timestamp of the last backup
-   * @type {string}
-   * @memberof Workspace
-   */
-  backupCreatedAt?: string
-  /**
-   * Auto-stop interval in minutes (0 means disabled)
-   * @type {number}
-   * @memberof Workspace
-   */
-  autoStopInterval?: number
-  /**
-   * Auto-archive interval in minutes
-   * @type {number}
-   * @memberof Workspace
-   */
-  autoArchiveInterval?: number
-  /**
-   * Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
-   * @type {number}
-   * @memberof Workspace
-   */
-  autoDeleteInterval?: number
-  /**
-   * Array of volumes attached to the sandbox
-   * @type {Array<SandboxVolume>}
-   * @memberof Workspace
-   */
-  volumes?: Array<SandboxVolume>
-  /**
-   * Build information for the sandbox
-   * @type {BuildInfo}
-   * @memberof Workspace
-   */
-  buildInfo?: BuildInfo
-  /**
-   * The creation timestamp of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  createdAt?: string
-  /**
-   * The last update timestamp of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  updatedAt?: string
-  /**
-   * The class of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   * @deprecated
-   */
-  class?: WorkspaceClassEnum
-  /**
-   * The version of the daemon running in the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  daemonVersion?: string
-  /**
-   * The runner ID of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   */
-  runnerId?: string
-  /**
-   * The image used for the workspace
-   * @type {string}
-   * @memberof Workspace
-   */
-  image?: string
-  /**
-   * The state of the snapshot
-   * @type {string}
-   * @memberof Workspace
-   */
-  snapshotState?: WorkspaceSnapshotStateEnum
-  /**
-   * The creation timestamp of the last snapshot
-   * @type {string}
-   * @memberof Workspace
-   */
-  snapshotCreatedAt?: string
-  /**
-   * Additional information about the sandbox
-   * @type {SandboxInfo}
-   * @memberof Workspace
-   */
-  info?: SandboxInfo
+    /**
+     * The ID of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'id': string;
+    /**
+     * The organization ID of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'organizationId': string;
+    /**
+     * The name of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'name': string;
+    /**
+     * The snapshot used for the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'snapshot'?: string;
+    /**
+     * The user associated with the project
+     * @type {string}
+     * @memberof Workspace
+     */
+    'user': string;
+    /**
+     * Environment variables for the sandbox
+     * @type {{ [key: string]: string; }}
+     * @memberof Workspace
+     */
+    'env': { [key: string]: string; };
+    /**
+     * Labels for the sandbox
+     * @type {{ [key: string]: string; }}
+     * @memberof Workspace
+     */
+    'labels': { [key: string]: string; };
+    /**
+     * Whether the sandbox http preview is public
+     * @type {boolean}
+     * @memberof Workspace
+     */
+    'public': boolean;
+    /**
+     * Whether to block all network access for the sandbox
+     * @type {boolean}
+     * @memberof Workspace
+     */
+    'networkBlockAll': boolean;
+    /**
+     * Comma-separated list of allowed CIDR network addresses for the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'networkAllowList'?: string;
+    /**
+     * The target environment for the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'target': string;
+    /**
+     * The CPU quota for the sandbox
+     * @type {number}
+     * @memberof Workspace
+     */
+    'cpu': number;
+    /**
+     * The GPU quota for the sandbox
+     * @type {number}
+     * @memberof Workspace
+     */
+    'gpu': number;
+    /**
+     * The memory quota for the sandbox
+     * @type {number}
+     * @memberof Workspace
+     */
+    'memory': number;
+    /**
+     * The disk quota for the sandbox
+     * @type {number}
+     * @memberof Workspace
+     */
+    'disk': number;
+    /**
+     * The state of the sandbox
+     * @type {SandboxState}
+     * @memberof Workspace
+     */
+    'state'?: SandboxState;
+    /**
+     * The desired state of the sandbox
+     * @type {SandboxDesiredState}
+     * @memberof Workspace
+     */
+    'desiredState'?: SandboxDesiredState;
+    /**
+     * The error reason of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'errorReason'?: string;
+    /**
+     * Whether the sandbox error is recoverable.
+     * @type {boolean}
+     * @memberof Workspace
+     */
+    'recoverable'?: boolean;
+    /**
+     * The state of the backup
+     * @type {string}
+     * @memberof Workspace
+     */
+    'backupState'?: WorkspaceBackupStateEnum;
+    /**
+     * The creation timestamp of the last backup
+     * @type {string}
+     * @memberof Workspace
+     */
+    'backupCreatedAt'?: string;
+    /**
+     * Auto-stop interval in minutes (0 means disabled)
+     * @type {number}
+     * @memberof Workspace
+     */
+    'autoStopInterval'?: number;
+    /**
+     * Auto-archive interval in minutes
+     * @type {number}
+     * @memberof Workspace
+     */
+    'autoArchiveInterval'?: number;
+    /**
+     * Auto-delete interval in minutes (negative value means disabled, 0 means delete immediately upon stopping)
+     * @type {number}
+     * @memberof Workspace
+     */
+    'autoDeleteInterval'?: number;
+    /**
+     * Array of volumes attached to the sandbox
+     * @type {Array<SandboxVolume>}
+     * @memberof Workspace
+     */
+    'volumes'?: Array<SandboxVolume>;
+    /**
+     * Build information for the sandbox
+     * @type {BuildInfo}
+     * @memberof Workspace
+     */
+    'buildInfo'?: BuildInfo;
+    /**
+     * The creation timestamp of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'createdAt'?: string;
+    /**
+     * The last update timestamp of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'updatedAt'?: string;
+    /**
+     * The class of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     * @deprecated
+     */
+    'class'?: WorkspaceClassEnum;
+    /**
+     * The version of the daemon running in the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'daemonVersion'?: string;
+    /**
+     * The runner ID of the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'runnerId'?: string;
+    /**
+     * The image used for the workspace
+     * @type {string}
+     * @memberof Workspace
+     */
+    'image'?: string;
+    /**
+     * The state of the snapshot
+     * @type {string}
+     * @memberof Workspace
+     */
+    'snapshotState'?: WorkspaceSnapshotStateEnum;
+    /**
+     * The creation timestamp of the last snapshot
+     * @type {string}
+     * @memberof Workspace
+     */
+    'snapshotCreatedAt'?: string;
+    /**
+     * Additional information about the sandbox
+     * @type {SandboxInfo}
+     * @memberof Workspace
+     */
+    'info'?: SandboxInfo;
 }
 
 export const WorkspaceBackupStateEnum = {
-  NONE: 'None',
-  PENDING: 'Pending',
-  IN_PROGRESS: 'InProgress',
-  COMPLETED: 'Completed',
-  ERROR: 'Error',
-} as const
+    NONE: 'None',
+    PENDING: 'Pending',
+    IN_PROGRESS: 'InProgress',
+    COMPLETED: 'Completed',
+    ERROR: 'Error'
+} as const;
 
-export type WorkspaceBackupStateEnum = (typeof WorkspaceBackupStateEnum)[keyof typeof WorkspaceBackupStateEnum]
+export type WorkspaceBackupStateEnum = typeof WorkspaceBackupStateEnum[keyof typeof WorkspaceBackupStateEnum];
 export const WorkspaceClassEnum = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large',
-} as const
+    SMALL: 'small',
+    MEDIUM: 'medium',
+    LARGE: 'large'
+} as const;
 
-export type WorkspaceClassEnum = (typeof WorkspaceClassEnum)[keyof typeof WorkspaceClassEnum]
+export type WorkspaceClassEnum = typeof WorkspaceClassEnum[keyof typeof WorkspaceClassEnum];
 export const WorkspaceSnapshotStateEnum = {
-  NONE: 'None',
-  PENDING: 'Pending',
-  IN_PROGRESS: 'InProgress',
-  COMPLETED: 'Completed',
-  ERROR: 'Error',
-} as const
+    NONE: 'None',
+    PENDING: 'Pending',
+    IN_PROGRESS: 'InProgress',
+    COMPLETED: 'Completed',
+    ERROR: 'Error'
+} as const;
 
-export type WorkspaceSnapshotStateEnum = (typeof WorkspaceSnapshotStateEnum)[keyof typeof WorkspaceSnapshotStateEnum]
+export type WorkspaceSnapshotStateEnum = typeof WorkspaceSnapshotStateEnum[keyof typeof WorkspaceSnapshotStateEnum];
+
+

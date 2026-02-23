@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,82 +12,85 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface RunnerHealthMetrics
  */
 export interface RunnerHealthMetrics {
-  /**
-   * Current CPU load average
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentCpuLoadAverage: number
-  /**
-   * Current CPU usage percentage
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentCpuUsagePercentage: number
-  /**
-   * Current memory usage percentage
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentMemoryUsagePercentage: number
-  /**
-   * Current disk usage percentage
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentDiskUsagePercentage: number
-  /**
-   * Currently allocated CPU cores
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentAllocatedCpu: number
-  /**
-   * Currently allocated memory in GiB
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentAllocatedMemoryGiB: number
-  /**
-   * Currently allocated disk in GiB
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentAllocatedDiskGiB: number
-  /**
-   * Number of snapshots currently stored
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentSnapshotCount: number
-  /**
-   * Number of started sandboxes
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  currentStartedSandboxes: number
-  /**
-   * Total CPU cores on the runner
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  cpu: number
-  /**
-   * Total RAM in GiB on the runner
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  memoryGiB: number
-  /**
-   * Total disk space in GiB on the runner
-   * @type {number}
-   * @memberof RunnerHealthMetrics
-   */
-  diskGiB: number
+    /**
+     * Current CPU load average
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentCpuLoadAverage': number;
+    /**
+     * Current CPU usage percentage
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentCpuUsagePercentage': number;
+    /**
+     * Current memory usage percentage
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentMemoryUsagePercentage': number;
+    /**
+     * Current disk usage percentage
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentDiskUsagePercentage': number;
+    /**
+     * Currently allocated CPU cores
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentAllocatedCpu': number;
+    /**
+     * Currently allocated memory in GiB
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentAllocatedMemoryGiB': number;
+    /**
+     * Currently allocated disk in GiB
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentAllocatedDiskGiB': number;
+    /**
+     * Number of snapshots currently stored
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentSnapshotCount': number;
+    /**
+     * Number of started sandboxes
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'currentStartedSandboxes': number;
+    /**
+     * Total CPU cores on the runner
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'cpu': number;
+    /**
+     * Total RAM in GiB on the runner
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'memoryGiB': number;
+    /**
+     * Total disk space in GiB on the runner
+     * @type {number}
+     * @memberof RunnerHealthMetrics
+     */
+    'diskGiB': number;
 }
+

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,21 +12,26 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @enum {string}
  */
 
 export const SnapshotState = {
-  BUILDING: 'building',
-  PENDING: 'pending',
-  PULLING: 'pulling',
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-  ERROR: 'error',
-  BUILD_FAILED: 'build_failed',
-  REMOVING: 'removing',
-} as const
+    BUILDING: 'building',
+    PENDING: 'pending',
+    PULLING: 'pulling',
+    ACTIVE: 'active',
+    INACTIVE: 'inactive',
+    ERROR: 'error',
+    BUILD_FAILED: 'build_failed',
+    REMOVING: 'removing'
+} as const;
 
-export type SnapshotState = (typeof SnapshotState)[keyof typeof SnapshotState]
+export type SnapshotState = typeof SnapshotState[keyof typeof SnapshotState];
+
+
+

@@ -31,7 +31,7 @@ type CreateRegionResponse struct {
 	SnapshotManagerUsername NullableString `json:"snapshotManagerUsername,omitempty"`
 	// Snapshot Manager password for the region
 	SnapshotManagerPassword NullableString `json:"snapshotManagerPassword,omitempty"`
-	AdditionalProperties    map[string]interface{}
+	AdditionalProperties map[string]interface{}
 }
 
 type _CreateRegionResponse CreateRegionResponse
@@ -110,7 +110,6 @@ func (o *CreateRegionResponse) HasProxyApiKey() bool {
 func (o *CreateRegionResponse) SetProxyApiKey(v string) {
 	o.ProxyApiKey.Set(&v)
 }
-
 // SetProxyApiKeyNil sets the value for ProxyApiKey to be an explicit nil
 func (o *CreateRegionResponse) SetProxyApiKeyNil() {
 	o.ProxyApiKey.Set(nil)
@@ -153,7 +152,6 @@ func (o *CreateRegionResponse) HasSshGatewayApiKey() bool {
 func (o *CreateRegionResponse) SetSshGatewayApiKey(v string) {
 	o.SshGatewayApiKey.Set(&v)
 }
-
 // SetSshGatewayApiKeyNil sets the value for SshGatewayApiKey to be an explicit nil
 func (o *CreateRegionResponse) SetSshGatewayApiKeyNil() {
 	o.SshGatewayApiKey.Set(nil)
@@ -196,7 +194,6 @@ func (o *CreateRegionResponse) HasSnapshotManagerUsername() bool {
 func (o *CreateRegionResponse) SetSnapshotManagerUsername(v string) {
 	o.SnapshotManagerUsername.Set(&v)
 }
-
 // SetSnapshotManagerUsernameNil sets the value for SnapshotManagerUsername to be an explicit nil
 func (o *CreateRegionResponse) SetSnapshotManagerUsernameNil() {
 	o.SnapshotManagerUsername.Set(nil)
@@ -239,7 +236,6 @@ func (o *CreateRegionResponse) HasSnapshotManagerPassword() bool {
 func (o *CreateRegionResponse) SetSnapshotManagerPassword(v string) {
 	o.SnapshotManagerPassword.Set(&v)
 }
-
 // SetSnapshotManagerPasswordNil sets the value for SnapshotManagerPassword to be an explicit nil
 func (o *CreateRegionResponse) SetSnapshotManagerPasswordNil() {
 	o.SnapshotManagerPassword.Set(nil)
@@ -251,7 +247,7 @@ func (o *CreateRegionResponse) UnsetSnapshotManagerPassword() {
 }
 
 func (o CreateRegionResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -294,10 +290,10 @@ func (o *CreateRegionResponse) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -362,3 +358,5 @@ func (v *NullableCreateRegionResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

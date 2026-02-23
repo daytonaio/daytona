@@ -19,16 +19,17 @@ import (
 	"strings"
 )
 
+
 type ProcessAPI interface {
 
 	/*
-		ConnectPtySession Connect to PTY session via WebSocket
+	ConnectPtySession Connect to PTY session via WebSocket
 
-		Establish a WebSocket connection to interact with a pseudo-terminal session
+	Establish a WebSocket connection to interact with a pseudo-terminal session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId PTY session ID
-		@return ProcessAPIConnectPtySessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId PTY session ID
+	@return ProcessAPIConnectPtySessionRequest
 	*/
 	ConnectPtySession(ctx context.Context, sessionId string) ProcessAPIConnectPtySessionRequest
 
@@ -36,12 +37,12 @@ type ProcessAPI interface {
 	ConnectPtySessionExecute(r ProcessAPIConnectPtySessionRequest) (*http.Response, error)
 
 	/*
-		CreatePtySession Create a new PTY session
+	CreatePtySession Create a new PTY session
 
-		Create a new pseudo-terminal session with specified configuration
+	Create a new pseudo-terminal session with specified configuration
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ProcessAPICreatePtySessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPICreatePtySessionRequest
 	*/
 	CreatePtySession(ctx context.Context) ProcessAPICreatePtySessionRequest
 
@@ -50,12 +51,12 @@ type ProcessAPI interface {
 	CreatePtySessionExecute(r ProcessAPICreatePtySessionRequest) (*PtyCreateResponse, *http.Response, error)
 
 	/*
-		CreateSession Create a new session
+	CreateSession Create a new session
 
-		Create a new shell session for command execution
+	Create a new shell session for command execution
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ProcessAPICreateSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPICreateSessionRequest
 	*/
 	CreateSession(ctx context.Context) ProcessAPICreateSessionRequest
 
@@ -63,13 +64,13 @@ type ProcessAPI interface {
 	CreateSessionExecute(r ProcessAPICreateSessionRequest) (*http.Response, error)
 
 	/*
-		DeletePtySession Delete a PTY session
+	DeletePtySession Delete a PTY session
 
-		Delete a pseudo-terminal session and terminate its process
+	Delete a pseudo-terminal session and terminate its process
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId PTY session ID
-		@return ProcessAPIDeletePtySessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId PTY session ID
+	@return ProcessAPIDeletePtySessionRequest
 	*/
 	DeletePtySession(ctx context.Context, sessionId string) ProcessAPIDeletePtySessionRequest
 
@@ -78,13 +79,13 @@ type ProcessAPI interface {
 	DeletePtySessionExecute(r ProcessAPIDeletePtySessionRequest) (map[string]map[string]interface{}, *http.Response, error)
 
 	/*
-		DeleteSession Delete a session
+	DeleteSession Delete a session
 
-		Delete an existing shell session
+	Delete an existing shell session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@return ProcessAPIDeleteSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@return ProcessAPIDeleteSessionRequest
 	*/
 	DeleteSession(ctx context.Context, sessionId string) ProcessAPIDeleteSessionRequest
 
@@ -92,12 +93,12 @@ type ProcessAPI interface {
 	DeleteSessionExecute(r ProcessAPIDeleteSessionRequest) (*http.Response, error)
 
 	/*
-		ExecuteCommand Execute a command
+	ExecuteCommand Execute a command
 
-		Execute a shell command and return the output and exit code
+	Execute a shell command and return the output and exit code
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ProcessAPIExecuteCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIExecuteCommandRequest
 	*/
 	ExecuteCommand(ctx context.Context) ProcessAPIExecuteCommandRequest
 
@@ -106,13 +107,13 @@ type ProcessAPI interface {
 	ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error)
 
 	/*
-		GetPtySession Get PTY session information
+	GetPtySession Get PTY session information
 
-		Get detailed information about a specific pseudo-terminal session
+	Get detailed information about a specific pseudo-terminal session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId PTY session ID
-		@return ProcessAPIGetPtySessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId PTY session ID
+	@return ProcessAPIGetPtySessionRequest
 	*/
 	GetPtySession(ctx context.Context, sessionId string) ProcessAPIGetPtySessionRequest
 
@@ -121,13 +122,13 @@ type ProcessAPI interface {
 	GetPtySessionExecute(r ProcessAPIGetPtySessionRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
-		GetSession Get session details
+	GetSession Get session details
 
-		Get details of a specific session including its commands
+	Get details of a specific session including its commands
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@return ProcessAPIGetSessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@return ProcessAPIGetSessionRequest
 	*/
 	GetSession(ctx context.Context, sessionId string) ProcessAPIGetSessionRequest
 
@@ -136,14 +137,14 @@ type ProcessAPI interface {
 	GetSessionExecute(r ProcessAPIGetSessionRequest) (*Session, *http.Response, error)
 
 	/*
-		GetSessionCommand Get session command details
+	GetSessionCommand Get session command details
 
-		Get details of a specific command within a session
+	Get details of a specific command within a session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@param commandId Command ID
-		@return ProcessAPIGetSessionCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@param commandId Command ID
+	@return ProcessAPIGetSessionCommandRequest
 	*/
 	GetSessionCommand(ctx context.Context, sessionId string, commandId string) ProcessAPIGetSessionCommandRequest
 
@@ -152,14 +153,14 @@ type ProcessAPI interface {
 	GetSessionCommandExecute(r ProcessAPIGetSessionCommandRequest) (*Command, *http.Response, error)
 
 	/*
-		GetSessionCommandLogs Get session command logs
+	GetSessionCommandLogs Get session command logs
 
-		Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+	Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@param commandId Command ID
-		@return ProcessAPIGetSessionCommandLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@param commandId Command ID
+	@return ProcessAPIGetSessionCommandLogsRequest
 	*/
 	GetSessionCommandLogs(ctx context.Context, sessionId string, commandId string) ProcessAPIGetSessionCommandLogsRequest
 
@@ -168,12 +169,12 @@ type ProcessAPI interface {
 	GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (string, *http.Response, error)
 
 	/*
-		ListPtySessions List all PTY sessions
+	ListPtySessions List all PTY sessions
 
-		Get a list of all active pseudo-terminal sessions
+	Get a list of all active pseudo-terminal sessions
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ProcessAPIListPtySessionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIListPtySessionsRequest
 	*/
 	ListPtySessions(ctx context.Context) ProcessAPIListPtySessionsRequest
 
@@ -182,12 +183,12 @@ type ProcessAPI interface {
 	ListPtySessionsExecute(r ProcessAPIListPtySessionsRequest) (*PtyListResponse, *http.Response, error)
 
 	/*
-		ListSessions List all sessions
+	ListSessions List all sessions
 
-		Get a list of all active shell sessions
+	Get a list of all active shell sessions
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ProcessAPIListSessionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ProcessAPIListSessionsRequest
 	*/
 	ListSessions(ctx context.Context) ProcessAPIListSessionsRequest
 
@@ -196,13 +197,13 @@ type ProcessAPI interface {
 	ListSessionsExecute(r ProcessAPIListSessionsRequest) ([]Session, *http.Response, error)
 
 	/*
-		ResizePtySession Resize a PTY session
+	ResizePtySession Resize a PTY session
 
-		Resize the terminal dimensions of a pseudo-terminal session
+	Resize the terminal dimensions of a pseudo-terminal session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId PTY session ID
-		@return ProcessAPIResizePtySessionRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId PTY session ID
+	@return ProcessAPIResizePtySessionRequest
 	*/
 	ResizePtySession(ctx context.Context, sessionId string) ProcessAPIResizePtySessionRequest
 
@@ -211,14 +212,14 @@ type ProcessAPI interface {
 	ResizePtySessionExecute(r ProcessAPIResizePtySessionRequest) (*PtySessionInfo, *http.Response, error)
 
 	/*
-		SendInput Send input to command
+	SendInput Send input to command
 
-		Send input data to a running command in a session for interactive execution
+	Send input data to a running command in a session for interactive execution
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@param commandId Command ID
-		@return ProcessAPISendInputRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@param commandId Command ID
+	@return ProcessAPISendInputRequest
 	*/
 	SendInput(ctx context.Context, sessionId string, commandId string) ProcessAPISendInputRequest
 
@@ -226,13 +227,13 @@ type ProcessAPI interface {
 	SendInputExecute(r ProcessAPISendInputRequest) (*http.Response, error)
 
 	/*
-		SessionExecuteCommand Execute command in session
+	SessionExecuteCommand Execute command in session
 
-		Execute a command within an existing shell session
+	Execute a command within an existing shell session
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sessionId Session ID
-		@return ProcessAPISessionExecuteCommandRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sessionId Session ID
+	@return ProcessAPISessionExecuteCommandRequest
 	*/
 	SessionExecuteCommand(ctx context.Context, sessionId string) ProcessAPISessionExecuteCommandRequest
 
@@ -245,9 +246,9 @@ type ProcessAPI interface {
 type ProcessAPIService service
 
 type ProcessAPIConnectPtySessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
+	sessionId string
 }
 
 func (r ProcessAPIConnectPtySessionRequest) Execute() (*http.Response, error) {
@@ -259,24 +260,24 @@ ConnectPtySession Connect to PTY session via WebSocket
 
 Establish a WebSocket connection to interact with a pseudo-terminal session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId PTY session ID
-	@return ProcessAPIConnectPtySessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId PTY session ID
+ @return ProcessAPIConnectPtySessionRequest
 */
 func (a *ProcessAPIService) ConnectPtySession(ctx context.Context, sessionId string) ProcessAPIConnectPtySessionRequest {
 	return ProcessAPIConnectPtySessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
 func (a *ProcessAPIService) ConnectPtySessionExecute(r ProcessAPIConnectPtySessionRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ConnectPtySession")
@@ -337,9 +338,9 @@ func (a *ProcessAPIService) ConnectPtySessionExecute(r ProcessAPIConnectPtySessi
 }
 
 type ProcessAPICreatePtySessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	request    *PtyCreateRequest
+	request *PtyCreateRequest
 }
 
 // PTY session creation request
@@ -357,25 +358,24 @@ CreatePtySession Create a new PTY session
 
 Create a new pseudo-terminal session with specified configuration
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ProcessAPICreatePtySessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPICreatePtySessionRequest
 */
 func (a *ProcessAPIService) CreatePtySession(ctx context.Context) ProcessAPICreatePtySessionRequest {
 	return ProcessAPICreatePtySessionRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PtyCreateResponse
+//  @return PtyCreateResponse
 func (a *ProcessAPIService) CreatePtySessionExecute(r ProcessAPICreatePtySessionRequest) (*PtyCreateResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PtyCreateResponse
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PtyCreateResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.CreatePtySession")
@@ -449,9 +449,9 @@ func (a *ProcessAPIService) CreatePtySessionExecute(r ProcessAPICreatePtySession
 }
 
 type ProcessAPICreateSessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	request    *CreateSessionRequest
+	request *CreateSessionRequest
 }
 
 // Session creation request
@@ -469,22 +469,22 @@ CreateSession Create a new session
 
 Create a new shell session for command execution
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ProcessAPICreateSessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPICreateSessionRequest
 */
 func (a *ProcessAPIService) CreateSession(ctx context.Context) ProcessAPICreateSessionRequest {
 	return ProcessAPICreateSessionRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *ProcessAPIService) CreateSessionExecute(r ProcessAPICreateSessionRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.CreateSession")
@@ -549,9 +549,9 @@ func (a *ProcessAPIService) CreateSessionExecute(r ProcessAPICreateSessionReques
 }
 
 type ProcessAPIDeletePtySessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
+	sessionId string
 }
 
 func (r ProcessAPIDeletePtySessionRequest) Execute() (map[string]map[string]interface{}, *http.Response, error) {
@@ -563,27 +563,26 @@ DeletePtySession Delete a PTY session
 
 Delete a pseudo-terminal session and terminate its process
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId PTY session ID
-	@return ProcessAPIDeletePtySessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId PTY session ID
+ @return ProcessAPIDeletePtySessionRequest
 */
 func (a *ProcessAPIService) DeletePtySession(ctx context.Context, sessionId string) ProcessAPIDeletePtySessionRequest {
 	return ProcessAPIDeletePtySessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]map[string]interface{}
+//  @return map[string]map[string]interface{}
 func (a *ProcessAPIService) DeletePtySessionExecute(r ProcessAPIDeletePtySessionRequest) (map[string]map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodDelete
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]map[string]interface{}
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.DeletePtySession")
@@ -653,9 +652,9 @@ func (a *ProcessAPIService) DeletePtySessionExecute(r ProcessAPIDeletePtySession
 }
 
 type ProcessAPIDeleteSessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
+	sessionId string
 }
 
 func (r ProcessAPIDeleteSessionRequest) Execute() (*http.Response, error) {
@@ -667,24 +666,24 @@ DeleteSession Delete a session
 
 Delete an existing shell session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@return ProcessAPIDeleteSessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @return ProcessAPIDeleteSessionRequest
 */
 func (a *ProcessAPIService) DeleteSession(ctx context.Context, sessionId string) ProcessAPIDeleteSessionRequest {
 	return ProcessAPIDeleteSessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
 func (a *ProcessAPIService) DeleteSessionExecute(r ProcessAPIDeleteSessionRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.DeleteSession")
@@ -745,9 +744,9 @@ func (a *ProcessAPIService) DeleteSessionExecute(r ProcessAPIDeleteSessionReques
 }
 
 type ProcessAPIExecuteCommandRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	request    *ExecuteRequest
+	request *ExecuteRequest
 }
 
 // Command execution request
@@ -765,25 +764,24 @@ ExecuteCommand Execute a command
 
 Execute a shell command and return the output and exit code
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ProcessAPIExecuteCommandRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPIExecuteCommandRequest
 */
 func (a *ProcessAPIService) ExecuteCommand(ctx context.Context) ProcessAPIExecuteCommandRequest {
 	return ProcessAPIExecuteCommandRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ExecuteResponse
+//  @return ExecuteResponse
 func (a *ProcessAPIService) ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ExecuteResponse
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ExecuteCommand")
@@ -857,9 +855,9 @@ func (a *ProcessAPIService) ExecuteCommandExecute(r ProcessAPIExecuteCommandRequ
 }
 
 type ProcessAPIGetPtySessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
+	sessionId string
 }
 
 func (r ProcessAPIGetPtySessionRequest) Execute() (*PtySessionInfo, *http.Response, error) {
@@ -871,27 +869,26 @@ GetPtySession Get PTY session information
 
 Get detailed information about a specific pseudo-terminal session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId PTY session ID
-	@return ProcessAPIGetPtySessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId PTY session ID
+ @return ProcessAPIGetPtySessionRequest
 */
 func (a *ProcessAPIService) GetPtySession(ctx context.Context, sessionId string) ProcessAPIGetPtySessionRequest {
 	return ProcessAPIGetPtySessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PtySessionInfo
+//  @return PtySessionInfo
 func (a *ProcessAPIService) GetPtySessionExecute(r ProcessAPIGetPtySessionRequest) (*PtySessionInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PtySessionInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PtySessionInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetPtySession")
@@ -961,9 +958,9 @@ func (a *ProcessAPIService) GetPtySessionExecute(r ProcessAPIGetPtySessionReques
 }
 
 type ProcessAPIGetSessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
+	sessionId string
 }
 
 func (r ProcessAPIGetSessionRequest) Execute() (*Session, *http.Response, error) {
@@ -975,27 +972,26 @@ GetSession Get session details
 
 Get details of a specific session including its commands
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@return ProcessAPIGetSessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @return ProcessAPIGetSessionRequest
 */
 func (a *ProcessAPIService) GetSession(ctx context.Context, sessionId string) ProcessAPIGetSessionRequest {
 	return ProcessAPIGetSessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Session
+//  @return Session
 func (a *ProcessAPIService) GetSessionExecute(r ProcessAPIGetSessionRequest) (*Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Session
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetSession")
@@ -1065,10 +1061,10 @@ func (a *ProcessAPIService) GetSessionExecute(r ProcessAPIGetSessionRequest) (*S
 }
 
 type ProcessAPIGetSessionCommandRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
-	commandId  string
+	sessionId string
+	commandId string
 }
 
 func (r ProcessAPIGetSessionCommandRequest) Execute() (*Command, *http.Response, error) {
@@ -1080,29 +1076,28 @@ GetSessionCommand Get session command details
 
 Get details of a specific command within a session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@param commandId Command ID
-	@return ProcessAPIGetSessionCommandRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @param commandId Command ID
+ @return ProcessAPIGetSessionCommandRequest
 */
 func (a *ProcessAPIService) GetSessionCommand(ctx context.Context, sessionId string, commandId string) ProcessAPIGetSessionCommandRequest {
 	return ProcessAPIGetSessionCommandRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
-		commandId:  commandId,
+		ctx: ctx,
+		sessionId: sessionId,
+		commandId: commandId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Command
+//  @return Command
 func (a *ProcessAPIService) GetSessionCommandExecute(r ProcessAPIGetSessionCommandRequest) (*Command, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Command
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Command
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetSessionCommand")
@@ -1173,11 +1168,11 @@ func (a *ProcessAPIService) GetSessionCommandExecute(r ProcessAPIGetSessionComma
 }
 
 type ProcessAPIGetSessionCommandLogsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
-	commandId  string
-	follow     *bool
+	sessionId string
+	commandId string
+	follow *bool
 }
 
 // Follow logs in real-time (WebSocket only)
@@ -1195,29 +1190,28 @@ GetSessionCommandLogs Get session command logs
 
 Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@param commandId Command ID
-	@return ProcessAPIGetSessionCommandLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @param commandId Command ID
+ @return ProcessAPIGetSessionCommandLogsRequest
 */
 func (a *ProcessAPIService) GetSessionCommandLogs(ctx context.Context, sessionId string, commandId string) ProcessAPIGetSessionCommandLogsRequest {
 	return ProcessAPIGetSessionCommandLogsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
-		commandId:  commandId,
+		ctx: ctx,
+		sessionId: sessionId,
+		commandId: commandId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return string
+//  @return string
 func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionCommandLogsRequest) (string, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue string
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.GetSessionCommandLogs")
@@ -1291,7 +1285,7 @@ func (a *ProcessAPIService) GetSessionCommandLogsExecute(r ProcessAPIGetSessionC
 }
 
 type ProcessAPIListPtySessionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
 }
 
@@ -1304,25 +1298,24 @@ ListPtySessions List all PTY sessions
 
 Get a list of all active pseudo-terminal sessions
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ProcessAPIListPtySessionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPIListPtySessionsRequest
 */
 func (a *ProcessAPIService) ListPtySessions(ctx context.Context) ProcessAPIListPtySessionsRequest {
 	return ProcessAPIListPtySessionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PtyListResponse
+//  @return PtyListResponse
 func (a *ProcessAPIService) ListPtySessionsExecute(r ProcessAPIListPtySessionsRequest) (*PtyListResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PtyListResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PtyListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ListPtySessions")
@@ -1391,7 +1384,7 @@ func (a *ProcessAPIService) ListPtySessionsExecute(r ProcessAPIListPtySessionsRe
 }
 
 type ProcessAPIListSessionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
 }
 
@@ -1404,25 +1397,24 @@ ListSessions List all sessions
 
 Get a list of all active shell sessions
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ProcessAPIListSessionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ProcessAPIListSessionsRequest
 */
 func (a *ProcessAPIService) ListSessions(ctx context.Context) ProcessAPIListSessionsRequest {
 	return ProcessAPIListSessionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Session
+//  @return []Session
 func (a *ProcessAPIService) ListSessionsExecute(r ProcessAPIListSessionsRequest) ([]Session, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Session
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Session
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ListSessions")
@@ -1491,10 +1483,10 @@ func (a *ProcessAPIService) ListSessionsExecute(r ProcessAPIListSessionsRequest)
 }
 
 type ProcessAPIResizePtySessionRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
-	request    *PtyResizeRequest
+	sessionId string
+	request *PtyResizeRequest
 }
 
 // Resize request with new dimensions
@@ -1512,27 +1504,26 @@ ResizePtySession Resize a PTY session
 
 Resize the terminal dimensions of a pseudo-terminal session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId PTY session ID
-	@return ProcessAPIResizePtySessionRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId PTY session ID
+ @return ProcessAPIResizePtySessionRequest
 */
 func (a *ProcessAPIService) ResizePtySession(ctx context.Context, sessionId string) ProcessAPIResizePtySessionRequest {
 	return ProcessAPIResizePtySessionRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PtySessionInfo
+//  @return PtySessionInfo
 func (a *ProcessAPIService) ResizePtySessionExecute(r ProcessAPIResizePtySessionRequest) (*PtySessionInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PtySessionInfo
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PtySessionInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ResizePtySession")
@@ -1607,11 +1598,11 @@ func (a *ProcessAPIService) ResizePtySessionExecute(r ProcessAPIResizePtySession
 }
 
 type ProcessAPISendInputRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
-	commandId  string
-	request    *SessionSendInputRequest
+	sessionId string
+	commandId string
+	request *SessionSendInputRequest
 }
 
 // Input send request
@@ -1629,26 +1620,26 @@ SendInput Send input to command
 
 Send input data to a running command in a session for interactive execution
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@param commandId Command ID
-	@return ProcessAPISendInputRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @param commandId Command ID
+ @return ProcessAPISendInputRequest
 */
 func (a *ProcessAPIService) SendInput(ctx context.Context, sessionId string, commandId string) ProcessAPISendInputRequest {
 	return ProcessAPISendInputRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
-		commandId:  commandId,
+		ctx: ctx,
+		sessionId: sessionId,
+		commandId: commandId,
 	}
 }
 
 // Execute executes the request
 func (a *ProcessAPIService) SendInputExecute(r ProcessAPISendInputRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.SendInput")
@@ -1715,10 +1706,10 @@ func (a *ProcessAPIService) SendInputExecute(r ProcessAPISendInputRequest) (*htt
 }
 
 type ProcessAPISessionExecuteCommandRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ProcessAPI
-	sessionId  string
-	request    *SessionExecuteRequest
+	sessionId string
+	request *SessionExecuteRequest
 }
 
 // Command execution request
@@ -1736,27 +1727,26 @@ SessionExecuteCommand Execute command in session
 
 Execute a command within an existing shell session
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sessionId Session ID
-	@return ProcessAPISessionExecuteCommandRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sessionId Session ID
+ @return ProcessAPISessionExecuteCommandRequest
 */
 func (a *ProcessAPIService) SessionExecuteCommand(ctx context.Context, sessionId string) ProcessAPISessionExecuteCommandRequest {
 	return ProcessAPISessionExecuteCommandRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sessionId:  sessionId,
+		ctx: ctx,
+		sessionId: sessionId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SessionExecuteResponse
+//  @return SessionExecuteResponse
 func (a *ProcessAPIService) SessionExecuteCommandExecute(r ProcessAPISessionExecuteCommandRequest) (*SessionExecuteResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SessionExecuteResponse
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SessionExecuteResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.SessionExecuteCommand")

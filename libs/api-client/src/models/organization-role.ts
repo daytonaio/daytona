@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,73 +12,76 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface OrganizationRole
  */
 export interface OrganizationRole {
-  /**
-   * Role ID
-   * @type {string}
-   * @memberof OrganizationRole
-   */
-  id: string
-  /**
-   * Role name
-   * @type {string}
-   * @memberof OrganizationRole
-   */
-  name: string
-  /**
-   * Role description
-   * @type {string}
-   * @memberof OrganizationRole
-   */
-  description: string
-  /**
-   * Roles assigned to the user
-   * @type {Array<string>}
-   * @memberof OrganizationRole
-   */
-  permissions: Array<OrganizationRolePermissionsEnum>
-  /**
-   * Global role flag
-   * @type {boolean}
-   * @memberof OrganizationRole
-   */
-  isGlobal: boolean
-  /**
-   * Creation timestamp
-   * @type {Date}
-   * @memberof OrganizationRole
-   */
-  createdAt: Date
-  /**
-   * Last update timestamp
-   * @type {Date}
-   * @memberof OrganizationRole
-   */
-  updatedAt: Date
+    /**
+     * Role ID
+     * @type {string}
+     * @memberof OrganizationRole
+     */
+    'id': string;
+    /**
+     * Role name
+     * @type {string}
+     * @memberof OrganizationRole
+     */
+    'name': string;
+    /**
+     * Role description
+     * @type {string}
+     * @memberof OrganizationRole
+     */
+    'description': string;
+    /**
+     * Roles assigned to the user
+     * @type {Array<string>}
+     * @memberof OrganizationRole
+     */
+    'permissions': Array<OrganizationRolePermissionsEnum>;
+    /**
+     * Global role flag
+     * @type {boolean}
+     * @memberof OrganizationRole
+     */
+    'isGlobal': boolean;
+    /**
+     * Creation timestamp
+     * @type {Date}
+     * @memberof OrganizationRole
+     */
+    'createdAt': Date;
+    /**
+     * Last update timestamp
+     * @type {Date}
+     * @memberof OrganizationRole
+     */
+    'updatedAt': Date;
 }
 
 export const OrganizationRolePermissionsEnum = {
-  WRITE_REGISTRIES: 'write:registries',
-  DELETE_REGISTRIES: 'delete:registries',
-  WRITE_SNAPSHOTS: 'write:snapshots',
-  DELETE_SNAPSHOTS: 'delete:snapshots',
-  WRITE_SANDBOXES: 'write:sandboxes',
-  DELETE_SANDBOXES: 'delete:sandboxes',
-  READ_VOLUMES: 'read:volumes',
-  WRITE_VOLUMES: 'write:volumes',
-  DELETE_VOLUMES: 'delete:volumes',
-  WRITE_REGIONS: 'write:regions',
-  DELETE_REGIONS: 'delete:regions',
-  READ_RUNNERS: 'read:runners',
-  WRITE_RUNNERS: 'write:runners',
-  DELETE_RUNNERS: 'delete:runners',
-  READ_AUDIT_LOGS: 'read:audit_logs',
-} as const
+    WRITE_REGISTRIES: 'write:registries',
+    DELETE_REGISTRIES: 'delete:registries',
+    WRITE_SNAPSHOTS: 'write:snapshots',
+    DELETE_SNAPSHOTS: 'delete:snapshots',
+    WRITE_SANDBOXES: 'write:sandboxes',
+    DELETE_SANDBOXES: 'delete:sandboxes',
+    READ_VOLUMES: 'read:volumes',
+    WRITE_VOLUMES: 'write:volumes',
+    DELETE_VOLUMES: 'delete:volumes',
+    WRITE_REGIONS: 'write:regions',
+    DELETE_REGIONS: 'delete:regions',
+    READ_RUNNERS: 'read:runners',
+    WRITE_RUNNERS: 'write:runners',
+    DELETE_RUNNERS: 'delete:runners',
+    READ_AUDIT_LOGS: 'read:audit_logs'
+} as const;
 
-export type OrganizationRolePermissionsEnum =
-  (typeof OrganizationRolePermissionsEnum)[keyof typeof OrganizationRolePermissionsEnum]
+export type OrganizationRolePermissionsEnum = typeof OrganizationRolePermissionsEnum[keyof typeof OrganizationRolePermissionsEnum];
+
+

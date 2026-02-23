@@ -20,10 +20,10 @@ var _ MappedNullable = &MouseDragRequest{}
 // MouseDragRequest struct for MouseDragRequest
 type MouseDragRequest struct {
 	Button *string `json:"button,omitempty"`
-	EndX   *int32  `json:"endX,omitempty"`
-	EndY   *int32  `json:"endY,omitempty"`
-	StartX *int32  `json:"startX,omitempty"`
-	StartY *int32  `json:"startY,omitempty"`
+	EndX *int32 `json:"endX,omitempty"`
+	EndY *int32 `json:"endY,omitempty"`
+	StartX *int32 `json:"startX,omitempty"`
+	StartY *int32 `json:"startY,omitempty"`
 }
 
 // NewMouseDragRequest instantiates a new MouseDragRequest object
@@ -204,7 +204,7 @@ func (o *MouseDragRequest) SetStartY(v int32) {
 }
 
 func (o MouseDragRequest) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -266,3 +266,5 @@ func (v *NullableMouseDragRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,49 +12,52 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateOrganizationRole
  */
 export interface CreateOrganizationRole {
-  /**
-   * The name of the role
-   * @type {string}
-   * @memberof CreateOrganizationRole
-   */
-  name: string
-  /**
-   * The description of the role
-   * @type {string}
-   * @memberof CreateOrganizationRole
-   */
-  description: string
-  /**
-   * The list of permissions assigned to the role
-   * @type {Array<string>}
-   * @memberof CreateOrganizationRole
-   */
-  permissions: Array<CreateOrganizationRolePermissionsEnum>
+    /**
+     * The name of the role
+     * @type {string}
+     * @memberof CreateOrganizationRole
+     */
+    'name': string;
+    /**
+     * The description of the role
+     * @type {string}
+     * @memberof CreateOrganizationRole
+     */
+    'description': string;
+    /**
+     * The list of permissions assigned to the role
+     * @type {Array<string>}
+     * @memberof CreateOrganizationRole
+     */
+    'permissions': Array<CreateOrganizationRolePermissionsEnum>;
 }
 
 export const CreateOrganizationRolePermissionsEnum = {
-  WRITE_REGISTRIES: 'write:registries',
-  DELETE_REGISTRIES: 'delete:registries',
-  WRITE_SNAPSHOTS: 'write:snapshots',
-  DELETE_SNAPSHOTS: 'delete:snapshots',
-  WRITE_SANDBOXES: 'write:sandboxes',
-  DELETE_SANDBOXES: 'delete:sandboxes',
-  READ_VOLUMES: 'read:volumes',
-  WRITE_VOLUMES: 'write:volumes',
-  DELETE_VOLUMES: 'delete:volumes',
-  WRITE_REGIONS: 'write:regions',
-  DELETE_REGIONS: 'delete:regions',
-  READ_RUNNERS: 'read:runners',
-  WRITE_RUNNERS: 'write:runners',
-  DELETE_RUNNERS: 'delete:runners',
-  READ_AUDIT_LOGS: 'read:audit_logs',
-} as const
+    WRITE_REGISTRIES: 'write:registries',
+    DELETE_REGISTRIES: 'delete:registries',
+    WRITE_SNAPSHOTS: 'write:snapshots',
+    DELETE_SNAPSHOTS: 'delete:snapshots',
+    WRITE_SANDBOXES: 'write:sandboxes',
+    DELETE_SANDBOXES: 'delete:sandboxes',
+    READ_VOLUMES: 'read:volumes',
+    WRITE_VOLUMES: 'write:volumes',
+    DELETE_VOLUMES: 'delete:volumes',
+    WRITE_REGIONS: 'write:regions',
+    DELETE_REGIONS: 'delete:regions',
+    READ_RUNNERS: 'read:runners',
+    WRITE_RUNNERS: 'write:runners',
+    DELETE_RUNNERS: 'delete:runners',
+    READ_AUDIT_LOGS: 'read:audit_logs'
+} as const;
 
-export type CreateOrganizationRolePermissionsEnum =
-  (typeof CreateOrganizationRolePermissionsEnum)[keyof typeof CreateOrganizationRolePermissionsEnum]
+export type CreateOrganizationRolePermissionsEnum = typeof CreateOrganizationRolePermissionsEnum[keyof typeof CreateOrganizationRolePermissionsEnum];
+
+

@@ -21,14 +21,14 @@ var _ MappedNullable = &FileInfo{}
 
 // FileInfo struct for FileInfo
 type FileInfo struct {
-	Name                 string  `json:"name"`
-	IsDir                bool    `json:"isDir"`
-	Size                 float32 `json:"size"`
-	ModTime              string  `json:"modTime"`
-	Mode                 string  `json:"mode"`
-	Permissions          string  `json:"permissions"`
-	Owner                string  `json:"owner"`
-	Group                string  `json:"group"`
+	Name string `json:"name"`
+	IsDir bool `json:"isDir"`
+	Size float32 `json:"size"`
+	ModTime string `json:"modTime"`
+	Mode string `json:"mode"`
+	Permissions string `json:"permissions"`
+	Owner string `json:"owner"`
+	Group string `json:"group"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -252,7 +252,7 @@ func (o *FileInfo) SetGroup(v string) {
 }
 
 func (o FileInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -297,10 +297,10 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -368,3 +368,5 @@ func (v *NullableFileInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

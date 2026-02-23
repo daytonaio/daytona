@@ -12,69 +12,72 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { OrganizationRole } from './organization-role'
+import type { OrganizationRole } from './organization-role';
 
 /**
- *
+ * 
  * @export
  * @interface OrganizationUser
  */
 export interface OrganizationUser {
-  /**
-   * User ID
-   * @type {string}
-   * @memberof OrganizationUser
-   */
-  userId: string
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof OrganizationUser
-   */
-  organizationId: string
-  /**
-   * User name
-   * @type {string}
-   * @memberof OrganizationUser
-   */
-  name: string
-  /**
-   * User email
-   * @type {string}
-   * @memberof OrganizationUser
-   */
-  email: string
-  /**
-   * Member role
-   * @type {string}
-   * @memberof OrganizationUser
-   */
-  role: OrganizationUserRoleEnum
-  /**
-   * Roles assigned to the user
-   * @type {Array<OrganizationRole>}
-   * @memberof OrganizationUser
-   */
-  assignedRoles: Array<OrganizationRole>
-  /**
-   * Creation timestamp
-   * @type {Date}
-   * @memberof OrganizationUser
-   */
-  createdAt: Date
-  /**
-   * Last update timestamp
-   * @type {Date}
-   * @memberof OrganizationUser
-   */
-  updatedAt: Date
+    /**
+     * User ID
+     * @type {string}
+     * @memberof OrganizationUser
+     */
+    'userId': string;
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof OrganizationUser
+     */
+    'organizationId': string;
+    /**
+     * User name
+     * @type {string}
+     * @memberof OrganizationUser
+     */
+    'name': string;
+    /**
+     * User email
+     * @type {string}
+     * @memberof OrganizationUser
+     */
+    'email': string;
+    /**
+     * Member role
+     * @type {string}
+     * @memberof OrganizationUser
+     */
+    'role': OrganizationUserRoleEnum;
+    /**
+     * Roles assigned to the user
+     * @type {Array<OrganizationRole>}
+     * @memberof OrganizationUser
+     */
+    'assignedRoles': Array<OrganizationRole>;
+    /**
+     * Creation timestamp
+     * @type {Date}
+     * @memberof OrganizationUser
+     */
+    'createdAt': Date;
+    /**
+     * Last update timestamp
+     * @type {Date}
+     * @memberof OrganizationUser
+     */
+    'updatedAt': Date;
 }
 
 export const OrganizationUserRoleEnum = {
-  OWNER: 'owner',
-  MEMBER: 'member',
-} as const
+    OWNER: 'owner',
+    MEMBER: 'member'
+} as const;
 
-export type OrganizationUserRoleEnum = (typeof OrganizationUserRoleEnum)[keyof typeof OrganizationUserRoleEnum]
+export type OrganizationUserRoleEnum = typeof OrganizationUserRoleEnum[keyof typeof OrganizationUserRoleEnum];
+
+

@@ -28,7 +28,7 @@ type CreateRegion struct {
 	// SSH Gateway URL for the region
 	SshGatewayUrl NullableString `json:"sshGatewayUrl,omitempty"`
 	// Snapshot Manager URL for the region
-	SnapshotManagerUrl   NullableString `json:"snapshotManagerUrl,omitempty"`
+	SnapshotManagerUrl NullableString `json:"snapshotManagerUrl,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -108,7 +108,6 @@ func (o *CreateRegion) HasProxyUrl() bool {
 func (o *CreateRegion) SetProxyUrl(v string) {
 	o.ProxyUrl.Set(&v)
 }
-
 // SetProxyUrlNil sets the value for ProxyUrl to be an explicit nil
 func (o *CreateRegion) SetProxyUrlNil() {
 	o.ProxyUrl.Set(nil)
@@ -151,7 +150,6 @@ func (o *CreateRegion) HasSshGatewayUrl() bool {
 func (o *CreateRegion) SetSshGatewayUrl(v string) {
 	o.SshGatewayUrl.Set(&v)
 }
-
 // SetSshGatewayUrlNil sets the value for SshGatewayUrl to be an explicit nil
 func (o *CreateRegion) SetSshGatewayUrlNil() {
 	o.SshGatewayUrl.Set(nil)
@@ -194,7 +192,6 @@ func (o *CreateRegion) HasSnapshotManagerUrl() bool {
 func (o *CreateRegion) SetSnapshotManagerUrl(v string) {
 	o.SnapshotManagerUrl.Set(&v)
 }
-
 // SetSnapshotManagerUrlNil sets the value for SnapshotManagerUrl to be an explicit nil
 func (o *CreateRegion) SetSnapshotManagerUrlNil() {
 	o.SnapshotManagerUrl.Set(nil)
@@ -206,7 +203,7 @@ func (o *CreateRegion) UnsetSnapshotManagerUrl() {
 }
 
 func (o CreateRegion) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -246,10 +243,10 @@ func (o *CreateRegion) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -313,3 +310,5 @@ func (v *NullableCreateRegion) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

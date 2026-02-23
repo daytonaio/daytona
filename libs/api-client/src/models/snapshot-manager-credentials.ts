@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface SnapshotManagerCredentials
  */
 export interface SnapshotManagerCredentials {
-  /**
-   * Snapshot Manager username for the region
-   * @type {string}
-   * @memberof SnapshotManagerCredentials
-   */
-  username: string
-  /**
-   * Snapshot Manager password for the region
-   * @type {string}
-   * @memberof SnapshotManagerCredentials
-   */
-  password: string
+    /**
+     * Snapshot Manager username for the region
+     * @type {string}
+     * @memberof SnapshotManagerCredentials
+     */
+    'username': string;
+    /**
+     * Snapshot Manager password for the region
+     * @type {string}
+     * @memberof SnapshotManagerCredentials
+     */
+    'password': string;
 }
+

@@ -19,15 +19,16 @@ import (
 	"strings"
 )
 
+
 type PortAPI interface {
 
 	/*
-		GetPorts Get active ports
+	GetPorts Get active ports
 
-		Get a list of all currently active ports
+	Get a list of all currently active ports
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return PortAPIGetPortsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return PortAPIGetPortsRequest
 	*/
 	GetPorts(ctx context.Context) PortAPIGetPortsRequest
 
@@ -36,13 +37,13 @@ type PortAPI interface {
 	GetPortsExecute(r PortAPIGetPortsRequest) (*PortList, *http.Response, error)
 
 	/*
-		IsPortInUse Check if port is in use
+	IsPortInUse Check if port is in use
 
-		Check if a specific port is currently in use
+	Check if a specific port is currently in use
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param port Port number (3000-9999)
-		@return PortAPIIsPortInUseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param port Port number (3000-9999)
+	@return PortAPIIsPortInUseRequest
 	*/
 	IsPortInUse(ctx context.Context, port int32) PortAPIIsPortInUseRequest
 
@@ -55,7 +56,7 @@ type PortAPI interface {
 type PortAPIService service
 
 type PortAPIGetPortsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService PortAPI
 }
 
@@ -68,25 +69,24 @@ GetPorts Get active ports
 
 Get a list of all currently active ports
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return PortAPIGetPortsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return PortAPIGetPortsRequest
 */
 func (a *PortAPIService) GetPorts(ctx context.Context) PortAPIGetPortsRequest {
 	return PortAPIGetPortsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PortList
+//  @return PortList
 func (a *PortAPIService) GetPortsExecute(r PortAPIGetPortsRequest) (*PortList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PortList
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PortList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PortAPIService.GetPorts")
@@ -155,9 +155,9 @@ func (a *PortAPIService) GetPortsExecute(r PortAPIGetPortsRequest) (*PortList, *
 }
 
 type PortAPIIsPortInUseRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService PortAPI
-	port       int32
+	port int32
 }
 
 func (r PortAPIIsPortInUseRequest) Execute() (*IsPortInUseResponse, *http.Response, error) {
@@ -169,27 +169,26 @@ IsPortInUse Check if port is in use
 
 Check if a specific port is currently in use
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param port Port number (3000-9999)
-	@return PortAPIIsPortInUseRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param port Port number (3000-9999)
+ @return PortAPIIsPortInUseRequest
 */
 func (a *PortAPIService) IsPortInUse(ctx context.Context, port int32) PortAPIIsPortInUseRequest {
 	return PortAPIIsPortInUseRequest{
 		ApiService: a,
-		ctx:        ctx,
-		port:       port,
+		ctx: ctx,
+		port: port,
 	}
 }
 
 // Execute executes the request
-//
-//	@return IsPortInUseResponse
+//  @return IsPortInUseResponse
 func (a *PortAPIService) IsPortInUseExecute(r PortAPIIsPortInUseRequest) (*IsPortInUseResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *IsPortInUseResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *IsPortInUseResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PortAPIService.IsPortInUse")

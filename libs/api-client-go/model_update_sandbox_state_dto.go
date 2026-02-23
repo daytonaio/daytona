@@ -26,7 +26,7 @@ type UpdateSandboxStateDto struct {
 	// Optional error message when reporting an error state
 	ErrorReason *string `json:"errorReason,omitempty"`
 	// Whether the sandbox is recoverable
-	Recoverable          *bool `json:"recoverable,omitempty"`
+	Recoverable *bool `json:"recoverable,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -139,7 +139,7 @@ func (o *UpdateSandboxStateDto) SetRecoverable(v bool) {
 }
 
 func (o UpdateSandboxStateDto) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -176,10 +176,10 @@ func (o *UpdateSandboxStateDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -242,3 +242,5 @@ func (v *NullableUpdateSandboxStateDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

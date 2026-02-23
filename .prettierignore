@@ -4,3 +4,5 @@
 /.nx/cache
 /.nx/workspace-data
 *.md
+
+libs/*api-client*/**

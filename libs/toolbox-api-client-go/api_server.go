@@ -18,15 +18,16 @@ import (
 	"net/url"
 )
 
+
 type ServerAPI interface {
 
 	/*
-		Initialize Initialize toolbox server
+	Initialize Initialize toolbox server
 
-		Set the auth token and initialize telemetry for the toolbox server
+	Set the auth token and initialize telemetry for the toolbox server
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ServerAPIInitializeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ServerAPIInitializeRequest
 	*/
 	Initialize(ctx context.Context) ServerAPIInitializeRequest
 
@@ -39,9 +40,9 @@ type ServerAPI interface {
 type ServerAPIService service
 
 type ServerAPIInitializeRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService ServerAPI
-	request    *InitializeRequest
+	request *InitializeRequest
 }
 
 // Initialization request
@@ -59,25 +60,24 @@ Initialize Initialize toolbox server
 
 Set the auth token and initialize telemetry for the toolbox server
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ServerAPIInitializeRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ServerAPIInitializeRequest
 */
 func (a *ServerAPIService) Initialize(ctx context.Context) ServerAPIInitializeRequest {
 	return ServerAPIInitializeRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]string
+//  @return map[string]string
 func (a *ServerAPIService) InitializeExecute(r ServerAPIInitializeRequest) (map[string]string, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]string
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.Initialize")

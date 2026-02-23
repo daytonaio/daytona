@@ -20,8 +20,8 @@ var _ MappedNullable = &ScreenshotResponse{}
 // ScreenshotResponse struct for ScreenshotResponse
 type ScreenshotResponse struct {
 	CursorPosition *Position `json:"cursorPosition,omitempty"`
-	Screenshot     *string   `json:"screenshot,omitempty"`
-	SizeBytes      *int32    `json:"sizeBytes,omitempty"`
+	Screenshot *string `json:"screenshot,omitempty"`
+	SizeBytes *int32 `json:"sizeBytes,omitempty"`
 }
 
 // NewScreenshotResponse instantiates a new ScreenshotResponse object
@@ -138,7 +138,7 @@ func (o *ScreenshotResponse) SetSizeBytes(v int32) {
 }
 
 func (o ScreenshotResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -194,3 +194,5 @@ func (v *NullableScreenshotResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

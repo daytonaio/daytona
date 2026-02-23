@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface OrganizationSandboxDefaultLimitedNetworkEgress
  */
 export interface OrganizationSandboxDefaultLimitedNetworkEgress {
-  /**
-   * Sandbox default limited network egress
-   * @type {boolean}
-   * @memberof OrganizationSandboxDefaultLimitedNetworkEgress
-   */
-  sandboxDefaultLimitedNetworkEgress: boolean
+    /**
+     * Sandbox default limited network egress
+     * @type {boolean}
+     * @memberof OrganizationSandboxDefaultLimitedNetworkEgress
+     */
+    'sandboxDefaultLimitedNetworkEgress': boolean;
 }
+

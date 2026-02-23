@@ -131,7 +131,7 @@ jobs:
           python-version: '3.12'
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.4.5'
       - name: Install Ruby dependencies
         run: |
           bundle install
@@ -149,7 +149,7 @@ jobs:
           echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
           yarn install --immutable
           mkdir -p dist/apps/api
-          yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
+          yarn generate:api-client
           yarn lint:fix
           yarn format
           poetry lock

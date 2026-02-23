@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,48 +12,52 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface CreateApiKey
  */
 export interface CreateApiKey {
-  /**
-   * The name of the API key
-   * @type {string}
-   * @memberof CreateApiKey
-   */
-  name: string
-  /**
-   * The list of organization resource permissions assigned to the API key
-   * @type {Array<string>}
-   * @memberof CreateApiKey
-   */
-  permissions: Array<CreateApiKeyPermissionsEnum>
-  /**
-   * When the API key expires
-   * @type {Date}
-   * @memberof CreateApiKey
-   */
-  expiresAt?: Date | null
+    /**
+     * The name of the API key
+     * @type {string}
+     * @memberof CreateApiKey
+     */
+    'name': string;
+    /**
+     * The list of organization resource permissions assigned to the API key
+     * @type {Array<string>}
+     * @memberof CreateApiKey
+     */
+    'permissions': Array<CreateApiKeyPermissionsEnum>;
+    /**
+     * When the API key expires
+     * @type {Date}
+     * @memberof CreateApiKey
+     */
+    'expiresAt'?: Date | null;
 }
 
 export const CreateApiKeyPermissionsEnum = {
-  WRITE_REGISTRIES: 'write:registries',
-  DELETE_REGISTRIES: 'delete:registries',
-  WRITE_SNAPSHOTS: 'write:snapshots',
-  DELETE_SNAPSHOTS: 'delete:snapshots',
-  WRITE_SANDBOXES: 'write:sandboxes',
-  DELETE_SANDBOXES: 'delete:sandboxes',
-  READ_VOLUMES: 'read:volumes',
-  WRITE_VOLUMES: 'write:volumes',
-  DELETE_VOLUMES: 'delete:volumes',
-  WRITE_REGIONS: 'write:regions',
-  DELETE_REGIONS: 'delete:regions',
-  READ_RUNNERS: 'read:runners',
-  WRITE_RUNNERS: 'write:runners',
-  DELETE_RUNNERS: 'delete:runners',
-  READ_AUDIT_LOGS: 'read:audit_logs',
-} as const
+    WRITE_REGISTRIES: 'write:registries',
+    DELETE_REGISTRIES: 'delete:registries',
+    WRITE_SNAPSHOTS: 'write:snapshots',
+    DELETE_SNAPSHOTS: 'delete:snapshots',
+    WRITE_SANDBOXES: 'write:sandboxes',
+    DELETE_SANDBOXES: 'delete:sandboxes',
+    READ_VOLUMES: 'read:volumes',
+    WRITE_VOLUMES: 'write:volumes',
+    DELETE_VOLUMES: 'delete:volumes',
+    WRITE_REGIONS: 'write:regions',
+    DELETE_REGIONS: 'delete:regions',
+    READ_RUNNERS: 'read:runners',
+    WRITE_RUNNERS: 'write:runners',
+    DELETE_RUNNERS: 'delete:runners',
+    READ_AUDIT_LOGS: 'read:audit_logs'
+} as const;
 
-export type CreateApiKeyPermissionsEnum = (typeof CreateApiKeyPermissionsEnum)[keyof typeof CreateApiKeyPermissionsEnum]
+export type CreateApiKeyPermissionsEnum = typeof CreateApiKeyPermissionsEnum[keyof typeof CreateApiKeyPermissionsEnum];
+
+

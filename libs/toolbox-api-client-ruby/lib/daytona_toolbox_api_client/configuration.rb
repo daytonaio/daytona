@@ -243,7 +243,8 @@ module DaytonaToolboxApiClient
 
     # Returns Auth Settings hash for api client.
     def auth_settings
-      {}
+      {
+      }
     end
 
     # Returns an array of Server setting
@@ -257,7 +258,8 @@ module DaytonaToolboxApiClient
     end
 
     def operation_server_settings
-      {}
+      {
+      }
     end
 
     # Returns URL based on server settings
@@ -293,5 +295,7 @@ module DaytonaToolboxApiClient
 
       url
     end
+
+
   end
 end

@@ -12,137 +12,141 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { BuildInfo } from './build-info'
+import type { BuildInfo } from './build-info';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SnapshotState } from './snapshot-state'
+import type { SnapshotState } from './snapshot-state';
 
 /**
- *
+ * 
  * @export
  * @interface SnapshotDto
  */
 export interface SnapshotDto {
-  /**
-   *
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  id: string
-  /**
-   *
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  organizationId?: string
-  /**
-   *
-   * @type {boolean}
-   * @memberof SnapshotDto
-   */
-  general: boolean
-  /**
-   *
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  name: string
-  /**
-   *
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  imageName?: string
-  /**
-   *
-   * @type {SnapshotState}
-   * @memberof SnapshotDto
-   */
-  state: SnapshotState
-  /**
-   *
-   * @type {number}
-   * @memberof SnapshotDto
-   */
-  size: number | null
-  /**
-   *
-   * @type {Array<string>}
-   * @memberof SnapshotDto
-   */
-  entrypoint: Array<string> | null
-  /**
-   *
-   * @type {number}
-   * @memberof SnapshotDto
-   */
-  cpu: number
-  /**
-   *
-   * @type {number}
-   * @memberof SnapshotDto
-   */
-  gpu: number
-  /**
-   *
-   * @type {number}
-   * @memberof SnapshotDto
-   */
-  mem: number
-  /**
-   *
-   * @type {number}
-   * @memberof SnapshotDto
-   */
-  disk: number
-  /**
-   *
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  errorReason: string | null
-  /**
-   *
-   * @type {Date}
-   * @memberof SnapshotDto
-   */
-  createdAt: Date
-  /**
-   *
-   * @type {Date}
-   * @memberof SnapshotDto
-   */
-  updatedAt: Date
-  /**
-   *
-   * @type {Date}
-   * @memberof SnapshotDto
-   */
-  lastUsedAt: Date | null
-  /**
-   * Build information for the snapshot
-   * @type {BuildInfo}
-   * @memberof SnapshotDto
-   */
-  buildInfo?: BuildInfo
-  /**
-   * IDs of regions where the snapshot is available
-   * @type {Array<string>}
-   * @memberof SnapshotDto
-   */
-  regionIds?: Array<string>
-  /**
-   * The initial runner ID of the snapshot
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  initialRunnerId?: string
-  /**
-   * The snapshot reference
-   * @type {string}
-   * @memberof SnapshotDto
-   */
-  ref?: string
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'organizationId'?: string;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof SnapshotDto
+     */
+    'general': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'imageName'?: string;
+    /**
+     * 
+     * @type {SnapshotState}
+     * @memberof SnapshotDto
+     */
+    'state': SnapshotState;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDto
+     */
+    'size': number | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof SnapshotDto
+     */
+    'entrypoint': Array<string> | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDto
+     */
+    'cpu': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDto
+     */
+    'gpu': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDto
+     */
+    'mem': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof SnapshotDto
+     */
+    'disk': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'errorReason': string | null;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SnapshotDto
+     */
+    'createdAt': Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SnapshotDto
+     */
+    'updatedAt': Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof SnapshotDto
+     */
+    'lastUsedAt': Date | null;
+    /**
+     * Build information for the snapshot
+     * @type {BuildInfo}
+     * @memberof SnapshotDto
+     */
+    'buildInfo'?: BuildInfo;
+    /**
+     * IDs of regions where the snapshot is available
+     * @type {Array<string>}
+     * @memberof SnapshotDto
+     */
+    'regionIds'?: Array<string>;
+    /**
+     * The initial runner ID of the snapshot
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'initialRunnerId'?: string;
+    /**
+     * The snapshot reference
+     * @type {string}
+     * @memberof SnapshotDto
+     */
+    'ref'?: string;
 }
+
+
+

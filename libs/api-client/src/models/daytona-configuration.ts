@@ -12,125 +12,127 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { Announcement } from './announcement'
+import type { Announcement } from './announcement';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { OidcConfig } from './oidc-config'
+import type { OidcConfig } from './oidc-config';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { PosthogConfig } from './posthog-config'
+import type { PosthogConfig } from './posthog-config';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RateLimitConfig } from './rate-limit-config'
+import type { RateLimitConfig } from './rate-limit-config';
 
 /**
- *
+ * 
  * @export
  * @interface DaytonaConfiguration
  */
 export interface DaytonaConfiguration {
-  /**
-   * Daytona version
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  version: string
-  /**
-   * PostHog configuration
-   * @type {PosthogConfig}
-   * @memberof DaytonaConfiguration
-   */
-  posthog?: PosthogConfig
-  /**
-   * OIDC configuration
-   * @type {OidcConfig}
-   * @memberof DaytonaConfiguration
-   */
-  oidc: OidcConfig
-  /**
-   * Whether linked accounts are enabled
-   * @type {boolean}
-   * @memberof DaytonaConfiguration
-   */
-  linkedAccountsEnabled: boolean
-  /**
-   * System announcements
-   * @type {{ [key: string]: Announcement; }}
-   * @memberof DaytonaConfiguration
-   */
-  announcements: { [key: string]: Announcement }
-  /**
-   * Pylon application ID
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  pylonAppId?: string
-  /**
-   * Proxy template URL
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  proxyTemplateUrl: string
-  /**
-   * Toolbox template URL
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  proxyToolboxUrl: string
-  /**
-   * Default snapshot for sandboxes
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  defaultSnapshot: string
-  /**
-   * Dashboard URL
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  dashboardUrl: string
-  /**
-   * Maximum auto-archive interval in minutes
-   * @type {number}
-   * @memberof DaytonaConfiguration
-   */
-  maxAutoArchiveInterval: number
-  /**
-   * Whether maintenance mode is enabled
-   * @type {boolean}
-   * @memberof DaytonaConfiguration
-   */
-  maintananceMode: boolean
-  /**
-   * Current environment
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  environment: string
-  /**
-   * Billing API URL
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  billingApiUrl?: string
-  /**
-   * SSH Gateway command
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  sshGatewayCommand?: string
-  /**
-   * Base64 encoded SSH Gateway public key
-   * @type {string}
-   * @memberof DaytonaConfiguration
-   */
-  sshGatewayPublicKey?: string
-  /**
-   * Rate limit configuration
-   * @type {RateLimitConfig}
-   * @memberof DaytonaConfiguration
-   */
-  rateLimit?: RateLimitConfig
+    /**
+     * Daytona version
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'version': string;
+    /**
+     * PostHog configuration
+     * @type {PosthogConfig}
+     * @memberof DaytonaConfiguration
+     */
+    'posthog'?: PosthogConfig;
+    /**
+     * OIDC configuration
+     * @type {OidcConfig}
+     * @memberof DaytonaConfiguration
+     */
+    'oidc': OidcConfig;
+    /**
+     * Whether linked accounts are enabled
+     * @type {boolean}
+     * @memberof DaytonaConfiguration
+     */
+    'linkedAccountsEnabled': boolean;
+    /**
+     * System announcements
+     * @type {{ [key: string]: Announcement; }}
+     * @memberof DaytonaConfiguration
+     */
+    'announcements': { [key: string]: Announcement; };
+    /**
+     * Pylon application ID
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'pylonAppId'?: string;
+    /**
+     * Proxy template URL
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'proxyTemplateUrl': string;
+    /**
+     * Toolbox template URL
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'proxyToolboxUrl': string;
+    /**
+     * Default snapshot for sandboxes
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'defaultSnapshot': string;
+    /**
+     * Dashboard URL
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'dashboardUrl': string;
+    /**
+     * Maximum auto-archive interval in minutes
+     * @type {number}
+     * @memberof DaytonaConfiguration
+     */
+    'maxAutoArchiveInterval': number;
+    /**
+     * Whether maintenance mode is enabled
+     * @type {boolean}
+     * @memberof DaytonaConfiguration
+     */
+    'maintananceMode': boolean;
+    /**
+     * Current environment
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'environment': string;
+    /**
+     * Billing API URL
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'billingApiUrl'?: string;
+    /**
+     * SSH Gateway command
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'sshGatewayCommand'?: string;
+    /**
+     * Base64 encoded SSH Gateway public key
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'sshGatewayPublicKey'?: string;
+    /**
+     * Rate limit configuration
+     * @type {RateLimitConfig}
+     * @memberof DaytonaConfiguration
+     */
+    'rateLimit'?: RateLimitConfig;
 }
+

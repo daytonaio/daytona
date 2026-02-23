@@ -12,119 +12,102 @@
  * Do not edit the class manually.
  */
 
-import type { Configuration } from '../configuration'
-import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios'
-import globalAxios from 'axios'
+
+import type { Configuration } from '../configuration';
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import {
-  DUMMY_BASE_URL,
-  assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
-  setSearchParams,
-  serializeDataIfNeeded,
-  toPathString,
-  createRequestFunction,
-} from '../common'
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
+import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
-import type { Region } from '../models'
+import type { Region } from '../models';
 /**
  * RegionsApi - axios parameter creator
  * @export
  */
 export const RegionsApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     *
-     * @summary List all shared regions
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listSharedRegions: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/shared-regions`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+    return {
+        /**
+         * 
+         * @summary List all shared regions
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSharedRegions: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/shared-regions`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication oauth2 required
+            // authentication oauth2 required
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-  }
-}
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
 
 /**
  * RegionsApi - functional programming interface
  * @export
  */
-export const RegionsApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = RegionsApiAxiosParamCreator(configuration)
-  return {
-    /**
-     *
-     * @summary List all shared regions
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listSharedRegions(
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listSharedRegions(options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RegionsApi.listSharedRegions']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-  }
-}
+export const RegionsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RegionsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary List all shared regions
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listSharedRegions(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listSharedRegions(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RegionsApi.listSharedRegions']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
 
 /**
  * RegionsApi - factory interface
  * @export
  */
 export const RegionsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-  const localVarFp = RegionsApiFp(configuration)
-  return {
-    /**
-     *
-     * @summary List all shared regions
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listSharedRegions(options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
-      return localVarFp.listSharedRegions(options).then((request) => request(axios, basePath))
-    },
-  }
-}
+    const localVarFp = RegionsApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary List all shared regions
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listSharedRegions(options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
+            return localVarFp.listSharedRegions(options).then((request) => request(axios, basePath));
+        },
+    };
+};
 
 /**
  * RegionsApi - object-oriented interface
@@ -133,16 +116,15 @@ export const RegionsApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class RegionsApi extends BaseAPI {
-  /**
-   *
-   * @summary List all shared regions
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RegionsApi
-   */
-  public listSharedRegions(options?: RawAxiosRequestConfig) {
-    return RegionsApiFp(this.configuration)
-      .listSharedRegions(options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List all shared regions
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RegionsApi
+     */
+    public listSharedRegions(options?: RawAxiosRequestConfig) {
+        return RegionsApiFp(this.configuration).listSharedRegions(options).then((request) => request(this.axios, this.basePath));
+    }
 }
+

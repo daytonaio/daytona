@@ -24,7 +24,7 @@ type SshAccessValidationDto struct {
 	// Whether the SSH access token is valid
 	Valid bool `json:"valid"`
 	// ID of the sandbox this SSH access is for
-	SandboxId            string `json:"sandboxId"`
+	SandboxId string `json:"sandboxId"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -98,7 +98,7 @@ func (o *SshAccessValidationDto) SetSandboxId(v string) {
 }
 
 func (o SshAccessValidationDto) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -131,10 +131,10 @@ func (o *SshAccessValidationDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -196,3 +196,5 @@ func (v *NullableSshAccessValidationDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

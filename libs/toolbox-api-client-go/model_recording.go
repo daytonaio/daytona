@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,13 +22,13 @@ var _ MappedNullable = &Recording{}
 // Recording struct for Recording
 type Recording struct {
 	DurationSeconds *float32 `json:"durationSeconds,omitempty"`
-	EndTime         *string  `json:"endTime,omitempty"`
-	FileName        string   `json:"fileName"`
-	FilePath        string   `json:"filePath"`
-	Id              string   `json:"id"`
-	SizeBytes       *int32   `json:"sizeBytes,omitempty"`
-	StartTime       string   `json:"startTime"`
-	Status          string   `json:"status"`
+	EndTime *string `json:"endTime,omitempty"`
+	FileName string `json:"fileName"`
+	FilePath string `json:"filePath"`
+	Id string `json:"id"`
+	SizeBytes *int32 `json:"sizeBytes,omitempty"`
+	StartTime string `json:"startTime"`
+	Status string `json:"status"`
 }
 
 type _Recording Recording
@@ -272,7 +272,7 @@ func (o *Recording) SetStatus(v string) {
 }
 
 func (o Recording) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -315,10 +315,10 @@ func (o *Recording) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -374,3 +374,5 @@ func (v *NullableRecording) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

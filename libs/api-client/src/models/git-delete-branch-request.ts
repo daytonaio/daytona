@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface GitDeleteBranchRequest
  */
 export interface GitDeleteBranchRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof GitDeleteBranchRequest
-   */
-  path: string
-  /**
-   *
-   * @type {string}
-   * @memberof GitDeleteBranchRequest
-   */
-  name: string
+    /**
+     * 
+     * @type {string}
+     * @memberof GitDeleteBranchRequest
+     */
+    'path': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GitDeleteBranchRequest
+     */
+    'name': string;
 }
+

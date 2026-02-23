@@ -18,15 +18,16 @@ import (
 	"net/url"
 )
 
+
 type LspAPI interface {
 
 	/*
-		Completions Get code completions
+	Completions Get code completions
 
-		Get code completion suggestions from the LSP server
+	Get code completion suggestions from the LSP server
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPICompletionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPICompletionsRequest
 	*/
 	Completions(ctx context.Context) LspAPICompletionsRequest
 
@@ -35,12 +36,12 @@ type LspAPI interface {
 	CompletionsExecute(r LspAPICompletionsRequest) (*CompletionList, *http.Response, error)
 
 	/*
-		DidClose Notify document closed
+	DidClose Notify document closed
 
-		Notify the LSP server that a document has been closed
+	Notify the LSP server that a document has been closed
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIDidCloseRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIDidCloseRequest
 	*/
 	DidClose(ctx context.Context) LspAPIDidCloseRequest
 
@@ -48,12 +49,12 @@ type LspAPI interface {
 	DidCloseExecute(r LspAPIDidCloseRequest) (*http.Response, error)
 
 	/*
-		DidOpen Notify document opened
+	DidOpen Notify document opened
 
-		Notify the LSP server that a document has been opened
+	Notify the LSP server that a document has been opened
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIDidOpenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIDidOpenRequest
 	*/
 	DidOpen(ctx context.Context) LspAPIDidOpenRequest
 
@@ -61,12 +62,12 @@ type LspAPI interface {
 	DidOpenExecute(r LspAPIDidOpenRequest) (*http.Response, error)
 
 	/*
-		DocumentSymbols Get document symbols
+	DocumentSymbols Get document symbols
 
-		Get symbols (functions, classes, etc.) from a document
+	Get symbols (functions, classes, etc.) from a document
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIDocumentSymbolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIDocumentSymbolsRequest
 	*/
 	DocumentSymbols(ctx context.Context) LspAPIDocumentSymbolsRequest
 
@@ -75,12 +76,12 @@ type LspAPI interface {
 	DocumentSymbolsExecute(r LspAPIDocumentSymbolsRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-		Start Start LSP server
+	Start Start LSP server
 
-		Start a Language Server Protocol server for the specified language
+	Start a Language Server Protocol server for the specified language
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIStartRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIStartRequest
 	*/
 	Start(ctx context.Context) LspAPIStartRequest
 
@@ -88,12 +89,12 @@ type LspAPI interface {
 	StartExecute(r LspAPIStartRequest) (*http.Response, error)
 
 	/*
-		Stop Stop LSP server
+	Stop Stop LSP server
 
-		Stop a Language Server Protocol server
+	Stop a Language Server Protocol server
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIStopRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIStopRequest
 	*/
 	Stop(ctx context.Context) LspAPIStopRequest
 
@@ -101,12 +102,12 @@ type LspAPI interface {
 	StopExecute(r LspAPIStopRequest) (*http.Response, error)
 
 	/*
-		WorkspaceSymbols Get workspace symbols
+	WorkspaceSymbols Get workspace symbols
 
-		Search for symbols across the entire workspace
+	Search for symbols across the entire workspace
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return LspAPIWorkspaceSymbolsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return LspAPIWorkspaceSymbolsRequest
 	*/
 	WorkspaceSymbols(ctx context.Context) LspAPIWorkspaceSymbolsRequest
 
@@ -119,9 +120,9 @@ type LspAPI interface {
 type LspAPIService service
 
 type LspAPICompletionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService LspAPI
-	request    *LspCompletionParams
+	request *LspCompletionParams
 }
 
 // Completion request
@@ -139,25 +140,24 @@ Completions Get code completions
 
 Get code completion suggestions from the LSP server
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPICompletionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPICompletionsRequest
 */
 func (a *LspAPIService) Completions(ctx context.Context) LspAPICompletionsRequest {
 	return LspAPICompletionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return CompletionList
+//  @return CompletionList
 func (a *LspAPIService) CompletionsExecute(r LspAPICompletionsRequest) (*CompletionList, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *CompletionList
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *CompletionList
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.Completions")
@@ -231,9 +231,9 @@ func (a *LspAPIService) CompletionsExecute(r LspAPICompletionsRequest) (*Complet
 }
 
 type LspAPIDidCloseRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService LspAPI
-	request    *LspDocumentRequest
+	request *LspDocumentRequest
 }
 
 // Document request
@@ -251,22 +251,22 @@ DidClose Notify document closed
 
 Notify the LSP server that a document has been closed
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIDidCloseRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIDidCloseRequest
 */
 func (a *LspAPIService) DidClose(ctx context.Context) LspAPIDidCloseRequest {
 	return LspAPIDidCloseRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *LspAPIService) DidCloseExecute(r LspAPIDidCloseRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.DidClose")
@@ -331,9 +331,9 @@ func (a *LspAPIService) DidCloseExecute(r LspAPIDidCloseRequest) (*http.Response
 }
 
 type LspAPIDidOpenRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService LspAPI
-	request    *LspDocumentRequest
+	request *LspDocumentRequest
 }
 
 // Document request
@@ -351,22 +351,22 @@ DidOpen Notify document opened
 
 Notify the LSP server that a document has been opened
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIDidOpenRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIDidOpenRequest
 */
 func (a *LspAPIService) DidOpen(ctx context.Context) LspAPIDidOpenRequest {
 	return LspAPIDidOpenRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *LspAPIService) DidOpenExecute(r LspAPIDidOpenRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.DidOpen")
@@ -431,11 +431,11 @@ func (a *LspAPIService) DidOpenExecute(r LspAPIDidOpenRequest) (*http.Response, 
 }
 
 type LspAPIDocumentSymbolsRequest struct {
-	ctx           context.Context
-	ApiService    LspAPI
-	languageId    *string
+	ctx context.Context
+	ApiService LspAPI
+	languageId *string
 	pathToProject *string
-	uri           *string
+	uri *string
 }
 
 // Language ID (e.g., python, typescript)
@@ -465,25 +465,24 @@ DocumentSymbols Get document symbols
 
 Get symbols (functions, classes, etc.) from a document
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIDocumentSymbolsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIDocumentSymbolsRequest
 */
 func (a *LspAPIService) DocumentSymbols(ctx context.Context) LspAPIDocumentSymbolsRequest {
 	return LspAPIDocumentSymbolsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []LspSymbol
+//  @return []LspSymbol
 func (a *LspAPIService) DocumentSymbolsExecute(r LspAPIDocumentSymbolsRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []LspSymbol
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.DocumentSymbols")
@@ -564,9 +563,9 @@ func (a *LspAPIService) DocumentSymbolsExecute(r LspAPIDocumentSymbolsRequest) (
 }
 
 type LspAPIStartRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService LspAPI
-	request    *LspServerRequest
+	request *LspServerRequest
 }
 
 // LSP server request
@@ -584,22 +583,22 @@ Start Start LSP server
 
 Start a Language Server Protocol server for the specified language
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIStartRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIStartRequest
 */
 func (a *LspAPIService) Start(ctx context.Context) LspAPIStartRequest {
 	return LspAPIStartRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *LspAPIService) StartExecute(r LspAPIStartRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.Start")
@@ -664,9 +663,9 @@ func (a *LspAPIService) StartExecute(r LspAPIStartRequest) (*http.Response, erro
 }
 
 type LspAPIStopRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService LspAPI
-	request    *LspServerRequest
+	request *LspServerRequest
 }
 
 // LSP server request
@@ -684,22 +683,22 @@ Stop Stop LSP server
 
 Stop a Language Server Protocol server
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIStopRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIStopRequest
 */
 func (a *LspAPIService) Stop(ctx context.Context) LspAPIStopRequest {
 	return LspAPIStopRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *LspAPIService) StopExecute(r LspAPIStopRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.Stop")
@@ -764,10 +763,10 @@ func (a *LspAPIService) StopExecute(r LspAPIStopRequest) (*http.Response, error)
 }
 
 type LspAPIWorkspaceSymbolsRequest struct {
-	ctx           context.Context
-	ApiService    LspAPI
-	query         *string
-	languageId    *string
+	ctx context.Context
+	ApiService LspAPI
+	query *string
+	languageId *string
 	pathToProject *string
 }
 
@@ -798,25 +797,24 @@ WorkspaceSymbols Get workspace symbols
 
 Search for symbols across the entire workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return LspAPIWorkspaceSymbolsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return LspAPIWorkspaceSymbolsRequest
 */
 func (a *LspAPIService) WorkspaceSymbols(ctx context.Context) LspAPIWorkspaceSymbolsRequest {
 	return LspAPIWorkspaceSymbolsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []LspSymbol
+//  @return []LspSymbol
 func (a *LspAPIService) WorkspaceSymbolsExecute(r LspAPIWorkspaceSymbolsRequest) ([]LspSymbol, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []LspSymbol
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []LspSymbol
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "LspAPIService.WorkspaceSymbols")

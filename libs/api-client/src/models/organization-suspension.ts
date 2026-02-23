@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,28 +12,31 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface OrganizationSuspension
  */
 export interface OrganizationSuspension {
-  /**
-   * Suspension reason
-   * @type {string}
-   * @memberof OrganizationSuspension
-   */
-  reason: string
-  /**
-   * Suspension until
-   * @type {Date}
-   * @memberof OrganizationSuspension
-   */
-  until: Date
-  /**
-   * Suspension cleanup grace period hours
-   * @type {number}
-   * @memberof OrganizationSuspension
-   */
-  suspensionCleanupGracePeriodHours?: number
+    /**
+     * Suspension reason
+     * @type {string}
+     * @memberof OrganizationSuspension
+     */
+    'reason': string;
+    /**
+     * Suspension until
+     * @type {Date}
+     * @memberof OrganizationSuspension
+     */
+    'until': Date;
+    /**
+     * Suspension cleanup grace period hours
+     * @type {number}
+     * @memberof OrganizationSuspension
+     */
+    'suspensionCleanupGracePeriodHours'?: number;
 }
+

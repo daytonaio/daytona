@@ -19,15 +19,16 @@ import (
 	"os"
 )
 
+
 type FileSystemAPI interface {
 
 	/*
-		CreateFolder Create a folder
+	CreateFolder Create a folder
 
-		Create a folder with the specified path and optional permissions
+	Create a folder with the specified path and optional permissions
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPICreateFolderRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPICreateFolderRequest
 	*/
 	CreateFolder(ctx context.Context) FileSystemAPICreateFolderRequest
 
@@ -35,12 +36,12 @@ type FileSystemAPI interface {
 	CreateFolderExecute(r FileSystemAPICreateFolderRequest) (*http.Response, error)
 
 	/*
-		DeleteFile Delete a file or directory
+	DeleteFile Delete a file or directory
 
-		Delete a file or directory at the specified path
+	Delete a file or directory at the specified path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIDeleteFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIDeleteFileRequest
 	*/
 	DeleteFile(ctx context.Context) FileSystemAPIDeleteFileRequest
 
@@ -48,12 +49,12 @@ type FileSystemAPI interface {
 	DeleteFileExecute(r FileSystemAPIDeleteFileRequest) (*http.Response, error)
 
 	/*
-		DownloadFile Download a file
+	DownloadFile Download a file
 
-		Download a file by providing its path
+	Download a file by providing its path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIDownloadFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIDownloadFileRequest
 	*/
 	DownloadFile(ctx context.Context) FileSystemAPIDownloadFileRequest
 
@@ -62,12 +63,12 @@ type FileSystemAPI interface {
 	DownloadFileExecute(r FileSystemAPIDownloadFileRequest) (*os.File, *http.Response, error)
 
 	/*
-		DownloadFiles Download multiple files
+	DownloadFiles Download multiple files
 
-		Download multiple files by providing their paths
+	Download multiple files by providing their paths
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIDownloadFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIDownloadFilesRequest
 	*/
 	DownloadFiles(ctx context.Context) FileSystemAPIDownloadFilesRequest
 
@@ -76,12 +77,12 @@ type FileSystemAPI interface {
 	DownloadFilesExecute(r FileSystemAPIDownloadFilesRequest) (map[string]map[string]interface{}, *http.Response, error)
 
 	/*
-		FindInFiles Find text in files
+	FindInFiles Find text in files
 
-		Search for text pattern within files in a directory
+	Search for text pattern within files in a directory
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIFindInFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIFindInFilesRequest
 	*/
 	FindInFiles(ctx context.Context) FileSystemAPIFindInFilesRequest
 
@@ -90,12 +91,12 @@ type FileSystemAPI interface {
 	FindInFilesExecute(r FileSystemAPIFindInFilesRequest) ([]Match, *http.Response, error)
 
 	/*
-		GetFileInfo Get file information
+	GetFileInfo Get file information
 
-		Get detailed information about a file or directory
+	Get detailed information about a file or directory
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIGetFileInfoRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIGetFileInfoRequest
 	*/
 	GetFileInfo(ctx context.Context) FileSystemAPIGetFileInfoRequest
 
@@ -104,12 +105,12 @@ type FileSystemAPI interface {
 	GetFileInfoExecute(r FileSystemAPIGetFileInfoRequest) (*FileInfo, *http.Response, error)
 
 	/*
-		ListFiles List files and directories
+	ListFiles List files and directories
 
-		List files and directories in the specified path
+	List files and directories in the specified path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIListFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIListFilesRequest
 	*/
 	ListFiles(ctx context.Context) FileSystemAPIListFilesRequest
 
@@ -118,12 +119,12 @@ type FileSystemAPI interface {
 	ListFilesExecute(r FileSystemAPIListFilesRequest) ([]FileInfo, *http.Response, error)
 
 	/*
-		MoveFile Move or rename file/directory
+	MoveFile Move or rename file/directory
 
-		Move or rename a file or directory from source to destination
+	Move or rename a file or directory from source to destination
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIMoveFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIMoveFileRequest
 	*/
 	MoveFile(ctx context.Context) FileSystemAPIMoveFileRequest
 
@@ -131,12 +132,12 @@ type FileSystemAPI interface {
 	MoveFileExecute(r FileSystemAPIMoveFileRequest) (*http.Response, error)
 
 	/*
-		ReplaceInFiles Replace text in files
+	ReplaceInFiles Replace text in files
 
-		Replace text pattern with new value in multiple files
+	Replace text pattern with new value in multiple files
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIReplaceInFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIReplaceInFilesRequest
 	*/
 	ReplaceInFiles(ctx context.Context) FileSystemAPIReplaceInFilesRequest
 
@@ -145,12 +146,12 @@ type FileSystemAPI interface {
 	ReplaceInFilesExecute(r FileSystemAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error)
 
 	/*
-		SearchFiles Search files by pattern
+	SearchFiles Search files by pattern
 
-		Search for files matching a specific pattern in a directory
+	Search for files matching a specific pattern in a directory
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPISearchFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPISearchFilesRequest
 	*/
 	SearchFiles(ctx context.Context) FileSystemAPISearchFilesRequest
 
@@ -159,12 +160,12 @@ type FileSystemAPI interface {
 	SearchFilesExecute(r FileSystemAPISearchFilesRequest) (*SearchFilesResponse, *http.Response, error)
 
 	/*
-		SetFilePermissions Set file permissions
+	SetFilePermissions Set file permissions
 
-		Set file permissions, ownership, and group for a file or directory
+	Set file permissions, ownership, and group for a file or directory
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPISetFilePermissionsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPISetFilePermissionsRequest
 	*/
 	SetFilePermissions(ctx context.Context) FileSystemAPISetFilePermissionsRequest
 
@@ -172,12 +173,12 @@ type FileSystemAPI interface {
 	SetFilePermissionsExecute(r FileSystemAPISetFilePermissionsRequest) (*http.Response, error)
 
 	/*
-		UploadFile Upload a file
+	UploadFile Upload a file
 
-		Upload a file to the specified path
+	Upload a file to the specified path
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIUploadFileRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIUploadFileRequest
 	*/
 	UploadFile(ctx context.Context) FileSystemAPIUploadFileRequest
 
@@ -186,12 +187,12 @@ type FileSystemAPI interface {
 	UploadFileExecute(r FileSystemAPIUploadFileRequest) (map[string]map[string]interface{}, *http.Response, error)
 
 	/*
-		UploadFiles Upload multiple files
+	UploadFiles Upload multiple files
 
-		Upload multiple files with their destination paths
+	Upload multiple files with their destination paths
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return FileSystemAPIUploadFilesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return FileSystemAPIUploadFilesRequest
 	*/
 	UploadFiles(ctx context.Context) FileSystemAPIUploadFilesRequest
 
@@ -203,10 +204,10 @@ type FileSystemAPI interface {
 type FileSystemAPIService service
 
 type FileSystemAPICreateFolderRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	mode       *string
+	path *string
+	mode *string
 }
 
 // Folder path to create
@@ -230,22 +231,22 @@ CreateFolder Create a folder
 
 Create a folder with the specified path and optional permissions
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPICreateFolderRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPICreateFolderRequest
 */
 func (a *FileSystemAPIService) CreateFolder(ctx context.Context) FileSystemAPICreateFolderRequest {
 	return FileSystemAPICreateFolderRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *FileSystemAPIService) CreateFolderExecute(r FileSystemAPICreateFolderRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.CreateFolder")
@@ -313,10 +314,10 @@ func (a *FileSystemAPIService) CreateFolderExecute(r FileSystemAPICreateFolderRe
 }
 
 type FileSystemAPIDeleteFileRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	recursive  *bool
+	path *string
+	recursive *bool
 }
 
 // File or directory path to delete
@@ -340,22 +341,22 @@ DeleteFile Delete a file or directory
 
 Delete a file or directory at the specified path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIDeleteFileRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIDeleteFileRequest
 */
 func (a *FileSystemAPIService) DeleteFile(ctx context.Context) FileSystemAPIDeleteFileRequest {
 	return FileSystemAPIDeleteFileRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *FileSystemAPIService) DeleteFileExecute(r FileSystemAPIDeleteFileRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.DeleteFile")
@@ -422,9 +423,9 @@ func (a *FileSystemAPIService) DeleteFileExecute(r FileSystemAPIDeleteFileReques
 }
 
 type FileSystemAPIDownloadFileRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
+	path *string
 }
 
 // File path to download
@@ -442,25 +443,24 @@ DownloadFile Download a file
 
 Download a file by providing its path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIDownloadFileRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIDownloadFileRequest
 */
 func (a *FileSystemAPIService) DownloadFile(ctx context.Context) FileSystemAPIDownloadFileRequest {
 	return FileSystemAPIDownloadFileRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return *os.File
+//  @return *os.File
 func (a *FileSystemAPIService) DownloadFileExecute(r FileSystemAPIDownloadFileRequest) (*os.File, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *os.File
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *os.File
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.DownloadFile")
@@ -533,8 +533,8 @@ func (a *FileSystemAPIService) DownloadFileExecute(r FileSystemAPIDownloadFileRe
 }
 
 type FileSystemAPIDownloadFilesRequest struct {
-	ctx           context.Context
-	ApiService    FileSystemAPI
+	ctx context.Context
+	ApiService FileSystemAPI
 	downloadFiles *FilesDownloadRequest
 }
 
@@ -553,25 +553,24 @@ DownloadFiles Download multiple files
 
 Download multiple files by providing their paths
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIDownloadFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIDownloadFilesRequest
 */
 func (a *FileSystemAPIService) DownloadFiles(ctx context.Context) FileSystemAPIDownloadFilesRequest {
 	return FileSystemAPIDownloadFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]map[string]interface{}
+//  @return map[string]map[string]interface{}
 func (a *FileSystemAPIService) DownloadFilesExecute(r FileSystemAPIDownloadFilesRequest) (map[string]map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]map[string]interface{}
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.DownloadFiles")
@@ -645,10 +644,10 @@ func (a *FileSystemAPIService) DownloadFilesExecute(r FileSystemAPIDownloadFiles
 }
 
 type FileSystemAPIFindInFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	pattern    *string
+	path *string
+	pattern *string
 }
 
 // Directory path to search in
@@ -672,25 +671,24 @@ FindInFiles Find text in files
 
 Search for text pattern within files in a directory
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIFindInFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIFindInFilesRequest
 */
 func (a *FileSystemAPIService) FindInFiles(ctx context.Context) FileSystemAPIFindInFilesRequest {
 	return FileSystemAPIFindInFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []Match
+//  @return []Match
 func (a *FileSystemAPIService) FindInFilesExecute(r FileSystemAPIFindInFilesRequest) ([]Match, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []Match
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []Match
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.FindInFiles")
@@ -767,9 +765,9 @@ func (a *FileSystemAPIService) FindInFilesExecute(r FileSystemAPIFindInFilesRequ
 }
 
 type FileSystemAPIGetFileInfoRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
+	path *string
 }
 
 // File or directory path
@@ -787,25 +785,24 @@ GetFileInfo Get file information
 
 Get detailed information about a file or directory
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIGetFileInfoRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIGetFileInfoRequest
 */
 func (a *FileSystemAPIService) GetFileInfo(ctx context.Context) FileSystemAPIGetFileInfoRequest {
 	return FileSystemAPIGetFileInfoRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return FileInfo
+//  @return FileInfo
 func (a *FileSystemAPIService) GetFileInfoExecute(r FileSystemAPIGetFileInfoRequest) (*FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *FileInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.GetFileInfo")
@@ -878,9 +875,9 @@ func (a *FileSystemAPIService) GetFileInfoExecute(r FileSystemAPIGetFileInfoRequ
 }
 
 type FileSystemAPIListFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
+	path *string
 }
 
 // Directory path to list (defaults to working directory)
@@ -898,25 +895,24 @@ ListFiles List files and directories
 
 List files and directories in the specified path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIListFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIListFilesRequest
 */
 func (a *FileSystemAPIService) ListFiles(ctx context.Context) FileSystemAPIListFilesRequest {
 	return FileSystemAPIListFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []FileInfo
+//  @return []FileInfo
 func (a *FileSystemAPIService) ListFilesExecute(r FileSystemAPIListFilesRequest) ([]FileInfo, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []FileInfo
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []FileInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.ListFiles")
@@ -988,9 +984,9 @@ func (a *FileSystemAPIService) ListFilesExecute(r FileSystemAPIListFilesRequest)
 }
 
 type FileSystemAPIMoveFileRequest struct {
-	ctx         context.Context
-	ApiService  FileSystemAPI
-	source      *string
+	ctx context.Context
+	ApiService FileSystemAPI
+	source *string
 	destination *string
 }
 
@@ -1015,22 +1011,22 @@ MoveFile Move or rename file/directory
 
 Move or rename a file or directory from source to destination
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIMoveFileRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIMoveFileRequest
 */
 func (a *FileSystemAPIService) MoveFile(ctx context.Context) FileSystemAPIMoveFileRequest {
 	return FileSystemAPIMoveFileRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *FileSystemAPIService) MoveFileExecute(r FileSystemAPIMoveFileRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.MoveFile")
@@ -1098,9 +1094,9 @@ func (a *FileSystemAPIService) MoveFileExecute(r FileSystemAPIMoveFileRequest) (
 }
 
 type FileSystemAPIReplaceInFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	request    *ReplaceRequest
+	request *ReplaceRequest
 }
 
 // Replace request
@@ -1118,25 +1114,24 @@ ReplaceInFiles Replace text in files
 
 Replace text pattern with new value in multiple files
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIReplaceInFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIReplaceInFilesRequest
 */
 func (a *FileSystemAPIService) ReplaceInFiles(ctx context.Context) FileSystemAPIReplaceInFilesRequest {
 	return FileSystemAPIReplaceInFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []ReplaceResult
+//  @return []ReplaceResult
 func (a *FileSystemAPIService) ReplaceInFilesExecute(r FileSystemAPIReplaceInFilesRequest) ([]ReplaceResult, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []ReplaceResult
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []ReplaceResult
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.ReplaceInFiles")
@@ -1210,10 +1205,10 @@ func (a *FileSystemAPIService) ReplaceInFilesExecute(r FileSystemAPIReplaceInFil
 }
 
 type FileSystemAPISearchFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	pattern    *string
+	path *string
+	pattern *string
 }
 
 // Directory path to search in
@@ -1237,25 +1232,24 @@ SearchFiles Search files by pattern
 
 Search for files matching a specific pattern in a directory
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPISearchFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPISearchFilesRequest
 */
 func (a *FileSystemAPIService) SearchFiles(ctx context.Context) FileSystemAPISearchFilesRequest {
 	return FileSystemAPISearchFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return SearchFilesResponse
+//  @return SearchFilesResponse
 func (a *FileSystemAPIService) SearchFilesExecute(r FileSystemAPISearchFilesRequest) (*SearchFilesResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SearchFilesResponse
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *SearchFilesResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.SearchFiles")
@@ -1332,12 +1326,12 @@ func (a *FileSystemAPIService) SearchFilesExecute(r FileSystemAPISearchFilesRequ
 }
 
 type FileSystemAPISetFilePermissionsRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	owner      *string
-	group      *string
-	mode       *string
+	path *string
+	owner *string
+	group *string
+	mode *string
 }
 
 // File or directory path
@@ -1373,22 +1367,22 @@ SetFilePermissions Set file permissions
 
 Set file permissions, ownership, and group for a file or directory
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPISetFilePermissionsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPISetFilePermissionsRequest
 */
 func (a *FileSystemAPIService) SetFilePermissions(ctx context.Context) FileSystemAPISetFilePermissionsRequest {
 	return FileSystemAPISetFilePermissionsRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *FileSystemAPIService) SetFilePermissionsExecute(r FileSystemAPISetFilePermissionsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.SetFilePermissions")
@@ -1461,10 +1455,10 @@ func (a *FileSystemAPIService) SetFilePermissionsExecute(r FileSystemAPISetFileP
 }
 
 type FileSystemAPIUploadFileRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
-	path       *string
-	file       *os.File
+	path *string
+	file *os.File
 }
 
 // Destination path for the uploaded file
@@ -1488,25 +1482,24 @@ UploadFile Upload a file
 
 Upload a file to the specified path
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIUploadFileRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIUploadFileRequest
 */
 func (a *FileSystemAPIService) UploadFile(ctx context.Context) FileSystemAPIUploadFileRequest {
 	return FileSystemAPIUploadFileRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return map[string]map[string]interface{}
+//  @return map[string]map[string]interface{}
 func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileRequest) (map[string]map[string]interface{}, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue map[string]map[string]interface{}
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]map[string]interface{}
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.UploadFile")
@@ -1545,8 +1538,8 @@ func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileReques
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	var fileLocalVarFormFileName string
-	var fileLocalVarFileName string
-	var fileLocalVarFileBytes []byte
+	var fileLocalVarFileName     string
+	var fileLocalVarFileBytes    []byte
 
 	fileLocalVarFormFileName = "file"
 	fileLocalVarFile := r.file
@@ -1597,7 +1590,7 @@ func (a *FileSystemAPIService) UploadFileExecute(r FileSystemAPIUploadFileReques
 }
 
 type FileSystemAPIUploadFilesRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService FileSystemAPI
 }
 
@@ -1610,22 +1603,22 @@ UploadFiles Upload multiple files
 
 Upload multiple files with their destination paths
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return FileSystemAPIUploadFilesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return FileSystemAPIUploadFilesRequest
 */
 func (a *FileSystemAPIService) UploadFiles(ctx context.Context) FileSystemAPIUploadFilesRequest {
 	return FileSystemAPIUploadFilesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *FileSystemAPIService) UploadFilesExecute(r FileSystemAPIUploadFilesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "FileSystemAPIService.UploadFiles")

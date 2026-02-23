@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface WorkspacePortPreviewUrl
  */
 export interface WorkspacePortPreviewUrl {
-  /**
-   * Preview url
-   * @type {string}
-   * @memberof WorkspacePortPreviewUrl
-   */
-  url: string
-  /**
-   * Access token
-   * @type {string}
-   * @memberof WorkspacePortPreviewUrl
-   */
-  token: string
+    /**
+     * Preview url
+     * @type {string}
+     * @memberof WorkspacePortPreviewUrl
+     */
+    'url': string;
+    /**
+     * Access token
+     * @type {string}
+     * @memberof WorkspacePortPreviewUrl
+     */
+    'token': string;
 }
+

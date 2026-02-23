@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -21,14 +21,14 @@ var _ MappedNullable = &FileInfo{}
 
 // FileInfo struct for FileInfo
 type FileInfo struct {
-	Group       string `json:"group"`
-	IsDir       bool   `json:"isDir"`
-	ModTime     string `json:"modTime"`
-	Mode        string `json:"mode"`
-	Name        string `json:"name"`
-	Owner       string `json:"owner"`
+	Group string `json:"group"`
+	IsDir bool `json:"isDir"`
+	ModTime string `json:"modTime"`
+	Mode string `json:"mode"`
+	Name string `json:"name"`
+	Owner string `json:"owner"`
 	Permissions string `json:"permissions"`
-	Size        int32  `json:"size"`
+	Size int32 `json:"size"`
 }
 
 type _FileInfo FileInfo
@@ -251,7 +251,7 @@ func (o *FileInfo) SetSize(v int32) {
 }
 
 func (o FileInfo) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -291,10 +291,10 @@ func (o *FileInfo) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -350,3 +350,5 @@ func (v *NullableFileInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

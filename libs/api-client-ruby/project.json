@@ -13,10 +13,7 @@
         "parallel": false
       },
       "dependsOn": ["set-version"],
-      "inputs": [
-        "default",
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
-      ],
+      "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{projectRoot}/**/*.gem"]
     },
     "set-version": {
@@ -29,13 +26,6 @@
       "inputs": [{ "env": "RUBYGEMS_PKG_VERSION" }, { "env": "VERSION" }],
       "outputs": ["{projectRoot}/lib/daytona_api_client/version.rb"]
     },
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "command": "bundle exec rubocop"
-      }
-    },
     "generate:api-client": {
       "executor": "nx:run-commands",
       "outputs": ["{projectRoot}/lib"],
@@ -44,30 +34,18 @@
           "rm -rf libs/api-client-ruby/lib",
           "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemVersion=$DEFAULT_GEM_VERSION,gemName=daytona_api_client -o libs/api-client-ruby",
           "bash libs/api-client-ruby/fix-gemspec.sh",
-          "cd libs/api-client-ruby && bundle install",
-          "cd libs/api-client-ruby && bundle exec rubocop -a --fail-level=E"
+          "cd libs/api-client-ruby && bundle install"
         ],
         "parallel": false
       },
       "cache": true,
-      "inputs": [
-        "apiClient",
-        { "env": "DEFAULT_GEM_VERSION" }
-      ],
+      "inputs": ["apiClient", { "env": "DEFAULT_GEM_VERSION" }],
       "dependsOn": [
         {
           "target": "openapi",
           "projects": "api"
         }
       ]
-    },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["bundle exec rubocop -a --fail-level=E", "prettier --write \"**/*.yml\""],
-        "parallel": false
-      }
     },
     "publish": {
       "executor": "nx:run-commands",

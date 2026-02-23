@@ -21,14 +21,6 @@
     "tidy": {
       "executor": "@nx-go/nx-go:tidy"
     },
-    "format": {
-      "executor": "nx:run-commands",
-      "options": {
-        "cwd": "{projectRoot}",
-        "commands": ["go fmt ./...", "prettier --write '**/*.yaml'"],
-        "parallel": false
-      }
-    },
     "clean": {
       "executor": "nx:run-commands",
       "options": {

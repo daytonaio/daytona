@@ -20,7 +20,7 @@ var _ MappedNullable = &ProcessStatusResponse{}
 // ProcessStatusResponse struct for ProcessStatusResponse
 type ProcessStatusResponse struct {
 	ProcessName *string `json:"processName,omitempty"`
-	Running     *bool   `json:"running,omitempty"`
+	Running *bool `json:"running,omitempty"`
 }
 
 // NewProcessStatusResponse instantiates a new ProcessStatusResponse object
@@ -105,7 +105,7 @@ func (o *ProcessStatusResponse) SetRunning(v bool) {
 }
 
 func (o ProcessStatusResponse) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -158,3 +158,5 @@ func (v *NullableProcessStatusResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

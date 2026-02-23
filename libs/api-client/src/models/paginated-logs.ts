@@ -12,38 +12,40 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { LogEntry } from './log-entry'
+import type { LogEntry } from './log-entry';
 
 /**
- *
+ * 
  * @export
  * @interface PaginatedLogs
  */
 export interface PaginatedLogs {
-  /**
-   * List of log entries
-   * @type {Array<LogEntry>}
-   * @memberof PaginatedLogs
-   */
-  items: Array<LogEntry>
-  /**
-   * Total number of log entries matching the query
-   * @type {number}
-   * @memberof PaginatedLogs
-   */
-  total: number
-  /**
-   * Current page number
-   * @type {number}
-   * @memberof PaginatedLogs
-   */
-  page: number
-  /**
-   * Total number of pages
-   * @type {number}
-   * @memberof PaginatedLogs
-   */
-  totalPages: number
+    /**
+     * List of log entries
+     * @type {Array<LogEntry>}
+     * @memberof PaginatedLogs
+     */
+    'items': Array<LogEntry>;
+    /**
+     * Total number of log entries matching the query
+     * @type {number}
+     * @memberof PaginatedLogs
+     */
+    'total': number;
+    /**
+     * Current page number
+     * @type {number}
+     * @memberof PaginatedLogs
+     */
+    'page': number;
+    /**
+     * Total number of pages
+     * @type {number}
+     * @memberof PaginatedLogs
+     */
+    'totalPages': number;
 }
+

@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type AdminAPI interface {
 
 	/*
-		AdminCreateRunner Create runner
+	AdminCreateRunner Create runner
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return AdminAPIAdminCreateRunnerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return AdminAPIAdminCreateRunnerRequest
 	*/
 	AdminCreateRunner(ctx context.Context) AdminAPIAdminCreateRunnerRequest
 
@@ -35,11 +36,11 @@ type AdminAPI interface {
 	AdminCreateRunnerExecute(r AdminAPIAdminCreateRunnerRequest) (*CreateRunnerResponse, *http.Response, error)
 
 	/*
-		AdminDeleteRunner Delete runner
+	AdminDeleteRunner Delete runner
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Runner ID
-		@return AdminAPIAdminDeleteRunnerRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Runner ID
+	@return AdminAPIAdminDeleteRunnerRequest
 	*/
 	AdminDeleteRunner(ctx context.Context, id string) AdminAPIAdminDeleteRunnerRequest
 
@@ -47,11 +48,11 @@ type AdminAPI interface {
 	AdminDeleteRunnerExecute(r AdminAPIAdminDeleteRunnerRequest) (*http.Response, error)
 
 	/*
-		AdminGetRunnerById Get runner by ID
+	AdminGetRunnerById Get runner by ID
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Runner ID
-		@return AdminAPIAdminGetRunnerByIdRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Runner ID
+	@return AdminAPIAdminGetRunnerByIdRequest
 	*/
 	AdminGetRunnerById(ctx context.Context, id string) AdminAPIAdminGetRunnerByIdRequest
 
@@ -60,10 +61,10 @@ type AdminAPI interface {
 	AdminGetRunnerByIdExecute(r AdminAPIAdminGetRunnerByIdRequest) (*RunnerFull, *http.Response, error)
 
 	/*
-		AdminListRunners List all runners
+	AdminListRunners List all runners
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return AdminAPIAdminListRunnersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return AdminAPIAdminListRunnersRequest
 	*/
 	AdminListRunners(ctx context.Context) AdminAPIAdminListRunnersRequest
 
@@ -72,11 +73,11 @@ type AdminAPI interface {
 	AdminListRunnersExecute(r AdminAPIAdminListRunnersRequest) ([]RunnerFull, *http.Response, error)
 
 	/*
-		AdminRecoverSandbox Recover sandbox from error state as an admin
+	AdminRecoverSandbox Recover sandbox from error state as an admin
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId ID of the sandbox
-		@return AdminAPIAdminRecoverSandboxRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return AdminAPIAdminRecoverSandboxRequest
 	*/
 	AdminRecoverSandbox(ctx context.Context, sandboxId string) AdminAPIAdminRecoverSandboxRequest
 
@@ -85,11 +86,11 @@ type AdminAPI interface {
 	AdminRecoverSandboxExecute(r AdminAPIAdminRecoverSandboxRequest) (*Sandbox, *http.Response, error)
 
 	/*
-		AdminUpdateRunnerScheduling Update runner scheduling status
+	AdminUpdateRunnerScheduling Update runner scheduling status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
-		@return AdminAPIAdminUpdateRunnerSchedulingRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return AdminAPIAdminUpdateRunnerSchedulingRequest
 	*/
 	AdminUpdateRunnerScheduling(ctx context.Context, id string) AdminAPIAdminUpdateRunnerSchedulingRequest
 
@@ -101,8 +102,8 @@ type AdminAPI interface {
 type AdminAPIService service
 
 type AdminAPIAdminCreateRunnerRequest struct {
-	ctx               context.Context
-	ApiService        AdminAPI
+	ctx context.Context
+	ApiService AdminAPI
 	adminCreateRunner *AdminCreateRunner
 }
 
@@ -118,25 +119,24 @@ func (r AdminAPIAdminCreateRunnerRequest) Execute() (*CreateRunnerResponse, *htt
 /*
 AdminCreateRunner Create runner
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AdminAPIAdminCreateRunnerRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AdminAPIAdminCreateRunnerRequest
 */
 func (a *AdminAPIService) AdminCreateRunner(ctx context.Context) AdminAPIAdminCreateRunnerRequest {
 	return AdminAPIAdminCreateRunnerRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return CreateRunnerResponse
+//  @return CreateRunnerResponse
 func (a *AdminAPIService) AdminCreateRunnerExecute(r AdminAPIAdminCreateRunnerRequest) (*CreateRunnerResponse, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *CreateRunnerResponse
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *CreateRunnerResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminCreateRunner")
@@ -210,9 +210,9 @@ func (a *AdminAPIService) AdminCreateRunnerExecute(r AdminAPIAdminCreateRunnerRe
 }
 
 type AdminAPIAdminDeleteRunnerRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AdminAPI
-	id         string
+	id string
 }
 
 func (r AdminAPIAdminDeleteRunnerRequest) Execute() (*http.Response, error) {
@@ -222,24 +222,24 @@ func (r AdminAPIAdminDeleteRunnerRequest) Execute() (*http.Response, error) {
 /*
 AdminDeleteRunner Delete runner
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Runner ID
-	@return AdminAPIAdminDeleteRunnerRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Runner ID
+ @return AdminAPIAdminDeleteRunnerRequest
 */
 func (a *AdminAPIService) AdminDeleteRunner(ctx context.Context, id string) AdminAPIAdminDeleteRunnerRequest {
 	return AdminAPIAdminDeleteRunnerRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *AdminAPIService) AdminDeleteRunnerExecute(r AdminAPIAdminDeleteRunnerRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminDeleteRunner")
@@ -300,9 +300,9 @@ func (a *AdminAPIService) AdminDeleteRunnerExecute(r AdminAPIAdminDeleteRunnerRe
 }
 
 type AdminAPIAdminGetRunnerByIdRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AdminAPI
-	id         string
+	id string
 }
 
 func (r AdminAPIAdminGetRunnerByIdRequest) Execute() (*RunnerFull, *http.Response, error) {
@@ -312,27 +312,26 @@ func (r AdminAPIAdminGetRunnerByIdRequest) Execute() (*RunnerFull, *http.Respons
 /*
 AdminGetRunnerById Get runner by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Runner ID
-	@return AdminAPIAdminGetRunnerByIdRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Runner ID
+ @return AdminAPIAdminGetRunnerByIdRequest
 */
 func (a *AdminAPIService) AdminGetRunnerById(ctx context.Context, id string) AdminAPIAdminGetRunnerByIdRequest {
 	return AdminAPIAdminGetRunnerByIdRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return RunnerFull
+//  @return RunnerFull
 func (a *AdminAPIService) AdminGetRunnerByIdExecute(r AdminAPIAdminGetRunnerByIdRequest) (*RunnerFull, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *RunnerFull
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *RunnerFull
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminGetRunnerById")
@@ -402,9 +401,9 @@ func (a *AdminAPIService) AdminGetRunnerByIdExecute(r AdminAPIAdminGetRunnerById
 }
 
 type AdminAPIAdminListRunnersRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AdminAPI
-	regionId   *string
+	regionId *string
 }
 
 // Filter runners by region ID
@@ -420,25 +419,24 @@ func (r AdminAPIAdminListRunnersRequest) Execute() ([]RunnerFull, *http.Response
 /*
 AdminListRunners List all runners
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return AdminAPIAdminListRunnersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return AdminAPIAdminListRunnersRequest
 */
 func (a *AdminAPIService) AdminListRunners(ctx context.Context) AdminAPIAdminListRunnersRequest {
 	return AdminAPIAdminListRunnersRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return []RunnerFull
+//  @return []RunnerFull
 func (a *AdminAPIService) AdminListRunnersExecute(r AdminAPIAdminListRunnersRequest) ([]RunnerFull, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []RunnerFull
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []RunnerFull
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminListRunners")
@@ -510,9 +508,9 @@ func (a *AdminAPIService) AdminListRunnersExecute(r AdminAPIAdminListRunnersRequ
 }
 
 type AdminAPIAdminRecoverSandboxRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AdminAPI
-	sandboxId  string
+	sandboxId string
 }
 
 func (r AdminAPIAdminRecoverSandboxRequest) Execute() (*Sandbox, *http.Response, error) {
@@ -522,27 +520,26 @@ func (r AdminAPIAdminRecoverSandboxRequest) Execute() (*Sandbox, *http.Response,
 /*
 AdminRecoverSandbox Recover sandbox from error state as an admin
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId ID of the sandbox
-	@return AdminAPIAdminRecoverSandboxRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return AdminAPIAdminRecoverSandboxRequest
 */
 func (a *AdminAPIService) AdminRecoverSandbox(ctx context.Context, sandboxId string) AdminAPIAdminRecoverSandboxRequest {
 	return AdminAPIAdminRecoverSandboxRequest{
 		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
+		ctx: ctx,
+		sandboxId: sandboxId,
 	}
 }
 
 // Execute executes the request
-//
-//	@return Sandbox
+//  @return Sandbox
 func (a *AdminAPIService) AdminRecoverSandboxExecute(r AdminAPIAdminRecoverSandboxRequest) (*Sandbox, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *Sandbox
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminRecoverSandbox")
@@ -612,9 +609,9 @@ func (a *AdminAPIService) AdminRecoverSandboxExecute(r AdminAPIAdminRecoverSandb
 }
 
 type AdminAPIAdminUpdateRunnerSchedulingRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService AdminAPI
-	id         string
+	id string
 }
 
 func (r AdminAPIAdminUpdateRunnerSchedulingRequest) Execute() (*http.Response, error) {
@@ -624,24 +621,24 @@ func (r AdminAPIAdminUpdateRunnerSchedulingRequest) Execute() (*http.Response, e
 /*
 AdminUpdateRunnerScheduling Update runner scheduling status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return AdminAPIAdminUpdateRunnerSchedulingRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return AdminAPIAdminUpdateRunnerSchedulingRequest
 */
 func (a *AdminAPIService) AdminUpdateRunnerScheduling(ctx context.Context, id string) AdminAPIAdminUpdateRunnerSchedulingRequest {
 	return AdminAPIAdminUpdateRunnerSchedulingRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *AdminAPIService) AdminUpdateRunnerSchedulingExecute(r AdminAPIAdminUpdateRunnerSchedulingRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPatch
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.AdminUpdateRunnerScheduling")

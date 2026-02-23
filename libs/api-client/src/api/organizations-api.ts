@@ -12,3512 +12,2710 @@
  * Do not edit the class manually.
  */
 
-import type { Configuration } from '../configuration'
-import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios'
-import globalAxios from 'axios'
+
+import type { Configuration } from '../configuration';
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import {
-  DUMMY_BASE_URL,
-  assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
-  setSearchParams,
-  serializeDataIfNeeded,
-  toPathString,
-  createRequestFunction,
-} from '../common'
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
+import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
-import type { CreateOrganization } from '../models'
+import type { CreateOrganization } from '../models';
 // @ts-ignore
-import type { CreateOrganizationInvitation } from '../models'
+import type { CreateOrganizationInvitation } from '../models';
 // @ts-ignore
-import type { CreateOrganizationRole } from '../models'
+import type { CreateOrganizationRole } from '../models';
 // @ts-ignore
-import type { CreateRegion } from '../models'
+import type { CreateRegion } from '../models';
 // @ts-ignore
-import type { CreateRegionResponse } from '../models'
+import type { CreateRegionResponse } from '../models';
 // @ts-ignore
-import type { Organization } from '../models'
+import type { Organization } from '../models';
 // @ts-ignore
-import type { OrganizationInvitation } from '../models'
+import type { OrganizationInvitation } from '../models';
 // @ts-ignore
-import type { OrganizationRole } from '../models'
+import type { OrganizationRole } from '../models';
 // @ts-ignore
-import type { OrganizationSandboxDefaultLimitedNetworkEgress } from '../models'
+import type { OrganizationSandboxDefaultLimitedNetworkEgress } from '../models';
 // @ts-ignore
-import type { OrganizationSuspension } from '../models'
+import type { OrganizationSuspension } from '../models';
 // @ts-ignore
-import type { OrganizationUsageOverview } from '../models'
+import type { OrganizationUsageOverview } from '../models';
 // @ts-ignore
-import type { OrganizationUser } from '../models'
+import type { OrganizationUser } from '../models';
 // @ts-ignore
-import type { OtelConfig } from '../models'
+import type { OtelConfig } from '../models';
 // @ts-ignore
-import type { RegenerateApiKeyResponse } from '../models'
+import type { RegenerateApiKeyResponse } from '../models';
 // @ts-ignore
-import type { Region } from '../models'
+import type { Region } from '../models';
 // @ts-ignore
-import type { RegionQuota } from '../models'
+import type { RegionQuota } from '../models';
 // @ts-ignore
-import type { SnapshotManagerCredentials } from '../models'
+import type { SnapshotManagerCredentials } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationDefaultRegion } from '../models'
+import type { UpdateOrganizationDefaultRegion } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationInvitation } from '../models'
+import type { UpdateOrganizationInvitation } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationMemberAccess } from '../models'
+import type { UpdateOrganizationMemberAccess } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationQuota } from '../models'
+import type { UpdateOrganizationQuota } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationRegionQuota } from '../models'
+import type { UpdateOrganizationRegionQuota } from '../models';
 // @ts-ignore
-import type { UpdateOrganizationRole } from '../models'
+import type { UpdateOrganizationRole } from '../models';
 // @ts-ignore
-import type { UpdateRegion } from '../models'
+import type { UpdateRegion } from '../models';
 /**
  * OrganizationsApi - axios parameter creator
  * @export
  */
 export const OrganizationsApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     *
-     * @summary Accept organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    acceptOrganizationInvitation: async (
-      invitationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'invitationId' is not null or undefined
-      assertParamExists('acceptOrganizationInvitation', 'invitationId', invitationId)
-      const localVarPath = `/organizations/invitations/{invitationId}/accept`.replace(
-        `{${'invitationId'}}`,
-        encodeURIComponent(String(invitationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Cancel organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    cancelOrganizationInvitation: async (
-      organizationId: string,
-      invitationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('cancelOrganizationInvitation', 'organizationId', organizationId)
-      // verify required parameter 'invitationId' is not null or undefined
-      assertParamExists('cancelOrganizationInvitation', 'invitationId', invitationId)
-      const localVarPath = `/organizations/{organizationId}/invitations/{invitationId}/cancel`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'invitationId'}}`, encodeURIComponent(String(invitationId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Create organization
-     * @param {CreateOrganization} createOrganization
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganization: async (
-      createOrganization: CreateOrganization,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'createOrganization' is not null or undefined
-      assertParamExists('createOrganization', 'createOrganization', createOrganization)
-      const localVarPath = `/organizations`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createOrganization, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Create organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationInvitation} createOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganizationInvitation: async (
-      organizationId: string,
-      createOrganizationInvitation: CreateOrganizationInvitation,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('createOrganizationInvitation', 'organizationId', organizationId)
-      // verify required parameter 'createOrganizationInvitation' is not null or undefined
-      assertParamExists('createOrganizationInvitation', 'createOrganizationInvitation', createOrganizationInvitation)
-      const localVarPath = `/organizations/{organizationId}/invitations`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        createOrganizationInvitation,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Create organization role
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationRole} createOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganizationRole: async (
-      organizationId: string,
-      createOrganizationRole: CreateOrganizationRole,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('createOrganizationRole', 'organizationId', organizationId)
-      // verify required parameter 'createOrganizationRole' is not null or undefined
-      assertParamExists('createOrganizationRole', 'createOrganizationRole', createOrganizationRole)
-      const localVarPath = `/organizations/{organizationId}/roles`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createOrganizationRole, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Create a new region
-     * @param {CreateRegion} createRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createRegion: async (
-      createRegion: CreateRegion,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'createRegion' is not null or undefined
-      assertParamExists('createRegion', 'createRegion', createRegion)
-      const localVarPath = `/regions`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createRegion, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Decline organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    declineOrganizationInvitation: async (
-      invitationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'invitationId' is not null or undefined
-      assertParamExists('declineOrganizationInvitation', 'invitationId', invitationId)
-      const localVarPath = `/organizations/invitations/{invitationId}/decline`.replace(
-        `{${'invitationId'}}`,
-        encodeURIComponent(String(invitationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Delete organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('deleteOrganization', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Delete organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganizationMember: async (
-      organizationId: string,
-      userId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('deleteOrganizationMember', 'organizationId', organizationId)
-      // verify required parameter 'userId' is not null or undefined
-      assertParamExists('deleteOrganizationMember', 'userId', userId)
-      const localVarPath = `/organizations/{organizationId}/users/{userId}`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Delete organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganizationRole: async (
-      organizationId: string,
-      roleId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('deleteOrganizationRole', 'organizationId', organizationId)
-      // verify required parameter 'roleId' is not null or undefined
-      assertParamExists('deleteOrganizationRole', 'roleId', roleId)
-      const localVarPath = `/organizations/{organizationId}/roles/{roleId}`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'roleId'}}`, encodeURIComponent(String(roleId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Delete a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteRegion: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('deleteRegion', 'id', id)
-      const localVarPath = `/regions/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get organization by ID
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('getOrganization', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get organization by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationBySandboxId: async (
-      sandboxId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getOrganizationBySandboxId', 'sandboxId', sandboxId)
-      const localVarPath = `/organizations/by-sandbox-id/{sandboxId}`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get count of organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationInvitationsCountForAuthenticatedUser: async (
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/organizations/invitations/count`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get organization OTEL config by sandbox auth token
-     * @param {string} authToken Sandbox Auth Token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationOtelConfigBySandboxAuthToken: async (
-      authToken: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'authToken' is not null or undefined
-      assertParamExists('getOrganizationOtelConfigBySandboxAuthToken', 'authToken', authToken)
-      const localVarPath = `/organizations/otel-config/by-sandbox-auth-token/{authToken}`.replace(
-        `{${'authToken'}}`,
-        encodeURIComponent(String(authToken)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get organization current usage overview
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationUsageOverview: async (
-      organizationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('getOrganizationUsageOverview', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/usage`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get region by ID
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionById: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('getRegionById', 'id', id)
-      const localVarPath = `/regions/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get region quota by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionQuotaBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getRegionQuotaBySandboxId', 'sandboxId', sandboxId)
-      const localVarPath = `/organizations/region-quota/by-sandbox-id/{sandboxId}`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Leave organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    leaveOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('leaveOrganization', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/leave`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List all available regions for the organization
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listAvailableRegions: async (
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/regions`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List pending organization invitations
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationInvitations: async (
-      organizationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('listOrganizationInvitations', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/invitations`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationInvitationsForAuthenticatedUser: async (
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      const localVarPath = `/organizations/invitations`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List organization members
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationMembers: async (
-      organizationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('listOrganizationMembers', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/users`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List organization roles
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationRoles: async (
-      organizationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('listOrganizationRoles', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/roles`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List organizations
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizations: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/organizations`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Regenerate proxy API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateProxyApiKey: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('regenerateProxyApiKey', 'id', id)
-      const localVarPath = `/regions/{id}/regenerate-proxy-api-key`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Regenerate snapshot manager credentials for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateSnapshotManagerCredentials: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('regenerateSnapshotManagerCredentials', 'id', id)
-      const localVarPath = `/regions/{id}/regenerate-snapshot-manager-credentials`.replace(
-        `{${'id'}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Regenerate SSH gateway API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateSshGatewayApiKey: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('regenerateSshGatewayApiKey', 'id', id)
-      const localVarPath = `/regions/{id}/regenerate-ssh-gateway-api-key`.replace(
-        `{${'id'}}`,
-        encodeURIComponent(String(id)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Set default region for organization
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    setOrganizationDefaultRegion: async (
-      organizationId: string,
-      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('setOrganizationDefaultRegion', 'organizationId', organizationId)
-      // verify required parameter 'updateOrganizationDefaultRegion' is not null or undefined
-      assertParamExists(
-        'setOrganizationDefaultRegion',
-        'updateOrganizationDefaultRegion',
-        updateOrganizationDefaultRegion,
-      )
-      const localVarPath = `/organizations/{organizationId}/default-region`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationDefaultRegion,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Suspend organization
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSuspension} [organizationSuspension]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    suspendOrganization: async (
-      organizationId: string,
-      organizationSuspension?: OrganizationSuspension,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('suspendOrganization', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/suspend`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(organizationSuspension, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Unsuspend organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    unsuspendOrganization: async (
-      organizationId: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('unsuspendOrganization', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/unsuspend`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update access for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateAccessForOrganizationMember: async (
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateAccessForOrganizationMember', 'organizationId', organizationId)
-      // verify required parameter 'userId' is not null or undefined
-      assertParamExists('updateAccessForOrganizationMember', 'userId', userId)
-      // verify required parameter 'updateOrganizationMemberAccess' is not null or undefined
-      assertParamExists(
-        'updateAccessForOrganizationMember',
-        'updateOrganizationMemberAccess',
-        updateOrganizationMemberAccess,
-      )
-      const localVarPath = `/organizations/{organizationId}/users/{userId}/access`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationMemberAccess,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update experimental configuration
-     * @param {string} organizationId Organization ID
-     * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateExperimentalConfig: async (
-      organizationId: string,
-      requestBody?: { [key: string]: any },
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateExperimentalConfig', 'organizationId', organizationId)
-      const localVarPath = `/organizations/{organizationId}/experimental-config`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(requestBody, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {UpdateOrganizationInvitation} updateOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationInvitation: async (
-      organizationId: string,
-      invitationId: string,
-      updateOrganizationInvitation: UpdateOrganizationInvitation,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateOrganizationInvitation', 'organizationId', organizationId)
-      // verify required parameter 'invitationId' is not null or undefined
-      assertParamExists('updateOrganizationInvitation', 'invitationId', invitationId)
-      // verify required parameter 'updateOrganizationInvitation' is not null or undefined
-      assertParamExists('updateOrganizationInvitation', 'updateOrganizationInvitation', updateOrganizationInvitation)
-      const localVarPath = `/organizations/{organizationId}/invitations/{invitationId}`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'invitationId'}}`, encodeURIComponent(String(invitationId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationInvitation,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update organization quota
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationQuota} updateOrganizationQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationQuota: async (
-      organizationId: string,
-      updateOrganizationQuota: UpdateOrganizationQuota,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateOrganizationQuota', 'organizationId', organizationId)
-      // verify required parameter 'updateOrganizationQuota' is not null or undefined
-      assertParamExists('updateOrganizationQuota', 'updateOrganizationQuota', updateOrganizationQuota)
-      const localVarPath = `/organizations/{organizationId}/quota`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationQuota,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update organization region quota
-     * @param {string} organizationId Organization ID
-     * @param {string} regionId ID of the region where the updated quota will be applied
-     * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationRegionQuota: async (
-      organizationId: string,
-      regionId: string,
-      updateOrganizationRegionQuota: UpdateOrganizationRegionQuota,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateOrganizationRegionQuota', 'organizationId', organizationId)
-      // verify required parameter 'regionId' is not null or undefined
-      assertParamExists('updateOrganizationRegionQuota', 'regionId', regionId)
-      // verify required parameter 'updateOrganizationRegionQuota' is not null or undefined
-      assertParamExists('updateOrganizationRegionQuota', 'updateOrganizationRegionQuota', updateOrganizationRegionQuota)
-      const localVarPath = `/organizations/{organizationId}/quota/{regionId}`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'regionId'}}`, encodeURIComponent(String(regionId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        updateOrganizationRegionQuota,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {UpdateOrganizationRole} updateOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationRole: async (
-      organizationId: string,
-      roleId: string,
-      updateOrganizationRole: UpdateOrganizationRole,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateOrganizationRole', 'organizationId', organizationId)
-      // verify required parameter 'roleId' is not null or undefined
-      assertParamExists('updateOrganizationRole', 'roleId', roleId)
-      // verify required parameter 'updateOrganizationRole' is not null or undefined
-      assertParamExists('updateOrganizationRole', 'updateOrganizationRole', updateOrganizationRole)
-      const localVarPath = `/organizations/{organizationId}/roles/{roleId}`
-        .replace(`{${'organizationId'}}`, encodeURIComponent(String(organizationId)))
-        .replace(`{${'roleId'}}`, encodeURIComponent(String(roleId)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationRole, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update region configuration
-     * @param {string} id Region ID
-     * @param {UpdateRegion} updateRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRegion: async (
-      id: string,
-      updateRegion: UpdateRegion,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('updateRegion', 'id', id)
-      // verify required parameter 'updateRegion' is not null or undefined
-      assertParamExists('updateRegion', 'updateRegion', updateRegion)
-      const localVarPath = `/regions/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(updateRegion, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update sandbox default limited network egress
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateSandboxDefaultLimitedNetworkEgress: async (
-      organizationId: string,
-      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'organizationId' is not null or undefined
-      assertParamExists('updateSandboxDefaultLimitedNetworkEgress', 'organizationId', organizationId)
-      // verify required parameter 'organizationSandboxDefaultLimitedNetworkEgress' is not null or undefined
-      assertParamExists(
-        'updateSandboxDefaultLimitedNetworkEgress',
-        'organizationSandboxDefaultLimitedNetworkEgress',
-        organizationSandboxDefaultLimitedNetworkEgress,
-      )
-      const localVarPath = `/organizations/{organizationId}/sandbox-default-limited-network-egress`.replace(
-        `{${'organizationId'}}`,
-        encodeURIComponent(String(organizationId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(
-        organizationSandboxDefaultLimitedNetworkEgress,
-        localVarRequestOptions,
-        configuration,
-      )
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-  }
-}
+    return {
+        /**
+         * 
+         * @summary Accept organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        acceptOrganizationInvitation: async (invitationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'invitationId' is not null or undefined
+            assertParamExists('acceptOrganizationInvitation', 'invitationId', invitationId)
+            const localVarPath = `/organizations/invitations/{invitationId}/accept`
+                .replace(`{${"invitationId"}}`, encodeURIComponent(String(invitationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Cancel organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelOrganizationInvitation: async (organizationId: string, invitationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('cancelOrganizationInvitation', 'organizationId', organizationId)
+            // verify required parameter 'invitationId' is not null or undefined
+            assertParamExists('cancelOrganizationInvitation', 'invitationId', invitationId)
+            const localVarPath = `/organizations/{organizationId}/invitations/{invitationId}/cancel`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"invitationId"}}`, encodeURIComponent(String(invitationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create organization
+         * @param {CreateOrganization} createOrganization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganization: async (createOrganization: CreateOrganization, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createOrganization' is not null or undefined
+            assertParamExists('createOrganization', 'createOrganization', createOrganization)
+            const localVarPath = `/organizations`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createOrganization, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationInvitation} createOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganizationInvitation: async (organizationId: string, createOrganizationInvitation: CreateOrganizationInvitation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('createOrganizationInvitation', 'organizationId', organizationId)
+            // verify required parameter 'createOrganizationInvitation' is not null or undefined
+            assertParamExists('createOrganizationInvitation', 'createOrganizationInvitation', createOrganizationInvitation)
+            const localVarPath = `/organizations/{organizationId}/invitations`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createOrganizationInvitation, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create organization role
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationRole} createOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganizationRole: async (organizationId: string, createOrganizationRole: CreateOrganizationRole, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('createOrganizationRole', 'organizationId', organizationId)
+            // verify required parameter 'createOrganizationRole' is not null or undefined
+            assertParamExists('createOrganizationRole', 'createOrganizationRole', createOrganizationRole)
+            const localVarPath = `/organizations/{organizationId}/roles`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createOrganizationRole, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create a new region
+         * @param {CreateRegion} createRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRegion: async (createRegion: CreateRegion, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createRegion' is not null or undefined
+            assertParamExists('createRegion', 'createRegion', createRegion)
+            const localVarPath = `/regions`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createRegion, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Decline organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        declineOrganizationInvitation: async (invitationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'invitationId' is not null or undefined
+            assertParamExists('declineOrganizationInvitation', 'invitationId', invitationId)
+            const localVarPath = `/organizations/invitations/{invitationId}/decline`
+                .replace(`{${"invitationId"}}`, encodeURIComponent(String(invitationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('deleteOrganization', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganizationMember: async (organizationId: string, userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('deleteOrganizationMember', 'organizationId', organizationId)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('deleteOrganizationMember', 'userId', userId)
+            const localVarPath = `/organizations/{organizationId}/users/{userId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"userId"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganizationRole: async (organizationId: string, roleId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('deleteOrganizationRole', 'organizationId', organizationId)
+            // verify required parameter 'roleId' is not null or undefined
+            assertParamExists('deleteOrganizationRole', 'roleId', roleId)
+            const localVarPath = `/organizations/{organizationId}/roles/{roleId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"roleId"}}`, encodeURIComponent(String(roleId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRegion: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('deleteRegion', 'id', id)
+            const localVarPath = `/regions/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get organization by ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('getOrganization', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get organization by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('getOrganizationBySandboxId', 'sandboxId', sandboxId)
+            const localVarPath = `/organizations/by-sandbox-id/{sandboxId}`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get count of organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationInvitationsCountForAuthenticatedUser: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/organizations/invitations/count`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get organization OTEL config by sandbox auth token
+         * @param {string} authToken Sandbox Auth Token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationOtelConfigBySandboxAuthToken: async (authToken: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'authToken' is not null or undefined
+            assertParamExists('getOrganizationOtelConfigBySandboxAuthToken', 'authToken', authToken)
+            const localVarPath = `/organizations/otel-config/by-sandbox-auth-token/{authToken}`
+                .replace(`{${"authToken"}}`, encodeURIComponent(String(authToken)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get organization current usage overview
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationUsageOverview: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('getOrganizationUsageOverview', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/usage`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get region by ID
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRegionById: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('getRegionById', 'id', id)
+            const localVarPath = `/regions/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get region quota by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRegionQuotaBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('getRegionQuotaBySandboxId', 'sandboxId', sandboxId)
+            const localVarPath = `/organizations/region-quota/by-sandbox-id/{sandboxId}`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Leave organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        leaveOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('leaveOrganization', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/leave`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List all available regions for the organization
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAvailableRegions: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/regions`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List pending organization invitations
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationInvitations: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('listOrganizationInvitations', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/invitations`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationInvitationsForAuthenticatedUser: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/organizations/invitations`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List organization members
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationMembers: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('listOrganizationMembers', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/users`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List organization roles
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationRoles: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('listOrganizationRoles', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/roles`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List organizations
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizations: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/organizations`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Regenerate proxy API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateProxyApiKey: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('regenerateProxyApiKey', 'id', id)
+            const localVarPath = `/regions/{id}/regenerate-proxy-api-key`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Regenerate snapshot manager credentials for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateSnapshotManagerCredentials: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('regenerateSnapshotManagerCredentials', 'id', id)
+            const localVarPath = `/regions/{id}/regenerate-snapshot-manager-credentials`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Regenerate SSH gateway API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateSshGatewayApiKey: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('regenerateSshGatewayApiKey', 'id', id)
+            const localVarPath = `/regions/{id}/regenerate-ssh-gateway-api-key`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Set default region for organization
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setOrganizationDefaultRegion: async (organizationId: string, updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('setOrganizationDefaultRegion', 'organizationId', organizationId)
+            // verify required parameter 'updateOrganizationDefaultRegion' is not null or undefined
+            assertParamExists('setOrganizationDefaultRegion', 'updateOrganizationDefaultRegion', updateOrganizationDefaultRegion)
+            const localVarPath = `/organizations/{organizationId}/default-region`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationDefaultRegion, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Suspend organization
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSuspension} [organizationSuspension] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        suspendOrganization: async (organizationId: string, organizationSuspension?: OrganizationSuspension, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('suspendOrganization', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/suspend`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(organizationSuspension, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Unsuspend organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        unsuspendOrganization: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('unsuspendOrganization', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/unsuspend`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update access for organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateAccessForOrganizationMember: async (organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateAccessForOrganizationMember', 'organizationId', organizationId)
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('updateAccessForOrganizationMember', 'userId', userId)
+            // verify required parameter 'updateOrganizationMemberAccess' is not null or undefined
+            assertParamExists('updateAccessForOrganizationMember', 'updateOrganizationMemberAccess', updateOrganizationMemberAccess)
+            const localVarPath = `/organizations/{organizationId}/users/{userId}/access`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"userId"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationMemberAccess, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update experimental configuration
+         * @param {string} organizationId Organization ID
+         * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateExperimentalConfig: async (organizationId: string, requestBody?: { [key: string]: any; }, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateExperimentalConfig', 'organizationId', organizationId)
+            const localVarPath = `/organizations/{organizationId}/experimental-config`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(requestBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {UpdateOrganizationInvitation} updateOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationInvitation: async (organizationId: string, invitationId: string, updateOrganizationInvitation: UpdateOrganizationInvitation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateOrganizationInvitation', 'organizationId', organizationId)
+            // verify required parameter 'invitationId' is not null or undefined
+            assertParamExists('updateOrganizationInvitation', 'invitationId', invitationId)
+            // verify required parameter 'updateOrganizationInvitation' is not null or undefined
+            assertParamExists('updateOrganizationInvitation', 'updateOrganizationInvitation', updateOrganizationInvitation)
+            const localVarPath = `/organizations/{organizationId}/invitations/{invitationId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"invitationId"}}`, encodeURIComponent(String(invitationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationInvitation, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update organization quota
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationQuota} updateOrganizationQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationQuota: async (organizationId: string, updateOrganizationQuota: UpdateOrganizationQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateOrganizationQuota', 'organizationId', organizationId)
+            // verify required parameter 'updateOrganizationQuota' is not null or undefined
+            assertParamExists('updateOrganizationQuota', 'updateOrganizationQuota', updateOrganizationQuota)
+            const localVarPath = `/organizations/{organizationId}/quota`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationQuota, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update organization region quota
+         * @param {string} organizationId Organization ID
+         * @param {string} regionId ID of the region where the updated quota will be applied
+         * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationRegionQuota: async (organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateOrganizationRegionQuota', 'organizationId', organizationId)
+            // verify required parameter 'regionId' is not null or undefined
+            assertParamExists('updateOrganizationRegionQuota', 'regionId', regionId)
+            // verify required parameter 'updateOrganizationRegionQuota' is not null or undefined
+            assertParamExists('updateOrganizationRegionQuota', 'updateOrganizationRegionQuota', updateOrganizationRegionQuota)
+            const localVarPath = `/organizations/{organizationId}/quota/{regionId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"regionId"}}`, encodeURIComponent(String(regionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationRegionQuota, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {UpdateOrganizationRole} updateOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationRole: async (organizationId: string, roleId: string, updateOrganizationRole: UpdateOrganizationRole, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateOrganizationRole', 'organizationId', organizationId)
+            // verify required parameter 'roleId' is not null or undefined
+            assertParamExists('updateOrganizationRole', 'roleId', roleId)
+            // verify required parameter 'updateOrganizationRole' is not null or undefined
+            assertParamExists('updateOrganizationRole', 'updateOrganizationRole', updateOrganizationRole)
+            const localVarPath = `/organizations/{organizationId}/roles/{roleId}`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"roleId"}}`, encodeURIComponent(String(roleId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateOrganizationRole, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update region configuration
+         * @param {string} id Region ID
+         * @param {UpdateRegion} updateRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRegion: async (id: string, updateRegion: UpdateRegion, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('updateRegion', 'id', id)
+            // verify required parameter 'updateRegion' is not null or undefined
+            assertParamExists('updateRegion', 'updateRegion', updateRegion)
+            const localVarPath = `/regions/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(updateRegion, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update sandbox default limited network egress
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSandboxDefaultLimitedNetworkEgress: async (organizationId: string, organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('updateSandboxDefaultLimitedNetworkEgress', 'organizationId', organizationId)
+            // verify required parameter 'organizationSandboxDefaultLimitedNetworkEgress' is not null or undefined
+            assertParamExists('updateSandboxDefaultLimitedNetworkEgress', 'organizationSandboxDefaultLimitedNetworkEgress', organizationSandboxDefaultLimitedNetworkEgress)
+            const localVarPath = `/organizations/{organizationId}/sandbox-default-limited-network-egress`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(organizationSandboxDefaultLimitedNetworkEgress, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
 
 /**
  * OrganizationsApi - functional programming interface
  * @export
  */
-export const OrganizationsApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = OrganizationsApiAxiosParamCreator(configuration)
-  return {
-    /**
-     *
-     * @summary Accept organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async acceptOrganizationInvitation(
-      invitationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.acceptOrganizationInvitation(invitationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.acceptOrganizationInvitation']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Cancel organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async cancelOrganizationInvitation(
-      organizationId: string,
-      invitationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.cancelOrganizationInvitation(
-        organizationId,
-        invitationId,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.cancelOrganizationInvitation']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Create organization
-     * @param {CreateOrganization} createOrganization
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createOrganization(
-      createOrganization: CreateOrganization,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganization(createOrganization, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.createOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Create organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationInvitation} createOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createOrganizationInvitation(
-      organizationId: string,
-      createOrganizationInvitation: CreateOrganizationInvitation,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganizationInvitation(
-        organizationId,
-        createOrganizationInvitation,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.createOrganizationInvitation']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Create organization role
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationRole} createOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createOrganizationRole(
-      organizationId: string,
-      createOrganizationRole: CreateOrganizationRole,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationRole>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganizationRole(
-        organizationId,
-        createOrganizationRole,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.createOrganizationRole']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Create a new region
-     * @param {CreateRegion} createRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createRegion(
-      createRegion: CreateRegion,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createRegion(
-        createRegion,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.createRegion']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Decline organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async declineOrganizationInvitation(
-      invitationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.declineOrganizationInvitation(invitationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.declineOrganizationInvitation']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Delete organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteOrganization(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganization(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.deleteOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Delete organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteOrganizationMember(
-      organizationId: string,
-      userId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganizationMember(
-        organizationId,
-        userId,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.deleteOrganizationMember']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Delete organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteOrganizationRole(
-      organizationId: string,
-      roleId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganizationRole(organizationId, roleId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.deleteOrganizationRole']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Delete a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteRegion(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRegion(id, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.deleteRegion']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get organization by ID
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getOrganization(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganization(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get organization by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getOrganizationBySandboxId(
-      sandboxId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationBySandboxId(sandboxId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getOrganizationBySandboxId']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get count of organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getOrganizationInvitationsCountForAuthenticatedUser(
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
-      const localVarAxiosArgs =
-        await localVarAxiosParamCreator.getOrganizationInvitationsCountForAuthenticatedUser(options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getOrganizationInvitationsCountForAuthenticatedUser']?.[
-          localVarOperationServerIndex
-        ]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get organization OTEL config by sandbox auth token
-     * @param {string} authToken Sandbox Auth Token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getOrganizationOtelConfigBySandboxAuthToken(
-      authToken: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OtelConfig>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationOtelConfigBySandboxAuthToken(
-        authToken,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getOrganizationOtelConfigBySandboxAuthToken']?.[
-          localVarOperationServerIndex
-        ]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get organization current usage overview
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getOrganizationUsageOverview(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUsageOverview>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationUsageOverview(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getOrganizationUsageOverview']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get region by ID
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRegionById(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Region>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getRegionById']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get region quota by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRegionQuotaBySandboxId(
-      sandboxId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionQuota>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionQuotaBySandboxId(sandboxId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.getRegionQuotaBySandboxId']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Leave organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async leaveOrganization(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.leaveOrganization(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.leaveOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List all available regions for the organization
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listAvailableRegions(
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listAvailableRegions(xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listAvailableRegions']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List pending organization invitations
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listOrganizationInvitations(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationInvitation>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationInvitations(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listOrganizationInvitations']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listOrganizationInvitationsForAuthenticatedUser(
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationInvitation>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationInvitationsForAuthenticatedUser(options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listOrganizationInvitationsForAuthenticatedUser']?.[
-          localVarOperationServerIndex
-        ]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List organization members
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listOrganizationMembers(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationUser>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationMembers(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listOrganizationMembers']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List organization roles
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listOrganizationRoles(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationRole>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationRoles(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listOrganizationRoles']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List organizations
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listOrganizations(
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Organization>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizations(options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.listOrganizations']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Regenerate proxy API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async regenerateProxyApiKey(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateProxyApiKey(
-        id,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.regenerateProxyApiKey']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Regenerate snapshot manager credentials for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async regenerateSnapshotManagerCredentials(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotManagerCredentials>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSnapshotManagerCredentials(
-        id,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.regenerateSnapshotManagerCredentials']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Regenerate SSH gateway API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async regenerateSshGatewayApiKey(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSshGatewayApiKey(
-        id,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.regenerateSshGatewayApiKey']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Set default region for organization
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async setOrganizationDefaultRegion(
-      organizationId: string,
-      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.setOrganizationDefaultRegion(
-        organizationId,
-        updateOrganizationDefaultRegion,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.setOrganizationDefaultRegion']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Suspend organization
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSuspension} [organizationSuspension]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async suspendOrganization(
-      organizationId: string,
-      organizationSuspension?: OrganizationSuspension,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.suspendOrganization(
-        organizationId,
-        organizationSuspension,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.suspendOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Unsuspend organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async unsuspendOrganization(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.unsuspendOrganization(organizationId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.unsuspendOrganization']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update access for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateAccessForOrganizationMember(
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateAccessForOrganizationMember(
-        organizationId,
-        userId,
-        updateOrganizationMemberAccess,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateAccessForOrganizationMember']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update experimental configuration
-     * @param {string} organizationId Organization ID
-     * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateExperimentalConfig(
-      organizationId: string,
-      requestBody?: { [key: string]: any },
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateExperimentalConfig(
-        organizationId,
-        requestBody,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateExperimentalConfig']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {UpdateOrganizationInvitation} updateOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateOrganizationInvitation(
-      organizationId: string,
-      invitationId: string,
-      updateOrganizationInvitation: UpdateOrganizationInvitation,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationInvitation(
-        organizationId,
-        invitationId,
-        updateOrganizationInvitation,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateOrganizationInvitation']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update organization quota
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationQuota} updateOrganizationQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateOrganizationQuota(
-      organizationId: string,
-      updateOrganizationQuota: UpdateOrganizationQuota,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationQuota(
-        organizationId,
-        updateOrganizationQuota,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateOrganizationQuota']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update organization region quota
-     * @param {string} organizationId Organization ID
-     * @param {string} regionId ID of the region where the updated quota will be applied
-     * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateOrganizationRegionQuota(
-      organizationId: string,
-      regionId: string,
-      updateOrganizationRegionQuota: UpdateOrganizationRegionQuota,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationRegionQuota(
-        organizationId,
-        regionId,
-        updateOrganizationRegionQuota,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateOrganizationRegionQuota']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {UpdateOrganizationRole} updateOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateOrganizationRole(
-      organizationId: string,
-      roleId: string,
-      updateOrganizationRole: UpdateOrganizationRole,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationRole>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationRole(
-        organizationId,
-        roleId,
-        updateOrganizationRole,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateOrganizationRole']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update region configuration
-     * @param {string} id Region ID
-     * @param {UpdateRegion} updateRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateRegion(
-      id: string,
-      updateRegion: UpdateRegion,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateRegion(
-        id,
-        updateRegion,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateRegion']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update sandbox default limited network egress
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateSandboxDefaultLimitedNetworkEgress(
-      organizationId: string,
-      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxDefaultLimitedNetworkEgress(
-        organizationId,
-        organizationSandboxDefaultLimitedNetworkEgress,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['OrganizationsApi.updateSandboxDefaultLimitedNetworkEgress']?.[localVarOperationServerIndex]
-          ?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-  }
-}
+export const OrganizationsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = OrganizationsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Accept organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.acceptOrganizationInvitation(invitationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.acceptOrganizationInvitation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Cancel organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async cancelOrganizationInvitation(organizationId: string, invitationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.cancelOrganizationInvitation(organizationId, invitationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.cancelOrganizationInvitation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create organization
+         * @param {CreateOrganization} createOrganization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createOrganization(createOrganization: CreateOrganization, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganization(createOrganization, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.createOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationInvitation} createOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createOrganizationInvitation(organizationId: string, createOrganizationInvitation: CreateOrganizationInvitation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganizationInvitation(organizationId, createOrganizationInvitation, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.createOrganizationInvitation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create organization role
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationRole} createOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createOrganizationRole(organizationId: string, createOrganizationRole: CreateOrganizationRole, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationRole>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createOrganizationRole(organizationId, createOrganizationRole, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.createOrganizationRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create a new region
+         * @param {CreateRegion} createRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRegionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createRegion(createRegion, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.createRegion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Decline organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.declineOrganizationInvitation(invitationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.declineOrganizationInvitation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganization(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOrganizationMember(organizationId: string, userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganizationMember(organizationId, userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteOrganizationMember']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteOrganizationRole(organizationId, roleId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteOrganizationRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRegion(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.deleteRegion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get organization by ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganization(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganization(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get organization by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationBySandboxId(sandboxId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationBySandboxId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get count of organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<number>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationInvitationsCountForAuthenticatedUser(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationInvitationsCountForAuthenticatedUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get organization OTEL config by sandbox auth token
+         * @param {string} authToken Sandbox Auth Token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganizationOtelConfigBySandboxAuthToken(authToken: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OtelConfig>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationOtelConfigBySandboxAuthToken(authToken, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationOtelConfigBySandboxAuthToken']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get organization current usage overview
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUsageOverview>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationUsageOverview(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationUsageOverview']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get region by ID
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Region>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getRegionById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get region quota by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionQuota>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionQuotaBySandboxId(sandboxId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getRegionQuotaBySandboxId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Leave organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.leaveOrganization(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.leaveOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List all available regions for the organization
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Region>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAvailableRegions(xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listAvailableRegions']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List pending organization invitations
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizationInvitations(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationInvitation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationInvitations(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizationInvitations']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizationInvitationsForAuthenticatedUser(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationInvitation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationInvitationsForAuthenticatedUser(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizationInvitationsForAuthenticatedUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List organization members
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizationMembers(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationUser>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationMembers(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizationMembers']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List organization roles
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizationRoles(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<OrganizationRole>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizationRoles(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizationRoles']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List organizations
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listOrganizations(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Organization>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listOrganizations(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.listOrganizations']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Regenerate proxy API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateProxyApiKey(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.regenerateProxyApiKey']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Regenerate snapshot manager credentials for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async regenerateSnapshotManagerCredentials(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotManagerCredentials>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.regenerateSnapshotManagerCredentials']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Regenerate SSH gateway API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegenerateApiKeyResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.regenerateSshGatewayApiKey']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Set default region for organization
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async setOrganizationDefaultRegion(organizationId: string, updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.setOrganizationDefaultRegion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Suspend organization
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSuspension} [organizationSuspension] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async suspendOrganization(organizationId: string, organizationSuspension?: OrganizationSuspension, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.suspendOrganization(organizationId, organizationSuspension, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.suspendOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Unsuspend organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.unsuspendOrganization(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.unsuspendOrganization']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update access for organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationUser>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateAccessForOrganizationMember']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update experimental configuration
+         * @param {string} organizationId Organization ID
+         * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateExperimentalConfig(organizationId: string, requestBody?: { [key: string]: any; }, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateExperimentalConfig(organizationId, requestBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateExperimentalConfig']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {UpdateOrganizationInvitation} updateOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateOrganizationInvitation(organizationId: string, invitationId: string, updateOrganizationInvitation: UpdateOrganizationInvitation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateOrganizationInvitation']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update organization quota
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationQuota} updateOrganizationQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateOrganizationQuota(organizationId: string, updateOrganizationQuota: UpdateOrganizationQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationQuota(organizationId, updateOrganizationQuota, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateOrganizationQuota']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update organization region quota
+         * @param {string} organizationId Organization ID
+         * @param {string} regionId ID of the region where the updated quota will be applied
+         * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateOrganizationRegionQuota']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {UpdateOrganizationRole} updateOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateOrganizationRole(organizationId: string, roleId: string, updateOrganizationRole: UpdateOrganizationRole, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<OrganizationRole>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateOrganizationRole']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update region configuration
+         * @param {string} id Region ID
+         * @param {UpdateRegion} updateRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRegion(id: string, updateRegion: UpdateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRegion(id, updateRegion, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateRegion']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update sandbox default limited network egress
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateSandboxDefaultLimitedNetworkEgress(organizationId: string, organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.updateSandboxDefaultLimitedNetworkEgress']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
 
 /**
  * OrganizationsApi - factory interface
  * @export
  */
-export const OrganizationsApiFactory = function (
-  configuration?: Configuration,
-  basePath?: string,
-  axios?: AxiosInstance,
-) {
-  const localVarFp = OrganizationsApiFp(configuration)
-  return {
-    /**
-     *
-     * @summary Accept organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    acceptOrganizationInvitation(
-      invitationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationInvitation> {
-      return localVarFp.acceptOrganizationInvitation(invitationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Cancel organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    cancelOrganizationInvitation(
-      organizationId: string,
-      invitationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .cancelOrganizationInvitation(organizationId, invitationId, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Create organization
-     * @param {CreateOrganization} createOrganization
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganization(
-      createOrganization: CreateOrganization,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Organization> {
-      return localVarFp.createOrganization(createOrganization, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Create organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationInvitation} createOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganizationInvitation(
-      organizationId: string,
-      createOrganizationInvitation: CreateOrganizationInvitation,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationInvitation> {
-      return localVarFp
-        .createOrganizationInvitation(organizationId, createOrganizationInvitation, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Create organization role
-     * @param {string} organizationId Organization ID
-     * @param {CreateOrganizationRole} createOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createOrganizationRole(
-      organizationId: string,
-      createOrganizationRole: CreateOrganizationRole,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationRole> {
-      return localVarFp
-        .createOrganizationRole(organizationId, createOrganizationRole, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Create a new region
-     * @param {CreateRegion} createRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createRegion(
-      createRegion: CreateRegion,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<CreateRegionResponse> {
-      return localVarFp
-        .createRegion(createRegion, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Decline organization invitation
-     * @param {string} invitationId Invitation ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.declineOrganizationInvitation(invitationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Delete organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.deleteOrganization(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Delete organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganizationMember(
-      organizationId: string,
-      userId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .deleteOrganizationMember(organizationId, userId, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Delete organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteOrganizationRole(
-      organizationId: string,
-      roleId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .deleteOrganizationRole(organizationId, roleId, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Delete a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.deleteRegion(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get organization by ID
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
-      return localVarFp.getOrganization(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get organization by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
-      return localVarFp.getOrganizationBySandboxId(sandboxId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get count of organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig): AxiosPromise<number> {
-      return localVarFp
-        .getOrganizationInvitationsCountForAuthenticatedUser(options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get organization OTEL config by sandbox auth token
-     * @param {string} authToken Sandbox Auth Token
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationOtelConfigBySandboxAuthToken(
-      authToken: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OtelConfig> {
-      return localVarFp
-        .getOrganizationOtelConfigBySandboxAuthToken(authToken, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get organization current usage overview
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getOrganizationUsageOverview(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationUsageOverview> {
-      return localVarFp
-        .getOrganizationUsageOverview(organizationId, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get region by ID
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
-      return localVarFp.getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get region quota by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<RegionQuota> {
-      return localVarFp.getRegionQuotaBySandboxId(sandboxId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Leave organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.leaveOrganization(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List all available regions for the organization
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listAvailableRegions(
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<Region>> {
-      return localVarFp
-        .listAvailableRegions(xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List pending organization invitations
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationInvitations(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<OrganizationInvitation>> {
-      return localVarFp.listOrganizationInvitations(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List organization invitations for authenticated user
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationInvitationsForAuthenticatedUser(
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<OrganizationInvitation>> {
-      return localVarFp
-        .listOrganizationInvitationsForAuthenticatedUser(options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List organization members
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationMembers(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<OrganizationUser>> {
-      return localVarFp.listOrganizationMembers(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List organization roles
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizationRoles(
-      organizationId: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<OrganizationRole>> {
-      return localVarFp.listOrganizationRoles(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List organizations
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listOrganizations(options?: RawAxiosRequestConfig): AxiosPromise<Array<Organization>> {
-      return localVarFp.listOrganizations(options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Regenerate proxy API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateProxyApiKey(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<RegenerateApiKeyResponse> {
-      return localVarFp
-        .regenerateProxyApiKey(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Regenerate snapshot manager credentials for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateSnapshotManagerCredentials(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<SnapshotManagerCredentials> {
-      return localVarFp
-        .regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Regenerate SSH gateway API key for a region
-     * @param {string} id Region ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    regenerateSshGatewayApiKey(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<RegenerateApiKeyResponse> {
-      return localVarFp
-        .regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Set default region for organization
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    setOrganizationDefaultRegion(
-      organizationId: string,
-      updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Suspend organization
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSuspension} [organizationSuspension]
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    suspendOrganization(
-      organizationId: string,
-      organizationSuspension?: OrganizationSuspension,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .suspendOrganization(organizationId, organizationSuspension, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Unsuspend organization
-     * @param {string} organizationId Organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.unsuspendOrganization(organizationId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update access for organization member
-     * @param {string} organizationId Organization ID
-     * @param {string} userId User ID
-     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateAccessForOrganizationMember(
-      organizationId: string,
-      userId: string,
-      updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationUser> {
-      return localVarFp
-        .updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update experimental configuration
-     * @param {string} organizationId Organization ID
-     * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateExperimentalConfig(
-      organizationId: string,
-      requestBody?: { [key: string]: any },
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .updateExperimentalConfig(organizationId, requestBody, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update organization invitation
-     * @param {string} organizationId Organization ID
-     * @param {string} invitationId Invitation ID
-     * @param {UpdateOrganizationInvitation} updateOrganizationInvitation
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationInvitation(
-      organizationId: string,
-      invitationId: string,
-      updateOrganizationInvitation: UpdateOrganizationInvitation,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationInvitation> {
-      return localVarFp
-        .updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update organization quota
-     * @param {string} organizationId Organization ID
-     * @param {UpdateOrganizationQuota} updateOrganizationQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationQuota(
-      organizationId: string,
-      updateOrganizationQuota: UpdateOrganizationQuota,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .updateOrganizationQuota(organizationId, updateOrganizationQuota, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update organization region quota
-     * @param {string} organizationId Organization ID
-     * @param {string} regionId ID of the region where the updated quota will be applied
-     * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationRegionQuota(
-      organizationId: string,
-      regionId: string,
-      updateOrganizationRegionQuota: UpdateOrganizationRegionQuota,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update organization role
-     * @param {string} organizationId Organization ID
-     * @param {string} roleId Role ID
-     * @param {UpdateOrganizationRole} updateOrganizationRole
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateOrganizationRole(
-      organizationId: string,
-      roleId: string,
-      updateOrganizationRole: UpdateOrganizationRole,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<OrganizationRole> {
-      return localVarFp
-        .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update region configuration
-     * @param {string} id Region ID
-     * @param {UpdateRegion} updateRegion
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRegion(
-      id: string,
-      updateRegion: UpdateRegion,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .updateRegion(id, updateRegion, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update sandbox default limited network egress
-     * @param {string} organizationId Organization ID
-     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateSandboxDefaultLimitedNetworkEgress(
-      organizationId: string,
-      organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .updateSandboxDefaultLimitedNetworkEgress(
-          organizationId,
-          organizationSandboxDefaultLimitedNetworkEgress,
-          options,
-        )
-        .then((request) => request(axios, basePath))
-    },
-  }
-}
+export const OrganizationsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = OrganizationsApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Accept organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationInvitation> {
+            return localVarFp.acceptOrganizationInvitation(invitationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Cancel organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelOrganizationInvitation(organizationId: string, invitationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.cancelOrganizationInvitation(organizationId, invitationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create organization
+         * @param {CreateOrganization} createOrganization 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganization(createOrganization: CreateOrganization, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
+            return localVarFp.createOrganization(createOrganization, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationInvitation} createOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganizationInvitation(organizationId: string, createOrganizationInvitation: CreateOrganizationInvitation, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationInvitation> {
+            return localVarFp.createOrganizationInvitation(organizationId, createOrganizationInvitation, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create organization role
+         * @param {string} organizationId Organization ID
+         * @param {CreateOrganizationRole} createOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createOrganizationRole(organizationId: string, createOrganizationRole: CreateOrganizationRole, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationRole> {
+            return localVarFp.createOrganizationRole(organizationId, createOrganizationRole, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create a new region
+         * @param {CreateRegion} createRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateRegionResponse> {
+            return localVarFp.createRegion(createRegion, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Decline organization invitation
+         * @param {string} invitationId Invitation ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.declineOrganizationInvitation(invitationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOrganization(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganizationMember(organizationId: string, userId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOrganizationMember(organizationId, userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteOrganizationRole(organizationId, roleId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteRegion(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get organization by ID
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
+            return localVarFp.getOrganization(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get organization by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
+            return localVarFp.getOrganizationBySandboxId(sandboxId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get count of organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig): AxiosPromise<number> {
+            return localVarFp.getOrganizationInvitationsCountForAuthenticatedUser(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get organization OTEL config by sandbox auth token
+         * @param {string} authToken Sandbox Auth Token
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationOtelConfigBySandboxAuthToken(authToken: string, options?: RawAxiosRequestConfig): AxiosPromise<OtelConfig> {
+            return localVarFp.getOrganizationOtelConfigBySandboxAuthToken(authToken, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get organization current usage overview
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationUsageOverview> {
+            return localVarFp.getOrganizationUsageOverview(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get region by ID
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
+            return localVarFp.getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get region quota by sandbox ID
+         * @param {string} sandboxId Sandbox ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<RegionQuota> {
+            return localVarFp.getRegionQuotaBySandboxId(sandboxId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Leave organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.leaveOrganization(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List all available regions for the organization
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Region>> {
+            return localVarFp.listAvailableRegions(xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List pending organization invitations
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationInvitations(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationInvitation>> {
+            return localVarFp.listOrganizationInvitations(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List organization invitations for authenticated user
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationInvitationsForAuthenticatedUser(options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationInvitation>> {
+            return localVarFp.listOrganizationInvitationsForAuthenticatedUser(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List organization members
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationMembers(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationUser>> {
+            return localVarFp.listOrganizationMembers(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List organization roles
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizationRoles(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<OrganizationRole>> {
+            return localVarFp.listOrganizationRoles(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List organizations
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listOrganizations(options?: RawAxiosRequestConfig): AxiosPromise<Array<Organization>> {
+            return localVarFp.listOrganizations(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Regenerate proxy API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<RegenerateApiKeyResponse> {
+            return localVarFp.regenerateProxyApiKey(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Regenerate snapshot manager credentials for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateSnapshotManagerCredentials(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotManagerCredentials> {
+            return localVarFp.regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Regenerate SSH gateway API key for a region
+         * @param {string} id Region ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<RegenerateApiKeyResponse> {
+            return localVarFp.regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set default region for organization
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        setOrganizationDefaultRegion(organizationId: string, updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Suspend organization
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSuspension} [organizationSuspension] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        suspendOrganization(organizationId: string, organizationSuspension?: OrganizationSuspension, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.suspendOrganization(organizationId, organizationSuspension, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Unsuspend organization
+         * @param {string} organizationId Organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.unsuspendOrganization(organizationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update access for organization member
+         * @param {string} organizationId Organization ID
+         * @param {string} userId User ID
+         * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationUser> {
+            return localVarFp.updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update experimental configuration
+         * @param {string} organizationId Organization ID
+         * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateExperimentalConfig(organizationId: string, requestBody?: { [key: string]: any; }, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateExperimentalConfig(organizationId, requestBody, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update organization invitation
+         * @param {string} organizationId Organization ID
+         * @param {string} invitationId Invitation ID
+         * @param {UpdateOrganizationInvitation} updateOrganizationInvitation 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationInvitation(organizationId: string, invitationId: string, updateOrganizationInvitation: UpdateOrganizationInvitation, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationInvitation> {
+            return localVarFp.updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update organization quota
+         * @param {string} organizationId Organization ID
+         * @param {UpdateOrganizationQuota} updateOrganizationQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationQuota(organizationId: string, updateOrganizationQuota: UpdateOrganizationQuota, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateOrganizationQuota(organizationId, updateOrganizationQuota, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update organization region quota
+         * @param {string} organizationId Organization ID
+         * @param {string} regionId ID of the region where the updated quota will be applied
+         * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update organization role
+         * @param {string} organizationId Organization ID
+         * @param {string} roleId Role ID
+         * @param {UpdateOrganizationRole} updateOrganizationRole 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateOrganizationRole(organizationId: string, roleId: string, updateOrganizationRole: UpdateOrganizationRole, options?: RawAxiosRequestConfig): AxiosPromise<OrganizationRole> {
+            return localVarFp.updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update region configuration
+         * @param {string} id Region ID
+         * @param {UpdateRegion} updateRegion 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRegion(id: string, updateRegion: UpdateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateRegion(id, updateRegion, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update sandbox default limited network egress
+         * @param {string} organizationId Organization ID
+         * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateSandboxDefaultLimitedNetworkEgress(organizationId: string, organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options).then((request) => request(axios, basePath));
+        },
+    };
+};
 
 /**
  * OrganizationsApi - object-oriented interface
@@ -3526,629 +2724,495 @@ export const OrganizationsApiFactory = function (
  * @extends {BaseAPI}
  */
 export class OrganizationsApi extends BaseAPI {
-  /**
-   *
-   * @summary Accept organization invitation
-   * @param {string} invitationId Invitation ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .acceptOrganizationInvitation(invitationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Accept organization invitation
+     * @param {string} invitationId Invitation ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public acceptOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).acceptOrganizationInvitation(invitationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Cancel organization invitation
-   * @param {string} organizationId Organization ID
-   * @param {string} invitationId Invitation ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public cancelOrganizationInvitation(organizationId: string, invitationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .cancelOrganizationInvitation(organizationId, invitationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Cancel organization invitation
+     * @param {string} organizationId Organization ID
+     * @param {string} invitationId Invitation ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public cancelOrganizationInvitation(organizationId: string, invitationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).cancelOrganizationInvitation(organizationId, invitationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Create organization
-   * @param {CreateOrganization} createOrganization
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public createOrganization(createOrganization: CreateOrganization, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .createOrganization(createOrganization, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Create organization
+     * @param {CreateOrganization} createOrganization 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public createOrganization(createOrganization: CreateOrganization, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).createOrganization(createOrganization, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Create organization invitation
-   * @param {string} organizationId Organization ID
-   * @param {CreateOrganizationInvitation} createOrganizationInvitation
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public createOrganizationInvitation(
-    organizationId: string,
-    createOrganizationInvitation: CreateOrganizationInvitation,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .createOrganizationInvitation(organizationId, createOrganizationInvitation, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Create organization invitation
+     * @param {string} organizationId Organization ID
+     * @param {CreateOrganizationInvitation} createOrganizationInvitation 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public createOrganizationInvitation(organizationId: string, createOrganizationInvitation: CreateOrganizationInvitation, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).createOrganizationInvitation(organizationId, createOrganizationInvitation, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Create organization role
-   * @param {string} organizationId Organization ID
-   * @param {CreateOrganizationRole} createOrganizationRole
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public createOrganizationRole(
-    organizationId: string,
-    createOrganizationRole: CreateOrganizationRole,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .createOrganizationRole(organizationId, createOrganizationRole, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Create organization role
+     * @param {string} organizationId Organization ID
+     * @param {CreateOrganizationRole} createOrganizationRole 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public createOrganizationRole(organizationId: string, createOrganizationRole: CreateOrganizationRole, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).createOrganizationRole(organizationId, createOrganizationRole, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Create a new region
-   * @param {CreateRegion} createRegion
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .createRegion(createRegion, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Create a new region
+     * @param {CreateRegion} createRegion 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public createRegion(createRegion: CreateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).createRegion(createRegion, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Decline organization invitation
-   * @param {string} invitationId Invitation ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .declineOrganizationInvitation(invitationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Decline organization invitation
+     * @param {string} invitationId Invitation ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public declineOrganizationInvitation(invitationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).declineOrganizationInvitation(invitationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Delete organization
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .deleteOrganization(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Delete organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public deleteOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).deleteOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Delete organization member
-   * @param {string} organizationId Organization ID
-   * @param {string} userId User ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public deleteOrganizationMember(organizationId: string, userId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .deleteOrganizationMember(organizationId, userId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Delete organization member
+     * @param {string} organizationId Organization ID
+     * @param {string} userId User ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public deleteOrganizationMember(organizationId: string, userId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).deleteOrganizationMember(organizationId, userId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Delete organization role
-   * @param {string} organizationId Organization ID
-   * @param {string} roleId Role ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .deleteOrganizationRole(organizationId, roleId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Delete organization role
+     * @param {string} organizationId Organization ID
+     * @param {string} roleId Role ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public deleteOrganizationRole(organizationId: string, roleId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).deleteOrganizationRole(organizationId, roleId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Delete a region
-   * @param {string} id Region ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .deleteRegion(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Delete a region
+     * @param {string} id Region ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public deleteRegion(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).deleteRegion(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get organization by ID
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getOrganization(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get organization by ID
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get organization by sandbox ID
-   * @param {string} sandboxId Sandbox ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getOrganizationBySandboxId(sandboxId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get organization by sandbox ID
+     * @param {string} sandboxId Sandbox ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganizationBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get count of organization invitations for authenticated user
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getOrganizationInvitationsCountForAuthenticatedUser(options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get count of organization invitations for authenticated user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganizationInvitationsCountForAuthenticatedUser(options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganizationInvitationsCountForAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get organization OTEL config by sandbox auth token
-   * @param {string} authToken Sandbox Auth Token
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getOrganizationOtelConfigBySandboxAuthToken(authToken: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getOrganizationOtelConfigBySandboxAuthToken(authToken, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get organization OTEL config by sandbox auth token
+     * @param {string} authToken Sandbox Auth Token
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganizationOtelConfigBySandboxAuthToken(authToken: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganizationOtelConfigBySandboxAuthToken(authToken, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get organization current usage overview
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getOrganizationUsageOverview(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get organization current usage overview
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getOrganizationUsageOverview(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getOrganizationUsageOverview(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get region by ID
-   * @param {string} id Region ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getRegionById(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get region by ID
+     * @param {string} id Region ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get region quota by sandbox ID
-   * @param {string} sandboxId Sandbox ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .getRegionQuotaBySandboxId(sandboxId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get region quota by sandbox ID
+     * @param {string} sandboxId Sandbox ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).getRegionQuotaBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Leave organization
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .leaveOrganization(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Leave organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public leaveOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).leaveOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List all available regions for the organization
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listAvailableRegions(xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List all available regions for the organization
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listAvailableRegions(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listAvailableRegions(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List pending organization invitations
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listOrganizationInvitations(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listOrganizationInvitations(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List pending organization invitations
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizationInvitations(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizationInvitations(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List organization invitations for authenticated user
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listOrganizationInvitationsForAuthenticatedUser(options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listOrganizationInvitationsForAuthenticatedUser(options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List organization invitations for authenticated user
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizationInvitationsForAuthenticatedUser(options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizationInvitationsForAuthenticatedUser(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List organization members
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listOrganizationMembers(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listOrganizationMembers(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List organization members
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizationMembers(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizationMembers(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List organization roles
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listOrganizationRoles(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listOrganizationRoles(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List organization roles
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizationRoles(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizationRoles(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List organizations
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public listOrganizations(options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .listOrganizations(options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List organizations
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public listOrganizations(options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).listOrganizations(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Regenerate proxy API key for a region
-   * @param {string} id Region ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .regenerateProxyApiKey(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Regenerate proxy API key for a region
+     * @param {string} id Region ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public regenerateProxyApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).regenerateProxyApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Regenerate snapshot manager credentials for a region
-   * @param {string} id Region ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public regenerateSnapshotManagerCredentials(
-    id: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Regenerate snapshot manager credentials for a region
+     * @param {string} id Region ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public regenerateSnapshotManagerCredentials(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).regenerateSnapshotManagerCredentials(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Regenerate SSH gateway API key for a region
-   * @param {string} id Region ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Regenerate SSH gateway API key for a region
+     * @param {string} id Region ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public regenerateSshGatewayApiKey(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).regenerateSshGatewayApiKey(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Set default region for organization
-   * @param {string} organizationId Organization ID
-   * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public setOrganizationDefaultRegion(
-    organizationId: string,
-    updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Set default region for organization
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationDefaultRegion} updateOrganizationDefaultRegion 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public setOrganizationDefaultRegion(organizationId: string, updateOrganizationDefaultRegion: UpdateOrganizationDefaultRegion, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).setOrganizationDefaultRegion(organizationId, updateOrganizationDefaultRegion, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Suspend organization
-   * @param {string} organizationId Organization ID
-   * @param {OrganizationSuspension} [organizationSuspension]
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public suspendOrganization(
-    organizationId: string,
-    organizationSuspension?: OrganizationSuspension,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .suspendOrganization(organizationId, organizationSuspension, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Suspend organization
+     * @param {string} organizationId Organization ID
+     * @param {OrganizationSuspension} [organizationSuspension] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public suspendOrganization(organizationId: string, organizationSuspension?: OrganizationSuspension, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).suspendOrganization(organizationId, organizationSuspension, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Unsuspend organization
-   * @param {string} organizationId Organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
-    return OrganizationsApiFp(this.configuration)
-      .unsuspendOrganization(organizationId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Unsuspend organization
+     * @param {string} organizationId Organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public unsuspendOrganization(organizationId: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).unsuspendOrganization(organizationId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update access for organization member
-   * @param {string} organizationId Organization ID
-   * @param {string} userId User ID
-   * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateAccessForOrganizationMember(
-    organizationId: string,
-    userId: string,
-    updateOrganizationMemberAccess: UpdateOrganizationMemberAccess,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update access for organization member
+     * @param {string} organizationId Organization ID
+     * @param {string} userId User ID
+     * @param {UpdateOrganizationMemberAccess} updateOrganizationMemberAccess 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateAccessForOrganizationMember(organizationId: string, userId: string, updateOrganizationMemberAccess: UpdateOrganizationMemberAccess, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateAccessForOrganizationMember(organizationId, userId, updateOrganizationMemberAccess, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update experimental configuration
-   * @param {string} organizationId Organization ID
-   * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateExperimentalConfig(
-    organizationId: string,
-    requestBody?: { [key: string]: any },
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateExperimentalConfig(organizationId, requestBody, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update experimental configuration
+     * @param {string} organizationId Organization ID
+     * @param {{ [key: string]: any; }} [requestBody] Experimental configuration as a JSON object. Set to null to clear the configuration.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateExperimentalConfig(organizationId: string, requestBody?: { [key: string]: any; }, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateExperimentalConfig(organizationId, requestBody, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update organization invitation
-   * @param {string} organizationId Organization ID
-   * @param {string} invitationId Invitation ID
-   * @param {UpdateOrganizationInvitation} updateOrganizationInvitation
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateOrganizationInvitation(
-    organizationId: string,
-    invitationId: string,
-    updateOrganizationInvitation: UpdateOrganizationInvitation,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update organization invitation
+     * @param {string} organizationId Organization ID
+     * @param {string} invitationId Invitation ID
+     * @param {UpdateOrganizationInvitation} updateOrganizationInvitation 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateOrganizationInvitation(organizationId: string, invitationId: string, updateOrganizationInvitation: UpdateOrganizationInvitation, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateOrganizationInvitation(organizationId, invitationId, updateOrganizationInvitation, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update organization quota
-   * @param {string} organizationId Organization ID
-   * @param {UpdateOrganizationQuota} updateOrganizationQuota
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateOrganizationQuota(
-    organizationId: string,
-    updateOrganizationQuota: UpdateOrganizationQuota,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateOrganizationQuota(organizationId, updateOrganizationQuota, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update organization quota
+     * @param {string} organizationId Organization ID
+     * @param {UpdateOrganizationQuota} updateOrganizationQuota 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateOrganizationQuota(organizationId: string, updateOrganizationQuota: UpdateOrganizationQuota, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateOrganizationQuota(organizationId, updateOrganizationQuota, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update organization region quota
-   * @param {string} organizationId Organization ID
-   * @param {string} regionId ID of the region where the updated quota will be applied
-   * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateOrganizationRegionQuota(
-    organizationId: string,
-    regionId: string,
-    updateOrganizationRegionQuota: UpdateOrganizationRegionQuota,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update organization region quota
+     * @param {string} organizationId Organization ID
+     * @param {string} regionId ID of the region where the updated quota will be applied
+     * @param {UpdateOrganizationRegionQuota} updateOrganizationRegionQuota 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateOrganizationRegionQuota(organizationId: string, regionId: string, updateOrganizationRegionQuota: UpdateOrganizationRegionQuota, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateOrganizationRegionQuota(organizationId, regionId, updateOrganizationRegionQuota, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update organization role
-   * @param {string} organizationId Organization ID
-   * @param {string} roleId Role ID
-   * @param {UpdateOrganizationRole} updateOrganizationRole
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateOrganizationRole(
-    organizationId: string,
-    roleId: string,
-    updateOrganizationRole: UpdateOrganizationRole,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update organization role
+     * @param {string} organizationId Organization ID
+     * @param {string} roleId Role ID
+     * @param {UpdateOrganizationRole} updateOrganizationRole 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateOrganizationRole(organizationId: string, roleId: string, updateOrganizationRole: UpdateOrganizationRole, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateOrganizationRole(organizationId, roleId, updateOrganizationRole, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update region configuration
-   * @param {string} id Region ID
-   * @param {UpdateRegion} updateRegion
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateRegion(
-    id: string,
-    updateRegion: UpdateRegion,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateRegion(id, updateRegion, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update region configuration
+     * @param {string} id Region ID
+     * @param {UpdateRegion} updateRegion 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateRegion(id: string, updateRegion: UpdateRegion, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateRegion(id, updateRegion, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update sandbox default limited network egress
-   * @param {string} organizationId Organization ID
-   * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof OrganizationsApi
-   */
-  public updateSandboxDefaultLimitedNetworkEgress(
-    organizationId: string,
-    organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return OrganizationsApiFp(this.configuration)
-      .updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update sandbox default limited network egress
+     * @param {string} organizationId Organization ID
+     * @param {OrganizationSandboxDefaultLimitedNetworkEgress} organizationSandboxDefaultLimitedNetworkEgress 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrganizationsApi
+     */
+    public updateSandboxDefaultLimitedNetworkEgress(organizationId: string, organizationSandboxDefaultLimitedNetworkEgress: OrganizationSandboxDefaultLimitedNetworkEgress, options?: RawAxiosRequestConfig) {
+        return OrganizationsApiFp(this.configuration).updateSandboxDefaultLimitedNetworkEgress(organizationId, organizationSandboxDefaultLimitedNetworkEgress, options).then((request) => request(this.axios, this.basePath));
+    }
 }
+

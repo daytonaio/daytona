@@ -11,8 +11,8 @@ API version: v0.0.0-dev
 package toolbox
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -21,11 +21,11 @@ var _ MappedNullable = &InterpreterContext{}
 
 // InterpreterContext struct for InterpreterContext
 type InterpreterContext struct {
-	Active    bool   `json:"active"`
+	Active bool `json:"active"`
 	CreatedAt string `json:"createdAt"`
-	Cwd       string `json:"cwd"`
-	Id        string `json:"id"`
-	Language  string `json:"language"`
+	Cwd string `json:"cwd"`
+	Id string `json:"id"`
+	Language string `json:"language"`
 }
 
 type _InterpreterContext InterpreterContext
@@ -173,7 +173,7 @@ func (o *InterpreterContext) SetLanguage(v string) {
 }
 
 func (o InterpreterContext) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -207,10 +207,10 @@ func (o *InterpreterContext) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -266,3 +266,5 @@ func (v *NullableInterpreterContext) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,28 +12,31 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface SandboxVolume
  */
 export interface SandboxVolume {
-  /**
-   * The ID of the volume
-   * @type {string}
-   * @memberof SandboxVolume
-   */
-  volumeId: string
-  /**
-   * The mount path for the volume
-   * @type {string}
-   * @memberof SandboxVolume
-   */
-  mountPath: string
-  /**
-   * Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
-   * @type {string}
-   * @memberof SandboxVolume
-   */
-  subpath?: string
+    /**
+     * The ID of the volume
+     * @type {string}
+     * @memberof SandboxVolume
+     */
+    'volumeId': string;
+    /**
+     * The mount path for the volume
+     * @type {string}
+     * @memberof SandboxVolume
+     */
+    'mountPath': string;
+    /**
+     * Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.
+     * @type {string}
+     * @memberof SandboxVolume
+     */
+    'subpath'?: string;
 }
+

@@ -12,74 +12,76 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { CreateBuildInfo } from './create-build-info'
+import type { CreateBuildInfo } from './create-build-info';
 
 /**
- *
+ * 
  * @export
  * @interface CreateSnapshot
  */
 export interface CreateSnapshot {
-  /**
-   * The name of the snapshot
-   * @type {string}
-   * @memberof CreateSnapshot
-   */
-  name: string
-  /**
-   * The image name of the snapshot
-   * @type {string}
-   * @memberof CreateSnapshot
-   */
-  imageName?: string
-  /**
-   * The entrypoint command for the snapshot
-   * @type {Array<string>}
-   * @memberof CreateSnapshot
-   */
-  entrypoint?: Array<string>
-  /**
-   * Whether the snapshot is general
-   * @type {boolean}
-   * @memberof CreateSnapshot
-   */
-  general?: boolean
-  /**
-   * CPU cores allocated to the resulting sandbox
-   * @type {number}
-   * @memberof CreateSnapshot
-   */
-  cpu?: number
-  /**
-   * GPU units allocated to the resulting sandbox
-   * @type {number}
-   * @memberof CreateSnapshot
-   */
-  gpu?: number
-  /**
-   * Memory allocated to the resulting sandbox in GB
-   * @type {number}
-   * @memberof CreateSnapshot
-   */
-  memory?: number
-  /**
-   * Disk space allocated to the sandbox in GB
-   * @type {number}
-   * @memberof CreateSnapshot
-   */
-  disk?: number
-  /**
-   * Build information for the snapshot
-   * @type {CreateBuildInfo}
-   * @memberof CreateSnapshot
-   */
-  buildInfo?: CreateBuildInfo
-  /**
-   * ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
-   * @type {string}
-   * @memberof CreateSnapshot
-   */
-  regionId?: string
+    /**
+     * The name of the snapshot
+     * @type {string}
+     * @memberof CreateSnapshot
+     */
+    'name': string;
+    /**
+     * The image name of the snapshot
+     * @type {string}
+     * @memberof CreateSnapshot
+     */
+    'imageName'?: string;
+    /**
+     * The entrypoint command for the snapshot
+     * @type {Array<string>}
+     * @memberof CreateSnapshot
+     */
+    'entrypoint'?: Array<string>;
+    /**
+     * Whether the snapshot is general
+     * @type {boolean}
+     * @memberof CreateSnapshot
+     */
+    'general'?: boolean;
+    /**
+     * CPU cores allocated to the resulting sandbox
+     * @type {number}
+     * @memberof CreateSnapshot
+     */
+    'cpu'?: number;
+    /**
+     * GPU units allocated to the resulting sandbox
+     * @type {number}
+     * @memberof CreateSnapshot
+     */
+    'gpu'?: number;
+    /**
+     * Memory allocated to the resulting sandbox in GB
+     * @type {number}
+     * @memberof CreateSnapshot
+     */
+    'memory'?: number;
+    /**
+     * Disk space allocated to the sandbox in GB
+     * @type {number}
+     * @memberof CreateSnapshot
+     */
+    'disk'?: number;
+    /**
+     * Build information for the snapshot
+     * @type {CreateBuildInfo}
+     * @memberof CreateSnapshot
+     */
+    'buildInfo'?: CreateBuildInfo;
+    /**
+     * ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
+     * @type {string}
+     * @memberof CreateSnapshot
+     */
+    'regionId'?: string;
 }
+

@@ -25,7 +25,7 @@ type ResizeSandbox struct {
 	// Memory in GB to allocate to the sandbox (minimum: 1)
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space in GB to allocate to the sandbox (can only be increased)
-	Disk                 *int32 `json:"disk,omitempty"`
+	Disk *int32 `json:"disk,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -145,7 +145,7 @@ func (o *ResizeSandbox) SetDisk(v int32) {
 }
 
 func (o ResizeSandbox) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -229,3 +229,5 @@ func (v *NullableResizeSandbox) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

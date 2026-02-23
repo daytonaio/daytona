@@ -120,8 +120,10 @@ module Daytona
         page: response.page,
         total_pages: response.total_pages,
         items: response
-          .items
-          .map { |sandbox_dto| to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels)) }
+               .items
+               .map do |sandbox_dto|
+                 to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+        end
       )
     end
 

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface GitAddRequest
  */
 export interface GitAddRequest {
-  /**
-   *
-   * @type {string}
-   * @memberof GitAddRequest
-   */
-  path: string
-  /**
-   * files to add (use . for all files)
-   * @type {Array<string>}
-   * @memberof GitAddRequest
-   */
-  files: Array<string>
+    /**
+     * 
+     * @type {string}
+     * @memberof GitAddRequest
+     */
+    'path': string;
+    /**
+     * files to add (use . for all files)
+     * @type {Array<string>}
+     * @memberof GitAddRequest
+     */
+    'files': Array<string>;
 }
+

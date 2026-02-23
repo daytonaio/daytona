@@ -40,7 +40,7 @@ type CreateSnapshot struct {
 	// Build information for the snapshot
 	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
 	// ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
-	RegionId             *string `json:"regionId,omitempty"`
+	RegionId *string `json:"regionId,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -377,7 +377,7 @@ func (o *CreateSnapshot) SetRegionId(v string) {
 }
 
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -435,10 +435,10 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -508,3 +508,5 @@ func (v *NullableCreateSnapshot) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

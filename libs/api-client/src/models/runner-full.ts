@@ -12,209 +12,213 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegionType } from './region-type'
+import type { RegionType } from './region-type';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RunnerState } from './runner-state'
+import type { RunnerState } from './runner-state';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxClass } from './sandbox-class'
+import type { SandboxClass } from './sandbox-class';
 
 /**
- *
+ * 
  * @export
  * @interface RunnerFull
  */
 export interface RunnerFull {
-  /**
-   * The ID of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  id: string
-  /**
-   * The domain of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  domain?: string
-  /**
-   * The API URL of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  apiUrl?: string
-  /**
-   * The proxy URL of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  proxyUrl?: string
-  /**
-   * The CPU capacity of the runner
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  cpu: number
-  /**
-   * The memory capacity of the runner in GiB
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  memory: number
-  /**
-   * The disk capacity of the runner in GiB
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  disk: number
-  /**
-   * The GPU capacity of the runner
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  gpu?: number
-  /**
-   * The type of GPU
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  gpuType?: string
-  /**
-   * The class of the runner
-   * @type {SandboxClass}
-   * @memberof RunnerFull
-   */
-  class: SandboxClass
-  /**
-   * Current CPU usage percentage
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentCpuUsagePercentage?: number
-  /**
-   * Current RAM usage percentage
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentMemoryUsagePercentage?: number
-  /**
-   * Current disk usage percentage
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentDiskUsagePercentage?: number
-  /**
-   * Current allocated CPU
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentAllocatedCpu?: number
-  /**
-   * Current allocated memory in GiB
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentAllocatedMemoryGiB?: number
-  /**
-   * Current allocated disk in GiB
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentAllocatedDiskGiB?: number
-  /**
-   * Current snapshot count
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentSnapshotCount?: number
-  /**
-   * Current number of started sandboxes
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  currentStartedSandboxes?: number
-  /**
-   * Runner availability score
-   * @type {number}
-   * @memberof RunnerFull
-   */
-  availabilityScore?: number
-  /**
-   * The region of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  region: string
-  /**
-   * The name of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  name: string
-  /**
-   * The state of the runner
-   * @type {RunnerState}
-   * @memberof RunnerFull
-   */
-  state: RunnerState
-  /**
-   * The last time the runner was checked
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  lastChecked?: string
-  /**
-   * Whether the runner is unschedulable
-   * @type {boolean}
-   * @memberof RunnerFull
-   */
-  unschedulable: boolean
-  /**
-   * The creation timestamp of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  createdAt: string
-  /**
-   * The last update timestamp of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  updatedAt: string
-  /**
-   * The version of the runner (deprecated in favor of apiVersion)
-   * @type {string}
-   * @memberof RunnerFull
-   * @deprecated
-   */
-  version: string
-  /**
-   * The api version of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   * @deprecated
-   */
-  apiVersion: string
-  /**
-   * The app version of the runner
-   * @type {string}
-   * @memberof RunnerFull
-   * @deprecated
-   */
-  appVersion?: string
-  /**
-   * The API key for the runner
-   * @type {string}
-   * @memberof RunnerFull
-   */
-  apiKey: string
-  /**
-   * The region type of the runner
-   * @type {RegionType}
-   * @memberof RunnerFull
-   */
-  regionType?: RegionType
+    /**
+     * The ID of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'id': string;
+    /**
+     * The domain of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'domain'?: string;
+    /**
+     * The API URL of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'apiUrl'?: string;
+    /**
+     * The proxy URL of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'proxyUrl'?: string;
+    /**
+     * The CPU capacity of the runner
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'cpu': number;
+    /**
+     * The memory capacity of the runner in GiB
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'memory': number;
+    /**
+     * The disk capacity of the runner in GiB
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'disk': number;
+    /**
+     * The GPU capacity of the runner
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'gpu'?: number;
+    /**
+     * The type of GPU
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'gpuType'?: string;
+    /**
+     * The class of the runner
+     * @type {SandboxClass}
+     * @memberof RunnerFull
+     */
+    'class': SandboxClass;
+    /**
+     * Current CPU usage percentage
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentCpuUsagePercentage'?: number;
+    /**
+     * Current RAM usage percentage
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentMemoryUsagePercentage'?: number;
+    /**
+     * Current disk usage percentage
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentDiskUsagePercentage'?: number;
+    /**
+     * Current allocated CPU
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentAllocatedCpu'?: number;
+    /**
+     * Current allocated memory in GiB
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentAllocatedMemoryGiB'?: number;
+    /**
+     * Current allocated disk in GiB
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentAllocatedDiskGiB'?: number;
+    /**
+     * Current snapshot count
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentSnapshotCount'?: number;
+    /**
+     * Current number of started sandboxes
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'currentStartedSandboxes'?: number;
+    /**
+     * Runner availability score
+     * @type {number}
+     * @memberof RunnerFull
+     */
+    'availabilityScore'?: number;
+    /**
+     * The region of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'region': string;
+    /**
+     * The name of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'name': string;
+    /**
+     * The state of the runner
+     * @type {RunnerState}
+     * @memberof RunnerFull
+     */
+    'state': RunnerState;
+    /**
+     * The last time the runner was checked
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'lastChecked'?: string;
+    /**
+     * Whether the runner is unschedulable
+     * @type {boolean}
+     * @memberof RunnerFull
+     */
+    'unschedulable': boolean;
+    /**
+     * The creation timestamp of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'createdAt': string;
+    /**
+     * The last update timestamp of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'updatedAt': string;
+    /**
+     * The version of the runner (deprecated in favor of apiVersion)
+     * @type {string}
+     * @memberof RunnerFull
+     * @deprecated
+     */
+    'version': string;
+    /**
+     * The api version of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     * @deprecated
+     */
+    'apiVersion': string;
+    /**
+     * The app version of the runner
+     * @type {string}
+     * @memberof RunnerFull
+     * @deprecated
+     */
+    'appVersion'?: string;
+    /**
+     * The API key for the runner
+     * @type {string}
+     * @memberof RunnerFull
+     */
+    'apiKey': string;
+    /**
+     * The region type of the runner
+     * @type {RegionType}
+     * @memberof RunnerFull
+     */
+    'regionType'?: RegionType;
 }
+
+
+
