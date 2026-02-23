@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,6 +12,8 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
  * The class of the runner
  * @export
@@ -19,9 +21,12 @@
  */
 
 export const SandboxClass = {
-  SMALL: 'small',
-  MEDIUM: 'medium',
-  LARGE: 'large',
-} as const
+    SMALL: 'small',
+    MEDIUM: 'medium',
+    LARGE: 'large'
+} as const;
 
-export type SandboxClass = (typeof SandboxClass)[keyof typeof SandboxClass]
+export type SandboxClass = typeof SandboxClass[keyof typeof SandboxClass];
+
+
+

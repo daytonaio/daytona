@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,94 +12,97 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface AuditLog
  */
 export interface AuditLog {
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  id: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  actorId: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  actorEmail: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  organizationId?: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  action: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  targetType?: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  targetId?: string
-  /**
-   *
-   * @type {number}
-   * @memberof AuditLog
-   */
-  statusCode?: number
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  errorMessage?: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  ipAddress?: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  userAgent?: string
-  /**
-   *
-   * @type {string}
-   * @memberof AuditLog
-   */
-  source?: string
-  /**
-   *
-   * @type {{ [key: string]: any; }}
-   * @memberof AuditLog
-   */
-  metadata?: { [key: string]: any }
-  /**
-   *
-   * @type {Date}
-   * @memberof AuditLog
-   */
-  createdAt: Date
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'actorId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'actorEmail': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'organizationId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'action': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'targetType'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'targetId'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof AuditLog
+     */
+    'statusCode'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'errorMessage'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'ipAddress'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'userAgent'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof AuditLog
+     */
+    'source'?: string;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof AuditLog
+     */
+    'metadata'?: { [key: string]: any; };
+    /**
+     * 
+     * @type {Date}
+     * @memberof AuditLog
+     */
+    'createdAt': Date;
 }
+

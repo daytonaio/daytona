@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,51 +12,54 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface UpdateSandboxStateDto
  */
 export interface UpdateSandboxStateDto {
-  /**
-   * The new state for the sandbox
-   * @type {string}
-   * @memberof UpdateSandboxStateDto
-   */
-  state: UpdateSandboxStateDtoStateEnum
-  /**
-   * Optional error message when reporting an error state
-   * @type {string}
-   * @memberof UpdateSandboxStateDto
-   */
-  errorReason?: string
-  /**
-   * Whether the sandbox is recoverable
-   * @type {boolean}
-   * @memberof UpdateSandboxStateDto
-   */
-  recoverable?: boolean
+    /**
+     * The new state for the sandbox
+     * @type {string}
+     * @memberof UpdateSandboxStateDto
+     */
+    'state': UpdateSandboxStateDtoStateEnum;
+    /**
+     * Optional error message when reporting an error state
+     * @type {string}
+     * @memberof UpdateSandboxStateDto
+     */
+    'errorReason'?: string;
+    /**
+     * Whether the sandbox is recoverable
+     * @type {boolean}
+     * @memberof UpdateSandboxStateDto
+     */
+    'recoverable'?: boolean;
 }
 
 export const UpdateSandboxStateDtoStateEnum = {
-  CREATING: 'creating',
-  RESTORING: 'restoring',
-  DESTROYED: 'destroyed',
-  DESTROYING: 'destroying',
-  STARTED: 'started',
-  STOPPED: 'stopped',
-  STARTING: 'starting',
-  STOPPING: 'stopping',
-  ERROR: 'error',
-  BUILD_FAILED: 'build_failed',
-  PENDING_BUILD: 'pending_build',
-  BUILDING_SNAPSHOT: 'building_snapshot',
-  UNKNOWN: 'unknown',
-  PULLING_SNAPSHOT: 'pulling_snapshot',
-  ARCHIVED: 'archived',
-  ARCHIVING: 'archiving',
-  RESIZING: 'resizing',
-} as const
+    CREATING: 'creating',
+    RESTORING: 'restoring',
+    DESTROYED: 'destroyed',
+    DESTROYING: 'destroying',
+    STARTED: 'started',
+    STOPPED: 'stopped',
+    STARTING: 'starting',
+    STOPPING: 'stopping',
+    ERROR: 'error',
+    BUILD_FAILED: 'build_failed',
+    PENDING_BUILD: 'pending_build',
+    BUILDING_SNAPSHOT: 'building_snapshot',
+    UNKNOWN: 'unknown',
+    PULLING_SNAPSHOT: 'pulling_snapshot',
+    ARCHIVED: 'archived',
+    ARCHIVING: 'archiving',
+    RESIZING: 'resizing'
+} as const;
 
-export type UpdateSandboxStateDtoStateEnum =
-  (typeof UpdateSandboxStateDtoStateEnum)[keyof typeof UpdateSandboxStateDtoStateEnum]
+export type UpdateSandboxStateDtoStateEnum = typeof UpdateSandboxStateDtoStateEnum[keyof typeof UpdateSandboxStateDtoStateEnum];
+
+

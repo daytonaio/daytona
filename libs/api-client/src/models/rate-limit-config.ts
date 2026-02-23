@@ -12,38 +12,40 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RateLimitEntry } from './rate-limit-entry'
+import type { RateLimitEntry } from './rate-limit-entry';
 
 /**
- *
+ * 
  * @export
  * @interface RateLimitConfig
  */
 export interface RateLimitConfig {
-  /**
-   * Failed authentication rate limit
-   * @type {RateLimitEntry}
-   * @memberof RateLimitConfig
-   */
-  failedAuth?: RateLimitEntry
-  /**
-   * Authenticated rate limit
-   * @type {RateLimitEntry}
-   * @memberof RateLimitConfig
-   */
-  authenticated?: RateLimitEntry
-  /**
-   * Sandbox create rate limit
-   * @type {RateLimitEntry}
-   * @memberof RateLimitConfig
-   */
-  sandboxCreate?: RateLimitEntry
-  /**
-   * Sandbox lifecycle rate limit
-   * @type {RateLimitEntry}
-   * @memberof RateLimitConfig
-   */
-  sandboxLifecycle?: RateLimitEntry
+    /**
+     * Failed authentication rate limit
+     * @type {RateLimitEntry}
+     * @memberof RateLimitConfig
+     */
+    'failedAuth'?: RateLimitEntry;
+    /**
+     * Authenticated rate limit
+     * @type {RateLimitEntry}
+     * @memberof RateLimitConfig
+     */
+    'authenticated'?: RateLimitEntry;
+    /**
+     * Sandbox create rate limit
+     * @type {RateLimitEntry}
+     * @memberof RateLimitConfig
+     */
+    'sandboxCreate'?: RateLimitEntry;
+    /**
+     * Sandbox lifecycle rate limit
+     * @type {RateLimitEntry}
+     * @memberof RateLimitConfig
+     */
+    'sandboxLifecycle'?: RateLimitEntry;
 }
+

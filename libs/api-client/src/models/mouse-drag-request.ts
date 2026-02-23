@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,40 +12,43 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface MouseDragRequest
  */
 export interface MouseDragRequest {
-  /**
-   * The starting X coordinate for the drag operation
-   * @type {number}
-   * @memberof MouseDragRequest
-   */
-  startX: number
-  /**
-   * The starting Y coordinate for the drag operation
-   * @type {number}
-   * @memberof MouseDragRequest
-   */
-  startY: number
-  /**
-   * The ending X coordinate for the drag operation
-   * @type {number}
-   * @memberof MouseDragRequest
-   */
-  endX: number
-  /**
-   * The ending Y coordinate for the drag operation
-   * @type {number}
-   * @memberof MouseDragRequest
-   */
-  endY: number
-  /**
-   * The mouse button to use for dragging (left, right, middle). Defaults to left
-   * @type {string}
-   * @memberof MouseDragRequest
-   */
-  button?: string
+    /**
+     * The starting X coordinate for the drag operation
+     * @type {number}
+     * @memberof MouseDragRequest
+     */
+    'startX': number;
+    /**
+     * The starting Y coordinate for the drag operation
+     * @type {number}
+     * @memberof MouseDragRequest
+     */
+    'startY': number;
+    /**
+     * The ending X coordinate for the drag operation
+     * @type {number}
+     * @memberof MouseDragRequest
+     */
+    'endX': number;
+    /**
+     * The ending Y coordinate for the drag operation
+     * @type {number}
+     * @memberof MouseDragRequest
+     */
+    'endY': number;
+    /**
+     * The mouse button to use for dragging (left, right, middle). Defaults to left
+     * @type {string}
+     * @memberof MouseDragRequest
+     */
+    'button'?: string;
 }
+

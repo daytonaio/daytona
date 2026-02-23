@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,28 +12,31 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface RunnerSnapshotDto
  */
 export interface RunnerSnapshotDto {
-  /**
-   * Runner snapshot ID
-   * @type {string}
-   * @memberof RunnerSnapshotDto
-   */
-  runnerSnapshotId: string
-  /**
-   * Runner ID
-   * @type {string}
-   * @memberof RunnerSnapshotDto
-   */
-  runnerId: string
-  /**
-   * Runner domain
-   * @type {string}
-   * @memberof RunnerSnapshotDto
-   */
-  runnerDomain?: string
+    /**
+     * Runner snapshot ID
+     * @type {string}
+     * @memberof RunnerSnapshotDto
+     */
+    'runnerSnapshotId': string;
+    /**
+     * Runner ID
+     * @type {string}
+     * @memberof RunnerSnapshotDto
+     */
+    'runnerId': string;
+    /**
+     * Runner domain
+     * @type {string}
+     * @memberof RunnerSnapshotDto
+     */
+    'runnerDomain'?: string;
 }
+

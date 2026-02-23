@@ -12,20 +12,22 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { Job } from './job'
+import type { Job } from './job';
 
 /**
- *
+ * 
  * @export
  * @interface PollJobsResponse
  */
 export interface PollJobsResponse {
-  /**
-   * List of jobs
-   * @type {Array<Job>}
-   * @memberof PollJobsResponse
-   */
-  jobs: Array<Job>
+    /**
+     * List of jobs
+     * @type {Array<Job>}
+     * @memberof PollJobsResponse
+     */
+    'jobs': Array<Job>;
 }
+

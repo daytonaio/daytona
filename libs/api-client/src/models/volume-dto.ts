@@ -12,62 +12,66 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { VolumeState } from './volume-state'
+import type { VolumeState } from './volume-state';
 
 /**
- *
+ * 
  * @export
  * @interface VolumeDto
  */
 export interface VolumeDto {
-  /**
-   * Volume ID
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  id: string
-  /**
-   * Volume name
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  name: string
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  organizationId: string
-  /**
-   * Volume state
-   * @type {VolumeState}
-   * @memberof VolumeDto
-   */
-  state: VolumeState
-  /**
-   * Creation timestamp
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  createdAt: string
-  /**
-   * Last update timestamp
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  updatedAt: string
-  /**
-   * Last used timestamp
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  lastUsedAt?: string | null
-  /**
-   * The error reason of the volume
-   * @type {string}
-   * @memberof VolumeDto
-   */
-  errorReason: string | null
+    /**
+     * Volume ID
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'id': string;
+    /**
+     * Volume name
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'name': string;
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'organizationId': string;
+    /**
+     * Volume state
+     * @type {VolumeState}
+     * @memberof VolumeDto
+     */
+    'state': VolumeState;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'createdAt': string;
+    /**
+     * Last update timestamp
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'updatedAt': string;
+    /**
+     * Last used timestamp
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'lastUsedAt'?: string | null;
+    /**
+     * The error reason of the volume
+     * @type {string}
+     * @memberof VolumeDto
+     */
+    'errorReason': string | null;
 }
+
+
+

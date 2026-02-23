@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,61 +12,64 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ApiKeyResponse
  */
 export interface ApiKeyResponse {
-  /**
-   * The name of the API key
-   * @type {string}
-   * @memberof ApiKeyResponse
-   */
-  name: string
-  /**
-   * The API key value
-   * @type {string}
-   * @memberof ApiKeyResponse
-   */
-  value: string
-  /**
-   * When the API key was created
-   * @type {Date}
-   * @memberof ApiKeyResponse
-   */
-  createdAt: Date
-  /**
-   * The list of organization resource permissions assigned to the API key
-   * @type {Array<string>}
-   * @memberof ApiKeyResponse
-   */
-  permissions: Array<ApiKeyResponsePermissionsEnum>
-  /**
-   * When the API key expires
-   * @type {Date}
-   * @memberof ApiKeyResponse
-   */
-  expiresAt: Date | null
+    /**
+     * The name of the API key
+     * @type {string}
+     * @memberof ApiKeyResponse
+     */
+    'name': string;
+    /**
+     * The API key value
+     * @type {string}
+     * @memberof ApiKeyResponse
+     */
+    'value': string;
+    /**
+     * When the API key was created
+     * @type {Date}
+     * @memberof ApiKeyResponse
+     */
+    'createdAt': Date;
+    /**
+     * The list of organization resource permissions assigned to the API key
+     * @type {Array<string>}
+     * @memberof ApiKeyResponse
+     */
+    'permissions': Array<ApiKeyResponsePermissionsEnum>;
+    /**
+     * When the API key expires
+     * @type {Date}
+     * @memberof ApiKeyResponse
+     */
+    'expiresAt': Date | null;
 }
 
 export const ApiKeyResponsePermissionsEnum = {
-  WRITE_REGISTRIES: 'write:registries',
-  DELETE_REGISTRIES: 'delete:registries',
-  WRITE_SNAPSHOTS: 'write:snapshots',
-  DELETE_SNAPSHOTS: 'delete:snapshots',
-  WRITE_SANDBOXES: 'write:sandboxes',
-  DELETE_SANDBOXES: 'delete:sandboxes',
-  READ_VOLUMES: 'read:volumes',
-  WRITE_VOLUMES: 'write:volumes',
-  DELETE_VOLUMES: 'delete:volumes',
-  WRITE_REGIONS: 'write:regions',
-  DELETE_REGIONS: 'delete:regions',
-  READ_RUNNERS: 'read:runners',
-  WRITE_RUNNERS: 'write:runners',
-  DELETE_RUNNERS: 'delete:runners',
-  READ_AUDIT_LOGS: 'read:audit_logs',
-} as const
+    WRITE_REGISTRIES: 'write:registries',
+    DELETE_REGISTRIES: 'delete:registries',
+    WRITE_SNAPSHOTS: 'write:snapshots',
+    DELETE_SNAPSHOTS: 'delete:snapshots',
+    WRITE_SANDBOXES: 'write:sandboxes',
+    DELETE_SANDBOXES: 'delete:sandboxes',
+    READ_VOLUMES: 'read:volumes',
+    WRITE_VOLUMES: 'write:volumes',
+    DELETE_VOLUMES: 'delete:volumes',
+    WRITE_REGIONS: 'write:regions',
+    DELETE_REGIONS: 'delete:regions',
+    READ_RUNNERS: 'read:runners',
+    WRITE_RUNNERS: 'write:runners',
+    DELETE_RUNNERS: 'delete:runners',
+    READ_AUDIT_LOGS: 'read:audit_logs'
+} as const;
 
-export type ApiKeyResponsePermissionsEnum =
-  (typeof ApiKeyResponsePermissionsEnum)[keyof typeof ApiKeyResponsePermissionsEnum]
+export type ApiKeyResponsePermissionsEnum = typeof ApiKeyResponsePermissionsEnum[keyof typeof ApiKeyResponsePermissionsEnum];
+
+

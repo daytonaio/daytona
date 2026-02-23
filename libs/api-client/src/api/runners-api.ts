@@ -12,931 +12,779 @@
  * Do not edit the class manually.
  */
 
-import type { Configuration } from '../configuration'
-import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios'
-import globalAxios from 'axios'
+
+import type { Configuration } from '../configuration';
+import type { AxiosPromise, AxiosInstance, RawAxiosRequestConfig } from 'axios';
+import globalAxios from 'axios';
 // Some imports not used depending on template conditions
 // @ts-ignore
-import {
-  DUMMY_BASE_URL,
-  assertParamExists,
-  setApiKeyToObject,
-  setBasicAuthToObject,
-  setBearerAuthToObject,
-  setOAuthToObject,
-  setSearchParams,
-  serializeDataIfNeeded,
-  toPathString,
-  createRequestFunction,
-} from '../common'
+import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObject, setBearerAuthToObject, setOAuthToObject, setSearchParams, serializeDataIfNeeded, toPathString, createRequestFunction } from '../common';
 // @ts-ignore
-import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
+import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
-import type { CreateRunner } from '../models'
+import type { CreateRunner } from '../models';
 // @ts-ignore
-import type { CreateRunnerResponse } from '../models'
+import type { CreateRunnerResponse } from '../models';
 // @ts-ignore
-import type { Runner } from '../models'
+import type { Runner } from '../models';
 // @ts-ignore
-import type { RunnerFull } from '../models'
+import type { RunnerFull } from '../models';
 // @ts-ignore
-import type { RunnerHealthcheck } from '../models'
+import type { RunnerHealthcheck } from '../models';
 // @ts-ignore
-import type { RunnerSnapshotDto } from '../models'
+import type { RunnerSnapshotDto } from '../models';
 /**
  * RunnersApi - axios parameter creator
  * @export
  */
 export const RunnersApiAxiosParamCreator = function (configuration?: Configuration) {
-  return {
-    /**
-     *
-     * @summary Create runner
-     * @param {CreateRunner} createRunner
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createRunner: async (
-      createRunner: CreateRunner,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'createRunner' is not null or undefined
-      assertParamExists('createRunner', 'createRunner', createRunner)
-      const localVarPath = `/runners`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+    return {
+        /**
+         * 
+         * @summary Create runner
+         * @param {CreateRunner} createRunner 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRunner: async (createRunner: CreateRunner, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createRunner' is not null or undefined
+            assertParamExists('createRunner', 'createRunner', createRunner)
+            const localVarPath = `/runners`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication oauth2 required
+            // authentication oauth2 required
 
-      localVarHeaderParameter['Content-Type'] = 'application/json'
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createRunner, localVarRequestOptions, configuration)
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Delete runner
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteRunner: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('deleteRunner', 'id', id)
-      const localVarPath = `/runners/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createRunner, localVarRequestOptions, configuration)
 
-      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Delete runner
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRunner: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('deleteRunner', 'id', id)
+            const localVarPath = `/runners/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication oauth2 required
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            // authentication oauth2 required
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get info for authenticated runner
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getInfoForAuthenticatedRunner: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/runners/me`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get info for authenticated runner
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getInfoForAuthenticatedRunner: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/runners/me`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication oauth2 required
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerById: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('getRunnerById', 'id', id)
-      const localVarPath = `/runners/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication oauth2 required
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication oauth2 required
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerById: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('getRunnerById', 'id', id)
+            const localVarPath = `/runners/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get runner by sandbox ID
-     * @param {string} sandboxId
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('getRunnerBySandboxId', 'sandboxId', sandboxId)
-      const localVarPath = `/runners/by-sandbox/{sandboxId}`.replace(
-        `{${'sandboxId'}}`,
-        encodeURIComponent(String(sandboxId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            // authentication oauth2 required
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication oauth2 required
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get runner by sandbox ID
+         * @param {string} sandboxId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'sandboxId' is not null or undefined
+            assertParamExists('getRunnerBySandboxId', 'sandboxId', sandboxId)
+            const localVarPath = `/runners/by-sandbox/{sandboxId}`
+                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerFullById: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('getRunnerFullById', 'id', id)
-      const localVarPath = `/runners/{id}/full`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            // authentication oauth2 required
 
-      // authentication oauth2 required
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnersBySnapshotRef: async (ref: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'ref' is not null or undefined
-      assertParamExists('getRunnersBySnapshotRef', 'ref', ref)
-      const localVarPath = `/runners/by-snapshot-ref`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerFullById: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('getRunnerFullById', 'id', id)
+            const localVarPath = `/runners/{id}/full`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication oauth2 required
+            // authentication oauth2 required
 
-      if (ref !== undefined) {
-        localVarQueryParameter['ref'] = ref
-      }
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary List all runners
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listRunners: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/runners`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get runners by snapshot ref
+         * @param {string} ref Snapshot ref
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnersBySnapshotRef: async (ref: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'ref' is not null or undefined
+            assertParamExists('getRunnersBySnapshotRef', 'ref', ref)
+            const localVarPath = `/runners/by-snapshot-ref`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      // authentication oauth2 required
+            // authentication oauth2 required
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            if (ref !== undefined) {
+                localVarQueryParameter['ref'] = ref;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
-     * @summary Runner healthcheck
-     * @param {RunnerHealthcheck} runnerHealthcheck
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    runnerHealthcheck: async (
-      runnerHealthcheck: RunnerHealthcheck,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'runnerHealthcheck' is not null or undefined
-      assertParamExists('runnerHealthcheck', 'runnerHealthcheck', runnerHealthcheck)
-      const localVarPath = `/runners/healthcheck`
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
 
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary List all runners
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRunners: async (xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/runners`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication oauth2 required
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      localVarHeaderParameter['Content-Type'] = 'application/json'
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(runnerHealthcheck, localVarRequestOptions, configuration)
+            // authentication oauth2 required
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update runner draining status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRunnerDraining: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('updateRunnerDraining', 'id', id)
-      const localVarPath = `/runners/{id}/draining`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
 
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+         * @summary Runner healthcheck
+         * @param {RunnerHealthcheck} runnerHealthcheck 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runnerHealthcheck: async (runnerHealthcheck: RunnerHealthcheck, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'runnerHealthcheck' is not null or undefined
+            assertParamExists('runnerHealthcheck', 'runnerHealthcheck', runnerHealthcheck)
+            const localVarPath = `/runners/healthcheck`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      // authentication oauth2 required
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
-     * @summary Update runner scheduling status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRunnerScheduling: async (
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'id' is not null or undefined
-      assertParamExists('updateRunnerScheduling', 'id', id)
-      const localVarPath = `/runners/{id}/scheduling`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
+            // authentication oauth2 required
 
-      const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
 
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
 
-      // authentication oauth2 required
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(runnerHealthcheck, localVarRequestOptions, configuration)
 
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update runner draining status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRunnerDraining: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('updateRunnerDraining', 'id', id)
+            const localVarPath = `/runners/{id}/draining`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
 
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-  }
-}
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Update runner scheduling status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRunnerScheduling: async (id: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('updateRunnerScheduling', 'id', id)
+            const localVarPath = `/runners/{id}/scheduling`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            if (xDaytonaOrganizationID != null) {
+                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
+            }
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
 
 /**
  * RunnersApi - functional programming interface
  * @export
  */
-export const RunnersApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = RunnersApiAxiosParamCreator(configuration)
-  return {
-    /**
-     *
-     * @summary Create runner
-     * @param {CreateRunner} createRunner
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async createRunner(
-      createRunner: CreateRunner,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRunnerResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createRunner(
-        createRunner,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.createRunner']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Delete runner
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async deleteRunner(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRunner(id, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.deleteRunner']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get info for authenticated runner
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getInfoForAuthenticatedRunner(
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getInfoForAuthenticatedRunner(options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getInfoForAuthenticatedRunner']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRunnerById(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerById(id, xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnerById']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get runner by sandbox ID
-     * @param {string} sandboxId
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRunnerBySandboxId(
-      sandboxId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerBySandboxId(sandboxId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnerBySandboxId']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRunnerFullById(
-      id: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerFullById(id, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnerFullById']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async getRunnersBySnapshotRef(
-      ref: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RunnerSnapshotDto>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnersBySnapshotRef(ref, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.getRunnersBySnapshotRef']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary List all runners
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async listRunners(
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(xDaytonaOrganizationID, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
-     * @summary Runner healthcheck
-     * @param {RunnerHealthcheck} runnerHealthcheck
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async runnerHealthcheck(
-      runnerHealthcheck: RunnerHealthcheck,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.runnerHealthcheck(runnerHealthcheck, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.runnerHealthcheck']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update runner draining status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateRunnerDraining(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerDraining(
-        id,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.updateRunnerDraining']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Update runner scheduling status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async updateRunnerScheduling(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerScheduling(
-        id,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['RunnersApi.updateRunnerScheduling']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-  }
-}
+export const RunnersApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RunnersApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * 
+         * @summary Create runner
+         * @param {CreateRunner} createRunner 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createRunner(createRunner: CreateRunner, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CreateRunnerResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createRunner(createRunner, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.createRunner']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Delete runner
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRunner(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.deleteRunner']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get info for authenticated runner
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getInfoForAuthenticatedRunner(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.getInfoForAuthenticatedRunner']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerById(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.getRunnerById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get runner by sandbox ID
+         * @param {string} sandboxId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerBySandboxId(sandboxId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.getRunnerBySandboxId']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRunnerFullById(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RunnerFull>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerFullById(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.getRunnerFullById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get runners by snapshot ref
+         * @param {string} ref Snapshot ref
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RunnerSnapshotDto>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnersBySnapshotRef(ref, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.getRunnersBySnapshotRef']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary List all runners
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Runner>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+         * @summary Runner healthcheck
+         * @param {RunnerHealthcheck} runnerHealthcheck 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.runnerHealthcheck(runnerHealthcheck, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.runnerHealthcheck']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update runner draining status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRunnerDraining(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerDraining(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.updateRunnerDraining']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Update runner scheduling status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRunnerScheduling(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerScheduling(id, xDaytonaOrganizationID, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['RunnersApi.updateRunnerScheduling']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
 
 /**
  * RunnersApi - factory interface
  * @export
  */
 export const RunnersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-  const localVarFp = RunnersApiFp(configuration)
-  return {
-    /**
-     *
-     * @summary Create runner
-     * @param {CreateRunner} createRunner
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    createRunner(
-      createRunner: CreateRunner,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<CreateRunnerResponse> {
-      return localVarFp
-        .createRunner(createRunner, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Delete runner
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.deleteRunner(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get info for authenticated runner
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
-      return localVarFp.getInfoForAuthenticatedRunner(options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
-      return localVarFp.getRunnerById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get runner by sandbox ID
-     * @param {string} sandboxId
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
-      return localVarFp.getRunnerBySandboxId(sandboxId, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get runner by ID
-     * @param {string} id Runner ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnerFullById(id: string, options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
-      return localVarFp.getRunnerFullById(id, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Get runners by snapshot ref
-     * @param {string} ref Snapshot ref
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RunnerSnapshotDto>> {
-      return localVarFp.getRunnersBySnapshotRef(ref, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary List all runners
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
-      return localVarFp.listRunners(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
-    },
-    /**
-     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
-     * @summary Runner healthcheck
-     * @param {RunnerHealthcheck} runnerHealthcheck
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.runnerHealthcheck(runnerHealthcheck, options).then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update runner draining status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRunnerDraining(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Runner> {
-      return localVarFp
-        .updateRunnerDraining(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
-     * @summary Update runner scheduling status
-     * @param {string} id Runner ID
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    updateRunnerScheduling(
-      id: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Runner> {
-      return localVarFp
-        .updateRunnerScheduling(id, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-  }
-}
+    const localVarFp = RunnersApiFp(configuration)
+    return {
+        /**
+         * 
+         * @summary Create runner
+         * @param {CreateRunner} createRunner 
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRunner(createRunner: CreateRunner, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<CreateRunnerResponse> {
+            return localVarFp.createRunner(createRunner, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Delete runner
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.deleteRunner(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get info for authenticated runner
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
+            return localVarFp.getInfoForAuthenticatedRunner(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+            return localVarFp.getRunnerById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get runner by sandbox ID
+         * @param {string} sandboxId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
+            return localVarFp.getRunnerBySandboxId(sandboxId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get runner by ID
+         * @param {string} id Runner ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnerFullById(id: string, options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
+            return localVarFp.getRunnerFullById(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get runners by snapshot ref
+         * @param {string} ref Snapshot ref
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<RunnerSnapshotDto>> {
+            return localVarFp.getRunnersBySnapshotRef(ref, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary List all runners
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<Runner>> {
+            return localVarFp.listRunners(xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+         * @summary Runner healthcheck
+         * @param {RunnerHealthcheck} runnerHealthcheck 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.runnerHealthcheck(runnerHealthcheck, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update runner draining status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRunnerDraining(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+            return localVarFp.updateRunnerDraining(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Update runner scheduling status
+         * @param {string} id Runner ID
+         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRunnerScheduling(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+            return localVarFp.updateRunnerScheduling(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        },
+    };
+};
 
 /**
  * RunnersApi - object-oriented interface
@@ -945,161 +793,140 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class RunnersApi extends BaseAPI {
-  /**
-   *
-   * @summary Create runner
-   * @param {CreateRunner} createRunner
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public createRunner(createRunner: CreateRunner, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .createRunner(createRunner, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Create runner
+     * @param {CreateRunner} createRunner 
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public createRunner(createRunner: CreateRunner, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).createRunner(createRunner, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Delete runner
-   * @param {string} id Runner ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .deleteRunner(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Delete runner
+     * @param {string} id Runner ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public deleteRunner(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).deleteRunner(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get info for authenticated runner
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .getInfoForAuthenticatedRunner(options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get info for authenticated runner
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public getInfoForAuthenticatedRunner(options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).getInfoForAuthenticatedRunner(options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get runner by ID
-   * @param {string} id Runner ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .getRunnerById(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get runner by ID
+     * @param {string} id Runner ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public getRunnerById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).getRunnerById(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get runner by sandbox ID
-   * @param {string} sandboxId
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .getRunnerBySandboxId(sandboxId, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get runner by sandbox ID
+     * @param {string} sandboxId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).getRunnerBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get runner by ID
-   * @param {string} id Runner ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public getRunnerFullById(id: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .getRunnerFullById(id, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get runner by ID
+     * @param {string} id Runner ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public getRunnerFullById(id: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).getRunnerFullById(id, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Get runners by snapshot ref
-   * @param {string} ref Snapshot ref
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .getRunnersBySnapshotRef(ref, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Get runners by snapshot ref
+     * @param {string} ref Snapshot ref
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public getRunnersBySnapshotRef(ref: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).getRunnersBySnapshotRef(ref, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary List all runners
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .listRunners(xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary List all runners
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public listRunners(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).listRunners(xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
-   * @summary Runner healthcheck
-   * @param {RunnerHealthcheck} runnerHealthcheck
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .runnerHealthcheck(runnerHealthcheck, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * Endpoint for version 2 runners to send healthcheck and metrics. Updates lastChecked timestamp and runner metrics.
+     * @summary Runner healthcheck
+     * @param {RunnerHealthcheck} runnerHealthcheck 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public runnerHealthcheck(runnerHealthcheck: RunnerHealthcheck, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).runnerHealthcheck(runnerHealthcheck, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update runner draining status
-   * @param {string} id Runner ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public updateRunnerDraining(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .updateRunnerDraining(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update runner draining status
+     * @param {string} id Runner ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public updateRunnerDraining(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).updateRunnerDraining(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 
-  /**
-   *
-   * @summary Update runner scheduling status
-   * @param {string} id Runner ID
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof RunnersApi
-   */
-  public updateRunnerScheduling(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-    return RunnersApiFp(this.configuration)
-      .updateRunnerScheduling(id, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
+    /**
+     * 
+     * @summary Update runner scheduling status
+     * @param {string} id Runner ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RunnersApi
+     */
+    public updateRunnerScheduling(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+        return RunnersApiFp(this.configuration).updateRunnerScheduling(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    }
 }
+

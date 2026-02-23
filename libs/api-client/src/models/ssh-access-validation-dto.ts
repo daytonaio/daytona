@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,22 +12,25 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface SshAccessValidationDto
  */
 export interface SshAccessValidationDto {
-  /**
-   * Whether the SSH access token is valid
-   * @type {boolean}
-   * @memberof SshAccessValidationDto
-   */
-  valid: boolean
-  /**
-   * ID of the sandbox this SSH access is for
-   * @type {string}
-   * @memberof SshAccessValidationDto
-   */
-  sandboxId: string
+    /**
+     * Whether the SSH access token is valid
+     * @type {boolean}
+     * @memberof SshAccessValidationDto
+     */
+    'valid': boolean;
+    /**
+     * ID of the sandbox this SSH access is for
+     * @type {string}
+     * @memberof SshAccessValidationDto
+     */
+    'sandboxId': string;
 }
+

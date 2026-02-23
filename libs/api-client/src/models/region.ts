@@ -12,68 +12,72 @@
  * Do not edit the class manually.
  */
 
+
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegionType } from './region-type'
+import type { RegionType } from './region-type';
 
 /**
- *
+ * 
  * @export
  * @interface Region
  */
 export interface Region {
-  /**
-   * Region ID
-   * @type {string}
-   * @memberof Region
-   */
-  id: string
-  /**
-   * Region name
-   * @type {string}
-   * @memberof Region
-   */
-  name: string
-  /**
-   * Organization ID
-   * @type {string}
-   * @memberof Region
-   */
-  organizationId?: string | null
-  /**
-   * The type of the region
-   * @type {RegionType}
-   * @memberof Region
-   */
-  regionType: RegionType
-  /**
-   * Creation timestamp
-   * @type {string}
-   * @memberof Region
-   */
-  createdAt: string
-  /**
-   * Last update timestamp
-   * @type {string}
-   * @memberof Region
-   */
-  updatedAt: string
-  /**
-   * Proxy URL for the region
-   * @type {string}
-   * @memberof Region
-   */
-  proxyUrl?: string | null
-  /**
-   * SSH Gateway URL for the region
-   * @type {string}
-   * @memberof Region
-   */
-  sshGatewayUrl?: string | null
-  /**
-   * Snapshot Manager URL for the region
-   * @type {string}
-   * @memberof Region
-   */
-  snapshotManagerUrl?: string | null
+    /**
+     * Region ID
+     * @type {string}
+     * @memberof Region
+     */
+    'id': string;
+    /**
+     * Region name
+     * @type {string}
+     * @memberof Region
+     */
+    'name': string;
+    /**
+     * Organization ID
+     * @type {string}
+     * @memberof Region
+     */
+    'organizationId'?: string | null;
+    /**
+     * The type of the region
+     * @type {RegionType}
+     * @memberof Region
+     */
+    'regionType': RegionType;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof Region
+     */
+    'createdAt': string;
+    /**
+     * Last update timestamp
+     * @type {string}
+     * @memberof Region
+     */
+    'updatedAt': string;
+    /**
+     * Proxy URL for the region
+     * @type {string}
+     * @memberof Region
+     */
+    'proxyUrl'?: string | null;
+    /**
+     * SSH Gateway URL for the region
+     * @type {string}
+     * @memberof Region
+     */
+    'sshGatewayUrl'?: string | null;
+    /**
+     * Snapshot Manager URL for the region
+     * @type {string}
+     * @memberof Region
+     */
+    'snapshotManagerUrl'?: string | null;
 }
+
+
+

@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -12,16 +12,19 @@
  * Do not edit the class manually.
  */
 
+
+
 /**
- *
+ * 
  * @export
  * @interface ToolboxProxyUrl
  */
 export interface ToolboxProxyUrl {
-  /**
-   * The toolbox proxy URL for the sandbox
-   * @type {string}
-   * @memberof ToolboxProxyUrl
-   */
-  url: string
+    /**
+     * The toolbox proxy URL for the sandbox
+     * @type {string}
+     * @memberof ToolboxProxyUrl
+     */
+    'url': string;
 }
+
