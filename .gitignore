@@ -59,6 +59,7 @@ vitest.config.*.timestamp*
 .eslintcache
 .tmp/
 .env.local
+apps/runner-win/.env
 
 # Python package metadata
 *.egg-info/
