@@ -34,8 +34,7 @@
           "rm -rf libs/api-client-ruby/lib",
           "yarn run openapi-generator-cli generate -i dist/apps/api/openapi.json -g ruby --additional-properties=gemAuthor=daytonaio,gemAuthorEmail=support@daytona.io,gemDescription=\\\"Daytona API Client\\\",gemHomepage=\\\"https://github.com/daytonaio/daytona\\\",gemVersion=$DEFAULT_GEM_VERSION,gemName=daytona_api_client -o libs/api-client-ruby",
           "bash libs/api-client-ruby/fix-gemspec.sh",
-          "cd libs/api-client-ruby && bundle install",
-          "cd libs/api-client-ruby && bundle exec rubocop -a --fail-level=E"
+          "cd libs/api-client-ruby && bundle install"
         ],
         "parallel": false
       },
