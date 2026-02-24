@@ -101,23 +101,28 @@ func PullSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
 
 		runner := runner.GetInstance(nil)
 
-		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+		cacheKey := request.Snapshot
+		if request.DestinationRef != nil {
+			cacheKey = *request.DestinationRef
+		}
+
+		err = runner.SnapshotErrorCache.RemoveError(generalCtx, cacheKey)
 		if err != nil {
-			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", cacheKey, err)
 		}
 
 		go func() {
 			err := runner.Docker.PullSnapshot(generalCtx, request)
 			if err != nil {
-				log.Debugf("Pull snapshot %s failed: %v", request.Snapshot, err)
-				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
+				log.Debugf("Pull snapshot %s failed: %v", cacheKey, err)
+				err = runner.SnapshotErrorCache.SetError(generalCtx, cacheKey, err.Error())
 				if err != nil {
-					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", cacheKey, err)
 				}
 			} else {
-				err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+				err = runner.SnapshotErrorCache.RemoveError(generalCtx, cacheKey)
 				if err != nil {
-					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", cacheKey, err)
 				}
 			}
 		}()

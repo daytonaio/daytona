@@ -735,9 +735,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     const runner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    const initialImageRefOnRunner = snapshot.buildInfo
-      ? snapshot.buildInfo.snapshotRef
-      : this.getInitialRunnerSnapshotTag(snapshot)
+    const initialImageRefOnRunner = snapshot.buildInfo ? snapshot.buildInfo.snapshotRef : snapshot.ref
 
     let snapshotInfoResponse: SnapshotInfoResponse
     try {
@@ -1215,20 +1213,6 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     if (shouldSave) {
       await this.snapshotRepository.save(snapshot)
     }
-  }
-
-  private getInitialRunnerSnapshotTag(snapshot: Snapshot) {
-    // Extract the base image name without any tag or digest
-    let baseImageName = snapshot.imageName
-    const colonIndex = baseImageName.indexOf(':')
-    if (colonIndex !== -1) {
-      baseImageName = baseImageName.substring(0, colonIndex)
-    }
-    const atIndex = baseImageName.indexOf('@')
-    if (atIndex !== -1) {
-      baseImageName = baseImageName.substring(0, atIndex)
-    }
-    return `${baseImageName}-${snapshot.id}-${snapshot.createdAt.getTime()}:daytona`
   }
 
   @OnAsyncEvent({
