@@ -9,11 +9,11 @@ Daytona provides **full composable computers** &mdash; **sandboxes** &mdash; for
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. [Organizations](/docs/en/organizations) get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**. For more power, see [resources](#resources) or contact [support@daytona.io](mailto:support@daytona.io).
 
-Sandboxes are built from OCI-compliant container images. A [snapshot](/docs/en/snapshots) captures a fully configured environment: base OS, installed packages, dependencies, and configuration to create new sandboxes. Snapshots can be built from any image in a public or private container registry, or defined programmatically using the [declarative image builder](/docs/en/declarative-builder). The sandbox filesystem uses a layered overlay model where the snapshot provides the read-only base and all runtime changes are written to a dedicated layer, preserving the original snapshot for reuse.
+Sandboxes are built from OCI-compliant container images. A [snapshot](/docs/en/snapshots) captures a fully configured environment: base OS, installed packages, dependencies, and configuration to create new sandboxes.
 
-Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely. Egress rate limiting is also supported. For details on configuring network access, see [Network settings](#network-settings-firewall).
+Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely. For details on configuring network access, see [network settings](/docs/en/network-limits).
 
-For a high-level overview of the Daytona platform components, see [architecture](/docs/en/architecture).
+For a detailed overview of the Daytona platform, see [architecture](/docs/en/architecture).
 
 ## Sandbox lifecycle
 
