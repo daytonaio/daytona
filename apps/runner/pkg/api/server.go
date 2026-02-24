@@ -103,9 +103,9 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	if a.logRequests {
 		a.router.Use(sloggin.New(a.logger))
 	}
+	a.router.Use(otelgin.Middleware("daytona-runner"))
 	a.router.Use(common_errors.NewErrorMiddleware(common.HandlePossibleDockerError))
 	a.router.Use(middlewares.RecoverableErrorsMiddleware())
-	a.router.Use(otelgin.Middleware("daytona-runner"))
 
 	public := a.router.Group("/")
 	public.GET("", controllers.HealthCheck)
