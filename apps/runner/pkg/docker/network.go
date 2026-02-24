@@ -18,7 +18,7 @@ func (d *DockerClient) UpdateNetworkSettings(ctx context.Context, containerId st
 	}
 	containerShortId := info.ID[:12]
 
-	ipAddress := common.GetContainerIpAddress(ctx, info)
+	ipAddress := common.GetContainerIpAddress(ctx, &info)
 
 	// Return error if container does not have an IP address
 	if ipAddress == "" {

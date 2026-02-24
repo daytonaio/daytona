@@ -270,7 +270,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	// Get container IP address
-	containerIP := common.GetContainerIpAddress(context.Background(), container)
+	containerIP := common.GetContainerIpAddress(context.Background(), &container)
 	if containerIP == "" {
 		return nil, fmt.Errorf("sandbox IP not found for %s", sandboxId)
 	}

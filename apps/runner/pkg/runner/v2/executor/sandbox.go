@@ -43,7 +43,7 @@ func (e *Executor) startSandbox(ctx context.Context, job *apiclient.Job) (any, e
 		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	daemonVersion, err := e.docker.Start(ctx, job.ResourceId, payload.AuthToken, payload.Metadata)
+	_, daemonVersion, err := e.docker.Start(ctx, job.ResourceId, payload.AuthToken, payload.Metadata)
 	if err != nil {
 		return nil, common.FormatRecoverableError(err)
 	}

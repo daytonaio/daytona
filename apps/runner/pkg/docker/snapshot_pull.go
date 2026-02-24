@@ -15,7 +15,7 @@ import (
 
 func (d *DockerClient) PullSnapshot(ctx context.Context, req dto.PullSnapshotRequestDTO) error {
 	// Pull the image using the pull registry (or none for public images)
-	err := d.PullImage(ctx, req.Snapshot, req.Registry)
+	_, err := d.PullImage(ctx, req.Snapshot, req.Registry)
 	if err != nil {
 		return err
 	}

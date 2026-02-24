@@ -16,7 +16,7 @@ import (
 	"github.com/docker/docker/api/types/strslice"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (string, error) {
+func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (*container.InspectResponse, string, error) {
 	defer timer.Timer()()
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
@@ -28,43 +28,38 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 
 	c, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	if c.State.Running {
-		containerIP := common.GetContainerIpAddress(ctx, c)
+		containerIP := common.GetContainerIpAddress(ctx, &c)
 		if containerIP == "" {
-			return "", errors.New("sandbox IP not found? Is the sandbox started?")
+			return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
 
 		daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP, authToken)
 		if err != nil {
-			return "", err
+			return nil, "", err
 		}
 
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-		return daemonVersion, nil
+		return &c, daemonVersion, nil
 	}
 
 	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	// make sure container is running
-	err = d.waitForContainerRunning(ctx, containerId)
+	runningContainer, err := d.waitForContainerRunning(ctx, containerId)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	c, err = d.ContainerInspect(ctx, containerId)
-	if err != nil {
-		return "", err
-	}
-
-	containerIP := common.GetContainerIpAddress(ctx, c)
+	containerIP := common.GetContainerIpAddress(ctx, runningContainer)
 	if containerIP == "" {
-		return "", errors.New("sandbox IP not found? Is the sandbox started?")
+		return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}
 
 	if !slices.Equal(c.Config.Entrypoint, strslice.StrSlice{common.DAEMON_PATH}) {
@@ -81,7 +76,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	// In either case, we wait for it here.
 	daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP, authToken)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
 	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
@@ -96,10 +91,10 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 		}()
 	}
 
-	return daemonVersion, nil
+	return runningContainer, daemonVersion, nil
 }
 
-func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string) error {
+func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string) (*container.InspectResponse, error) {
 	defer timer.Timer()()
 
 	timeout := time.Duration(d.sandboxStartTimeoutSec) * time.Second
@@ -112,15 +107,15 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return errors.New("timeout waiting for the sandbox to start - please ensure that your entrypoint is long-running")
+			return nil, errors.New("timeout waiting for the sandbox to start - please ensure that your entrypoint is long-running")
 		case <-ticker.C:
-			c, err := d.ContainerInspect(ctx, containerId)
+			c, err := d.ContainerInspect(timeoutCtx, containerId)
 			if err != nil {
-				return err
+				return nil, err
 			}
 
 			if c.State.Running {
-				return nil
+				return &c, nil
 			}
 		}
 	}
