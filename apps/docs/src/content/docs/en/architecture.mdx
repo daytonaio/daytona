@@ -37,10 +37,10 @@ The API integrates the following internal services and components:
 
 - **PostgreSQL** serves as the primary persistent store for metadata and configuration
 - **Redis** provides caching, session management, and distributed locking
-- **OIDC provider** authenticates users and services via OpenID Connect (OIDC). Interactive user sessions use JWT tokens issued through the OIDC flow, while programmatic access uses API keys with bearer tokens. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary
+- **Auth0/OIDC provider** authenticates users and services via OpenID Connect (OIDC). Interactive user sessions use JWT tokens issued through the OIDC flow, while programmatic access uses API keys with bearer tokens. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary
 - **SMTP server** handles email delivery for organization invitations, account notifications, and alert messages
-- **Sandbox manager** schedules sandboxes onto runners, reconciles desired and actual state, and enforces sandbox lifecycle management policies. See [sandbox manager](#sandbox-manager) for details
-- **Analytics service** collects product usage telemetry and platform metrics for monitoring and improvement
+- **Sandbox manager** schedules sandboxes onto runners, reconciles states, and enforces sandbox lifecycle management policies. See [sandbox manager](#sandbox-manager) for details
+- **PostHog** collects platform analytics and usage metrics for monitoring and improvement
 
 To interact with sandboxes from the API, see the [API](/docs/en/tools/api) and [Toolbox API](/docs/en/tools/api#daytona-toolbox) references.
 
