@@ -348,6 +348,7 @@ export class Sandbox {
             SandboxState.ERROR,
             SandboxState.BUILD_FAILED,
             SandboxState.ARCHIVING,
+            SandboxState.PENDING_BUILD,
           ].includes(this.state)
         ) {
           break
