@@ -10,7 +10,13 @@
         "production": {
           "mode": "production"
         }
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "sdk-typescript"
+        }
+      ]
     },
     "format": {
       "executor": "nx:run-commands",
