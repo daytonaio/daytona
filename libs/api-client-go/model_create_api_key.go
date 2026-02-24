@@ -24,7 +24,7 @@ var _ MappedNullable = &CreateApiKey{}
 type CreateApiKey struct {
 	// The name of the API key
 	Name string `json:"name"`
-	// The list of organization resource permissions assigned to the API key
+	// The list of organization resource permissions explicitly assigned to the API key
 	Permissions []string `json:"permissions"`
 	// When the API key expires
 	ExpiresAt NullableTime `json:"expiresAt,omitempty"`
