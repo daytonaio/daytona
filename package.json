@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@astrojs/mdx": "2.2.4",
-    "@astrojs/node": "8.2.5",
+    "@astrojs/node": "9.5.4",
     "@astrojs/react": "^3.1.1",
     "@astrojs/starlight": "0.30.0",
     "@astrojs/starlight-tailwind": "^2.0.1",
@@ -113,7 +113,7 @@
     "@tanstack/react-query": "^5.90.1",
     "@tanstack/react-table": "^8.21.2",
     "algoliasearch": "^5.30.0",
-    "astro": "5.15.9",
+    "astro": "5.17.3",
     "astro-expressive-code": "^0.41.2",
     "axios": "^1.13.5",
     "axios-debug-log": "^1.0.0",
