@@ -258,7 +258,11 @@ export class OrganizationUserService {
     try {
       const cacheKeys = users.map((user) => getOrganizationUserCacheKey(organizationId, user.userId))
       if (cacheKeys.length > 0) {
-        await this.redis.del(...cacheKeys)
+        const BATCH_SIZE = 500
+        for (let i = 0; i < cacheKeys.length; i += BATCH_SIZE) {
+          const batch = cacheKeys.slice(i, i + BATCH_SIZE)
+          await this.redis.del(...batch)
+        }
       }
     } catch (error) {
       this.logger.error(`Failed to invalidate caches for organization ${organizationId}:`, error)
