@@ -54,7 +54,7 @@ const IMPLICIT_READ_RESOURCES = ['Sandboxes', 'Snapshots', 'Registries', 'Region
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   expiresAt: z.date().optional(),
-  permissions: z.array(z.enum(CreateApiKeyPermissionsEnum)).min(1, 'Select at least one permission'),
+  permissions: z.array(z.enum(CreateApiKeyPermissionsEnum)),
 })
 
 type FormValues = z.infer<typeof formSchema>
