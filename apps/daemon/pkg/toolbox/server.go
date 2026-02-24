@@ -239,85 +239,69 @@ func (s *server) Start() error {
 		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols(lspLogger))
 	}
 
-	// Initialize plugin-based computer use
-	pluginPath := "/usr/local/lib/daytona-computer-use"
-	// Fallback to local config directory for development
-	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
-		pluginPath = path.Join(s.configDir, "daytona-computer-use")
-	}
-	var err error
-	s.ComputerUse, err = manager.GetComputerUse(s.logger, pluginPath)
-	if err != nil {
-		s.logger.Error("Computer-Use error", "error", err)
-		s.logger.Info("Continuing without computer-use functionality...")
-	}
+	lazyCU := computeruse.NewLazyComputerUse()
+	s.ComputerUse = lazyCU
 
-	// Always register computer-use endpoints, but handle the case when plugin is nil
+	go func() {
+		// Initialize plugin-based computer use lazily in a background goroutine
+		pluginPath := "/usr/local/lib/daytona-computer-use"
+		// Fallback to local config directory for development
+		if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
+			pluginPath = path.Join(s.configDir, "daytona-computer-use")
+		}
+
+		impl, err := manager.GetComputerUse(s.logger, pluginPath)
+		if err != nil {
+			s.logger.Error("Computer-Use error", "error", err)
+			s.logger.Info("Continuing without computer-use functionality...")
+			return
+		}
+		lazyCU.Set(impl)
+		s.logger.Info("Computer-use plugin loaded successfully")
+	}()
+
+	// Register computer-use endpoints with lazy check middleware
 	computerUseController := r.Group("/computeruse")
 	{
-		if s.ComputerUse != nil {
-			computerUseHandler := computeruse.Handler{
-				ComputerUse: s.ComputerUse,
-			}
-
-			// Computer use status endpoint
-			computerUseController.GET("/status", computeruse.WrapStatusHandler(s.ComputerUse.GetStatus))
-
-			// Computer use management endpoints
-			computerUseController.POST("/start", computerUseHandler.StartComputerUse)
-			computerUseController.POST("/stop", computerUseHandler.StopComputerUse)
-			computerUseController.GET("/process-status", computerUseHandler.GetComputerUseStatus)
-			computerUseController.GET("/process/:processName/status", computerUseHandler.GetProcessStatus)
-			computerUseController.POST("/process/:processName/restart", computerUseHandler.RestartProcess)
-			computerUseController.GET("/process/:processName/logs", computerUseHandler.GetProcessLogs)
-			computerUseController.GET("/process/:processName/errors", computerUseHandler.GetProcessErrors)
-
-			// Screenshot endpoints
-			computerUseController.GET("/screenshot", computeruse.WrapScreenshotHandler(s.ComputerUse.TakeScreenshot))
-			computerUseController.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(s.ComputerUse.TakeRegionScreenshot))
-			computerUseController.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(s.ComputerUse.TakeCompressedScreenshot))
-			computerUseController.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(s.ComputerUse.TakeCompressedRegionScreenshot))
-
-			// Mouse control endpoints
-			computerUseController.GET("/mouse/position", computeruse.WrapMousePositionHandler(s.ComputerUse.GetMousePosition))
-			computerUseController.POST("/mouse/move", computeruse.WrapMoveMouseHandler(s.ComputerUse.MoveMouse))
-			computerUseController.POST("/mouse/click", computeruse.WrapClickHandler(s.ComputerUse.Click))
-			computerUseController.POST("/mouse/drag", computeruse.WrapDragHandler(s.ComputerUse.Drag))
-			computerUseController.POST("/mouse/scroll", computeruse.WrapScrollHandler(s.ComputerUse.Scroll))
-
-			// Keyboard control endpoints
-			computerUseController.POST("/keyboard/type", computeruse.WrapTypeTextHandler(s.ComputerUse.TypeText))
-			computerUseController.POST("/keyboard/key", computeruse.WrapPressKeyHandler(s.ComputerUse.PressKey))
-			computerUseController.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(s.ComputerUse.PressHotkey))
-
-			// Display info endpoints
-			computerUseController.GET("/display/info", computeruse.WrapDisplayInfoHandler(s.ComputerUse.GetDisplayInfo))
-			computerUseController.GET("/display/windows", computeruse.WrapWindowsHandler(s.ComputerUse.GetWindows))
-		} else {
-			// Register all endpoints with disabled middleware when plugin is not available
-			computerUseController.GET("/status", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/start", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/stop", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/process-status", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/status", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/process/:processName/restart", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/logs", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/process/:processName/errors", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/region", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/compressed", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/screenshot/region/compressed", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/mouse/position", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/move", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/click", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/drag", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/mouse/scroll", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/type", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/key", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.POST("/keyboard/hotkey", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/display/info", computeruse.ComputerUseDisabledMiddleware())
-			computerUseController.GET("/display/windows", computeruse.ComputerUseDisabledMiddleware())
+		computerUseHandler := computeruse.Handler{
+			ComputerUse: lazyCU,
 		}
+
+		cuRoutes := computerUseController.Group("/", computeruse.LazyCheckMiddleware(lazyCU))
+
+		// Computer use status endpoint
+		cuRoutes.GET("/status", computeruse.WrapStatusHandler(lazyCU.GetStatus))
+
+		// Computer use management endpoints
+		cuRoutes.POST("/start", computerUseHandler.StartComputerUse)
+		cuRoutes.POST("/stop", computerUseHandler.StopComputerUse)
+		cuRoutes.GET("/process-status", computerUseHandler.GetComputerUseStatus)
+		cuRoutes.GET("/process/:processName/status", computerUseHandler.GetProcessStatus)
+		cuRoutes.POST("/process/:processName/restart", computerUseHandler.RestartProcess)
+		cuRoutes.GET("/process/:processName/logs", computerUseHandler.GetProcessLogs)
+		cuRoutes.GET("/process/:processName/errors", computerUseHandler.GetProcessErrors)
+
+		// Screenshot endpoints
+		cuRoutes.GET("/screenshot", computeruse.WrapScreenshotHandler(lazyCU.TakeScreenshot))
+		cuRoutes.GET("/screenshot/region", computeruse.WrapRegionScreenshotHandler(lazyCU.TakeRegionScreenshot))
+		cuRoutes.GET("/screenshot/compressed", computeruse.WrapCompressedScreenshotHandler(lazyCU.TakeCompressedScreenshot))
+		cuRoutes.GET("/screenshot/region/compressed", computeruse.WrapCompressedRegionScreenshotHandler(lazyCU.TakeCompressedRegionScreenshot))
+
+		// Mouse control endpoints
+		cuRoutes.GET("/mouse/position", computeruse.WrapMousePositionHandler(lazyCU.GetMousePosition))
+		cuRoutes.POST("/mouse/move", computeruse.WrapMoveMouseHandler(lazyCU.MoveMouse))
+		cuRoutes.POST("/mouse/click", computeruse.WrapClickHandler(lazyCU.Click))
+		cuRoutes.POST("/mouse/drag", computeruse.WrapDragHandler(lazyCU.Drag))
+		cuRoutes.POST("/mouse/scroll", computeruse.WrapScrollHandler(lazyCU.Scroll))
+
+		// Keyboard control endpoints
+		cuRoutes.POST("/keyboard/type", computeruse.WrapTypeTextHandler(lazyCU.TypeText))
+		cuRoutes.POST("/keyboard/key", computeruse.WrapPressKeyHandler(lazyCU.PressKey))
+		cuRoutes.POST("/keyboard/hotkey", computeruse.WrapPressHotkeyHandler(lazyCU.PressHotkey))
+
+		// Display info endpoints
+		cuRoutes.GET("/display/info", computeruse.WrapDisplayInfoHandler(lazyCU.GetDisplayInfo))
+		cuRoutes.GET("/display/windows", computeruse.WrapWindowsHandler(lazyCU.GetWindows))
 	}
 
 	// Recording endpoints - always registered, independent of computer-use plugin
