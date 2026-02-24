@@ -855,6 +855,19 @@ export class RunnerService {
     return await this.findOneOrFail(snapshot.initialRunnerId)
   }
 
+  async getRunnerApiVersion(runnerId: string): Promise<string> {
+    const result = await this.runnerRepository.findOneOrFail({
+      select: ['apiVersion'],
+      where: { id: runnerId },
+      cache: {
+        id: `runner:apiVersion:${runnerId}`,
+        milliseconds: 60 * 60 * 1000, // Cache for 1 hour
+      },
+    })
+
+    return result.apiVersion
+  }
+
   private async updateRunner(
     id: string,
     data: Partial<Omit<Runner, 'id' | 'createdAt' | 'updatedAt'>>,
