@@ -9036,8 +9036,8 @@ components:
           example: My API Key
           type: string
         permissions:
-          description: The list of organization resource permissions assigned to the
-            API key
+          description: The list of organization resource permissions explicitly assigned
+            to the API key
           items:
             enum:
             - write:registries

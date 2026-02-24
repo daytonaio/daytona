@@ -29,7 +29,7 @@ class CreateApiKey(BaseModel):
     CreateApiKey
     """ # noqa: E501
     name: StrictStr = Field(description="The name of the API key")
-    permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
+    permissions: List[StrictStr] = Field(description="The list of organization resource permissions explicitly assigned to the API key")
     expires_at: Optional[datetime] = Field(default=None, description="When the API key expires", serialization_alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "permissions", "expiresAt"]

@@ -18,7 +18,7 @@ module DaytonaApiClient
     # The name of the API key
     attr_accessor :name
 
-    # The list of organization resource permissions assigned to the API key
+    # The list of organization resource permissions explicitly assigned to the API key
     attr_accessor :permissions
 
     # When the API key expires

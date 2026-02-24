@@ -27,7 +27,7 @@ export interface CreateApiKey {
      */
     'name': string;
     /**
-     * The list of organization resource permissions assigned to the API key
+     * The list of organization resource permissions explicitly assigned to the API key
      * @type {Array<string>}
      * @memberof CreateApiKey
      */
