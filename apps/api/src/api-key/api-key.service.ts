@@ -194,8 +194,13 @@ export class ApiKeyService {
     try {
       const validationCacheKeys = apiKeys.map((apiKey) => getApiKeyValidationCacheKey(apiKey.keyHash))
       const userCacheKeys = apiKeys.map((apiKey) => getApiKeyUserCacheKey(apiKey.userId))
-      if (validationCacheKeys.length > 0 || userCacheKeys.length > 0) {
-        await this.redis.del(...validationCacheKeys, ...userCacheKeys)
+      const allKeys = [...validationCacheKeys, ...userCacheKeys]
+      if (allKeys.length > 0) {
+        const BATCH_SIZE = 500
+        for (let i = 0; i < allKeys.length; i += BATCH_SIZE) {
+          const batch = allKeys.slice(i, i + BATCH_SIZE)
+          await this.redis.del(...batch)
+        }
       }
     } catch (error) {
       this.logger.error(`Failed to invalidate API key caches for organization ${organizationId}:`, error)
