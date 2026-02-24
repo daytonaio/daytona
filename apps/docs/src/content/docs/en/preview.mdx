@@ -15,13 +15,17 @@ Daytona supports two types of preview URLs, each with a different authentication
 
 If a sandbox has its `public` property set to `true`, preview links are publicly accessible without authentication. Otherwise, authentication is required. The authentication mechanism depends on the preview URL type.
 
+:::note
+Standard and signed preview tokens are not interchangeable. The token from `get_preview_link()` must be sent via the `x-daytona-preview-token` header. The token from `create_signed_preview_url()` is embedded in the URL itself: it cannot be used as a header value, and vice versa.
+:::
+
 ## Standard preview URL
 
 The standard preview URL includes your sandbox ID in the URL and provides a separate token for authentication via the `x-daytona-preview-token` request header.
 
 URL structure: `https://{port}-{sandboxId}.{daytonaProxyDomain}`
 
-The token resets automatically when the sandbox restarts. Use standard preview URLs for programmatic access and API integrations where you control the HTTP headers.
+The token resets automatically when the sandbox restarts. Any previously issued standard preview tokens become invalid. Call the `get_preview_link()` method again after starting the sandbox to obtain a fresh token. Use standard preview URLs for programmatic access and API integrations where you control the HTTP headers.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -106,6 +110,10 @@ curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 ## Signed preview URL
 
 The signed preview URL embeds the authentication token directly in the URL, eliminating the need for separate headers. You can set a custom expiry time for the token (defaults to 60 seconds). The token persists across sandbox restarts until it expires. Tokens can be revoked manually before expiry if needed.
+
+:::tip
+Always set the `expires_in_seconds` parameter explicitly. The default of 60 seconds is short due to security considerations. Most use cases should use at least 3600 (1 hour).
+:::
 
 URL structure: `https://{port}-{token}.{daytonaProxyDomain}`
 
