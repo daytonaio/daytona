@@ -101,7 +101,7 @@ export function parseDockerImage(imageName: string): DockerImage {
   }
 
   // Check if first part looks like a registry (contains '.' or ':')
-  if (parts.length >= 3) {
+  if (parts.length >= 2 && (parts[0].includes('.') || parts[0].includes(':'))) {
     result.registry = parts[0]
     parts.shift() // Remove registry part
   }
