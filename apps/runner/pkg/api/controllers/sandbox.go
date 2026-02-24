@@ -279,7 +279,7 @@ func Start(ctx *gin.Context) {
 		authToken = &tokenQuery
 	}
 
-	daemonVersion, err := runner.Docker.Start(ctx.Request.Context(), sandboxId, authToken, metadata)
+	_, daemonVersion, err := runner.Docker.Start(ctx.Request.Context(), sandboxId, authToken, metadata)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)

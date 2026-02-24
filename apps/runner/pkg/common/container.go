@@ -9,7 +9,11 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func GetContainerIpAddress(ctx context.Context, container container.InspectResponse) string {
+func GetContainerIpAddress(ctx context.Context, container *container.InspectResponse) string {
+	if container.NetworkSettings == nil {
+		return ""
+	}
+
 	if container.NetworkSettings.Networks == nil {
 		return ""
 	}

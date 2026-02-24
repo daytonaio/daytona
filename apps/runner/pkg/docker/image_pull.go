@@ -21,7 +21,7 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) error {
+func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) (*image.InspectResponse, error) {
 	defer timer.Timer()()
 
 	tag := "latest"
@@ -31,13 +31,9 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 
 	if tag != "latest" {
-		exists, err := d.ImageExists(ctx, imageName, true)
-		if err != nil {
-			return err
-		}
-
-		if exists {
-			return nil
+		inspect, err := d.apiClient.ImageInspect(ctx, imageName)
+		if err == nil {
+			return &inspect, nil
 		}
 	}
 
@@ -55,18 +51,23 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		Platform:     "linux/amd64",
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer responseBody.Close()
 
 	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&log.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	d.logger.InfoContext(ctx, "Image pulled successfully", "imageName", imageName)
 
-	return nil
+	inspect, err := d.apiClient.ImageInspect(ctx, imageName)
+	if err != nil {
+		return nil, err
+	}
+
+	return &inspect, nil
 }
 
 func getRegistryAuth(reg *dto.RegistryDTO) string {

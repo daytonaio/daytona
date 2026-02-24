@@ -141,7 +141,7 @@ func run() int {
 
 	statesCache := cache.GetStatesCache(ctx, cfg.CacheRetentionDays)
 
-	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+	dockerClient, err := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:                    cli,
 		StatesCache:                  statesCache,
 		Logger:                       logger,
@@ -160,6 +160,10 @@ func run() int {
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
 	})
+	if err != nil {
+		logger.Error("Error creating Docker client wrapper", "error", err)
+		return 2
+	}
 
 	// Start Docker events monitor
 	monitorOpts := docker.MonitorOptions{

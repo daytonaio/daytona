@@ -4,6 +4,8 @@
 package docker
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -35,7 +37,7 @@ type DockerClientConfig struct {
 	InitializeDaemonTelemetry    bool
 }
 
-func NewDockerClient(config DockerClientConfig) *DockerClient {
+func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 	logger := slog.Default().With(slog.String("component", "docker-client"))
 	if config.Logger != nil {
 		logger = config.Logger.With(slog.String("component", "docker-client"))
@@ -54,6 +56,20 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 	if config.BackupTimeoutMin <= 0 {
 		logger.Warn("Invalid backup timeout value. Using default value of 60 minutes")
 		config.BackupTimeoutMin = 60
+	}
+
+	info, err := config.ApiClient.Info(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get Docker info: %w", err)
+	}
+
+	filesystem := ""
+
+	for _, driver := range info.DriverStatus {
+		if driver[0] == "Backing Filesystem" {
+			filesystem = driver[1]
+			break
+		}
 	}
 
 	return &DockerClient{
@@ -77,7 +93,8 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		volumeCleanupExclusionPeriod: config.VolumeCleanupExclusionPeriod,
 		backupTimeoutMin:             config.BackupTimeoutMin,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
-	}
+		filesystem:                   filesystem,
+	}, nil
 }
 
 func (d *DockerClient) ApiClient() client.APIClient {
@@ -108,4 +125,5 @@ type DockerClient struct {
 	volumeCleanupMutex           sync.Mutex
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool
+	filesystem                   string
 }
