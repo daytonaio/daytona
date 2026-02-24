@@ -457,7 +457,7 @@ export class SnapshotService {
       return `${this.configService.getOrThrow('proxy.protocol')}://${this.configService.getOrThrow('proxy.domain')}/snapshots/${snapshot.id}/build-logs`
     }
 
-    return region.proxyUrl + '/snapshots/' + snapshot.id + '/build-logs'
+    return region.proxyUrl.replace(/\/+$/, '') + '/snapshots/' + snapshot.id + '/build-logs'
   }
 
   private async validateOrganizationQuotas(

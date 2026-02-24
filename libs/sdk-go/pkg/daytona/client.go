@@ -304,7 +304,7 @@ func (c *Client) handleAPIError(err error, httpResp *http.Response) error {
 // createToolboxClient creates a configured toolbox client for a specific sandbox.
 func (c *Client) createToolboxClient(proxyURL string, sandboxID string) (*toolbox.APIClient, error) {
 	// Construct full toolbox URL for this sandbox
-	toolboxURL := fmt.Sprintf("%s/%s", proxyURL, sandboxID)
+	toolboxURL := fmt.Sprintf("%s/%s", strings.TrimRight(proxyURL, "/"), sandboxID)
 
 	cfg := toolbox.NewConfiguration()
 	cfg.Host = common.ExtractHost(toolboxURL)

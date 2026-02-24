@@ -78,7 +78,7 @@ import { Redis } from 'ioredis'
 import {
   SANDBOX_LOOKUP_CACHE_TTL_MS,
   SANDBOX_ORG_ID_CACHE_TTL_MS,
-  TOOLBOX_PROXY_URL_CACHE_TTL_MS,
+  TOOLBOX_PROXY_URL_CACHE_TTL_S,
   sandboxLookupCacheKeyById,
   sandboxLookupCacheKeyByName,
   sandboxOrgIdCacheKeyById,
@@ -1642,7 +1642,13 @@ export class SandboxService {
 
   async toSandboxDtos(sandboxes: Sandbox[]): Promise<SandboxDto[]> {
     const urlMap = await this.resolveToolboxProxyUrls(sandboxes.map((s) => s.region))
-    return sandboxes.map((s) => SandboxDto.fromSandbox(s, urlMap.get(s.region) as string))
+    return sandboxes.map((s) => {
+      const url = urlMap.get(s.region)
+      if (!url) {
+        throw new NotFoundException(`Toolbox proxy URL not resolved for region ${s.region}`)
+      }
+      return SandboxDto.fromSandbox(s, url)
+    })
   }
 
   async resolveToolboxProxyUrl(regionId: string): Promise<string> {
@@ -1654,10 +1660,10 @@ export class SandboxService {
 
     const region = await this.regionService.findOne(regionId)
     const url = region?.toolboxProxyUrl
-      ? region.toolboxProxyUrl + '/toolbox'
+      ? region.toolboxProxyUrl.replace(/\/+$/, '') + '/toolbox'
       : this.configService.getOrThrow('proxy.toolboxUrl')
 
-    await this.redis.setex(cacheKey, TOOLBOX_PROXY_URL_CACHE_TTL_MS, url)
+    await this.redis.setex(cacheKey, TOOLBOX_PROXY_URL_CACHE_TTL_S, url)
     return url
   }
 
@@ -1673,6 +1679,10 @@ export class SandboxService {
 
     const uncached: string[] = []
     for (let i = 0; i < unique.length; i++) {
+      const err = cached?.[i]?.[0]
+      if (err) {
+        this.logger.warn(`Failed to get cached toolbox proxy URL for region ${unique[i]}: ${err.message}`)
+      }
       const val = cached?.[i]?.[1] as string | null
       if (val) {
         result.set(unique[i], val)
@@ -1688,11 +1698,16 @@ export class SandboxService {
       const setPipeline = this.redis.pipeline()
       for (const id of uncached) {
         const region = regionMap.get(id)
-        const url = region?.toolboxProxyUrl ? region.toolboxProxyUrl + '/toolbox' : fallback
+        const url = region?.toolboxProxyUrl ? region.toolboxProxyUrl.replace(/\/+$/, '') + '/toolbox' : fallback
         result.set(id, url)
-        setPipeline.setex(toolboxProxyUrlCacheKey(id), TOOLBOX_PROXY_URL_CACHE_TTL_MS, url)
+        setPipeline.setex(toolboxProxyUrlCacheKey(id), TOOLBOX_PROXY_URL_CACHE_TTL_S, url)
       }
-      await setPipeline.exec()
+      const setResults = await setPipeline.exec()
+      setResults?.forEach(([err], i) => {
+        if (err) {
+          this.logger.warn(`Failed to cache toolbox proxy URL for region ${uncached[i]}: ${err.message}`)
+        }
+      })
     }
 
     return result

@@ -267,7 +267,9 @@ export class RegionService {
       await em.remove(region)
     })
 
-    await this.redis.del(toolboxProxyUrlCacheKey(id))
+    this.redis.del(toolboxProxyUrlCacheKey(id)).catch((err) => {
+      this.logger.warn(`Failed to invalidate toolbox proxy URL cache for region ${id}: ${err.message}`)
+    })
   }
 
   async update(regionId: string, updateRegion: UpdateRegionDto): Promise<void> {
@@ -332,7 +334,9 @@ export class RegionService {
     })
 
     if (updateRegion.proxyUrl !== undefined) {
-      await this.redis.del(toolboxProxyUrlCacheKey(regionId))
+      this.redis.del(toolboxProxyUrlCacheKey(regionId)).catch((err) => {
+        this.logger.warn(`Failed to invalidate toolbox proxy URL cache for region ${regionId}: ${err.message}`)
+      })
     }
   }
 
