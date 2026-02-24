@@ -51,6 +51,7 @@ type Config struct {
 	BackupTimeoutMin                   int           `envconfig:"BACKUP_TIMEOUT_MIN" default:"60" validate:"min=1"`
 	ApiVersion                         int           `envconfig:"API_VERSION" default:"2"`
 	InitializeDaemonTelemetry          bool          `envconfig:"INITIALIZE_DAEMON_TELEMETRY" default:"true"`
+	SnapshotErrorCacheRetention        time.Duration `envconfig:"SNAPSHOT_ERROR_CACHE_RETENTION" default:"10m" validate:"min=5m"`
 }
 
 var DEFAULT_API_PORT int = 8080

@@ -34,6 +34,7 @@ import {
   InspectSnapshotInRegistryRequest,
   RecoverSandboxDTO,
 } from '@daytonaio/runner-api-client'
+import { SnapshotStateError } from '../errors/snapshot-state-error'
 
 /**
  * RunnerAdapterV2 implements RunnerAdapter for v2 runners.
@@ -443,7 +444,9 @@ export class RunnerAdapterV2 implements RunnerAdapter {
           `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,
         )
       case JobStatus.FAILED:
-        throw new Error(`Snapshot ${snapshotRef} failed to build on runner ${this.runner.id}`)
+        throw new SnapshotStateError(
+          latestJob.errorMessage || `Snapshot ${snapshotRef} failed on runner ${this.runner.id}`,
+        )
       default:
         throw new Error(
           `Snapshot ${snapshotRef} is in an unknown state (${latestJob.status}) on runner ${this.runner.id}`,

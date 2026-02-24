@@ -1047,7 +1047,8 @@ paths:
         - toolbox
   /snapshots/build:
     post:
-      description: Build a snapshot from a Dockerfile and context hashes
+      description: Build a snapshot from a Dockerfile and context hashes. The operation
+        runs asynchronously and returns 202 immediately.
       operationId: BuildSnapshot
       parameters:
         - description: Build snapshot request
@@ -1057,8 +1058,8 @@ paths:
           schema:
             $ref: '#/definitions/BuildSnapshotRequestDTO'
       responses:
-        '200':
-          description: Snapshot successfully built
+        '202':
+          description: Snapshot build started
           schema:
             type: string
         '400':
@@ -1126,7 +1127,9 @@ paths:
         - snapshots
   /snapshots/info:
     get:
-      description: Get information about a specified snapshot including size and entrypoint
+      description: Get information about a specified snapshot including size and entrypoint.
+        Returns 422 if the last pull/build operation failed, with the error reason
+        in the message.
       operationId: GetSnapshotInfo
       parameters:
         - description: Snapshot name and tag
@@ -1151,6 +1154,10 @@ paths:
             $ref: '#/definitions/ErrorResponse'
         '404':
           description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '422':
+          description: Unprocessable Entity
           schema:
             $ref: '#/definitions/ErrorResponse'
         '500':
@@ -1238,7 +1245,7 @@ paths:
   /snapshots/pull:
     post:
       description: Pull a snapshot from a registry and optionally push to another
-        registry
+        registry. The operation runs asynchronously and returns 202 immediately.
       operationId: PullSnapshot
       parameters:
         - description: Pull snapshot
@@ -1248,8 +1255,8 @@ paths:
           schema:
             $ref: '#/definitions/PullSnapshotRequestDTO'
       responses:
-        '200':
-          description: Snapshot successfully pulled
+        '202':
+          description: Snapshot pull started
           schema:
             type: string
         '400':

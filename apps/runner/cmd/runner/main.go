@@ -158,12 +158,13 @@ func main() {
 	metricsCollector.Start(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		StatesCache:       statesCache,
-		Docker:            dockerClient,
-		SandboxService:    sandboxService,
-		MetricsCollector:  metricsCollector,
-		NetRulesManager:   netRulesManager,
-		SSHGatewayService: sshGatewayService,
+		StatesCache:        statesCache,
+		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
+		Docker:             dockerClient,
+		SandboxService:     sandboxService,
+		MetricsCollector:   metricsCollector,
+		NetRulesManager:    netRulesManager,
+		SSHGatewayService:  sshGatewayService,
 	})
 
 	if cfg.ApiVersion == 2 {
@@ -225,7 +226,7 @@ func main() {
 	apiServerErrChan := make(chan error)
 
 	go func() {
-		err := apiServer.Start()
+		err := apiServer.Start(ctx)
 		apiServerErrChan <- err
 	}()
 
