@@ -2,22 +2,20 @@
 title: Architecture
 ---
 
-Daytona provides **full composable computers** — [sandboxes](/docs/en/sandboxes) — for AI agents. Daytona platform is organized into multiple components:
+Daytona provides **full composable computers** — [sandboxes](/docs/en/sandboxes) — for AI agents. Daytona platform is organized into multiple plane components, each serving a specific purpose:
 
 - [Interface plane](#interface-plane) provides client interfaces for interacting with Daytona
 - [Control plane](#control-plane) orchestrates all sandbox operations
 - [Compute plane](#compute-plane) runs and manages sandbox instances
-- [Container registry](#container-registry) serves as the source for base images when building sandbox snapshots
 
 ### Interface plane
 
 The interface plane provides client interfaces for users and agents to interact with Daytona. The following components are part of the interface plane and available to all users and agents:
 
-- **SDK**: [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), and [Go](/docs/en/go-sdk) SDKs for programmatic sandbox management
+- **SDK**: [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk), and [Go](/docs/en/go-sdk) for programmatic sandbox management
 - [CLI](/docs/en/tools/cli): command-line interface for direct sandbox operations
 - [Dashboard](https://app.daytona.io/dashboard/): web interface for visual sandbox management and monitoring
 - [MCP](/docs/en/mcp): Model Context Protocol server for AI tool integration
-- **Browser**: direct browser access to services running inside sandboxes via [preview](/docs/en/preview)
 - [SSH](/docs/en/ssh-access): secure shell access to running sandboxes
 
 ### Control plane
@@ -35,11 +33,11 @@ The API is a NestJS-based RESTful service that serves as the primary entry point
 
 The API integrates the following internal services and components:
 
-- **PostgreSQL** serves as the primary persistent store for metadata and configuration
 - **Redis** provides caching, session management, and distributed locking
-- **Auth0/OIDC provider** authenticates users and services via OpenID Connect (OIDC). Interactive user sessions use JWT tokens issued through the OIDC flow, while programmatic access uses API keys with bearer tokens. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary
+- **PostgreSQL** serves as the primary persistent store for metadata and configuration
+- **Auth0/OIDC provider** authenticates users and services via OpenID Connect. The API enforces organization-level multi-tenancy, where each sandbox, snapshot, and volume belongs to an organization, and access control is applied at the organization boundary
 - **SMTP server** handles email delivery for organization invitations, account notifications, and alert messages
-- **Sandbox manager** schedules sandboxes onto runners, reconciles states, and enforces sandbox lifecycle management policies. See [sandbox manager](#sandbox-manager) for details
+- [Sandbox manager](#sandbox-manager) schedules sandboxes onto runners, reconciles states, and enforces sandbox lifecycle management policies
 - **PostHog** collects platform analytics and usage metrics for monitoring and improvement
 
 To interact with sandboxes from the API, see the [API](/docs/en/tools/api) and [Toolbox API](/docs/en/tools/api#daytona-toolbox) references.
@@ -69,7 +67,7 @@ The compute plane consists of the following components:
 - [Sandbox runners](#sandbox-runners) host sandboxes with dedicated resources
 - [Sandbox daemon](#sandbox-daemon) provides code execution and environment access inside each sandbox
 - [Snapshot store](#snapshot-store) stores sandbox snapshot images
-- [Volumes (S3 object store)](#volumes-s3-object-store) provides persistent storage shared across sandboxes
+- [Volumes](#volumes) provides persistent storage shared across sandboxes
 
 Each runner registers with the control plane and is assigned to a [region](/docs/en/regions), which determines the geographic locality of the sandboxes it hosts. Regions can be shared across all organizations or dedicated to a single organization for workload isolation. Runners within a region scale horizontally: new runners can be added to increase capacity, and runners can be drained and decommissioned gracefully by migrating their sandboxes to other available runners in the same region.
 
@@ -89,7 +87,7 @@ Each sandbox daemon manages a Docker Engine container runtime, enabling sandboxe
 
 The snapshot store is an internal OCI-compliant registry that stores sandbox snapshot images using the OCI distribution specification. Runners pull snapshot images from this store when creating new sandboxes. The store uses S3-compatible object storage as its backend.
 
-#### Volumes (S3 object store)
+#### Volumes
 
 [Volumes](/docs/en/volumes) provide persistent storage that can be shared across sandboxes. Each volume is backed by S3-compatible object storage and mounted into sandbox containers as a read-write directory. Multiple sandboxes can mount the same volume simultaneously, allowing data to be shared across sandboxes and persist independently of the sandbox lifecycle.
 
