@@ -294,7 +294,7 @@ export class SandboxService {
 
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { pending: false, state: SandboxState.STOPPED },
+      whereCondition: { pending: Not(true), state: SandboxState.STOPPED },
     })
 
     this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(updatedSandbox))
@@ -1238,7 +1238,7 @@ export class SandboxService {
 
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { pending: false, state: sandbox.state },
+      whereCondition: { pending: Not(true), state: sandbox.state },
     })
 
     this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(updatedSandbox))
@@ -1307,7 +1307,7 @@ export class SandboxService {
 
       const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
         updateData,
-        whereCondition: { pending: false, state: sandbox.state },
+        whereCondition: { pending: Not(true), state: sandbox.state },
       })
 
       this.eventEmitter.emit(SandboxEvents.STARTED, new SandboxStartedEvent(updatedSandbox))
@@ -1349,7 +1349,7 @@ export class SandboxService {
 
     const updatedSandbox = await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { pending: false, state: sandbox.state },
+      whereCondition: { pending: Not(true), state: sandbox.state },
     })
 
     if (sandbox.autoDeleteInterval === 0) {
@@ -1544,7 +1544,7 @@ export class SandboxService {
 
       await this.sandboxRepository.updateWhere(sandbox.id, {
         updateData,
-        whereCondition: { pending: false, state: previousState },
+        whereCondition: { pending: Not(true), state: previousState },
       })
 
       try {
@@ -1861,7 +1861,7 @@ export class SandboxService {
 
     await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { pending: false, state: oldState, desiredState: oldDesiredState },
+      whereCondition: { pending: Not(true), state: oldState, desiredState: oldDesiredState },
     })
   }
 

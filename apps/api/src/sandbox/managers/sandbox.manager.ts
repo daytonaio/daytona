@@ -134,7 +134,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               try {
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
-                  whereCondition: { pending: false, state: sandbox.state },
+                  whereCondition: { pending: Not(true), state: sandbox.state },
                 })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
@@ -192,7 +192,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
             await this.sandboxRepository.updateWhere(sandbox.id, {
               updateData,
-              whereCondition: { pending: false, state: sandbox.state },
+              whereCondition: { pending: Not(true), state: sandbox.state },
             })
 
             this.syncInstanceState(sandbox.id).catch(this.logger.error)
@@ -253,7 +253,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
                 const updateData = Sandbox.getSoftDeleteUpdate(sandbox)
                 await this.sandboxRepository.updateWhere(sandbox.id, {
                   updateData,
-                  whereCondition: { pending: false, state: sandbox.state },
+                  whereCondition: { pending: Not(true), state: sandbox.state },
                 })
 
                 this.syncInstanceState(sandbox.id).catch(this.logger.error)
