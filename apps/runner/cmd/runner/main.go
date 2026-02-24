@@ -168,12 +168,12 @@ func run() int {
 		},
 	}
 	monitor := docker.NewDockerMonitor(logger, cli, netRulesManager, monitorOpts)
+	monitorErrChan := make(chan error)
 	go func() {
 		logger.Info("Starting Docker monitor")
 		err = monitor.Start()
 		if err != nil {
-			logger.Error("Failed to start Docker events monitor", "error", err)
-			return
+			monitorErrChan <- err
 		}
 	}()
 	defer monitor.Stop()
@@ -300,5 +300,8 @@ func run() int {
 		apiServer.Stop()
 		logger.Info("Shutdown complete")
 		return 143 // SIGTERM
+	case err := <-monitorErrChan:
+		logger.Error("Docker monitor error", "error", err)
+		return 1
 	}
 }
