@@ -35,7 +35,7 @@ The control plane includes the following components:
 
 #### API
 
-The API provides a RESTful interface for interacting with Daytona platform, including managing authentication, sandbox lifecycle, resource allocation. 
+The API provides a RESTful interface for interacting with Daytona platform, including managing authentication, sandbox lifecycle, resource allocation.
 
 Daytona API is a platform-level interface for managing authentication, sandbox lifecycle, snapshots, volumes, and resource allocation. Toolbox API runs inside each sandbox and provides direct access to the sandbox environment: file system and Git operations, process and code execution, computer use, log streaming, and terminal sessions.
 
@@ -63,7 +63,7 @@ Sandbox lifecycle policies enforce [auto-stop](/docs/en/sandboxes#auto-stop-inte
 
 ### Compute plane
 
-The compute plane is an infrastructure layer where sandboxes run. Sandboxes run on [runners](#sandbox-runners), compute nodes that host multiple sandboxes with dedicated resources and scale horizontally across shared or dedicated [regions](/docs/en/regions). 
+The compute plane is an infrastructure layer where sandboxes run. Sandboxes run on [runners](#sandbox-runners), compute nodes that host multiple sandboxes with dedicated resources and scale horizontally across shared or dedicated [regions](/docs/en/regions).
 
 The compute plane consists of the following components:
 
@@ -77,9 +77,7 @@ Each runner registers with the control plane and is assigned to a [region](/docs
 
 Runners are machines that power Daytona's compute plane, providing the underlying infrastructure for running sandbox workloads. Each runner exposes an API that the control plane calls to create, start, stop, destroy, resize, and back up sandboxes.
 
-Each sandbox runs as an isolated container with its own Linux namespaces for processes, network, filesystem mounts, and inter-process communication. The base snapshot image provides a shared read-only filesystem layer, and each sandbox gets its own copy-on-write layer for runtime changes, ensuring sandboxes cannot modify each other's filesystems or the underlying snapshot.
-
-Runners report health metrics to the control plane at regular intervals. These metrics are used by the [sandbox manager](#sandbox-manager) for scheduling decisions. Backups are performed by committing the sandbox to a snapshot image, allowing archived sandboxes to be restored on any available runner.
+Each sandbox runs as an isolated container with its own Linux namespaces for processes, network, filesystem mounts, and inter-process communication. The base snapshot image provides a shared read-only filesystem layer, and each sandbox gets its own copy-on-write layer for runtime changes, ensuring sandboxes cannot modify each other's filesystems or the underlying snapshot. Backups are performed by committing the sandbox to a snapshot image, allowing archived sandboxes to be restored on any available runner.
 
 #### Snapshot store
 
@@ -89,13 +87,13 @@ The snapshot store implements the full Docker registry V2 API, supporting manife
 
 #### Volumes (S3 object store)
 
-[Volumes](/docs/en/volumes) provide persistent storage that can be shared across sandboxes. Each volume is backed by S3-compatible object storage and mounted into sandbox containers as a read-write directory. Multiple sandboxes can mount the same volume simultaneously, allowing data to be shared across sandboxes and persist independently of the sandbox lifecycle. 
+[Volumes](/docs/en/volumes) provide persistent storage that can be shared across sandboxes. Each volume is backed by S3-compatible object storage and mounted into sandbox containers as a read-write directory. Multiple sandboxes can mount the same volume simultaneously, allowing data to be shared across sandboxes and persist independently of the sandbox lifecycle.
 
-Volumes are mounted into sandbox containers using FUSE (Filesystem in Userspace), which translates filesystem operations into S3 API calls transparently. Each volume supports optional subpath mounting, allowing different sandboxes to access different subdirectories within the same underlying storage. 
+Volumes are mounted into sandbox containers using FUSE (Filesystem in Userspace), which translates filesystem operations into S3 API calls transparently. Each volume supports optional subpath mounting, allowing different sandboxes to access different subdirectories within the same underlying storage.
 
 Concurrent access is coordinated through per-volume locking to prevent race conditions during mount and unmount operations, and a periodic cleanup service removes stale mounts to free system resources.
 
-For more details on sandbox isolation, resource management, and the file system model, see [sandbox architecture](/docs/en/sandboxes).
+For more details on sandbox isolation, resource management, and the file system model, see [sandboxes](/docs/en/sandboxes).
 
 ### Container registry
 
