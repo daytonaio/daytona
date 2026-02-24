@@ -4,10 +4,9 @@
 package timer
 
 import (
+	"log/slog"
 	"runtime"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // callerName returns the name of the function skip frames up the call stack.
@@ -25,7 +24,7 @@ func callerName(skip int) string {
 	return frame.Function
 }
 
-// Timer returns a function that prints (on trace level) the name of the calling
+// Timer returns a function that logs (at debug level) the name of the calling
 // function and the elapsed time between the call to Timer and
 // the call to the returned function. The returned function is
 // intended to be used in a defer statement:
@@ -35,6 +34,6 @@ func Timer() func() {
 	name := callerName(1)
 	start := time.Now()
 	return func() {
-		log.Tracef("%s took %v", name, time.Since(start))
+		slog.Debug("function timing", "function", name, "duration", time.Since(start))
 	}
 }

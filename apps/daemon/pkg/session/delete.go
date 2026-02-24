@@ -12,8 +12,6 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/shirou/gopsutil/v4/process"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SessionService) Delete(ctx context.Context, sessionId string) error {
@@ -25,7 +23,7 @@ func (s *SessionService) Delete(ctx context.Context, sessionId string) error {
 	// Terminate process group first with signals (SIGTERM -> SIGKILL)
 	err := s.terminateSession(ctx, session)
 	if err != nil {
-		log.Errorf("Failed to terminate session %s: %v", session.id, err)
+		s.logger.ErrorContext(ctx, "Failed to terminate session", "sessionId", session.id, "error", err)
 		// Continue with cleanup even if termination fails
 	}
 
@@ -54,18 +52,18 @@ func (s *SessionService) terminateSession(ctx context.Context, session *session)
 	err := session.cmd.Process.Signal(syscall.SIGTERM)
 	if err != nil {
 		// If SIGTERM fails, try SIGKILL immediately
-		log.Warnf("SIGTERM failed for session %s, trying SIGKILL: %v", session.id, err)
+		s.logger.WarnContext(ctx, "SIGTERM failed for session, trying SIGKILL", "sessionId", session.id, "error", err)
 		_ = s.signalProcessTree(pid, syscall.SIGKILL)
 		return session.cmd.Process.Kill()
 	}
 
 	// Wait for graceful termination
 	if s.waitForTermination(ctx, pid, s.terminationGracePeriod, s.terminationCheckInterval) {
-		log.Debugf("Session %s terminated gracefully", session.id)
+		s.logger.DebugContext(ctx, "Session terminated gracefully", "sessionId", session.id)
 		return nil
 	}
 
-	log.Debugf("Session %s timeout, sending SIGKILL to process tree", session.id)
+	s.logger.DebugContext(ctx, "Session timeout, sending SIGKILL to process tree", "sessionId", session.id)
 	_ = s.signalProcessTree(pid, syscall.SIGKILL)
 	return session.cmd.Process.Kill()
 }

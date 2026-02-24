@@ -104,7 +104,7 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		default:
 			metrics, err := c.collect(ctx)
 			if err != nil {
-				c.log.Warn("Failed to collect metrics", slog.Any("error", err))
+				c.log.WarnContext(ctx, "Failed to collect metrics", "error", err)
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -185,13 +185,13 @@ func (c *Collector) snapshotCPUUsage(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			c.log.Info("CPU usage snapshotting stopped")
+			c.log.InfoContext(ctx, "CPU usage snapshotting stopped")
 			return
 		case <-ticker.C:
 			// Add a new CPU snapshot to the ring buffer
 			cpuPercent, err := cpu.PercentWithContext(ctx, 0, false)
 			if err != nil {
-				c.log.Warn("Failed to collect next CPU usage ring", slog.Any("error", err))
+				c.log.WarnContext(ctx, "Failed to collect next CPU usage ring", "error", err)
 				continue
 			}
 
@@ -240,12 +240,12 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			c.log.Info("Allocated resources snapshotting stopped")
+			c.log.InfoContext(ctx, "Allocated resources snapshotting stopped")
 			return
 		case <-ticker.C:
 			containers, err := c.docker.ApiClient().ContainerList(ctx, container.ListOptions{All: true})
 			if err != nil {
-				c.log.Error("Error listing containers when getting allocated resources", slog.Any("error", err))
+				c.log.ErrorContext(ctx, "Error listing containers when getting allocated resources", "error", err)
 				continue
 			}
 
@@ -257,6 +257,7 @@ func (c *Collector) snapshotAllocatedResources(ctx context.Context) {
 			for _, ctr := range containers {
 				cpu, memory, disk, err := c.getContainerAllocatedResources(ctx, ctr.ID)
 				if err != nil {
+					c.log.WarnContext(ctx, "Failed to get allocated resources for container", "container_id", ctr.ID, "error", err)
 					continue
 				}
 

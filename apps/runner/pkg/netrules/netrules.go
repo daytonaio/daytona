@@ -5,17 +5,19 @@ package netrules
 
 import (
 	"context"
+	"errors"
+	"log/slog"
 	"os/exec"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/coreos/go-iptables/iptables"
-	log "github.com/sirupsen/logrus"
 )
 
 // NetRulesManager provides thread-safe operations for managing network rules
 type NetRulesManager struct {
+	log        *slog.Logger
 	ipt        *iptables.IPTables
 	mu         sync.Mutex
 	persistent bool
@@ -24,15 +26,20 @@ type NetRulesManager struct {
 }
 
 // NewNetRulesManager creates a new instance of NetRulesManager
-func NewNetRulesManager(persistent bool) (*NetRulesManager, error) {
+func NewNetRulesManager(logger *slog.Logger, persistent bool) (*NetRulesManager, error) {
 	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
 		return nil, err
 	}
 
+	if logger == nil {
+		return nil, errors.New("logger can't be nil")
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &NetRulesManager{
+		log:        logger.With(slog.String("component", "netrules_manager")),
 		ipt:        ipt,
 		persistent: persistent,
 		ctx:        ctx,
@@ -131,16 +138,16 @@ func (manager *NetRulesManager) persistRulesLoop() {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 
-	log.Info("Starting iptables persistence loop")
+	manager.log.Info("Starting iptables persistence loop")
 
 	for {
 		select {
 		case <-manager.ctx.Done():
-			log.Info("Stopping iptables persistence loop")
+			manager.log.Info("Stopping iptables persistence loop")
 			return
 		case <-ticker.C:
 			if err := manager.saveIptablesRules(); err != nil {
-				log.Errorf("Failed to save iptables rules: %v", err)
+				manager.log.Error("Failed to save iptables rules", "error", err)
 			}
 		}
 	}

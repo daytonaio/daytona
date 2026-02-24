@@ -5,6 +5,7 @@ package interpreter
 
 import (
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -30,7 +31,7 @@ func InitManager(defaultCwd string) {
 }
 
 // CreateContext creates a new interpreter context
-func (m *Manager) CreateContext(id, cwd, language string) (*Context, error) {
+func (m *Manager) CreateContext(logger *slog.Logger, id, cwd, language string) (*Context, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -57,6 +58,7 @@ func (m *Manager) CreateContext(id, cwd, language string) (*Context, error) {
 			Active:    false,
 			Language:  language,
 		},
+		logger: logger.With(slog.String("context_id", id)),
 	}
 
 	err := iCtx.start()
@@ -90,7 +92,7 @@ func (m *Manager) GetContext(id string) (*Context, error) {
 }
 
 // GetOrCreateDefaultContext gets or creates the default context
-func (m *Manager) GetOrCreateDefaultContext() (*Context, error) {
+func (m *Manager) GetOrCreateDefaultContext(logger *slog.Logger) (*Context, error) {
 	m.mu.RLock()
 	iCtx, exists := m.contexts["default"]
 	m.mu.RUnlock()
@@ -106,7 +108,7 @@ func (m *Manager) GetOrCreateDefaultContext() (*Context, error) {
 		return iCtx, nil
 	}
 
-	return m.CreateContext("default", m.defaultCwd, LanguagePython)
+	return m.CreateContext(logger, "default", m.defaultCwd, LanguagePython)
 }
 
 // DeleteContext removes a context and shuts it down
@@ -139,12 +141,12 @@ func (m *Manager) ListContexts() []ContextInfo {
 // Global convenience functions
 
 // CreateContext creates a new context using the global manager
-func CreateContext(cwd, language string) (*Context, error) {
+func CreateContext(logger *slog.Logger, cwd, language string) (*Context, error) {
 	if globalManager == nil {
 		return nil, fmt.Errorf("context manager not initialized")
 	}
 	id := uuid.NewString()
-	return globalManager.CreateContext(id, cwd, language)
+	return globalManager.CreateContext(logger, id, cwd, language)
 }
 
 // GetContext gets a context by ID using the global manager
@@ -156,11 +158,11 @@ func GetContext(id string) (*Context, error) {
 }
 
 // GetOrCreateDefaultContext gets or creates the default context
-func GetOrCreateDefaultContext() (*Context, error) {
+func GetOrCreateDefaultContext(logger *slog.Logger) (*Context, error) {
 	if globalManager == nil {
 		return nil, fmt.Errorf("context manager not initialized")
 	}
-	return globalManager.GetOrCreateDefaultContext()
+	return globalManager.GetOrCreateDefaultContext(logger)
 }
 
 // DeleteContext deletes a context using the global manager

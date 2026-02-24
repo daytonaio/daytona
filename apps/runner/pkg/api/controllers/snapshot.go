@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
@@ -90,7 +90,7 @@ func TagImage(ctx *gin.Context) {
 //	@Router			/snapshots/pull [post]
 //
 //	@id				PullSnapshot
-func PullSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
+func PullSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		var request dto.PullSnapshotRequestDTO
 		err := ctx.ShouldBindJSON(&request)
@@ -108,21 +108,21 @@ func PullSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
 
 		err = runner.SnapshotErrorCache.RemoveError(generalCtx, cacheKey)
 		if err != nil {
-			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", cacheKey, err)
+			logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", cacheKey, "error", err)
 		}
 
 		go func() {
 			err := runner.Docker.PullSnapshot(generalCtx, request)
 			if err != nil {
-				log.Debugf("Pull snapshot %s failed: %v", cacheKey, err)
+				logger.DebugContext(generalCtx, "Pull snapshot failed", "cacheKey", cacheKey, "error", err)
 				err = runner.SnapshotErrorCache.SetError(generalCtx, cacheKey, err.Error())
 				if err != nil {
-					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", cacheKey, err)
+					logger.ErrorContext(generalCtx, "Failed to set snapshot error cache entry", "cacheKey", cacheKey, "error", err)
 				}
 			} else {
 				err = runner.SnapshotErrorCache.RemoveError(generalCtx, cacheKey)
 				if err != nil {
-					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", cacheKey, err)
+					logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", cacheKey, "error", err)
 				}
 			}
 		}()
@@ -147,7 +147,7 @@ func PullSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
 //	@Router			/snapshots/build [post]
 //
 //	@id				BuildSnapshot
-func BuildSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
+func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		var request dto.BuildSnapshotRequestDTO
 		err := ctx.ShouldBindJSON(&request)
@@ -164,21 +164,21 @@ func BuildSnapshot(generalCtx context.Context) func(ctx *gin.Context) {
 		runner := runner.GetInstance(nil)
 		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
 		if err != nil {
-			log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+			logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
 		}
 
 		go func() {
 			err := runner.Docker.BuildSnapshot(generalCtx, request)
 			if err != nil {
-				log.Debugf("Build snapshot %s failed: %v", request.Snapshot, err)
+				logger.DebugContext(generalCtx, "Build snapshot failed", "cacheKey", request.Snapshot, "error", err)
 				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
 				if err != nil {
-					log.Errorf("Failed to set snapshot error cache entry for key %s: %v", request.Snapshot, err)
+					logger.ErrorContext(generalCtx, "Failed to set snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
 				}
 			} else {
 				err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
 				if err != nil {
-					log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", request.Snapshot, err)
+					logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
 				}
 			}
 		}()
@@ -239,27 +239,29 @@ func SnapshotExists(ctx *gin.Context) {
 //	@Router			/snapshots/remove [post]
 //
 //	@id				RemoveSnapshot
-func RemoveSnapshot(ctx *gin.Context) {
-	snapshot := ctx.Query("snapshot")
-	if snapshot == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
-		return
+func RemoveSnapshot(logger *slog.Logger) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		snapshot := ctx.Query("snapshot")
+		if snapshot == "" {
+			ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
+			return
+		}
+
+		runner := runner.GetInstance(nil)
+
+		err := runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, true)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+
+		err = runner.SnapshotErrorCache.RemoveError(ctx.Request.Context(), snapshot)
+		if err != nil {
+			logger.ErrorContext(ctx.Request.Context(), "Failed to remove snapshot error cache entry", "cacheKey", snapshot, "error", err)
+		}
+
+		ctx.JSON(http.StatusOK, "Snapshot removed successfully")
 	}
-
-	runner := runner.GetInstance(nil)
-
-	err := runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, true)
-	if err != nil {
-		ctx.Error(err)
-		return
-	}
-
-	err = runner.SnapshotErrorCache.RemoveError(ctx.Request.Context(), snapshot)
-	if err != nil {
-		log.Errorf("Failed to remove snapshot error cache entry for key %s: %v", snapshot, err)
-	}
-
-	ctx.JSON(http.StatusOK, "Snapshot removed successfully")
 }
 
 type SnapshotExistsResponse struct {
@@ -282,93 +284,96 @@ type SnapshotExistsResponse struct {
 //	@Router			/snapshots/logs [get]
 //
 //	@id				GetBuildLogs
-func GetBuildLogs(ctx *gin.Context) {
-	snapshotRef := ctx.Query("snapshotRef")
-	if snapshotRef == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("snapshotRef parameter is required")))
-		return
-	}
+func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		reqCtx := ctx.Request.Context()
+		snapshotRef := ctx.Query("snapshotRef")
+		if snapshotRef == "" {
+			ctx.Error(common_errors.NewBadRequestError(errors.New("snapshotRef parameter is required")))
+			return
+		}
 
-	follow := ctx.Query("follow") == "true"
+		follow := ctx.Query("follow") == "true"
 
-	logFilePath, err := config.GetBuildLogFilePath(snapshotRef)
-	if err != nil {
-		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
-		return
-	}
-
-	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("build logs not found for ref: %s", snapshotRef)))
-		return
-	}
-
-	ctx.Header("Content-Type", "application/octet-stream")
-
-	file, err := os.Open(logFilePath)
-	if err != nil {
-		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
-		return
-	}
-	defer file.Close()
-
-	// If not following, just return the entire file content
-	if !follow {
-		_, err = io.Copy(ctx.Writer, file)
+		logFilePath, err := config.GetBuildLogFilePath(snapshotRef)
 		if err != nil {
 			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			return
 		}
-		return
-	}
 
-	reader := bufio.NewReader(file)
-	runner := runner.GetInstance(nil)
+		if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
+			ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("build logs not found for ref: %s", snapshotRef)))
+			return
+		}
 
-	checkSnapshotRef := snapshotRef
+		ctx.Header("Content-Type", "application/octet-stream")
 
-	// Fixed tag for instances where we are not looking for an entry with snapshot ID
-	if strings.HasPrefix(snapshotRef, "daytona") {
-		checkSnapshotRef = snapshotRef + ":daytona"
-	}
+		file, err := os.Open(logFilePath)
+		if err != nil {
+			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			return
+		}
+		defer file.Close()
 
-	flusher, ok := ctx.Writer.(http.Flusher)
-	if !ok {
-		ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
-		return
-	}
+		// If not following, just return the entire file content
+		if !follow {
+			_, err = io.Copy(ctx.Writer, file)
+			if err != nil {
+				ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+			}
+			return
+		}
 
-	go func() {
+		reader := bufio.NewReader(file)
+		runner := runner.GetInstance(nil)
+
+		checkSnapshotRef := snapshotRef
+
+		// Fixed tag for instances where we are not looking for an entry with snapshot ID
+		if strings.HasPrefix(snapshotRef, "daytona") {
+			checkSnapshotRef = snapshotRef + ":daytona"
+		}
+
+		flusher, ok := ctx.Writer.(http.Flusher)
+		if !ok {
+			ctx.Error(common_errors.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
+			return
+		}
+
+		go func() {
+			for {
+				line, err := reader.ReadBytes('\n')
+				if err != nil && err != io.EOF {
+					logger.ErrorContext(reqCtx, "Error reading log file", "error", err)
+					break
+				}
+
+				if len(line) > 0 {
+					_, writeErr := ctx.Writer.Write(line)
+					if writeErr != nil {
+						logger.ErrorContext(reqCtx, "Error writing to response", "error", writeErr)
+						break
+					}
+					flusher.Flush()
+				}
+			}
+		}()
+
 		for {
-			line, err := reader.ReadBytes('\n')
-			if err != nil && err != io.EOF {
-				log.Errorf("Error reading log file: %v", err)
+			exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkSnapshotRef, false)
+			if err != nil {
+				logger.ErrorContext(reqCtx, "Error checking build status", "error", err)
 				break
 			}
 
-			if len(line) > 0 {
-				_, writeErr := ctx.Writer.Write(line)
-				if writeErr != nil {
-					log.Errorf("Error writing to response: %v", writeErr)
-					break
-				}
-				flusher.Flush()
+			if exists {
+				// If snapshot exists, build is complete, allow time for the last logs to be written and break the loop
+				time.Sleep(1 * time.Second)
+				break
 			}
-		}
-	}()
 
-	for {
-		exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkSnapshotRef, false)
-		if err != nil {
-			log.Errorf("Error checking build status: %v", err)
-			break
+			time.Sleep(250 * time.Millisecond)
 		}
-
-		if exists {
-			// If snapshot exists, build is complete, allow time for the last logs to be written and break the loop
-			time.Sleep(1 * time.Second)
-			break
-		}
-
-		time.Sleep(250 * time.Millisecond)
 	}
 }
 

@@ -6,6 +6,7 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"regexp"
 	"strings"
@@ -33,15 +34,17 @@ import (
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [get]
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [post]
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [delete]
-func ProxyRequest(ctx *gin.Context) {
-	if ctx.Request.Header.Get("Upgrade") != "websocket" && regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
-		if ctx.Query("follow") == "true" {
-			ProxyCommandLogsStream(ctx)
-			return
+func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if ctx.Request.Header.Get("Upgrade") != "websocket" && regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
+			if ctx.Query("follow") == "true" {
+				ProxyCommandLogsStream(ctx, logger)
+				return
+			}
 		}
-	}
 
-	proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+	}
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {

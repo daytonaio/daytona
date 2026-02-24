@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 // validateLabel validates a user-provided label to prevent path injection
@@ -135,7 +134,7 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		return nil, fmt.Errorf("failed to start ffmpeg: %w", err)
 	}
 
-	log.Debugf("Started recording %s to %s (DISPLAY=%s)", id, filePath, display)
+	s.logger.Debug("Started recording", "id", id, "path", filePath, "display", display)
 
 	// Create a done channel to receive the Wait() result exactly once
 	done := make(chan error, 1)
@@ -156,7 +155,7 @@ func (s *RecordingService) StartRecording(label *string) (*Recording, error) {
 		// Atomically remove from active recordings if still there
 		if active, exists := s.activeRecordings.Pop(id); exists {
 			if err != nil {
-				log.Warnf("Recording %s ffmpeg process exited unexpectedly with error: %v", id, err)
+				s.logger.Warn("Recording ffmpeg process exited unexpectedly", "id", id, "error", err)
 				active.recording.Status = "failed"
 			}
 		}

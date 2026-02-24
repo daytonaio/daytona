@@ -6,6 +6,7 @@ package manager
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +16,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
-	log "github.com/sirupsen/logrus"
 )
 
 type pluginRef struct {
@@ -44,7 +44,7 @@ func (e *ComputerUseError) Error() string {
 }
 
 // detectPluginError tries to execute the plugin binary directly to get detailed error information
-func detectPluginError(path string) *ComputerUseError {
+func detectPluginError(logger *slog.Logger, path string) *ComputerUseError {
 	// Try to execute the plugin directly to get error output
 	cmd := exec.Command(path)
 
@@ -75,9 +75,9 @@ func detectPluginError(path string) *ComputerUseError {
 	}
 
 	// Log the raw error for debugging
-	log.Debugf("Plugin execution failed - Exit code: %d, Error: %v", exitCode, err)
-	log.Debugf("Plugin stdout: %s", stdout.String())
-	log.Debugf("Plugin stderr: %s", stderr.String())
+	logger.Debug("Plugin execution failed", "exitCode", exitCode, "error", err)
+	logger.Debug("Plugin stdout", "stdout", stdout.String())
+	logger.Debug("Plugin stderr", "stderr", stderr.String())
 
 	// Check for missing X11 runtime dependencies
 	if strings.Contains(output, "libX11.so.6") ||
@@ -241,14 +241,13 @@ Note: Computer-use features will be disabled until dependencies are installed.`,
 	}
 }
 
-func GetComputerUse(path string) (computeruse.IComputerUse, error) {
+func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse, error) {
 	if computerUse.impl != nil {
 		return computerUse.impl, nil
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		log.Infof("Computer use plugin not found at %s. Skipping...", path)
-		return nil, nil
+		return nil, fmt.Errorf("computer-use plugin not found at path: %s", path)
 	}
 
 	pluginName := filepath.Base(path)
@@ -258,7 +257,7 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 		pluginName = strings.TrimSuffix(pluginName, ".exe")
 	}
 
-	logger := hclog.New(&hclog.LoggerOptions{
+	hclogger := hclog.New(&hclog.LoggerOptions{
 		Name: pluginName,
 		// Output: log.New().WriterLevel(log.DebugLevel),
 		Output: os.Stdout,
@@ -272,60 +271,37 @@ func GetComputerUse(path string) (computeruse.IComputerUse, error) {
 		HandshakeConfig: ComputerUseHandshakeConfig,
 		Plugins:         pluginMap,
 		Cmd:             exec.Command(path),
-		Logger:          logger,
+		Logger:          hclogger,
 		Managed:         true,
 	})
 
-	log.Infof("Computer use %s registered", pluginName)
-
+	logger.Info("Computer use registered", "pluginName", pluginName)
 	rpcClient, err := client.Client()
 	if err != nil {
 		// Try to get detailed error information
-		pluginErr := detectPluginError(path)
-
-		switch pluginErr.Type {
-		case "dependency":
-			log.Warn(pluginErr.Message)
-			log.Info(pluginErr.Details)
-			log.Info("Continuing without computer-use functionality...")
-			return nil, nil // Return nil to continue without the plugin
-
-		case "system":
-			log.Error(pluginErr.Message)
-			log.Info(pluginErr.Details)
-			log.Info("Continuing without computer-use functionality...")
-			return nil, nil // Return nil to continue without the plugin
-
-		default:
-			log.Error(pluginErr.Message)
-			log.Info(pluginErr.Details)
-			log.Info("Continuing without computer-use functionality...")
-			return nil, nil // Return nil to continue without the plugin
+		pluginErr := detectPluginError(logger, path)
+		if pluginErr != nil {
+			return nil, fmt.Errorf("failed to get RPC client for computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
 		}
+		return nil, fmt.Errorf("failed to get RPC client for computer-use plugin: %w", err)
 	}
 
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		log.Errorf("Failed to dispense computer-use plugin: %v", err)
-		log.Info("Continuing without computer-use functionality...")
-		return nil, nil
+		return nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
 	}
 
 	impl, ok := raw.(computeruse.IComputerUse)
 	if !ok {
-		log.Errorf("Unexpected type from computer-use plugin")
-		log.Info("Continuing without computer-use functionality...")
-		return nil, nil
+		return nil, fmt.Errorf("unexpected type from computer-use plugin")
 	}
 
 	_, err = impl.Initialize()
 	if err != nil {
-		log.Errorf("Failed to initialize computer-use plugin: %v", err)
-		log.Info("Continuing without computer-use functionality...")
-		return nil, nil
+		return nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
 	}
 
-	log.Info("Computer-use plugin initialized successfully")
+	logger.Info("Computer-use plugin initialized successfully")
 	computerUse.client = client
 	computerUse.impl = impl
 	computerUse.path = pluginBasePath

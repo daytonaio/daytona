@@ -6,14 +6,13 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"runtime"
 	"time"
 
 	"github.com/gin-gonic/gin"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) ErrorResponse) gin.HandlerFunc {
@@ -130,18 +129,18 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 			}
 
 			if errorResponse.StatusCode == http.StatusInternalServerError {
-				log.WithError(err).WithFields(log.Fields{
-					"path":   ctx.Request.URL.Path,
-					"method": ctx.Request.Method,
-					"error":  errorResponse.Message,
-				}).Error("Internal Server Error")
+				slog.Error("Internal Server Error",
+					"path", ctx.Request.URL.Path,
+					"method", ctx.Request.Method,
+					"error", errorResponse.Message,
+				)
 			} else {
-				log.WithFields(log.Fields{
-					"method": ctx.Request.Method,
-					"URI":    ctx.Request.URL.Path,
-					"status": errorResponse.StatusCode,
-					"error":  errorResponse.Message,
-				}).Error("API ERROR")
+				slog.Error("API ERROR",
+					"method", ctx.Request.Method,
+					"URI", ctx.Request.URL.Path,
+					"status", errorResponse.StatusCode,
+					"error", errorResponse.Message,
+				)
 			}
 
 			// Set explicit content type header
@@ -174,11 +173,11 @@ func Recovery() gin.HandlerFunc {
 					return
 				}
 
-				log.Errorf("panic recovered: %v", err)
+				slog.Error("panic recovered", "panic", err)
 				// print caller stack
 				buf := make([]byte, maxStackTraceSize)
 				stackSize := runtime.Stack(buf, false)
-				log.Errorf("stack trace: %s", string(buf[:stackSize]))
+				slog.Error("stack trace", "stack", string(buf[:stackSize]))
 
 				if ctx.Writer.Written() {
 					return

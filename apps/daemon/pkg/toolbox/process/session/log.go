@@ -9,8 +9,6 @@ import (
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/session"
 	"github.com/gin-gonic/gin"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // GetSessionCommandLogs godoc
@@ -33,7 +31,7 @@ func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
 	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
 	versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
 	if err != nil {
-		log.Debug(err)
+		s.logger.DebugContext(c.Request.Context(), "failed to compare versions", "error", err)
 		versionComparison = util.Pointer(1)
 	}
 

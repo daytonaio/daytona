@@ -68,17 +68,17 @@ func (s *Service) Start(ctx context.Context) {
 
 	// Send initial healthcheck immediately
 	if err := s.sendHealthcheck(ctx); err != nil {
-		s.log.Warn("Failed to send initial healthcheck", slog.Any("error", err))
+		s.log.WarnContext(ctx, "Failed to send initial healthcheck", "error", err)
 	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			s.log.Info("Healthcheck loop stopped")
+			s.log.InfoContext(ctx, "Healthcheck loop stopped")
 			return
 		case <-ticker.C:
 			if err := s.sendHealthcheck(ctx); err != nil {
-				s.log.Warn("Failed to send healthcheck", slog.Any("error", err))
+				s.log.WarnContext(ctx, "Failed to send healthcheck", "error", err)
 				// Continue trying - don't crash
 			}
 		}
@@ -134,6 +134,6 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 		return err
 	}
 
-	s.log.Debug("Healthcheck sent successfully")
+	s.log.DebugContext(ctx, "Healthcheck sent successfully")
 	return nil
 }

@@ -6,6 +6,7 @@ package recordingdashboard
 import (
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -15,17 +16,18 @@ import (
 	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // DashboardServer serves the recording dashboard
 type DashboardServer struct {
+	logger           *slog.Logger
 	recordingService *recording.RecordingService
 }
 
 // NewDashboardServer creates a new dashboard server
-func NewDashboardServer(recordingService *recording.RecordingService) *DashboardServer {
+func NewDashboardServer(logger *slog.Logger, recordingService *recording.RecordingService) *DashboardServer {
 	return &DashboardServer{
+		logger:           logger.With(slog.String("component", "recordings_dashboard")),
 		recordingService: recordingService,
 	}
 }
@@ -54,7 +56,7 @@ func (s *DashboardServer) Start() error {
 	r.DELETE("/api/recordings", s.deleteRecordings)
 
 	addr := fmt.Sprintf(":%d", config.RECORDING_DASHBOARD_PORT)
-	log.Println("Starting recording dashboard on port", config.RECORDING_DASHBOARD_PORT)
+	s.logger.Info("Starting recording dashboard", "port", config.RECORDING_DASHBOARD_PORT)
 
 	err = r.Run(addr)
 	return err
@@ -114,7 +116,7 @@ func (s *DashboardServer) deleteRecordings(ctx *gin.Context) {
 	for _, id := range req.IDs {
 		if err := s.recordingService.DeleteRecording(id); err != nil {
 			failed = append(failed, id)
-			log.Warnf("Failed to delete recording %s: %v", id, err)
+			s.logger.Warn("Failed to delete recording", "id", id, "error", err)
 		} else {
 			deleted = append(deleted, id)
 		}
