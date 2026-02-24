@@ -25,7 +25,7 @@ export class SandboxDestroyAction extends SandboxAction {
   }
 
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
-    if (sandbox.state === SandboxState.ARCHIVED) {
+    if (sandbox.state === SandboxState.ARCHIVED || sandbox.state === SandboxState.PENDING_BUILD) {
       await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
       return DONT_SYNC_AGAIN
     }
