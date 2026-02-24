@@ -75,7 +75,7 @@ Executes code in the Sandbox using the appropriate language runtime.
 
 - `code` _string_ - Code to execute
 - `params?` _CodeRunParams_ - Parameters for code execution
-- `timeout?` _number_ - Maximum time in seconds to wait for execution to complete
+- `timeout?` _number_ - Maximum time in seconds to wait for execution to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
 
 **Returns**:
@@ -321,7 +321,7 @@ Executes a shell command in the Sandbox.
 - `command` _string_ - Shell command to execute
 - `cwd?` _string_ - Working directory for command execution. If not specified, uses the sandbox working directory.
 - `env?` _Record\<string, string\>_ - Environment variables to set for the command
-- `timeout?` _number_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
+- `timeout?` _number_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
 
 **Returns**:

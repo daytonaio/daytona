@@ -24,7 +24,7 @@ type ExecuteRequest struct {
 	Command string `json:"command"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty"`
-	// Timeout in seconds, defaults to 10 seconds
+	// Timeout in seconds, defaults to 360 seconds (6 minutes)
 	Timeout *int32 `json:"timeout,omitempty"`
 }
 

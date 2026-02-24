@@ -28,7 +28,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
-	"github.com/daytonaio/daemon/pkg/toolbox/process"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/execute"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
@@ -169,7 +169,8 @@ func (s *server) Start() error {
 	processLogger := s.logger.With(slog.String("component", "process_controller"))
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand(processLogger))
+		executeController := execute.NewExecuteController(processLogger, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
+		processController.POST("/execute", executeController.ExecuteCommand)
 
 		sessionController := session.NewSessionController(s.logger, s.configDir, s.WorkDir, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
 		sessionGroup := processController.Group("/session")

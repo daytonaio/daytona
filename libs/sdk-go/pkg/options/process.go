@@ -13,7 +13,7 @@ import (
 type ExecuteCommand struct {
 	Cwd     *string           // Working directory for command execution
 	Env     map[string]string // Environment variables
-	Timeout *time.Duration    // Command execution timeout
+	Timeout *time.Duration    // Command execution timeout. 0 means wait indefinitely. Defaults to 6 minutes.
 }
 
 // WithCwd sets the working directory for command execution.
@@ -63,7 +63,7 @@ func WithExecuteTimeout(timeout time.Duration) func(*ExecuteCommand) {
 // CodeRun holds optional parameters for [daytona.ProcessService.CodeRun].
 type CodeRun struct {
 	Params  *types.CodeRunParams // Code execution parameters
-	Timeout *time.Duration       // Execution timeout
+	Timeout *time.Duration       // Execution timeout. 0 means wait indefinitely. Defaults to 6 minutes.
 }
 
 // WithCodeRunParams sets the code execution parameters.

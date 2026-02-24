@@ -25,7 +25,7 @@ export interface ExecuteResponse {
      * @type {number}
      * @memberof ExecuteResponse
      */
-    'exitCode'?: number;
+    'exitCode': number;
     /**
      * 
      * @type {string}
