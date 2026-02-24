@@ -239,8 +239,6 @@ export class Daytona implements AsyncDisposable {
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
-  // Toolbox proxy cache per region
-  private readonly toolboxProxyCache = new Map<string, Promise<string>>()
   private otelSdk?: NodeSDK
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
@@ -577,7 +575,6 @@ export class Daytona implements AsyncDisposable {
         this.createAxiosInstance(),
         this.sandboxApi,
         codeToolbox,
-        this.getProxyToolboxUrl.bind(this),
       )
 
       if (sandbox.state !== 'started') {
@@ -620,7 +617,6 @@ export class Daytona implements AsyncDisposable {
       this.createAxiosInstance(),
       this.sandboxApi,
       codeToolbox,
-      this.getProxyToolboxUrl.bind(this),
     )
   }
 
@@ -682,7 +678,6 @@ export class Daytona implements AsyncDisposable {
           this.createAxiosInstance(),
           this.sandboxApi,
           this.getCodeToolbox(language),
-          this.getProxyToolboxUrl.bind(this),
         )
       }),
       total: response.data.total,
@@ -878,22 +873,5 @@ export class Daytona implements AsyncDisposable {
     )
 
     return axiosInstance
-  }
-
-  @WithInstrumentation()
-  public async getProxyToolboxUrl(sandboxId: string, regionId: string): Promise<string> {
-    const cachedProxyToolboxUrl = this.toolboxProxyCache.get(regionId)
-    if (cachedProxyToolboxUrl) {
-      return await cachedProxyToolboxUrl
-    }
-
-    const proxyToolboxUrlPromise = (async () => {
-      const response = await this.sandboxApi.getToolboxProxyUrl(sandboxId)
-      return response.data.url
-    })()
-
-    this.toolboxProxyCache.set(regionId, proxyToolboxUrlPromise)
-
-    return await proxyToolboxUrlPromise
   }
 }

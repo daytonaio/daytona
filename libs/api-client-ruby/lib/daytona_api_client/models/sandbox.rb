@@ -108,6 +108,9 @@ module DaytonaApiClient
     # The runner ID of the sandbox
     attr_accessor :runner_id
 
+    # The toolbox proxy URL for the sandbox
+    attr_accessor :toolbox_proxy_url
+
     class EnumAttributeValidator
       attr_reader :datatype
       attr_reader :allowable_values
@@ -163,7 +166,8 @@ module DaytonaApiClient
         :'updated_at' => :'updatedAt',
         :'_class' => :'class',
         :'daemon_version' => :'daemonVersion',
-        :'runner_id' => :'runnerId'
+        :'runner_id' => :'runnerId',
+        :'toolbox_proxy_url' => :'toolboxProxyUrl'
       }
     end
 
@@ -210,7 +214,8 @@ module DaytonaApiClient
         :'updated_at' => :'String',
         :'_class' => :'String',
         :'daemon_version' => :'String',
-        :'runner_id' => :'String'
+        :'runner_id' => :'String',
+        :'toolbox_proxy_url' => :'String'
       }
     end
 
@@ -391,6 +396,12 @@ module DaytonaApiClient
       if attributes.key?(:'runner_id')
         self.runner_id = attributes[:'runner_id']
       end
+
+      if attributes.key?(:'toolbox_proxy_url')
+        self.toolbox_proxy_url = attributes[:'toolbox_proxy_url']
+      else
+        self.toolbox_proxy_url = nil
+      end
     end
 
     # Show invalid properties with the reasons. Usually used together with valid?
@@ -450,6 +461,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "disk", disk cannot be nil.')
       end
 
+      if @toolbox_proxy_url.nil?
+        invalid_properties.push('invalid value for "toolbox_proxy_url", toolbox_proxy_url cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -474,6 +489,7 @@ module DaytonaApiClient
       return false unless backup_state_validator.valid?(@backup_state)
       _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
       return false unless _class_validator.valid?(@_class)
+      return false if @toolbox_proxy_url.nil?
       true
     end
 
@@ -627,6 +643,16 @@ module DaytonaApiClient
       @_class = _class
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] toolbox_proxy_url Value to be assigned
+    def toolbox_proxy_url=(toolbox_proxy_url)
+      if toolbox_proxy_url.nil?
+        fail ArgumentError, 'toolbox_proxy_url cannot be nil'
+      end
+
+      @toolbox_proxy_url = toolbox_proxy_url
+    end
+
     # Checks equality by comparing each attribute.
     # @param [Object] Object to be compared
     def ==(o)
@@ -662,7 +688,8 @@ module DaytonaApiClient
           updated_at == o.updated_at &&
           _class == o._class &&
           daemon_version == o.daemon_version &&
-          runner_id == o.runner_id
+          runner_id == o.runner_id &&
+          toolbox_proxy_url == o.toolbox_proxy_url
     end
 
     # @see the `==` method
@@ -674,7 +701,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id, toolbox_proxy_url].hash
     end
 
     # Builds the object from hash

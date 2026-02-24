@@ -219,9 +219,6 @@ class AsyncDaytona:
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
         self._object_storage_api: ObjectStorageApi = ObjectStorageApi(self._api_client)
         self._config_api: ConfigApi = ConfigApi(self._api_client)
-        # Toolbox proxy cache per region
-        self._proxy_toolbox_url_tasks: dict[str, asyncio.Task[str]] = {}
-        self._proxy_toolbox_url_lock: asyncio.Lock = asyncio.Lock()
         self._toolbox_api_client: ToolboxApiClient = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
@@ -530,7 +527,6 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._get_proxy_toolbox_url,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -625,7 +621,6 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._get_proxy_toolbox_url,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -695,7 +690,6 @@ class AsyncDaytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
-                    self._get_proxy_toolbox_url,
                 )
                 for sandbox in response.items
             ],
@@ -765,20 +759,3 @@ class AsyncDaytona:
         toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 
         return toolbox_api_client
-
-    async def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
-        if self._proxy_toolbox_url_tasks.get(region_id) is not None:
-            return await self._proxy_toolbox_url_tasks[region_id]
-
-        async with self._proxy_toolbox_url_lock:
-            # Double-check: another coroutine might have created the task
-            if self._proxy_toolbox_url_tasks.get(region_id) is None:
-
-                async def _fetch():
-                    response = await self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
-                    return response.url
-
-                self._proxy_toolbox_url_tasks[region_id] = asyncio.create_task(_fetch())
-
-        # All coroutines that made it here can now await the same task in parallel
-        return await self._proxy_toolbox_url_tasks[region_id]

@@ -6,6 +6,7 @@
 export const SANDBOX_LOOKUP_CACHE_TTL_MS = 10_000
 export const SANDBOX_BUILD_INFO_CACHE_TTL_MS = 60_000
 export const SANDBOX_ORG_ID_CACHE_TTL_MS = 60_000
+export const TOOLBOX_PROXY_URL_CACHE_TTL_MS = 300_000 // 5 minutes
 
 type SandboxLookupCacheKeyArgs = {
   organizationId?: string | null
@@ -40,4 +41,8 @@ export function sandboxOrgIdCacheKeyById(args: SandboxOrgIdCacheKeyArgs & { sand
 export function sandboxOrgIdCacheKeyByName(args: SandboxOrgIdCacheKeyArgs & { sandboxName: string }): string {
   const organizationId = args.organizationId ?? 'none'
   return `sandbox:orgId:by-name:org:${organizationId}:value:${args.sandboxName}`
+}
+
+export function toolboxProxyUrlCacheKey(regionId: string): string {
+  return `toolbox-proxy-url:region:${regionId}`
 }

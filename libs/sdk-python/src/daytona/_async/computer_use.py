@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Awaitable, Callable
 
 import aiofiles
 import httpx
@@ -465,10 +464,8 @@ class AsyncRecordingService:
     def __init__(
         self,
         api_client: ComputerUseApi,
-        ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         self._api_client: ComputerUseApi = api_client
-        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to start recording: ")
     @with_instrumentation()
@@ -586,9 +583,6 @@ class AsyncRecordingService:
             print("Recording downloaded")
             ```
         """
-        # Ensure the toolbox URL is loaded before making the request
-        await self._ensure_toolbox_url()
-
         # Serialize the request to get the URL and headers
         method, url, headers, *_ = self._api_client._download_recording_serialize(
             id=recording_id,
@@ -630,7 +624,6 @@ class AsyncComputerUse:
     def __init__(
         self,
         api_client: ComputerUseApi,
-        ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         self._api_client: ComputerUseApi = api_client
 
@@ -638,7 +631,7 @@ class AsyncComputerUse:
         self.keyboard: AsyncKeyboard = AsyncKeyboard(api_client)
         self.screenshot: AsyncScreenshot = AsyncScreenshot(api_client)
         self.display: AsyncDisplay = AsyncDisplay(api_client)
-        self.recording: AsyncRecordingService = AsyncRecordingService(api_client, ensure_toolbox_url)
+        self.recording: AsyncRecordingService = AsyncRecordingService(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     @with_instrumentation()

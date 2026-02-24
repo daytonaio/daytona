@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import io
 import os
-from collections.abc import Awaitable, Callable
 from contextlib import ExitStack
 from typing import cast, overload
 
@@ -40,17 +39,13 @@ class AsyncFileSystem:
     def __init__(
         self,
         api_client: FileSystemApi,
-        ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         """Initializes a new FileSystem instance.
 
         Args:
             api_client (FileSystemApi): API client for Sandbox file system operations.
-            ensure_toolbox_url (Callable[[], Awaitable[None]]): Ensures the toolbox API URL is initialized.
-            Must be called before invoking any private methods on the API client.
         """
         self._api_client: FileSystemApi = api_client
-        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to create folder: ")
     @with_instrumentation()
@@ -213,7 +208,6 @@ class AsyncFileSystem:
         for f in files:
             src_file_meta_dict[f.source] = FileMeta(dst=f.destination)
 
-        await self._ensure_toolbox_url()
         method, url, headers, body, *_ = self._api_client._download_files_serialize(
             download_files=FilesDownloadRequest(paths=list(src_file_meta_dict.keys())),
             _request_auth=None,
@@ -683,7 +677,6 @@ class AsyncFileSystem:
                 # HTTPX will stream this file object in 64 KiB chunks :contentReference[oaicite:1]{index=1}
                 file_fields[f"files[{i}].file"] = (filename, stream)
 
-            await self._ensure_toolbox_url()
             _, url, headers, *_ = self._api_client._upload_files_serialize(None, None, None, None)
             # strip any prior Content-Type so HTTPX can set its own multipart header
             _ = headers.pop("Content-Type", None)

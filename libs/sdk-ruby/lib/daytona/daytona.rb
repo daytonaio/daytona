@@ -44,8 +44,6 @@ module Daytona
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
       @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:, default_region_id: config.target,
                                       otel_state:)
-      @proxy_toolbox_url_cache = {}
-      @proxy_toolbox_url_mutex = Mutex.new
     end
 
     # Shuts down OTel providers, flushing any pending telemetry data.
@@ -267,28 +265,8 @@ module Daytona
         config:,
         sandbox_api:,
         code_toolbox:,
-        get_proxy_toolbox_url: proc { |sandbox_id, region_id| proxy_toolbox_url(sandbox_id, region_id) },
         otel_state: @otel_state
       )
-    end
-
-    # Gets the proxy toolbox URL from the sandbox API (cached per region)
-    #
-    # @param sandbox_id [String] The sandbox ID
-    # @param region_id [String] The region ID
-    # @return [String] The proxy toolbox URL
-    def proxy_toolbox_url(sandbox_id, region_id)
-      # Return cached URL if available
-      return @proxy_toolbox_url_cache[region_id] if @proxy_toolbox_url_cache.key?(region_id)
-
-      # Use mutex to ensure thread-safe caching
-      @proxy_toolbox_url_mutex.synchronize do
-        # Double-check after acquiring lock
-        return @proxy_toolbox_url_cache[region_id] if @proxy_toolbox_url_cache.key?(region_id)
-
-        # Fetch and cache the URL
-        @proxy_toolbox_url_cache[region_id] = sandbox_api.get_toolbox_proxy_url(sandbox_id).url
-      end
     end
 
     # Converts a language to a code toolbox

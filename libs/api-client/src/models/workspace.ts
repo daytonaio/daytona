@@ -223,6 +223,12 @@ export interface Workspace {
      */
     'runnerId'?: string;
     /**
+     * The toolbox proxy URL for the sandbox
+     * @type {string}
+     * @memberof Workspace
+     */
+    'toolboxProxyUrl': string;
+    /**
      * The image used for the workspace
      * @type {string}
      * @memberof Workspace

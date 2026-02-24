@@ -56,6 +56,6 @@ export class AdminSandboxController {
       throw new NotFoundException('Sandbox not found')
     }
     const recoveredSandbox = await this.sandboxService.recover(sandboxId, organization)
-    return SandboxDto.fromSandbox(recoveredSandbox)
+    return this.sandboxService.toSandboxDto(recoveredSandbox)
   }
 }

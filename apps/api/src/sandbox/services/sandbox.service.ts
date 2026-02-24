@@ -78,10 +78,12 @@ import { Redis } from 'ioredis'
 import {
   SANDBOX_LOOKUP_CACHE_TTL_MS,
   SANDBOX_ORG_ID_CACHE_TTL_MS,
+  TOOLBOX_PROXY_URL_CACHE_TTL_MS,
   sandboxLookupCacheKeyById,
   sandboxLookupCacheKeyByName,
   sandboxOrgIdCacheKeyById,
   sandboxOrgIdCacheKeyByName,
+  toolboxProxyUrlCacheKey,
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 
@@ -519,7 +521,7 @@ export class SandboxService {
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
-      return SandboxDto.fromSandbox(insertedSandbox)
+      return this.toSandboxDto(insertedSandbox)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -610,7 +612,7 @@ export class SandboxService {
       SandboxEvents.STATE_UPDATED,
       new SandboxStateUpdatedEvent(updatedSandbox, SandboxState.STARTED, SandboxState.STARTED),
     )
-    return SandboxDto.fromSandbox(updatedSandbox)
+    return this.toSandboxDto(updatedSandbox)
   }
 
   async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
@@ -740,7 +742,7 @@ export class SandboxService {
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
-      return SandboxDto.fromSandbox(insertedSandbox)
+      return this.toSandboxDto(insertedSandbox)
     } catch (error) {
       await this.rollbackPendingUsage(
         organization.id,
@@ -1630,14 +1632,70 @@ export class SandboxService {
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {
     const sandbox = await this.findOne(sandboxId)
+    return this.resolveToolboxProxyUrl(sandbox.region)
+  }
 
-    const region = await this.regionService.findOne(sandbox.region, true)
+  async toSandboxDto(sandbox: Sandbox): Promise<SandboxDto> {
+    const toolboxProxyUrl = await this.resolveToolboxProxyUrl(sandbox.region)
+    return SandboxDto.fromSandbox(sandbox, toolboxProxyUrl)
+  }
 
-    if (region && region.toolboxProxyUrl) {
-      return region.toolboxProxyUrl + '/toolbox'
+  async toSandboxDtos(sandboxes: Sandbox[]): Promise<SandboxDto[]> {
+    const urlMap = await this.resolveToolboxProxyUrls(sandboxes.map((s) => s.region))
+    return sandboxes.map((s) => SandboxDto.fromSandbox(s, urlMap.get(s.region) as string))
+  }
+
+  async resolveToolboxProxyUrl(regionId: string): Promise<string> {
+    const cacheKey = toolboxProxyUrlCacheKey(regionId)
+    const cached = await this.redis.get(cacheKey)
+    if (cached) {
+      return cached
     }
 
-    return this.configService.getOrThrow('proxy.toolboxUrl')
+    const region = await this.regionService.findOne(regionId)
+    const url = region?.toolboxProxyUrl
+      ? region.toolboxProxyUrl + '/toolbox'
+      : this.configService.getOrThrow('proxy.toolboxUrl')
+
+    await this.redis.setex(cacheKey, TOOLBOX_PROXY_URL_CACHE_TTL_MS, url)
+    return url
+  }
+
+  async resolveToolboxProxyUrls(regionIds: string[]): Promise<Map<string, string>> {
+    const unique = [...new Set(regionIds)]
+    const result = new Map<string, string>()
+
+    const pipeline = this.redis.pipeline()
+    for (const id of unique) {
+      pipeline.get(toolboxProxyUrlCacheKey(id))
+    }
+    const cached = await pipeline.exec()
+
+    const uncached: string[] = []
+    for (let i = 0; i < unique.length; i++) {
+      const val = cached?.[i]?.[1] as string | null
+      if (val) {
+        result.set(unique[i], val)
+      } else {
+        uncached.push(unique[i])
+      }
+    }
+
+    if (uncached.length > 0) {
+      const regions = await this.regionService.findByIds(uncached)
+      const regionMap = new Map(regions.map((r) => [r.id, r]))
+      const fallback = this.configService.getOrThrow('proxy.toolboxUrl')
+      const setPipeline = this.redis.pipeline()
+      for (const id of uncached) {
+        const region = regionMap.get(id)
+        const url = region?.toolboxProxyUrl ? region.toolboxProxyUrl + '/toolbox' : fallback
+        result.set(id, url)
+        setPipeline.setex(toolboxProxyUrlCacheKey(id), TOOLBOX_PROXY_URL_CACHE_TTL_MS, url)
+      }
+      await setPipeline.exec()
+    }
+
+    return result
   }
 
   async getBuildLogsUrl(sandboxIdOrName: string, organizationId: string): Promise<string> {

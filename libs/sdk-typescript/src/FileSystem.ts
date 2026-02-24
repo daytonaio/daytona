@@ -113,7 +113,6 @@ export class FileSystem {
   constructor(
     private readonly clientConfig: Configuration,
     private readonly apiClient: FileSystemApi,
-    private readonly ensureToolboxUrl: () => Promise<void>,
   ) {}
 
   /**
@@ -502,7 +501,6 @@ export class FileSystem {
     }
 
     if (isNonStreamingRuntime) {
-      await this.ensureToolboxUrl()
       const url = `${this.clientConfig.basePath}/files/bulk-upload`
       await fetch(url, {
         method: 'POST',

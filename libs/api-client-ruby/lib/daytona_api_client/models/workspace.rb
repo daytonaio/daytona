@@ -108,6 +108,9 @@ module DaytonaApiClient
     # The runner ID of the sandbox
     attr_accessor :runner_id
 
+    # The toolbox proxy URL for the sandbox
+    attr_accessor :toolbox_proxy_url
+
     # The image used for the workspace
     attr_accessor :image
 
@@ -176,6 +179,7 @@ module DaytonaApiClient
         :'_class' => :'class',
         :'daemon_version' => :'daemonVersion',
         :'runner_id' => :'runnerId',
+        :'toolbox_proxy_url' => :'toolboxProxyUrl',
         :'image' => :'image',
         :'snapshot_state' => :'snapshotState',
         :'snapshot_created_at' => :'snapshotCreatedAt',
@@ -227,6 +231,7 @@ module DaytonaApiClient
         :'_class' => :'String',
         :'daemon_version' => :'String',
         :'runner_id' => :'String',
+        :'toolbox_proxy_url' => :'String',
         :'image' => :'String',
         :'snapshot_state' => :'String',
         :'snapshot_created_at' => :'String',
@@ -412,6 +417,12 @@ module DaytonaApiClient
         self.runner_id = attributes[:'runner_id']
       end
 
+      if attributes.key?(:'toolbox_proxy_url')
+        self.toolbox_proxy_url = attributes[:'toolbox_proxy_url']
+      else
+        self.toolbox_proxy_url = nil
+      end
+
       if attributes.key?(:'image')
         self.image = attributes[:'image']
       end
@@ -486,6 +497,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "disk", disk cannot be nil.')
       end
 
+      if @toolbox_proxy_url.nil?
+        invalid_properties.push('invalid value for "toolbox_proxy_url", toolbox_proxy_url cannot be nil.')
+      end
+
       invalid_properties
     end
 
@@ -510,6 +525,7 @@ module DaytonaApiClient
       return false unless backup_state_validator.valid?(@backup_state)
       _class_validator = EnumAttributeValidator.new('String', ["small", "medium", "large"])
       return false unless _class_validator.valid?(@_class)
+      return false if @toolbox_proxy_url.nil?
       snapshot_state_validator = EnumAttributeValidator.new('String', ["None", "Pending", "InProgress", "Completed", "Error"])
       return false unless snapshot_state_validator.valid?(@snapshot_state)
       true
@@ -665,6 +681,16 @@ module DaytonaApiClient
       @_class = _class
     end
 
+    # Custom attribute writer method with validation
+    # @param [Object] toolbox_proxy_url Value to be assigned
+    def toolbox_proxy_url=(toolbox_proxy_url)
+      if toolbox_proxy_url.nil?
+        fail ArgumentError, 'toolbox_proxy_url cannot be nil'
+      end
+
+      @toolbox_proxy_url = toolbox_proxy_url
+    end
+
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] snapshot_state Object to be assigned
     def snapshot_state=(snapshot_state)
@@ -711,6 +737,7 @@ module DaytonaApiClient
           _class == o._class &&
           daemon_version == o.daemon_version &&
           runner_id == o.runner_id &&
+          toolbox_proxy_url == o.toolbox_proxy_url &&
           image == o.image &&
           snapshot_state == o.snapshot_state &&
           snapshot_created_at == o.snapshot_created_at &&
@@ -726,7 +753,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id, image, snapshot_state, snapshot_created_at, info].hash
+      [id, organization_id, name, snapshot, user, env, labels, public, network_block_all, network_allow_list, target, cpu, gpu, memory, disk, state, desired_state, error_reason, recoverable, backup_state, backup_created_at, auto_stop_interval, auto_archive_interval, auto_delete_interval, volumes, build_info, created_at, updated_at, _class, daemon_version, runner_id, toolbox_proxy_url, image, snapshot_state, snapshot_created_at, info].hash
     end
 
     # Builds the object from hash

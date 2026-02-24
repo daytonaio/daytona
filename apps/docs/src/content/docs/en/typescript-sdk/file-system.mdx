@@ -13,17 +13,13 @@ Provides file system operations within a Sandbox.
 #### new FileSystem()
 
 ```ts
-new FileSystem(
-   clientConfig: Configuration, 
-   apiClient: FileSystemApi, 
-   ensureToolboxUrl: () => Promise<void>): FileSystem
+new FileSystem(clientConfig: Configuration, apiClient: FileSystemApi): FileSystem
 ```
 
 **Parameters**:
 
 - `clientConfig` _Configuration_
 - `apiClient` _FileSystemApi_
-- `ensureToolboxUrl` _\(\) =\> Promise\<void\>_
 
 
 **Returns**:

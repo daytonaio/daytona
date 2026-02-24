@@ -119,12 +119,11 @@ module Daytona
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
     # @params otel_state [Daytona::OtelState, nil]
-    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, get_proxy_toolbox_url:, otel_state: nil) # rubocop:disable Metrics/MethodLength
+    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, otel_state: nil) # rubocop:disable Metrics/MethodLength
       process_response(sandbox_dto)
       @code_toolbox = code_toolbox
       @config = config
       @sandbox_api = sandbox_api
-      @get_proxy_toolbox_url = get_proxy_toolbox_url
       @otel_state = otel_state
 
       # Create toolbox API clients with dynamic configuration
@@ -477,10 +476,9 @@ module Daytona
     # @return [DaytonaToolboxApiClient::Configuration]
     def build_toolbox_api_config
       DaytonaToolboxApiClient::Configuration.new.configure do |cfg|
-        # Get the proxy toolbox URL and append sandbox ID
-        proxy_toolbox_url = @get_proxy_toolbox_url.call(id, target)
-        proxy_toolbox_url += '/' unless proxy_toolbox_url.end_with?('/')
-        full_url = "#{proxy_toolbox_url}#{id}"
+        proxy_url = @toolbox_proxy_url
+        proxy_url += '/' unless proxy_url.end_with?('/')
+        full_url = "#{proxy_url}#{id}"
         uri = URI(full_url)
 
         cfg.scheme = uri.scheme
@@ -521,6 +519,7 @@ module Daytona
       @daemon_version = sandbox_dto.daemon_version
       @network_block_all = sandbox_dto.network_block_all
       @network_allow_list = sandbox_dto.network_allow_list
+      @toolbox_proxy_url = sandbox_dto.toolbox_proxy_url
     end
 
     # Monitors block not to exceed max execution time.

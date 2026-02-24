@@ -34,7 +34,6 @@ export class CodeInterpreter {
     private readonly clientConfig: Configuration,
     private readonly apiClient: InterpreterApi,
     private readonly getPreviewToken: () => Promise<string>,
-    private readonly ensureToolboxUrl: () => Promise<void>,
   ) {}
 
   /**
@@ -73,7 +72,6 @@ export class CodeInterpreter {
       throw new DaytonaError('Code is required for execution')
     }
 
-    await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/interpreter/execute`
 
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)

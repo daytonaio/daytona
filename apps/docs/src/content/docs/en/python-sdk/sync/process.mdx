@@ -14,8 +14,7 @@ Handles process and code execution within a Sandbox.
 #### Process.\_\_init\_\_
 
 ```python
-def __init__(code_toolbox: SandboxCodeToolbox, api_client: ProcessApi,
-             ensure_toolbox_url: Callable[[], None])
+def __init__(code_toolbox: SandboxCodeToolbox, api_client: ProcessApi)
 ```
 
 Initialize a new Process instance.
@@ -24,8 +23,6 @@ Initialize a new Process instance.
 
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific code execution toolbox.
 - `api_client` _ProcessApi_ - API client for process operations.
-- `ensure_toolbox_url` _Callable[[], None]_ - Ensures the toolbox API URL is initialized.
-  Must be called before invoking any private methods on the API client.
 
 #### Process.exec
 

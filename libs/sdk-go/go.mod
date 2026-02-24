@@ -9,7 +9,6 @@ require (
 	github.com/daytonaio/daytona/libs/api-client-go v0.145.0
 	github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.145.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.40.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.40.0

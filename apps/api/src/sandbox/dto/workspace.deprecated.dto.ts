@@ -70,8 +70,8 @@ export class WorkspaceDto extends SandboxDto {
     super()
   }
 
-  static fromSandbox(sandbox: Sandbox): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox)
+  static fromSandbox(sandbox: Sandbox, toolboxProxyUrl: string): WorkspaceDto {
+    const dto = super.fromSandbox(sandbox, toolboxProxyUrl)
     return this.fromSandboxDto(dto)
   }
 

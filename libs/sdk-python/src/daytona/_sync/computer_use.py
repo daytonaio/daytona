@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
 
 import httpx
 from daytona_toolbox_api_client import (
@@ -464,10 +463,8 @@ class RecordingService:
     def __init__(
         self,
         api_client: ComputerUseApi,
-        ensure_toolbox_url: Callable[[], None],
     ):
         self._api_client: ComputerUseApi = api_client
-        self._ensure_toolbox_url: Callable[[], None] = ensure_toolbox_url
 
     @intercept_errors(message_prefix="Failed to start recording: ")
     @with_instrumentation()
@@ -585,9 +582,6 @@ class RecordingService:
             print("Recording downloaded")
             ```
         """
-        # Ensure the toolbox URL is loaded before making the request
-        self._ensure_toolbox_url()
-
         # Serialize the request to get the URL and headers
         method, url, headers, *_ = self._api_client._download_recording_serialize(
             id=recording_id,
@@ -629,7 +623,6 @@ class ComputerUse:
     def __init__(
         self,
         api_client: ComputerUseApi,
-        ensure_toolbox_url: Callable[[], None],
     ):
         self._api_client: ComputerUseApi = api_client
 
@@ -637,7 +630,7 @@ class ComputerUse:
         self.keyboard: Keyboard = Keyboard(api_client)
         self.screenshot: Screenshot = Screenshot(api_client)
         self.display: Display = Display(api_client)
-        self.recording: RecordingService = RecordingService(api_client, ensure_toolbox_url)
+        self.recording: RecordingService = RecordingService(api_client)
 
     @intercept_errors(message_prefix="Failed to start computer use: ")
     @with_instrumentation()

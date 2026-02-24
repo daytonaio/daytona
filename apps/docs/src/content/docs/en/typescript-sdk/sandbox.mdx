@@ -184,6 +184,13 @@ Represents a Daytona Sandbox.
     ```ts
     SandboxDto.target
     ```
+- `toolboxProxyUrl` _string_ - The toolbox proxy URL for the sandbox
+    
+    ##### Implementation of
+    
+    ```ts
+    SandboxDto.toolboxProxyUrl
+    ```
 - `updatedAt?` _string_ - When the Sandbox was last updated
     
     ##### Implementation of
@@ -224,8 +231,7 @@ new Sandbox(
    clientConfig: Configuration, 
    axiosInstance: AxiosInstance, 
    sandboxApi: SandboxApi, 
-   codeToolbox: SandboxCodeToolbox, 
-   getToolboxBaseUrl: (sandboxId: string, regionId: string) => Promise<string>): Sandbox
+   codeToolbox: SandboxCodeToolbox): Sandbox
 ```
 
 Creates a new Sandbox instance
@@ -237,7 +243,6 @@ Creates a new Sandbox instance
 - `axiosInstance` _AxiosInstance_
 - `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
-- `getToolboxBaseUrl` _\(sandboxId: string, regionId: string\) =\> Promise\<string\>_
 
 
 **Returns**:

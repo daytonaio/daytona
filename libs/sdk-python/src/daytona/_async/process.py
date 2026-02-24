@@ -50,19 +50,15 @@ class AsyncProcess:
         self,
         code_toolbox: SandboxCodeToolbox,
         api_client: ProcessApi,
-        ensure_toolbox_url: Callable[[], Awaitable[None]],
     ):
         """Initialize a new Process instance.
 
         Args:
             code_toolbox (SandboxCodeToolbox): Language-specific code execution toolbox.
             api_client (ProcessApi): API client for process operations.
-            ensure_toolbox_url (Callable[[], Awaitable[None]]): Ensures the toolbox API URL is initialized.
-            Must be called before invoking any private methods on the API client.
         """
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         self._api_client: ProcessApi = api_client
-        self._ensure_toolbox_url: Callable[[], Awaitable[None]] = ensure_toolbox_url
 
     @staticmethod
     def _parse_output(lines: list[str]) -> ExecutionArtifacts:
@@ -435,7 +431,6 @@ class AsyncProcess:
             )
             ```
         """
-        await self._ensure_toolbox_url()
         _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(
             session_id=session_id,
             command_id=command_id,
@@ -571,7 +566,6 @@ class AsyncProcess:
         Raises:
             DaytonaError: If the PTY session doesn't exist or connection fails.
         """
-        await self._ensure_toolbox_url()
         _, url, headers, *_ = self._api_client._connect_pty_session_serialize(
             session_id=session_id,
             _request_auth=None,

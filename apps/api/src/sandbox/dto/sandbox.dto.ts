@@ -270,7 +270,13 @@ export class SandboxDto {
   @IsOptional()
   runnerId?: string
 
-  static fromSandbox(sandbox: Sandbox): SandboxDto {
+  @ApiProperty({
+    description: 'The toolbox proxy URL for the sandbox',
+    example: 'https://proxy.app.daytona.io/toolbox',
+  })
+  toolboxProxyUrl: string
+
+  static fromSandbox(sandbox: Sandbox, toolboxProxyUrl: string): SandboxDto {
     return {
       id: sandbox.id,
       organizationId: sandbox.organizationId,
@@ -311,6 +317,7 @@ export class SandboxDto {
         : undefined,
       daemonVersion: sandbox.daemonVersion,
       runnerId: sandbox.runnerId,
+      toolboxProxyUrl,
     }
   }
 
