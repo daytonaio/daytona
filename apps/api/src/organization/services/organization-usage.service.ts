@@ -760,17 +760,18 @@ export class OrganizationUsageService {
     const script = `
       local cacheKey = KEYS[1]
       local pendingCacheKey = KEYS[2]
-      local delta = tonumber(ARGV[1])
+      local delta = ARGV[1]
       local ttl = tonumber(ARGV[2])
 
       if redis.call("EXISTS", cacheKey) == 1 then
-        redis.call("INCRBY", cacheKey, delta)
+        redis.call("INCRBYFLOAT", cacheKey, delta)
         redis.call("EXPIRE", cacheKey, ttl)
       end
 
+      local numDelta = tonumber(delta)
       local pending = tonumber(redis.call("GET", pendingCacheKey))
-      if pending and pending > 0 and delta > 0 then
-        redis.call("DECRBY", pendingCacheKey, delta)
+      if pending and pending > 0 and numDelta > 0 then
+        redis.call("INCRBYFLOAT", pendingCacheKey, -numDelta)
       end
     `
 
@@ -864,24 +865,24 @@ export class OrganizationUsageService {
       local shouldIncrementMemory = ARGV[2] == "true"
       local shouldIncrementDisk = ARGV[3] == "true"
 
-      local cpuIncrement = tonumber(ARGV[4])
-      local memoryIncrement = tonumber(ARGV[5])
-      local diskIncrement = tonumber(ARGV[6])
+      local cpuIncrement = ARGV[4]
+      local memoryIncrement = ARGV[5]
+      local diskIncrement = ARGV[6]
 
       local ttl = tonumber(ARGV[7])
     
       if shouldIncrementCpu then
-        redis.call("INCRBY", cpuKey, cpuIncrement)
+        redis.call("INCRBYFLOAT", cpuKey, cpuIncrement)
         redis.call("EXPIRE", cpuKey, ttl)
       end
 
       if shouldIncrementMemory then
-        redis.call("INCRBY", memoryKey, memoryIncrement)
+        redis.call("INCRBYFLOAT", memoryKey, memoryIncrement)
         redis.call("EXPIRE", memoryKey, ttl)
       end
 
       if shouldIncrementDisk then
-        redis.call("INCRBY", diskKey, diskIncrement)
+        redis.call("INCRBYFLOAT", diskKey, diskIncrement)
         redis.call("EXPIRE", diskKey, ttl)
       end
     `
@@ -942,16 +943,16 @@ export class OrganizationUsageService {
       local memoryDecrement = tonumber(ARGV[2])
       local diskDecrement = tonumber(ARGV[3])
       
-      if cpuDecrement then
-        redis.call("DECRBY", cpuKey, cpuDecrement)
+      if cpuDecrement and cpuDecrement ~= 0 then
+        redis.call("INCRBYFLOAT", cpuKey, -cpuDecrement)
       end
 
-      if memoryDecrement then
-        redis.call("DECRBY", memoryKey, memoryDecrement)
+      if memoryDecrement and memoryDecrement ~= 0 then
+        redis.call("INCRBYFLOAT", memoryKey, -memoryDecrement)
       end
 
-      if diskDecrement then
-        redis.call("DECRBY", diskKey, diskDecrement)
+      if diskDecrement and diskDecrement ~= 0 then
+        redis.call("INCRBYFLOAT", diskKey, -diskDecrement)
       end
     `
 
