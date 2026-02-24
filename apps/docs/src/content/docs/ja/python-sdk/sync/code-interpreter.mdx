@@ -1,0 +1,278 @@
+---
+title: "CodeInterpreter"
+hideTitleOnPage: true
+---
+
+## コードインタープリター \{#codeinterpreter\}
+
+```python
+class CodeInterpreter()
+```
+
+サンドボックス内でのコードの解釈と実行を行います。現在サポートしている言語は Python のみです。
+
+このクラスは、分離されたインタプリタコンテキストでコードを実行するメソッド、
+コンテキストを管理するメソッド、およびコールバックを通じて実行出力をストリーミングするメソッドを提供します。
+同じコンテキストで後続のコード実行を行う場合、前回の実行で定義された変数、インポート、および関数は引き続き利用可能です。
+
+他の言語の場合は、`Process` インターフェースの `code_run` メソッドを使用するか、
+サンドボックスのターミナルで適切なコマンドを直接実行してください。
+
+#### CodeInterpreter.__init__ \{#codeinterpreter__init__\}
+
+```python
+def __init__(api_client: InterpreterApi, ensure_toolbox_url: Callable[[],
+                                                                      None])
+```
+
+新しい CodeInterpreter インスタンスを初期化します。
+
+**引数**:
+
+* `api_client` - インタープリター操作用の API クライアント。
+* `ensure_toolbox_url` - toolbox API の URL が初期化済みであることを保証します。
+
+#### CodeInterpreter.run_code \{#codeinterpreterrun_code\}
+
+```python
+@intercept_errors(message_prefix="Failed to run code: ")
+def run_code(code: str,
+             *,
+             context: InterpreterContext | None = None,
+             on_stdout: OutputHandler[OutputMessage] | None = None,
+             on_stderr: OutputHandler[OutputMessage] | None = None,
+             on_error: OutputHandler[ExecutionError] | None = None,
+             envs: dict[str, str] | None = None,
+             timeout: int | None = None) -> ExecutionResult
+```
+
+サンドボックス内でPythonコードを実行します。
+
+デフォルトでは、コードはデフォルトの共有コンテキストで実行され、変数、
+インポート、および関数が実行間で保持されます。分離されたコンテキストで実行する場合は、
+`create_context()`で新しいコンテキストを作成し、`context`引数として渡してください。
+
+**引数**:
+
+* `code` *str* - 実行するコード。
+* `context` *InterpreterContext | None* - コードを実行するコンテキスト。指定しない場合は、デフォルトのコンテキストが使用されます。
+* `on_stdout` *OutputHandler[OutputMessage] | None* - 標準出力メッセージのコールバック。
+* `on_stderr` *OutputHandler[OutputMessage] | None* - 標準エラーメッセージのコールバック。
+* `on_error` *OutputHandler[ExecutionError] | None* - 実行エラーのコールバック
+  (例: 構文エラー、実行時エラー)。
+* `envs` *dict[str, str] | None* - この実行で使用する環境変数。
+* `timeout` *int | None* - タイムアウト(秒単位)。0は無制限を意味します。デフォルトは10分です。
+
+**戻り値**:
+
+* `ExecutionResult` - 標準出力、標準エラー、およびエラー(存在する場合)を含む結果オブジェクト。
+
+**例外**:
+
+* `DaytonaTimeoutError` - 実行がタイムアウトした場合。
+* `DaytonaError` - 通信またはその他のSDKエラーにより実行が失敗した場合。
+
+**例**:
+
+```python
+def handle_stdout(msg: OutputMessage):
+    print(f"STDOUT: {msg.output}", end="")
+
+def handle_stderr(msg: OutputMessage):
+    print(f"STDERR: {msg.output}", end="")
+
+def handle_error(err: ExecutionError):
+    print(f"ERROR: {err.name}: {err.value}")
+
+code = '''
+import sys
+import time
+for i in range(5):
+    print(i)
+    time.sleep(1)
+sys.stderr.write("Counting done!")
+'''
+result = sandbox.code_interpreter.run_code(
+    code=code,
+    on_stdout=handle_stdout,
+    on_stderr=handle_stderr,
+    on_error=handle_error,
+    timeout=10
+)
+```
+
+#### CodeInterpreter.create_context \{#codeinterpretercreate_context\}
+
+````python
+@intercept_errors(message_prefix="Failed to create interpreter context: ")
+def create_context(cwd: str | None = None) -> InterpreterContext
+```
+
+新しい独立したインタプリタコンテキストを作成します。
+
+コンテキストは、それぞれ独自のグローバル名前空間を持つ独立した実行環境を提供します。
+あるコンテキストで定義された変数、インポート、および関数は、他のコンテキストに影響を与えません。
+
+**引数**:
+
+* `cwd` *str | None* - コンテキストの作業ディレクトリ。指定しない場合は、サンドボックスの作業ディレクトリが使用されます。
+
+**戻り値**:
+
+* `InterpreterContext` - 作成されたコンテキスト。その ID とメタデータを含みます。
+
+**例外**:
+
+* `DaytonaError` - コンテキストの作成に失敗した場合に送出されます。
+
+**使用例**:
+
+```python
+# 分離されたコンテキストを作成
+ctx = sandbox.code_interpreter.create_context()
+
+# このコンテキストでコードを実行
+sandbox.code_interpreter.run_code("x = 100", context=ctx)
+
+# 変数はこのコンテキスト内にのみ存在
+result = sandbox.code_interpreter.run_code("print(x)", context=ctx)  # OK
+
+# デフォルトコンテキストでは変数は参照できない
+result = sandbox.code_interpreter.run_code("print(x)")  # NameError
+
+# クリーンアップ
+sandbox.code_interpreter.delete_context(ctx)
+```
+````
+
+新しい独立したインタプリタコンテキストを作成します。
+
+コンテキストは、それぞれ独自のグローバル名前空間を持つ独立した実行環境を提供します。
+あるコンテキストで定義された変数、インポート、および関数は、他のコンテキストに影響を与えません。
+
+**引数**:
+
+* `cwd` *str | None* - コンテキストの作業ディレクトリ。指定しない場合は、サンドボックスの作業ディレクトリが使用されます。
+
+**戻り値**:
+
+* `InterpreterContext` - 作成されたコンテキスト。その ID とメタデータを含みます。
+
+**例外**:
+
+* `DaytonaError` - コンテキストの作成に失敗した場合に送出されます。
+
+**使用例**:
+
+```python
+# Create isolated context
+ctx = sandbox.code_interpreter.create_context()
+
+# Execute code in this context
+sandbox.code_interpreter.run_code("x = 100", context=ctx)
+
+# Variable only exists in this context
+result = sandbox.code_interpreter.run_code("print(x)", context=ctx)  # OK
+
+# デフォルトコンテキストでは変数は参照できない
+result = sandbox.code_interpreter.run_code("print(x)")  # NameError
+
+# Clean up
+sandbox.code_interpreter.delete_context(ctx)
+```
+
+#### CodeInterpreter.list_contexts \{#codeinterpreterlist_contexts\}
+
+```python
+@intercept_errors(message_prefix="インタープリターコンテキストのリスト取得に失敗しました: ")
+def list_contexts() -> list[InterpreterContext]
+```
+
+ユーザーが作成したすべてのインタープリターコンテキストを一覧表示します。
+
+デフォルトのコンテキストはこの一覧には含まれません。`create_context()` によって
+作成されたコンテキストのみが返されます。
+
+**戻り値**:
+
+* `list[InterpreterContext]` - コンテキストオブジェクトのリスト。
+
+**発生しうる例外**:
+
+* `DaytonaError` - 一覧の取得に失敗した場合。
+
+**使用例**:
+
+```python
+contexts = sandbox.code_interpreter.list_contexts()
+for ctx in contexts:
+    print(f"コンテキスト {ctx.id}: {ctx.language}、場所: {ctx.cwd}")
+```
+
+#### CodeInterpreter.delete_context \{#codeinterpreterdelete_context\}
+
+```python
+@intercept_errors(message_prefix="インタープリターコンテキストの削除に失敗しました: ")
+def delete_context(context: InterpreterContext) -> None
+```
+
+インタープリターコンテキストを削除し、関連するすべてのプロセスを停止します。
+
+これにより、そのコンテキストおよびその状態（変数、インポートなど）が恒久的に削除されます。
+既定のコンテキストは削除できません。
+
+**引数**:
+
+* `context` *InterpreterContext* - 削除するコンテキスト。
+
+**発生し得る例外**:
+
+* `DaytonaError` - 削除に失敗した場合、またはコンテキストが見つからない場合。
+
+**使用例**:
+
+```python
+ctx = sandbox.code_interpreter.create_context()
+# ... コンテキストを使用 ...
+sandbox.code_interpreter.delete_context(ctx)
+```
+
+## OutputMessage \{#outputmessage\}
+
+```python
+class OutputMessage(BaseModel)
+```
+
+コード実行時の stdout または stderr の出力を表します。
+
+**属性**:
+
+* `output` - 出力内容。
+
+## ExecutionError \{#executionerror\}
+
+```python
+class ExecutionError(BaseModel)
+```
+
+コード実行中に発生したエラーを表します。
+
+**属性**:
+
+* `name` - エラーの種類/クラス名（例: &quot;ValueError&quot;, &quot;SyntaxError&quot;）。
+* `value` - エラー値。
+* `traceback` - エラーの完全なトレースバック。
+
+## ExecutionResult \{#executionresult\}
+
+```python
+class ExecutionResult(BaseModel)
+```
+
+コード実行結果。
+
+**属性**:
+
+* `stdout` - コード実行時の標準出力。
+* `stderr` - コード実行時の標準エラー出力。
+* `error` - 実行が失敗した場合のエラー詳細。それ以外の場合は None。
