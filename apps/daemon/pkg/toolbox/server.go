@@ -18,6 +18,7 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
+	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -89,7 +90,7 @@ type server struct {
 type Telemetry struct {
 	TracerProvider *sdktrace.TracerProvider
 	MeterProvider  *metric.MeterProvider
-	Logger         *otellog.LoggerProvider
+	LoggerProvider *otellog.LoggerProvider
 }
 
 func (s *server) Start() error {
@@ -345,4 +346,33 @@ func (s *server) Start() error {
 	}
 
 	return httpserver.Serve(listener)
+}
+
+func (s *server) Shutdown() {
+	s.logger.Info("Shutting down toolbox server")
+
+	// Flush telemetry
+	if s.telemetry.TracerProvider != nil {
+		s.logger.Info("Shutting down tracer provider")
+		telemetry.ShutdownTracer(s.logger, s.telemetry.TracerProvider)
+	}
+
+	if s.telemetry.MeterProvider != nil {
+		s.logger.Info("Shutting down meter provider")
+		telemetry.ShutdownMeter(s.logger, s.telemetry.MeterProvider)
+	}
+
+	if s.telemetry.LoggerProvider != nil {
+		s.logger.Info("Shutting down logger provider")
+		telemetry.ShutdownLogger(s.logger, s.telemetry.LoggerProvider)
+	}
+
+	// Stop computer use if running
+	if s.ComputerUse != nil {
+		s.logger.Info("Stopping computer use...")
+		_, err := s.ComputerUse.Stop()
+		if err != nil {
+			s.logger.Error("Failed to stop computer use", "error", err)
+		}
+	}
 }

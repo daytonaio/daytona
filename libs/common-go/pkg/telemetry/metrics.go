@@ -104,12 +104,12 @@ func InitMetrics(ctx context.Context, config Config, meterName string) (*sdk_met
 }
 
 // ShutdownMeter gracefully shuts down the MeterProvider and flushes metrics.
-func ShutdownMeter(mp *sdk_metric.MeterProvider) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func ShutdownMeter(logger *slog.Logger, mp *sdk_metric.MeterProvider) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	if err := mp.Shutdown(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "Error shutting down meter provider: %v\n", err)
+		logger.Error("Error shutting down meter provider", "error", err)
 	}
 }
 

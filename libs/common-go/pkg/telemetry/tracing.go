@@ -81,7 +81,7 @@ func InitTracer(ctx context.Context, config Config, exporterFilters ...ExporterF
 
 // ShutdownTracer gracefully shuts down the tracer provider
 func ShutdownTracer(logger *slog.Logger, tp *trace.TracerProvider) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
 	if err := tp.Shutdown(ctx); err != nil {

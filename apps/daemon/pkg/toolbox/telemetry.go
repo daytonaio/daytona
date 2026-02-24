@@ -17,8 +17,8 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 		return nil
 	}
 
-	if s.telemetry.Logger != nil {
-		if err := s.telemetry.Logger.Shutdown(ctx); err != nil {
+	if s.telemetry.LoggerProvider != nil {
+		if err := s.telemetry.LoggerProvider.Shutdown(ctx); err != nil {
 			return fmt.Errorf("failed to shutdown existing telemetry logger: %w", err)
 		}
 	}
@@ -77,7 +77,7 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 
 	s.telemetry.TracerProvider = tp
 	s.telemetry.MeterProvider = mp
-	s.telemetry.Logger = lp
+	s.telemetry.LoggerProvider = lp
 
 	s.logger.InfoContext(ctx, "Telemetry initialized successfully")
 	return nil
