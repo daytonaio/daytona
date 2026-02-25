@@ -228,6 +228,10 @@ module Daytona
     def delete
       sandbox_api.delete_sandbox(id)
       refresh
+    rescue DaytonaApiClient::ApiError => e
+      raise unless e.code == 404
+
+      @state = 'destroyed'
     end
 
     # Gets the user's home directory path for the logged in user inside the Sandbox.
