@@ -41,7 +41,7 @@ function normalizeRegistryUrl(url: string): string {
     return DOCKER_HUB_URL
   }
   // Strip trailing slashes for consistent matching
-  return url.replace(/\/+$/, '')
+  return url.trim().replace(/\/+$/, '')
 }
 
 export interface ImageDetails {
