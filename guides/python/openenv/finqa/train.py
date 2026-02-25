@@ -725,6 +725,8 @@ async def collect_rollouts(
                 # interleaving (state ping response vs step response).
                 if batch_idx % reconnect_every_batches == 0:
                     busy_indices = set()
+                    for env_idx in start_tasks.values():
+                        busy_indices.add(env_idx)
                     for meta in step_tasks.values():
                         busy_indices.add(meta[0].sandbox_idx)
                     for fep in force_tasks.values():
@@ -740,11 +742,15 @@ async def collect_rollouts(
                     tool_name, tool_args = parse_tool_call(generated_text)
 
                     if i < DEBUG_LOG_SAMPLE_LIMIT:
+                        user_msg = ep.chat_history[1]["content"] if len(ep.chat_history) > 1 else "(no user msg)"
                         debug_logger.info(
-                            "\n=== batch=%s step=%s sandbox=%s ===\nGENERATED (%s chars):\n%s\nPARSED: %s(%s)",
+                            "\n=== batch=%s step=%s sandbox=%s ==="
+                            "\nUSER_PROMPT: %s\nGENERATED (%s chars):\n%s"
+                            "\nPARSED: %s(%s)",
                             batch_idx,
                             len(ep.turns),
                             ep.sandbox_idx,
+                            user_msg[:300],
                             len(generated_text),
                             generated_text[:1000],
                             tool_name,
@@ -807,7 +813,15 @@ async def collect_rollouts(
                 if ep is None:
                     start_failures[env_idx] += 1
                     if start_failures[env_idx] >= MAX_PLAY_RETRIES:
-                        await reconnect_envs(envs, pool)
+                        # Skip envs with in-flight tasks to avoid WS interleaving.
+                        busy = set()
+                        for ei in start_tasks.values():
+                            busy.add(ei)
+                        for m in step_tasks.values():
+                            busy.add(m[0].sandbox_idx)
+                        for fe in force_tasks.values():
+                            busy.add(fe.sandbox_idx)
+                        await reconnect_envs(envs, pool, skip_indices=busy)
                         start_failures[env_idx] = 0
                     fail_count = max(1, start_failures[env_idx])
                     backoff = min(5.0, 0.25 * (2 ** (fail_count - 1)))
@@ -953,6 +967,8 @@ async def collect_rollouts(
     # Track envs with in-flight WS requests — cancellation leaves stale
     # responses queued on the socket, corrupting subsequent communication.
     stale_env_indices = set()
+    for env_idx in start_tasks.values():
+        stale_env_indices.add(env_idx)
     for meta in step_tasks.values():
         stale_env_indices.add(meta[0].sandbox_idx)
     for fep in force_tasks.values():
