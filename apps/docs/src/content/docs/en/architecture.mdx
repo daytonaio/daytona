@@ -60,9 +60,7 @@ The sandbox manager is part of the API process and schedules sandboxes onto runn
 
 ### Compute plane
 
-The compute plane is the infrastructure layer where sandboxes run. Sandboxes run on [runners](#sandbox-runners), compute nodes that host multiple sandboxes with dedicated resources and scale horizontally across shared or dedicated [regions](/docs/en/regions).
-
-The compute plane consists of the following components:
+The compute plane is the infrastructure layer where sandboxes run. Sandboxes run on [runners](#sandbox-runners), compute nodes that host multiple sandboxes with dedicated resources and scale horizontally across shared or dedicated [regions](/docs/en/regions). The compute plane consists of the following components:
 
 - [Sandbox runners](#sandbox-runners) host sandboxes with dedicated resources
 - [Sandbox daemon](#sandbox-daemon) provides code execution and environment access inside each sandbox
@@ -93,13 +91,10 @@ Volumes are mounted into sandbox containers using FUSE (Filesystem in Userspace)
 
 ### Container registry
 
-Container registries serve as the source for sandbox base images. When creating a [snapshot](/docs/en/snapshots), the snapshot builder pulls the specified image from an external registry, re-tags it with an internal naming convention, and pushes it to the internal snapshot registry for use by runners. For Dockerfile-based snapshots, parent images referenced in `FROM` directives are also pulled from the configured source registries during the build.
-
-Daytona supports any OCI-compatible registry:
+Container registries serve as the source for sandbox base images. When creating a [snapshot](/docs/en/snapshots), the snapshot builder pulls the specified image from an external registry, and pushes it to the internal snapshot registry for use by runners. For Dockerfile-based snapshots, parent images referenced in `FROM` directives are also pulled from the configured source registries during the build. Daytona supports any OCI-compatible registry:
 
 - [Docker Hub](/docs/en/snapshots#docker-hub)
 - [Google Artifact Registry](/docs/en/snapshots#google-artifact-registry)
 - [GitHub Container Registry (GHCR)](/docs/en/snapshots#github-container-registry-ghcr)
 - [Private registries](/docs/en/snapshots#using-images-from-private-registries): any registry that implements the OCI distribution specification
 
-Registry credentials can be provided per snapshot to authenticate pulls from private registries. All images are validated for `linux/amd64` architecture compatibility before being accepted.
