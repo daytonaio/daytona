@@ -220,9 +220,6 @@ func run() int {
 		logger.Info("Received signal, shutting down gracefully...", "signal", sig)
 	}
 
-	// Toolbox server graceful shutdown
-	toolBoxServer.Shutdown()
-
 	// Handle entrypoint command shutdown
 	if entrypointCmd != nil && entrypointCmd.Process != nil {
 		logger.Info("Waiting for entrypoint command to complete...")
@@ -272,6 +269,9 @@ func run() int {
 		}
 	}
 
-	logger.Info("Shutdown complete")
+	// Toolbox server graceful shutdown
+	toolBoxServer.Shutdown()
+
+	slog.Info("Shutdown complete")
 	return 0
 }

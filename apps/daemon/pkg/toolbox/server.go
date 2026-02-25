@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
@@ -85,6 +86,7 @@ type server struct {
 	terminationCheckIntervalMilliseconds int
 	configDir                            string
 	recordingService                     *recording.RecordingService
+	httpServer                           *http.Server
 }
 
 type Telemetry struct {
@@ -332,7 +334,7 @@ func (s *server) Start() error {
 
 	go portDetector.Start(context.Background())
 
-	httpserver := &http.Server{
+	s.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", config.TOOLBOX_API_PORT),
 		Handler: r,
 	}
@@ -340,16 +342,34 @@ func (s *server) Start() error {
 	// Print to stdout so the runner can know that the daemon is ready
 	fmt.Println("Starting toolbox server on port", config.TOOLBOX_API_PORT)
 
-	listener, err := net.Listen("tcp", httpserver.Addr)
+	listener, err := net.Listen("tcp", s.httpServer.Addr)
 	if err != nil {
 		return err
 	}
 
-	return httpserver.Serve(listener)
+	return s.httpServer.Serve(listener)
 }
 
 func (s *server) Shutdown() {
 	s.logger.Info("Shutting down toolbox server")
+
+	// Stop accepting new requests and drain in-flight ones
+	if s.httpServer != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := s.httpServer.Shutdown(ctx); err != nil {
+			s.logger.Error("toolbox HTTP server shutdown error", "error", err)
+		}
+	}
+
+	// Stop computer use if running
+	if s.ComputerUse != nil {
+		s.logger.Info("Stopping computer use...")
+		_, err := s.ComputerUse.Stop()
+		if err != nil {
+			s.logger.Error("Failed to stop computer use", "error", err)
+		}
+	}
 
 	// Flush telemetry
 	if s.telemetry.TracerProvider != nil {
@@ -365,14 +385,5 @@ func (s *server) Shutdown() {
 	if s.telemetry.LoggerProvider != nil {
 		s.logger.Info("Shutting down logger provider")
 		telemetry.ShutdownLogger(s.logger, s.telemetry.LoggerProvider)
-	}
-
-	// Stop computer use if running
-	if s.ComputerUse != nil {
-		s.logger.Info("Stopping computer use...")
-		_, err := s.ComputerUse.Stop()
-		if err != nil {
-			s.logger.Error("Failed to stop computer use", "error", err)
-		}
 	}
 }
