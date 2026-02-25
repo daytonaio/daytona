@@ -16,8 +16,8 @@ import {
 import { ScreenshotActions, ScreenshotFormatOption } from '@/enums/Playground'
 import { usePlayground } from '@/hooks/usePlayground'
 import { CompressedScreenshotResponse, RegionScreenshotResponse } from '@daytonaio/api-client'
-import { ScreenshotResponse } from '@daytonaio/toolbox-api-client'
 import { ComputerUse, ScreenshotRegion } from '@daytonaio/sdk'
+import { ScreenshotResponse } from '@daytonaio/toolbox-api-client'
 import PlaygroundActionForm from '../../ActionForm'
 import FormCheckboxInput from '../../Inputs/CheckboxInput'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
@@ -168,6 +168,21 @@ const VNCScreenshotOperations: React.FC<VNCInteractionOptionsSectionComponentPro
         : '',
     ].join('\n')
     setVNCInteractionOptionsParamValue('responseContent', screenshotActionsResponseText)
+
+    // Auto-download the screenshot image
+    if (screenshotActionResponse.screenshot) {
+      const format = screenshotOptions.format ?? ScreenshotFormatOption.PNG
+      const mimeType =
+        format === ScreenshotFormatOption.JPEG
+          ? 'image/jpeg'
+          : format === ScreenshotFormatOption.WEBP
+            ? 'image/webp'
+            : 'image/png'
+      const link = document.createElement('a')
+      link.href = `data:${mimeType};base64,${screenshotActionResponse.screenshot}`
+      link.download = `screenshot-${Date.now()}.${format}`
+      link.click()
+    }
   }
 
   return (

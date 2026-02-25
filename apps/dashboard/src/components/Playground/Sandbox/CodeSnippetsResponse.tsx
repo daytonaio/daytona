@@ -387,7 +387,12 @@ const SandboxCodeSnippetsResponse = ({ className }: { className?: string }) => {
                       size="icon-sm"
                       value={sandboxCodeSnippetsData[language.value].code}
                     />
-                    <ScrollArea fade="mask" horizontal className="h-full overflow-auto" fadeOffset={35}>
+                    <ScrollArea
+                      fade="mask"
+                      horizontal
+                      className="h-full overflow-auto bg-[hsl(var(--code-background))]"
+                      fadeOffset={35}
+                    >
                       <CodeBlock
                         showCopy={false}
                         language={language.value}
