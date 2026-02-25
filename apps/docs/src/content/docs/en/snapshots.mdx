@@ -328,6 +328,26 @@ Daytona supports creating snapshots from images from GitHub Container Registry (
 5. Click the **Create Snapshot** button
 6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and project name (e.g. **`ghcr.io/<my-project>/custom-alpine:3.21`**)
 
+#### Amazon Elastic Container Registry (ECR)
+
+Daytona supports creating snapshots from images from Amazon Elastic Container Registry.
+
+1. Navigate to [Daytona Registries ↗](https://app.daytona.io/dashboard/registries)
+2. Click the **Add Registry** button
+3. Enter the **registry name**, **registry URL**, **username**, **password**, and **project** (if applicable)
+
+- **Registry URL**: `<account_id>.dkr.ecr.<region>.amazonaws.com`
+- **Username**: `AWS`
+- **Password**: [Authorization token](https://docs.aws.amazon.com/AmazonECR/latest/userguide/registry_auth.html)
+
+4. After the container registry is successfully created, navigate to [Daytona Snapshots ↗](https://app.daytona.io/dashboard/snapshots)
+5. Click the **Create Snapshot** button
+6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and repository name (e.g. **`123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo/custom-alpine:3.21`**)
+
+:::caution
+Amazon ECR authorization tokens expire after **12 hours**. Update the registry password in Daytona each time the token expires.
+:::
+
 ### Using the declarative builder
 
 [Declarative Builder](/docs/en/declarative-builder) provides a powerful, code-first approach to defining dependencies for Daytona Sandboxes. Instead of importing images from a container registry, you can programmatically define them using the Daytona [SDKs](/docs/en/getting-started#sdks).
