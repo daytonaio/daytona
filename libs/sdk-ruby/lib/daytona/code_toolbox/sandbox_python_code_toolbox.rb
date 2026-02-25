@@ -21,11 +21,10 @@ module Daytona
 
       argv = params&.argv&.join(' ') || ''
 
-      # Execute the bootstrapper code directly
+      # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+      # echo is a shell builtin so the base64 string doesn't hit ARG_MAX
       # Use -u flag to ensure unbuffered output for real-time error reporting
-
-      " sh -c 'python3 -u -c \"exec(__import__(\\\"base64\\\").b64decode(\\\"\\\"\\\"#{encoded_code}\\\"\\\"\\\")" \
-        ".decode())\" #{argv}' "
+      "echo '#{encoded_code}' | base64 -d | python3 -u - #{argv}"
     end
 
     private

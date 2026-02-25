@@ -135,22 +135,18 @@ class AsyncProcess:
             result = await sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        base64_user_cmd = base64.b64encode(command.encode()).decode()
-        command = f"echo '{base64_user_cmd}' | base64 -d | sh"
-
         if env and len(env.items()) > 0:
             safe_env_exports = (
-                ";".join(
+                " ".join(
                     [
-                        f"export {key}=$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)"
+                        f"""export {key}="$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
                         for key, value in env.items()
                     ]
                 )
-                + ";"
+                + " "
             )
-            command = f"{safe_env_exports} {command}"
+            command = f"{safe_env_exports}{command}"
 
-        command = f'sh -c "{command}"'
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
         response = await self._api_client.execute_command(request=execute_request)
