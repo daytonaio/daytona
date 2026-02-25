@@ -5,6 +5,7 @@
 
 export const SnapshotEvents = {
   CREATED: 'snapshot.created',
+  ACTIVATED: 'snapshot.activated',
   STATE_UPDATED: 'snapshot.state.updated',
   REMOVED: 'snapshot.removed',
 } as const

@@ -49,6 +49,7 @@ import { RunnerService } from './runner.service'
 import { RegionService } from '../../region/services/region.service'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
 @Injectable()
@@ -573,7 +574,11 @@ export class SnapshotService {
       }
 
       snapshot.state = SnapshotState.PENDING
-      return await this.snapshotRepository.save(snapshot)
+      const savedSnapshot = await this.snapshotRepository.save(snapshot)
+
+      this.eventEmitter.emit(SnapshotEvents.ACTIVATED, new SnapshotActivatedEvent(savedSnapshot))
+
+      return savedSnapshot
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, pendingSnapshotCountIncrement)
       throw error
