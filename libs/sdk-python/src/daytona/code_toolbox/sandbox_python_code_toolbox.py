@@ -29,12 +29,10 @@ class SandboxPythonCodeToolbox(SandboxCodeToolbox):
         if params and params.argv:
             argv = " ".join(params.argv)
 
-        # Execute the bootstrapper code directly
+        # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+        # echo is a shell builtin so the base64 string doesn't hit ARG_MAX
         # Use -u flag to ensure unbuffered output for real-time error reporting
-        return (
-            f""" sh -c 'python3 -u -c "exec(__import__(\\\"base64\\\")"""
-            f""".b64decode(\\\"{base64_code}\\\").decode())" {argv}' """
-        )
+        return f"echo '{base64_code}' | base64 -d | python3 -u - {argv}"
 
     @staticmethod
     def _is_matplotlib_imported(code: str) -> bool:
