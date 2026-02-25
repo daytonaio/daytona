@@ -17,6 +17,7 @@ import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../../constants/sandbox-events.constants'
 import { SandboxBackupCreatedEvent } from '../../events/sandbox-backup-created.event'
+import { WithSpan } from '../../../common/decorators/otel.decorator'
 
 @Injectable()
 export class SandboxArchiveAction extends SandboxAction {
@@ -31,6 +32,7 @@ export class SandboxArchiveAction extends SandboxAction {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
+  @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
