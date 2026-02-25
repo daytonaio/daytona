@@ -207,6 +207,23 @@ debug_logger.setLevel(logging.INFO)
 debug_logger.propagate = False
 
 
+def summarize_exception_samples(
+    failures: list[tuple[int | str, Exception]],
+    max_samples: int = 5,
+) -> str:
+    """Compact summary of best-effort cleanup failures for warning prints."""
+    if not failures:
+        return ""
+    samples = []
+    for item_id, exc in failures[:max_samples]:
+        msg = str(exc).strip().replace("\n", " ")
+        if len(msg) > 80:
+            msg = msg[:77] + "..."
+        samples.append(f"{item_id}={type(exc).__name__}({msg})")
+    suffix = "" if len(failures) <= max_samples else f", +{len(failures) - max_samples} more"
+    return ", ".join(samples) + suffix
+
+
 # ---------------------------------------------------------------------------
 # Data structures
 # ---------------------------------------------------------------------------
@@ -326,11 +343,18 @@ async def connect_envs(pool, play_sem: asyncio.Semaphore) -> list[FinQAEnv]:
 
 async def disconnect_envs(envs: list[FinQAEnv]):
     """Close all persistent connections."""
-    for env in envs:
+    close_failures: list[tuple[int | str, Exception]] = []
+    for idx, env in enumerate(envs):
         try:
             await env.close()
-        except Exception:
-            pass
+        except Exception as e:
+            close_failures.append((idx, e))
+    if close_failures:
+        print(
+            "  Warning: failed to close "
+            + f"{len(close_failures)}/{len(envs)} env connections "
+            + f"({summarize_exception_samples(close_failures)})"
+        )
 
 
 async def reconnect_envs(
@@ -362,8 +386,10 @@ async def reconnect_envs(
             # Connection is dead, reconnect
             try:
                 await env.close()
-            except Exception:
-                pass
+            except Exception as e:
+                print(
+                    "    Warning: failed to close stale env before reconnect " + f"(idx={i}): {type(e).__name__}: {e}"
+                )
             _, url = pool[i]
             new_env = FinQAEnv(base_url=url)
             await new_env.connect()
@@ -774,7 +800,14 @@ async def collect_rollouts(
                 try:
                     force_result = task.result()
                     force_reward = force_result.observation.reward or 0.0
-                except Exception:
+                except Exception as e:
+                    if force_ep.sandbox_idx < DEBUG_SANDBOX_LOG_LIMIT:
+                        debug_logger.info(
+                            "  FORCE ERROR sandbox=%s: %s: %s",
+                            force_ep.sandbox_idx,
+                            type(e).__name__,
+                            e,
+                        )
                     force_reward = 0.0
                 complete_episode(force_ep, force_reward)
                 if completed >= next_progress:
@@ -898,11 +931,18 @@ async def collect_rollouts(
         await asyncio.gather(*pending_cancel, return_exceptions=True)
     # Force-disconnect envs whose WebSocket has stale responses from
     # cancelled tasks.  The next reconnect_envs() will reopen them cleanly.
+    disconnect_failures: list[tuple[int | str, Exception]] = []
     for idx in stale_env_indices:
         try:
             await envs[idx].disconnect()
-        except Exception:
-            pass
+        except Exception as e:
+            disconnect_failures.append((idx, e))
+    if disconnect_failures:
+        print(
+            "    Warning: failed to disconnect "
+            + f"{len(disconnect_failures)}/{len(stale_env_indices)} stale envs "
+            + f"({summarize_exception_samples(disconnect_failures)})"
+        )
 
     flat_eps = [ep for per_env in groups for ep in per_env]
     elapsed = time.time() - rollout_t0
@@ -1419,8 +1459,8 @@ async def train(args):
         shutil.rmtree(lora_export_root, ignore_errors=True)
         try:
             vllm_model.llm_engine.engine_core.shutdown()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  Warning during vLLM shutdown: {type(e).__name__}: {e}")
         print("Done.")
 
 
