@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from daytona_api_client_async.models.webhook_event import WebhookEvent
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,7 +28,7 @@ class SendWebhookDto(BaseModel):
     """
     SendWebhookDto
     """ # noqa: E501
-    event_type: StrictStr = Field(description="The type of event being sent", serialization_alias="eventType")
+    event_type: WebhookEvent = Field(description="The type of event being sent", serialization_alias="eventType")
     payload: Dict[str, Any] = Field(description="The payload data to send")
     event_id: Optional[StrictStr] = Field(default=None, description="Optional event ID for idempotency", serialization_alias="eventId")
     additional_properties: Dict[str, Any] = {}

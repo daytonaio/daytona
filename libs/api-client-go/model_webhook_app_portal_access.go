@@ -21,6 +21,8 @@ var _ MappedNullable = &WebhookAppPortalAccess{}
 
 // WebhookAppPortalAccess struct for WebhookAppPortalAccess
 type WebhookAppPortalAccess struct {
+	// The authentication token for the Svix consumer app portal
+	Token string `json:"token"`
 	// The URL to the webhook app portal
 	Url string `json:"url"`
 	AdditionalProperties map[string]interface{}
@@ -32,8 +34,9 @@ type _WebhookAppPortalAccess WebhookAppPortalAccess
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWebhookAppPortalAccess(url string) *WebhookAppPortalAccess {
+func NewWebhookAppPortalAccess(token string, url string) *WebhookAppPortalAccess {
 	this := WebhookAppPortalAccess{}
+	this.Token = token
 	this.Url = url
 	return &this
 }
@@ -44,6 +47,30 @@ func NewWebhookAppPortalAccess(url string) *WebhookAppPortalAccess {
 func NewWebhookAppPortalAccessWithDefaults() *WebhookAppPortalAccess {
 	this := WebhookAppPortalAccess{}
 	return &this
+}
+
+// GetToken returns the Token field value
+func (o *WebhookAppPortalAccess) GetToken() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Token
+}
+
+// GetTokenOk returns a tuple with the Token field value
+// and a boolean to check if the value has been set.
+func (o *WebhookAppPortalAccess) GetTokenOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Token, true
+}
+
+// SetToken sets field value
+func (o *WebhookAppPortalAccess) SetToken(v string) {
+	o.Token = v
 }
 
 // GetUrl returns the Url field value
@@ -80,6 +107,7 @@ func (o WebhookAppPortalAccess) MarshalJSON() ([]byte, error) {
 
 func (o WebhookAppPortalAccess) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["token"] = o.Token
 	toSerialize["url"] = o.Url
 
 	for key, value := range o.AdditionalProperties {
@@ -94,6 +122,7 @@ func (o *WebhookAppPortalAccess) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"token",
 		"url",
 	}
 
@@ -124,6 +153,7 @@ func (o *WebhookAppPortalAccess) UnmarshalJSON(data []byte) (err error) {
 	additionalProperties := make(map[string]interface{})
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
+		delete(additionalProperties, "token")
 		delete(additionalProperties, "url")
 		o.AdditionalProperties = additionalProperties
 	}

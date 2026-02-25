@@ -61,7 +61,7 @@ class WebhooksApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> WebhookAppPortalAccess:
-        """Get Svix Consumer App Portal access URL for an organization
+        """Get Svix Consumer App Portal access for an organization
 
 
         :param organization_id: (required)
@@ -131,7 +131,7 @@ class WebhooksApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[WebhookAppPortalAccess]:
-        """Get Svix Consumer App Portal access URL for an organization
+        """Get Svix Consumer App Portal access for an organization
 
 
         :param organization_id: (required)
@@ -201,7 +201,7 @@ class WebhooksApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get Svix Consumer App Portal access URL for an organization
+        """Get Svix Consumer App Portal access for an organization
 
 
         :param organization_id: (required)

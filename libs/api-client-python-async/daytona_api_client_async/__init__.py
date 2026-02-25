@@ -220,6 +220,7 @@ from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
 from daytona_api_client_async.models.webhook_app_portal_access import WebhookAppPortalAccess
 from daytona_api_client_async.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
+from daytona_api_client_async.models.webhook_event import WebhookEvent
 from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client_async.models.windows_response import WindowsResponse
 from daytona_api_client_async.models.work_dir_response import WorkDirResponse
@@ -427,6 +428,7 @@ __all__ = [
     "VolumeState",
     "WebhookAppPortalAccess",
     "WebhookControllerGetStatus200Response",
+    "WebhookEvent",
     "WebhookInitializationStatus",
     "WindowsResponse",
     "WorkDirResponse",

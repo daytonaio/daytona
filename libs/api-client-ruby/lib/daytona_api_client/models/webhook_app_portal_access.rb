@@ -15,12 +15,16 @@ require 'time'
 
 module DaytonaApiClient
   class WebhookAppPortalAccess
+    # The authentication token for the Svix consumer app portal
+    attr_accessor :token
+
     # The URL to the webhook app portal
     attr_accessor :url
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
+        :'token' => :'token',
         :'url' => :'url'
       }
     end
@@ -38,6 +42,7 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
+        :'token' => :'String',
         :'url' => :'String'
       }
     end
@@ -64,6 +69,12 @@ module DaytonaApiClient
         h[k.to_sym] = v
       }
 
+      if attributes.key?(:'token')
+        self.token = attributes[:'token']
+      else
+        self.token = nil
+      end
+
       if attributes.key?(:'url')
         self.url = attributes[:'url']
       else
@@ -76,6 +87,10 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @token.nil?
+        invalid_properties.push('invalid value for "token", token cannot be nil.')
+      end
+
       if @url.nil?
         invalid_properties.push('invalid value for "url", url cannot be nil.')
       end
@@ -87,8 +102,19 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @token.nil?
       return false if @url.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] token Value to be assigned
+    def token=(token)
+      if token.nil?
+        fail ArgumentError, 'token cannot be nil'
+      end
+
+      @token = token
     end
 
     # Custom attribute writer method with validation
@@ -106,6 +132,7 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
+          token == o.token &&
           url == o.url
     end
 
@@ -118,7 +145,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [url].hash
+      [token, url].hash
     end
 
     # Builds the object from hash
