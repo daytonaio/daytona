@@ -300,6 +300,9 @@
     "includedScripts": []
   },
   "lint-staged": {
+    "apps/api/src/migrations/**/*-migration.ts": [
+      "bash scripts/validate-migration-paths.sh"
+    ],
     "!(libs/*api-client*/**/*)*.{ts,tsx,astro}": [
       "eslint --cache --fix",
       "prettier --write"
