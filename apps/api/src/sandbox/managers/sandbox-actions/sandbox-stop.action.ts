@@ -13,6 +13,7 @@ import { RunnerService } from '../../services/runner.service'
 import { RunnerAdapterFactory } from '../../runner-adapter/runnerAdapter'
 import { SandboxRepository } from '../../repositories/sandbox.repository'
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
+import { WithSpan } from '../../../common/decorators/otel.decorator'
 
 @Injectable()
 export class SandboxStopAction extends SandboxAction {
@@ -25,6 +26,7 @@ export class SandboxStopAction extends SandboxAction {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
+  @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {

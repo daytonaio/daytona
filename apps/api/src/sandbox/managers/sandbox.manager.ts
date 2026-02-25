@@ -23,7 +23,7 @@ import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 
-import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { WithInstrumentation, WithSpan } from '../../common/decorators/otel.decorator'
 
 import { SandboxStartAction } from './sandbox-actions/sandbox-start.action'
 import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
@@ -807,6 +807,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     event: SandboxEvents.ARCHIVED,
   })
   @TrackJobExecution()
+  @WithSpan()
   private async handleSandboxArchivedEvent(event: SandboxArchivedEvent) {
     await this.syncInstanceState(event.sandbox.id)
   }
@@ -815,6 +816,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     event: SandboxEvents.DESTROYED,
   })
   @TrackJobExecution()
+  @WithSpan()
   private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
     await this.syncInstanceState(event.sandbox.id)
   }
@@ -823,6 +825,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     event: SandboxEvents.STARTED,
   })
   @TrackJobExecution()
+  @WithSpan()
   private async handleSandboxStartedEvent(event: SandboxStartedEvent) {
     await this.syncInstanceState(event.sandbox.id)
   }
@@ -831,6 +834,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     event: SandboxEvents.STOPPED,
   })
   @TrackJobExecution()
+  @WithSpan()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
     await this.syncInstanceState(event.sandbox.id)
   }
@@ -839,6 +843,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     event: SandboxEvents.CREATED,
   })
   @TrackJobExecution()
+  @WithSpan()
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     await this.syncInstanceState(event.sandbox.id)
   }

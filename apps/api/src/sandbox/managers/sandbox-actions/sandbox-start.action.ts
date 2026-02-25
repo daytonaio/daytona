@@ -28,6 +28,7 @@ import { Organization } from '../../../organization/entities/organization.entity
 import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import { WithSpan } from '../../../common/decorators/otel.decorator'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -46,10 +47,14 @@ export class SandboxStartAction extends SandboxAction {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
 
+  @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     // Load buildInfo only for states that need it — avoids a JOIN+DISTINCT in the
     // shared syncInstanceState query that stop/destroy/archive paths never use.
-    if ([SandboxState.PENDING_BUILD, SandboxState.BUILDING_SNAPSHOT, SandboxState.UNKNOWN].includes(sandbox.state)) {
+    if (
+      sandbox.snapshot === null &&
+      [SandboxState.PENDING_BUILD, SandboxState.BUILDING_SNAPSHOT, SandboxState.UNKNOWN].includes(sandbox.state)
+    ) {
       await this.loadBuildInfo(sandbox)
     }
 
