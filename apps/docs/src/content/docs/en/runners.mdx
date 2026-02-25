@@ -698,7 +698,7 @@ ssh -i ~/.ssh/your-key.pem ubuntu@<instance-ip>
 
 #### Troubleshooting
 
-Troubleshooting cloud-init issues:
+Troubleshoot cloud-init issues:
 
 ```bash
 # View cloud-init output
@@ -708,7 +708,7 @@ sudo cat /var/log/cloud-init-output.log
 sudo cloud-init status
 ```
 
-Troubleshooting runner issues:
+Troubleshoot runner issues:
 
 ```bash
 # Service status
@@ -721,7 +721,7 @@ sudo journalctl -u daytona-runner -n 100 --no-pager
 sudo cat /etc/daytona/runner.env
 ```
 
-Verifying runner installation:
+Verify runner installation:
 
 ```bash
 # Check if binary exists
