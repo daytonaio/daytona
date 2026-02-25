@@ -62,6 +62,15 @@ export const queryKeys = {
       ] as const
     },
   },
+  sandboxes: {
+    all: ['sandboxes'] as const,
+    detail: (organizationId: string, sandboxId: string) =>
+      [...queryKeys.sandboxes.all, organizationId, sandboxId, 'detail'] as const,
+    terminalSession: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'terminal-session'] as const,
+    vncInitialStatus: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'vnc-initial-status'] as const,
+    vncPollStatus: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'vnc-poll-status'] as const,
+    vncSession: (sandboxId: string) => [...queryKeys.sandboxes.all, sandboxId, 'vnc-session'] as const,
+  },
   telemetry: {
     all: ['telemetry'] as const,
     logs: (sandboxId: string, params: object) => [...queryKeys.telemetry.all, sandboxId, 'logs', params] as const,
