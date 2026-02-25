@@ -793,7 +793,11 @@ sudo systemctl stop daytona-runner
 
 #### Override with env vars
 
-The following environment variables can be set to override default values in the install script:
+The following environment variables can be set to override the default values in the install script:
+
+:::tip
+Set these variables before running the install script to customize the runner configuration.
+:::
 
 | **Variable name**           | **Description**              | **Default value / notes**                     |
 | --------------------------- | ---------------------------- | --------------------------------------------- |
@@ -814,5 +818,3 @@ The following environment variables can be set to override default values in the
 | **`SSH_PUBLIC_KEY`**        | SSH gateway public key       | Fetched from API                              |
 | **`SSH_HOST_KEY_PATH`**     | Path to SSH host key         | `/etc/ssh/ssh_host_rsa_key`                   |
 | **`SERVER_URL`**            | Daytona API URL              | User-provided                                 |
-
-You can set these variables before running the install script to customize the runner configuration.
