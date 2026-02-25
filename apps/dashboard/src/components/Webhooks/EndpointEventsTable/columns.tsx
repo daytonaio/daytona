@@ -54,7 +54,7 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
     id: 'status',
     accessorFn: (row) => row.statusText || 'unknown',
     header: 'Status',
-    size: 150,
+    size: 100,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
@@ -81,9 +81,26 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
     },
   },
   {
+    accessorKey: 'nextAttempt',
+    header: 'Next Attempt',
+    size: 100,
+    cell: ({ row }) => {
+      const nextAttempt = row.original.nextAttempt
+      if (!nextAttempt) {
+        return <span className="text-muted-foreground">-</span>
+      }
+      const relativeTime = getRelativeTimeString(nextAttempt)
+      return (
+        <TimestampTooltip timestamp={nextAttempt.toString()}>
+          <span className="cursor-default text-sm">{relativeTime.relativeTimeString}</span>
+        </TimestampTooltip>
+      )
+    },
+  },
+  {
     accessorKey: 'timestamp',
     header: 'Sent',
-    size: 200,
+    size: 100,
     cell: ({ row }) => {
       const timestamp = row.original.timestamp
       if (!timestamp) {
@@ -100,7 +117,7 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
   },
   {
     id: 'actions',
-    size: 50,
+    maxSize: 44,
     enableHiding: false,
     cell: ({ row, table }) => {
       const { onReplay } = getMeta(table)

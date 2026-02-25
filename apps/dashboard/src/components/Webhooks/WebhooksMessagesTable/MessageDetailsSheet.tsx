@@ -6,15 +6,13 @@
 import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { getRelativeTimeString } from '@/lib/utils'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
-import { MessageAttemptOut, MessageOut } from 'svix'
-import { useMessageAttempts } from 'svix-react'
-import { Button } from '@/components/ui/button'
+import { MessageOut } from 'svix'
+import { MessageAttemptsTable } from '../MessageAttemptsTable'
 
 interface MessageDetailsSheetProps {
   message: MessageOut | null
@@ -23,74 +21,6 @@ interface MessageDetailsSheetProps {
   onNavigate: (direction: 'prev' | 'next') => void
   hasPrev: boolean
   hasNext: boolean
-}
-
-function AttemptStatusBadge({ status }: { status: number }) {
-  const variant = status === 0 ? 'success' : status === 1 ? 'secondary' : 'destructive'
-  const label = status === 0 ? 'Success' : status === 1 ? 'Pending' : status === 3 ? 'Sending' : 'Failed'
-  return <Badge variant={variant}>{label}</Badge>
-}
-
-function MessageAttemptsTable({ messageId }: { messageId: string }) {
-  const attempts = useMessageAttempts(messageId)
-
-  if (attempts.loading) {
-    return (
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-8 w-full" />
-      </div>
-    )
-  }
-
-  if (attempts.error) {
-    return <div className="text-sm text-muted-foreground">Failed to load message attempts.</div>
-  }
-
-  const data = attempts.data ?? []
-
-  if (data.length === 0) {
-    return <div className="text-sm text-muted-foreground">No delivery attempts yet.</div>
-  }
-
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="px-3">Status</TableHead>
-            <TableHead className="px-3">URL</TableHead>
-            <TableHead className="px-3">Timestamp</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((attempt: MessageAttemptOut) => {
-            const { relativeTimeString } = getRelativeTimeString(attempt.timestamp)
-            return (
-              <TableRow key={attempt.id}>
-                <TableCell className="px-3">
-                  <AttemptStatusBadge status={attempt.status} />
-                </TableCell>
-                <TableCell className="px-3">
-                  <span className="text-sm font-mono truncate block max-w-[200px]">{attempt.url}</span>
-                </TableCell>
-                <TableCell className="px-3">
-                  <TimestampTooltip
-                    timestamp={
-                      attempt.timestamp instanceof Date ? attempt.timestamp.toISOString() : String(attempt.timestamp)
-                    }
-                  >
-                    <span className="text-sm cursor-default">{relativeTimeString}</span>
-                  </TimestampTooltip>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </div>
-  )
 }
 
 export function MessageDetailsSheet({
@@ -214,7 +144,6 @@ export function MessageDetailsSheet({
           <Separator />
 
           <div className="flex flex-col px-5 py-4">
-            <span className="text-base font-medium mb-3">Delivery Attempts</span>
             <MessageAttemptsTable messageId={message.id} />
           </div>
         </div>

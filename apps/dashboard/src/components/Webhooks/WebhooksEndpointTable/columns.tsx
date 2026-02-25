@@ -81,7 +81,7 @@ const columns: ColumnDef<EndpointOut>[] = [
   {
     id: 'actions',
     header: () => null,
-    size: 50,
+    maxSize: 44,
     cell: ({ row, table }) => {
       const { onDisable, onDelete, isLoadingEndpoint } = getMeta(table)
       const isLoading = isLoadingEndpoint(row.original)
