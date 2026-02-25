@@ -63,6 +63,13 @@ export default defineConfig({
       ...generateI18nConfig(config),
     }),
   ],
+  security: {
+    allowedDomains: [
+      { hostname: 'daytona.io' },
+      { hostname: 'www.daytona.io' },
+      { hostname: 'localhost' },
+    ],
+  },
   output: 'server',
   adapter: node({
     mode: 'middleware',
