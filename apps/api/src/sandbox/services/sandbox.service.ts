@@ -542,11 +542,13 @@ export class SandboxService {
     createSandboxDto: CreateSandboxDto,
     organization: Organization,
   ): Promise<SandboxDto> {
+    const now = new Date()
     const updateData: Partial<Sandbox> = {
       public: createSandboxDto.public || false,
       labels: createSandboxDto.labels || {},
       organizationId: organization.id,
-      createdAt: new Date(),
+      createdAt: now,
+      lastActivityAt: now,
     }
 
     if (createSandboxDto.name) {
