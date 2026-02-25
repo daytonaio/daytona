@@ -1,0 +1,101 @@
+---
+title: Run OpenClaw in a Daytona Sandbox via SDK
+description: Learn how to run OpenClaw inside a Daytona sandbox using the Daytona SDK — create a sandbox programmatically and access the dashboard via a preview URL.
+---
+
+import { Image } from 'astro:assets'
+
+import openclawSandbox from '../../../../../assets/docs/images/openclaw-sandbox.gif'
+
+This guide shows how to run [OpenClaw](https://openclaw.ai/) inside a Daytona sandbox using the Daytona SDK. The script automatically creates and configures a sandbox with OpenClaw and provides an authenticated [preview URL](/docs/en/preview/) for using OpenClaw in the browser.
+
+---
+
+### 1. Workflow Overview
+
+When you run the script, it creates a Daytona sandbox, starts the OpenClaw gateway inside it, and prints a preview link for the dashboard:
+
+```
+$ npm start
+Creating Daytona sandbox...
+Configuring OpenClaw...
+Starting OpenClaw...
+(Ctrl+C to shut down and delete the sandbox)
+
+🔗 Secret link to Control UI: https://18789-xxxx.proxy.daytona.works?token=...
+```
+
+Open the provided link in your browser to connect to the OpenClaw Control UI. This link contains a configuration token, and anyone can use it to connect to OpenClaw without device approval.
+
+<Image
+  src={openclawSandbox}
+  alt="OpenClaw Control UI running in a Daytona sandbox"
+  width={600}
+  style="max-width: 100%; height: auto; margin: 1rem 0;"
+/>
+
+You can use the Control UI to chat with your assistant, configure Telegram and WhatsApp, and manage sessions. When you exit the script (Ctrl+C), the sandbox will not be deleted unless [sandbox persistence is disabled](/docs/en/guides/openclaw/openclaw-sdk-sandbox#4-key-constants).
+
+### 2. Project Setup
+
+#### Clone the Repository
+
+Clone the Daytona [repository](https://github.com/daytonaio/daytona) and go to the example directory:
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/openclaw
+```
+
+#### Configure Environment
+
+Get your API key from the [Daytona Dashboard](https://app.daytona.io/dashboard/keys).
+
+Copy `.env.example` to `.env` and add your Daytona API key:
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+```
+
+A default OpenClaw configuration is stored in `openclaw.json`. You can customize it according to the [configuration reference](https://docs.openclaw.ai/gateway/configuration-reference). You can also add additional environment variables to `.env.sandbox` (e.g. `ANTHROPIC_API_KEY` for Claude) and they will be loaded into the sandbox.
+
+#### Run the Example
+
+:::note[Node.js]
+Node.js 18 or newer is required.
+:::
+
+Install dependencies and run:
+
+```bash
+npm install
+npm start
+```
+
+The script creates the sandbox, starts the OpenClaw gateway, and prints a secret link with the token in the URL.
+
+### 3. How It Works
+
+1. The script creates a [Daytona sandbox](/docs/en/sandboxes) with `DAYTONA_SNAPSHOT` (e.g. `daytona-medium`) and loads env vars from `.env.sandbox`.
+2. Your local `openclaw.json` is merged with built-in config and written to `~/.openclaw/openclaw.json` in the sandbox.
+3. The OpenClaw gateway is started inside the sandbox on `OPENCLAW_PORT` via [process execution](/docs/en/process-code-execution).
+4. A signed [preview link](/docs/en/preview/) is generated and the token is appended as `?token=...`; this link is printed so you can open the Control UI.
+5. On Ctrl+C, the sandbox is deleted unless `PERSIST_SANDBOX` is `true`.
+
+### 4. Key Constants
+
+You can change behavior by editing the constants in [`src/index.ts`](https://github.com/daytonaio/daytona/blob/main/guides/typescript/openclaw/src/index.ts):
+
+| Constant | Default | Description |
+|----------|---------|-------------|
+| `PERSIST_SANDBOX` | true | When true, the sandbox is not deleted when the script exits |
+| `MAKE_PUBLIC` | true | Allow anyone to access the sandbox instead of limiting to your Daytona organization |
+| `OPENCLAW_PORT` | 18789 | OpenClaw Gateway and Control UI port |
+| `SHOW_LOGS` | true | Stream OpenClaw stdout/stderr to the terminal |
+
+**Key advantages:**
+
+- Secure, isolated execution in a Daytona sandbox
+- No device approval — token in URL and `allowInsecureAuth` skip pairing
+- Control UI and channels accessible via the secret preview link
+- Optional: keep the sandbox running after exit (`PERSIST_SANDBOX`)
