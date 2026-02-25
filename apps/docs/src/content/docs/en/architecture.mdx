@@ -87,8 +87,6 @@ The snapshot store is an internal OCI-compliant registry that stores sandbox sna
 
 [Volumes](/docs/en/volumes) provide persistent storage that can be shared across sandboxes. Each volume is backed by S3-compatible object storage and mounted into sandbox containers as a read-write directory. Multiple sandboxes can mount the same volume simultaneously, allowing data to be shared across sandboxes and persist independently of the sandbox lifecycle.
 
-Volumes are mounted into sandbox containers using FUSE (Filesystem in Userspace), which translates filesystem operations into S3 API calls transparently.
-
 ### Container registry
 
 Container registries serve as the source for sandbox base images. When creating a [snapshot](/docs/en/snapshots), the snapshot builder pulls the specified image from an external registry, and pushes it to the internal snapshot registry for use by runners. For Dockerfile-based snapshots, parent images referenced in `FROM` directives are also pulled from the configured source registries during the build. Daytona supports any OCI-compatible registry:
