@@ -420,15 +420,32 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/guides/opencode', locale),
+          label: t('sidebarconfig.opencode'),
+          disablePagination: true,
+          attrs: {
+            icon: 'opencode.svg',
+          },
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/opencode/opencode-sdk-agent',
+            locale
+          ),
+          label: t('sidebarconfig.opencode'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
           href: localizePath(
             '/docs/guides/opencode/opencode-web-agent',
             locale
           ),
           label: t('sidebarconfig.opencode'),
           disablePagination: true,
-          attrs: {
-            icon: 'opencode.svg',
-          },
+          hideInSidebar: true,
         },
         {
           type: 'link',
