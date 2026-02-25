@@ -5,6 +5,7 @@
 
 import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { CreateSandboxDialog } from '@/components/Sandbox/CreateSandboxDialog'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
@@ -932,6 +933,7 @@ const Sandboxes: React.FC = () => {
             </Button>
           </div>
         )}
+        <CreateSandboxDialog />
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
         <SandboxTable
