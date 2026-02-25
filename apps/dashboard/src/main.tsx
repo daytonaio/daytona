@@ -6,6 +6,7 @@
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
@@ -36,9 +37,11 @@ enableMocking().then(() =>
             <Suspense fallback={<LoadingFallback />}>
               <ConfigProvider>
                 <PostHogProviderWrapper>
-                  <BrowserRouter>
-                    <App />
-                  </BrowserRouter>
+                  <NuqsAdapter>
+                    <BrowserRouter>
+                      <App />
+                    </BrowserRouter>
+                  </NuqsAdapter>
                 </PostHogProviderWrapper>
               </ConfigProvider>
             </Suspense>

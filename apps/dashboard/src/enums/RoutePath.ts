@@ -41,6 +41,8 @@ export enum RoutePath {
   // Webhooks
   WEBHOOKS = '/dashboard/webhooks',
   WEBHOOK_ENDPOINT_DETAILS = '/dashboard/webhooks/:endpointId',
+  // Sandboxes
+  SANDBOX_DETAILS = '/dashboard/sandboxes/:sandboxId',
 
   // Email verification
   EMAIL_VERIFY = '/dashboard/organization/:organizationId/verify-email/:email/:token',
