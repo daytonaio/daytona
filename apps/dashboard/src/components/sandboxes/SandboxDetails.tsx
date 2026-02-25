@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
 import { useDeleteSandboxMutation } from '@/hooks/mutations/useDeleteSandboxMutation'
@@ -36,6 +37,7 @@ import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { Spinner } from '@/components/ui/spinner'
 import { RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -61,23 +63,25 @@ export default function SandboxDetails() {
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
   const { getRegionName } = useRegions()
 
+  const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [createSshDialogOpen, setCreateSshDialogOpen] = useState(false)
   const [revokeSshDialogOpen, setRevokeSshDialogOpen] = useState(false)
   const [tab, setTab] = useQueryState('tab', tabParser)
 
-  // On desktop (lg+), the overview tab is hidden in the sidebar, so switch to logs
+  // On desktop (lg+), the overview tab is hidden in the sidebar, so switch to a content tab
   useEffect(() => {
     const mql = window.matchMedia('(min-width: 1024px)')
     const handler = () => {
       if (mql.matches && tab === 'overview') {
-        setTab('logs')
+        setTab(experimentsEnabled ? 'logs' : 'terminal')
       }
     }
     handler()
     mql.addEventListener('change', handler)
     return () => mql.removeEventListener('change', handler)
-  }, [tab, setTab])
+  }, [tab, setTab, experimentsEnabled])
 
   const { data: sandbox, isLoading, isError, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
 
@@ -232,15 +236,19 @@ export default function SandboxDetails() {
                   <TabsTrigger value="overview" className={`${TAB_TRIGGER} lg:hidden`}>
                     Overview
                   </TabsTrigger>
-                  <TabsTrigger value="logs" className={TAB_TRIGGER}>
-                    Logs
-                  </TabsTrigger>
-                  <TabsTrigger value="traces" className={TAB_TRIGGER}>
-                    Traces
-                  </TabsTrigger>
-                  <TabsTrigger value="metrics" className={TAB_TRIGGER}>
-                    Metrics
-                  </TabsTrigger>
+                  {experimentsEnabled && (
+                    <>
+                      <TabsTrigger value="logs" className={TAB_TRIGGER}>
+                        Logs
+                      </TabsTrigger>
+                      <TabsTrigger value="traces" className={TAB_TRIGGER}>
+                        Traces
+                      </TabsTrigger>
+                      <TabsTrigger value="metrics" className={TAB_TRIGGER}>
+                        Metrics
+                      </TabsTrigger>
+                    </>
+                  )}
                   <TabsTrigger value="terminal" className={TAB_TRIGGER}>
                     Terminal
                   </TabsTrigger>
@@ -255,21 +263,25 @@ export default function SandboxDetails() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="logs" className="relative flex-1 min-h-0 m-0">
-                  <div className="absolute inset-0 flex flex-col overflow-hidden">
-                    <SandboxLogsTab sandboxId={sandbox.id} />
-                  </div>
-                </TabsContent>
-                <TabsContent value="traces" className="relative flex-1 min-h-0 m-0">
-                  <div className="absolute inset-0 flex flex-col overflow-hidden">
-                    <SandboxTracesTab sandboxId={sandbox.id} />
-                  </div>
-                </TabsContent>
-                <TabsContent value="metrics" className="relative flex-1 min-h-0 m-0">
-                  <div className="absolute inset-0 flex flex-col overflow-hidden">
-                    <SandboxMetricsTab sandboxId={sandbox.id} />
-                  </div>
-                </TabsContent>
+                {experimentsEnabled && (
+                  <>
+                    <TabsContent value="logs" className="relative flex-1 min-h-0 m-0">
+                      <div className="absolute inset-0 flex flex-col overflow-hidden">
+                        <SandboxLogsTab sandboxId={sandbox.id} />
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="traces" className="relative flex-1 min-h-0 m-0">
+                      <div className="absolute inset-0 flex flex-col overflow-hidden">
+                        <SandboxTracesTab sandboxId={sandbox.id} />
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="metrics" className="relative flex-1 min-h-0 m-0">
+                      <div className="absolute inset-0 flex flex-col overflow-hidden">
+                        <SandboxMetricsTab sandboxId={sandbox.id} />
+                      </div>
+                    </TabsContent>
+                  </>
+                )}
                 <TabsContent value="terminal" className="relative flex-1 min-h-0 m-0">
                   <div className="absolute inset-0 flex flex-col overflow-hidden">
                     <SandboxTerminalTab sandbox={sandbox} />
