@@ -1663,7 +1663,9 @@ export class SandboxService {
       ? region.toolboxProxyUrl.replace(/\/+$/, '') + '/toolbox'
       : this.configService.getOrThrow('proxy.toolboxUrl')
 
-    await this.redis.setex(cacheKey, TOOLBOX_PROXY_URL_CACHE_TTL_S, url)
+    this.redis.setex(cacheKey, TOOLBOX_PROXY_URL_CACHE_TTL_S, url).catch((err) => {
+      this.logger.warn(`Failed to cache toolbox proxy URL for region ${regionId}: ${err.message}`)
+    })
     return url
   }
 
