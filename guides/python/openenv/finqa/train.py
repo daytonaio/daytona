@@ -1,6 +1,6 @@
-"""GRPO training for FinQA across 250 Daytona sandboxes.
+"""GRPO training for FinQA across 1000 Daytona sandboxes.
 
-Trains Qwen3-32B with LoRA to answer financial questions using tool calls,
+Trains Qwen3-14B with LoRA to answer financial questions using tool calls,
 with rollouts collected in parallel across Daytona sandboxes running the
 FinQA OpenEnv environment.
 
@@ -17,7 +17,7 @@ Usage:
     # Build snapshot first (once)
     python build_snapshot.py
 
-    # Train (default: 250 sandboxes, 20 iterations)
+    # Train (default: 1000 sandboxes, 20 iterations)
     python train.py
 
     # Quick smoke test
@@ -33,7 +33,7 @@ import re
 import shutil
 import tempfile
 import time
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -50,13 +50,13 @@ from vllm import LLM, SamplingParams
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-SANDBOX_COUNT = 250
+SANDBOX_COUNT = 500
 EPISODES_PER_GROUP = 4
 TRAINING_ITERATIONS = 20
-MIN_GROUPS_PER_ITER = 64
-MAX_ROLLOUT_ROUNDS = 4
-MAX_CONCURRENT_CREATE = 50
-MAX_CONCURRENT_PLAY = 50
+MIN_USE_PCT = 90.0  # Stop collecting rollout rounds once this % of episodes are in groups
+MAX_ROLLOUT_ROUNDS = 8
+MAX_CONCURRENT_CREATE = 100
+MAX_CONCURRENT_PLAY = 200
 MAX_PLAY_RETRIES = 3
 MAX_EPISODE_STEPS = 20
 MAX_GEN_TOKENS = 512
@@ -67,16 +67,16 @@ ROLLOUT_DISPATCH_WAIT_MS = 500
 ROLLOUT_RECONNECT_EVERY_BATCHES = 1
 LEARNING_RATE = 1e-4  # Higher LR for LoRA (only adapter weights update)
 KL_BETA = 0.1
-MODEL_NAME = "Qwen/Qwen3-32B"
+MODEL_NAME = "Qwen/Qwen3-14B"
 GPU_MEMORY_UTILIZATION = 0.9  # vLLM gets its own GPUs, use most of them
 TENSOR_PARALLEL_SIZE = 2  # vLLM tensor parallelism across cuda:0-1
 SYNC_EVERY = 1  # Export/switch actor LoRA adapter every N training iterations
-GRPO_UPDATE_BATCH_SIZE = 4
+GRPO_UPDATE_BATCH_SIZE = 8
 
 # LoRA configuration
-LORA_RANK = 64
-LORA_ALPHA = 128
-LORA_DROPOUT = 0.05
+LORA_RANK = 32
+LORA_ALPHA = 64
+LORA_DROPOUT = 0.0
 LORA_TARGET_MODULES = [
     "q_proj",
     "k_proj",
@@ -273,29 +273,48 @@ async def create_sandbox_pool(n: int, snapshot_name: str, semaphore: asyncio.Sem
         nonlocal created
         async with semaphore:
             provider = DaytonaProvider(auto_stop_interval=0, cmd=SERVER_CMD)
-            url = await asyncio.to_thread(
-                provider.start_container,
-                f"snapshot:{snapshot_name}",
-                ephemeral=True,
-            )
-            for attempt in range(3):
+            try:
+                url = await asyncio.to_thread(
+                    provider.start_container,
+                    f"snapshot:{snapshot_name}",
+                )
+                # Mark sandbox for auto-deletion on stop (provider doesn't expose this yet).
+                await asyncio.to_thread(provider._sandbox.set_auto_delete_interval, 0)
+                for attempt in range(3):
+                    try:
+                        await asyncio.to_thread(provider.wait_for_ready, url, 120)
+                        break
+                    except Exception:
+                        if attempt == 2:
+                            raise
+                        await asyncio.sleep(3)
+                # Keep stable index ordering so env <-> pool mapping is deterministic.
+                pool_by_idx[idx] = (provider, url)
+                created += 1
+                if created % 50 == 0 or created == n:
+                    print(f"  Sandboxes ready: {created}/{n}")
+            except Exception:
+                # Avoid leaking partially created containers when readiness fails.
                 try:
-                    await asyncio.to_thread(provider.wait_for_ready, url, 120)
-                    break
+                    await asyncio.to_thread(provider.stop_container)
                 except Exception:
-                    if attempt == 2:
-                        raise
-                    await asyncio.sleep(3)
-            # Keep stable index ordering so env <-> pool mapping is deterministic.
-            pool_by_idx[idx] = (provider, url)
-            created += 1
-            if created % 50 == 0 or created == n:
-                print(f"  Sandboxes ready: {created}/{n}")
+                    pass
+                raise
 
-    results = await asyncio.gather(*[create_one(i) for i in range(n)], return_exceptions=True)
+    # Stagger launches to stay under API rate limits (~600 creates/min).
+    tasks = []
+    for i in range(n):
+        tasks.append(asyncio.create_task(create_one(i)))
+        if (i + 1) % 10 == 0:
+            await asyncio.sleep(1.0)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
     errors = [r for r in results if isinstance(r, Exception)]
     if errors:
         print(f"  Warning: {len(errors)}/{n} sandboxes failed to create")
+        # Log unique error messages to help diagnose failures.
+        err_counts = Counter(f"{type(e).__name__}: {e}" for e in errors)
+        for msg, cnt in err_counts.most_common(5):
+            print(f"    [{cnt}x] {msg[:200]}")
         if not any(pool_by_idx):
             raise errors[0]
     return [entry for entry in pool_by_idx if entry is not None]
@@ -582,6 +601,10 @@ async def collect_rollouts(
     wait_s = max(0.0, dispatch_wait_ms / 1000.0)
     reconnect_every_batches = max(1, reconnect_every_batches)
     rollout_t0 = time.time()
+    start_reset_timeout_s = 30.0
+    start_state_timeout_s = 15.0
+    step_timeout_s = 45.0
+    loop_wait_timeout_s = max(wait_s, 1.0)
 
     ready_eps: deque[ActiveEpisode] = deque()
     start_tasks: dict[asyncio.Task, int] = {}
@@ -602,8 +625,11 @@ async def collect_rollouts(
 
     async def start_episode(env_idx: int) -> ActiveEpisode | None:
         env = envs[env_idx]
-        await env.reset()
-        state_res = await env._send_and_receive({"type": "state"})
+        await asyncio.wait_for(env.reset(), timeout=start_reset_timeout_s)
+        state_res = await asyncio.wait_for(
+            env._send_and_receive({"type": "state"}),
+            timeout=start_state_timeout_s,
+        )
         state_data = state_res.get("data", {})
         question = state_data.get("current_question", "")
         company = state_data.get("current_company", "")
@@ -726,7 +752,7 @@ async def collect_rollouts(
                         )
 
                     action = CallToolAction(tool_name=tool_name, arguments=tool_args)
-                    task = asyncio.create_task(ep.env.step(action))
+                    task = asyncio.create_task(asyncio.wait_for(ep.env.step(action), timeout=step_timeout_s))
                     step_tasks[task] = (
                         ep,
                         prompt_ids,
@@ -739,8 +765,8 @@ async def collect_rollouts(
 
         pending = list(start_tasks.keys()) + list(step_tasks.keys()) + list(force_tasks.keys())
         if not pending:
-            if completed < target_episodes and not ready_eps and (time.monotonic() - last_completion_ts) > 120.0:
-                print("    Rollout warning: stalled without completions for 120s; ending round early.")
+            if completed < target_episodes and not ready_eps and (time.monotonic() - last_completion_ts) > 45.0:
+                print("    Rollout warning: stalled without completions for 45s; ending round early.")
                 break
             if completed >= target_episodes:
                 break
@@ -756,9 +782,12 @@ async def collect_rollouts(
         done, _ = await asyncio.wait(
             pending,
             return_when=asyncio.FIRST_COMPLETED,
-            timeout=wait_s if ready_eps else None,
+            timeout=loop_wait_timeout_s,
         )
         if not done:
+            if (time.monotonic() - last_completion_ts) > 45.0:
+                print("    Rollout warning: stalled with in-flight tasks for 45s; ending round early.")
+                break
             continue
 
         for task in done:
@@ -893,11 +922,14 @@ async def collect_rollouts(
             elif len(ep.turns) >= max_episode_steps:
                 # Force terminal action once turn budget is exhausted.
                 force_task = asyncio.create_task(
-                    ep.env.step(
-                        CallToolAction(
-                            tool_name="submit_answer",
-                            arguments={"answer": "unknown"},
-                        )
+                    asyncio.wait_for(
+                        ep.env.step(
+                            CallToolAction(
+                                tool_name="submit_answer",
+                                arguments={"answer": "unknown"},
+                            )
+                        ),
+                        timeout=step_timeout_s,
                     )
                 )
                 force_tasks[force_task] = ep
@@ -1225,7 +1257,7 @@ async def train(args):
     print(f"Sandboxes: {args.sandboxes}")
     print(f"Iterations: {args.iterations}")
     print(f"GRPO group size K: {args.group_size}")
-    print(f"Min groups/iter: {args.min_groups_per_iter}")
+    print(f"Min use %: {args.min_use_pct}")
     print(f"Max rollout rounds/iter: {args.max_rollout_rounds}")
     print(f"Rollout min gen batch: {args.rollout_min_gen_batch} (0=auto)")
     print(f"Rollout dispatch wait: {args.rollout_dispatch_wait_ms} ms")
@@ -1384,7 +1416,7 @@ async def train(args):
                     + f"{elapsed_round:.1f}s"
                 )
 
-                if args.min_groups_per_iter > 0 and len(groups) >= args.min_groups_per_iter:
+                if args.min_use_pct > 0 and use_pct >= args.min_use_pct:
                     break
 
             # 2. Compute advantages
@@ -1485,12 +1517,12 @@ def main():
         help=f"Strict GRPO group size K (same-question episodes per group, default: {EPISODES_PER_GROUP}).",
     )
     parser.add_argument(
-        "--min-groups-per-iter",
-        type=int,
-        default=MIN_GROUPS_PER_ITER,
+        "--min-use-pct",
+        type=float,
+        default=MIN_USE_PCT,
         help=(
-            "Stop rollout collection early once at least this many strict groups "
-            + f"are formed (default: {MIN_GROUPS_PER_ITER}). Set <=0 to always "
+            "Stop rollout collection early once this percentage of episodes are "
+            + f"in complete groups (default: {MIN_USE_PCT}). Set <=0 to always "
             + "use all rollout rounds."
         ),
     )

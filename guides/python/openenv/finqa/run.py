@@ -49,7 +49,7 @@ def create_sandbox():
     provider = DaytonaProvider(auto_stop_interval=0, cmd=SERVER_CMD)
 
     print(f"Creating sandbox from snapshot '{SNAPSHOT}'...")
-    url = provider.start_container(f"snapshot:{SNAPSHOT}", ephemeral=True)
+    url = provider.start_container(f"snapshot:{SNAPSHOT}")
 
     print("Waiting for server health check...")
     provider.wait_for_ready(url, 120)
@@ -74,7 +74,7 @@ async def run_episode(url: str):
         # 2. Get the question and company name.
         #    Workaround: obs.metadata["question"] doesn't work because
         #    openenv-core's serialize_observation() strips metadata from
-        #    reset observations (exclude={"metadata"}). This is a known bug.
+        #    reset observations (exclude={"metadata"}).
         #    The intended public API would be: obs.observation.metadata["question"]
         state = await env._send_and_receive({"type": "state"})
         data = state.get("data", {})

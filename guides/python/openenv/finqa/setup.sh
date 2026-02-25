@@ -9,6 +9,10 @@ pip install --no-deps "openenv-finqa-env @ git+https://github.com/meta-pytorch/O
 
 echo ""
 echo "Done! Next steps:"
-echo "  cp ../.env.example ../.env   # add your DAYTONA_API_KEY"
-echo "  python ../build_snapshot.py"
+echo "  cp .env.example .env   # add your DAYTONA_API_KEY"
+echo "  python build_snapshot.py"
 echo "  python run.py"
+echo ""
+echo "For training (requires GPUs):"
+echo "  pip install -e '.[train]'"
+echo "  python train.py --sandboxes 2 --iterations 1 --group-size 2  # smoke test"
