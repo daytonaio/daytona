@@ -1,0 +1,15 @@
+[project]
+name = "daytona-openenv-finqa"
+version = "0.1.0"
+description = "FinQA evaluation on Daytona sandboxes using OpenEnv"
+authors = [{name = "Daytona Team", email = "support@daytona.io"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "daytona",
+    "python-dotenv>=1.2.0",
+    "openenv-core @ git+https://github.com/meta-pytorch/OpenEnv.git",
+]
+
+[tool.setuptools]
+py-modules = []
