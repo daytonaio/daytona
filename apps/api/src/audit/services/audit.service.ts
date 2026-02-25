@@ -74,7 +74,7 @@ export class AuditService implements OnApplicationBootstrap {
     auditLog.source = createDto.source
     auditLog.metadata = createDto.metadata
 
-    return this.auditLogRepository.save(auditLog)
+    return this.auditLogRepository.save(auditLog, { transaction: false })
   }
 
   async updateLog(id: string, updateDto: UpdateAuditLogInternalDto): Promise<AuditLog> {

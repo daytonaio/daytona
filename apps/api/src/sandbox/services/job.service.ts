@@ -60,6 +60,9 @@ export class JobService {
           payload: encodedPayload,
           traceContext,
         }),
+        {
+          transaction: false,
+        },
       )
 
       // Log with context-specific info
