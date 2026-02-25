@@ -18,9 +18,11 @@ class SandboxTsCodeToolbox:
         if params and params.argv:
             argv = " ".join(params.argv)
 
-        # Combine everything into the final command for TypeScript
+        # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+        # Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
+        # Capture the exit code before filtering to preserve ts-node's exit status
         return (
-            f""" sh -c 'echo {base64_code} | base64 --decode | npx ts-node -O """
-            f""""{{\\\"module\\\":\\\"CommonJS\\\"}}" -e "$(cat)" x {argv} 2>&1 | grep -vE """
-            f""""npm notice"' """
+            f"""_dtn_out=$(echo '{base64_code}' | base64 -d | npx ts-node -O """
+            f"""'{{"module":"CommonJS"}}' /dev/stdin {argv} 2>&1); _dtn_ec=$?; """
+            f"""printf '%s\\n' "$_dtn_out" | grep -v 'npm notice'; exit $_dtn_ec"""
         )
