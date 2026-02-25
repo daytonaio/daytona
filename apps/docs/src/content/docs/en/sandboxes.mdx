@@ -160,8 +160,6 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 
 Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
 
-Compute resources are allocated per sandbox and enforced at the kernel level. Each sandbox receives a dedicated CPU quota, a hard memory limit with swap disabled, and a disk allocation on an XFS-backed filesystem. CPU and memory can be increased on a running sandbox without interruption. Disk resizing and resource decreases require the sandbox to be stopped first.
-
 Daytona keeps a pool of warm sandboxes using default snapshots. When available, sandboxes launch within milliseconds instead of cold-booting.
 
 To set custom sandbox resources (CPU, memory, and disk space), use the `Resources` class:
