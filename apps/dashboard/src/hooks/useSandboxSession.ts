@@ -22,6 +22,7 @@ type CreateSandboxParams = CreateSandboxBaseParams | CreateSandboxFromImageParam
 
 const TERMINAL_PORT = 22222
 const VNC_PORT = 6080
+const DEFAULT_URL_EXPIRY_SECONDS = 600
 
 export type UseSandboxSessionOptions = {
   scope?: string
@@ -29,6 +30,7 @@ export type UseSandboxSessionOptions = {
   terminal?: boolean
   vnc?: boolean
   notify?: { sandbox?: boolean; terminal?: boolean; vnc?: boolean }
+  urlExpirySeconds?: number
 }
 
 export type SandboxState = {
@@ -74,7 +76,14 @@ export function removeSandboxSessionQueriesByInstanceId(queryClient: QueryClient
 }
 
 export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandboxSessionResult {
-  const { scope, createParams, terminal = false, vnc = false, notify } = options ?? {}
+  const {
+    scope,
+    createParams,
+    terminal = false,
+    vnc = false,
+    notify,
+    urlExpirySeconds = DEFAULT_URL_EXPIRY_SECONDS,
+  } = options ?? {}
   const notifyRef = useRef({ sandbox: true, terminal: true, vnc: true, ...notify })
   notifyRef.current = { sandbox: true, terminal: true, vnc: true, ...notify }
   const { user } = useAuth()
@@ -124,8 +133,8 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
 
   const getPortPreviewUrl = useCallback(
     async (id: string, port: number) =>
-      (await sandboxApi.getSignedPortPreviewUrl(id, port, selectedOrganization?.id)).data.url,
-    [sandboxApi, selectedOrganization?.id],
+      (await sandboxApi.getSignedPortPreviewUrl(id, port, selectedOrganization?.id, urlExpirySeconds)).data.url,
+    [sandboxApi, selectedOrganization?.id, urlExpirySeconds],
   )
 
   const terminalQuery = useQuery<string, Error>({
