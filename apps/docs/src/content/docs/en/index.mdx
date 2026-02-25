@@ -18,9 +18,7 @@ tableOfContents: true
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona is an open-source, secure and elastic infrastructure for running AI-generated code.
-
-Daytona provides isolated sandbox environments that you can manage programmatically using the Daytona SDKs, [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api) to run and control code execution.
+Daytona is an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](/docs/en/sandboxes) — that you can manage programmatically using the Daytona SDKs, [CLI](/docs/en/tools/cli), and [API](/docs/en/tools/api) to run and control code execution.
 
 Daytona SDK is available for [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk) and [Go](/docs/en/go-sdk) interfaces.
 
@@ -31,10 +29,6 @@ Open the [Daytona Dashboard ↗](https://app.daytona.io/) to create your account
 ## 2. Obtain an API key
 
 Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or using the [Daytona API](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys) to authenticate SDK requests and access Daytona services.
-
-:::tip
-Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
-:::
 
 ## 3. Install the SDK
 
@@ -75,7 +69,7 @@ go get github.com/daytonaio/daytona/libs/sdk-go
 
 ## 4. Create a Sandbox
 
-Create a [Daytona Sandbox](/docs/en/sandboxes) to run your code securely in an isolated environment.
+Create a [sandbox](/docs/en/sandboxes) to run your code securely in an isolated environment.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -101,15 +95,13 @@ sandbox = daytona.create()
 
 ```typescript
 // Import the Daytona SDK
-import { Daytona } from '@daytonaio/sdk';
+import { Daytona } from '@daytonaio/sdk'
 
 // Initialize the Daytona client
-const daytona = new Daytona({ apiKey: 'YOUR_API_KEY' }); // Replace with your API key
+const daytona = new Daytona({ apiKey: 'YOUR_API_KEY' }) // Replace with your API key
 
 // Create the Sandbox instance
-const sandbox = await daytona.create({
-  language: 'typescript',
-});
+const sandbox = await daytona.create()
 ```
 
 </TabItem>
@@ -120,22 +112,13 @@ const sandbox = await daytona.create({
 require 'daytona'
 
 # Initialize the Daytona client
-config = Daytona::Config.new(api_key: 'your-api-key')
+config = Daytona::Config.new(api_key: 'YOUR_API_KEY') # Replace with your API key
+
+# Create the Daytona client
 daytona = Daytona::Daytona.new(config)
 
 # Create the Sandbox instance
 sandbox = daytona.create
-
-# Run the code securely inside the Sandbox
-response = sandbox.process.code_run(code: 'print("Hello World from code!")')
-if response.exit_code != 0
-  puts "Error: #{response.exit_code} #{response.result}"
-else
-  puts response.result
-end
-
-# Clean up
-daytona.delete(sandbox)
 ```
 
 </TabItem>
@@ -146,49 +129,21 @@ daytona.delete(sandbox)
 package main
 
 import (
-    "context"
-    "log"
+	"context"
+	"fmt"
 
-    "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
-    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
-    // Initialize the Daytona client
-    config := &types.DaytonaConfig{
-        APIKey: "your-api-key",
+	config := &types.DaytonaConfig{
+        APIKey: "YOUR_API_KEY", // Replace with your API key
     }
-    client, err := daytona.NewClientWithConfig(config)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    ctx := context.Background()
-
-    // Create the Sandbox instance
-    params := types.SnapshotParams{
-        SandboxBaseParams: types.SandboxBaseParams{
-            Language: types.CodeLanguagePython,
-        },
-    }
-    sandbox, err := client.Create(ctx, params)
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    // Run the code securely inside the Sandbox
-    result, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello World from code!'")
-    if err != nil {
-        log.Fatalf("Error: %v", err)
-    }
-    if result.ExitCode != 0 {
-        log.Printf("Error: %d %s", result.ExitCode, result.Result)
-    } else {
-        log.Println(result.Result)
-    }
-
-    // Clean up
-    sandbox.Delete(ctx)
+	client, _ := daytona.NewClientWithConfig(config)
+	ctx := context.Background()
+	sandbox, _ := client.Create(ctx, nil)
+	fmt.Println(sandbox.ID)
 }
 ```
 
@@ -206,9 +161,13 @@ curl https://app.daytona.io/api/sandbox \
 </TabItem>
 </Tabs>
 
+:::tip
+Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
+:::
+
 ## 5. Write and run code
 
-Create a program that runs code inside a Daytona Sandbox. The following snippet is an example "Hello World" program that runs securely inside a Daytona Sandbox.
+Create a program that runs code inside a sandbox. The following snippets are examples of "Hello World" programs that run securely inside a sandbox.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -356,16 +315,16 @@ func main() {
 
 ## Summary
 
-By following the steps above, you successfully create a Daytona account, obtain an API key, install the SDK, create a sandbox, write code, and run it securely in a Daytona Sandbox.
+By following the steps above, you successfully create a Daytona account, obtain an API key, install the SDK, create a sandbox, write code, and run it securely in a sandbox.
 
 ## Next steps
 
-Use the following resources to interact with Daytona Sandboxes:
+Use the following resources to interact with sandboxes:
 
 - Learn more about Daytona with the [Getting Started](/docs/en/getting-started) guide
 - Get started with [Python](/docs/en/python-sdk), [TypeScript](/docs/en/typescript-sdk), [Ruby](/docs/en/ruby-sdk) or [Go](/docs/en/go-sdk) **SDKs**
-- Install the [CLI](/docs/en/getting-started#cli) to manage Daytona Sandboxes from the command line
-- Use the [API](/docs/en/tools/api) to manage Daytona Sandboxes programmatically
+- Install the [CLI](/docs/en/getting-started#cli) to manage sandboxes from the command line
+- Use the [API](/docs/en/tools/api) to manage sandboxes programmatically
 - View [examples](/docs/en/getting-started#examples) for common sandbox operations and best practices
 - Explore [guides](/docs/en/guides) to connect Daytona with [Claude](/docs/en/guides/claude), [OpenCode](/docs/en/guides/opencode/opencode-web-agent), [Codex](/docs/en/guides/codex/codex-sdk-interactive-terminal-sandbox), [LangChain](/docs/en/guides/langchain/langchain-data-analysis) and more
 
