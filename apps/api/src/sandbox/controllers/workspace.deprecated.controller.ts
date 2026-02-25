@@ -109,8 +109,11 @@ export class WorkspaceController {
   ): Promise<WorkspaceDto[]> {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const workspacees = await this.workspaceService.findAllDeprecated(authContext.organizationId, labels)
-    const dtos = await this.workspaceService.toSandboxDtos(workspacees)
-    return dtos.map(WorkspaceDto.fromSandboxDto)
+    const dtos = workspacees.map(async (workspace) => {
+      const dto = WorkspaceDto.fromSandbox(workspace)
+      return dto
+    })
+    return await Promise.all(dtos)
   }
 
   @Post()
@@ -214,8 +217,8 @@ export class WorkspaceController {
     @Query('verbose') verbose?: boolean,
   ): Promise<WorkspaceDto> {
     const workspace = await this.workspaceService.findOne(workspaceId, true)
-    const dto = await this.workspaceService.toSandboxDto(workspace)
-    return WorkspaceDto.fromSandboxDto(dto)
+
+    return WorkspaceDto.fromSandbox(workspace)
   }
 
   @Delete(':workspaceId')
