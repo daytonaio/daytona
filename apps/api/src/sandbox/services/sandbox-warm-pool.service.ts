@@ -32,7 +32,7 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 export type FetchWarmPoolSandboxParams = {
-  snapshot: string
+  snapshot: string | Snapshot
   target: string
   class: SandboxClass
   cpu: number
@@ -71,25 +71,32 @@ export class SandboxWarmPoolService {
 
   async fetchWarmPoolSandbox(params: FetchWarmPoolSandboxParams): Promise<Sandbox | null> {
     //  validate snapshot
-    const sandboxSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
+    let snapshot: Snapshot | null = null
+    if (typeof params.snapshot === 'string') {
+      const sandboxSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
 
-    const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
-      { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-      { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-    ]
+      const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
+        { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+        { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+      ]
 
-    if (isValidUuid(sandboxSnapshot)) {
-      snapshotFilter.push(
-        { organizationId: params.organizationId, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
-        { general: true, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
-      )
-    }
+      if (isValidUuid(sandboxSnapshot)) {
+        snapshotFilter.push(
+          { organizationId: params.organizationId, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
+          { general: true, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
+        )
+      }
 
-    const snapshot = await this.snapshotRepository.findOne({
-      where: snapshotFilter,
-    })
-    if (!snapshot) {
-      throw new BadRequestError(`Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`)
+      snapshot = await this.snapshotRepository.findOne({
+        where: snapshotFilter,
+      })
+      if (!snapshot) {
+        throw new BadRequestError(
+          `Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`,
+        )
+      }
+    } else {
+      snapshot = params.snapshot
     }
 
     //  check if sandbox is warm pool
@@ -156,7 +163,7 @@ export class SandboxWarmPoolService {
     }
 
     //  no warm pool config exists for this snapshot — cache it so callers can skip
-    await this.redis.set(`warm-pool:skip:${sandboxSnapshot}`, '1', 'EX', 60)
+    await this.redis.set(`warm-pool:skip:${snapshot.id}`, '1', 'EX', 60)
 
     return null
   }
