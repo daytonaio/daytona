@@ -45,10 +45,7 @@
           "transitive": true
         }
       ],
-      "outputs": [
-        "{workspaceRoot}/dist/apps/api/openapi.json",
-        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"
-      ],
+      "outputs": ["{workspaceRoot}/dist/apps/api/openapi.json", "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"],
       "options": {
         "commands": [
           "mkdir -p dist/apps/api",
@@ -65,9 +62,7 @@
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "options": {
         "buildTarget": "api:build",
         "runBuildTargetDependencies": false,
@@ -109,7 +104,7 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "bash scripts/validate-migration-paths.sh $(find apps/api/src/migrations -name '*-migration.ts' -type f)"
+        "command": "bash apps/api/scripts/validate-migration-paths.sh $(find apps/api/src/migrations -name '*-migration.ts' -type f)"
       }
     }
   }
