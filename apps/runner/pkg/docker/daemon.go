@@ -114,9 +114,11 @@ func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP str
 				Transport: otelhttp.NewTransport(http.DefaultTransport),
 			}
 			go func() {
-				err := d.initializeDaemon(ctx, containerIP, *authToken, otelClient)
+				// Don't cancel context
+				initContext := context.WithoutCancel(ctx)
+				err := d.initializeDaemon(initContext, containerIP, *authToken, otelClient)
 				if err != nil {
-					d.logger.ErrorContext(ctx, "Failed to initialize daemon telemetry", "error", err)
+					d.logger.ErrorContext(initContext, "Failed to initialize daemon telemetry", "error", err)
 				}
 			}()
 
