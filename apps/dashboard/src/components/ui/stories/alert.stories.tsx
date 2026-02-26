@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import type { Meta, StoryObj } from '@storybook/react'
 import { Alert, AlertDescription, AlertTitle } from '../alert'
 import { InfoIcon, AlertTriangleIcon, CheckCircleIcon, XCircleIcon } from 'lucide-react'

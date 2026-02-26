@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import type { Preview } from '@storybook/react'
 import '../src/index.css'
 

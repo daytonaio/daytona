@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState, useCallback } from 'react'
 import { MoreVertical, Check } from 'lucide-react'

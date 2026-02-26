@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import type { StorybookConfig } from '@storybook/react-vite'
 import { mergeConfig } from 'vite'
 import path from 'path'
