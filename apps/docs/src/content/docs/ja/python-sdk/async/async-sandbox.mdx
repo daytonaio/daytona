@@ -3,71 +3,75 @@ title: "AsyncSandbox"
 hideTitleOnPage: true
 ---
 
-## AsyncSandbox
+## AsyncSandbox \{#asyncsandbox\}
 
 ```python
 class AsyncSandbox(SandboxDto)
 ```
 
-Daytona のサンドボックスを表します。
+Daytona サンドボックスを表します。
 
 **属性**:
 
-- `fs` _AsyncFileSystem_ - ファイルシステム操作インターフェース。
-- `git` _AsyncGit_ - Git 操作インターフェース。
-- `process` _AsyncProcess_ - プロセス実行インターフェース。
-- `computer_use` _AsyncComputerUse_ - デスクトップ自動化のためのコンピューター使用インターフェース。
-- `id` _str_ - サンドボックスの一意の識別子。
-- `organization_id` _str_ - サンドボックスの組織 ID。
-- `snapshot` _str_ - サンドボックスの作成に使用された Daytona のスナップショット。
-- `user` _str_ - サンドボックス内で実行中の OS ユーザー。
-- `env` _Dict[str, str]_ - サンドボックス内で設定される環境変数。
-- `labels` _Dict[str, str]_ - サンドボックスに付与されたカスタムラベル。
-- `public` _bool_ - サンドボックスが公開アクセス可能かどうか。
-- `target` _str_ - サンドボックスを実行するランナーのターゲット（リージョン）。
-- `cpu` _int_ - サンドボックスに割り当てられた CPU 数。
-- `gpu` _int_ - サンドボックスに割り当てられた GPU 数。
-- `memory` _int_ - サンドボックスに割り当てられたメモリ容量（GiB）。
-- `disk` _int_ - サンドボックスに割り当てられたディスク容量（GiB）。
-- `state` _SandboxState_ - サンドボックスの現在の状態（例: "started", "stopped"）。
-- `error_reason` _str_ - サンドボックスがエラー状態の場合のエラーメッセージ。
-- `backup_state` _SandboxBackupStateEnum_ - サンドボックスのバックアップ状態。
-- `backup_created_at` _str_ - バックアップの作成時刻。
-- `auto_stop_interval` _int_ - 自動停止の間隔（分）。
-- `auto_archive_interval` _int_ - 自動アーカイブの間隔（分）。
-- `auto_delete_interval` _int_ - 自動削除の間隔（分）。
-- `runner_domain` _str_ - サンドボックスのランナーのドメイン名。
-- `volumes` _List[str]_ - サンドボックスに接続されたボリューム。
-- `build_info` _str_ - 動的ビルドから作成された場合のビルド情報。
-- `created_at` _str_ - サンドボックスの作成時刻。
-- `updated_at` _str_ - サンドボックスの最終更新時刻。
-- `network_block_all` _bool_ - サンドボックスの全ネットワークアクセスをブロックするかどうか。
-- `network_allow_list` _str_ - サンドボックスで許可される CIDR ネットワークアドレスのカンマ区切りリスト。
+* `fs` *AsyncFileSystem* - ファイルシステム操作インターフェース。
+* `git` *AsyncGit* - Git 操作インターフェース。
+* `process` *AsyncProcess* - プロセス実行インターフェース。
+* `computer_use` *AsyncComputerUse* - デスクトップ自動化のためのコンピューター使用操作インターフェース。
+* `code_interpreter` *AsyncCodeInterpreter* - コード実行用のステートフルなインタープリターインターフェース。
+  現在は Python のみをサポートします。他の言語については、`process.code_run` インターフェースを使用してください。
+* `id` *str* - サンドボックスの一意の識別子。
+* `name` *str* - サンドボックス名。
+* `organization_id` *str* - サンドボックスの組織 ID。
+* `snapshot` *str* - サンドボックスの作成に使用された Daytona スナップショット。
+* `user` *str* - サンドボックス内で動作している OS ユーザー。
+* `env` *dict[str, str]* - サンドボックス内に設定されている環境変数。
+* `labels` *dict[str, str]* - サンドボックスに付与されたカスタムラベル。
+* `public` *bool* - サンドボックスが外部からアクセス可能かどうか。
+* `target` *str* - サンドボックスが実行されるランナーのターゲットロケーション。
+* `cpu` *int* - サンドボックスに割り当てられた CPU 数。
+* `gpu` *int* - サンドボックスに割り当てられた GPU 数。
+* `memory` *int* - サンドボックスに割り当てられたメモリ容量（GiB 単位）。
+* `disk` *int* - サンドボックスに割り当てられたディスク容量（GiB 単位）。
+* `state` *SandboxState* - サンドボックスの現在の状態（例: 「started」「stopped」）。
+* `error_reason` *str* - サンドボックスがエラー状態の場合のエラーメッセージ。
+* `recoverable` *bool* - サンドボックスのエラーが回復可能かどうか。
+* `backup_state` *SandboxBackupStateEnum* - サンドボックスのバックアップの現在の状態。
+* `backup_created_at` *str* - バックアップが作成された日時。
+* `auto_stop_interval` *int* - 自動停止までの時間（分単位）。
+* `auto_archive_interval` *int* - 自動アーカイブまでの時間（分単位）。
+* `auto_delete_interval` *int* - 自動削除までの時間（分単位）。
+* `volumes` *list[str]* - サンドボックスにアタッチされているボリューム。
+* `build_info` *str* - 動的ビルドから作成された場合のサンドボックスのビルド情報。
+* `created_at` *str* - サンドボックスが作成された日時。
+* `updated_at` *str* - サンドボックスが最後に更新された日時。
+* `network_block_all` *bool* - サンドボックスに対するすべてのネットワークアクセスをブロックするかどうか。
+* `network_allow_list` *str* - サンドボックスに対して許可される CIDR ネットワークアドレスのカンマ区切りリスト。
 
-#### AsyncSandbox.__init__
+#### AsyncSandbox.**init** \{#asyncsandbox__init__\}
 
 ```python
-def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
-             toolbox_api: ToolboxApi, code_toolbox: SandboxCodeToolbox)
+def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
+             sandbox_api: SandboxApi, code_toolbox: SandboxCodeToolbox)
 ```
 
-新しいサンドボックスインスタンスを初期化します。
+新しいサンドボックス インスタンスを初期化します。
 
 **引数**:
 
-- `id` _str_ - サンドボックスの一意の識別子。
-- `instance` _SandboxInstance_ - 基盤となるサンドボックスインスタンス。
-- `sandbox_api` _SandboxApi_ - サンドボックス操作用の API クライアント。
-- `toolbox_api` _ToolboxApi_ - ツールボックス操作用の API クライアント。
-- `code_toolbox` _SandboxCodeToolbox_ - 言語別のツールボックス実装。
+* `sandbox_dto` *SandboxDto* - API から取得したサンドボックスのデータ。
+* `toolbox_api` *ApiClient* - Toolbox 操作用の API クライアント。
+* `sandbox_api` *SandboxApi* - サンドボックス操作用の API クライアント。
+* `code_toolbox` *SandboxCodeToolbox* - 言語別の Toolbox 実装。
 
-#### AsyncSandbox.refresh_data
+#### AsyncSandbox.refresh_data \{#asyncsandboxrefresh_data\}
 
 ```python
+@intercept_errors(message_prefix="サンドボックスデータの更新に失敗しました: ")
+@with_instrumentation()
 async def refresh_data() -> None
 ```
 
-API からサンドボックスのデータを更新します。
+API からサンドボックスのデータをリフレッシュします。
 
 **例**:
 
@@ -75,52 +79,72 @@ API からサンドボックスのデータを更新します。
 await sandbox.refresh_data()
 print(f"Sandbox {sandbox.id}:")
 print(f"State: {sandbox.state}")
-print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
+print(f"リソース: {sandbox.cpu} CPU、{sandbox.memory} GiB RAM")
 ```
 
-#### AsyncSandbox.get_user_root_dir
+#### AsyncSandbox.get_user_home_dir \{#asyncsandboxget_user_home_dir\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get sandbox root directory: ")
-async def get_user_root_dir() -> str
+@intercept_errors(message_prefix="ユーザーホームディレクトリの取得に失敗しました: ")
+@with_instrumentation()
+async def get_user_home_dir() -> str
 ```
 
-サンドボックス内でログイン中のユーザーのルートディレクトリのパスを取得します。
+サンドボックス内のユーザーのホームディレクトリのパスを取得します。
 
 **戻り値**:
 
-- `str` - ログイン中のユーザー向けサンドボックスのルートディレクトリへの絶対パス。
-  
+* `str` - サンドボックス内のユーザーのホームディレクトリへの絶対パス。
 
 **例**:
 
 ```python
-root_dir = await sandbox.get_user_root_dir()
-print(f"Sandbox root: {root_dir}")
+user_home_dir = await sandbox.get_user_home_dir()
+print(f"サンドボックスユーザーホーム: {user_home_dir}")
 ```
 
-#### AsyncSandbox.create_lsp_server
+#### AsyncSandbox.get_work_dir \{#asyncsandboxget_work_dir\}
 
 ```python
-def create_lsp_server(language_id: LspLanguageId,
-                      path_to_project: str) -> AsyncLspServer
+@intercept_errors(message_prefix="作業ディレクトリパスの取得に失敗しました: ")
+@with_instrumentation()
+async def get_work_dir() -> str
 ```
 
-新しい Language Server Protocol (LSP) サーバーインスタンスを作成します。
-
-LSP サーバーは、コード補完や診断などの言語固有機能を提供します。
-
-**引数**:
-
-- `language_id` _LspLanguageId_ - 言語サーバーの種類（例: LspLanguageId.PYTHON）。
-- `path_to_project` _str_ - プロジェクトのルートディレクトリへのパス。相対パスはユーザーの
-  ルートディレクトリを基準に解決されます。
-  
+サンドボックス内の作業ディレクトリのパスを取得します。
 
 **戻り値**:
 
-- `LspServer` - 指定した言語向けに構成された新しい LSP サーバーインスタンス。
-  
+* `str` - サンドボックスの作業ディレクトリへの絶対パス。Dockerfile に `WORKDIR` が指定されていればそれを使用し、指定されていない場合はユーザーのホームディレクトリを使用します。
+
+**例**:
+
+```python
+work_dir = await sandbox.get_work_dir()
+print(f"サンドボックス作業ディレクトリ: {work_dir}")
+```
+
+#### AsyncSandbox.create_lsp_server \{#asyncsandboxcreate_lsp_server\}
+
+```python
+@with_instrumentation()
+def create_lsp_server(language_id: LspLanguageId | LspLanguageIdLiteral,
+                      path_to_project: str) -> AsyncLspServer
+```
+
+新しい Language Server Protocol (LSP) サーバーのインスタンスを作成します。
+
+LSP サーバーは、コード補完や診断などの言語固有の機能を提供します。
+
+**引数**:
+
+* `language_id` *LspLanguageId | LspLanguageIdLiteral* - 言語サーバーの種類（例: LspLanguageId.PYTHON）。
+* `path_to_project` *str* - プロジェクトのルートディレクトリへのパス。相対パスは
+  サンドボックスの作業ディレクトリを基準に解決されます。
+
+**戻り値**:
+
+* `LspServer` - 指定した言語向けに構成された新しい LSP サーバーのインスタンス。
 
 **例**:
 
@@ -128,26 +152,25 @@ LSP サーバーは、コード補完や診断などの言語固有機能を提�
 lsp = sandbox.create_lsp_server("python", "workspace/project")
 ```
 
-#### AsyncSandbox.set\_labels
+#### AsyncSandbox.set_labels \{#asyncsandboxset_labels\}
 
 ```python
-@intercept_errors(message_prefix="Failed to set labels: ")
-async def set_labels(labels: Dict[str, str]) -> Dict[str, str]
+@intercept_errors(message_prefix="ラベルの設定に失敗しました: ")
+@with_instrumentation()
+async def set_labels(labels: dict[str, str]) -> dict[str, str]
 ```
 
-サンドボックスにラベルを設定します。
+サンドボックスのラベルを設定します。
 
-ラベルは、サンドボックスを整理・識別するために使えるキーと値のペアです。
+ラベルは、サンドボックスを整理・識別するために使用できるキーと値のペアです。
 
 **引数**:
 
-- `labels` _Dict[str, str]_ - サンドボックスのラベルを表すキーと値のペアのディクショナリ。
-  
+* `labels` *dict[str, str]* - サンドボックスのラベルを表すキーと値ペアのディクショナリ。
 
 **戻り値**:
 
-  Dict[str, str]: 更新後のサンドボックスのラベルを含むディクショナリ。
-  
+dict[str, str]: 更新されたサンドボックスのラベルを含むディクショナリ。
 
 **例**:
 
@@ -157,167 +180,182 @@ new_labels = sandbox.set_labels({
     "environment": "development",
     "team": "backend"
 })
-print(f"Updated labels: {new_labels}")
+print(f"更新されたラベル: {new_labels}")
 ```
 
-#### AsyncSandbox.start
+#### AsyncSandbox.start \{#asyncsandboxstart\}
 
 ```python
 @intercept_errors(message_prefix="Failed to start sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {self.id} failed to start within the {timeout} seconds timeout period"
-))
-async def start(timeout: Optional[float] = 60)
+@with_timeout()
+@with_instrumentation()
+async def start(timeout: float | None = 60)
 ```
 
-サンドボックスを起動し、準備完了まで待機します。
+サンドボックスを起動し、準備が整うまで待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
-  
+* `timeout` *float | None* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒です。
 
 **例外**:
 
-- `DaytonaError` - タイムアウトが負の場合。サンドボックスの起動に失敗した場合、またはタイムアウトした場合。
-  
+* `DaytonaError` - timeout が負の場合、またはサンドボックスの起動に失敗した／タイムアウトした場合。
 
 **例**:
 
 ```python
 sandbox = daytona.get("my-sandbox-id")
-sandbox.start(timeout=40)  # 最大 40 秒待機
+sandbox.start(timeout=40)  # 最大40秒待機
 print("Sandbox started successfully")
 ```
 
-#### AsyncSandbox.stop
+#### AsyncSandbox.recover \{#asyncsandboxrecover\}
 
 ```python
-@intercept_errors(message_prefix="Failed to stop sandbox: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {self.id} failed to stop within the {timeout} seconds timeout period"
-))
-async def stop(timeout: Optional[float] = 60)
+@intercept_errors(message_prefix="Failed to recover sandbox: ")
+@with_timeout()
+async def recover(timeout: float | None = 60)
+```
+
+サンドボックスを回復可能なエラー状態から復旧させ、準備が整うまで待機します。
+
+**引数**:
+
+* `timeout` *float | None* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒です。
+
+**例外**:
+
+* `DaytonaError` - timeout が負の場合、またはサンドボックスの復旧に失敗した／タイムアウトした場合。
+
+**例**:
+
+```python
+sandbox = daytona.get("my-sandbox-id")
+await sandbox.recover(timeout=40)  # 最大40秒待機
+print("Sandbox recovered successfully")
+```
+
+#### AsyncSandbox.stop \{#asyncsandboxstop\}
+
+```python
+@intercept_errors(message_prefix="サンドボックスの停止に失敗しました: ")
+@with_timeout()
+@with_instrumentation()
+async def stop(timeout: float | None = 60)
 ```
 
 サンドボックスを停止し、完全に停止するまで待機します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
-  
+* `timeout` *float | None* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
 
 **例外**:
 
-- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの停止に失敗した場合／タイムアウトした場合。
-  
+* `DaytonaError` - timeout が負の値の場合、またはサンドボックスの停止に失敗した／タイムアウトした場合
 
 **例**:
 
 ```python
 sandbox = daytona.get("my-sandbox-id")
 sandbox.stop()
-print("Sandbox stopped successfully")
+print("サンドボックスが正常に停止されました")
 ```
 
-#### AsyncSandbox.delete
+#### AsyncSandbox.delete \{#asyncsandboxdelete\}
 
 ```python
-@intercept_errors(message_prefix="Failed to remove sandbox: ")
-async def delete(timeout: Optional[float] = 60) -> None
+@intercept_errors(message_prefix="サンドボックスの削除に失敗しました: ")
+@with_instrumentation()
+async def delete(timeout: float | None = 60) -> None
 ```
 
 サンドボックスを削除します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - サンドボックス削除のタイムアウト（秒）。0 はタイムアウトなし。
-  デフォルトは 60 秒。
+* `timeout` *float | None* - サンドボックス削除のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  デフォルトは 60 秒です。
 
-#### AsyncSandbox.wait\_for\_sandbox\_start
+#### AsyncSandbox.wait_for_sandbox_start \{#asyncsandboxwait_for_sandbox_start\}
 
 ```python
 @intercept_errors(
     message_prefix="Failure during waiting for sandbox to start: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {self.id} failed to become ready within the {timeout} seconds timeout period"
-))
-async def wait_for_sandbox_start(timeout: Optional[float] = 60) -> None
+@with_timeout()
+@with_instrumentation()
+async def wait_for_sandbox_start(timeout: float | None = 60) -> None
 ```
 
-サンドボックスが「started」状態になるまで待機します。サンドボックスのステータスをポーリングし、
-「started」になるか、エラーが発生するか、タイムアウトするまで待機します。
+サンドボックスが&#39;started&#39; 状態に到達するまで待機します。サンドボックスのステータスをポーリングし、&#39;started&#39; 状態に到達するか、エラーが発生するか、タイムアウトするまで実行します。
 
 **引数**:
 
-- `timeout` _Optional[float]_ - 最大待機時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
-  
-
-**例外**:
-
-- `DaytonaError` - タイムアウトが負の場合、またはサンドボックスの起動に失敗／タイムアウトした場合。
-
-#### AsyncSandbox.wait\_for\_sandbox\_stop
-
-```python
-@intercept_errors(
-    message_prefix="Failure during waiting for sandbox to stop: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Sandbox {self.id} failed to become stopped within the {timeout} seconds timeout period"
-))
-async def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
-```
-
-サンドボックスが「stopped」状態になるまで待機します。サンドボックスのステータスをポーリングし、
-「stopped」状態に到達するか、エラーが発生するか、タイムアウトするまで待機します。最大 60 秒間、
-サンドボックスの停止を待機します。
-
-**引数**:
-
-- `timeout` _Optional[float]_ - 待機する最大時間（秒）。0 はタイムアウトなし。デフォルトは 60 秒。
-  
+* `timeout` *float | None* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒です。
 
 **送出**:
 
-- `DaytonaError` - タイムアウトが負の場合。サンドボックスの停止に失敗した場合、またはタイムアウトした場合。
+* `DaytonaError` - タイムアウトが負の値の場合、またはサンドボックスの起動に失敗するかタイムアウトした場合
 
-#### AsyncSandbox.set\_autostop\_interval
+#### AsyncSandbox.wait_for_sandbox_stop \{#asyncsandboxwait_for_sandbox_stop\}
 
 ```python
-@intercept_errors(message_prefix="Failed to set auto-stop interval: ")
+@intercept_errors(
+    message_prefix="サンドボックスの停止待機中に失敗: ")
+@with_timeout()
+@with_instrumentation()
+async def wait_for_sandbox_stop(timeout: float | None = 60) -> None
+```
+
+サンドボックスが「stopped」状態になるまで待機します。サンドボックスのステータスをポーリングし、「stopped」状態に到達するか、エラーが発生するか、タイムアウトするまで継続します。サンドボックスの停止を最大60秒まで待機します。
+停止後に自動削除される短命なサンドボックスに対応するため、destroyed を stopped と同等として扱います。
+
+**引数**:
+
+* `timeout` *float | None* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒。
+
+**例外**:
+
+* `DaytonaError` - timeout が負の値の場合。サンドボックスの停止に失敗した場合、またはタイムアウトした場合。
+
+#### AsyncSandbox.set_autostop_interval \{#asyncsandboxset_autostop_interval\}
+
+```python
+@intercept_errors(message_prefix="自動停止間隔の設定に失敗しました: ")
+@with_instrumentation()
 async def set_autostop_interval(interval: int) -> None
 ```
 
 サンドボックスの自動停止間隔を設定します。
 
-指定した間隔のあいだアイドル（新規イベントなし）が続くと、サンドボックスは自動的に停止します。
-イベントには、SDK を通じたサンドボックスのあらゆる状態変更や操作が含まれます。
-サンドボックスのプレビューを用いた操作は含まれません。
+サンドボックスは、指定した間隔のあいだアイドル状態（新しいイベントなし）が続くと自動的に停止します。
+イベントには、SDK を通じたサンドボックスへの状態変更や操作が含まれます。
+サンドボックスのプレビュー経由の操作は含まれません。
 
 **引数**:
 
-- `interval` _int_ - 自動停止までの非アクティブ時間（分）。
-  0 に設定すると自動停止を無効化。デフォルトは 15。
-  
+* `interval` *int* - 自動停止までの非アクティブ時間（分）。
+  0 に設定すると自動停止を無効化します。既定値は 15。
 
 **送出**:
 
-- `DaytonaError` - interval が負の場合
-  
+* `DaytonaError` - interval が負の場合
 
 **例**:
 
 ```python
-# 1 時間後に自動停止
+# Auto-stop after 1 hour
 sandbox.set_autostop_interval(60)
-# もしくは自動停止を無効化
+# または自動停止を無効化
 sandbox.set_autostop_interval(0)
 ```
 
-#### AsyncSandbox.set\_auto\_archive\_interval
+#### AsyncSandbox.set_auto_archive_interval \{#asyncsandboxset_auto_archive_interval\}
 
 ```python
-@intercept_errors(message_prefix="Failed to set auto-archive interval: ")
+@intercept_errors(message_prefix="自動アーカイブ間隔の設定に失敗しました: ")
+@with_instrumentation()
 async def set_auto_archive_interval(interval: int) -> None
 ```
 
@@ -327,113 +365,299 @@ async def set_auto_archive_interval(interval: int) -> None
 
 **引数**:
 
-- `interval` _int_ - 連続停止中のサンドボックスが自動アーカイブされるまでの分数。
-  0 に設定すると最大の間隔になります。デフォルトは 7 日。
-  
+* `interval` *int* - 連続停止後に自動アーカイブされるまでの分数。
+  最大の間隔にするには 0 を設定します。デフォルトは 7 日です。
 
-**送出**:
+**例外**:
 
-- `DaytonaError` - interval が負の場合
-  
+* `DaytonaError` - interval が負の場合
 
 **例**:
 
 ```python
-# 1 時間後に自動アーカイブ
+# Auto-archive after 1 hour
 sandbox.set_auto_archive_interval(60)
-# もしくは最大の間隔を使用
+# または最大間隔を使用
 sandbox.set_auto_archive_interval(0)
 ```
 
-#### AsyncSandbox.set\_auto\_delete\_interval
+#### AsyncSandbox.set_auto_delete_interval \{#asyncsandboxset_auto_delete_interval\}
 
 ```python
-@intercept_errors(message_prefix="Failed to set auto-delete interval: ")
+@intercept_errors(message_prefix="自動削除間隔の設定に失敗しました: ")
+@with_instrumentation()
 async def set_auto_delete_interval(interval: int) -> None
 ```
 
 サンドボックスの自動削除間隔を設定します。
 
-指定した間隔のあいだ連続して停止状態が続くと、サンドボックスは自動的に削除されます。
+指定した間隔のあいだ連続して停止していた場合、サンドボックスは自動的に削除されます。
 
 **引数**:
 
-- `interval` _int_ - 連続停止中のサンドボックスが自動削除されるまでの分数。
-  自動削除を無効化するには負の値を設定。停止時に即時削除するには 0 を設定。
+* `interval` *int* - 連続停止から自動削除までの分数。
+  自動削除を無効にするには負の値を設定します。停止時に即時削除するには 0 を設定します。
   既定では自動削除は無効です。
-  
 
 **例**:
 
 ```python
-# 1 時間後に自動削除
+# Auto-delete after 1 hour
 sandbox.set_auto_delete_interval(60)
-# もしくは停止時に即時削除
+# または停止時に即座に削除
 sandbox.set_auto_delete_interval(0)
-# もしくは自動削除を無効化
+# Or disable auto-delete
 sandbox.set_auto_delete_interval(-1)
 ```
 
-#### AsyncSandbox.get\_preview\_link
+#### AsyncSandbox.get_preview_link \{#asyncsandboxget_preview_link\}
 
 ```python
-@intercept_errors(message_prefix="Failed to get preview link: ")
+@intercept_errors(message_prefix="プレビューリンクの取得に失敗しました: ")
+@with_instrumentation()
 async def get_preview_link(port: int) -> PortPreviewUrl
 ```
 
-指定したポートのサンドボックスに対するプレビューリンクを取得します。ポートが閉じている場合は
-自動的に開かれます。プライベートなサンドボックスの場合は、URL へのアクセスを許可するトークンが
-含まれます。
+指定したポートのサンドボックスに対するプレビューリンクを取得します。ポートが閉じている場合は自動的に開かれます。プライベートなサンドボックスでは、URL へのアクセスを許可するトークンが含まれます。
 
 **引数**:
 
-- `port` _int_ - プレビューリンクを開くポート。
-  
+* `port` *int* - プレビューリンクを公開するポート。
 
 **戻り値**:
 
-- `PortPreviewUrl` - プレビューリンクのレスポンスオブジェクト。`url`
-  と `token`（プライベートなサンドボックスへのアクセス用）を含みます。
-  
+* `PortPreviewUrl` - プレビューリンクのレスポンスオブジェクト。`url` と
+  `token`（プライベートなサンドボックスにアクセスするため）を含みます。
 
 **例**:
 
 ```python
 preview_link = sandbox.get_preview_link(3000)
-print(f"Preview URL: {preview_link.url}")
+print(f"プレビューURL: {preview_link.url}")
 print(f"Token: {preview_link.token}")
 ```
 
-#### AsyncSandbox.archive
+#### AsyncSandbox.create_signed_preview_url \{#asyncsandboxcreate_signed_preview_url\}
+
+````python
+@intercept_errors(message_prefix="Failed to create signed preview url: ")
+async def create_signed_preview_url(
+        port: int,
+        expires_in_seconds: int | None = None) -> SignedPortPreviewUrl
+```
+
+指定されたポートでサンドボックスの署名付きプレビューリンクを作成します。
+
+**引数**:
+
+* `port` *int* - プレビューリンクを開くポート。
+* `expires_in_seconds` *int | None* - 署名付きプレビューリンクが有効となる秒数。デフォルトは 60 秒。
+
+**戻り値**:
+
+* `SignedPortPreviewUrl` - 署名付きプレビューリンクに対するレスポンスオブジェクト。
+````
+
+指定されたポートでサンドボックスの署名付きプレビューリンクを作成します。
+
+**引数**:
+
+* `port` *int* - プレビューリンクを開くポート。
+* `expires_in_seconds` *int | None* - 署名付きプレビューリンクが有効となる秒数。デフォルトは 60 秒。
+
+**戻り値**:
+
+* `SignedPortPreviewUrl` - 署名付きプレビューリンクに対するレスポンスオブジェクト。
+
+#### AsyncSandbox.expire_signed_preview_url \{#asyncsandboxexpire_signed_preview_url\}
 
 ```python
-@intercept_errors(message_prefix="Failed to archive sandbox: ")
+@intercept_errors(message_prefix="Failed to expire signed preview url: ")
+async def expire_signed_preview_url(port: int, token: str) -> None
+```
+
+指定されたポートでサンドボックスの署名付きプレビュー URL を失効させます。
+
+**引数**:
+
+* `port` *int* - 署名付きプレビュー URL を失効させるポート。
+* `token` *str* - 署名付きプレビュー URL を失効させるトークン。
+
+#### AsyncSandbox.archive \{#asyncsandboxarchive\}
+
+```python
+@intercept_errors(message_prefix="サンドボックスのアーカイブに失敗しました: ")
+@with_instrumentation()
 async def archive() -> None
 ```
 
-サンドボックスをアーカイブし、非アクティブ化して状態を保持します。サンドボックスが
-アーカイブされると、ファイルシステムの状態全体がコスト効率の高いオブジェクトストレージに移され、
-長期間にわたってサンドボックスを保持できます。アーカイブ状態と停止状態の
-トレードオフは、サンドボックスのサイズに応じて、アーカイブされたサンドボックスの起動により
-時間がかかる点です。アーカイブ前にサンドボックスは停止している必要があります。
+サンドボックスをアーカイブし、非アクティブ化したうえで状態を保持します。サンドボックスが
+アーカイブされると、ファイルシステム全体の状態がコスト効率の高いオブジェクトストレージへ移され、
+サンドボックスを長期間にわたり利用可能な状態で保持できます。アーカイブと
+停止状態の違いとして、サンドボックスのサイズに応じてアーカイブ済みサンドボックスの起動にはより時間がかかります。
+アーカイブする前にサンドボックスを停止する必要があります。
 
+#### AsyncSandbox.resize \{#asyncsandboxresize\}
 
-## リソース
+```python
+@intercept_errors(message_prefix="Failed to resize sandbox: ")
+@with_timeout()
+@with_instrumentation()
+async def resize(resources: Resources, timeout: float | None = 60) -> None
+```
+
+サンドボックスのリソースサイズを変更します。
+
+サンドボックスの CPU、メモリ、またはディスクの割り当てを変更します。ホットリサイズ（実行中の
+サンドボックスに対するリサイズ）では、CPU/メモリの増加のみが可能です。ディスクリサイズには停止中のサンドボックスが必要です。
+
+**引数**:
+
+* `resources` *Resources* - 新しいリソース構成。指定されたフィールドのみが更新されます。
+  * cpu: CPU コア数（最小: 1）。ホットリサイズの場合は増加のみ可能です。
+  * memory: メモリ (GiB)（最小: 1）。ホットリサイズの場合は増加のみ可能です。
+  * disk: ディスク容量 (GiB)（増加のみ可能で、停止中のサンドボックスが必要です）。
+* `timeout` *Optional[float]* - リサイズ操作のタイムアウト（秒）。0 はタイムアウトなしを意味します。
+  デフォルトは 60 秒です。
+
+**送出される例外**:
+
+* `DaytonaError` - ホットリサイズの制約に違反した場合（実行中サンドボックスで CPU/メモリを減少させた場合）。
+* `DaytonaError` - 実行中サンドボックスでディスクリサイズを試みた場合。
+* `DaytonaError` - ディスクサイズの減少を試みた場合。
+* `DaytonaError` - リサイズ操作がタイムアウトした場合。
+* `DaytonaError` - 変更するリソースが何も指定されていない場合。
+
+**例**:
+
+```python
+# 実行中のサンドボックスでCPU/メモリを増やす（ホットリサイズ）
+await sandbox.resize(Resources(cpu=4, memory=8))
+
+# Change disk (sandbox must be stopped)
+await sandbox.stop()
+await sandbox.resize(Resources(cpu=2, memory=4, disk=30))
+```
+
+#### AsyncSandbox.wait_for_resize_complete \{#asyncsandboxwait_for_resize_complete\}
+
+```python
+@intercept_errors(
+    message_prefix="Failure during waiting for resize to complete: ")
+@with_timeout()
+@with_instrumentation()
+async def wait_for_resize_complete(timeout: float | None = 60) -> None
+```
+
+サンドボックスのリサイズ操作が完了するまで待機します。状態が &#39;resizing&#39; ではなくなるまで、サンドボックスのステータスをポーリングし続けます。
+
+**引数**:
+
+* `timeout` *Optional[float]* - 待機する最大時間（秒）。0 はタイムアウトなしを意味します。デフォルトは 60 秒です。
+
+**送出される例外**:
+
+* `DaytonaError` - `timeout` が負の値の場合、またはリサイズ操作がタイムアウトした場合に送出されます。
+
+#### AsyncSandbox.create_ssh_access \{#asyncsandboxcreate_ssh_access\}
+
+```python
+@intercept_errors(message_prefix="SSHアクセスの作成に失敗しました: ")
+@with_instrumentation()
+async def create_ssh_access(
+        expires_in_minutes: int | None = None) -> SshAccessDto
+```
+
+サンドボックス用のSSHアクセス・トークンを作成します。
+
+**引数**:
+
+* `expires_in_minutes` *int | None* - SSHアクセス・トークンの有効期間（分）。
+
+#### AsyncSandbox.revoke_ssh_access \{#asyncsandboxrevoke_ssh_access\}
+
+```python
+@intercept_errors(message_prefix="SSHアクセスの取り消しに失敗しました: ")
+@with_instrumentation()
+async def revoke_ssh_access(token: str) -> None
+```
+
+サンドボックスのSSHアクセス用トークンを失効します。
+
+**引数**:
+
+* `token` *str* - 失効するトークン。
+
+#### AsyncSandbox.validate_ssh_access \{#asyncsandboxvalidate_ssh_access\}
+
+```python
+@intercept_errors(message_prefix="SSHアクセスの検証に失敗しました: ")
+@with_instrumentation()
+async def validate_ssh_access(token: str) -> SshAccessValidationDto
+```
+
+サンドボックスのSSHアクセス用トークンを検証します。
+
+**引数**:
+
+* `token` *str* - 検証するトークン。
+
+#### AsyncSandbox.refresh_activity \{#asyncsandboxrefresh_activity\}
+
+```python
+@intercept_errors(message_prefix="サンドボックスアクティビティの更新に失敗しました: ")
+async def refresh_activity() -> None
+```
+
+サンドボックスのアクティビティを更新し、自動ライフサイクル管理アクション用のタイマーをリセットします。
+
+このメソッドは、サンドボックスの最終アクティビティ時刻のタイムスタンプを、その状態を変更せずに更新します。
+ユーザーの操作が続いている間、長時間実行されるセッションを維持するのに役立ちます。
+
+**例**:
+
+```python
+await sandbox.refresh_activity()
+```
+
+## AsyncPaginatedSandboxes \{#asyncpaginatedsandboxes\}
+
+```python
+class AsyncPaginatedSandboxes(PaginatedSandboxesDto)
+```
+
+Daytona のサンドボックスをページ分割したリストを表します。
+
+**属性**:
+
+* `items` *list[AsyncSandbox]* - 現在のページに含まれるサンドボックスインスタンスの一覧。
+* `total` *int* - 全ページ合計のサンドボックス数。
+* `page` *int* - 現在のページ番号。
+* `total_pages` *int* - 利用可能なページの総数。
+
+##### items: `list[AsyncSandbox]` \{#items-listasyncsandbox\}
+
+```python
+items = None
+```
+
+pyright: ignore[reportIncompatibleVariableOverride]
+
+## リソース \{#resources\}
 
 ```python
 @dataclass
 class Resources()
 ```
 
-サンドボックスのリソース構成。
+サンドボックスのリソース設定。
 
 **属性**:
 
-- `cpu` _Optional[int]_ - 割り当てるCPUコア数。
-- `memory` _Optional[int]_ - 割り当てるメモリ容量（GiB）。
-- `disk` _Optional[int]_ - 割り当てるディスク容量（GiB）。
-- `gpu` _Optional[int]_ - 割り当てるGPU数。
-  
+* `cpu` *int | None* - 割り当てる CPU コア数。
+* `memory` *int | None* - 割り当てるメモリ容量（GiB）。
+* `disk` *int | None* - 割り当てるディスク容量（GiB）。
+* `gpu` *int | None* - 割り当てる GPU 数。
 
 **例**:
 
@@ -441,7 +665,7 @@ class Resources()
 resources = Resources(
     cpu=2,
     memory=4,  # 4GiB RAM
-    disk=20,   # 20GiB disk
+    disk=20,   # 20GiB ディスク
     gpu=1
 )
 params = CreateSandboxFromImageParams(
@@ -450,4 +674,3 @@ params = CreateSandboxFromImageParams(
     resources=resources
 )
 ```
-

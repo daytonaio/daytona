@@ -1,0 +1,245 @@
+---
+title: AgentKit と Daytona を使用したコーディングエージェントの構築
+description: AgentKit フレームワークと Daytona のサンドボックスを使用して自律型コーディングエージェントを構築するためのステップバイステップのガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import notesAppDemo from '../../../../../assets/docs/images/inngest-agentkit-coding-agent-notes-app-demo.png'
+
+このガイドでは、[Daytona](https://daytona.io) のサンドボックス環境でソフトウェア開発タスクを実行する、完全自律型コーディングエージェントのセットアップ方法と利用方法を説明します。エージェントは [AgentKit](https://agentkit.inngest.com/) を使用して構築されており、Daytona のサンドボックスを活用して、安全かつ分離された環境で処理を実行します。ユーザーからのプロンプトに基づいて、Web アプリの作成、テストの実行、スクリプトの実行など、複数のステップからなるワークフローを自動化できます。
+
+***
+
+### 1. ワークフロー概要 \{#1-workflow-overview\}
+
+ソフトウェアタスクを説明する自然言語のプロンプトを入力します。エージェントはリクエストの内容を解釈して手順を計画し、Daytona のサンドボックス内でそれらを安全に実行します。これにより、プロジェクトのセットアップからライブプレビューまで、すべてを自動的に処理します。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、統合用の[リポジトリ](https://github.com/daytonaio/inngest-agentkit-coding-agent.git)をクローンします。
+
+```bash
+git https://github.com/daytonaio/inngest-agentkit-coding-agent.git
+cd inngest-agentkit-coding-agent
+```
+
+#### 環境の設定 \{#configure-environment\}
+
+API キーを取得します:
+
+* **Daytona API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
+* **Anthropic API キー:** [Anthropic Console](https://console.anthropic.com/)
+
+`.env.example` を `.env` にコピーし、取得したキーを追加します:
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+ANTHROPIC_API_KEY=your_anthropic_key
+```
+
+#### ローカル環境での利用 \{#local-usage\}
+
+:::caution[Node.js のバージョン]
+ローカルでコーディングエージェントを実行するには、Node.js 18 以降が必要です。先に進む前に、環境がこの要件を満たしていることを確認してください。
+:::
+
+依存パッケージをインストールします:
+
+```bash
+npm install
+```
+
+エージェントを実行する:
+
+```bash
+npm run start
+```
+
+#### Docker \{#docker\}
+
+Docker イメージをビルドします:
+
+```bash
+docker buildx build . -t coding-agent
+```
+
+コンテナを起動します：
+
+```bash
+docker run --rm -it coding-agent
+```
+
+### 3. 設定 \{#3-configuration\}
+
+* **プロンプト設定:** エージェントのタスクを変更するには、`src/index.ts` の `network.run(...)` 内にあるメインのプロンプトを編集します。
+* **デバッグログ:** エージェントの動作フローを詳細に追跡するには、`enableDebugLogs=true` に設定します。
+
+### 4. 使用例 \{#4-example-usage\}
+
+`src/index.ts` にあるデフォルトのプロンプトをお試しください：
+
+```typescript
+const result = await network.run(
+  `Create a minimal React app called "Notes" that lets users add, view, and delete notes. Each note should have a title and content. Use Create React App or Vite for setup. Include a simple UI with a form to add notes and a list to display them.`
+)
+```
+
+**エージェントは次の処理を行います。**
+
+* アプリのひな型を作成する
+* 依存関係をインストールする
+* 開発サーバーを起動する
+* プレビューリンクを生成する
+
+ターミナル出力の例：
+
+```
+✔️ App is ready!
+Preview: https://5173-3a828150-1573-42e3-bf9f-9793a2c2c0c2.proxy.daytona.works
+```
+
+下の画像は、この実行で生成された結果です。
+
+<Image src={notesAppDemo} alt="コーディングエージェントによって生成されたメモアプリのデモ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+### 5. エージェントの実行フローの理解 \{#5-understanding-the-agents-execution-flow\}
+
+エージェントは内部で大規模言語モデル（LLM）を活用し、一連の特化したツールにアクセスして動作します。これらのツールにより、Daytona のサンドボックス環境内で、プロジェクトのセットアップからアプリのデプロイまで、必要な処理をすべて実行できます。各ステップでエージェントは現在の目標について推論し、どのツールを呼び出すかを決定し、望ましい結果を得るためにワークフロー全体を調整・制御します。
+
+以下では、エージェントがデモ用 Notes アプリを構築していく過程を、各イテレーション、エージェントのメッセージ、および使用されたツールを示しながら、ステップごとに分解して解説します。
+
+#### プロジェクトの初期化 \{#project-initialization\}
+
+**エージェントからのメッセージ:**
+
+```
+I'll create a React app for Notes using Vite, which provides a faster and more modern setup compared to Create React App. I'll break this down into steps:
+- First, I'll create the project using Vite
+- Install necessary dependencies
+- Create the components for the Notes app
+- Implement the core functionality
+
+Let's get started:
+```
+
+**使用したツール:**
+
+`shellTool` が次のコマンドで実行されました：
+
+```
+npm create vite@latest notes -- --template react
+```
+
+#### 依存関係をインストール \{#install-dependencies\}
+
+**エージェントメッセージ：**
+
+```
+それでは、プロジェクトディレクトリに移動して依存関係をインストールします:
+```
+
+**使用したツール:**
+
+`shellTool` は次のコマンドで呼び出されました:
+
+```
+cd notes && npm install
+```
+
+#### コンポーネントの作成とアプリ構造の更新 \{#create-components-update-app-structure\}
+
+**エージェントからのメッセージ:**
+
+```
+Now, I'll create the necessary components and update the app structure:
+1. Update App.jsx
+2. Update App.css for basic styling
+```
+
+**使用したツール:**
+
+`uploadFilesTool` が次のファイルをアップロードするために呼び出されました：
+
+```
+App.jsx (メインコンポーネントロジック)
+App.css (基本スタイリング)
+```
+
+#### 開発サーバーを起動する \{#start-development-server\}
+
+**エージェントからのメッセージ:**
+
+```
+Now, I'll start the development server:
+```
+
+**使用したツール:**
+
+`startDevServerTool` は以下のコマンドで呼び出されました:
+
+```
+cd notes && npm run dev
+```
+
+#### 開発サーバーの正常性チェック \{#check-dev-server-health\}
+
+**エージェントメッセージ：**
+
+```
+Let's check the dev server health:
+```
+
+**使用したツール:**
+
+`checkDevServerHealthTool` が呼び出され、開発サーバーが稼働しておりアクセス可能であることを確認しました。
+
+#### アプリ概要と機能 \{#app-summary-features\}
+
+**エージェントメッセージ:**
+
+```
+Great! I've created a minimal React Notes app with the following features:
+- Add notes with a title and content
+- View the list of notes
+- Delete individual notes
+- Basic responsive styling
+
+Key details:
+- Used Vite for project setup
+- Implemented state management with React hooks (useState)
+- Simple form for adding notes
+- Notes are stored in local state
+- Each note has a unique ID, title, and content
+- Delete functionality for individual notes
+
+DEV_SERVER_PORT=5173
+
+TASK_COMPLETED
+
+The app is now running and ready to use. Users can:
+1. Enter a note title in the first input
+2. Enter note content in the textarea
+3. Click "Add Note" to save the note
+4. View notes in the list below
+5. Delete notes by clicking the "Delete" button next to each note
+
+Would you like me to explain any part of the implementation or make any modifications?
+```
+
+エージェントの出力メッセージ内の `DEV_SERVER_PORT` と `TASK_COMPLETED` フィールドに注目してください。
+
+`DEV_SERVER_PORT` の値はエージェントによって自動検出され、アプリ用のプレビューリンクを生成するために使用されます。
+
+`TASK_COMPLETED` はタスクが完了したことを示し、エージェントのルーティングロジック内部で使用されます。
+
+***
+
+**主な利点:**
+
+* セキュアで分離された実行
+* 複数言語対応
+* 開発サーバーを自動検出して起動し、プレビューリンクを生成します
+* エージェントの動作に関する詳細なデバッグログ
