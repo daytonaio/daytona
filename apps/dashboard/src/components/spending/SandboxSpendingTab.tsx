@@ -1,10 +1,10 @@
 /*
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
 
 import React, { useState, useCallback } from 'react'
-import { useSandboxUsagePeriods, AnalyticsUsageParams } from '@/hooks/useAnalyticsUsage'
+import { useSandboxUsagePeriods, AnalyticsUsageParams } from '@/hooks/queries/useAnalyticsUsage'
 import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
