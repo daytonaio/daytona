@@ -55,7 +55,9 @@ export class Sandbox {
   })
   organizationId: string
 
-  @Column()
+  @Column({
+    default: () => `('sandbox-'|| "substring"((gen_random_uuid()), 1, 10))`,
+  })
   name: string
 
   @Column()
