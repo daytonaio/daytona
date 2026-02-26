@@ -12,6 +12,7 @@ import { ModelsAggregatedUsage, ModelsSandboxUsage, ModelsUsagePeriod } from '@d
 export interface AnalyticsUsageParams {
   from: Date
   to: Date
+  enabled?: boolean
 }
 
 export function useAggregatedUsage(params: AnalyticsUsageParams) {
@@ -31,7 +32,7 @@ export function useAggregatedUsage(params: AnalyticsUsageParams) {
       )
       return response.data
     },
-    enabled: !!selectedOrganization && !!api.analyticsUsageApi,
+    enabled: !!selectedOrganization && !!api.analyticsUsageApi && params.enabled !== false,
     staleTime: 10_000,
   })
 }
@@ -53,7 +54,7 @@ export function useSandboxesUsage(params: AnalyticsUsageParams) {
       )
       return response.data
     },
-    enabled: !!selectedOrganization && !!api.analyticsUsageApi,
+    enabled: !!selectedOrganization && !!api.analyticsUsageApi && params.enabled !== false,
     staleTime: 10_000,
   })
 }
@@ -76,7 +77,7 @@ export function useSandboxUsagePeriods(sandboxId: string | undefined, params: An
       )
       return response.data
     },
-    enabled: !!sandboxId && !!selectedOrganization && !!api.analyticsUsageApi,
+    enabled: !!sandboxId && !!selectedOrganization && !!api.analyticsUsageApi && params.enabled !== false,
     staleTime: 10_000,
   })
 }
