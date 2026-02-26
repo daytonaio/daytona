@@ -45,8 +45,12 @@ const Spending = () => {
     to: analyticsDateRange.to ?? new Date(),
   }
 
-  const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams)
-  const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams)
+  const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams, {
+    enabled: analyticsAvailable && !!selectedOrganization,
+  })
+  const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams, {
+    enabled: analyticsAvailable && !!selectedOrganization,
+  })
 
   const fetchOrganizationUsage = useCallback(async () => {
     if (!selectedOrganization) {
