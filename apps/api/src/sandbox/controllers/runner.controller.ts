@@ -367,6 +367,7 @@ export class RunnerController {
       healthcheck.domain,
       healthcheck.apiUrl,
       healthcheck.proxyUrl,
+      healthcheck.serviceHealth,
       healthcheck.metrics,
       healthcheck.appVersion,
     )

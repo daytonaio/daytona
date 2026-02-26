@@ -46,6 +46,7 @@ import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Injectable()
 export class RunnerService {
@@ -378,6 +379,7 @@ export class RunnerService {
     domain?: string,
     apiUrl?: string,
     proxyUrl?: string,
+    serviceHealth?: RunnerServiceInfo[],
     metrics?: {
       currentCpuLoadAverage?: number
       currentCpuUsagePercentage?: number
@@ -424,6 +426,19 @@ export class RunnerService {
 
     if (appVersion) {
       updateData.appVersion = appVersion
+    }
+
+    if (serviceHealth !== undefined) {
+      updateData.serviceHealth = serviceHealth
+    }
+
+    const unhealthyServices = serviceHealth?.filter((s) => !s.healthy) ?? []
+    if (unhealthyServices.length > 0) {
+      const unhealthySummary = unhealthyServices
+        .map((s) => `"${s.serviceName}"${s.errorReason ? ` (${s.errorReason})` : ''}`)
+        .join(', ')
+      this.logger.warn(`Runner ${runnerId} services reported unhealthy: ${unhealthySummary}`)
+      updateData.state = RunnerState.UNRESPONSIVE
     }
 
     if (metrics) {
@@ -559,6 +574,7 @@ export class RunnerService {
                     undefined,
                     undefined,
                     undefined,
+                    runnerInfo?.serviceHealth,
                     runnerInfo?.metrics,
                     runnerInfo?.appVersion,
                   )
