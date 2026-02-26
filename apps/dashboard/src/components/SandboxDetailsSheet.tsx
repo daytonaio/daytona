@@ -10,6 +10,8 @@ import { formatDuration, formatTimestamp, getRelativeTimeString } from '@/lib/ut
 import { Sandbox, SandboxState } from '@daytonaio/api-client'
 import { Archive, Play, Tag, Trash, Wrench, X } from 'lucide-react'
 import React, { useState } from 'react'
+import { Link, generatePath } from 'react-router-dom'
+import { RoutePath } from '@/enums/RoutePath'
 import { CopyButton } from './CopyButton'
 import { ResourceChip } from './ResourceChip'
 import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxState'
@@ -79,6 +81,9 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
         <SheetHeader className="space-y-0 flex flex-row justify-between items-center  p-4 px-5 border-b border-border">
           <SheetTitle className="text-2xl font-medium">Sandbox Details</SheetTitle>
           <div className="flex gap-2 items-center">
+            <Button variant="link" asChild>
+              <Link to={generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id })}>View</Link>
+            </Button>
             {writePermitted && (
               <>
                 {sandbox.state === SandboxState.STARTED && (

@@ -38,6 +38,9 @@ export enum RoutePath {
   USER_INVITATIONS = '/dashboard/user/invitations',
   ACCOUNT_SETTINGS = '/dashboard/user/account-settings',
 
+  // Sandboxes
+  SANDBOX_DETAILS = '/dashboard/sandboxes/:sandboxId',
+
   // Email verification
   EMAIL_VERIFY = '/dashboard/organization/:organizationId/verify-email/:email/:token',
 }
