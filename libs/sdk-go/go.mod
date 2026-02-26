@@ -6,8 +6,8 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.5
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.2
-	github.com/daytonaio/daytona/libs/api-client-go v0.146.0
-	github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.146.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.147.0
+	github.com/daytonaio/daytona/libs/toolbox-api-client-go v0.147.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/stretchr/testify v1.11.1
