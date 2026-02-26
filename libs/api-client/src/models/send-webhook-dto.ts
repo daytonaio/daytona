@@ -13,6 +13,9 @@
  */
 
 
+// May contain unused imports in some cases
+// @ts-ignore
+import type { WebhookEvent } from './webhook-event';
 
 /**
  * 
@@ -22,10 +25,10 @@
 export interface SendWebhookDto {
     /**
      * The type of event being sent
-     * @type {string}
+     * @type {WebhookEvent}
      * @memberof SendWebhookDto
      */
-    'eventType': string;
+    'eventType': WebhookEvent;
     /**
      * The payload data to send
      * @type {object}
@@ -39,4 +42,6 @@ export interface SendWebhookDto {
      */
     'eventId'?: string;
 }
+
+
 

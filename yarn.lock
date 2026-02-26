@@ -13984,15 +13984,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.7.5":
-  version: 22.17.2
-  resolution: "@types/node@npm:22.17.2"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10c0/23cd13aa35da6322a6d66cf4b3a45dbd40764ba726ab8681960270156c3abba776dd8dc173250c467f708d40612ecd725755d7659b775b513904680d5205eaff
-  languageName: node
-  linkType: hard
-
 "@types/nodemailer@npm:^6.4.17":
   version: 6.4.19
   resolution: "@types/nodemailer@npm:6.4.19"
@@ -19564,7 +19555,8 @@ __metadata:
     sqlite3: "npm:^5.1.7"
     starlight-openapi: "npm:^0.19.1"
     suspend-react: "npm:^0.1.3"
-    svix: "npm:^1.73.0"
+    svix: "npm:^1.84.1"
+    svix-react: "npm:^1.13.7"
     tailwind: "npm:^4.0.0"
     tailwind-merge: "npm:^3.4.0"
     tailwind-scrollbar: "npm:^4.0.2"
@@ -20805,13 +20797,6 @@ __metadata:
     prettier-plugin-sort-re-exports@0.0.1:
       unplugged: true
   checksum: 10c0/4edcc19984df0e521d222082d055f131233cada9277de3f427311ecd43dc99442dc66a39f86b1b10c298c5a72133231928eb91668c0bff4f11e12af8b6d758a3
-  languageName: node
-  linkType: hard
-
-"es6-promise@npm:^4.2.8":
-  version: 4.2.8
-  resolution: "es6-promise@npm:4.2.8"
-  checksum: 10c0/2373d9c5e9a93bdd9f9ed32ff5cb6dd3dd785368d1c21e9bbbfd07d16345b3774ae260f2bd24c8f836a6903f432b4151e7816a7fa8891ccb4e1a55a028ec42c3
   languageName: node
   linkType: hard
 
@@ -35991,6 +35976,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"standardwebhooks@npm:1.0.0":
+  version: 1.0.0
+  resolution: "standardwebhooks@npm:1.0.0"
+  dependencies:
+    "@stablelib/base64": "npm:^1.0.0"
+    fast-sha256: "npm:^1.3.0"
+  checksum: 10c0/aee097d0f3c05172c19b80df1ed9596a2ce92f8956957650d0bbe47c2ca6d36515796b51d523333cb4a48c889b2ab130d789e7879e14975c4381bc7a61274327
+  languageName: node
+  linkType: hard
+
 "starlight-openapi@npm:^0.19.1":
   version: 0.19.1
   resolution: "starlight-openapi@npm:0.19.1"
@@ -36628,17 +36623,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svix@npm:^1.73.0":
-  version: 1.76.1
-  resolution: "svix@npm:1.76.1"
+"svix-react@npm:^1.13.7":
+  version: 1.13.7
+  resolution: "svix-react@npm:1.13.7"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+    svix: ">=1.26.0"
+  checksum: 10c0/8936a33bc9023af0aa7e630e471278a33db00ad3722364116bda37666e9f0a6a4ebd9186a78ca7c933f2f756736adaa8206fe5dbab95f30912af9fcbfb7b6d33
+  languageName: node
+  linkType: hard
+
+"svix@npm:^1.84.1":
+  version: 1.84.1
+  resolution: "svix@npm:1.84.1"
   dependencies:
-    "@stablelib/base64": "npm:^1.0.0"
-    "@types/node": "npm:^22.7.5"
-    es6-promise: "npm:^4.2.8"
-    fast-sha256: "npm:^1.3.0"
-    url-parse: "npm:^1.5.10"
+    standardwebhooks: "npm:1.0.0"
     uuid: "npm:^10.0.0"
-  checksum: 10c0/18500f4f8ffc0b93035f7185b068330ea9e2ecbae214baae6c1bca865e6023a28db01b3628991b21f8da54f5faa8c27858ac338cb95e18deb47f7dec55e5ada8
+  checksum: 10c0/59b06741d37d1de271fcc1fe7f16e4180bb295fd3e8990be330bb6c31988d4ba2ca82548060374dba3d9ceb776c49136f70a485dd856a3dfb9a76728c429874e
   languageName: node
   linkType: hard
 
@@ -38477,7 +38479,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"url-parse@npm:^1.5.10, url-parse@npm:^1.5.3":
+"url-parse@npm:^1.5.3":
   version: 1.5.10
   resolution: "url-parse@npm:1.5.10"
   dependencies:

@@ -8196,7 +8196,7 @@ paths:
           description: App Portal access generated successfully
       security:
       - bearer: []
-      summary: Get Svix Consumer App Portal access URL for an organization
+      summary: Get Svix Consumer App Portal access for an organization
       tags:
       - webhooks
   /webhooks/organizations/{organizationId}/send:
@@ -14149,14 +14149,31 @@ components:
     WebhookAppPortalAccess:
       example:
         url: https://app.svix.com/app_1234567890
+        token: appsk_...
       properties:
+        token:
+          description: The authentication token for the Svix consumer app portal
+          example: appsk_...
+          type: string
         url:
           description: The URL to the webhook app portal
           example: https://app.svix.com/app_1234567890
           type: string
       required:
+      - token
       - url
       type: object
+    WebhookEvent:
+      description: The type of event being sent
+      enum:
+      - sandbox.created
+      - sandbox.state.updated
+      - snapshot.created
+      - snapshot.state.updated
+      - snapshot.removed
+      - volume.created
+      - volume.state.updated
+      type: string
     SendWebhookDto:
       example:
         eventId: evt_1234567890abcdef
@@ -14166,9 +14183,10 @@ components:
         eventType: sandbox.created
       properties:
         eventType:
+          allOf:
+          - $ref: '#/components/schemas/WebhookEvent'
           description: The type of event being sent
           example: sandbox.created
-          type: string
         payload:
           description: The payload data to send
           example:

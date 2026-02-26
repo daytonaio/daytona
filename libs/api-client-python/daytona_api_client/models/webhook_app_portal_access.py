@@ -27,9 +27,10 @@ class WebhookAppPortalAccess(BaseModel):
     """
     WebhookAppPortalAccess
     """ # noqa: E501
+    token: StrictStr = Field(description="The authentication token for the Svix consumer app portal")
     url: StrictStr = Field(description="The URL to the webhook app portal")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["url"]
+    __properties: ClassVar[List[str]] = ["token", "url"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,7 @@ class WebhookAppPortalAccess(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "token": obj.get("token"),
             "url": obj.get("url")
         })
         # store additional fields in additional_properties

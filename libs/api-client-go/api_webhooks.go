@@ -24,7 +24,7 @@ import (
 type WebhooksAPI interface {
 
 	/*
-	WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access URL for an organization
+	WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access for an organization
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param organizationId
@@ -121,7 +121,7 @@ func (r WebhooksAPIWebhookControllerGetAppPortalAccessRequest) Execute() (*Webho
 }
 
 /*
-WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access URL for an organization
+WebhookControllerGetAppPortalAccess Get Svix Consumer App Portal access for an organization
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param organizationId

@@ -195,6 +195,7 @@ daytona_api_client/models/volume_dto.py
 daytona_api_client/models/volume_state.py
 daytona_api_client/models/webhook_app_portal_access.py
 daytona_api_client/models/webhook_controller_get_status200_response.py
+daytona_api_client/models/webhook_event.py
 daytona_api_client/models/webhook_initialization_status.py
 daytona_api_client/models/windows_response.py
 daytona_api_client/models/work_dir_response.py

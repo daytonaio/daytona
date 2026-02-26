@@ -38,6 +38,10 @@ export enum RoutePath {
   USER_INVITATIONS = '/dashboard/user/invitations',
   ACCOUNT_SETTINGS = '/dashboard/user/account-settings',
 
+  // Webhooks
+  WEBHOOKS = '/dashboard/webhooks',
+  WEBHOOK_ENDPOINT_DETAILS = '/dashboard/webhooks/:endpointId',
+
   // Email verification
   EMAIL_VERIFY = '/dashboard/organization/:organizationId/verify-email/:email/:token',
 }

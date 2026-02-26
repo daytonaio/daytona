@@ -22,7 +22,7 @@ var _ MappedNullable = &SendWebhookDto{}
 // SendWebhookDto struct for SendWebhookDto
 type SendWebhookDto struct {
 	// The type of event being sent
-	EventType string `json:"eventType"`
+	EventType WebhookEvent `json:"eventType"`
 	// The payload data to send
 	Payload map[string]interface{} `json:"payload"`
 	// Optional event ID for idempotency
@@ -36,7 +36,7 @@ type _SendWebhookDto SendWebhookDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSendWebhookDto(eventType string, payload map[string]interface{}) *SendWebhookDto {
+func NewSendWebhookDto(eventType WebhookEvent, payload map[string]interface{}) *SendWebhookDto {
 	this := SendWebhookDto{}
 	this.EventType = eventType
 	this.Payload = payload
@@ -52,9 +52,9 @@ func NewSendWebhookDtoWithDefaults() *SendWebhookDto {
 }
 
 // GetEventType returns the EventType field value
-func (o *SendWebhookDto) GetEventType() string {
+func (o *SendWebhookDto) GetEventType() WebhookEvent {
 	if o == nil {
-		var ret string
+		var ret WebhookEvent
 		return ret
 	}
 
@@ -63,7 +63,7 @@ func (o *SendWebhookDto) GetEventType() string {
 
 // GetEventTypeOk returns a tuple with the EventType field value
 // and a boolean to check if the value has been set.
-func (o *SendWebhookDto) GetEventTypeOk() (*string, bool) {
+func (o *SendWebhookDto) GetEventTypeOk() (*WebhookEvent, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,7 +71,7 @@ func (o *SendWebhookDto) GetEventTypeOk() (*string, bool) {
 }
 
 // SetEventType sets field value
-func (o *SendWebhookDto) SetEventType(v string) {
+func (o *SendWebhookDto) SetEventType(v WebhookEvent) {
 	o.EventType = v
 }
 

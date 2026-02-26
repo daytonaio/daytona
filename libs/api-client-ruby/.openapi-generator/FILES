@@ -196,6 +196,7 @@ lib/daytona_api_client/models/volume_dto.rb
 lib/daytona_api_client/models/volume_state.rb
 lib/daytona_api_client/models/webhook_app_portal_access.rb
 lib/daytona_api_client/models/webhook_controller_get_status200_response.rb
+lib/daytona_api_client/models/webhook_event.rb
 lib/daytona_api_client/models/webhook_initialization_status.rb
 lib/daytona_api_client/models/windows_response.rb
 lib/daytona_api_client/models/work_dir_response.rb

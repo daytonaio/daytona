@@ -16,7 +16,7 @@ import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-u
 import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
 import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
 import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
-import { WebhookEvents } from '../constants/webhook-events.constants'
+import { WebhookEvent } from '../constants/webhook-events.constants'
 import {
   SandboxCreatedWebhookDto,
   SandboxStateUpdatedWebhookDto,
@@ -40,8 +40,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = SandboxCreatedWebhookDto.fromEvent(event, WebhookEvents.SANDBOX_CREATED)
-      await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvents.SANDBOX_CREATED, payload)
+      const payload = SandboxCreatedWebhookDto.fromEvent(event, WebhookEvent.SANDBOX_CREATED)
+      await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvent.SANDBOX_CREATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for sandbox created: ${error.message}`)
     }
@@ -54,8 +54,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = SandboxStateUpdatedWebhookDto.fromEvent(event, WebhookEvents.SANDBOX_STATE_UPDATED)
-      await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvents.SANDBOX_STATE_UPDATED, payload)
+      const payload = SandboxStateUpdatedWebhookDto.fromEvent(event, WebhookEvent.SANDBOX_STATE_UPDATED)
+      await this.webhookService.sendWebhook(event.sandbox.organizationId, WebhookEvent.SANDBOX_STATE_UPDATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for sandbox state updated: ${error.message}`)
     }
@@ -68,8 +68,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = SnapshotCreatedWebhookDto.fromEvent(event, WebhookEvents.SNAPSHOT_CREATED)
-      await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_CREATED, payload)
+      const payload = SnapshotCreatedWebhookDto.fromEvent(event, WebhookEvent.SNAPSHOT_CREATED)
+      await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvent.SNAPSHOT_CREATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for snapshot created: ${error.message}`)
     }
@@ -82,12 +82,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = SnapshotStateUpdatedWebhookDto.fromEvent(event, WebhookEvents.SNAPSHOT_STATE_UPDATED)
-      await this.webhookService.sendWebhook(
-        event.snapshot.organizationId,
-        WebhookEvents.SNAPSHOT_STATE_UPDATED,
-        payload,
-      )
+      const payload = SnapshotStateUpdatedWebhookDto.fromEvent(event, WebhookEvent.SNAPSHOT_STATE_UPDATED)
+      await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvent.SNAPSHOT_STATE_UPDATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for snapshot state updated: ${error.message}`)
     }
@@ -100,8 +96,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = SnapshotRemovedWebhookDto.fromEvent(event, WebhookEvents.SNAPSHOT_REMOVED)
-      await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvents.SNAPSHOT_REMOVED, payload)
+      const payload = SnapshotRemovedWebhookDto.fromEvent(event, WebhookEvent.SNAPSHOT_REMOVED)
+      await this.webhookService.sendWebhook(event.snapshot.organizationId, WebhookEvent.SNAPSHOT_REMOVED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for snapshot removed: ${error.message}`)
     }
@@ -114,8 +110,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = VolumeCreatedWebhookDto.fromEvent(event, WebhookEvents.VOLUME_CREATED)
-      await this.webhookService.sendWebhook(event.volume.organizationId, WebhookEvents.VOLUME_CREATED, payload)
+      const payload = VolumeCreatedWebhookDto.fromEvent(event, WebhookEvent.VOLUME_CREATED)
+      await this.webhookService.sendWebhook(event.volume.organizationId, WebhookEvent.VOLUME_CREATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for volume created: ${error.message}`)
     }
@@ -128,8 +124,8 @@ export class WebhookEventHandlerService {
     }
 
     try {
-      const payload = VolumeStateUpdatedWebhookDto.fromEvent(event, WebhookEvents.VOLUME_STATE_UPDATED)
-      await this.webhookService.sendWebhook(event.volume.organizationId, WebhookEvents.VOLUME_STATE_UPDATED, payload)
+      const payload = VolumeStateUpdatedWebhookDto.fromEvent(event, WebhookEvent.VOLUME_STATE_UPDATED)
+      await this.webhookService.sendWebhook(event.volume.organizationId, WebhookEvent.VOLUME_STATE_UPDATED, payload)
     } catch (error) {
       this.logger.error(`Failed to send webhook for volume state updated: ${error.message}`)
     }
