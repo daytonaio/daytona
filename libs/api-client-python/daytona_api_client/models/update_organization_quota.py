@@ -39,8 +39,9 @@ class UpdateOrganizationQuota(BaseModel):
     authenticated_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="authenticatedRateLimitTtlSeconds")
     sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxCreateRateLimitTtlSeconds")
     sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
+    snapshot_deactivation_timeout: Optional[Union[StrictFloat, StrictInt]] = Field(description="Time in seconds before an unused snapshot is deactivated", serialization_alias="snapshotDeactivationTimeout")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds"]
+    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeout"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -148,6 +149,11 @@ class UpdateOrganizationQuota(BaseModel):
         if self.sandbox_lifecycle_rate_limit_ttl_seconds is None and "sandbox_lifecycle_rate_limit_ttl_seconds" in self.model_fields_set:
             _dict['sandboxLifecycleRateLimitTtlSeconds'] = None
 
+        # set to None if snapshot_deactivation_timeout (nullable) is None
+        # and model_fields_set contains the field
+        if self.snapshot_deactivation_timeout is None and "snapshot_deactivation_timeout" in self.model_fields_set:
+            _dict['snapshotDeactivationTimeout'] = None
+
         return _dict
 
     @classmethod
@@ -171,7 +177,8 @@ class UpdateOrganizationQuota(BaseModel):
             "sandbox_lifecycle_rate_limit": obj.get("sandboxLifecycleRateLimit"),
             "authenticated_rate_limit_ttl_seconds": obj.get("authenticatedRateLimitTtlSeconds"),
             "sandbox_create_rate_limit_ttl_seconds": obj.get("sandboxCreateRateLimitTtlSeconds"),
-            "sandbox_lifecycle_rate_limit_ttl_seconds": obj.get("sandboxLifecycleRateLimitTtlSeconds")
+            "sandbox_lifecycle_rate_limit_ttl_seconds": obj.get("sandboxLifecycleRateLimitTtlSeconds"),
+            "snapshot_deactivation_timeout": obj.get("snapshotDeactivationTimeout")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
