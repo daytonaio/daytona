@@ -80,7 +80,7 @@ export const TracesTab: React.FC<TracesTabProps> = ({ sandboxId }) => {
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 border rounded-md">
+      <ScrollArea fade="mask" className="flex-1 min-h-0 border rounded-md">
         {isLoading ? (
           <div className="flex items-center justify-center h-40">
             <Spinner className="w-6 h-6" />

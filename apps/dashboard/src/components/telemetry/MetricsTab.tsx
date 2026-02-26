@@ -7,6 +7,7 @@ import React, { useState, useCallback } from 'react'
 import { useSandboxMetrics, MetricsQueryParams } from '@/hooks/useSandboxMetrics'
 import { TimeRangeSelector } from './TimeRangeSelector'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartConfig } from '@/components/ui/chart'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from 'recharts'
 import { RefreshCw, BarChart3 } from 'lucide-react'
@@ -239,7 +240,7 @@ export const MetricsTab: React.FC<MetricsTabProps> = ({ sandboxId }) => {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <ScrollArea fade="mask" className="flex-1 min-h-0">
         {isLoading ? (
           <div className="flex items-center justify-center h-full min-h-[400px]">
             <Spinner className="w-6 h-6" />
@@ -263,7 +264,7 @@ export const MetricsTab: React.FC<MetricsTabProps> = ({ sandboxId }) => {
             ))}
           </div>
         )}
-      </div>
+      </ScrollArea>
     </div>
   )
 }
