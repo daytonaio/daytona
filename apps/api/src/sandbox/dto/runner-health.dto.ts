@@ -4,7 +4,8 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { Type } from 'class-transformer'
 
 @ApiSchema({ name: 'RunnerHealthMetrics' })
 export class RunnerHealthMetricsDto {
@@ -93,6 +94,31 @@ export class RunnerHealthMetricsDto {
   diskGiB: number
 }
 
+@ApiSchema({ name: 'RunnerServiceHealth' })
+export class RunnerServiceHealthDto {
+  @ApiProperty({
+    description: 'Name of the service being checked',
+    example: 'runner',
+  })
+  @IsString()
+  serviceName: string
+
+  @ApiProperty({
+    description: 'Whether the service is healthy',
+    example: false,
+  })
+  @IsBoolean()
+  healthy: boolean
+
+  @ApiPropertyOptional({
+    description: 'Error message if the service is unhealthy',
+    example: 'Cannot connect to the runner',
+  })
+  @IsOptional()
+  @IsString()
+  error?: string
+}
+
 @ApiSchema({ name: 'RunnerHealthcheck' })
 export class RunnerHealthcheckDto {
   @ApiPropertyOptional({
@@ -101,6 +127,16 @@ export class RunnerHealthcheckDto {
   })
   @IsOptional()
   metrics?: RunnerHealthMetricsDto
+
+  @ApiPropertyOptional({
+    description: 'Health status of individual services on the runner',
+    type: [RunnerServiceHealthDto],
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RunnerServiceHealthDto)
+  serviceHealth?: RunnerServiceHealthDto[]
 
   @ApiPropertyOptional({
     description: 'Runner domain',

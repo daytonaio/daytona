@@ -14,34 +14,22 @@ require 'date'
 require 'time'
 
 module DaytonaApiClient
-  class RunnerHealthcheck
-    # Runner metrics
-    attr_accessor :metrics
+  class RunnerServiceHealth
+    # Name of the service being checked
+    attr_accessor :service_name
 
-    # Health status of individual services on the runner
-    attr_accessor :service_health
+    # Whether the service is healthy
+    attr_accessor :healthy
 
-    # Runner domain
-    attr_accessor :domain
-
-    # Runner proxy URL
-    attr_accessor :proxy_url
-
-    # Runner API URL
-    attr_accessor :api_url
-
-    # Runner app version
-    attr_accessor :app_version
+    # Error message if the service is unhealthy
+    attr_accessor :error
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
-        :'metrics' => :'metrics',
-        :'service_health' => :'serviceHealth',
-        :'domain' => :'domain',
-        :'proxy_url' => :'proxyUrl',
-        :'api_url' => :'apiUrl',
-        :'app_version' => :'appVersion'
+        :'service_name' => :'serviceName',
+        :'healthy' => :'healthy',
+        :'error' => :'error'
       }
     end
 
@@ -58,12 +46,9 @@ module DaytonaApiClient
     # Attribute type mapping.
     def self.openapi_types
       {
-        :'metrics' => :'RunnerHealthMetrics',
-        :'service_health' => :'Array<RunnerServiceHealth>',
-        :'domain' => :'String',
-        :'proxy_url' => :'String',
-        :'api_url' => :'String',
-        :'app_version' => :'String'
+        :'service_name' => :'String',
+        :'healthy' => :'Boolean',
+        :'error' => :'String'
       }
     end
 
@@ -77,44 +62,32 @@ module DaytonaApiClient
     # @param [Hash] attributes Model attributes in the form of hash
     def initialize(attributes = {})
       if (!attributes.is_a?(Hash))
-        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::RunnerHealthcheck` initialize method"
+        fail ArgumentError, "The input argument (attributes) must be a hash in `DaytonaApiClient::RunnerServiceHealth` initialize method"
       end
 
       # check to see if the attribute exists and convert string to symbol for hash key
       acceptable_attribute_map = self.class.acceptable_attribute_map
       attributes = attributes.each_with_object({}) { |(k, v), h|
         if (!acceptable_attribute_map.key?(k.to_sym))
-          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::RunnerHealthcheck`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
+          fail ArgumentError, "`#{k}` is not a valid attribute in `DaytonaApiClient::RunnerServiceHealth`. Please check the name to make sure it's valid. List of attributes: " + acceptable_attribute_map.keys.inspect
         end
         h[k.to_sym] = v
       }
 
-      if attributes.key?(:'metrics')
-        self.metrics = attributes[:'metrics']
-      end
-
-      if attributes.key?(:'service_health')
-        if (value = attributes[:'service_health']).is_a?(Array)
-          self.service_health = value
-        end
-      end
-
-      if attributes.key?(:'domain')
-        self.domain = attributes[:'domain']
-      end
-
-      if attributes.key?(:'proxy_url')
-        self.proxy_url = attributes[:'proxy_url']
-      end
-
-      if attributes.key?(:'api_url')
-        self.api_url = attributes[:'api_url']
-      end
-
-      if attributes.key?(:'app_version')
-        self.app_version = attributes[:'app_version']
+      if attributes.key?(:'service_name')
+        self.service_name = attributes[:'service_name']
       else
-        self.app_version = nil
+        self.service_name = nil
+      end
+
+      if attributes.key?(:'healthy')
+        self.healthy = attributes[:'healthy']
+      else
+        self.healthy = nil
+      end
+
+      if attributes.key?(:'error')
+        self.error = attributes[:'error']
       end
     end
 
@@ -123,8 +96,12 @@ module DaytonaApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
-      if @app_version.nil?
-        invalid_properties.push('invalid value for "app_version", app_version cannot be nil.')
+      if @service_name.nil?
+        invalid_properties.push('invalid value for "service_name", service_name cannot be nil.')
+      end
+
+      if @healthy.nil?
+        invalid_properties.push('invalid value for "healthy", healthy cannot be nil.')
       end
 
       invalid_properties
@@ -134,18 +111,29 @@ module DaytonaApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
-      return false if @app_version.nil?
+      return false if @service_name.nil?
+      return false if @healthy.nil?
       true
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] app_version Value to be assigned
-    def app_version=(app_version)
-      if app_version.nil?
-        fail ArgumentError, 'app_version cannot be nil'
+    # @param [Object] service_name Value to be assigned
+    def service_name=(service_name)
+      if service_name.nil?
+        fail ArgumentError, 'service_name cannot be nil'
       end
 
-      @app_version = app_version
+      @service_name = service_name
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] healthy Value to be assigned
+    def healthy=(healthy)
+      if healthy.nil?
+        fail ArgumentError, 'healthy cannot be nil'
+      end
+
+      @healthy = healthy
     end
 
     # Checks equality by comparing each attribute.
@@ -153,12 +141,9 @@ module DaytonaApiClient
     def ==(o)
       return true if self.equal?(o)
       self.class == o.class &&
-          metrics == o.metrics &&
-          service_health == o.service_health &&
-          domain == o.domain &&
-          proxy_url == o.proxy_url &&
-          api_url == o.api_url &&
-          app_version == o.app_version
+          service_name == o.service_name &&
+          healthy == o.healthy &&
+          error == o.error
     end
 
     # @see the `==` method
@@ -170,7 +155,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [metrics, service_health, domain, proxy_url, api_url, app_version].hash
+      [service_name, healthy, error].hash
     end
 
     # Builds the object from hash

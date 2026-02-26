@@ -152,6 +152,7 @@ lib/daytona_api_client/models/runner.rb
 lib/daytona_api_client/models/runner_full.rb
 lib/daytona_api_client/models/runner_health_metrics.rb
 lib/daytona_api_client/models/runner_healthcheck.rb
+lib/daytona_api_client/models/runner_service_health.rb
 lib/daytona_api_client/models/runner_snapshot_dto.rb
 lib/daytona_api_client/models/runner_state.rb
 lib/daytona_api_client/models/sandbox.rb

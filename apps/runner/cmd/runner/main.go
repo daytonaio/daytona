@@ -217,7 +217,7 @@ func run() int {
 	})
 	metricsCollector.Start(ctx)
 
-	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
+	_, err = runner.GetInstance(&runner.RunnerInstanceConfig{
 		StatesCache:        statesCache,
 		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
 		Docker:             dockerClient,
@@ -226,6 +226,10 @@ func run() int {
 		NetRulesManager:    netRulesManager,
 		SSHGatewayService:  sshGatewayService,
 	})
+	if err != nil {
+		logger.Error("Failed to initialize runner instance", "error", err)
+		return 2
+	}
 
 	if cfg.ApiVersion == 2 {
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
@@ -237,6 +241,7 @@ func run() int {
 			ApiPort:    cfg.ApiPort,
 			ProxyPort:  cfg.ApiPort,
 			TlsEnabled: cfg.EnableTLS,
+			Docker:     dockerClient,
 		})
 		if err != nil {
 			logger.Error("Failed to create healthcheck service", "error", err)

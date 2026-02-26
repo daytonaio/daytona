@@ -375,6 +375,7 @@ export class RunnerService {
 
   async updateRunnerHealth(
     runnerId: string,
+    serviceHealth?: Array<{ serviceName: string; healthy: boolean; error?: string }>,
     domain?: string,
     apiUrl?: string,
     proxyUrl?: string,
@@ -426,7 +427,21 @@ export class RunnerService {
       updateData.appVersion = appVersion
     }
 
-    if (metrics) {
+    if (serviceHealth !== undefined) {
+      updateData.serviceHealth = serviceHealth
+    }
+
+    const unhealthyServices = serviceHealth?.filter((s) => !s.healthy) ?? []
+    if (unhealthyServices.length > 0) {
+      for (const s of unhealthyServices) {
+        this.logger.warn(
+          `Runner ${runnerId} service "${s.serviceName}" reported unhealthy` + (s.error ? `: ${s.error}` : ''),
+        )
+      }
+      updateData.state = RunnerState.UNRESPONSIVE
+    }
+
+    if (updateData.state === RunnerState.READY && metrics) {
       updateData.currentCpuLoadAverage = metrics.currentCpuLoadAverage || 0
       updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
       updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
@@ -556,6 +571,7 @@ export class RunnerService {
 
                   await this.updateRunnerHealth(
                     runner.id,
+                    [{ serviceName: 'runner', healthy: true }], // v0 runners don't report service health directly; reachability implies healthy
                     undefined,
                     undefined,
                     undefined,

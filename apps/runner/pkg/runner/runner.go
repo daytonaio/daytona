@@ -4,7 +4,7 @@
 package runner
 
 import (
-	"log"
+	"errors"
 
 	"github.com/daytonaio/runner/internal/metrics"
 	"github.com/daytonaio/runner/pkg/cache"
@@ -36,14 +36,14 @@ type Runner struct {
 
 var runner *Runner
 
-func GetInstance(config *RunnerInstanceConfig) *Runner {
+func GetInstance(config *RunnerInstanceConfig) (*Runner, error) {
 	if config != nil && runner != nil {
-		log.Fatal("Runner already initialized")
+		return nil, errors.New("runner instance already initialized")
 	}
 
 	if runner == nil {
 		if config == nil {
-			log.Fatal("Runner not initialized")
+			return nil, errors.New("runner instance not initialized and no config provided")
 		}
 
 		runner = &Runner{
@@ -57,5 +57,5 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 	}
 
-	return runner
+	return runner, nil
 }

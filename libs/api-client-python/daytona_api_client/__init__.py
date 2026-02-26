@@ -176,6 +176,7 @@ from daytona_api_client.models.runner import Runner
 from daytona_api_client.models.runner_full import RunnerFull
 from daytona_api_client.models.runner_health_metrics import RunnerHealthMetrics
 from daytona_api_client.models.runner_healthcheck import RunnerHealthcheck
+from daytona_api_client.models.runner_service_health import RunnerServiceHealth
 from daytona_api_client.models.runner_snapshot_dto import RunnerSnapshotDto
 from daytona_api_client.models.runner_state import RunnerState
 from daytona_api_client.models.sandbox import Sandbox
@@ -384,6 +385,7 @@ __all__ = [
     "RunnerFull",
     "RunnerHealthMetrics",
     "RunnerHealthcheck",
+    "RunnerServiceHealth",
     "RunnerSnapshotDto",
     "RunnerState",
     "Sandbox",
