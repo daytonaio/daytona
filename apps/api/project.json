@@ -93,18 +93,6 @@
         "passWithNoTests": true
       }
     },
-    "validate-migrations": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "bash scripts/validate-migration-paths.sh",
-        "forwardAllArgs": false
-      }
-    },
-    "lint": {
-      "dependsOn": [
-        "validate-migrations"
-      ]
-    },
     "check-version-env": {},
     "docker": {
       "options": {

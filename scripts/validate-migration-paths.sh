@@ -15,9 +15,12 @@ for f in "$@"; do
   rel="$(realpath --relative-to="$PWD" "$f")"
 
   case "$rel" in
-    apps/api/src/migrations/pre-deploy/*.ts) ;;
-    apps/api/src/migrations/post-deploy/*.ts) ;;
-    apps/api/src/migrations/*.ts)
+    apps/api/src/migrations/pre-deploy/*-migration.ts) ;;
+    apps/api/src/migrations/post-deploy/*-migration.ts) ;;
+    apps/api/src/migrations/*/*-migration.ts)
+      forbidden+=("$rel")
+      ;;
+    apps/api/src/migrations/*-migration.ts)
       timestamp=$(basename "$rel" | grep -oP '^\d+')
       if [ -n "$timestamp" ] && [ "$timestamp" -le "$LEGACY_CUTOFF" ]; then
         continue
