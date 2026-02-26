@@ -45,6 +45,7 @@ import { nanoid } from 'nanoid'
 })
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
+@Index('idx_sandbox_volumes_gin', { synchronize: false })
 export class Sandbox {
   @PrimaryColumn({ default: () => 'uuid_generate_v4()' })
   id: string
