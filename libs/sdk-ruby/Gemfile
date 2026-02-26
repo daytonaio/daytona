@@ -7,7 +7,7 @@ gemspec
 
 gem 'pry', '~> 0.15'
 gem 'rake', '~> 13.0'
-gem 'rubocop', '~> 1.21'
+gem 'rubocop', '1.84.2'
 gem 'rubocop-rake', '~> 0.7'
 gem 'solargraph', '~> 0.57'
 gem 'webmock', '~> 3.25'
