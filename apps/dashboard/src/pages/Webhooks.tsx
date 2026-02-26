@@ -7,16 +7,6 @@ import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/Pag
 import { CreateEndpointDialog } from '@/components/Webhooks/CreateEndpointDialog'
 import { WebhooksEndpointTable } from '@/components/Webhooks/WebhooksEndpointTable'
 import { WebhooksMessagesTable } from '@/components/Webhooks/WebhooksMessagesTable/WebhooksMessagesTable'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -32,8 +22,6 @@ import { useEndpoints } from 'svix-react'
 const Webhooks: React.FC = () => {
   const endpoints = useEndpoints()
   const [mutatingEndpointId, setMutatingEndpointId] = useState<string | null>(null)
-  const [endpointToDelete, setEndpointToDelete] = useState<EndpointOut | null>(null)
-  const [deleteDialogIsOpen, setDeleteDialogIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('endpoints')
 
   const updateMutation = useUpdateWebhookEndpointMutation()
@@ -45,7 +33,7 @@ const Webhooks: React.FC = () => {
       try {
         await updateMutation.mutateAsync({
           endpointId: endpoint.id,
-          update: { disabled: !endpoint.disabled, url: endpoint.url },
+          update: { disabled: !endpoint.disabled },
         })
         toast.success('Endpoint updated')
         endpoints.reload()
@@ -64,8 +52,6 @@ const Webhooks: React.FC = () => {
       try {
         await deleteMutation.mutateAsync({ endpointId: endpoint.id })
         toast.success('Endpoint deleted')
-        setEndpointToDelete(null)
-        setDeleteDialogIsOpen(false)
         endpoints.reload()
       } catch (error) {
         handleApiError(error, 'Failed to delete endpoint')
@@ -77,7 +63,6 @@ const Webhooks: React.FC = () => {
   )
 
   const handleSuccess = useCallback(() => {
-    toast.success('Endpoint created')
     endpoints.reload()
   }, [endpoints])
 
@@ -151,10 +136,7 @@ const Webhooks: React.FC = () => {
               loading={endpoints.loading}
               isLoadingEndpoint={isLoadingEndpoint}
               onDisable={handleDisable}
-              onDelete={(endpoint) => {
-                setEndpointToDelete(endpoint)
-                setDeleteDialogIsOpen(true)
-              }}
+              onDelete={handleDelete}
             />
           </TabsContent>
           <TabsContent value="messages">
@@ -162,36 +144,6 @@ const Webhooks: React.FC = () => {
           </TabsContent>
         </Tabs>
       </PageContent>
-
-      <AlertDialog
-        open={deleteDialogIsOpen}
-        onOpenChange={(isOpen) => {
-          setDeleteDialogIsOpen(isOpen)
-          if (!isOpen) {
-            setEndpointToDelete(null)
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Webhook Endpoint</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this endpoint? This action cannot be undone. All webhook history for this
-              endpoint will be permanently deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => endpointToDelete && handleDelete(endpointToDelete)}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </PageLayout>
   )
 }

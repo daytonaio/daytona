@@ -4,12 +4,12 @@
  */
 
 import { useMutation } from '@tanstack/react-query'
-import { EndpointUpdate } from 'svix'
+import { EndpointPatch } from 'svix'
 import { useSvix } from 'svix-react'
 
 interface UpdateWebhookEndpointVariables {
   endpointId: string
-  update: EndpointUpdate
+  update: EndpointPatch
 }
 
 export const useUpdateWebhookEndpointMutation = () => {
@@ -17,7 +17,7 @@ export const useUpdateWebhookEndpointMutation = () => {
 
   return useMutation({
     mutationFn: async ({ endpointId, update }: UpdateWebhookEndpointVariables) => {
-      return svix.endpoint.update(appId, endpointId, update)
+      return svix.endpoint.patch(appId, endpointId, update)
     },
   })
 }

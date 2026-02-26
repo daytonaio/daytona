@@ -22,8 +22,9 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { Mail } from 'lucide-react'
+import { Mail, RefreshCcw } from 'lucide-react'
 import { useCallback, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { useMessages } from 'svix-react'
 import { columns, eventTypeOptions } from './columns'
 import { MessageDetailsSheet } from './MessageDetailsSheet'
@@ -102,6 +103,15 @@ export function WebhooksMessagesTable() {
         {table.getColumn('eventType') && (
           <DataTableFacetedFilter column={table.getColumn('eventType')} title="Event Type" options={eventTypeOptions} />
         )}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => messages.reload()}
+          disabled={messages.loading}
+          className="ml-auto"
+        >
+          <RefreshCcw className="h-4 w-4" />
+        </Button>
       </div>
       <div className="rounded-md border">
         <Table style={{ tableLayout: 'fixed', width: '100%' }}>

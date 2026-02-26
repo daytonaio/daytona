@@ -83,7 +83,7 @@ const WebhookEndpointDetails: React.FC = () => {
     try {
       await updateMutation.mutateAsync({
         endpointId: endpoint.data.id,
-        update: { url: endpoint.data.url, disabled: !endpoint.data.disabled },
+        update: { disabled: !endpoint.data.disabled },
       })
       toast.success('Endpoint updated')
       endpoint.reload()
@@ -129,7 +129,6 @@ const WebhookEndpointDetails: React.FC = () => {
   }
 
   const handleEditSuccess = () => {
-    toast.success('Endpoint updated')
     endpoint.reload()
   }
 
@@ -172,9 +171,6 @@ const WebhookEndpointDetails: React.FC = () => {
                 </span>
               </TimestampTooltip>
               <div className="ml-auto flex items-center gap-2 shrink-0">
-                <Button variant="ghost" size="icon-sm" onClick={handleRetry} disabled={isRefreshing}>
-                  {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
-                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon-sm" disabled={isMutating}>
@@ -202,6 +198,9 @@ const WebhookEndpointDetails: React.FC = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <Button variant="ghost" size="icon-sm" onClick={handleRetry} disabled={isRefreshing}>
+                  {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+                </Button>
               </div>
             </>
           ) : null}
