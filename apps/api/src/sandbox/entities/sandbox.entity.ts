@@ -10,7 +10,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm'
@@ -46,7 +46,7 @@ import { nanoid } from 'nanoid'
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ default: () => 'uuid_generate_v4()' })
   id: string
 
   @Column({
