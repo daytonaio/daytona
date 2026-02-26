@@ -98,7 +98,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async create(
     @Body() createRunnerDto: CreateRunnerDto,
     @AuthContext() authContext: OrganizationAuthContext,
@@ -197,7 +197,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
     return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
@@ -230,7 +230,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async updateSchedulingStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('unschedulable') unschedulable: boolean,
@@ -298,7 +298,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: true }] })
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.runnerService.remove(id)
   }

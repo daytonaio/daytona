@@ -13,7 +13,7 @@ import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
@@ -55,6 +55,7 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
+import { useFeatureFlagEnabled } from './hooks/useFeatureFlagEnabled'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
