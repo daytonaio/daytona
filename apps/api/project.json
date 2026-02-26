@@ -40,9 +40,15 @@
         "{projectRoot}/src/**/*.ts",
         "!{projectRoot}/src/**/*.spec.ts",
         "{projectRoot}/tsconfig.app.json",
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
       ],
-      "outputs": ["{workspaceRoot}/dist/apps/api/openapi.json", "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/api/openapi.json",
+        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"
+      ],
       "options": {
         "commands": [
           "mkdir -p dist/apps/api",
@@ -59,7 +65,9 @@
     "serve": {
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "buildTarget": "api:build",
         "runBuildTargetDependencies": false,
@@ -85,6 +93,18 @@
         "passWithNoTests": true
       }
     },
+    "validate-migrations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash scripts/validate-migration-paths.sh",
+        "forwardAllArgs": false
+      }
+    },
+    "lint": {
+      "dependsOn": [
+        "validate-migrations"
+      ]
+    },
     "check-version-env": {},
     "docker": {
       "options": {
@@ -97,6 +117,12 @@
         }
       ]
     },
-    "push-manifest": {}
+    "push-manifest": {},
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash scripts/validate-migration-paths.sh $(find apps/api/src/migrations -name '*-migration.ts' -type f)"
+      }
+    }
   }
 }

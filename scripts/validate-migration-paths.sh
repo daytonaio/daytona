@@ -3,8 +3,11 @@
 # Copyright Daytona Platforms Inc.
 # SPDX-License-Identifier: AGPL-3.0
 
-# Fails if any staged migration file is placed directly under
+# Fails if any migration file is placed directly under
 # apps/api/src/migrations/ instead of pre-deploy/ or post-deploy/.
+# Legacy migrations (timestamp <= LEGACY_CUTOFF) are excluded.
+
+LEGACY_CUTOFF=1770880371265
 
 forbidden=()
 
@@ -14,7 +17,13 @@ for f in "$@"; do
   case "$rel" in
     apps/api/src/migrations/pre-deploy/*.ts) ;;
     apps/api/src/migrations/post-deploy/*.ts) ;;
-    apps/api/src/migrations/*.ts) forbidden+=("$rel") ;;
+    apps/api/src/migrations/*.ts)
+      timestamp=$(basename "$rel" | grep -oP '^\d+')
+      if [ -n "$timestamp" ] && [ "$timestamp" -le "$LEGACY_CUTOFF" ]; then
+        continue
+      fi
+      forbidden+=("$rel")
+      ;;
   esac
 done
 
