@@ -79,20 +79,23 @@ export const SandboxSpendingTab: React.FC<SandboxSpendingTabProps> = ({ sandboxI
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((period, index) => (
-                <TableRow key={index}>
-                  <TableCell className="text-sm">
-                    {period.startAt ? format(new Date(period.startAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {period.endAt ? format(new Date(period.endAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
-                  </TableCell>
-                  <TableCell className="text-right">{period.cpu ?? 0}</TableCell>
-                  <TableCell className="text-right">{period.ramGB ?? 0}</TableCell>
-                  <TableCell className="text-right">{period.diskGB ?? 0}</TableCell>
-                  <TableCell className="text-right">{formatPrice(period.price ?? 0)}</TableCell>
-                </TableRow>
-              ))}
+              {data.map((period) => {
+                const rowKey = `${period.startAt ?? 'unknown-start'}-${period.endAt ?? 'unknown-end'}`
+                return (
+                  <TableRow key={rowKey}>
+                    <TableCell className="text-sm">
+                      {period.startAt ? format(new Date(period.startAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {period.endAt ? format(new Date(period.endAt), 'yyyy-MM-dd HH:mm:ss') : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">{period.cpu ?? 0}</TableCell>
+                    <TableCell className="text-right">{period.ramGB ?? 0}</TableCell>
+                    <TableCell className="text-right">{period.diskGB ?? 0}</TableCell>
+                    <TableCell className="text-right">{formatPrice(period.price ?? 0)}</TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         )}
