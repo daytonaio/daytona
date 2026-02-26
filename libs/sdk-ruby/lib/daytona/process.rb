@@ -57,7 +57,7 @@ module Daytona
     def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
       if env && !env.empty?
         safe_env_exports = env.map do |key, value|
-          "export #{key}=\"$(echo '#{Base64.encode64(value)}' | base64 -d)\""
+          "export #{key}=\"$(echo '#{Base64.strict_encode64(value)}' | base64 -d)\""
         end.join('; ')
         command = "#{safe_env_exports}; #{command}"
       end

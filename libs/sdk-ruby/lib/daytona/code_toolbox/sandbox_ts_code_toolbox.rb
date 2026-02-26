@@ -10,7 +10,7 @@ module Daytona
     # @param params [Daytona::CodeRunParams, nil] Optional parameters for code execution
     # @return [String] The command to run the TypeScript code
     def get_run_command(code, params = nil)
-      encoded_code = Base64.encode64(code)
+      encoded_code = Base64.strict_encode64(code)
 
       argv = params&.argv&.join(' ') || ''
 

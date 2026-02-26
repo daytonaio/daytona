@@ -10,11 +10,11 @@ module Daytona
     # @param params [Daytona::CodeRunParams, nil] Optional parameters for code execution
     # @return [String] The command to run the Python code
     def get_run_command(code, params = nil)
-      encoded_code = Base64.encode64(code)
+      encoded_code = Base64.strict_encode64(code)
 
       # Override plt.show() method if matplotlib is imported
       if matplotlib_imported?(code)
-        encoded_code = Base64.encode64(
+        encoded_code = Base64.strict_encode64(
           Base64.decode64(PYTHON_CODE_WRAPPER).gsub('{encoded_code}', encoded_code)
         )
       end
