@@ -6,7 +6,7 @@
 export const SANDBOX_LOOKUP_CACHE_TTL_MS = 10_000
 export const SANDBOX_BUILD_INFO_CACHE_TTL_MS = 60_000
 export const SANDBOX_ORG_ID_CACHE_TTL_MS = 60_000
-export const TOOLBOX_PROXY_URL_CACHE_TTL_S = 300 // 5 minutes
+export const TOOLBOX_PROXY_URL_CACHE_TTL_S = 30 * 60 // 30 minutes
 
 type SandboxLookupCacheKeyArgs = {
   organizationId?: string | null
