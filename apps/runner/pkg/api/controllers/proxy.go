@@ -49,7 +49,11 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return nil, nil, err
+	}
 
 	sandboxId := ctx.Param("sandboxId")
 	if sandboxId == "" {
@@ -61,7 +65,7 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	// networking states where the container exists but has no IP yet.
 	var containerIP string
 	var containerNotFound bool
-	err := utils.RetryWithExponentialBackoff(ctx.Request.Context(), "resolve container IP", 3, 100*time.Millisecond, 500*time.Millisecond, func() error {
+	err = utils.RetryWithExponentialBackoff(ctx.Request.Context(), "resolve container IP", 3, 100*time.Millisecond, 500*time.Millisecond, func() error {
 		container, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
 		if err != nil {
 			containerNotFound = true

@@ -13,6 +13,7 @@ import { DockerRegistry } from '../../docker-registry/entities/docker-registry.e
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { RunnerServiceInfo } from '../common/runner-service-info'
 
 export interface RunnerSandboxInfo {
   state: SandboxState
@@ -46,6 +47,7 @@ export interface RunnerMetrics {
 }
 
 export interface RunnerInfo {
+  serviceHealth?: RunnerServiceInfo[]
   metrics?: RunnerMetrics
   appVersion?: string
 }
