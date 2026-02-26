@@ -80,13 +80,9 @@ func (p *Proxy) getSnapshot(ctx context.Context, snapshotId string) (*apiclient.
 }
 
 func (p *Proxy) getRunnerInfo(ctx context.Context, runnerId string) (*RunnerInfo, error) {
-	has, err := p.runnerCache.Has(ctx, runnerId)
-	if err != nil {
-		return nil, err
-	}
-
-	if has {
-		return p.runnerCache.Get(ctx, runnerId)
+	runnerInfo, err := p.runnerCache.Get(ctx, runnerId)
+	if err == nil {
+		return runnerInfo, nil
 	}
 
 	runner, _, err := p.apiclient.RunnersAPI.GetRunnerFullById(ctx, runnerId).Execute()
