@@ -71,8 +71,6 @@ export function useSandboxUsagePeriods(sandboxId: string | undefined, params: An
       const response = await api.analyticsUsageApi.organizationOrganizationIdSandboxSandboxIdUsageGet(
         selectedOrganization.id,
         sandboxId,
-        // '1866bcb7-4735-4388-8653-2259e8e4ee57',
-        // 'cdd329c8-ce84-4831-aff7-c4eef1c9301a',
         params.from.toISOString(),
         params.to.toISOString(),
       )
