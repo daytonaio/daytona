@@ -21,9 +21,7 @@ export class SshAccess {
   @Generated('uuid')
   id: string
 
-  @Column({
-    type: 'uuid',
-  })
+  @Column()
   sandboxId: string
 
   @Column({
