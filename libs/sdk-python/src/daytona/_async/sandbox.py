@@ -533,6 +533,8 @@ class AsyncSandbox(SandboxDto):
         Returns:
             SignedPortPreviewUrl: The response object for the signed preview url.
         """
+        if expires_in_seconds is None:
+            expires_in_seconds = 300
         return await self._sandbox_api.get_signed_port_preview_url(self.id, port, expires_in_seconds=expires_in_seconds)
 
     @intercept_errors(message_prefix="Failed to expire signed preview url: ")
