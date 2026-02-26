@@ -219,6 +219,12 @@ export interface Sandbox {
      * @memberof Sandbox
      */
     'runnerId'?: string;
+    /**
+     * The toolbox proxy URL for the sandbox
+     * @type {string}
+     * @memberof Sandbox
+     */
+    'toolboxProxyUrl': string;
 }
 
 export const SandboxBackupStateEnum = {

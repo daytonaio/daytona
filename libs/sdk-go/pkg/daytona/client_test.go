@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-	"sync"
+
 	"testing"
 	"time"
 
@@ -803,185 +803,16 @@ func TestServicesInitialization(t *testing.T) {
 	assert.NotNil(t, client.Snapshot)
 }
 
-// TestGetProxyToolboxURL tests the getProxyToolboxURL method and its caching behavior
-func TestGetProxyToolboxURL(t *testing.T) {
-	t.Run("fetches and caches proxy URL by region", func(t *testing.T) {
-		callCount := 0
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			callCount++
-			// Return toolbox proxy URL response
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"url": "https://toolbox-proxy.example.com"}`)
-		}))
-		defer server.Close()
-
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
-
-		client, err := NewClient()
-		require.NoError(t, err)
-
-		ctx := context.Background()
-
-		// First call should fetch from API
-		url1, err := client.getProxyToolboxURL(ctx, "sandbox-1", "us-east-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy.example.com", url1)
-		assert.Equal(t, 1, callCount)
-
-		// Second call with same region should use cache
-		url2, err := client.getProxyToolboxURL(ctx, "sandbox-2", "us-east-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy.example.com", url2)
-		assert.Equal(t, 1, callCount) // No additional API call
-	})
-
-	t.Run("caches separately for different regions", func(t *testing.T) {
-		callCount := 0
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			callCount++
-			// Return different URLs based on sandbox ID (which determines region in reality)
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"url": "https://toolbox-proxy-%d.example.com"}`, callCount)
-		}))
-		defer server.Close()
-
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
-
-		client, err := NewClient()
-		require.NoError(t, err)
-
-		ctx := context.Background()
-
-		// Call for first region
-		url1, err := client.getProxyToolboxURL(ctx, "sandbox-1", "us-east-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy-1.example.com", url1)
-		assert.Equal(t, 1, callCount)
-
-		// Call for second region - should make new API call
-		url2, err := client.getProxyToolboxURL(ctx, "sandbox-2", "eu-west-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy-2.example.com", url2)
-		assert.Equal(t, 2, callCount)
-
-		// Call for first region again - should use cache
-		url3, err := client.getProxyToolboxURL(ctx, "sandbox-3", "us-east-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy-1.example.com", url3)
-		assert.Equal(t, 2, callCount) // No additional API call
-
-		// Call for second region again - should use cache
-		url4, err := client.getProxyToolboxURL(ctx, "sandbox-4", "eu-west-1")
-		require.NoError(t, err)
-		assert.Equal(t, "https://toolbox-proxy-2.example.com", url4)
-		assert.Equal(t, 2, callCount) // No additional API call
-	})
-
-	t.Run("handles API errors", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusInternalServerError)
-			fmt.Fprintf(w, `{"error": "internal server error"}`)
-		}))
-		defer server.Close()
-
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
-
-		client, err := NewClient()
-		require.NoError(t, err)
-
-		ctx := context.Background()
-
-		_, err = client.getProxyToolboxURL(ctx, "sandbox-1", "us-east-1")
-		require.Error(t, err)
-	})
-}
-
-// TestToolboxProxyCacheConcurrency tests thread safety of the toolbox proxy cache
-func TestToolboxProxyCacheConcurrency(t *testing.T) {
-	callCount := 0
-	var mu sync.Mutex
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		mu.Lock()
-		callCount++
-		mu.Unlock()
-
-		// Simulate some latency
-		time.Sleep(10 * time.Millisecond)
-
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"url": "https://toolbox-proxy.example.com"}`)
-	}))
-	defer server.Close()
-
-	os.Clearenv()
-	os.Setenv("DAYTONA_API_KEY", "test-api-key")
-	os.Setenv("DAYTONA_API_URL", server.URL)
-
-	client, err := NewClient()
-	require.NoError(t, err)
-
-	ctx := context.Background()
-
-	// Launch multiple goroutines requesting the same region
-	const numGoroutines = 10
-	var wg sync.WaitGroup
-	wg.Add(numGoroutines)
-
-	results := make([]string, numGoroutines)
-	errs := make([]error, numGoroutines)
-
-	for i := 0; i < numGoroutines; i++ {
-		go func(idx int) {
-			defer wg.Done()
-			url, err := client.getProxyToolboxURL(ctx, fmt.Sprintf("sandbox-%d", idx), "us-east-1")
-			results[idx] = url
-			errs[idx] = err
-		}(i)
-	}
-
-	wg.Wait()
-
-	// All results should be the same URL
-	for i := 0; i < numGoroutines; i++ {
-		require.NoError(t, errs[i])
-		assert.Equal(t, "https://toolbox-proxy.example.com", results[i])
-	}
-
-	// Note: Due to race conditions, we might have more than 1 API call,
-	// but after the cache is populated, subsequent calls should use it.
-	// The important thing is no panics and all results are correct.
-}
-
 // TestCreateToolboxClient tests the createToolboxClient method
 func TestCreateToolboxClient(t *testing.T) {
 	t.Run("creates toolbox client with correct configuration", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"url": "https://toolbox-proxy.example.com"}`)
-		}))
-		defer server.Close()
-
 		os.Clearenv()
 		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-		os.Setenv("DAYTONA_API_URL", server.URL)
 
 		client, err := NewClient()
 		require.NoError(t, err)
 
-		ctx := context.Background()
-
-		toolboxClient, err := client.createToolboxClient(ctx, "test-sandbox-id", "us-east-1")
+		toolboxClient, err := client.createToolboxClient("https://toolbox-proxy.example.com", "test-sandbox-id")
 		require.NoError(t, err)
 		require.NotNil(t, toolboxClient)
 
@@ -1003,24 +834,14 @@ func TestCreateToolboxClient(t *testing.T) {
 	})
 
 	t.Run("creates toolbox client with JWT auth", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"url": "https://toolbox-proxy.example.com"}`)
-		}))
-		defer server.Close()
-
 		os.Clearenv()
 		os.Setenv("DAYTONA_JWT_TOKEN", "test-jwt-token")
 		os.Setenv("DAYTONA_ORGANIZATION_ID", "test-org-id")
-		os.Setenv("DAYTONA_API_URL", server.URL)
 
 		client, err := NewClient()
 		require.NoError(t, err)
 
-		ctx := context.Background()
-
-		toolboxClient, err := client.createToolboxClient(ctx, "test-sandbox-id", "us-east-1")
+		toolboxClient, err := client.createToolboxClient("https://toolbox-proxy.example.com", "test-sandbox-id")
 		require.NoError(t, err)
 		require.NotNil(t, toolboxClient)
 

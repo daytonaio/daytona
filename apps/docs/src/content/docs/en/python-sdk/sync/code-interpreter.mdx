@@ -22,8 +22,7 @@ or execute the appropriate command directly in the sandbox terminal.
 #### CodeInterpreter.\_\_init\_\_
 
 ```python
-def __init__(api_client: InterpreterApi, ensure_toolbox_url: Callable[[],
-                                                                      None])
+def __init__(api_client: InterpreterApi)
 ```
 
 Initialize a new CodeInterpreter instance.
@@ -31,7 +30,6 @@ Initialize a new CodeInterpreter instance.
 **Arguments**:
 
 - `api_client` - API client for interpreter operations.
-- `ensure_toolbox_url` - Ensures the toolbox API URL is initialized.
 
 #### CodeInterpreter.run\_code
 

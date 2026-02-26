@@ -10410,6 +10410,7 @@ components:
       example:
         memory: 4
         buildInfo: ""
+        toolboxProxyUrl: https://proxy.app.daytona.io/toolbox
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -10594,6 +10595,10 @@ components:
           description: The runner ID of the sandbox
           example: runner123
           type: string
+        toolboxProxyUrl:
+          description: The toolbox proxy URL for the sandbox
+          example: https://proxy.app.daytona.io/toolbox
+          type: string
       required:
       - cpu
       - disk
@@ -10607,6 +10612,7 @@ components:
       - organizationId
       - public
       - target
+      - toolboxProxyUrl
       - user
       type: object
     PaginatedSandboxes:
@@ -10617,6 +10623,7 @@ components:
         items:
         - memory: 4
           buildInfo: ""
+          toolboxProxyUrl: https://proxy.app.daytona.io/toolbox
           autoStopInterval: 30
           organizationId: organization123
           createdAt: 2024-10-01T12:00:00Z
@@ -10656,6 +10663,7 @@ components:
           snapshot: daytonaio/sandbox:latest
         - memory: 4
           buildInfo: ""
+          toolboxProxyUrl: https://proxy.app.daytona.io/toolbox
           autoStopInterval: 30
           organizationId: organization123
           createdAt: 2024-10-01T12:00:00Z
@@ -13291,6 +13299,7 @@ components:
       example:
         memory: 4
         buildInfo: ""
+        toolboxProxyUrl: https://proxy.app.daytona.io/toolbox
         autoStopInterval: 30
         organizationId: organization123
         createdAt: 2024-10-01T12:00:00Z
@@ -13479,6 +13488,10 @@ components:
           description: The runner ID of the sandbox
           example: runner123
           type: string
+        toolboxProxyUrl:
+          description: The toolbox proxy URL for the sandbox
+          example: https://proxy.app.daytona.io/toolbox
+          type: string
         image:
           description: The image used for the workspace
           example: daytonaio/workspace:latest
@@ -13514,6 +13527,7 @@ components:
       - organizationId
       - public
       - target
+      - toolboxProxyUrl
       - user
       type: object
     CreateWorkspace:

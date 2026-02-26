@@ -6,7 +6,6 @@ from __future__ import annotations
 import base64
 import json
 import re
-from typing import Callable
 
 import websockets
 from daytona_toolbox_api_client import (
@@ -50,19 +49,15 @@ class Process:
         self,
         code_toolbox: SandboxCodeToolbox,
         api_client: ProcessApi,
-        ensure_toolbox_url: Callable[[], None],
     ):
         """Initialize a new Process instance.
 
         Args:
             code_toolbox (SandboxCodeToolbox): Language-specific code execution toolbox.
             api_client (ProcessApi): API client for process operations.
-            ensure_toolbox_url (Callable[[], None]): Ensures the toolbox API URL is initialized.
-            Must be called before invoking any private methods on the API client.
         """
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
         self._api_client: ProcessApi = api_client
-        self._ensure_toolbox_url: Callable[[], None] = ensure_toolbox_url
 
     @staticmethod
     def _parse_output(lines: list[str]) -> ExecutionArtifacts:
@@ -433,7 +428,6 @@ class Process:
             ```
         """
 
-        self._ensure_toolbox_url()
         _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(
             session_id=session_id,
             command_id=command_id,
@@ -564,7 +558,6 @@ class Process:
         Raises:
             DaytonaError: If the PTY session doesn't exist or connection fails.
         """
-        self._ensure_toolbox_url()
         _, url, headers, *_ = self._api_client._connect_pty_session_serialize(
             session_id=session_id,
             _request_auth=None,

@@ -41,8 +41,7 @@ new Process(
    clientConfig: Configuration, 
    codeToolbox: SandboxCodeToolbox, 
    apiClient: ProcessApi, 
-   getPreviewToken: () => Promise<string>, 
-   ensureToolboxUrl: () => Promise<void>): Process
+   getPreviewToken: () => Promise<string>): Process
 ```
 
 **Parameters**:
@@ -51,7 +50,6 @@ new Process(
 - `codeToolbox` _SandboxCodeToolbox_
 - `apiClient` _ProcessApi_
 - `getPreviewToken` _\(\) =\> Promise\<string\>_
-- `ensureToolboxUrl` _\(\) =\> Promise\<void\>_
 
 
 **Returns**:

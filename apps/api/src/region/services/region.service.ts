@@ -32,6 +32,9 @@ import {
 } from '../events/region-snapshot-manager-creds.event'
 import { UpdateRegionDto } from '../dto/update-region.dto'
 import { Snapshot } from '../../sandbox/entities/snapshot.entity'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { toolboxProxyUrlCacheKey } from '../../sandbox/utils/sandbox-lookup-cache.util'
 
 @Injectable()
 export class RegionService {
@@ -46,6 +49,7 @@ export class RegionService {
     private readonly eventEmitter: EventEmitter2,
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   /**
@@ -262,6 +266,10 @@ export class RegionService {
       await this.eventEmitter.emitAsync(RegionEvents.DELETED, new RegionDeletedEvent(em, region))
       await em.remove(region)
     })
+
+    this.redis.del(toolboxProxyUrlCacheKey(id)).catch((err) => {
+      this.logger.warn(`Failed to invalidate toolbox proxy URL cache for region ${id}: ${err.message}`)
+    })
   }
 
   async update(regionId: string, updateRegion: UpdateRegionDto): Promise<void> {
@@ -324,6 +332,12 @@ export class RegionService {
 
       await em.save(region)
     })
+
+    if (updateRegion.proxyUrl !== undefined) {
+      this.redis.del(toolboxProxyUrlCacheKey(regionId)).catch((err) => {
+        this.logger.warn(`Failed to invalidate toolbox proxy URL cache for region ${regionId}: ${err.message}`)
+      })
+    }
   }
 
   /**

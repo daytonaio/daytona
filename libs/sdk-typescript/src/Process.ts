@@ -65,7 +65,6 @@ export class Process {
     private readonly codeToolbox: SandboxCodeToolbox,
     private readonly apiClient: ProcessApi,
     private readonly getPreviewToken: () => Promise<string>,
-    private readonly ensureToolboxUrl: () => Promise<void>,
   ) {}
 
   /**
@@ -386,7 +385,6 @@ export class Process {
       }
     }
 
-    await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
 
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
@@ -533,8 +531,6 @@ export class Process {
    */
   @WithInstrumentation()
   public async connectPty(sessionId: string, options?: PtyConnectOptions): Promise<PtyHandle> {
-    // Get preview link for WebSocket connection
-    await this.ensureToolboxUrl()
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/pty/${sessionId}/connect`
 
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)

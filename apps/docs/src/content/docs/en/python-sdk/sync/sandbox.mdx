@@ -51,8 +51,7 @@ Represents a Daytona Sandbox.
 
 ```python
 def __init__(sandbox_dto: SandboxDto, toolbox_api: ApiClient,
-             sandbox_api: SandboxApi, code_toolbox: SandboxCodeToolbox,
-             get_toolbox_base_url: Callable[[str, str], str])
+             sandbox_api: SandboxApi, code_toolbox: SandboxCodeToolbox)
 ```
 
 Initialize a new Sandbox instance.
@@ -63,7 +62,6 @@ Initialize a new Sandbox instance.
 - `toolbox_api` _ApiClient_ - API client for toolbox operations.
 - `sandbox_api` _SandboxApi_ - API client for Sandbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
-- `get_toolbox_base_url` _Callable[[], str]_ - Function to get the toolbox base URL.
 
 #### Sandbox.refresh\_data
 

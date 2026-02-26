@@ -7,7 +7,6 @@ import { Injectable } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { NotificationGateway } from '../gateways/notification.gateway'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
-import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
 import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
@@ -27,6 +26,7 @@ import { RunnerCreatedEvent } from '../../sandbox/events/runner-created.event'
 import { RunnerStateUpdatedEvent } from '../../sandbox/events/runner-state-updated.event'
 import { RunnerUnschedulableUpdatedEvent } from '../../sandbox/events/runner-unschedulable-updated.event'
 import { RegionService } from '../../region/services/region.service'
+import { SandboxService } from '../../sandbox/services/sandbox.service'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
@@ -36,25 +36,26 @@ export class NotificationService {
   constructor(
     private readonly notificationGateway: NotificationGateway,
     private readonly regionService: RegionService,
+    private readonly sandboxService: SandboxService,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
   @OnEvent(SandboxEvents.CREATED)
   async handleSandboxCreated(event: SandboxCreatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
+    const dto = await this.sandboxService.toSandboxDto(event.sandbox)
     this.notificationGateway.emitSandboxCreated(dto)
   }
 
   @OnEvent(SandboxEvents.STATE_UPDATED)
   async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
+    const dto = await this.sandboxService.toSandboxDto(event.sandbox)
     this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
     this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
   }
 
   @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
   async handleSandboxDesiredStateUpdated(event: SandboxDesiredStateUpdatedEvent) {
-    const dto = SandboxDto.fromSandbox(event.sandbox)
+    const dto = await this.sandboxService.toSandboxDto(event.sandbox)
     this.notificationGateway.emitSandboxDesiredStateUpdated(dto, event.oldDesiredState, event.newDesiredState)
     this.redis.publish(SANDBOX_EVENT_CHANNEL, JSON.stringify(event))
   }

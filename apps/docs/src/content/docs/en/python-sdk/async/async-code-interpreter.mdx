@@ -22,8 +22,7 @@ or execute the appropriate command directly in the sandbox terminal.
 #### AsyncCodeInterpreter.\_\_init\_\_
 
 ```python
-def __init__(api_client: InterpreterApi,
-             ensure_toolbox_url: Callable[[], Awaitable[None]])
+def __init__(api_client: InterpreterApi)
 ```
 
 Initialize a new AsyncCodeInterpreter instance.
@@ -31,7 +30,6 @@ Initialize a new AsyncCodeInterpreter instance.
 **Arguments**:
 
 - `api_client` - API client for interpreter operations.
-- `ensure_toolbox_url` - Ensures the toolbox API URL is initialized.
 
 #### AsyncCodeInterpreter.run\_code
 

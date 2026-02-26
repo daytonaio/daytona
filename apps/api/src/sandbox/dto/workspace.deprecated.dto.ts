@@ -71,7 +71,8 @@ export class WorkspaceDto extends SandboxDto {
   }
 
   static fromSandbox(sandbox: Sandbox): WorkspaceDto {
-    const dto = super.fromSandbox(sandbox)
+    // Send empty string for toolboxProxyUrl as it is not needed in deprecated DTO
+    const dto = super.fromSandbox(sandbox, '')
     return this.fromSandboxDto(dto)
   }
 

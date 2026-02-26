@@ -38,8 +38,6 @@ import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
 
-const TOOLBOX_URL_PLACEHOLDER = 'dtn-placeholder'
-
 /**
  * Interface defining methods that a code toolbox must implement
  * @interface
@@ -121,6 +119,7 @@ export class Sandbox implements SandboxDto {
   public updatedAt?: string
   public networkBlockAll!: boolean
   public networkAllowList?: string
+  public toolboxProxyUrl: string
 
   private infoApi: InfoApi
 
@@ -138,42 +137,32 @@ export class Sandbox implements SandboxDto {
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
-    private readonly getToolboxBaseUrl: (sandboxId: string, regionId: string) => Promise<string>,
   ) {
     this.processSandboxDto(sandboxDto)
 
-    // Lazy load the base URL for the toolbox
-    this.axiosInstance.defaults.baseURL = TOOLBOX_URL_PLACEHOLDER
-    this.axiosInstance.interceptors.request.use(async (config) => {
-      if (this.axiosInstance.defaults.baseURL === TOOLBOX_URL_PLACEHOLDER) {
-        await this.ensureToolboxUrl()
-
-        config.baseURL = this.axiosInstance.defaults.baseURL
-      }
-      return config
-    })
+    // Set the toolbox base URL
+    let baseUrl = this.toolboxProxyUrl
+    if (!baseUrl.endsWith('/')) {
+      baseUrl += '/'
+    }
+    this.axiosInstance.defaults.baseURL = baseUrl + this.id
+    this.clientConfig.basePath = this.axiosInstance.defaults.baseURL
 
     // Initialize Services
     const getPreviewToken = async () => (await this.getPreviewLink(1)).token
 
-    this.fs = new FileSystem(
-      this.clientConfig,
-      new FileSystemApi(this.clientConfig, '', this.axiosInstance),
-      this.ensureToolboxUrl.bind(this),
-    )
+    this.fs = new FileSystem(this.clientConfig, new FileSystemApi(this.clientConfig, '', this.axiosInstance))
     this.git = new Git(new GitApi(this.clientConfig, '', this.axiosInstance))
     this.process = new Process(
       this.clientConfig,
       this.codeToolbox,
       new ProcessApi(this.clientConfig, '', this.axiosInstance),
       getPreviewToken,
-      this.ensureToolboxUrl.bind(this),
     )
     this.codeInterpreter = new CodeInterpreter(
       this.clientConfig,
       new InterpreterApi(this.clientConfig, '', this.axiosInstance),
       getPreviewToken,
-      this.ensureToolboxUrl.bind(this),
     )
     this.computerUse = new ComputerUse(new ComputerUseApi(this.clientConfig, '', this.axiosInstance))
     this.infoApi = new InfoApi(this.clientConfig, '', this.axiosInstance)
@@ -747,6 +736,7 @@ export class Sandbox implements SandboxDto {
     this.updatedAt = sandboxDto.updatedAt
     this.networkBlockAll = sandboxDto.networkBlockAll
     this.networkAllowList = sandboxDto.networkAllowList
+    this.toolboxProxyUrl = sandboxDto.toolboxProxyUrl
   }
 
   /**
@@ -763,18 +753,6 @@ export class Sandbox implements SandboxDto {
         this.state = SandboxState.DESTROYED
       }
     }
-  }
-
-  private async ensureToolboxUrl(): Promise<void> {
-    if (this.axiosInstance.defaults.baseURL !== TOOLBOX_URL_PLACEHOLDER) {
-      return
-    }
-    this.axiosInstance.defaults.baseURL = await this.getToolboxBaseUrl(this.id, this.target)
-    if (!this.axiosInstance.defaults.baseURL.endsWith('/')) {
-      this.axiosInstance.defaults.baseURL += '/'
-    }
-    this.axiosInstance.defaults.baseURL += this.id
-    this.clientConfig.basePath = this.axiosInstance.defaults.baseURL
   }
 }
 

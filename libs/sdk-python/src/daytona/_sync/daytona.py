@@ -6,10 +6,8 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import threading
 import time
 import warnings
-from concurrent.futures import Future
 from copy import deepcopy
 from importlib.metadata import version
 from typing import Callable, cast, overload
@@ -219,9 +217,6 @@ class Daytona:
         self._sandbox_api: SandboxApi = SandboxApi(self._api_client)
         self._object_storage_api: ObjectStorageApi = ObjectStorageApi(self._api_client)
         self._config_api: ConfigApi = ConfigApi(self._api_client)
-        # Toolbox proxy cache per region
-        self._proxy_toolbox_url_futures: dict[str, Future[str]] = {}
-        self._proxy_toolbox_url_lock: threading.Lock = threading.Lock()
         self._toolbox_api_client: ToolboxApiClient = self._clone_api_client_to_toolbox_api_client()
 
         # Initialize services
@@ -478,7 +473,6 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._get_proxy_toolbox_url,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -573,7 +567,6 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
-            self._get_proxy_toolbox_url,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -641,7 +634,6 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
-                    self._get_proxy_toolbox_url,
                 )
                 for sandbox in response.items
             ],
@@ -711,30 +703,3 @@ class Daytona:
         toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 
         return toolbox_api_client
-
-    def _get_proxy_toolbox_url(self, sandbox_id: str, region_id: str) -> str:
-        if self._proxy_toolbox_url_futures.get(region_id) is not None:
-            return self._proxy_toolbox_url_futures[region_id].result()
-
-        future: Future[str] | None = None
-
-        with self._proxy_toolbox_url_lock:
-            # Double-check: another thread might have created the future
-            # Create local variable "future" so that the thread knows if it created the future
-            # and should do the API call and set the result
-            if self._proxy_toolbox_url_futures.get(region_id) is None:
-                future = Future()
-                self._proxy_toolbox_url_futures[region_id] = future
-
-        # Make API call if we created the future
-        # This allows other threads to wait on the future instead of blocking on the lock
-        if future is not None:
-            try:
-                response = self._sandbox_api.get_toolbox_proxy_url(sandbox_id)
-                future.set_result(response.url)
-            except Exception as e:
-                future.set_exception(e)
-                raise
-
-        # Allows other threads to wait on the same future in parallel
-        return self._proxy_toolbox_url_futures[region_id].result()

@@ -72,7 +72,6 @@ import (
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	toolbox "github.com/daytonaio/daytona/libs/toolbox-api-client-go"
-	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
 const (
@@ -111,10 +110,6 @@ type Client struct {
 
 	// Otel holds OpenTelemetry state; nil when OTel is disabled.
 	Otel *otelState
-
-	// toolboxProxyCache caches toolbox proxy URLs per region.
-	// Key: region string, Value: proxy URL string
-	toolboxProxyCache cmap.ConcurrentMap[string, string]
 
 	// apiClient is the underlying OpenAPI-generated client
 	apiClient *apiclient.APIClient
@@ -261,7 +256,6 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	// Initialize services
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
-	client.toolboxProxyCache = cmap.New[string]()
 
 	return client, nil
 }
@@ -308,15 +302,9 @@ func (c *Client) handleAPIError(err error, httpResp *http.Response) error {
 }
 
 // createToolboxClient creates a configured toolbox client for a specific sandbox.
-// The region parameter is used as the key for caching the toolbox proxy URL.
-func (c *Client) createToolboxClient(ctx context.Context, sandboxID string, region string) (*toolbox.APIClient, error) {
-	proxyURL, err := c.getProxyToolboxURL(ctx, sandboxID, region)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Client) createToolboxClient(proxyURL string, sandboxID string) (*toolbox.APIClient, error) {
 	// Construct full toolbox URL for this sandbox
-	toolboxURL := fmt.Sprintf("%s/%s", proxyURL, sandboxID)
+	toolboxURL := fmt.Sprintf("%s/%s", strings.TrimRight(proxyURL, "/"), sandboxID)
 
 	cfg := toolbox.NewConfiguration()
 	cfg.Host = common.ExtractHost(toolboxURL)
@@ -542,7 +530,7 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 		return nil, errors.NewDaytonaError("Sandbox failed to start", 0, nil)
 	}
 
-	toolboxClient, err := c.createToolboxClient(ctx, sandboxResp.GetId(), sandboxResp.GetTarget())
+	toolboxClient, err := c.createToolboxClient(sandboxResp.GetToolboxProxyUrl(), sandboxResp.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -637,7 +625,7 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 		return nil, errors.ConvertAPIError(err, httpResp)
 	}
 
-	toolboxClient, err := c.createToolboxClient(ctx, sandboxResp.GetId(), sandboxResp.GetTarget())
+	toolboxClient, err := c.createToolboxClient(sandboxResp.GetToolboxProxyUrl(), sandboxResp.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -775,7 +763,7 @@ func (c *Client) doList(ctx context.Context, labels map[string]string, page *int
 	items := result.GetItems()
 	sandboxes := make([]*Sandbox, len(items))
 	for i := range items {
-		toolboxClient, err := c.createToolboxClient(ctx, items[i].GetId(), items[i].GetTarget())
+		toolboxClient, err := c.createToolboxClient(items[i].GetToolboxProxyUrl(), items[i].GetId())
 		if err != nil {
 			return nil, err
 		}
@@ -884,29 +872,6 @@ func (c *Client) streamBuildLogsToChannel(ctx context.Context, sandboxID string,
 			}
 		}
 	}
-}
-
-// getProxyToolboxURL gets the proxy toolbox URL for a specific region.
-// The URL is cached per region to avoid redundant API calls.
-func (c *Client) getProxyToolboxURL(ctx context.Context, sandboxID string, regionID string) (string, error) {
-	// Check cache first
-	if cachedURL, exists := c.toolboxProxyCache.Get(regionID); exists {
-		return cachedURL, nil
-	}
-
-	// Fetch from API using the sandbox-specific endpoint
-	authCtx := c.getAuthContext(ctx)
-	result, httpResp, err := c.apiClient.SandboxAPI.GetToolboxProxyUrl(authCtx, sandboxID).Execute()
-	if err != nil {
-		return "", c.handleAPIError(err, httpResp)
-	}
-
-	proxyURL := result.GetUrl()
-
-	// Cache the result by region
-	c.toolboxProxyCache.Set(regionID, proxyURL)
-
-	return proxyURL, nil
 }
 
 // getPushAccessCredentials gets object storage push access credentials from the API

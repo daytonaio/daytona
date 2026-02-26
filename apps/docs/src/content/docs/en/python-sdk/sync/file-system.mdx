@@ -17,8 +17,7 @@ be performed within a Daytona Sandbox.
 #### FileSystem.\_\_init\_\_
 
 ```python
-def __init__(api_client: FileSystemApi, ensure_toolbox_url: Callable[[],
-                                                                     None])
+def __init__(api_client: FileSystemApi)
 ```
 
 Initializes a new FileSystem instance.
@@ -26,8 +25,6 @@ Initializes a new FileSystem instance.
 **Arguments**:
 
 - `api_client` _FileSystemApi_ - API client for Sandbox file system operations.
-- `ensure_toolbox_url` _Callable[[], None]_ - Ensures the toolbox API URL is initialized.
-  Must be called before invoking any private methods on the API client.
 
 #### FileSystem.create\_folder
 
