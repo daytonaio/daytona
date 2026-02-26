@@ -10,8 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { RefreshCw, DollarSign } from 'lucide-react'
-import { format } from 'date-fns'
-import { subDays } from 'date-fns'
+import { format, subHours } from 'date-fns'
+
+function formatPrice(price: number): string {
+  if (price >= 0.01) return `$${price.toFixed(2)}`
+  if (price === 0) return '$0.00'
+  return `$${parseFloat(price.toPrecision(2))}`
+}
 
 interface SandboxSpendingTabProps {
   sandboxId: string
@@ -20,7 +25,7 @@ interface SandboxSpendingTabProps {
 export const SandboxSpendingTab: React.FC<SandboxSpendingTabProps> = ({ sandboxId }) => {
   const [timeRange, setTimeRange] = useState(() => {
     const now = new Date()
-    return { from: subDays(now, 30), to: now }
+    return { from: subHours(now, 24), to: now }
   })
 
   const queryParams: AnalyticsUsageParams = {
@@ -39,7 +44,12 @@ export const SandboxSpendingTab: React.FC<SandboxSpendingTabProps> = ({ sandboxI
   return (
     <div className="flex flex-col h-full gap-4 p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <TimeRangeSelector onChange={handleTimeRangeChange} defaultRange={defaultRange} className="w-auto" />
+        <TimeRangeSelector
+          onChange={handleTimeRangeChange}
+          defaultRange={defaultRange}
+          defaultSelectedQuickRange="Last 24 hours"
+          className="w-auto"
+        />
 
         <Button variant="outline" size="icon" onClick={() => refetch()}>
           <RefreshCw className="h-4 w-4" />
@@ -80,7 +90,7 @@ export const SandboxSpendingTab: React.FC<SandboxSpendingTabProps> = ({ sandboxI
                   <TableCell className="text-right">{period.cpu ?? 0}</TableCell>
                   <TableCell className="text-right">{period.ramGB ?? 0}</TableCell>
                   <TableCell className="text-right">{period.diskGB ?? 0}</TableCell>
-                  <TableCell className="text-right">${(period.price ?? 0).toFixed(2)}</TableCell>
+                  <TableCell className="text-right">{formatPrice(period.price ?? 0)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
