@@ -106,8 +106,8 @@ export const SandboxUsageTable: React.FC<SandboxUsageTableProps> = ({ data, isLo
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {paginatedData.map((sandbox) => (
-                  <TableRow key={sandbox.sandboxId}>
+                {paginatedData.map((sandbox, index) => (
+                  <TableRow key={sandbox.sandboxId ?? `row-${index}`}>
                     <TableCell className="font-mono text-sm">
                       <div className="flex items-center gap-1">
                         <span className="truncate max-w-[200px]">{sandbox.sandboxId}</span>
