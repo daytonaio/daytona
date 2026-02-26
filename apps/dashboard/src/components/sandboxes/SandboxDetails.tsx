@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
@@ -28,13 +29,14 @@ import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutati
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
 import { useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
 import { useConfig } from '@/hooks/useConfig'
+import { useMatchMedia } from '@/hooks/useMatchMedia'
 import { useRegions } from '@/hooks/useRegions'
+import { useSandboxWsSync } from '@/hooks/useSandboxWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { Spinner } from '@/components/ui/spinner'
 import { RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
@@ -69,21 +71,18 @@ export default function SandboxDetails() {
   const [createSshDialogOpen, setCreateSshDialogOpen] = useState(false)
   const [revokeSshDialogOpen, setRevokeSshDialogOpen] = useState(false)
   const [tab, setTab] = useQueryState('tab', tabParser)
+  const isDesktop = useMatchMedia('(min-width: 1024px)')
 
   // On desktop (lg+), the overview tab is hidden in the sidebar, so switch to a content tab
   useEffect(() => {
-    const mql = window.matchMedia('(min-width: 1024px)')
-    const handler = () => {
-      if (mql.matches && tab === 'overview') {
-        setTab(experimentsEnabled ? 'logs' : 'terminal')
-      }
+    if (isDesktop && tab === 'overview') {
+      setTab(experimentsEnabled ? 'logs' : 'terminal')
     }
-    handler()
-    mql.addEventListener('change', handler)
-    return () => mql.removeEventListener('change', handler)
-  }, [tab, setTab, experimentsEnabled])
+  }, [isDesktop, tab, setTab, experimentsEnabled])
 
   const { data: sandbox, isLoading, isError, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
+
+  useSandboxWsSync({ sandboxId })
 
   const startMutation = useStartSandboxMutation()
   const stopMutation = useStopSandboxMutation()
