@@ -1,3 +1,8 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import * as Slot from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 
