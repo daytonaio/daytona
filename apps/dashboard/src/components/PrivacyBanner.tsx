@@ -5,17 +5,18 @@
 
 import { Cookie, Settings } from 'lucide-react'
 import { useState } from 'react'
+import { PrivacyPreferencesDialog, usePrivacyConsent } from './PrivacyPreferencesDialog'
 import { Button } from './ui/button'
-import { CookiePreferencesDialog, useCookieConsent } from './CookiePreferencesDialog'
 
-export function CookieBanner() {
-  const { hasConsented, preferences, saveConsent } = useCookieConsent()
+export function PrivacyBanner() {
+  const { hasConsented, preferences, saveConsent } = usePrivacyConsent()
   const [showCustomize, setShowCustomize] = useState(false)
 
   const handleAcceptAll = () => {
     saveConsent({
       necessary: true,
       analytics: true,
+      preferences: true,
       marketing: true,
     })
   }
@@ -24,6 +25,7 @@ export function CookieBanner() {
     saveConsent({
       necessary: true,
       analytics: false,
+      preferences: false,
       marketing: false,
     })
   }
@@ -40,7 +42,8 @@ export function CookieBanner() {
               <div className="space-y-1">
                 <h4 className="font-semibold text-sm">We value your privacy</h4>
                 <p className="text-sm text-muted-foreground max-w-xl">
-                  We use cookies for authentication and analytics to improve our product.
+                  We use tracking technologies for essential functionality like authentication, and optionally for
+                  analytics to improve our product.
                 </p>
               </div>
             </div>
@@ -50,7 +53,7 @@ export function CookieBanner() {
                 Customize
               </Button>
               <Button variant="secondary" size="sm" onClick={handleRejectAll}>
-                Reject All
+                Essential Only
               </Button>
               <Button size="sm" onClick={handleAcceptAll}>
                 Accept All
@@ -60,7 +63,7 @@ export function CookieBanner() {
         </div>
       </div>
 
-      <CookiePreferencesDialog
+      <PrivacyPreferencesDialog
         open={showCustomize}
         onOpenChange={setShowCustomize}
         preferences={preferences}

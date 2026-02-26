@@ -7,24 +7,27 @@ import { usePostHog } from 'posthog-js/react'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Button } from './ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
+import { Separator } from './ui/separator'
 import { Switch } from './ui/switch'
 
 type ConsentPreferences = {
   necessary: boolean
   analytics: boolean
+  preferences: boolean
   marketing: boolean
 }
 
-const CONSENT_KEY_PREFIX = 'cookie_consent_'
+const CONSENT_KEY_PREFIX = 'privacy_consent_'
 
 const DEFAULT_PREFERENCES: ConsentPreferences = {
   necessary: true,
   analytics: false,
+  preferences: false,
   marketing: false,
 }
 
-export function useCookieConsent() {
+export function usePrivacyConsent() {
   const posthog = usePostHog()
   const { user } = useAuth()
 
@@ -51,7 +54,7 @@ export function useCookieConsent() {
         setHasConsented(false)
       }
     } catch {
-      console.error('Error parsing cookie consent')
+      console.error('Error parsing privacy consent')
       setHasConsented(false)
     }
   }, [posthog, consentKey])
@@ -77,14 +80,14 @@ export function useCookieConsent() {
   return { hasConsented, preferences, saveConsent }
 }
 
-type CookiePreferencesDialogProps = {
+type PrivacyPreferencesDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   preferences: ConsentPreferences
   onSave: (preferences: ConsentPreferences) => void
 }
 
-export function CookiePreferencesDialog({ open, onOpenChange, preferences, onSave }: CookiePreferencesDialogProps) {
+export function PrivacyPreferencesDialog({ open, onOpenChange, preferences, onSave }: PrivacyPreferencesDialogProps) {
   const [tempPreferences, setTempPreferences] = useState<ConsentPreferences>(preferences)
 
   useEffect(() => {
@@ -102,22 +105,32 @@ export function CookiePreferencesDialog({ open, onOpenChange, preferences, onSav
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Cookie Preferences</DialogTitle>
+          <DialogTitle>Privacy Preferences</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-start justify-between space-x-2 rounded-md border p-3 bg-muted/50">
+        <DialogDescription>
+          Choose which tracking technologies you allow. Essential tracking is always required.
+        </DialogDescription>
+
+        <div className="rounded-md border">
+          <div className="flex items-start justify-between space-x-2 p-3 bg-muted/50">
             <div className="space-y-1">
-              <p className="font-medium text-sm">Strictly Necessary</p>
-              <p className="text-xs text-muted-foreground">Required for authentication.</p>
+              <p className="font-medium text-sm">Essential</p>
+              <p className="text-xs text-muted-foreground">
+                Required for login sessions and core functionality. Cannot be disabled.
+              </p>
             </div>
             <Switch checked disabled />
           </div>
 
-          <div className="flex items-start justify-between space-x-2 rounded-md border p-3">
+          <Separator />
+
+          <div className="flex items-start justify-between space-x-2 p-3">
             <div className="space-y-1">
               <p className="font-medium text-sm">Analytics</p>
-              <p className="text-xs text-muted-foreground">Helps us improve the product.</p>
+              <p className="text-xs text-muted-foreground">
+                Collects anonymous usage data to help us understand how the product is used and improve it.
+              </p>
             </div>
             <Switch
               checked={tempPreferences.analytics}
@@ -125,10 +138,29 @@ export function CookiePreferencesDialog({ open, onOpenChange, preferences, onSav
             />
           </div>
 
-          <div className="flex items-start justify-between space-x-2 rounded-md border p-3">
+          <Separator />
+
+          <div className="flex items-start justify-between space-x-2 p-3">
             <div className="space-y-1">
-              <p className="font-medium text-sm">Preferences & Marketing</p>
-              <p className="text-xs text-muted-foreground">Personalization and targeted content.</p>
+              <p className="font-medium text-sm">Preferences</p>
+              <p className="text-xs text-muted-foreground">
+                Remembers your settings like theme and layout across sessions.
+              </p>
+            </div>
+            <Switch
+              checked={tempPreferences.preferences}
+              onCheckedChange={(checked) => setTempPreferences((prev) => ({ ...prev, preferences: checked }))}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="flex items-start justify-between space-x-2 p-3">
+            <div className="space-y-1">
+              <p className="font-medium text-sm">Marketing</p>
+              <p className="text-xs text-muted-foreground">
+                Used for communications about Daytona features and updates.
+              </p>
             </div>
             <Switch
               checked={tempPreferences.marketing}
