@@ -7,11 +7,11 @@ import { Image } from 'astro:assets'
 
 import opencodePluginGif from '../../../../../assets/docs/images/opencode-plugin.gif'
 
-This guide demonstrates how to run the [Daytona OpenCode plugin](https://www.npmjs.com/package/@daytonaio/opencode) which seamlessly integrates Daytona sandboxes and OpenCode. When the plugin is active all agent operations occur in secure sandboxes, with one sandbox per OpenCode session. The plugin also has the ability to sync changes between sandboxes and local git branches.
+This guide demonstrates how to run the [Daytona OpenCode plugin](https://www.npmjs.com/package/@daytonaio/opencode) which integrates Daytona sandboxes and OpenCode. When the plugin is active all agent operations occur in secure sandboxes, with one sandbox per OpenCode session. The plugin also has the ability to sync changes between sandboxes and local Git branches.
 
 ### 1. Workflow Overview
 
-When you run OpenCode with the Daytona plugin, sandboxes will be created automatically inside OpenCode sessions. Operations such as running code, installing dependencies, and starting servers will all occur in the sandbox.
+When you run OpenCode with the Daytona plugin, sandboxes are created automatically inside OpenCode sessions. Operations such as running code, installing dependencies, and starting servers occur in the sandbox.
 
 <Image
   src={opencodePluginGif}
@@ -20,7 +20,7 @@ When you run OpenCode with the Daytona plugin, sandboxes will be created automat
   style="max-width: 100%; height: auto; margin: 1rem 0;"
 />
 
-Sandboxes are preserved until you delete the OpenCode session. If a local git repository is detected, the plugin will sync changes between the sandbox and branches with the `opencode/` prefix. 
+Sandboxes are preserved until you delete the OpenCode session. If a local Git repository is detected, the plugin syncs changes between the sandbox and branches with the `opencode/` prefix. 
 
 ### 2. Project Setup
 
@@ -35,7 +35,7 @@ Add the Daytona plugin to your project by creating or editing `opencode.json` in
 }
 ```
 
-OpenCode will download the plugin automatically when it starts. To install the plugin globally instead, edit `~/.config/opencode/opencode.json` and add the same `plugin` entry.
+OpenCode downloads the plugin automatically when it starts. To install the plugin globally instead, edit `~/.config/opencode/opencode.json` and add the same `plugin` entry.
 
 #### Configure Environment
 
@@ -56,10 +56,10 @@ DAYTONA_API_KEY=your-api-key
 #### Run OpenCode
 
 :::note[Git required]
-Ensure your project is a git repository to enable syncing changes between the sandbox and your machine.
+Ensure your project is a Git repository to enable syncing changes between the sandbox and your machine.
 :::
 
-Initialize git if needed, then start OpenCode:
+Initialize Git if needed, then start OpenCode:
 
 ```bash
 git init
@@ -68,7 +68,7 @@ opencode
 
 You can now use OpenCode as usual. As you work, you will see notifications in OpenCode indicating sandboxes are being created and changes are being synced to local branches.
 
-To confirm the plugin is working, you can type `pwd` in the chat and you should see a path like `/home/daytona/project`.
+To confirm the plugin is working, type `pwd` in the chat and you should see a path like `/home/daytona/project`.
 
 To view live logs from the plugin for debugging:
 
@@ -78,25 +78,25 @@ tail -f ~/.local/share/opencode/log/daytona.log
 
 #### Version control
 
-In your project directory, use git to list and check out the branches OpenCode creates:
+In your project directory, use Git to list and check out the branches OpenCode creates:
 
 ```bash
 git branch
 git checkout opencode/1
 ```
 
-By default, new sessions will start from the branch that was checked out when OpenCode was started. After this, synchronization only goes one way: from the sandbox to your local branch. To start working from a different branch, use git tocheck out that branch and start OpenCode again:
+By default, new sessions start from the branch that was checked out when OpenCode was started. After this, synchronization only goes one way: from the sandbox to your local branch. To start working from a different branch, use git to check out that branch and start OpenCode again:
 
 ```bash
 git checkout opencode/1
 opencode
 ```
 
-You can run as many OpenCode sessions in parallel as you want, and use git afterwards to review and merge changes.
+You can run as many OpenCode sessions in parallel as you want. Use Git to review and merge changes.
 
 ### 3. Understanding the Plugin Architecture
 
-The Daytona plugin consists of four plugin modules and a session manager. Each module registers hooks (tools or events) that ensure every agent action runs in a [Daytona sandbox](/docs/en/sandboxes) and that changes sync to local git branches:
+The Daytona plugin consists of four plugin modules and a session manager. Each module registers hooks (tools or events) that ensure every agent action runs in a [Daytona sandbox](/docs/en/sandboxes) and that changes sync to local Git branches:
 
 - **Custom tools:** Overrides bash, read, write, edit, etc., so they run in the sandbox.
 - **System transform:** Injects sandbox path and instructions into the agent’s system prompt.
@@ -106,7 +106,7 @@ The Daytona plugin consists of four plugin modules and a session manager. Each m
 
 #### Custom tools
 
-The custom tools module registers overrides for OpenCode’s built-in tools so that every file and process operation goes through the Daytona SDK. It receives the project id and worktree from the plugin context and returns a `tool` map:
+The custom tools module registers overrides for OpenCode’s built-in tools so that every file and process operation goes through the Daytona SDK. It receives the project `id` and `worktree` from the plugin context and returns a `tool` map:
 
 ```typescript
 export function createCustomToolsPlugin(sessionManager: DaytonaSessionManager): Plugin {
@@ -187,13 +187,13 @@ return {
 
 #### File synchronization
 
-While OpenCode is in use, the plugin uses git to keep session sandboxes and your local git repository in sync. This only occurs if a git repository is detected in the project directory. On plugin start:
+While OpenCode is in use, the plugin uses Git to keep session sandboxes and your local Git repository in sync. This only occurs if a git repository is detected in the project directory. On plugin start:
 
-1. The plugin looks for a git repository in the local directory.
+1. The plugin looks for a Git repository in the local directory.
 2. A parallel repository is created in the sandbox with a single `opencode` branch, mirroring your current local branch.
 3. A `sandbox` remote is added to your local repo using an SSH connection to the sandbox.
 4. Your current `HEAD` is pushed to `opencode`, and the sandbox repo is reset to that state.
-5. On session idle, the plugin commits in the sandbox on `opencode`, then pulls into a local branch `opencode/1`, `opencode/2`, etc. which is unique to each sandbox. A notification is shown when the sync is complete.
+5. On session idle, the plugin commits in the sandbox on `opencode`, then pulls into a local branch (`opencode/1`, `opencode/2`, etc.) which is unique to each sandbox. A notification is shown when the sync is complete.
 
 For more information on how the sync is implemented, see the [SessionGitManager](https://github.com/daytonaio/daytona/blob/main/libs/opencode-plugin/.opencode/plugin/daytona/git/session-git-manager.ts) class.
 
