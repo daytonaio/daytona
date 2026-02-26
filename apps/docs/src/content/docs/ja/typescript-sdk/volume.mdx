@@ -3,64 +3,65 @@ title: "ボリューム"
 hideTitleOnPage: true
 ---
 
+## VolumeService \{#volumeservice\}
 
-## VolumeService
+Daytona のボリュームを管理するためのサービス。
 
-Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を管理するサービス。
+このサービスは、ボリュームの一覧表示、取得、作成、および削除を行うメソッドを提供します。
 
-このサービスは、ボリュームの一覧取得、参照、作成、削除の各メソッドを提供します。
+ボリュームは、オプションの subpath パラメーターを指定してサンドボックスにマウントでき、
+ボリューム内の特定の S3 プレフィックスのみをマウントすることができます。subpath が指定されていない場合は、
+ボリューム全体がマウントされます。
 
-### Constructors
+### コンストラクタ \{#constructors\}
 
-#### new VolumeService()
+#### new VolumeService() \{#new-volumeservice\}
 
 ```ts
 new VolumeService(volumesApi: VolumesApi): VolumeService
 ```
 
-**Parameters**:
+**パラメータ**:
 
-- `volumesApi` _VolumesApi_
+* `volumesApi` *VolumesApi*
 
+**戻り値**:
 
-**Returns**:
+* `VolumeService`
 
-- `VolumeService`
+### メソッド \{#methods\}
 
-### Methods
-
-#### create()
+#### create() \{#create\}
 
 ```ts
 create(name: string): Promise<Volume>
 ```
 
-指定した名前で新しいボリュームを作成します。
+指定された名前の新しい Volume を作成します。
 
 **Parameters**:
 
-- `name` _string_ - 新規ボリュームの名前
-
+* `name` *string* - 新しい Volume の名前
 
 **Returns**:
 
-- `Promise<Volume>` - 作成されたボリューム
+* `Promise<Volume>` - 作成された新しい Volume
 
 **Throws**:
 
-ボリュームを作成できない場合
+Volume を作成できなかった場合にスローされます
 
 **Example:**
 
 ```ts
 const daytona = new Daytona();
 const volume = await daytona.volume.create("my-data-volume");
-console.log(`Created volume ${volume.name} with ID ${volume.id}`);
+console.log(`ボリューム ${volume.name} を作成しました (ID: ${volume.id})`);
 ```
 
 ***
 
-#### delete()
+#### delete() \{#delete\}
 
 ```ts
 delete(volume: Volume): Promise<void>
@@ -68,31 +69,30 @@ delete(volume: Volume): Promise<void>
 
 ボリュームを削除します。
 
-**Parameters**:
+**パラメーター**:
 
-- `volume` _Volume_ - 削除するボリューム
+* `volume` *Volume* - 削除するボリューム
 
+**戻り値**:
 
-**Returns**:
+* `Promise<void>`
 
-- `Promise<void>`
+**スローされる例外**:
 
-**Throws**:
+ボリュームが存在しない、または削除できない場合にスローされます
 
-ボリュームが存在しない、または削除できない場合
-
-**Example:**
+**例:**
 
 ```ts
 const daytona = new Daytona();
 const volume = await daytona.volume.get("volume-name");
 await daytona.volume.delete(volume);
-console.log("Volume deleted successfully");
+console.log("ボリュームが正常に削除されました");
 ```
 
 ***
 
-#### get()
+#### get() \{#get\}
 
 ```ts
 get(name: string, create: boolean): Promise<Volume>
@@ -100,21 +100,20 @@ get(name: string, create: boolean): Promise<Volume>
 
 名前を指定してボリュームを取得します。
 
-**Parameters**:
+**パラメータ**:
 
-- `name` _string_ - 取得するボリューム名
-- `create` _boolean = false_ - 存在しない場合に作成するかどうか
+* `name` *string* - 取得するボリュームの名前
+* `create` *boolean = false* - ボリュームが存在しない場合に作成するかどうか
 
+**返り値**:
 
-**Returns**:
+* `Promise<Volume>` - 指定されたボリューム
 
-- `Promise<Volume>` - 取得されたボリューム
+**スロー**:
 
-**Throws**:
+ボリュームが存在しない、またはアクセスできない場合にスローされます
 
-ボリュームが存在しない、またはアクセスできない場合
-
-**Example:**
+**例:**
 
 ```ts
 const daytona = new Daytona();
@@ -124,7 +123,7 @@ console.log(`Volume ${volume.name} is in state ${volume.state}`);
 
 ***
 
-#### list()
+#### list() \{#list\}
 
 ```ts
 list(): Promise<Volume[]>
@@ -132,11 +131,11 @@ list(): Promise<Volume[]>
 
 利用可能なすべてのボリュームを一覧表示します。
 
-**Returns**:
+**戻り値**:
 
-- `Promise<Volume[]>` - ユーザーがアクセス可能なすべてのボリュームの一覧
+* `Promise<Volume[]>` - ユーザーがアクセスできるすべてのボリュームの一覧
 
-**Example:**
+**例:**
 
 ```ts
 const daytona = new Daytona();
@@ -147,8 +146,7 @@ volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
 
 ***
 
-
-## ボリューム（Volume）
+## ボリューム \{#volume\}
 
 ```ts
 type Volume = VolumeDto & {
@@ -156,9 +154,8 @@ type Volume = VolumeDto & {
 };
 ```
 
-Daytona（サンドボックスを作成・管理するプラットフォーム）のボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を表します。サンドボックス（Daytonaが管理する隔離された一時的なコンピュート環境）間で共有されるストレージです。
+Daytona のボリュームを表します。サンドボックス間で共有されるストレージボリュームです。
 
 **型定義**:
 
-- `\_\_brand` _"Volume"_
-
+* `\_\_brand` *&quot;Volume&quot;*
