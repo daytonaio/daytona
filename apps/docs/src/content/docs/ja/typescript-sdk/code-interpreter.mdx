@@ -1,0 +1,219 @@
+---
+title: "CodeInterpreter"
+hideTitleOnPage: true
+---
+
+## CodeInterpreter \{#codeinterpreter\}
+
+サンドボックス内での Python コードの解釈と実行を行います。
+
+分離されたインタプリタコンテキスト内でコード（現在は Python のみに対応）を実行するメソッド、コンテキストの管理、およびコールバックを通じて実行出力をストリーミングする機能を提供します。
+
+その他の言語については、`Process` インターフェースの `codeRun` メソッドを使用するか、サンドボックスのターミナルで適切なコマンドを直接実行してください。
+
+### コンストラクタ \{#constructors\}
+
+#### new CodeInterpreter() \{#new-codeinterpreter\}
+
+```ts
+new CodeInterpreter(
+   clientConfig: Configuration, 
+   apiClient: InterpreterApi, 
+   getPreviewToken: () => Promise<string>): CodeInterpreter
+```
+
+**パラメータ**:
+
+* `clientConfig` *Configuration*
+* `apiClient` *InterpreterApi*
+* `getPreviewToken` *() =&gt; Promise&lt;string&gt;*
+
+**戻り値**:
+
+* `CodeInterpreter`
+
+### メソッド \{#methods\}
+
+#### createContext() \{#createcontext\}
+
+```ts
+createContext(cwd?: string): Promise<InterpreterContext>
+```
+
+新しい分離されたインタープリターコンテキストを作成します。
+
+**パラメーター**:
+
+* `cwd?` *string* - コンテキストの作業ディレクトリ。省略した場合はサンドボックスの作業ディレクトリが使用されます。
+
+**戻り値**:
+
+* `Promise<InterpreterContext>` - 作成されたコンテキスト。
+
+**例:**
+
+```ts
+const ctx = await sandbox.codeInterpreter.createContext()
+await sandbox.codeInterpreter.runCode('x = 10', { context: ctx })
+await sandbox.codeInterpreter.deleteContext(ctx.id!)
+```
+
+***
+
+#### deleteContext() \{#deletecontext\}
+
+```ts
+deleteContext(context: InterpreterContext): Promise<void>
+```
+
+インタープリター コンテキストを削除し、対応するワーカー プロセスをシャットダウンします。
+
+**パラメーター**:
+
+* `context` *InterpreterContext* - 削除するコンテキスト。
+
+**戻り値**:
+
+* `Promise<void>`
+
+**例:**
+
+```ts
+const ctx = await sandbox.codeInterpreter.createContext()
+// ... コンテキストを使用 ...
+await sandbox.codeInterpreter.deleteContext(ctx)
+```
+
+***
+
+#### listContexts() \{#listcontexts\}
+
+```ts
+listContexts(): Promise<InterpreterContext[]>
+```
+
+ユーザーが作成したインタープリターコンテキストをすべて一覧表示します（デフォルトコンテキストは除外されます）。
+
+**戻り値**:
+
+* `Promise<InterpreterContext[]>` - コンテキストの一覧。
+
+**例:**
+
+```ts
+const contexts = await sandbox.codeInterpreter.listContexts()
+for (const ctx of contexts) {
+  console.log(ctx.id, ctx.language, ctx.cwd)
+}
+```
+
+***
+
+#### runCode() \{#runcode\}
+
+```ts
+runCode(code: string, options: RunCodeOptions): Promise<ExecutionResult>
+```
+
+サンドボックスで Python コードを実行します。
+
+**パラメータ**:
+
+* `code` *string* - 実行するコード。
+* `options` *RunCodeOptions = {}* - 実行オプション（context、envs、callbacks、timeout）。
+
+**戻り値**:
+
+* `Promise<ExecutionResult>` - 標準出力（stdout）、標準エラー出力（stderr）、およびオプションのエラー情報を含む ExecutionResult。
+
+**例:**
+
+```ts
+const handleStdout = (msg: OutputMessage) => process.stdout.write(`STDOUT: ${msg.output}`)
+const handleStderr = (msg: OutputMessage) => process.stdout.write(`STDERR: ${msg.output}`)
+const handleError = (err: ExecutionError) =>
+  console.error(`ERROR: ${err.name}: ${err.value}\n${err.traceback ?? ''}`)
+
+const code = `
+import sys
+import time
+for i in range(5):
+    print(i)
+    time.sleep(1)
+sys.stderr.write("Counting done!")
+`
+
+const result = await codeInterpreter.runCode(code, {
+  onStdout: handleStdout,
+  onStderr: handleStderr,
+  onError: handleError,
+  timeout: 10,
+})
+```
+
+***
+
+## ExecutionError \{#executionerror\}
+
+コードの実行中に発生したエラーを表します。
+
+**プロパティ**:
+
+* `name` *string* - エラーの種類/クラス名（例: &quot;ValueError&quot;, &quot;SyntaxError&quot;）。
+* `traceback?` *string* - 利用可能な場合、エラーの完全なトレースバック情報。
+* `value` *string* - エラーの値またはメッセージ。
+
+## ExecutionResult \{#executionresult\}
+
+コード実行の結果。
+
+**プロパティ**:
+
+* `error?` *ExecutionError* - 実行エラーが発生した場合のエラー詳細。
+* `stderr` *string* - 実行中に取得された標準エラー出力。
+* `stdout` *string* - 実行中に取得された標準出力。
+
+## OutputMessage \{#outputmessage\}
+
+コード実行時の stdout または stderr の出力を表します。
+
+**プロパティ**:
+
+* `output` *string* - 出力内容。
+
+## RunCodeOptions \{#runcodeoptions\}
+
+インタープリタでコードを実行するためのオプション。
+
+**プロパティ**:
+
+* `context?` *InterpreterContext* - コードを実行するインタープリタコンテキスト。
+* `envs?` *Record&lt;string, string&gt;* - この実行で使用する環境変数。
+* `onError()?` *(error: ExecutionError) =&gt; any* - 実行エラー（例: ランタイム例外）が発生した際のコールバック。
+
+  **パラメーター**:
+
+  * `error` *ExecutionError*
+
+  **戻り値**:
+
+  * `any`
+* `onStderr()?` *(message: OutputMessage) =&gt; any* - stderr メッセージを処理するコールバック。
+
+  **パラメーター**:
+
+  * `message` *OutputMessage*
+
+  **戻り値**:
+
+  * `any`
+* `onStdout()?` *(message: OutputMessage) =&gt; any* - stdout メッセージを処理するコールバック。
+
+  **パラメーター**:
+
+  * `message` *OutputMessage*
+
+  **戻り値**:
+
+  * `any`
+* `timeout?` *number* - タイムアウト時間（秒）。0 を指定するとタイムアウトなし。デフォルトは 10 分。
