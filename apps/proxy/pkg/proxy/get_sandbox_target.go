@@ -120,13 +120,9 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 }
 
 func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInfo, error) {
-	has, err := p.sandboxRunnerCache.Has(ctx, sandboxId)
-	if err != nil {
-		return nil, err
-	}
-
-	if has {
-		return p.sandboxRunnerCache.Get(ctx, sandboxId)
+	runnerInfo, err := p.sandboxRunnerCache.Get(ctx, sandboxId)
+	if err == nil {
+		return runnerInfo, nil
 	}
 
 	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
@@ -152,13 +148,9 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 }
 
 func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, error) {
-	has, err := p.sandboxPublicCache.Has(ctx, sandboxId)
-	if err != nil {
-		return nil, err
-	}
-
-	if has {
-		return p.sandboxPublicCache.Get(ctx, sandboxId)
+	isPublicCache, err := p.sandboxPublicCache.Get(ctx, sandboxId)
+	if err == nil {
+		return isPublicCache, nil
 	}
 
 	isPublic := false
@@ -199,13 +191,9 @@ func (p *Proxy) validateAndCache(
 	apiValidation func() bool,
 ) (*bool, error) {
 	cacheKey := fmt.Sprintf("%s:%s", sandboxId, authKey)
-	has, err := p.sandboxAuthKeyValidCache.Has(ctx, cacheKey)
-	if err != nil {
-		return nil, err
-	}
-
-	if has {
-		return p.sandboxAuthKeyValidCache.Get(ctx, cacheKey)
+	authKeyValidCache, err := p.sandboxAuthKeyValidCache.Get(ctx, cacheKey)
+	if err == nil {
+		return authKeyValidCache, nil
 	}
 
 	isValid := apiValidation()

@@ -31,15 +31,10 @@ func NewResolver(cache common_cache.ICache[apiclient.OtelConfig], logger *zap.Lo
 }
 
 func (r *Resolver) GetOrganizationOtelConfig(ctx context.Context, authToken string) (*apiclient.OtelConfig, error) {
-	has, err := r.cache.Has(ctx, authToken)
-	if err != nil {
-		return nil, err
-	}
-
-	if has {
-		otelConfig, err := r.cache.Get(ctx, authToken)
-		if err != nil || otelConfig.Endpoint == "(none)" {
-			return nil, err
+	otelConfig, err := r.cache.Get(ctx, authToken)
+	if err == nil {
+		if otelConfig.Endpoint == "(none)" {
+			return nil, nil
 		}
 		return otelConfig, nil
 	}
