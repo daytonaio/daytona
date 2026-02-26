@@ -4,283 +4,1018 @@ title: ファイルシステム操作
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona（サンドボックスという隔離されたクラウド開発環境を作成・管理するプラットフォーム）のSDKは、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内の`fs`モジュールを通じて、充実したファイルシステム操作機能を提供します。本ガイドでは、利用可能なすべてのファイルシステム操作とベストプラクティスについて説明します。
+Daytonaは、サンドボックス内の`fs`モジュールを通じて、充実したファイルシステム操作を提供します。
 
-## 基本操作
+## 基本操作 \{#basic-operations\}
 
-Daytona SDK は、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）内のファイルシステムとやり取りする機能を提供します。ファイルの一覧表示、ディレクトリ作成、ファイルの読み書きなど、さまざまな操作を実行できます。
+Daytona は、サンドボックス内のファイルシステムを操作するためのメソッドを提供しています。ファイル一覧の取得、ディレクトリの作成、ファイルの読み書きなど、さまざまな操作を実行できます。
 
-簡潔さのため、ファイル操作はデフォルトでサンドボックスユーザーのホームディレクトリ直下で行われる前提です。例えば、`workspace` は `/home/[username]/workspace` を意味します。先頭にスラッシュ `/` を付けた絶対パスを作業ディレクトリとして指定することも可能です。
+ファイル操作は、サンドボックスユーザーのホームディレクトリで作業していることを前提としています（例: `workspace` は `/home/[username]/workspace` を指します）。絶対パスを指定する場合は、先頭に `/` を付けてください。
 
-### ファイルとディレクトリの一覧表示
+### ファイルとディレクトリの一覧表示 \{#list-files-and-directories\}
 
-Daytona SDK は、Python と TypeScript を用いてサンドボックス内のファイルやディレクトリを一覧表示できます。
+Daytona では、ディレクトリへのパスを指定することで、サンドボックス内のファイルとディレクトリを一覧表示するメソッドを提供します。パスを指定しない場合、メソッドはサンドボックスの作業ディレクトリ内のファイルとディレクトリを一覧表示します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# List files in a directory
-files = sandbox.fs.list_files("workspace")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # List files in a directory
+    files = sandbox.fs.list_files("workspace")
 
-for file in files:
-    print(f"Name: {file.name}")
-    print(f"Is directory: {file.is_dir}")
-    print(f"Size: {file.size}")
-    print(f"Modified: {file.mod_time}")
+    for file in files:
+        print(f"Name: {file.name}")
+        print(f"Is directory: {file.is_dir}")
+        print(f"Size: {file.size}")
+        print(f"Modified: {file.mod_time}")
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// List files in a directory
-const files = await sandbox.fs.listFiles("workspace")
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // List files in a directory
+    const files = await sandbox.fs.listFiles('workspace')
 
-files.forEach(file => {
-    console.log(`Name: ${file.name}`)
-    console.log(`Is directory: ${file.isDir}`)
-    console.log(`Size: ${file.size}`)
-    console.log(`Modified: ${file.modTime}`)
-})
-```
+    files.forEach(file => {
+      console.log(`Name: ${file.name}`)
+      console.log(`Is directory: ${file.isDir}`)
+      console.log(`Size: ${file.size}`)
+      console.log(`Modified: ${file.modTime}`)
+    })
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # List directory contents
+    files = sandbox.fs.list_files("workspace/data")
+
+    # Print files and their sizes
+    files.each do |file|
+      puts "#{file.name}: #{file.size} bytes" unless file.is_dir
+    end
+
+    # List only directories
+    dirs = files.select(&:is_dir)
+    puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // List files in a directory
+    files, err := sandbox.FileSystem.ListFiles(ctx, "workspace")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    for _, file := range files {
+    	fmt.Printf("Name: %s\n", file.Name)
+    	fmt.Printf("Is directory: %t\n", file.IsDirectory)
+    	fmt.Printf("Size: %d\n", file.Size)
+    	fmt.Printf("Modified: %s\n", file.ModifiedTime)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files'
+    ```
+  </TabItem>
 </Tabs>
 
-### ディレクトリの作成
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
 
-Daytona SDK は、Python と TypeScript で特定のパーミッションを指定してディレクトリを作成できます。
+> [**list&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemlist_files)
+>
+> [**listFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#listfiles)
+>
+> [**list&#95;files (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#list_files)
+>
+> [**ListFiles (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.ListFiles)
+>
+> [**list files and directories (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/GET/files)
+
+### ディレクトリまたはファイル情報を取得する \{#get-directory-or-file-information\}
+
+Daytona は、ディレクトリまたはファイルへのパスを指定することで、グループ、ディレクトリかどうか、更新日時、モード、名前、所有者、パーミッション、サイズといった情報を取得するためのメソッドを提供します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Create with specific permissions
-sandbox.fs.create_folder("workspace/new-dir", "755")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Create with specific permissions
-await sandbox.fs.createFolder("workspace/new-dir", "755")
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ファイルのメタデータを取得
+    info = sandbox.fs.get_file_info("workspace/data/file.txt")
+    print(f"Size: {info.size} bytes")
+    print(f"Modified: {info.mod_time}")
+    print(f"Mode: {info.mode}")
 
-</TabItem>
+    # パスがディレクトリかどうかを確認
+    info = sandbox.fs.get_file_info("workspace/data")
+    if info.is_dir:
+        print("Path is a directory")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ファイルの詳細を取得
+    const info = await fs.getFileDetails('app/config.json')
+    console.log(`Size: ${info.size}, Modified: ${info.modTime}`)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ファイルのメタデータを取得
+    info = sandbox.fs.get_file_info("workspace/data/file.txt")
+    puts "Size: #{info.size} bytes"
+    puts "Modified: #{info.mod_time}"
+    puts "Mode: #{info.mode}"
+
+    # パスがディレクトリかどうかを確認
+    info = sandbox.fs.get_file_info("workspace/data")
+    puts "Path is a directory" if info.is_dir
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ファイルのメタデータを取得
+    info, err := sandbox.FileSystem.GetFileInfo(ctx, "workspace/data/file.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Size: %d bytes\n", info.Size)
+    fmt.Printf("Modified: %s\n", info.ModifiedTime)
+    fmt.Printf("Mode: %s\n", info.Mode)
+
+    // パスがディレクトリかどうかを確認
+    info, err = sandbox.FileSystem.GetFileInfo(ctx, "workspace/data")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    if info.IsDirectory {
+    	fmt.Println("Path is a directory")
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/info?path='
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルのアップロード
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
 
-Daytona SDK は、Python と TypeScript を用いて、サンドボックス内でのファイルの読み取り、書き込み、アップロード、ダウンロード、削除を行うための機能を提供します。
+> [**get&#95;file&#95;info (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemget_file_info)
+>
+> [**getFileDetails (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#getfiledetails)
+>
+> [**get&#95;file&#95;info (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#get_file_info)
+>
+> [**GetFileInfo (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.GetFileInfo)
+>
+> [**get file information (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/GET/files/info)
 
-#### 単一ファイルのアップロード
+### ディレクトリを作成する \{#create-directories\}
 
-単一ファイルをアップロードする場合は、次のように実行します。
+Daytona では、ディレクトリのパスと、そのディレクトリに設定するパーミッションを指定してディレクトリを作成するメソッドを提供しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload a single file
-with open("local_file.txt", "rb") as f:
-    content = f.read()
-sandbox.fs.upload_file(content, "remote_file.txt")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload a single file
-const fileContent = Buffer.from('Hello, World!')
-await sandbox.fs.uploadFile(fileContent, "data.txt")
-```
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # パーミッションを指定して作成
+    sandbox.fs.create_folder("workspace/new-dir", "755")
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // パーミッションを指定して作成
+    await sandbox.fs.createFolder('workspace/new-dir', '755')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 標準的なパーミッションでディレクトリを作成
+    sandbox.fs.create_folder("workspace/data", "755")
+
+    # プライベートディレクトリを作成
+    sandbox.fs.create_folder("workspace/secrets", "700")
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // パーミッションを指定して作成
+    err := sandbox.FileSystem.CreateFolder(ctx, "workspace/new-dir",
+    	options.WithMode("755"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/folder?path=&mode=' \
+      --request POST
+    ```
+  </TabItem>
 </Tabs>
 
-#### 複数ファイルのアップロード
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) の各リファレンスを参照してください。
 
-以下は、1回のメソッド呼び出しで複数ファイルを効率的にアップロードする例です。
+> [**create&#95;folder (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemcreate_folder)
+>
+> [**createFolder (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#createfolder)
+>
+> [**create&#95;folder (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#create_folder)
+>
+> [**CreateFolder (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.CreateFolder)
+>
+> [**create folder (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/POST/files/folder)
+
+### ファイルのアップロード \{#upload-files\}
+
+Daytona は、サンドボックスに単一ファイルまたは複数ファイルをアップロードするためのメソッドを提供します。
+
+#### 単一ファイルをアップロードする \{#upload-a-single-file\}
+
+Daytona では、アップロードするコンテンツと保存先ファイルのパスを指定して、サンドボックス内に単一ファイルをアップロードするためのメソッドを提供しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Upload multiple files at once
-files_to_upload = []
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 単一ファイルをアップロードする
+    with open("local_file.txt", "rb") as f:
+        content = f.read()
+    sandbox.fs.upload_file(content, "remote_file.txt")
+    ```
+  </TabItem>
 
-with open("file1.txt", "rb") as f1:
-    files_to_upload.append(FileUpload(
-        source=f1.read(),
-        destination="data/file1.txt",
-    ))
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 単一ファイルをアップロードする
+    const fileContent = Buffer.from('Hello, World!')
+    await sandbox.fs.uploadFile(fileContent, 'data.txt')
+    ```
+  </TabItem>
 
-with open("file2.txt", "rb") as f2:
-    files_to_upload.append(FileUpload(
-        source=f2.read(),
-        destination="data/file2.txt",
-    ))
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 文字列コンテンツからテキストファイルをアップロードする
+    content = "Hello, World!"
+    sandbox.fs.upload_file(content, "tmp/hello.txt")
 
-with open("settings.json", "rb") as f3:
-    files_to_upload.append(FileUpload(
-        source=f3.read(),
-        destination="config/settings.json",
-    ))
+    # ローカルファイルをアップロードする
+    sandbox.fs.upload_file("local_file.txt", "tmp/file.txt")
 
-sandbox.fs.upload_files(files_to_upload)
+    # バイナリデータをアップロードする
+    data = { key: "value" }.to_json
+    sandbox.fs.upload_file(data, "tmp/config.json")
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Upload multiple files at once
-const files = [
-    {
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ローカルファイルパスからアップロードする
+    err := sandbox.FileSystem.UploadFile(ctx, "local_file.txt", "remote_file.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // またはバイト列データからアップロードする
+    content := []byte("Hello, World!")
+    err = sandbox.FileSystem.UploadFile(ctx, content, "hello.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/upload?path=' \
+      --request POST \
+      --header 'Content-Type: multipart/form-data' \
+      --form 'file='
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
+
+> [**upload&#95;file (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemupload_file)
+>
+> [**uploadFile (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#uploadfile)
+>
+> [**upload&#95;file (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#upload_file)
+>
+> [**UploadFile (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.UploadFile)
+>
+> [**upload file (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/POST/files/upload)
+
+#### 複数ファイルのアップロード \{#upload-multiple-files\}
+
+Daytona では、アップロードするコンテンツとそのアップロード先パスを指定することで、サンドボックス内に複数のファイルをアップロードするメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 複数のファイルを一度にアップロードする
+    files_to_upload = []
+
+    with open("file1.txt", "rb") as f1:
+        files_to_upload.append(FileUpload(
+            source=f1.read(),
+            destination="data/file1.txt",
+        ))
+
+    with open("file2.txt", "rb") as f2:
+        files_to_upload.append(FileUpload(
+            source=f2.read(),
+            destination="data/file2.txt",
+        ))
+
+    with open("settings.json", "rb") as f3:
+        files_to_upload.append(FileUpload(
+            source=f3.read(),
+            destination="config/settings.json",
+        ))
+
+    sandbox.fs.upload_files(files_to_upload)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 複数のファイルを一度にアップロードする
+    const files = [
+      {
         source: Buffer.from('Content of file 1'),
         destination: 'data/file1.txt',
-    },
-    {
+      },
+      {
         source: Buffer.from('Content of file 2'),
         destination: 'data/file2.txt',
-    },
-    {
+      },
+      {
         source: Buffer.from('{"key": "value"}'),
         destination: 'config/settings.json',
+      },
+    ]
+
+    await sandbox.fs.uploadFiles(files)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 複数のファイルをアップロードする
+    files = [
+      FileUpload.new("Content of file 1", "/tmp/file1.txt"),
+      FileUpload.new("workspace/data/file2.txt", "/tmp/file2.txt"),
+      FileUpload.new('{"key": "value"}', "/tmp/config.json")
+    ]
+
+    sandbox.fs.upload_files(files)
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // UploadFile をそれぞれ呼び出して複数のファイルをアップロードする
+    filesToUpload := []struct {
+    	source      string
+    	destination string
+    }{
+    	{"file1.txt", "data/file1.txt"},
+    	{"file2.txt", "data/file2.txt"},
+    	{"settings.json", "config/settings.json"},
     }
-]
 
-await sandbox.fs.uploadFiles(files)
-```
+    for _, f := range filesToUpload {
+    	err := sandbox.FileSystem.UploadFile(ctx, f.source, f.destination)
+    	if err != nil {
+    		log.Fatal(err)
+    	}
+    }
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-upload' \
+      --request POST
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルのダウンロード
+詳細については、次の [Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
 
-次のコマンドは、サンドボックスユーザーのホームディレクトリから `file1.txt` をダウンロードし、その内容を出力します。
+> [**upload&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemupload_files)
+>
+> [**uploadFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#uploadfiles)
+>
+> [**upload&#95;files (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#upload_files)
+>
+> [**upload multiple files (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/POST/files/bulk-upload)
+
+### ファイルのダウンロード \{#download-files\}
+
+Daytona はサンドボックスからファイルをダウンロードするためのメソッドを提供しています。
+
+#### 単一ファイルのダウンロード \{#download-a-single-file\}
+
+Daytona では、ダウンロードするファイルのパスを指定することで、サンドボックスから単一のファイルをダウンロードするメソッドを提供しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    content = sandbox.fs.download_file("file1.txt")
 
-content = sandbox.fs.download_file("file1.txt")
+    with open("local_file.txt", "wb") as f:
+        f.write(content)
 
-with open("local_file.txt", "wb") as f:
-    f.write(content)
+    print(content.decode('utf-8'))
+    ```
+  </TabItem>
 
-print(content.decode('utf-8'))
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const downloadedFile = await sandbox.fs.downloadFile('file1.txt')
+    console.log('File content:', downloadedFile.toString())
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Download and get file content
+    content = sandbox.fs.download_file("workspace/data/file.txt")
+    puts content
 
-const downloadedFile = await sandbox.fs.downloadFile("file1.txt")
+    # Download and save a file locally
+    sandbox.fs.download_file("workspace/data/file.txt", "local_copy.txt")
+    size_mb = File.size("local_copy.txt") / 1024.0 / 1024.0
+    puts "Size of the downloaded file: #{size_mb} MB"
+    ```
+  </TabItem>
 
-console.log('File content:', downloadedFile.toString())
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Download and get contents in memory
+    content, err := sandbox.FileSystem.DownloadFile(ctx, "file1.txt", nil)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Println(string(content))
 
-```
+    // Download and save to a local file
+    localPath := "local_file.txt"
+    content, err = sandbox.FileSystem.DownloadFile(ctx, "file1.txt", &localPath)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/download?path='
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルの削除
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) の各リファレンスを参照してください。
 
-不要になったファイルは、`delete_file` 関数で削除できます。
+> [**download&#95;file (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemdownload_file)
+>
+> [**downloadFile (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#downloadfile)
+>
+> [**download&#95;file (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#download_file)
+>
+> [**DownloadFile (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.DownloadFile)
+>
+> [**download file (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/GET/files/download)
+
+#### 複数ファイルのダウンロード \{#download-multiple-files\}
+
+Daytona は、ダウンロード対象ファイルのパスを指定することで、サンドボックスから複数のファイルをダウンロードするためのメソッドを提供します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 複数ファイルをまとめてダウンロード
+    files_to_download = [
+        FileDownloadRequest(source="data/file1.txt"), # 保存先なし - メモリにダウンロード
+        FileDownloadRequest(source="data/file2.txt", destination="local_file2.txt"), # ローカルファイルにダウンロード
+    ]
 
-sandbox.fs.delete_file("workspace/file.txt")
+    results = sandbox.fs.download_files(files_to_download)
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
+    for result in results:
+        if result.error:
+            print(f"Error downloading {result.source}: {result.error}")
+        elif result.result:
+            print(f"Downloaded {result.source} to {result.result}")
+    ```
+  </TabItem>
 
-await sandbox.fs.deleteFile("workspace/file.txt")
-```
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 複数ファイルをまとめてダウンロード
+    const files = [
+      { source: 'data/file1.txt' }, // 保存先なし - メモリにダウンロード
+      { source: 'data/file2.txt', destination: 'local_file2.txt' }, // ローカルファイルにダウンロード
+    ]
 
-</TabItem>
+    const results = await sandbox.fs.downloadFiles(files)
+
+    results.forEach(result => {
+      if (result.error) {
+        console.error(`Error downloading ${result.source}: ${result.error}`)
+      } else if (result.result) {
+        console.log(`Downloaded ${result.source} to ${result.result}`)
+      }
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # download_file をそれぞれ呼び出して複数ファイルをダウンロード
+    files_to_download = [
+      { remote: "data/file1.txt", local: nil },              # メモリにダウンロード
+      { remote: "data/file2.txt", local: "local_file2.txt" } # ローカルファイルにダウンロード
+    ]
+
+    files_to_download.each do |f|
+      if f[:local]
+        sandbox.fs.download_file(f[:remote], f[:local])
+        puts "Downloaded #{f[:remote]} to #{f[:local]}"
+      else
+        content = sandbox.fs.download_file(f[:remote])
+        puts "Downloaded #{f[:remote]} to memory (#{content.size} bytes)"
+      end
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 各ファイルに対して DownloadFile を呼び出して複数ファイルをダウンロード
+    filesToDownload := []struct {
+    	remotePath string
+    	localPath  *string
+    }{
+    	{"data/file1.txt", nil},                           // メモリにダウンロード
+    	{"data/file2.txt", ptrString("local_file2.txt")},  // ローカルファイルにダウンロード
+    }
+
+    for _, f := range filesToDownload {
+    	content, err := sandbox.FileSystem.DownloadFile(ctx, f.remotePath, f.localPath)
+    	if err != nil {
+    		fmt.Printf("Error downloading %s: %v\n", f.remotePath, err)
+    		continue
+    	}
+    	if f.localPath == nil {
+    		fmt.Printf("Downloaded %s to memory (%d bytes)\n", f.remotePath, len(content))
+    	} else {
+    		fmt.Printf("Downloaded %s to %s\n", f.remotePath, *f.localPath)
+    	}
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/bulk-download' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "paths": [
+        ""
+      ]
+    }'
+    ```
+  </TabItem>
 </Tabs>
 
-## 高度な操作
+詳しくは、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) リファレンスを参照してください:
 
-Daytona SDK は、ファイル権限の設定・取得、検索と置換などの高度なファイルシステム操作を提供します。
+> [**download&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemdownload_files)
+>
+> [**downloadFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#downloadfiles)
+>
+> [**download&#95;file (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#download_file)
+>
+> [**download multiple files (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/POST/files/bulk-download)
 
-### ファイル権限
+### ファイルの削除 \{#delete-files\}
 
-Daytona SDK では、Python と TypeScript から、ファイル権限の設定・取得や、ディレクトリ権限の再帰的な設定が行えます。
+Daytona では、削除対象のファイルまたはディレクトリへのパスを指定することで、サンドボックス内のファイルやディレクトリを削除するメソッドを利用できます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Set file permissions
-sandbox.fs.set_file_permissions("workspace/file.txt", "644")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    sandbox.fs.delete_file("workspace/file.txt")
+    ```
+  </TabItem>
 
-# Get file permissions
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    await sandbox.fs.deleteFile('workspace/file.txt')
+    ```
+  </TabItem>
 
-file_info = sandbox.fs.get_file_info("workspace/file.txt")
-print(f"Permissions: {file_info.permissions}")
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ファイルを削除
+    sandbox.fs.delete_file("workspace/data/old_file.txt")
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Set file permissions
-await sandbox.fs.setFilePermissions("workspace/file.txt", { mode: "644" })
+    # ディレクトリを再帰的に削除
+    sandbox.fs.delete_file("workspace/old_dir", recursive: true)
+    ```
+  </TabItem>
 
-// Get file permissions
-const fileInfo = await sandbox.fs.getFileDetails("workspace/file.txt")
-console.log(`Permissions: ${fileInfo.permissions}`)
-```
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ファイルを削除
+    err := sandbox.FileSystem.DeleteFile(ctx, "workspace/file.txt", false)
+    if err != nil {
+    	log.Fatal(err)
+    }
 
-</TabItem>
+    // ディレクトリを再帰的に削除
+    err = sandbox.FileSystem.DeleteFile(ctx, "workspace/old_dir", true)
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files?path=' \
+      --request DELETE
+    ```
+  </TabItem>
 </Tabs>
 
-### ファイルの検索と置換
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
 
-Daytona SDK では、Python と TypeScript から、ファイル内のテキストの検索および置換を行えます。
+> [**delete&#95;file (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemdelete_file)
+>
+> [**deleteFile (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#deletefile)
+>
+> [**delete&#95;file (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#delete_file)
+>
+> [**DeleteFile (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.DeleteFile)
+>
+> [**delete file or directory (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/DELETE/files)
+
+## 高度な操作 \{#advanced-operations\}
+
+Daytona は、ファイルのアクセス権や検索・置換、ファイルの移動など、より高度なファイルシステム操作を提供します。
+
+### ファイルパーミッション \{#file-permissions\}
+
+Daytona には、ファイルまたはディレクトリのパスと設定するパーミッションを指定することで、そのファイルまたはディレクトリのパーミッション、所有者、グループを設定できるメソッドが用意されています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Search for text in files; if a folder is specified, the search is recursive
-results = sandbox.fs.find_files(
-    path="workspace/src",
-    pattern="text-of-interest"
-)
-for match in results:
-    print(f"Absolute file path: {match.file}")
-    print(f"Line number: {match.line}")
-    print(f"Line content: {match.content}")
-    print("\n")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Set file permissions
+    sandbox.fs.set_file_permissions("workspace/file.txt", "644")
 
-# Replace text in files
+    # Get file permissions
+    file_info = sandbox.fs.get_file_info("workspace/file.txt")
+    print(f"Permissions: {file_info.permissions}")
+    ```
+  </TabItem>
 
-sandbox.fs.replace_in_files(
-    files=["workspace/file1.txt", "workspace/file2.txt"],
-    pattern="old_text",
-    new_value="new_text"
-)
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Set file permissions
+    await sandbox.fs.setFilePermissions('workspace/file.txt', { mode: '644' })
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Search for text in files; if a folder is specified, the search is recursive
-const results = await sandbox.fs.findFiles({
-    path="workspace/src",
-    pattern: "text-of-interest"
-})
-results.forEach(match => {
-    console.log('Absolute file path:', match.file)
-    console.log('Line number:', match.line)
-    console.log('Line content:', match.content)
-})
+    // Get file permissions
+    const fileInfo = await sandbox.fs.getFileDetails('workspace/file.txt')
+    console.log(`Permissions: ${fileInfo.permissions}`)
+    ```
+  </TabItem>
 
-// Replace text in files
-await sandbox.fs.replaceInFiles(
-    ["workspace/file1.txt", "workspace/file2.txt"],
-    "old_text",
-    "new_text"
-)
-```
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Make a file executable
+    sandbox.fs.set_file_permissions(
+      path: "workspace/scripts/run.sh",
+      mode: "755"  # rwxr-xr-x
+    )
 
-</TabItem>
+    # Change file owner
+    sandbox.fs.set_file_permissions(
+      path: "workspace/data/file.txt",
+      owner: "daytona",
+      group: "daytona"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Set file permissions
+    err := sandbox.FileSystem.SetFilePermissions(ctx, "workspace/file.txt",
+    	options.WithPermissionMode("644"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // Set owner and group
+    err = sandbox.FileSystem.SetFilePermissions(ctx, "workspace/file.txt",
+    	options.WithOwner("daytona"),
+    	options.WithGroup("daytona"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // Get file info to check permissions
+    fileInfo, err := sandbox.FileSystem.GetFileInfo(ctx, "workspace/file.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Mode: %s\n", fileInfo.Mode)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/permissions?path=' \
+      --request POST
+    ```
+  </TabItem>
 </Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) の各リファレンスを参照してください。
+
+> [**set&#95;file&#95;permissions (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemset_file_permissions)
+>
+> [**setFilePermissions (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#setfilepermissions)
+>
+> [**set&#95;file&#95;permissions (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#set_file_permissions)
+>
+> [**SetFilePermissions (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.SetFilePermissions)
+>
+> [**set file permissions (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/POST/files/permissions)
+
+### ファイルの検索と置換 \{#find-and-replace-text-in-files\}
+
+Daytona は、検索対象のディレクトリのパスと検索パターンを指定して、ファイル内のテキストの検索および置換を行うメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ファイル内のテキストを検索します。検索対象のディレクトリのパスと検索パターンを指定します
+    results = sandbox.fs.find_files(
+        path="workspace/src",
+        pattern="text-of-interest"
+    )
+    for match in results:
+        print(f"Absolute file path: {match.file}")
+        print(f"Line number: {match.line}")
+        print(f"Line content: {match.content}")
+        print("\n")
+
+    # ファイル内のテキストを置換します
+    sandbox.fs.replace_in_files(
+        files=["workspace/file1.txt", "workspace/file2.txt"],
+        pattern="old_text",
+        new_value="new_text"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ファイル内のテキストを検索します。フォルダを指定した場合、再帰的に検索されます
+    const results = await sandbox.fs.findFiles({
+        path="workspace/src",
+        pattern: "text-of-interest"
+    })
+    results.forEach(match => {
+        console.log('Absolute file path:', match.file)
+        console.log('Line number:', match.line)
+        console.log('Line content:', match.content)
+    })
+
+    // ファイル内のテキストを置換します
+    await sandbox.fs.replaceInFiles(
+        ["workspace/file1.txt", "workspace/file2.txt"],
+        "old_text",
+        "new_text"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Ruby ファイル内の TODO を検索します
+    matches = sandbox.fs.find_files("workspace/src", "TODO:")
+    matches.each do |match|
+      puts "#{match.file}:#{match.line}: #{match.content.strip}"
+    end
+
+    # 特定のファイル内で置換を実行します
+    results = sandbox.fs.replace_in_files(
+      files: ["workspace/src/file1.rb", "workspace/src/file2.rb"],
+      pattern: "old_function",
+      new_value: "new_function"
+    )
+
+    # 結果を出力します
+    results.each do |result|
+      if result.success
+        puts "#{result.file}: #{result.success}"
+      else
+        puts "#{result.file}: #{result.error}"
+      end
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ファイル内のテキストを検索します
+    result, err := sandbox.FileSystem.FindFiles(ctx, "workspace/src", "text-of-interest")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    matches := result.([]map[string]any)
+    for _, match := range matches {
+    	fmt.Printf("Absolute file path: %s\n", match["file"])
+    	fmt.Printf("Line number: %v\n", match["line"])
+    	fmt.Printf("Line content: %s\n\n", match["content"])
+    }
+
+    // ファイル内のテキストを置換します
+    _, err = sandbox.FileSystem.ReplaceInFiles(ctx,
+    	[]string{"workspace/file1.txt", "workspace/file2.txt"},
+    	"old_text",
+    	"new_text",
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ファイル内のテキストを検索します:
+
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/find?path=&pattern='
+    ```
+
+    ファイル内のテキストを置換します:
+
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/replace' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "files": [
+        ""
+      ],
+      "newValue": "",
+      "pattern": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/) のリファレンスを参照してください。
+
+> [**find&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemfind_files)
+>
+> [**replace&#95;in&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemreplace_in_files)
+>
+> [**findFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#findfiles)
+>
+> [**replaceInFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#replaceinfiles)
+>
+> [**find&#95;files (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#find_files)
+>
+> [**replace&#95;in&#95;files (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#replace_in_files)
+>
+> [**FindFiles (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.FindFiles)
+>
+> [**ReplaceInFiles (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.ReplaceInFiles)
+>
+> [**ファイル内のテキスト検索 (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/GET/files/find)
+>
+> [**ファイル内のテキスト置換 (API)**](/docs/ja/tools/api#daytona-toolbox/tag/file-system/POST/files/replace)
+
+### ディレクトリまたはファイルを移動・名前変更する \{#move-or-rename-directory-or-file\}
+
+Daytona では、サンドボックス内のディレクトリやファイルについて、ファイルまたはディレクトリの現在のパス（source）と新しいパス（destination）を指定することで、移動や名前変更を行うメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ファイル名を変更する
+    sandbox.fs.move_files(
+        "workspace/data/old_name.txt",
+        "workspace/data/new_name.txt"
+    )
+
+    # ファイルを別のディレクトリに移動する
+    sandbox.fs.move_files(
+        "workspace/data/file.txt",
+        "workspace/archive/file.txt"
+    )
+
+    # ディレクトリを移動する
+    sandbox.fs.move_files(
+        "workspace/old_dir",
+        "workspace/new_dir"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ファイルを新しい場所に移動する
+    await fs.moveFiles('app/temp/data.json', 'app/data/data.json')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ファイル名を変更する
+    sandbox.fs.move_files(
+      "workspace/data/old_name.txt",
+      "workspace/data/new_name.txt"
+    )
+
+    # ファイルを別のディレクトリに移動する
+    sandbox.fs.move_files(
+      "workspace/data/file.txt",
+      "workspace/archive/file.txt"
+    )
+
+    # ディレクトリを移動する
+    sandbox.fs.move_files(
+      "workspace/old_dir",
+      "workspace/new_dir"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ファイル名を変更する
+    err := sandbox.FileSystem.MoveFiles(ctx, "workspace/data/old_name.txt", "workspace/data/new_name.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // ファイルを別のディレクトリに移動する
+    err = sandbox.FileSystem.MoveFiles(ctx, "workspace/data/file.txt", "workspace/archive/file.txt")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // ディレクトリを移動する
+    err = sandbox.FileSystem.MoveFiles(ctx, "workspace/old_dir", "workspace/new_dir")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/files/move?source=&destination=' \
+      --request POST
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**move&#95;files (Python SDK)**](/docs/ja/python-sdk/sync/file-system/#filesystemmove_files)
+>
+> [**moveFiles (TypeScript SDK)**](/docs/ja/typescript-sdk/file-system/#movefiles)
+>
+> [**move&#95;files (Ruby SDK)**](/docs/ja/ruby-sdk/file-system/#move_files)
+>
+> [**MoveFiles (Go SDK)**](/docs/ja/go-sdk/daytona/#FileSystemService.MoveFiles)
+>
+> [**move or rename file or directory (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/file-system/POST/files/move)
