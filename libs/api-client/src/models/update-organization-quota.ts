@@ -92,5 +92,11 @@ export interface UpdateOrganizationQuota {
      * @memberof UpdateOrganizationQuota
      */
     'sandboxLifecycleRateLimitTtlSeconds': number | null;
+    /**
+     * Time in minutes before an unused snapshot is deactivated
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
+    'snapshotDeactivationTimeoutMinutes': number | null;
 }
 
