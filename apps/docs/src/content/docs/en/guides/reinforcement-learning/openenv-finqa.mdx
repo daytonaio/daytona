@@ -5,26 +5,40 @@ description: Use parallel Daytona sandboxes with OpenEnv's FinQA environment to 
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-{/* import rewardsPlot from '../../../../../assets/docs/images/openenv-finqa-rewards-plot.png' */}
-{/* import { Image } from 'astro:assets' */}
+import rewardsPlot from '../../../../../assets/docs/images/openenv-finqa-rewards-plot.png'
+import { Image } from 'astro:assets'
 
-This guide demonstrates how to use [OpenEnv](https://github.com/meta-pytorch/OpenEnv) with Daytona sandboxes to train and evaluate language models on [FinQA](https://huggingface.co/datasets/snorkelai/finqa-data), a financial question-answering benchmark based on SEC 10-K filings.
+Training with reinforcement learning from verified rewards — where agents interact with environments that provide ground-truth feedback — is driving rapid progress in reasoning, tool use, and code generation. But it requires scalable, isolated environments that can run in parallel. [OpenEnv](https://github.com/meta-pytorch/OpenEnv) addresses this — it's a framework for building and serving RL environments, decoupling the environment from the training loop so each instance can run in its own container. It has native support for Daytona sandboxes, enabling parallel execution across hundreds of isolated instances.
 
-We cover two modes of using the environment: a **single-episode demo** that walks through one complete interaction, and a **full GRPO training loop** that trains `Qwen3-14B` with LoRA across 500 parallel sandboxes.
+This guide walks through [FinQA](https://huggingface.co/datasets/snorkelai/finqa-data), one of OpenEnv's multi-turn, tool-calling environments. FinQA presents the model with financial questions based on SEC 10-K filings and gives it SQL tools to explore the underlying data before submitting an answer.
 
 ---
 
-### 1. Workflow Overview
+### 1. OpenEnv and Daytona
 
-Unlike single-shot code evaluation (as in the [TRL guide](/docs/guides/reinforcement-learning/trl-grpo-training)), this setup uses **multi-turn tool-calling episodes**. The model iteratively explores financial data using SQL queries before submitting a final answer.
+OpenEnv environments are standalone servers that expose a Gymnasium-style API — `reset`, `step`, `state` — over WebSocket. The environment logic (e.g. a FinQA database with SQL tools, a code execution sandbox, a web browsing agent) runs inside a container; the training loop connects as a remote client. This separation means the environment and the trainer don't share a process, a machine, or even a language — they communicate over a standard protocol.
 
-Each episode follows this cycle:
-1. **Reset**: A sandbox starts a new episode with a random financial question
-2. **Explore**: The model calls tools (`get_descriptions`, `get_table_info`, `sql_query`) to discover and query financial tables
-3. **Submit**: After gathering enough data, the model calls `submit_answer` with its answer
+Within each environment, tools are exposed via MCP (Model Context Protocol) over JSON-RPC. Clients discover available tools at runtime via `tools/list` and invoke them via `tools/call`. This is how the model's tool calls in the training loop get routed to the actual environment running inside a container.
+
+OpenEnv has a pluggable provider model for *where* environments run — local Docker, Docker Swarm, Kubernetes, or Daytona. The `DaytonaProvider` launches each environment instance as a Daytona sandbox, which gives you API-driven lifecycle management and the ability to run thousands of instances in parallel without local infrastructure. In the training loop, each of the 500 sandboxes is an independent FinQA environment with its own persistent WebSocket connection.
+
+What makes this scale practical is the snapshot workflow: Daytona snapshots pre-package the environment server and dataset into a container image. Sandboxes created from a snapshot start in ~100 ms, so you're not installing packages or downloading datasets 500 times.
+
+### 2. Workflow Overview
+
+We cover two modes of using the FinQA environment:
+
+- **`run.py`** — A single-episode demo that creates one sandbox, runs one complete interaction, and tears down. Useful for understanding the environment and verifying your setup.
+- **`train.py`** — A full GRPO training loop that creates 500 sandboxes, collects multi-turn rollouts in parallel with batched vLLM generation, runs policy gradient updates with LoRA, and hot-swaps adapters into vLLM between iterations.
+
+Both modes use the same underlying episode structure. Each episode is a multi-turn, tool-calling interaction:
+
+1. **Reset**: A sandbox starts a new episode with a random financial question about a company
+2. **Explore**: The model calls tools to discover tables, inspect schemas, and run SQL queries against that company's 10-K data
+3. **Submit**: After gathering enough data, the model calls `submit_answer` with its computed answer
 4. **Reward**: The environment returns a binary reward (1.0 = correct, 0.0 = wrong)
 
-The available tools in the FinQA environment are:
+The available tools are:
 
 | Tool | Description |
 |------|-------------|
@@ -33,11 +47,7 @@ The available tools in the FinQA environment are:
 | `sql_query(query)` | Run a SQL query against the company's 10-K data |
 | `submit_answer(answer)` | Submit a final answer (terminates the episode) |
 
-**Single-episode demo (`run.py`)**: Creates one sandbox, runs one episode, observes the reward, tears down.
-
-**Full training (`train.py`)**: Creates 500 sandboxes, collects multi-turn rollouts in parallel with batched vLLM generation, groups episodes by question for GRPO advantage computation, runs policy gradient updates with LoRA, and hot-swaps adapters into vLLM between iterations.
-
-### 2. Setup
+### 3. Setup
 
 #### Clone the Repository
 
@@ -66,7 +76,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 #### Install Dependencies
 
 ```bash
-bash setup.sh
+pip install -e .
 ```
 
 This installs:
@@ -99,46 +109,9 @@ Before running any episodes, build a Daytona snapshot that pre-packages the FinQ
 python build_snapshot.py
 ```
 
-The snapshot builder uses Daytona's declarative Image API to create a reproducible container image:
+This uses Daytona's declarative Image API to clone the FinQA environment from the OpenEnv repo, install its dependencies, and pre-download the FinQA dataset from HuggingFace — all baked into a single container image. Sandboxes created from this snapshot start in ~100 ms with no network dependencies.
 
-<Tabs>
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    image = (
-        Image.base("ghcr.io/meta-pytorch/openenv-base:latest")
-        .workdir("/app/env")
-        .run_commands(
-            "apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*",
-            f"git clone --depth 1 {OPENENV_REPO} /tmp/openenv",
-            "cp -r /tmp/openenv/envs/finqa_env/. /app/env/",
-            "rm -rf /tmp/openenv",
-        )
-        .run_commands(
-            "pip install --no-cache-dir -e .",
-            # Pre-download FinQA dataset from HuggingFace
-            'python -c "'
-            "from huggingface_hub import snapshot_download; "
-            "snapshot_download('snorkelai/finqa-data', repo_type='dataset', local_dir='/app/env/data')"
-            '"',
-        )
-        .env({
-            "PYTHONUNBUFFERED": "1",
-            "FINQA_DATA_PATH": "/app/env/data",
-        })
-        .cmd(["sh", "-c", SERVER_CMD])
-    )
-
-    snapshot = daytona.snapshot.create(
-        CreateSnapshotParams(name="openenv-finqa", image=image),
-        on_logs=lambda line: print(f"  {line}"),
-    )
-    ```
-  </TabItem>
-</Tabs>
-
-This builds a container with the FinQA server pre-installed and the dataset pre-downloaded, so sandboxes created from this snapshot start in ~2 seconds with no network dependencies.
-
-### 3. Running a Single Episode
+### 4. Running a Single Episode
 
 The `run.py` script demonstrates the full OpenEnv + Daytona integration in a single episode. Run it with:
 
@@ -262,7 +235,7 @@ Cleaning up sandbox...
 Done.
 ```
 
-### 4. Understanding the Training Code
+### 5. Understanding the Training Code
 
 The `train.py` script (~1800 lines) implements end-to-end GRPO training with parallel rollout collection across hundreds of sandboxes. Let's walk through its key components.
 
@@ -682,7 +655,7 @@ The training loop overlaps iteration N's gradient update (on GPUs 2-3) with iter
   </TabItem>
 </Tabs>
 
-### 5. Running the Training
+### 6. Running the Training
 
 Start training with:
 
@@ -720,22 +693,283 @@ After training completes, artifacts are saved to `runs/YYYYMMDD_HHMMSS/`:
 - `rollouts.jsonl` — Per-round rollout summaries
 - `trajectories.jsonl` — Every episode with all turns (tool calls, results, reward)
 
-### 6. Training Results
+### 7. Training Results
 
-:::note[Work in Progress]
-Training results and a reward curve plot will be added once a full training run completes.
-:::
+We ran a full training run with default parameters (`--sandboxes 500 --iterations 10 --group-size 6`), training Qwen3-14B with LoRA on the FinQA task. Each episode presents the model with a financial question about a real company's SEC 10-K filing — questions like:
 
-{/* When training results are available, uncomment the Image import at the top and add:
+- *"What is the year-over-year percentage growth in Total Revenues from fiscal year 2023 to fiscal year 2024?"* (Walmart)
+- *"What is the ratio of Domestic Income to Foreign Income for continuing operations before income taxes in 2022?"* (Alphabet)
+- *"What fraction of the finance lease liability balance is due in the next twelve months?"* (Alphabet)
+- *"What is the net change in gross unrecognized tax benefits for the year ended December 31, 2024?"* (Alphabet)
+- *"Does the sum of the basic shares outstanding and the weighted average dilutive impact of awards equal the diluted shares outstanding?"* (Disney)
+
+The model must use the available tools to discover tables, inspect schemas, run SQL queries, and compute a final answer — receiving a binary reward (1.0 = correct, 0.0 = wrong). Over 10 iterations (~1,000 episodes each), accuracy more than doubled:
+
 <Image
   src={rewardsPlot}
-  alt="Rewards over training steps showing improvement"
+  alt="Rollout accuracy per iteration, rising from ~23% to ~55%"
   width={700}
   style="max-width: 100%; height: auto; margin: 1rem 0;"
 />
-*/}
 
-### 7. Configuration Options
+#### What Did the Model Actually Learn?
+
+The model did not learn a fundamentally new strategy for navigating financial databases. From iteration 1 onward, it already followed the correct pipeline — `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer`. Average turn count barely changed (4.5 → 4.8). Most of the training's impact came from **two specific behavioral fixes** that removed systematic failure modes, plus a set of subtler improvements in data interpretation.
+
+#### The Year-Column Quoting Fix
+
+This was the single biggest win. The FinQA database uses year strings as column names (`"2024"`, `"2023"`, `"2022"`). In SQLite, writing `SELECT 2024 FROM table` returns the **integer literal** 2024, not the data in column `"2024"`. The correct syntax is `SELECT "2024" FROM table`.
+
+In early training, the model consistently wrote unquoted year columns:
+
+```sql
+-- Iteration 1: Unquoted year columns (BROKEN)
+SELECT 2024, 2023 FROM us_gaap_ScheduleOfRevenuesFromExternalCustomers...
+  WHERE operation_type = 'total_revenues'
+
+-- Returns: [{"2024": 2024, "2023": 2023}]  ← integer literals, not data!
+```
+
+The model received back the same number it asked for — `2024` — instead of the actual revenue figure like `$648,125`. With garbage in, every downstream computation was wrong.
+
+By iteration 8, the model had completely learned to quote:
+
+```sql
+-- Iteration 8+: Quoted year columns (CORRECT)
+SELECT "2024" AS rev2024, "2023" AS rev2023
+  FROM us_gaap_ScheduleOfRevenuesFromExternalCustomers...
+  WHERE operation_type = 'total_revenues'
+
+-- Returns: [{"rev2024": "$648,125", "rev2023": "$611,289"}]  ← actual data
+```
+
+The adoption curve was dramatic:
+
+| Iteration | Quoted SQL Queries | Integer-Echo Bug Rate | `SELECT *` Rate |
+|-----------|--------------------|-----------------------|-----------------|
+| 1 | 22% | 22.4% | 7.8% |
+| 3 | 20% | 21.9% | 6.9% |
+| 5 | 44% | 8.5% | 4.2% |
+| 7 | 94% | 0.0% | 0.6% |
+| 8 | 99% | 0.0% | 0.0% |
+| 10 | **99.8%** | **0.0%** | **0.0%** |
+
+The year-echo bug directly caused ~28% of all early failures. Its complete elimination accounts for the bulk of the accuracy improvement. Note that `SELECT *` usage (which the environment rejects as "too inefficient") was also fully eliminated by iteration 8, removing another source of wasted turns.
+
+The fix did come with minor collateral damage: the model learned to quote *everything*, and in rare cases where a row value (not a column name) looks like an identifier, the over-quoting produces garbage.
+
+**Concrete example — Walmart revenue growth:**
+
+<Tabs>
+  <TabItem label="Iteration 1 (Failure)" icon="warning">
+    ```
+    Turn 1: get_descriptions("walmart") → [list of 30 tables]
+    Turn 2: get_table_info("us_gaap_ScheduleOfRevenues...") → columns: category, operation_type, 2025, 2024, 2023
+    Turn 3: sql_query("SELECT 2024, 2023 FROM ...ScheduleOfRevenues...
+                        WHERE operation_type = 'total_revenues'")
+             → [{"2024": 2024, "2023": 2023}]                    ← INTEGERS, not revenue!
+    Turn 4: submit_answer("2024: 2024, 2023: 2023")              ← Garbage
+    ```
+  </TabItem>
+  <TabItem label="Iteration 8 (Success)" icon="approve-check">
+    ```
+    Turn 1: get_descriptions("walmart") → [same tables]
+    Turn 2: get_table_info("us_gaap_ScheduleOfRevenues...") → [same schema]
+    Turn 3: sql_query('SELECT "2024" as rev2024, "2023" as rev2023
+                        FROM ...ScheduleOfRevenues...
+                        WHERE operation_type = \'total_revenues\'')
+             → [{"rev2024": "$648,125", "rev2023": "$611,289"}]   ← Real data
+    Turn 4: submit_answer("0.0599")                               ← Correct: (648125-611289)/611289
+    ```
+  </TabItem>
+</Tabs>
+
+**Concrete example — cascading failure from the year-echo bug (Boeing):**
+
+This trajectory shows how the bug compounds when the model doesn't recover:
+
+```
+Turn 1: get_descriptions("boeing") → [table list]
+Turn 2: get_table_info("us_gaap_ScheduleOf...") → Error: table not found
+Turn 3: get_table_info("ba_ScheduleOf...") → columns: item, 2024, 2023   ← Found via company prefix
+Turn 4: sql_query("SELECT * FROM ...") → Error: SELECT * is not allowed   ← Wasted turn
+Turn 5: sql_query("SELECT 2023 FROM ... WHERE item = '...'") → [{"2023": 2023}]  ← Year echo
+Turn 6: sql_query("SELECT 2023 FROM ... WHERE item = '...'") → [{"2023": 2023}]  ← Year echo again
+Turn 7: sql_query("SELECT 2023 FROM ... WHERE item = '...'") → [{"2023": 2023}]  ← Year echo again
+Turn 8: submit_answer("0.0") → reward=0.0                                ← Out of turns, gives up
+```
+
+The model hit the table-name error (turn 2), recovered by trying a company-specific prefix (turn 3), wasted a turn on `SELECT *` (turn 4), then repeated the unquoted year query three times (turns 5-7) — never learning within the episode that it needed quotes. All 8 turns exhausted with no useful data retrieved. After training, this entire failure pattern disappears.
+
+#### Numeric Answer Formatting
+
+Early on, the model frequently submitted raw SQL results, multi-value strings, or narrative text instead of a single computed number:
+
+```
+Early answers:  "31586: 30582"    "2024: 2024, 2023: 2023"    "22935,24862"    "unknown"
+Late answers:   "0.0328"          "0.0599"                     "0.0843"          "0.3385"
+```
+
+| Iteration | Clean Numeric Answer | Multi-Value / Mixed | Unknown |
+|-----------|---------------------|---------------------|---------|
+| 1 | 56% | 42% | 2.0% |
+| 5 | 80% | 18% | 1.8% |
+| 10 | **93%** | 5% | 1.4% |
+
+This mattered enormously because the reward function expects a single value. Multi-value submissions like `"31586: 30582"` were always graded as wrong even when the underlying data was correct. The model learned through GRPO that the rewarded behavior is to *compute* the answer (e.g., percentage change, ratio) and submit a single decimal.
+
+This is a net-positive learning — it fixes the vast majority of questions (~90%), which ask for a single ratio or percentage. But it's a blunt instrument. The model internalized "single decimal = reward" without learning "...except when the question asks for multiple values." This caused a few regressions: one Alphabet question asks for nonoperating income across three years. Early on, the model answered `"2022: -3514, 2023: 1424, 2024: 7425"` — correct multi-value format, rewarded. After training hammered in the single-decimal habit, it tried to compress three years into one number and failed. The same learning that fixed 90% of answer formatting broke the ~5% of questions that legitimately need multi-value answers.
+
+**Concrete example — raw data dump to computed ratio (GM):**
+
+<Tabs>
+  <TabItem label="Iteration 1 (Failure)" icon="warning">
+    ```
+    Turn 3: sql_query("SELECT december_31_2024, december_31_2023
+                        FROM ...LessorOperatingLease...
+                        WHERE line_item = 'leased_vehicles,_net'")
+             → [{"december_31_2024": "$31,586", "december_31_2023": "$30,582"}]
+    Turn 4: submit_answer("31586: 30582")                   ← Dumps both values
+    ```
+  </TabItem>
+  <TabItem label="Iteration 9 (Success)" icon="approve-check">
+    ```
+    Turn 3: sql_query('SELECT "december_31_2024", "december_31_2023"
+                        FROM ...LessorOperatingLease...
+                        WHERE line_item = \'leased_vehicles,_net\'')
+             → [{"december_31_2024": "$31,586", "december_31_2023": "$30,582"}]
+    Turn 4: submit_answer("0.0328")                          ← Computes (31586-30582)/30582
+    ```
+  </TabItem>
+</Tabs>
+
+#### Parenthetical Negative Notation
+
+SEC filings use `$(X)` to denote negative values (accounting convention). Early on, the model missed the negative sign:
+
+**Concrete example — Ford, return on plan assets ratio:**
+
+<Tabs>
+  <TabItem label="Iteration 1 (Failure)" icon="warning">
+    ```
+    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    Turn 4: submit_answer("0.6666666666666666")              ← Positive! Missed the $(6) = -6
+    ```
+  </TabItem>
+  <TabItem label="Iteration 9 (Success)" icon="approve-check">
+    ```
+    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    Turn 4: submit_answer("-0.6666666666666666")             ← Negative! Correctly interprets $(6) as -6
+    ```
+  </TabItem>
+</Tabs>
+
+The model learned that parenthetical dollar amounts like `$(6)` represent negative values — a domain-specific convention that required RL signal to internalize.
+
+#### Adaptive Error Recovery
+
+Later iterations show the model recovering from failed queries rather than getting stuck.
+
+**Concrete example — empty results, retry with modified filter (Microsoft):**
+
+```
+Turn 3: sql_query(WHERE expense_type='interest...' AND expense_type='total...')
+         → []                                             ← Empty! (impossible AND)
+Turn 4: sql_query(WHERE expense_type='interest_on_lease_liabilities')
+         → [{"year_ended_june_30_2022": "$429"}]          ← Split query works
+Turn 5: sql_query(WHERE expense_type='total_finance_lease_cost')
+         → [{"year_ended_june_30_2022": "$1,409"}]
+Turn 6: submit_answer("0.304")                            ← Correct: 429/1409
+```
+
+**Concrete example — blank row labels for totals (Caterpillar):**
+
+```
+Turn 3: sql_query(WHERE component='u.s.') → [{"2022": "$2,962"}]       ← Got numerator
+Turn 4: sql_query(WHERE component='total') → []                         ← Empty! No "total" row
+Turn 5: sql_query(WHERE component='total') → []                         ← Retries, still empty
+Turn 6: sql_query(WHERE component='') → [{"2022": "$8,752"}]            ← Finds total in blank row!
+Turn 7: submit_answer("0.3385")                                         ← Correct: 2962/8752
+```
+
+The model learned that some SEC filing tables use blank row labels for totals — a dataset-specific convention it discovered through trial and error across training.
+
+#### Shortcut Arithmetic
+
+The model learned to identify questions where all numeric values are embedded directly in the question text, and skip database exploration entirely:
+
+```
+Question: "What is the equity-to-asset ratio computed as net acquired assets including
+           goodwill (9,638 million USD) divided by total assets (20,461 million USD)?"
+
+Turn 1: submit_answer("0.4708")   ← Computed 9638/20461 immediately, no tools needed
+```
+
+There are ~130 such 1-turn successes in late training (99.4% accuracy), representing an efficient learned optimization. The model recognizes when it has enough information to answer without exploring the database.
+
+#### SQL Quality
+
+The overall SQL error rate dropped from 8.3% to 0.5% across training:
+
+| Iteration | SQL Calls | Errors | Error Rate |
+|-----------|-----------|--------|------------|
+| 1 | 2,462 | 204 | 8.3% |
+| 3 | 1,630 | 113 | 6.9% |
+| 5 | 1,506 | 67 | 4.4% |
+| 7 | 1,515 | 23 | 1.5% |
+| 10 | 1,814 | 9 | **0.5%** |
+
+The dominant error source was `SELECT *` (634 of 708 total errors, 89.5%), which the environment blocks as "too inefficient." This was completely eliminated by iteration 8.
+
+Interestingly, the model's SQL queries became *simpler* over training. Usage of aggregations (`SUM`, `COUNT`, etc.) and `CAST` operations declined, while `LIMIT` usage increased. The model learned that targeted, simple queries with precise WHERE clauses are more reliable than complex aggregations — a reasonable strategy given the table structures.
+
+#### What Still Fails
+
+Even at 55% accuracy, nearly half the episodes fail. The nature of failures shifted dramatically over training:
+
+**Early failures**: Dominated by the year-echo bug (28%), raw data dumps (20%), and `SELECT *` errors (8%). These are *systematic* bugs that affect almost every question.
+
+**Late failures**: Almost entirely **"has correct data, computes wrong answer"**. The model retrieves the right numbers from the right table but produces an incorrect final answer. The information retrieval problem is solved; the arithmetic/interpretation problem remains.
+
+**"Net change" vs "percentage change" confusion** — the most systematic remaining failure. When a question asks for "net change" or "absolute change" (expecting a dollar amount), the model computes a percentage instead:
+
+```
+Question: "What is the net change in unrecognized tax benefits from Dec 31, 2021 to Dec 31, 2022?"
+
+Data retrieved: Dec 2021 = $531M, Dec 2022 = $870M
+Expected answer: 870 - 531 = 339  (absolute difference)
+Model submits:   0.635             (percentage change: (870-531)/531)
+```
+
+All 23 attempts on this question across late training submit exactly `0.635` — the model has converged to a consistent-but-wrong policy. The GRPO training signal pushed the model toward "always output a ratio/percentage," which is correct for ~80% of questions but wrong for absolute-change questions. Hence, the model found a mode that works for most questions and cannot escape it.
+
+**Sign errors on decreasing values** — when a value decreases year-over-year, the percentage change should be negative. The model frequently submits the absolute value:
+
+```
+Question: "Percentage change in Life and Health premiums from 2023 to 2024?"
+
+Data: 2024 = $5,007, 2023 = $5,093
+Correct: (5007-5093)/5093 = -0.0169
+Model submits: 0.0169 (positive — wrong sign)
+```
+
+This error is perfectly consistent across all 19 attempts on this question, showing a systematic blind spot rather than random error.
+
+#### Summary
+
+1. **The model's exploration strategy was already correct from iteration 1.** The `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer` pipeline was established from the start. GRPO did not need to teach the model *how* to use tools.
+
+2. **Two specific behavioral fixes drove most of the improvement:** quoting year-string column names in SQL (22% → 99.8% adoption) and submitting single numeric answers instead of raw data (56% → 93%).
+
+3. **The remaining gains came from subtler improvements:** parsing parenthetical negatives as negative values, recovering from empty query results, and learning company/table-specific conventions (like blank-row totals).
+
+4. **The residual error is an arithmetic/interpretation problem, not an information retrieval problem.** The vast majority of late failures have the correct data but compute the wrong answer.
+
+5. **GRPO's group-based advantage signal was effective at eliminating systematic bugs** (year-echo, `SELECT *`) but insufficient to escape local optima for answer formatting (percentage vs absolute change). Longer training or a more nuanced reward signal might address the remaining failures.
+
+### 8. Training Configuration
+
+The `train.py` script accepts the following command-line arguments:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
