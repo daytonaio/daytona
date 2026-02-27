@@ -18,6 +18,20 @@
         }
       ]
     },
+    "storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "storybook dev -p 6006 -c .storybook",
+        "cwd": "apps/dashboard"
+      }
+    },
+    "build-storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "storybook build -c .storybook -o ../../dist/storybook",
+        "cwd": "apps/dashboard"
+      }
+    },
     "format": {
       "executor": "nx:run-commands",
       "options": {
