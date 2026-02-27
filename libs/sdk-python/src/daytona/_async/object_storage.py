@@ -37,6 +37,7 @@ class AsyncObjectStorage:
         bucket_name: str = "daytona-volume-builds",
     ):
         self.bucket_name: str = bucket_name
+        # obstore (Rust object_store crate) does not send AWS-specific checksum headers — s3proxy compatible as-is.
         with isolated_env():
             self.store: S3Store = S3Store(
                 bucket=bucket_name,
