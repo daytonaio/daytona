@@ -1,0 +1,213 @@
+---
+title: Codex SDK と Daytona を用いてコーディングエージェントを構築する
+description: OpenAI Codex と Daytona サンドボックスを利用して、自律的に動作するコーディングエージェントを構築するためのステップバイステップガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import codexSdkLunarLanderResult from '../../../../../assets/docs/images/codex-sdk-lunar-lander-result.gif'
+
+このガイドでは、[OpenAI Codex](https://chatgpt.com/features/codex) を基盤とした自律的に動作するコーディングエージェントを Daytona のサンドボックス環境内で実行する方法を説明します。エージェントはフルスタック Web アプリケーションを開発し、あらゆる言語でコードを書き、依存関係をインストールし、スクリプトを実行できます。また、開発サーバーを起動および管理し、稼働中のアプリ向けにプレビューリンクを生成することもできます。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+メインモジュールを起動すると、Daytona のサンドボックスが作成され、その中で Node.js エージェントが初期化されます。エージェントは [Codex SDK](https://developers.openai.com/codex/sdk/) を基盤としています。
+
+コマンドラインベースのチャットインターフェースを通じてメインプログラムと対話します。プログラムはプロンプトをサンドボックス内のエージェントに送信し、エージェントがそれを実行して結果を返します。
+
+```
+$ npm run start
+Creating sandbox...
+Installing Codex agent in sandbox...
+Press Ctrl+C at any time to exit.
+User: create a 3d animated web-based, lunar lander game
+Thinking...
+🔨 ✓ Run: /bin/sh -lc ls
+🔨 ✓ Run: /bin/sh -lc 'ls -a'
+🔨 ✓ Run: /bin/sh -lc 'ls .daytona'
+🔨 ✓ Run: /bin/sh -lc 'find /home/daytona -maxdepth 4 -name .git'
+📝 Add /home/daytona/index.html
+📝 Add /home/daytona/style.css
+📝 Add /home/daytona/main.js
+📝 Update /home/daytona/main.js
+- Built a self-contained 3D lunar lander experience with HUD in index.html wired to main.js.
+- Styled a glassy mission card, typography, and neon accents in style.css.
+- Implemented the Three.js scene in main.js: starfield + noisy terrain with a flattened pad, modeled lander, thrust/fuel/rotation controls, gravity/drag physics, landing/crash checks, exhaust particles, and a chase camera. Controls: Space/↑ thrust, ←/→ yaw, W/S pitch, R restart.
+
+Next steps:
+1) Serve locally (e.g., cd /home/daytona && python3 -m http.server 8080) and open https://8080-e7c5deb5-7723-4bb8-93c6-25258d9b7c53.proxy.daytona.works.
+2) Tune physics constants or terrain size if you want a harder/easier landing.
+🗒️ To-do list:
+- [x] Inspect workspace and set up project structure for web-based lunar lander game
+- [x] Implement 3D scene, lunar lander controls, physics, and game loop
+- [x] Add UI elements, polish, and quick sanity check (open file if feasible)
+Usage Summary: Cached: 71936, Input: 103238, Output: 11311
+User: start the server
+Thinking...
+🔨 ✓ Run: /bin/sh -lc 'cd /home/daytona && nohup python3 -m http.server 8080 --bind 0.0.0.0 >/home/daytona/server.log 2>&1 & echo $!'
+Server started on port 8080 (pid 274). Open the game at:
+https://8080-e7c5deb5-7723-4bb8-93c6-25258d9b7c53.proxy.daytona.works
+
+If you need to stop it later: kill 274.
+Usage Summary: Cached: 4096, Input: 22231, Output: 272
+User:
+Cleaning up...
+```
+
+エージェントは Web アプリをホストし、Daytona の [Preview Links](https://www.daytona.io/docs/en/preview-and-authentication/) 機能を利用してプレビューリンクを提供することもできます。タスクに Web アプリケーションの実行やプレビューが含まれている場合、エージェントがその必要性を自動的に判断し、アプリをホストして、ライブの結果を確認できるプレビューリンクを生成します。
+
+<Image src={codexSdkLunarLanderResult} alt="Codex コーディングエージェントによって生成されたルナーランダーゲームのデモ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+作業が完了するまで、エージェントとの対話を継続できます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytona の[リポジトリ](https://github.com/daytonaio/daytona.git)をクローンし、example ディレクトリに移動してください。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/openai/codex-sdk
+```
+
+#### 環境設定 \{#configure-environment\}
+
+API キーを取得します：
+
+* **Daytona API キー:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
+* **OpenAI API キー:** [OpenAI Developer Platform](https://platform.openai.com/api-keys)
+
+`.env.example` を `.env` にコピーし、取得したキーを追加します：
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+SANDBOX_OPENAI_API_KEY=your_openai_key
+```
+
+:::caution[API キーのセキュリティ]
+注意: `SANDBOX_OPENAI_API_KEY` キーは Daytona のサンドボックス環境に渡され、サンドボックス内で実行されるすべてのコードからアクセス可能です。
+:::
+
+#### ローカルでの利用 \{#local-usage\}
+
+:::note[Node.js のバージョン]
+この例を実行するには Node.js 18 以降が必要です。続行する前に、環境がこの要件を満たしていることを確認してください。
+:::
+
+依存関係をインストールします:
+
+```bash
+npm install
+```
+
+エージェントを実行する：
+
+```bash
+npm run start
+```
+
+エージェントが起動し、あなたからのプロンプト入力を待機します。
+
+### 3. エージェントのアーキテクチャについて \{#3-understanding-the-agents-architecture\}
+
+この例は、2 つの主要なコンポーネントで構成されています。
+
+* **メインプログラム:** メインプログラムはローカルマシン上で動作する Node.js スクリプト (`src/index.ts`) です。Daytona SDK を使用して Daytona サンドボックスを作成および管理します。メインプログラムは、サンドボックス内のエージェントと対話するためのコマンドラインインターフェースを提供します。
+* **サンドボックスエージェント:** サンドボックスエージェントは Daytona サンドボックス内で動作する Node.js スクリプト (`agent/index.ts`) です。Codex SDK を使用してカスタマイズされたコーディングエージェントを作成します。
+
+#### 初期化 \{#initialization\}
+
+初期化時にメインプログラムは次の処理を行います：
+
+1. 環境変数に OpenAI API キーを含めて、新しい [Daytona サンドボックス](/docs/ja/sandboxes) を作成します。
+2. Codex のシステムプロンプトを Daytona 固有の指示で構成し、その内容をサンドボックス内の `.codex/config.toml` ファイルに書き込みます。
+3. [ファイルアップロード](/docs/file-system-operations#uploading-a-single-file) を使って、エージェントパッケージをサンドボックスにアップロードします。
+4. アップロードしたエージェントディレクトリ内で `npm install` を実行して、エージェントの依存関係をインストールします。
+5. ユーザー入力を待ち、各プロンプトに対してエージェントを非同期に実行します。
+
+#### メインプログラムコード \{#main-program-code\}
+
+Codex のカスタムシステムプロンプトは `.codex/config.toml` ファイルを通じて設定する必要があるため、メインプログラムはエージェントを起動する前にサンドボックス内にこのファイルを作成します。
+
+```typescript
+const systemPrompt = [
+  'You are running in a Daytona sandbox.',
+  'Use the /home/daytona directory instead of /workspace for file operations.',
+  `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
+].join(' ')
+const config = `developer_instructions = "${systemPrompt}"`
+await sandbox.fs.createFolder('.codex', '755')
+await sandbox.fs.uploadFile(Buffer.from(config, 'utf8'), '.codex/config.toml')
+```
+
+このプロンプトは、Daytona のサンドボックスに対して正しいファイルパスおよびプレビューリンクの形式を使用するよう、エージェントに指示します。
+
+依存関係のインストールが完了すると、メインプログラムはループに入り、ユーザー入力を読み取ってエージェントに送信します。各ユーザープロンプトを受信するたびに、新しい Daytona プロセスセッションを作成し、エージェントコマンドを非同期に実行して、その出力をストリーミングで返します。
+
+```typescript
+// Create a session to stream the agent output
+const sessionId = `codex-session-${Date.now()}`
+await sandbox.process.createSession(sessionId)
+
+// Run the agent asynchronously, passing the prompt and OpenAI API key
+const command = await sandbox.process.executeSessionCommand(sessionId, {
+  command: `${environmentPrefix({ PROMPT: prompt })} npm exec --prefix /tmp/agent tsx -- /tmp/agent/index.ts`,
+  runAsync: true,
+})
+
+// Stream agent output as it arrives
+if (!command.cmdId) throw new Error('サンドボックス内でエージェントコマンドの起動に失敗しました')
+await sandbox.process.getSessionCommandLogs(
+  sessionId,
+  command.cmdId,
+  onStdout,
+  onStderr,
+)
+
+// Delete the session
+await sandbox.process.deleteSession(sessionId)
+```
+
+`onStdout` と `onStderr` の各コールバックは、エージェントの出力をメインプログラムへ渡すために使用されます。エージェントがプロンプトへの応答を終えると、メインプログラムは次のユーザー入力を待機します。
+
+#### サンドボックスエージェントのコード \{#sandbox-agent-code\}
+
+サンドボックスエージェントは、[Codex SDK](https://developers.openai.com/codex/sdk/) を使用して独自のコーディングエージェントを作成します。
+エージェントは、ワークスペースディレクトリを含むカスタムオプションで初期化されます。
+
+```typescript
+// Codexオプションを設定
+const options: ThreadOptions = {
+  workingDirectory: '/home/daytona',
+  skipGitRepoCheck: true,
+  sandboxMode: 'danger-full-access',
+}
+```
+
+エージェントはリクエスト間のスレッド状態を保持するためにスレッド ID をファイルに書き出し、複数回のやり取りにわたってコンテキストを維持します。
+
+```typescript
+const threadIdPath = '/tmp/codex-thread-id'
+const threadId = (await readFileIfExisting(threadIdPath))?.trim()
+const thread: Thread = threadId 
+  ? codex.resumeThread(threadId, options) 
+  : codex.startThread(options)
+```
+
+エージェントのレスポンスをストリーミングするための追加コードは、OpenAI の [Codex SDK ドキュメント](https://github.com/openai/codex/blob/main/sdk/typescript/README.md) にあるサンプルコードに倣っています。
+
+#### クリーンアップ \{#clean-up\}
+
+メインプログラムを終了すると、Daytona サンドボックスとその中のすべてのファイルは自動的に削除されます。
+
+**主な利点:**
+
+* Daytona サンドボックス内での安全かつ隔離された実行
+* ターミナルから直接エージェントと対話できます
+* 開発サーバーの自動検出とライブプレビューリンク
+* 複数言語およびフルスタック開発のサポート
+* 複数リクエスト間でのスレッドの永続化
+* シンプルなセットアップと自動クリーンアップ
