@@ -140,6 +140,8 @@
   "sidebarconfig.googleAdk": "Google ADK",
   "sidebarconfig.lettacode": "Letta Code",
   "sidebarconfig.trlGrpo": "TRL",
+  "sidebarconfig.reinforcementLearning": "Reinforcement Learning",
+  "sidebarconfig.openenvFinqa": "OpenEnv FinQA",
   "sidebarconfig.rlm": "RLMs",
   "sidebarconfig.recursiveLms": "RLMs",
   "sidebarconfig.dspyRlms": "RLMs via DSPy",
