@@ -1,0 +1,160 @@
+---
+title: "SnapshotService"
+hideTitleOnPage: true
+---
+
+## SnapshotService \{#snapshotservice\}
+
+Daytona SDK の SnapshotService クラスです。
+
+### コンストラクタ \{#constructors\}
+
+#### new SnapshotService() \{#new-snapshotservice\}
+
+```ruby
+def initialize(snapshots_api:, object_storage_api:, default_region_id:, otel_state:)
+
+```
+
+**パラメーター**:
+
+* `snapshots_api` *DaytonaApiClient:SnapshotsApi* - スナップショット API クライアント
+* `object_storage_api` *DaytonaApiClient:ObjectStorageApi* - オブジェクトストレージ API クライアント
+* `default_region_id` *String, nil* - スナップショット作成時のデフォルトリージョン ID
+* `otel_state` *Daytona:OtelState, nil* -
+
+**戻り値**:
+
+* `SnapshotService` - `SnapshotService` の新しいインスタンス
+
+### メソッド \{#methods\}
+
+#### list() \{#list\}
+
+```ruby
+def list(page:, limit:)
+
+```
+
+すべてのスナップショットの一覧を取得します。
+
+**パラメータ**:
+
+* `page` *Integer, Nil* -
+* `limit` *Integer, Nil* -
+
+**戻り値**:
+
+* `Daytona:PaginatedResource` - すべてのスナップショットのページネーションされたリスト
+
+**スローされる例外**:
+
+* `Daytona:Sdk:Error` -
+
+**使用例:**
+
+```ruby
+daytona = Daytona::Daytona.new
+response = daytona.snapshot.list(page: 1, limit: 10)
+snapshots.items.each { |snapshot| puts "#{snapshot.name} (#{snapshot.image_name})" }
+
+```
+
+#### delete() \{#delete\}
+
+```ruby
+def delete(snapshot)
+
+```
+
+スナップショットを削除します。
+
+**パラメータ**:
+
+* `snapshot` *Daytona:Snapshot* - 削除するスナップショット
+
+**戻り値**:
+
+* `void`
+
+**例:**
+
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get("demo")
+daytona.snapshot.delete(snapshot)
+puts "スナップショットが削除されました"
+
+```
+
+#### get() \{#get\}
+
+```ruby
+def get(name)
+
+```
+
+名前を指定してスナップショットを取得します。
+
+**パラメータ**:
+
+* `name` *String* - 取得するスナップショットの名前
+
+**戻り値**:
+
+* `Daytona:Snapshot` - スナップショットオブジェクト
+
+**使用例:**
+
+```ruby
+daytona = Daytona::Daytona.new
+snapshot = daytona.snapshot.get("demo")
+puts "#{snapshot.name} (#{snapshot.image_name})"
+
+```
+
+#### create() \{#create\}
+
+```ruby
+def create(params, on_logs:)
+
+```
+
+指定された Image 定義に基づいて新しいスナップショットを作成し、登録します。
+
+**Parameters**:
+
+* `params` *Daytona:CreateSnapshotParams* - スナップショット作成のためのパラメータ
+* `on_logs` *Proc, Nil* - スナップショット作成時のログを処理するコールバック `proc`
+
+**Returns**:
+
+* `Daytona:Snapshot` - 作成されたスナップショット
+
+**Examples:**
+
+```ruby
+image = Image.debianSlim('3.12').pipInstall('numpy')
+params = CreateSnapshotParams.new(name: 'my-snapshot', image: image)
+snapshot = daytona.snapshot.create(params) do |chunk|
+  print chunk
+end
+
+```
+
+#### activate() \{#activate\}
+
+```ruby
+def activate(snapshot)
+
+```
+
+スナップショットを有効化する
+
+**パラメータ**:
+
+* `snapshot` *Daytona:Snapshot* - スナップショットのインスタンス
+
+**戻り値**:
+
+* `Daytona:Snapshot`

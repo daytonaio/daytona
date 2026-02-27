@@ -1,0 +1,256 @@
+---
+title: Daytona CLI 経由で Daytona サンドボックス内で OpenClaw を実行する
+description: Daytona CLI を使用して Daytona サンドボックス内で OpenClaw を実行し、Telegram と WhatsApp に対応したセキュアで分離された常時稼働の AI アシスタントを実現する方法を説明します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+このガイドでは、Daytona サンドボックス内に [OpenClaw](https://openclaw.ai/) をセットアップし、Telegram と WhatsApp のチャネルを設定する手順を説明します。
+
+Daytona サンドボックスで OpenClaw を実行することで、AI アシスタントをローカルマシンから切り離し、コード実行のためのセキュアな環境を提供し、個人のコンピューターを占有することなくボットを 24 時間 365 日オンラインの状態に保てます。
+
+### 前提条件 \{#prerequisites\}
+
+* Daytona アカウントと API キー（[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得可能）
+* ローカル環境のターミナル（macOS、Linux、または Windows）
+
+### Daytona CLI をインストールする \{#install-the-daytona-cli\}
+
+<Tabs syncKey="os">
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
+
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+すでに CLI をインストール済みの場合は、`daytona --version` でバージョンを確認してください。**0.135.0** 未満の場合は、[最新バージョンにアップグレード](https://www.daytona.io/docs/en/getting-started/#cli)してください。
+:::
+
+### Daytona で認証する \{#authenticate-with-daytona\}
+
+API キーを使用して、Daytona アカウントにログインします。
+
+```bash
+daytona login --api-key=YOUR_API_KEY
+```
+
+`YOUR_API_KEY` をご自身の Daytona API キーに置き換えてください。
+
+### サンドボックスを作成する \{#create-a-sandbox\}
+
+OpenClaw を実行するためのサンドボックスを作成します。
+
+```bash
+daytona sandbox create --name openclaw --snapshot daytona-medium --auto-stop 0
+```
+
+OpenClaw はデフォルトの Daytona スナップショットにあらかじめインストールされているため、上記のコマンドだけで済みます。
+
+:::note
+`--auto-stop 0` フラグは自動シャットダウンを無効にし、サンドボックスを手動で停止または削除するまで OpenClaw へのアクセスを維持します。OpenClaw ゲートウェイには最低 2GB のメモリが必要なため、`daytona-medium` スナップショットを使用する必要があります。
+:::
+
+### サンドボックスに接続する \{#connect-to-the-sandbox\}
+
+SSH でサンドボックスに接続します:
+
+```bash
+daytona ssh openclaw
+```
+
+### OpenClaw のオンボーディングを開始する \{#run-openclaw-onboarding\}
+
+オンボーディングプロセスを開始します：
+
+```bash
+openclaw onboard
+```
+
+:::note
+以下のモデルプロバイダに関する手順は Anthropic 向けです。別のプロバイダを使用する場合は、選択したオプションに応じた指示に従ってください。
+:::
+
+画面の指示に従って進めます:
+
+1. **Security acknowledgment:** 同意して続行
+2. **Onboarding mode:** **Quickstart** を選択
+3. **Model/auth provider:** **Anthropic** を選択
+4. **Anthropic auth method:** **Anthropic API key** を選択
+5. **Enter Anthropic API key:** API キーをペースト
+6. **Default model:** 現在の設定を維持 (デフォルト: `anthropic/claude-opus-4-5`)
+7. **Select channel:** **Skip for now** を選択（チャネルは後で設定します）
+8. **Configure skills:** **No** を選択（必要に応じて後で設定します）
+9. **Enable hooks:** **Skip for now** を選択（必要に応じて後で設定します）
+10. **Gateway service:** **Skip** を選択（すでにインストール済み）
+
+オンボーディングが完了すると、出力結果にダッシュボードへのリンクを含む **Dashboard ready** セクションが表示されます。Gateway トークンは、その URL 内の `?token=` 以降の値です。このトークンはダッシュボードに接続する際に必要になるため、必ず保存してください。
+
+また、OpenClaw から **Install shell completion script?** と尋ねられますが、これは任意のため、どちらを選んでも構いません。機能には影響しません。
+
+### Gateway を起動する \{#start-the-gateway\}
+
+Gateway をバックグラウンドで実行します:
+
+```bash
+nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
+```
+
+`&` はゲートウェイをバックグラウンドプロセスとして実行し、他のコマンドを実行できるようにターミナルを空けておきます。`nohup` は、SSH 接続を閉じた後でもゲートウェイが動作し続けるようにします。
+
+### ダッシュボードにアクセスする \{#access-the-dashboard\}
+
+OpenClaw ダッシュボードは、アシスタントの管理、接続の監視、チャネルの設定を行うための Web インターフェースです。これにアクセスするには、サンドボックス内で動作しているゲートウェイポートを公開する [preview URL](https://www.daytona.io/docs/en/preview/) が必要です。
+
+ローカル環境のターミナル（サンドボックスの SSH セッション内ではない）で、preview URL を生成します。
+
+```bash
+daytona preview-url openclaw --port 18789
+```
+
+このコマンドは、ポートを安全に公開する[署名付きプレビュー URL](https://www.daytona.io/docs/en/preview/#signed-preview-url)を生成します。
+
+ブラウザで生成された URL を開き、**Overview** セクションを開き、**Gateway Token** フィールドにゲートウェイ トークンを貼り付けて、**Connect** をクリックします。
+
+:::tip
+プレビュー URL はデフォルトで 1 時間で有効期限が切れます（`--expires` フラグで変更可能）。有効期限が切れた場合は、同じ CLI コマンドを再度実行して新しい URL を生成してください。
+:::
+
+### ブラウザをペアリングする \{#pair-your-browser\}
+
+OpenClaw はセキュリティ対策としてデバイスのペアリングを使用します。承認されたデバイスのみが、アシスタントに接続して操作できます。ダッシュボードから初めて接続を行うとき、利用中のブラウザは承認が必要な新しいデバイスとして登録されます。
+
+保留中のデバイスリクエストを一覧表示します：
+
+```bash
+openclaw devices list
+```
+
+デバイスを承認する：
+
+```bash
+openclaw devices approve REQUEST_ID
+```
+
+`REQUEST_ID` を **Request** 列の値に置き換えてください。
+
+ダッシュボードで **Connect** をもう一度クリックします。
+
+接続されると、ステータスインジケーターが緑色になります。これで OpenClaw を使用する準備が整いました。
+
+### セキュリティ \{#security\}
+
+この方法で OpenClaw を実行すると、3 つのセキュリティレイヤーが提供されます:
+
+1. **プレビュー URL:** ダッシュボードポートへの時間制限付きアクセス
+2. **ゲートウェイトークン:** ダッシュボードへの認証に必要
+3. **デバイス承認:** 承認されたデバイスのみが接続してアシスタントを操作可能
+
+誰かがダッシュボードの URL を入手したとしても、ゲートウェイトークンと承認済みデバイスがなければ接続できません。
+
+:::caution
+ゲートウェイトークンとプレビュー URL は厳重に管理してください。公開の場で共有しないでください。
+:::
+
+***
+
+### Telegram を設定する \{#configure-telegram\}
+
+OpenClaw とチャットするための Telegram ボットを作成します。
+
+#### Telegram ボットを作成する \{#create-a-telegram-bot\}
+
+1. Telegram を開き、**@BotFather** を検索します
+2. `/start` を送信し、次に `/newbot` を送信します
+3. ボットの名前を入力します
+4. ボットのユーザー名を入力します
+5. 提供されたボットトークンをコピーします
+
+#### OpenClaw を設定する \{#configure-openclaw\}
+
+Telegram を有効化し、ボットトークンを設定します。
+
+```bash
+openclaw config set channels.telegram.enabled true
+openclaw config set channels.telegram.botToken YOUR_BOT_TOKEN
+```
+
+設定を確認します：
+
+```bash
+openclaw config get channels.telegram
+```
+
+#### ゲートウェイを再起動する \{#restart-the-gateway\}
+
+```bash
+openclaw gateway stop
+nohup openclaw gateway run > /tmp/gateway.log 2>&1 &
+```
+
+#### 認証を完了する \{#complete-verification\}
+
+1. Telegramでボットとのチャットを開き、**Start** をクリックします。
+2. ペアリングコードが表示されます。ペアリングリクエストを承認します：
+
+```bash
+openclaw pairing approve telegram PAIRING_CODE
+```
+
+これで Telegram 経由で OpenClaw にメッセージを送れるようになりました。
+
+***
+
+### WhatsApp を設定する \{#configure-whatsapp\}
+
+OpenClaw とのチャット用に WhatsApp を設定します。
+
+#### 実行設定 \{#run-configuration\}
+
+```bash
+openclaw config --section channels
+```
+
+プロンプトが表示されたら、次の手順を実行します。
+
+1. ゲートウェイの場所として **Local (this machine)** を選択します
+2. **Configure/link** を選択します
+3. **WhatsApp (QR link)** を選択します
+4. 「Link WhatsApp now (QR)?」で **Yes** を選択します
+
+#### QRコードをスキャンする \{#scan-the-qr-code\}
+
+スマートフォンで WhatsApp を開き、**Settings → Linked Devices → Link a Device** に移動して、ターミナルに表示されている QR コードをスキャンします。
+
+ペアリングが完了すると、次のように表示されます：
+
+```
+✅ Linked after restart; web session ready.
+```
+
+#### 電話番号を設定する \{#set-up-your-phone-number\}
+
+OpenClaw 用に別の電話をお持ちでない場合は **This is my personal phone number** を選択し、表示された入力欄に電話番号を入力します。別の電話をお持ちの場合は、もう一方のオプションを選択して、同様に案内に従って電話番号を入力します。
+
+#### 設定の完了 \{#finish-configuration\}
+
+別のチャネルを選択するよう求められたら、**Finished** を選択します。次のように表示されます：
+
+```
+└  Configure complete.
+```
+
+#### チャットを開始する \{#start-chatting\}
+
+WhatsApp で自分宛てにメッセージを送信してください。OpenClaw から返信が返ってきます。チャット内で、OpenClaw に対してどのように振る舞うかについての指示や情報を直接与えることができます。
+
+:::tip
+ほかのユーザーが OpenClaw とチャットできるようにするには、ダッシュボード内の **Channels → WhatsApp** の **Allow From** リストに、それぞれの電話番号を追加してください。そのユーザーがメッセージを送信すると、OpenClaw が返信します。
+:::
