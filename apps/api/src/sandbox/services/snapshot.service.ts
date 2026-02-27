@@ -296,6 +296,7 @@ export class SnapshotService {
 
       if (exists) {
         snapshot.state = SnapshotState.ACTIVE
+        snapshot.lastUsedAt = new Date()
       }
 
       try {

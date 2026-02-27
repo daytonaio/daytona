@@ -978,6 +978,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       state,
     }
 
+    if (state === SnapshotState.ACTIVE) {
+      partialUpdate.lastUsedAt = new Date()
+    }
+
     if (errorReason !== undefined) {
       partialUpdate.errorReason = errorReason
     }

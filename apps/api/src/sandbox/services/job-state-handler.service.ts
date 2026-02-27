@@ -278,6 +278,7 @@ export class JobStateHandlerService {
           this.logger.debug(`Marking snapshot ${snapshot.id} as ACTIVE after initial pull completed`)
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
+          snapshot.lastUsedAt = new Date()
           await this.snapshotRepository.save(snapshot)
         }
       } else if (job.status === JobStatus.FAILED) {
@@ -328,6 +329,7 @@ export class JobStateHandlerService {
         if (snapshot?.state === SnapshotState.BUILDING) {
           snapshot.state = SnapshotState.ACTIVE
           snapshot.errorReason = null
+          snapshot.lastUsedAt = new Date()
           await this.snapshotRepository.save(snapshot)
           this.logger.debug(`Marked snapshot ${snapshot.id} as ACTIVE after build completed`)
         }
