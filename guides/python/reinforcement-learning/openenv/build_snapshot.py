@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """Build a Daytona snapshot for finqa_env.
 
 Creates a snapshot from the openenv-base image with finqa_env installed

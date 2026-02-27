@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """GRPO training for FinQA across 1000 Daytona sandboxes.
 
 Trains Qwen3-14B with LoRA to answer financial questions using tool calls,

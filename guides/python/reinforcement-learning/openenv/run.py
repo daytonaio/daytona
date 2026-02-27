@@ -1,3 +1,6 @@
+# Copyright Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """Run a single FinQA episode on a Daytona sandbox using OpenEnv.
 
 Demonstrates the full OpenEnv + Daytona integration pattern:
