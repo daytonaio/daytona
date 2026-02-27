@@ -10,7 +10,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm'
@@ -45,8 +45,9 @@ import { nanoid } from 'nanoid'
 })
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
+@Index('idx_sandbox_volumes_gin', { synchronize: false })
 export class Sandbox {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ default: () => 'uuid_generate_v4()' })
   id: string
 
   @Column({
@@ -54,7 +55,9 @@ export class Sandbox {
   })
   organizationId: string
 
-  @Column()
+  @Column({
+    default: () => `('sandbox-'|| "substring"((gen_random_uuid()), 1, 10))`,
+  })
   name: string
 
   @Column()
@@ -205,7 +208,7 @@ export class Sandbox {
   @Column({ default: false, type: 'boolean' })
   pending: boolean | undefined = false
 
-  @Column({ default: () => 'MD5(random()::text)', type: 'text' })
+  @Column({ default: () => 'md5((random()))', type: 'character varying' })
   authToken = nanoid(32).toLocaleLowerCase()
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {

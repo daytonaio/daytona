@@ -44,7 +44,7 @@ export class Snapshot {
   @Column()
   name: string
 
-  @Column()
+  @Column({ default: '' })
   imageName: string
 
   @Column({ nullable: true })
