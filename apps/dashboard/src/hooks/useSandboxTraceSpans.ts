@@ -20,13 +20,29 @@ export function useSandboxTraceSpans(
   return useQuery<TraceSpan[]>({
     queryKey: queryKeys.telemetry.traceSpans(sandboxId ?? '', traceId ?? ''),
     queryFn: async () => {
-      if (!selectedOrganization || !sandboxId || !traceId) {
+      if (!selectedOrganization || !sandboxId || !traceId || !api.analyticsTelemetryApi) {
         throw new Error('Missing required parameters')
       }
-      const response = await api.sandboxApi.getSandboxTraceSpans(sandboxId, traceId, selectedOrganization.id)
-      return response.data
+      const response =
+        await api.analyticsTelemetryApi.organizationOrganizationIdSandboxSandboxIdTelemetryTracesTraceIdGet(
+          selectedOrganization.id,
+          sandboxId,
+          traceId,
+        )
+
+      return (response.data ?? []).map((span) => ({
+        traceId: span.traceId ?? '',
+        spanId: span.spanId ?? '',
+        parentSpanId: span.parentSpanId,
+        spanName: span.spanName ?? '',
+        timestamp: span.timestamp ?? '',
+        durationNs: (span.durationMs ?? 0) * 1_000_000,
+        spanAttributes: span.spanAttributes ?? {},
+        statusCode: span.statusCode,
+        statusMessage: span.statusMessage,
+      }))
     },
-    enabled: !!sandboxId && !!traceId && !!selectedOrganization,
+    enabled: !!sandboxId && !!traceId && !!selectedOrganization && !!api.analyticsTelemetryApi,
     staleTime: 30_000,
     ...options,
   })

@@ -117,6 +117,12 @@ export interface DaytonaConfiguration {
      */
     'billingApiUrl'?: string;
     /**
+     * Analytics API URL
+     * @type {string}
+     * @memberof DaytonaConfiguration
+     */
+    'analyticsApiUrl'?: string;
+    /**
      * SSH Gateway command
      * @type {string}
      * @memberof DaytonaConfiguration

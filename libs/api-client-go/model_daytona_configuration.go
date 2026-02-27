@@ -49,6 +49,8 @@ type DaytonaConfiguration struct {
 	Environment string `json:"environment"`
 	// Billing API URL
 	BillingApiUrl *string `json:"billingApiUrl,omitempty"`
+	// Analytics API URL
+	AnalyticsApiUrl *string `json:"analyticsApiUrl,omitempty"`
 	// SSH Gateway command
 	SshGatewayCommand *string `json:"sshGatewayCommand,omitempty"`
 	// Base64 encoded SSH Gateway public key
@@ -448,6 +450,38 @@ func (o *DaytonaConfiguration) SetBillingApiUrl(v string) {
 	o.BillingApiUrl = &v
 }
 
+// GetAnalyticsApiUrl returns the AnalyticsApiUrl field value if set, zero value otherwise.
+func (o *DaytonaConfiguration) GetAnalyticsApiUrl() string {
+	if o == nil || IsNil(o.AnalyticsApiUrl) {
+		var ret string
+		return ret
+	}
+	return *o.AnalyticsApiUrl
+}
+
+// GetAnalyticsApiUrlOk returns a tuple with the AnalyticsApiUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *DaytonaConfiguration) GetAnalyticsApiUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.AnalyticsApiUrl) {
+		return nil, false
+	}
+	return o.AnalyticsApiUrl, true
+}
+
+// HasAnalyticsApiUrl returns a boolean if a field has been set.
+func (o *DaytonaConfiguration) HasAnalyticsApiUrl() bool {
+	if o != nil && !IsNil(o.AnalyticsApiUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetAnalyticsApiUrl gets a reference to the given string and assigns it to the AnalyticsApiUrl field.
+func (o *DaytonaConfiguration) SetAnalyticsApiUrl(v string) {
+	o.AnalyticsApiUrl = &v
+}
+
 // GetSshGatewayCommand returns the SshGatewayCommand field value if set, zero value otherwise.
 func (o *DaytonaConfiguration) GetSshGatewayCommand() string {
 	if o == nil || IsNil(o.SshGatewayCommand) {
@@ -574,6 +608,9 @@ func (o DaytonaConfiguration) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.BillingApiUrl) {
 		toSerialize["billingApiUrl"] = o.BillingApiUrl
 	}
+	if !IsNil(o.AnalyticsApiUrl) {
+		toSerialize["analyticsApiUrl"] = o.AnalyticsApiUrl
+	}
 	if !IsNil(o.SshGatewayCommand) {
 		toSerialize["sshGatewayCommand"] = o.SshGatewayCommand
 	}
@@ -650,6 +687,7 @@ func (o *DaytonaConfiguration) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maintananceMode")
 		delete(additionalProperties, "environment")
 		delete(additionalProperties, "billingApiUrl")
+		delete(additionalProperties, "analyticsApiUrl")
 		delete(additionalProperties, "sshGatewayCommand")
 		delete(additionalProperties, "sshGatewayPublicKey")
 		delete(additionalProperties, "rateLimit")

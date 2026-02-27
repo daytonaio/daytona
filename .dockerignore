@@ -19,6 +19,7 @@ libs
 !libs/computer-use
 !libs/common-go
 !libs/api-client
+!libs/analytics-api-client
 !libs/runner-api-client
 !libs/api-client-go
 !libs/toolbox-api-client-go

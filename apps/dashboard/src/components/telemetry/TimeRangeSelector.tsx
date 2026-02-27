@@ -11,6 +11,7 @@ import { subHours } from 'date-fns'
 interface TimeRangeSelectorProps {
   onChange: (from: Date, to: Date) => void
   defaultRange?: { from: Date; to: Date }
+  defaultSelectedQuickRange?: string
   className?: string
 }
 
@@ -20,7 +21,12 @@ const quickRanges: QuickRangesConfig = {
   days: [3, 7],
 }
 
-export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ onChange, defaultRange, className }) => {
+export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({
+  onChange,
+  defaultRange,
+  defaultSelectedQuickRange = 'Last 1 hour',
+  className,
+}) => {
   const pickerRef = React.useRef<DateRangePickerRef>(null)
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     if (defaultRange) {
@@ -50,7 +56,7 @@ export const TimeRangeSelector: React.FC<TimeRangeSelectorProps> = ({ onChange, 
       quickRanges={quickRanges}
       timeSelection
       className={className}
-      defaultSelectedQuickRange="Last 1 hour"
+      defaultSelectedQuickRange={defaultSelectedQuickRange}
     />
   )
 }

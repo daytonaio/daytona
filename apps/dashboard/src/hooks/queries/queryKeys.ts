@@ -86,4 +86,13 @@ export const queryKeys = {
     vncStatus: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-status'] as const,
     vncUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-url'] as const,
   },
+  analytics: {
+    all: ['analytics'] as const,
+    aggregatedUsage: (organizationId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, 'aggregated-usage', params] as const,
+    sandboxesUsage: (organizationId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, 'sandboxes-usage', params] as const,
+    sandboxUsagePeriods: (organizationId: string, sandboxId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, sandboxId, 'usage-periods', params] as const,
+  },
 } as const

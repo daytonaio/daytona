@@ -19,6 +19,11 @@ import {
   RunnersApi,
   WebhooksApi,
 } from '@daytonaio/api-client'
+import {
+  UsageApi as AnalyticsUsageApi,
+  TelemetryApi as AnalyticsTelemetryApi,
+  Configuration as AnalyticsConfiguration,
+} from '@daytonaio/analytics-api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
 import { DashboardConfig } from '@/types/DashboardConfig'
@@ -38,6 +43,8 @@ export class ApiClient {
   private _regionsApi: RegionsApi
   private _runnersApi: RunnersApi
   private _webhooksApi: WebhooksApi
+  private _analyticsUsageApi: AnalyticsUsageApi | null
+  private _analyticsTelemetryApi: AnalyticsTelemetryApi | null
 
   constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
@@ -77,6 +84,23 @@ export class ApiClient {
     this._regionsApi = new RegionsApi(this.config, undefined, axiosInstance)
     this._runnersApi = new RunnersApi(this.config, undefined, axiosInstance)
     this._webhooksApi = new WebhooksApi(this.config, undefined, axiosInstance)
+
+    if (config.analyticsApiUrl) {
+      const analyticsConfig = new AnalyticsConfiguration({
+        basePath: config.analyticsApiUrl,
+        accessToken: accessToken,
+        baseOptions: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      })
+      this._analyticsUsageApi = new AnalyticsUsageApi(analyticsConfig, undefined, axiosInstance)
+      this._analyticsTelemetryApi = new AnalyticsTelemetryApi(analyticsConfig, undefined, axiosInstance)
+    } else {
+      this._analyticsUsageApi = null
+      this._analyticsTelemetryApi = null
+    }
   }
 
   public setAccessToken(accessToken: string) {
@@ -133,6 +157,14 @@ export class ApiClient {
 
   public get webhooksApi() {
     return this._webhooksApi
+  }
+
+  public get analyticsUsageApi() {
+    return this._analyticsUsageApi
+  }
+
+  public get analyticsTelemetryApi() {
+    return this._analyticsTelemetryApi
   }
 
   public async webhookRequest(method: string, url: string, data?: any) {

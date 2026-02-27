@@ -21,6 +21,7 @@ header:
     - 'guides/**/*.js'
 
   paths-ignore:
+    - 'libs/analytics-api-client/**'
     - 'libs/api-client/**'
     - 'libs/runner-api-client/**'
     - 'libs/api-client-go/**'
