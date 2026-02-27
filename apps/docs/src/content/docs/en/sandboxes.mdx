@@ -33,9 +33,25 @@ If omitted, the Daytona SDK will default to `python`. To override this, explicit
 
 ## Create Sandboxes
 
-Daytona provides options to programmatically create sandboxes with default or custom configurations.
-You can specify [programming language runtime](/docs/en/sandboxes#multiple-runtime-support), [snapshots](/docs/en/snapshots), [resources](/docs/en/sandboxes#resources), [environment variables](/docs/en/configuration#environment-variables), and [volumes](/docs/en/volumes) for each sandbox.
-Running sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
+Daytona provides methods to create sandboxes using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programatically using the Daytona [Python](/docs/en/python-sdk/sync/sandbox), [TypeScript](/docs/en/typescript-sdk/sandbox), [Ruby](/docs/en/ruby-sdk/sandbox), [Go](/docs/en/go-sdk/daytona#type-sandbox) **SDKs**, [CLI](/docs/en/tools/cli#daytona-create), or [API](/docs/en/tools/api#daytona/tag/sandbox).
+
+You can specify [programming language runtime](/docs/en/sandboxes#multiple-runtime-support), [snapshots](/docs/en/snapshots), [resources](/docs/en/sandboxes#resources), [regions](/docs/en/regions), [environment variables](/docs/en/configuration#environment-variables), and [volumes](/docs/en/volumes) for each sandbox. Running sandboxes utilize CPU, memory, and disk storage. Every resource is charged per second of usage.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the **Create Sandbox** button
+3. Enter the name of the sandbox
+4. Select a [snapshot](/docs/en/snapshots): if not specified, the [default snapshot](/docs/en/snapshots#default-snapshots) will be used
+5. Select a [region](/docs/en/regions): if not specified, your organization's default region will be used
+6. Define [resources](/docs/en/sandboxes#resources): if not specified, default values will be used: 1 vCPU, 1GB RAM, 3GiB disk
+7. Define sandbox lifecycle management options: [auto-stop](#auto-stop-interval), [auto-archive](#auto-archive-interval), [auto-delete](#auto-delete-interval)
+8. Add environment variables in key-value pairs
+9. Add labels in key-value pairs
+10. Select network settings:
+
+    - **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
+    - **Block all network access**: block all outbound network access
+
+11. Click the **Create Sandbox** button to create the sandbox
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
