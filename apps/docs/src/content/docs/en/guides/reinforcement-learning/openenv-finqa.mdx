@@ -399,6 +399,47 @@ After creation, persistent WebSocket connections are opened to all sandboxes wit
   </TabItem>
 </Tabs>
 
+With 500 long-lived WebSocket connections, some will inevitably go stale mid-training (network blips, server-side timeouts, etc.). The `reconnect_envs` function runs a periodic health-check sweep: it sends a lightweight state ping to every connection, and any socket that doesn't respond within 5 seconds gets closed and replaced. Connections with in-flight episode requests are skipped to avoid WebSocket message interleaving — where a ping response and a step response arrive on the same socket and get delivered to the wrong awaiter:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    async def reconnect_envs(
+        envs: list[FinQAEnv], pool, skip_indices: set[int] | None = None,
+    ) -> list[FinQAEnv]:
+        reconnected = 0
+        skip = skip_indices or set()
+
+        async def check_and_reconnect(i: int):
+            nonlocal reconnected
+            env = envs[i]
+            try:
+                # Quick health check — if the WS is alive this returns fast
+                await asyncio.wait_for(
+                    env._send_and_receive({"type": "state"}), timeout=5.0
+                )
+            except Exception:
+                # Connection is dead — close and reopen
+                try:
+                    await env.close()
+                except Exception:
+                    pass
+                _, url = pool[i]
+                new_env = FinQAEnv(base_url=url)
+                await new_env.connect()
+                if hasattr(new_env, "_ws") and new_env._ws is not None:
+                    new_env._ws.ping_timeout = 300
+                envs[i] = new_env
+                reconnected += 1
+
+        await asyncio.gather(
+            *[check_and_reconnect(i) for i in range(len(envs)) if i not in skip],
+            return_exceptions=True,
+        )
+    ```
+  </TabItem>
+</Tabs>
+
 #### Multi-Turn Rollout Collection
 
 The `collect_rollouts` function is the heart of the training loop (~430 lines). It keeps all sandboxes continuously occupied, using a sophisticated async event loop:
@@ -668,7 +709,7 @@ Training results and a reward curve plot will be added once a full training run 
 | `--max-rollout-rounds` | 8 | Max rollout rounds per iteration |
 | `--snapshot` | `openenv-finqa` | Daytona snapshot name |
 | `--model` | `Qwen/Qwen3-14B` | HuggingFace model ID |
-| `--lr` | 3e-4 | Learning rate |
+| `--lr` | 8e-5 | Learning rate |
 | `--temperature` | 1.0 | Sampling temperature |
 | `--max-steps` | 20 | Max episode steps before forced termination |
 | `--max-gen-tokens` | 512 | Max tokens per generation |
