@@ -46,6 +46,7 @@ import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
+const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
@@ -1051,28 +1052,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
-      const twoWeeksAgo = new Date(Date.now() - 14 * 1000 * 60 * 60 * 24)
+      const cutoff = `NOW() - INTERVAL '1 minute' * COALESCE(org."snapshot_deactivation_timeout_minutes", ${DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES})`
 
       const oldSnapshots = await this.snapshotRepository
         .createQueryBuilder('snapshot')
+        .leftJoin('organization', 'org', `org."id" = snapshot."organizationId"`)
         .where('snapshot.general = false')
         .andWhere('snapshot.state = :snapshotState', { snapshotState: SnapshotState.ACTIVE })
-        .andWhere('(snapshot."lastUsedAt" IS NULL OR snapshot."lastUsedAt" < :twoWeeksAgo)', { twoWeeksAgo })
-        .andWhere('snapshot."createdAt" < :twoWeeksAgo', { twoWeeksAgo })
+        .andWhere(`(snapshot."lastUsedAt" IS NULL OR snapshot."lastUsedAt" < ${cutoff})`)
+        .andWhere(`snapshot."createdAt" < ${cutoff}`)
         .andWhere(
-          () => {
-            const query = this.snapshotRepository
-              .createQueryBuilder('s')
-              .select('1')
-              .where('s."ref" = snapshot."ref"')
-              .andWhere('s.state = :activeState')
-              .andWhere('(s."lastUsedAt" >= :twoWeeksAgo OR s."createdAt" >= :twoWeeksAgo)')
-
-            return `NOT EXISTS (${query.getQuery()})`
-          },
+          `NOT EXISTS (
+            SELECT 1 FROM snapshot s
+            WHERE s."ref" = snapshot."ref"
+            AND s.state = :activeState
+            AND (s."lastUsedAt" >= ${cutoff} OR s."createdAt" >= ${cutoff})
+          )`,
           {
             activeState: SnapshotState.ACTIVE,
-            twoWeeksAgo,
           },
         )
         .take(100)

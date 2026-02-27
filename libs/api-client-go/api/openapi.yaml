@@ -9375,25 +9375,26 @@ components:
     Organization:
       example:
         defaultRegionId: defaultRegionId
-        sandboxCreateRateLimitTtlSeconds: 3.616076749251911
+        sandboxCreateRateLimitTtlSeconds: 2.027123023002322
         suspensionReason: suspensionReason
-        sandboxLifecycleRateLimit: 7.061401241503109
+        sandboxLifecycleRateLimit: 9.301444243932576
         suspendedAt: 2000-01-23T04:56:07.000+00:00
         personal: true
         suspensionCleanupGracePeriodHours: 0.8008281904610115
-        authenticatedRateLimit: 5.637376656633329
+        authenticatedRateLimit: 2.3021358869347655
         suspended: true
-        sandboxCreateRateLimit: 2.3021358869347655
-        sandboxLifecycleRateLimitTtlSeconds: 2.027123023002322
+        sandboxCreateRateLimit: 7.061401241503109
+        sandboxLifecycleRateLimitTtlSeconds: 4.145608029883936
         createdAt: 2000-01-23T04:56:07.000+00:00
         maxCpuPerSandbox: 6.027456183070403
         sandboxLimitedNetworkEgress: true
         suspendedUntil: 2000-01-23T04:56:07.000+00:00
         maxDiskPerSandbox: 5.962133916683182
         createdBy: createdBy
+        snapshotDeactivationTimeoutMinutes: 5.637376656633329
         name: name
         maxMemoryPerSandbox: 1.4658129805029452
-        authenticatedRateLimitTtlSeconds: 9.301444243932576
+        authenticatedRateLimitTtlSeconds: 3.616076749251911
         id: id
         experimentalConfig: "{}"
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -9443,6 +9444,10 @@ components:
           type: number
         maxDiskPerSandbox:
           description: Max disk per sandbox
+          type: number
+        snapshotDeactivationTimeoutMinutes:
+          default: 20160
+          description: Time in minutes before an unused snapshot is deactivated
           type: number
         sandboxLimitedNetworkEgress:
           description: Sandbox default network block all
@@ -9494,6 +9499,7 @@ components:
       - sandboxLifecycleRateLimit
       - sandboxLifecycleRateLimitTtlSeconds
       - sandboxLimitedNetworkEgress
+      - snapshotDeactivationTimeoutMinutes
       - suspended
       - suspendedAt
       - suspendedUntil
@@ -9588,18 +9594,19 @@ components:
       type: object
     UpdateOrganizationQuota:
       example:
+        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
+        sandboxLifecycleRateLimit: 3.616076749251911
+        volumeQuota: 2.3021358869347655
+        maxSnapshotSize: 5.637376656633329
+        authenticatedRateLimit: 7.061401241503109
+        sandboxCreateRateLimit: 9.301444243932576
         snapshotQuota: 5.962133916683182
         sandboxLifecycleRateLimitTtlSeconds: 7.386281948385884
         maxCpuPerSandbox: 0.8008281904610115
         maxDiskPerSandbox: 1.4658129805029452
-        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
-        sandboxLifecycleRateLimit: 3.616076749251911
+        snapshotDeactivationTimeoutMinutes: 1.2315135367772556
         maxMemoryPerSandbox: 6.027456183070403
-        volumeQuota: 2.3021358869347655
         authenticatedRateLimitTtlSeconds: 2.027123023002322
-        maxSnapshotSize: 5.637376656633329
-        authenticatedRateLimit: 7.061401241503109
-        sandboxCreateRateLimit: 9.301444243932576
       properties:
         maxCpuPerSandbox:
           nullable: true
@@ -9637,6 +9644,10 @@ components:
         sandboxLifecycleRateLimitTtlSeconds:
           nullable: true
           type: number
+        snapshotDeactivationTimeoutMinutes:
+          description: Time in minutes before an unused snapshot is deactivated
+          nullable: true
+          type: number
       required:
       - authenticatedRateLimit
       - authenticatedRateLimitTtlSeconds
@@ -9648,6 +9659,7 @@ components:
       - sandboxCreateRateLimitTtlSeconds
       - sandboxLifecycleRateLimit
       - sandboxLifecycleRateLimitTtlSeconds
+      - snapshotDeactivationTimeoutMinutes
       - snapshotQuota
       - volumeQuota
       type: object

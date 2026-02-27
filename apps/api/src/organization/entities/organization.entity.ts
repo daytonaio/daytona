@@ -170,6 +170,13 @@ export class Organization {
   suspendedUntil?: Date
 
   @Column({
+    type: 'int',
+    default: 20160,
+    name: 'snapshot_deactivation_timeout_minutes',
+  })
+  snapshotDeactivationTimeoutMinutes: number
+
+  @Column({
     default: false,
   })
   sandboxLimitedNetworkEgress: boolean
