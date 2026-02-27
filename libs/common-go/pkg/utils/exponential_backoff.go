@@ -5,10 +5,24 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
 )
+
+// NonRetryableError wraps an error to signal that it should not be retried
+type NonRetryableError struct {
+	Err error
+}
+
+func (e *NonRetryableError) Error() string {
+	return e.Err.Error()
+}
+
+func (e *NonRetryableError) Unwrap() error {
+	return e.Err
+}
 
 const (
 	// Default retry configuration for Docker operations
@@ -34,6 +48,11 @@ func RetryWithExponentialBackoff(ctx context.Context, operationName string, maxR
 		err := operationFunc()
 		if err == nil {
 			return nil
+		}
+
+		var nonRetryable *NonRetryableError
+		if errors.As(err, &nonRetryable) {
+			return nonRetryable.Err
 		}
 
 		if attempt < maxRetries-1 {

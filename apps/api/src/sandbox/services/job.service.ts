@@ -223,6 +223,10 @@ export class JobService {
       throw new NotFoundException(`Job with ID ${jobId} not found`)
     }
 
+    if (!this.isValidStatusTransition(job.status, status)) {
+      throw new ConflictException(`Invalid job status transition from ${job.status} to ${status} for job ${jobId}`)
+    }
+
     job.status = status
     if (errorMessage) {
       job.errorMessage = errorMessage
@@ -349,6 +353,21 @@ export class JobService {
     }
 
     return null
+  }
+
+  private isValidStatusTransition(currentStatus: JobStatus, newStatus: JobStatus): boolean {
+    if (currentStatus === newStatus) {
+      return true
+    }
+
+    const allowedTransitions: Record<JobStatus, JobStatus[]> = {
+      [JobStatus.PENDING]: [JobStatus.IN_PROGRESS, JobStatus.FAILED],
+      [JobStatus.IN_PROGRESS]: [JobStatus.COMPLETED, JobStatus.FAILED],
+      [JobStatus.COMPLETED]: [],
+      [JobStatus.FAILED]: [],
+    }
+
+    return allowedTransitions[currentStatus]?.includes(newStatus) ?? false
   }
 
   private getRunnerQueueKey(runnerId: string): string {
