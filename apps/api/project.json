@@ -40,7 +40,10 @@
         "{projectRoot}/src/**/*.ts",
         "!{projectRoot}/src/**/*.spec.ts",
         "{projectRoot}/tsconfig.app.json",
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+        {
+          "dependentTasksOutputFiles": "**/*",
+          "transitive": true
+        }
       ],
       "outputs": ["{workspaceRoot}/dist/apps/api/openapi.json", "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json"],
       "options": {
@@ -97,6 +100,12 @@
         }
       ]
     },
-    "push-manifest": {}
+    "push-manifest": {},
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash apps/api/scripts/validate-migration-paths.sh $(find apps/api/src/migrations -name '*-migration.ts' -type f)"
+      }
+    }
   }
 }
