@@ -5,24 +5,23 @@ description: Use parallel Daytona sandboxes with OpenEnv's FinQA environment to 
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-import rewardsPlot from '../../../../../assets/docs/images/openenv-finqa-rewards-plot.png'
 import { Image } from 'astro:assets'
 
-Training with reinforcement learning from verified rewards — where agents interact with environments that provide ground-truth feedback — is driving rapid progress in reasoning, tool use, and code generation. But it requires scalable, isolated environments that can run in parallel. [OpenEnv](https://github.com/meta-pytorch/OpenEnv) addresses this — it's a framework for building and serving RL environments, decoupling the environment from the training loop so each instance can run in its own container. It has native support for Daytona sandboxes, enabling parallel execution across hundreds of isolated instances.
+import rewardsPlot from '../../../../../assets/docs/images/openenv-finqa-rewards-plot.png'
 
-This guide walks through [FinQA](https://huggingface.co/datasets/snorkelai/finqa-data), one of OpenEnv's multi-turn, tool-calling environments. FinQA presents the model with financial questions based on SEC 10-K filings and gives it SQL tools to explore the underlying data before submitting an answer.
+Reinforcement learning from verified rewards is driving rapid progress in reasoning, tool use, and code generation. Agents interact with environments that provide ground-truth feedback, but this requires scalable, isolated environments that can run in parallel. [OpenEnv](https://github.com/meta-pytorch/OpenEnv) is a framework for building and serving RL environments that addresses this, decoupling the environment from the training loop so each instance can run in its own container. It has native support for Daytona sandboxes, enabling parallel execution across many isolated instances.
+
+This guide demonstrates the OpenEnv + Daytona integration through [FinQA](https://huggingface.co/datasets/snorkelai/finqa-data), a multi-turn, tool-calling environment contributed by [Snorkel AI](https://snorkel.ai/) to OpenEnv. FinQA presents the model with financial questions based on SEC 10-K filings and gives it SQL tools to explore the underlying data before submitting an answer.
 
 ---
 
 ### 1. OpenEnv and Daytona
 
-OpenEnv environments are standalone servers that expose a Gymnasium-style API — `reset`, `step`, `state` — over WebSocket. The environment logic (e.g. a FinQA database with SQL tools, a code execution sandbox, a web browsing agent) runs inside a container; the training loop connects as a remote client. This separation means the environment and the trainer don't share a process, a machine, or even a language — they communicate over a standard protocol.
+OpenEnv environments are standalone servers that expose a Gymnasium-style API (`reset`, `step`, `state`) over the network. The environment logic (e.g. a FinQA database with SQL tools, a code execution sandbox, a web browsing agent) runs inside a container; the training loop connects as a remote client. This separation means the environment and the trainer don't need to share a process, a machine, or even a language; they communicate over a standard protocol.
 
-Within each environment, tools are exposed via MCP (Model Context Protocol) over JSON-RPC. Clients discover available tools at runtime via `tools/list` and invoke them via `tools/call`. This is how the model's tool calls in the training loop get routed to the actual environment running inside a container.
+In MCP-enabled environments like FinQA, tools are exposed via MCP (Model Context Protocol) over JSON-RPC. Clients discover available tools at runtime via `tools/list` and invoke them via `tools/call`. This is how the model's tool calls in the training loop get routed to the actual environment running inside a container.
 
-OpenEnv has a pluggable provider model for *where* environments run — local Docker, Docker Swarm, Kubernetes, or Daytona. The `DaytonaProvider` launches each environment instance as a Daytona sandbox, which gives you API-driven lifecycle management and the ability to run thousands of instances in parallel without local infrastructure. In the training loop, each of the 500 sandboxes is an independent FinQA environment with its own persistent WebSocket connection.
-
-What makes this scale practical is the snapshot workflow: Daytona snapshots pre-package the environment server and dataset into a container image. Sandboxes created from a snapshot start in ~100 ms, so you're not installing packages or downloading datasets 500 times.
+OpenEnv has a pluggable provider model for _where_ environments run: local Docker, Docker Swarm, or Daytona. The `DaytonaProvider` launches each environment instance as a Daytona sandbox, which gives you API-driven lifecycle management and the ability to run thousands of instances in parallel without local infrastructure. In the training loop below, each sandbox is an independent FinQA environment with its own persistent WebSocket connection.
 
 ### 2. Workflow Overview
 
@@ -40,12 +39,12 @@ Both modes use the same underlying episode structure. Each episode is a multi-tu
 
 The available tools are:
 
-| Tool | Description |
-|------|-------------|
-| `get_descriptions(company_name)` | List available tables for a company |
-| `get_table_info(company_name, table_name)` | Get column names and types |
-| `sql_query(query)` | Run a SQL query against the company's 10-K data |
-| `submit_answer(answer)` | Submit a final answer (terminates the episode) |
+| Tool                                       | Description                                     |
+| ------------------------------------------ | ----------------------------------------------- |
+| `get_descriptions(company_name)`           | List available tables for a company             |
+| `get_table_info(company_name, table_name)` | Get column names and types                      |
+| `sql_query(query)`                         | Run a SQL query against the company's 10-K data |
+| `submit_answer(answer)`                    | Submit a final answer (terminates the episode)  |
 
 ### 3. Setup
 
@@ -80,6 +79,7 @@ pip install -e .
 ```
 
 This installs:
+
 - `daytona` - Daytona SDK for sandbox management
 - `openenv-core` - OpenEnv runtime (WebSocket-based RL environment protocol)
 - `openenv-finqa-env` - The FinQA environment client (`FinQAEnv`, `CallToolAction`)
@@ -109,7 +109,7 @@ Before running any episodes, build a Daytona snapshot that pre-packages the FinQ
 python build_snapshot.py
 ```
 
-This uses Daytona's declarative Image API to clone the FinQA environment from the OpenEnv repo, install its dependencies, and pre-download the FinQA dataset from HuggingFace — all baked into a single container image. Sandboxes created from this snapshot start in ~100 ms with no network dependencies.
+This uses Daytona's declarative Image API to clone the FinQA environment from the OpenEnv repo, install its dependencies, and pre-download the FinQA dataset from HuggingFace, all baked into a single container image. Sandboxes created from this snapshot start in ~100 ms.
 
 ### 4. Running a Single Episode
 
@@ -137,6 +137,7 @@ The `DaytonaProvider` from OpenEnv wraps the Daytona SDK, creating a sandbox fro
         provider.wait_for_ready(url, 120)
         return provider, url
     ```
+
   </TabItem>
 </Tabs>
 
@@ -158,6 +159,7 @@ OpenEnv communicates over WebSocket. The `FinQAEnv` client handles the connectio
         question = data.get("current_question", "")
         company = data.get("current_company", "")
     ```
+
   </TabItem>
 </Tabs>
 
@@ -179,6 +181,7 @@ OpenEnv provides two ways to interact with the environment:
         "get_table_info", company_name=company, table_name=table_names[0]
     )
     ```
+
   </TabItem>
 </Tabs>
 
@@ -202,6 +205,7 @@ OpenEnv provides two ways to interact with the environment:
     obs = step_result.observation
     print(f"Submitted (done={obs.done}, reward={obs.reward})")
     ```
+
   </TabItem>
 </Tabs>
 
@@ -259,6 +263,7 @@ The model is instructed to act as a financial analyst, using tools iteratively t
     - For multi-year answers, use: year: value, year: value
     - If the question is yes/no, answer Yes or No"""
     ```
+
   </TabItem>
 </Tabs>
 
@@ -344,6 +349,7 @@ The training creates hundreds of sandboxes upfront from the pre-built snapshot, 
         await asyncio.gather(*tasks, return_exceptions=True)
         return [entry for entry in pool_by_idx if entry is not None]
     ```
+
   </TabItem>
 </Tabs>
 
@@ -369,10 +375,11 @@ After creation, persistent WebSocket connections are opened to all sandboxes wit
         )
         return [env for env in envs if env is not None]
     ```
+
   </TabItem>
 </Tabs>
 
-With 500 long-lived WebSocket connections, some will inevitably go stale mid-training (network blips, server-side timeouts, etc.). The `reconnect_envs` function runs a periodic health-check sweep: it sends a lightweight state ping to every connection, and any socket that doesn't respond within 5 seconds gets closed and replaced. Connections with in-flight episode requests are skipped to avoid WebSocket message interleaving — where a ping response and a step response arrive on the same socket and get delivered to the wrong awaiter:
+With 500 long-lived WebSocket connections, some will inevitably go stale mid-training (network blips, server-side timeouts, etc.). The `reconnect_envs` function runs a periodic health-check sweep: it sends a lightweight state ping to every connection, and any socket that doesn't respond within 5 seconds gets closed and replaced. Connections with in-flight episode requests are skipped to avoid WebSocket message interleaving, where a ping response and a step response arrive on the same socket and get delivered to the wrong awaiter:
 
 <Tabs>
   <TabItem label="Python" icon="seti:python">
@@ -410,6 +417,7 @@ With 500 long-lived WebSocket connections, some will inevitably go stale mid-tra
             return_exceptions=True,
         )
     ```
+
   </TabItem>
 </Tabs>
 
@@ -454,6 +462,7 @@ The flow for a single episode within the rollout engine:
     # 5. If not done: append to chat history, re-enter ready queue
     # If done or max steps: capture reward, mark sandbox as idle
     ```
+
   </TabItem>
 </Tabs>
 
@@ -478,6 +487,7 @@ The `parse_tool_call` function handles multiple output formats from the model:
         # Pattern 4: Text that looks like a number/short answer
         # Fallback: submit_answer({"answer": "unknown"})
     ```
+
   </TabItem>
 </Tabs>
 
@@ -515,6 +525,7 @@ To prevent this, the code tracks which envs had in-flight WebSocket requests at 
         except Exception:
             pass
     ```
+
   </TabItem>
 </Tabs>
 
@@ -554,6 +565,7 @@ Episodes are grouped by the same question (identified by `question_id`). Groups 
             all_advantages.append([float(a) for a in advs])
         return all_advantages
     ```
+
   </TabItem>
 </Tabs>
 
@@ -592,6 +604,7 @@ The update processes each episode's turns as individual training samples. The lo
         torch.nn.utils.clip_grad_norm_(train_model.parameters(), max_norm=1.0)
         optimizer.step()
     ```
+
   </TabItem>
 </Tabs>
 
@@ -614,12 +627,14 @@ After each training iteration, the updated LoRA adapter is exported and loaded i
         )
         # Future vLLM generations use the new adapter automatically
     ```
+
   </TabItem>
 </Tabs>
 
 #### GPU Layout and Lag-1 Pipeline
 
 The training uses a 4-GPU setup with clear separation:
+
 - **GPUs 0-1**: vLLM with tensor parallelism (TP=2) for fast batched generation during rollouts
 - **GPUs 2-3**: Base model + LoRA with `device_map="auto"` for training
 
@@ -652,10 +667,20 @@ The training loop overlaps iteration N's gradient update (on GPUs 2-3) with iter
                 f"grpo_iter_{it + 1}", lora_request_seq, new_lora_dir
             )
     ```
+
   </TabItem>
 </Tabs>
 
 ### 6. Running the Training
+
+:::tip[Open File Limit]
+With hundreds of concurrent WebSocket connections, you may hit the default open file descriptor limit. If you run into this, raise it by running:
+
+```bash
+ulimit -n 65536
+```
+
+:::
 
 Start training with:
 
@@ -688,6 +713,7 @@ Tools: ['get_descriptions', 'get_table_info', 'sql_query', 'submit_answer']
 ```
 
 After training completes, artifacts are saved to `runs/YYYYMMDD_HHMMSS/`:
+
 - `config.json` — Full training configuration
 - `metrics.jsonl` — Per-iteration metrics (accuracy, loss, eps/sec, etc.)
 - `rollouts.jsonl` — Per-round rollout summaries
@@ -695,26 +721,25 @@ After training completes, artifacts are saved to `runs/YYYYMMDD_HHMMSS/`:
 
 ### 7. Training Results
 
-We ran a full training run with default parameters (`--sandboxes 500 --iterations 10 --group-size 6`), training Qwen3-14B with LoRA on the FinQA task. Each episode presents the model with a financial question about a real company's SEC 10-K filing — questions like:
+We ran a full training run with default parameters (`--sandboxes 500 --iterations 10 --group-size 6`), training Qwen3-14B with LoRA on the FinQA task. Each episode presents the model with a financial question about a real company's SEC 10-K filing. Questions like:
 
-- *"What is the year-over-year percentage growth in Total Revenues from fiscal year 2023 to fiscal year 2024?"* (Walmart)
-- *"What is the ratio of Domestic Income to Foreign Income for continuing operations before income taxes in 2022?"* (Alphabet)
-- *"What fraction of the finance lease liability balance is due in the next twelve months?"* (Alphabet)
-- *"What is the net change in gross unrecognized tax benefits for the year ended December 31, 2024?"* (Alphabet)
-- *"Does the sum of the basic shares outstanding and the weighted average dilutive impact of awards equal the diluted shares outstanding?"* (Disney)
+- _"What is the year-over-year percentage growth in Total Revenues from fiscal year 2023 to fiscal year 2024?"_ (Walmart)
+- _"What is the ratio of Domestic Income to Foreign Income for continuing operations before income taxes in 2022?"_ (Alphabet)
+- _"What fraction of the finance lease liability balance is due in the next twelve months?"_ (Alphabet)
+- _"What is the net change in gross unrecognized tax benefits for the year ended December 31, 2024?"_ (Alphabet)
 
 The model must use the available tools to discover tables, inspect schemas, run SQL queries, and compute a final answer — receiving a binary reward (1.0 = correct, 0.0 = wrong). Over 10 iterations (~1,000 episodes each), accuracy more than doubled:
 
 <Image
   src={rewardsPlot}
-  alt="Episode success rate per iteration, rising from ~23% to ~55%"
+  alt="Episode success rate per iteration, rising from ~21% to ~52%"
   width={700}
   style="max-width: 100%; height: auto; margin: 1rem 0;"
 />
 
 #### What Did the Model Actually Learn?
 
-The model did not learn a fundamentally new strategy for navigating financial databases. From iteration 1 onward, it already followed the correct pipeline — `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer`. Average turn count barely changed (4.5 → 4.8). Most of the training's impact came from **two specific behavioral fixes** that removed systematic failure modes, plus a set of subtler improvements in data interpretation.
+The model did not learn a fundamentally new strategy for navigating financial databases. From iteration 1 onward, it already followed the correct pipeline: `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer`. Average turn count barely changed (4.5 → 4.8). Most of the training's impact came from **two specific behavioral fixes** that removed systematic failure modes, plus a set of subtler improvements in data interpretation.
 
 #### The Year-Column Quoting Fix
 
@@ -730,7 +755,7 @@ SELECT 2024, 2023 FROM us_gaap_ScheduleOfRevenuesFromExternalCustomers...
 -- Returns: [{"2024": 2024, "2023": 2023}]  ← integer literals, not data!
 ```
 
-The model received back the same number it asked for — `2024` — instead of the actual revenue figure like `$648,125`. With garbage in, every downstream computation was wrong.
+The model received back the same number it asked for, `2024`, instead of the actual revenue figure like `$648,125`. With garbage in, every downstream computation was wrong.
 
 By iteration 8, the model had completely learned to quote:
 
@@ -746,17 +771,17 @@ SELECT "2024" AS rev2024, "2023" AS rev2023
 The adoption curve was dramatic:
 
 | Iteration | Quoted SQL Queries | Integer-Echo Bug Rate | `SELECT *` Rate |
-|-----------|--------------------|-----------------------|-----------------|
-| 1 | 22% | 22.4% | 7.8% |
-| 3 | 20% | 21.9% | 6.9% |
-| 5 | 44% | 8.5% | 4.2% |
-| 7 | 94% | 0.0% | 0.6% |
-| 8 | 99% | 0.0% | 0.0% |
-| 10 | **99.8%** | **0.0%** | **0.0%** |
+| --------- | ------------------ | --------------------- | --------------- |
+| 1         | 22%                | 22.4%                 | 7.8%            |
+| 3         | 20%                | 21.9%                 | 6.9%            |
+| 5         | 44%                | 8.5%                  | 4.2%            |
+| 7         | 94%                | 0.0%                  | 0.6%            |
+| 8         | 99%                | 0.0%                  | 0.0%            |
+| 10        | **99.8%**          | **0.0%**              | **0.0%**        |
 
 The year-echo bug directly caused ~28% of all early failures. Its complete elimination accounts for the bulk of the accuracy improvement. Note that `SELECT *` usage (which the environment rejects as "too inefficient") was also fully eliminated by iteration 8, removing another source of wasted turns.
 
-The fix did come with minor collateral damage: the model learned to quote *everything*, and in rare cases where a row value (not a column name) looks like an identifier, the over-quoting produces garbage.
+The fix did come with minor collateral damage: the model learned to quote _everything_, and in rare cases where a row value (not a column name) looks like an identifier, the over-quoting produces garbage.
 
 **Concrete example — Walmart revenue growth:**
 
@@ -811,14 +836,14 @@ Late answers:   "0.0328"          "0.0599"                     "0.0843"         
 ```
 
 | Iteration | Clean Numeric Answer | Multi-Value / Mixed | Unknown |
-|-----------|---------------------|---------------------|---------|
-| 1 | 56% | 42% | 2.0% |
-| 5 | 80% | 18% | 1.8% |
-| 10 | **93%** | 5% | 1.4% |
+| --------- | -------------------- | ------------------- | ------- |
+| 1         | 56%                  | 42%                 | 2.0%    |
+| 5         | 80%                  | 18%                 | 1.8%    |
+| 10        | **93%**              | 5%                  | 1.4%    |
 
-This mattered enormously because the reward function expects a single value. Multi-value submissions like `"31586: 30582"` were always graded as wrong even when the underlying data was correct. The model learned through GRPO that the rewarded behavior is to *compute* the answer (e.g., percentage change, ratio) and submit a single decimal.
+This mattered enormously because the reward function expects a single value. Multi-value submissions like `"31586: 30582"` were always graded as wrong even when the underlying data was correct. The model learned through GRPO that the rewarded behavior is to _compute_ the answer (e.g., percentage change, ratio) and submit a single decimal.
 
-This is a net-positive learning — it fixes the vast majority of questions (~90%), which ask for a single ratio or percentage. But it's a blunt instrument. The model internalized "single decimal = reward" without learning "...except when the question asks for multiple values." This caused a few regressions: one Alphabet question asks for nonoperating income across three years. Early on, the model answered `"2022: -3514, 2023: 1424, 2024: 7425"` — correct multi-value format, rewarded. After training hammered in the single-decimal habit, it tried to compress three years into one number and failed. The same learning that fixed 90% of answer formatting broke the ~5% of questions that legitimately need multi-value answers.
+This is a net-positive learning, for it fixes the vast majority of questions (~90%), which ask for a single ratio or percentage. But it's a blunt instrument. The model internalized "single decimal = reward" without learning "...except when the question asks for multiple values." This caused a few regressions: one Alphabet question asks for nonoperating income across three years. Early on, the model answered `"2022: -3514, 2023: 1424, 2024: 7425"` (correct multi-value format, rewarded). After training hammered in the single-decimal habit, it tried to compress three years into one number and failed. The same learning that fixed 90% of answer formatting broke the ~5% of questions that legitimately need multi-value answers.
 
 **Concrete example — raw data dump to computed ratio (GM):**
 
@@ -851,20 +876,18 @@ SEC filings use `$(X)` to denote negative values (accounting convention). Early 
 
 <Tabs>
   <TabItem label="Iteration 1 (Failure)" icon="warning">
-    ```
-    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
-    Turn 4: submit_answer("0.6666666666666666")              ← Positive! Missed the $(6) = -6
+    ``` Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    Turn 4: submit_answer("0.6666666666666666") ← Positive! Missed the $(6) = -6
     ```
   </TabItem>
   <TabItem label="Iteration 9 (Success)" icon="approve-check">
-    ```
-    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
-    Turn 4: submit_answer("-0.6666666666666666")             ← Negative! Correctly interprets $(6) as -6
-    ```
+    ``` Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    Turn 4: submit_answer("-0.6666666666666666") ← Negative! Correctly
+    interprets $(6) as -6 ```
   </TabItem>
 </Tabs>
 
-The model learned that parenthetical dollar amounts like `$(6)` represent negative values — a domain-specific convention that required RL signal to internalize.
+The model learned that parenthetical dollar amounts like `$(6)` represent negative values, a domain-specific convention that required RL signal to internalize.
 
 #### Adaptive Error Recovery
 
@@ -892,7 +915,7 @@ Turn 6: sql_query(WHERE component='') → [{"2022": "$8,752"}]            ← Fi
 Turn 7: submit_answer("0.3385")                                         ← Correct: 2962/8752
 ```
 
-The model learned that some SEC filing tables use blank row labels for totals — a dataset-specific convention it discovered through trial and error across training.
+The model learned that some SEC filing tables use blank row labels for totals, a dataset-specific convention it discovered through trial and error across training.
 
 #### Shortcut Arithmetic
 
@@ -912,22 +935,22 @@ There are ~130 such 1-turn successes in late training (99.4% accuracy), represen
 The overall SQL error rate dropped from 8.3% to 0.5% across training:
 
 | Iteration | SQL Calls | Errors | Error Rate |
-|-----------|-----------|--------|------------|
-| 1 | 2,462 | 204 | 8.3% |
-| 3 | 1,630 | 113 | 6.9% |
-| 5 | 1,506 | 67 | 4.4% |
-| 7 | 1,515 | 23 | 1.5% |
-| 10 | 1,814 | 9 | **0.5%** |
+| --------- | --------- | ------ | ---------- |
+| 1         | 2,462     | 204    | 8.3%       |
+| 3         | 1,630     | 113    | 6.9%       |
+| 5         | 1,506     | 67     | 4.4%       |
+| 7         | 1,515     | 23     | 1.5%       |
+| 10        | 1,814     | 9      | **0.5%**   |
 
 The dominant error source was `SELECT *` (634 of 708 total errors, 89.5%), which the environment blocks as "too inefficient." This was completely eliminated by iteration 8.
 
-Interestingly, the model's SQL queries became *simpler* over training. Usage of aggregations (`SUM`, `COUNT`, etc.) and `CAST` operations declined, while `LIMIT` usage increased. The model learned that targeted, simple queries with precise WHERE clauses are more reliable than complex aggregations — a reasonable strategy given the table structures.
+Interestingly, the model's SQL queries became _simpler_ over training. Usage of aggregations (`SUM`, `COUNT`, etc.) and `CAST` operations declined, while `LIMIT` usage increased. The model learned that targeted, simple queries with precise WHERE clauses are more reliable than complex aggregations, a reasonable strategy given the table structures.
 
 #### What Still Fails
 
-Even at 55% accuracy, nearly half the episodes fail. The nature of failures shifted dramatically over training:
+Even at 52% accuracy, nearly half the episodes fail. The nature of failures shifted dramatically over training:
 
-**Early failures**: Dominated by the year-echo bug (28%), raw data dumps (20%), and `SELECT *` errors (8%). These are *systematic* bugs that affect almost every question.
+**Early failures**: Dominated by the year-echo bug (28%), raw data dumps (20%), and `SELECT *` errors (8%). These are _systematic_ bugs that affect almost every question.
 
 **Late failures**: Almost entirely **"has correct data, computes wrong answer"**. The model retrieves the right numbers from the right table but produces an incorrect final answer. The information retrieval problem is solved; the arithmetic/interpretation problem remains.
 
@@ -941,7 +964,7 @@ Expected answer: 870 - 531 = 339  (absolute difference)
 Model submits:   0.635             (percentage change: (870-531)/531)
 ```
 
-All 23 attempts on this question across late training submit exactly `0.635` — the model has converged to a consistent-but-wrong policy. The GRPO training signal pushed the model toward "always output a ratio/percentage," which is correct for ~80% of questions but wrong for absolute-change questions. Hence, the model found a mode that works for most questions and cannot escape it.
+All 23 attempts on this question across late training submit exactly `0.635`; the model has converged to a consistent-but-wrong policy. The GRPO training signal pushed the model toward "always output a ratio/percentage," which is correct for ~80% of questions but wrong for absolute-change questions. Hence, the model found a mode that works for most questions and cannot escape it.
 
 **Sign errors on decreasing values** — when a value decreases year-over-year, the percentage change should be negative. The model frequently submits the absolute value:
 
@@ -957,7 +980,7 @@ This error is perfectly consistent across all 19 attempts on this question, show
 
 #### Summary
 
-1. **The model's exploration strategy was already correct from iteration 1.** The `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer` pipeline was established from the start. GRPO did not need to teach the model *how* to use tools.
+1. **The model's exploration strategy was already correct from iteration 1.** The `get_descriptions` → `get_table_info` → `sql_query` → `submit_answer` pipeline was established from the start. GRPO did not need to teach the model _how_ to use tools.
 
 2. **Two specific behavioral fixes drove most of the improvement:** quoting year-string column names in SQL (22% → 99.8% adoption) and submitting single numeric answers instead of raw data (56% → 93%).
 
@@ -971,32 +994,33 @@ This error is perfectly consistent across all 19 attempts on this question, show
 
 The `train.py` script accepts the following command-line arguments:
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `--sandboxes` | 500 | Number of concurrent Daytona sandboxes |
-| `--iterations` | 10 | Training iterations |
-| `--group-size` | 6 | Episodes per prompt group for GRPO |
-| `--target-groups-per-iter` | 100 | Target number of complete groups per iteration |
-| `--max-rollout-rounds` | 8 | Max rollout rounds per iteration |
-| `--snapshot` | `openenv-finqa` | Daytona snapshot name |
-| `--model` | `Qwen/Qwen3-14B` | HuggingFace model ID |
-| `--lr` | 8e-5 | Learning rate |
-| `--temperature` | 1.0 | Sampling temperature |
-| `--max-steps` | 20 | Max episode steps before forced termination |
-| `--max-gen-tokens` | 512 | Max tokens per generation |
-| `--tensor-parallel-size` | 2 | vLLM tensor parallelism |
-| `--gpu-memory-utilization` | 0.85 | vLLM GPU memory fraction |
-| `--lora-rank` | 16 | LoRA rank |
-| `--lora-alpha` | 32 | LoRA alpha |
-| `--sync-every` | 1 | Export LoRA adapter every N iterations |
-| `--grpo-update-batch-size` | 12 | Micro-batch size for GRPO updates |
+| Parameter                  | Default          | Description                                    |
+| -------------------------- | ---------------- | ---------------------------------------------- |
+| `--sandboxes`              | 500              | Number of concurrent Daytona sandboxes         |
+| `--iterations`             | 10               | Training iterations                            |
+| `--group-size`             | 6                | Episodes per prompt group for GRPO             |
+| `--target-groups-per-iter` | 100              | Target number of complete groups per iteration |
+| `--max-rollout-rounds`     | 8                | Max rollout rounds per iteration               |
+| `--snapshot`               | `openenv-finqa`  | Daytona snapshot name                          |
+| `--model`                  | `Qwen/Qwen3-14B` | HuggingFace model ID                           |
+| `--lr`                     | 8e-5             | Learning rate                                  |
+| `--temperature`            | 1.0              | Sampling temperature                           |
+| `--max-steps`              | 20               | Max episode steps before forced termination    |
+| `--max-gen-tokens`         | 512              | Max tokens per generation                      |
+| `--tensor-parallel-size`   | 2                | vLLM tensor parallelism                        |
+| `--gpu-memory-utilization` | 0.85             | vLLM GPU memory fraction                       |
+| `--lora-rank`              | 16               | LoRA rank                                      |
+| `--lora-alpha`             | 32               | LoRA alpha                                     |
+| `--sync-every`             | 1                | Export LoRA adapter every N iterations         |
+| `--grpo-update-batch-size` | 12               | Micro-batch size for GRPO updates              |
 
 :::tip[Scaling Tips]
+
 - For a quick smoke test, use `--sandboxes 2 --iterations 1 --group-size 2`
 - Increase `--max-steps` for questions that require more exploration
 - Decrease `--grpo-update-batch-size` if you run out of GPU memory during the update step
 - Keep `--group-size` at 6+ for meaningful advantage estimation within groups
-:::
+  :::
 
 ---
 
@@ -1006,5 +1030,3 @@ The `train.py` script accepts the following command-line arguments:
 - **Massive parallelism**: Hundreds of sandboxes collect episodes simultaneously
 - **Safe execution**: SQL queries and data exploration execute in isolated environments
 - **OpenEnv protocol**: Standard RL environment interface over WebSocket, decoupling the environment from the agent
-- **LoRA efficiency**: Parameter-efficient training with hot-swappable adapters avoids full model copies
-- **Lag-1 pipeline**: Overlapped rollout collection and gradient updates maximize GPU utilization
