@@ -542,7 +542,7 @@ export const getSidebarConfig = (
           label: t('sidebarconfig.reinforcementLearning'),
           disablePagination: true,
           attrs: {
-            icon: 'trl-logo.svg',
+            icon: 'nabla.svg',
           },
         },
         {
