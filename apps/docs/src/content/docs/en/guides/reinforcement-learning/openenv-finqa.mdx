@@ -876,14 +876,16 @@ SEC filings use `$(X)` to denote negative values (accounting convention). Early 
 
 <Tabs>
   <TabItem label="Iteration 1 (Failure)" icon="warning">
-    ``` Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    ```
+    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
     Turn 4: submit_answer("0.6666666666666666") ← Positive! Missed the $(6) = -6
     ```
   </TabItem>
   <TabItem label="Iteration 9 (Success)" icon="approve-check">
-    ``` Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
-    Turn 4: submit_answer("-0.6666666666666666") ← Negative! Correctly
-    interprets $(6) as -6 ```
+    ```
+    Turn 3: sql_query(...) → return_on_assets = "$(6)", fair_value = "$9"
+    Turn 4: submit_answer("-0.6666666666666666") ← Negative! Correctly interprets $(6) as -6
+    ```
   </TabItem>
 </Tabs>
 
