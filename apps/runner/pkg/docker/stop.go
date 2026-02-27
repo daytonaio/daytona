@@ -34,7 +34,7 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	err = d.stopContainerWithRetry(ctx, containerId, 2)
+	err = d.stopContainerWithRetry(ctx, containerId, 10)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (d *DockerClient) stopContainerWithRetry(ctx context.Context, containerId s
 		utils.DEFAULT_MAX_DELAY,
 		func() error {
 			return d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
-				Signal:  "SIGKILL",
+				Signal:  "SIGTERM",
 				Timeout: &timeout,
 			})
 		},
