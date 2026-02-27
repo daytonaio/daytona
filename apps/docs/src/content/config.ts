@@ -502,15 +502,32 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/guides/openclaw', locale),
+          label: t('sidebarconfig.openclaw'),
+          disablePagination: true,
+          attrs: {
+            icon: 'openclaw.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath(
             '/docs/guides/openclaw/openclaw-run-secure-sandbox',
             locale
           ),
           label: t('sidebarconfig.openclaw'),
           disablePagination: true,
-          attrs: {
-            icon: 'openclaw.svg',
-          },
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/openclaw/openclaw-sdk-sandbox',
+            locale
+          ),
+          label: t('sidebarconfig.openclaw'),
+          disablePagination: true,
+          hideInSidebar: true,
         },
         {
           type: 'link',
