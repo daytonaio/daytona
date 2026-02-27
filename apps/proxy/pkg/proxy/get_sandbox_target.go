@@ -168,27 +168,40 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 }
 
 func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, authKey string) (*bool, error) {
-	apiValidation := func() bool {
-		_, resp, _ := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
-		return resp != nil && resp.StatusCode == http.StatusOK
+	apiValidation := func() (bool, error) {
+		_, resp, err := p.apiclient.PreviewAPI.IsValidAuthToken(context.Background(), sandboxId, authKey).Execute()
+		if resp != nil && resp.StatusCode == http.StatusOK {
+			return true, nil
+		}
+		if err != nil {
+			if resp != nil && resp.StatusCode >= 400 && resp.StatusCode < 500 &&
+				resp.StatusCode != http.StatusRequestTimeout && resp.StatusCode != http.StatusTooManyRequests {
+				return false, nil
+			}
+			return false, fmt.Errorf("failed to validate auth token: %w", err)
+		}
+		return false, nil
 	}
 
 	return p.validateAndCache(ctx, sandboxId, authKey, apiValidation)
 }
 
 func (p *Proxy) getSandboxBearerTokenValid(ctx context.Context, sandboxId string, bearerToken string) (*bool, error) {
-	apiValidation := func() bool {
+	apiValidation := func() (bool, error) {
 		return p.hasSandboxAccess(ctx, sandboxId, bearerToken)
 	}
 
 	return p.validateAndCache(ctx, sandboxId, bearerToken, apiValidation)
 }
 
+const authValidationRetries = 2
+const authValidationRetryDelay = 250 * time.Millisecond
+
 func (p *Proxy) validateAndCache(
 	ctx context.Context,
 	sandboxId string,
 	authKey string,
-	apiValidation func() bool,
+	apiValidation func() (bool, error),
 ) (*bool, error) {
 	cacheKey := fmt.Sprintf("%s:%s", sandboxId, authKey)
 	authKeyValidCache, err := p.sandboxAuthKeyValidCache.Get(ctx, cacheKey)
@@ -196,7 +209,21 @@ func (p *Proxy) validateAndCache(
 		return authKeyValidCache, nil
 	}
 
-	isValid := apiValidation()
+	var isValid bool
+	var validationErr error
+	for attempt := range authValidationRetries {
+		isValid, validationErr = apiValidation()
+		if validationErr == nil {
+			break
+		}
+		if attempt < authValidationRetries-1 {
+			log.Warnf("Auth validation attempt %d/%d failed for sandbox %s: %v, retrying...", attempt+1, authValidationRetries, sandboxId, validationErr)
+			time.Sleep(authValidationRetryDelay)
+		}
+	}
+	if validationErr != nil {
+		return nil, validationErr
+	}
 
 	if err := p.sandboxAuthKeyValidCache.Set(ctx, cacheKey, isValid, 2*time.Minute); err != nil {
 		log.Errorf("Failed to set sandbox auth key valid in cache: %v", err)

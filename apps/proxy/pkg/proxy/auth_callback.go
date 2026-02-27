@@ -107,7 +107,11 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		return
 	}
 
-	hasAccess := p.hasSandboxAccess(ctx, sandboxId, token.AccessToken)
+	hasAccess, err := p.hasSandboxAccess(ctx, sandboxId, token.AccessToken)
+	if err != nil {
+		ctx.Error(common_errors.NewInternalServerError(fmt.Errorf("failed to verify sandbox access: %w", err)))
+		return
+	}
 	if !hasAccess {
 		ctx.Error(common_errors.NewNotFoundError(errors.New("sandbox not found")))
 		return
@@ -181,7 +185,7 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 	return authURL, nil
 }
 
-func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToken string) bool {
+func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToken string) (bool, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
@@ -192,9 +196,19 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 
 	apiClient := apiclient.NewAPIClient(clientConfig)
 
-	_, res, _ := apiClient.PreviewAPI.HasSandboxAccess(ctx, sandboxId).Execute()
+	_, res, err := apiClient.PreviewAPI.HasSandboxAccess(context.Background(), sandboxId).Execute()
+	if res != nil && res.StatusCode == http.StatusOK {
+		return true, nil
+	}
+	if err != nil {
+		if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 &&
+			res.StatusCode != http.StatusRequestTimeout && res.StatusCode != http.StatusTooManyRequests {
+			return false, nil
+		}
+		return false, err
+	}
 
-	return res != nil && res.StatusCode == http.StatusOK
+	return false, nil
 }
 
 func (p *Proxy) getOidcEndpoint(ctx context.Context) (context.Context, *oauth2.Endpoint, error) {
