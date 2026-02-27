@@ -24,7 +24,7 @@ import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { CookieBanner } from '@/components/CookieBanner'
+import { PrivacyBanner } from '@/components/PrivacyBanner'
 
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
         </SidebarInset>
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
-        <CookieBanner />
+        <PrivacyBanner />
       </SidebarProvider>
     </div>
   )
