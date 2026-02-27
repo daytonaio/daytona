@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, IsNull, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
@@ -202,18 +202,20 @@ export class RunnerService {
     const runners = await this.runnerRepository.find({
       where: {
         region: In(regionIds),
+        domain: Not(IsNull()),
       },
       select: ['domain', 'region'],
     })
 
     const result: RunnersByRegionDto = {}
     for (const runner of runners) {
+      if (!runner.domain) {
+        continue
+      }
       if (!result[runner.region]) {
         result[runner.region] = []
       }
-      if (runner.domain) {
-        result[runner.region].push(runner.domain)
-      }
+      result[runner.region].push(runner.domain)
     }
 
     return result
