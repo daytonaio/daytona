@@ -22,6 +22,7 @@ import (
 )
 
 const volumeMountPrefix = "daytona-volume-"
+const volumeMountDriverMountS3 = "mount-s3"
 
 func getVolumeMountBasePath() string {
 	if config.GetEnvironment() == "development" {
@@ -175,6 +176,50 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 }
 
 func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
+	if d.volumeMountDriver == volumeMountDriverMountS3 {
+		return d.getMountS3Cmd(ctx, volume, subpath, path)
+	}
+	return d.getRcloneMountCmd(ctx, volume, subpath, path)
+}
+
+func (d *DockerClient) getRcloneMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
+	remote := ":s3:" + volume
+	if subpath != nil && *subpath != "" {
+		prefix := *subpath
+		if !strings.HasSuffix(prefix, "/") {
+			prefix = prefix + "/"
+		}
+		remote = remote + "/" + prefix
+	}
+
+	args := []string{
+		"mount", remote, path,
+		"--s3-provider=Other", // disables AWS-specific checksums and virtual-hosted addressing not supported by s3proxy
+		"--allow-other",
+		"--vfs-cache-mode=full",
+		"--vfs-write-back=0s", // flush on file close; prevents data loss if the runner restarts before writeback
+		"--daemon",
+	}
+
+	if d.awsEndpointUrl != "" {
+		args = append(args, "--s3-endpoint="+d.awsEndpointUrl)
+	}
+	if d.awsAccessKeyId != "" {
+		args = append(args, "--s3-access-key-id="+d.awsAccessKeyId)
+	}
+	if d.awsSecretAccessKey != "" {
+		args = append(args, "--s3-secret-access-key="+d.awsSecretAccessKey)
+	}
+
+	cmd := exec.CommandContext(ctx, "rclone", args...)
+	cmd.Env = append(os.Environ(), "RCLONE_S3_PATH_STYLE=true") // s3proxy does not support virtual-hosted style
+	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
+	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
+
+	return cmd
+}
+
+func (d *DockerClient) getMountS3Cmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
 
 	if subpath != nil && *subpath != "" {

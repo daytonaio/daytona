@@ -61,6 +61,9 @@ export class VolumeManager
         secretAccessKey,
       },
       forcePathStyle: true,
+      // s3proxy does not implement AWS SDK v3 checksum headers — suppress unless required by protocol.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     })
   }
 
@@ -198,27 +201,33 @@ export class VolumeManager
 
       await this.s3Client.send(createBucketCommand)
 
-      await this.s3Client.send(
-        new PutBucketTaggingCommand({
-          Bucket: volume.getBucketName(),
-          Tagging: {
-            TagSet: [
-              {
-                Key: 'VolumeId',
-                Value: volume.id,
-              },
-              {
-                Key: 'OrganizationId',
-                Value: volume.organizationId,
-              },
-              {
-                Key: 'Environment',
-                Value: this.configService.get('environment'),
-              },
-            ],
-          },
-        }),
-      )
+      try {
+        await this.s3Client.send(
+          new PutBucketTaggingCommand({
+            Bucket: volume.getBucketName(),
+            Tagging: {
+              TagSet: [
+                {
+                  Key: 'VolumeId',
+                  Value: volume.id,
+                },
+                {
+                  Key: 'OrganizationId',
+                  Value: volume.organizationId,
+                },
+                {
+                  Key: 'Environment',
+                  Value: this.configService.get('environment'),
+                },
+              ],
+            },
+          }),
+        )
+      } catch (taggingError) {
+        this.logger.warn(
+          `Volume ${volume.id}: bucket tagging not supported by backend, skipping: ${taggingError.message}`,
+        )
+      }
 
       // Refresh lock before final state update
       await this.redis.setex(lockKey, 30, '1')
