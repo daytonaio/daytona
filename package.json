@@ -44,6 +44,8 @@
     "@aws-sdk/credential-providers": "^3.901.0",
     "@aws-sdk/lib-storage": "^3.798.0",
     "@clickhouse/client": "^1.16.0",
+    "@docsearch/css": "4.5.3",
+    "@docsearch/react": "4.5.3",
     "@dotenvx/dotenvx": "^1.25.1",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
     "@iarna/toml": "^2.2.5",

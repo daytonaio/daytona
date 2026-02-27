@@ -3590,6 +3590,55 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@docsearch/core@npm:4.5.3":
+  version: 4.5.3
+  resolution: "@docsearch/core@npm:4.5.3"
+  peerDependencies:
+    "@types/react": ">= 16.8.0 < 20.0.0"
+    react: ">= 16.8.0 < 20.0.0"
+    react-dom: ">= 16.8.0 < 20.0.0"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/0e158032ec5024986c84d77f7c84b21b6ad37ad43c405a8204456103c5b0aa843db7e725c82eb7a092680e7d0af1ccd70bcb28a3021d8d8deae6a00f1cad31fc
+  languageName: node
+  linkType: hard
+
+"@docsearch/css@npm:4.5.3":
+  version: 4.5.3
+  resolution: "@docsearch/css@npm:4.5.3"
+  checksum: 10c0/1ed0d50c52f5c43e91321a6b15d83d03c76208beadb359fa83537ab553d8be91cbfe0793f2b2a32ea3fb4a0e177e80af6e2b09c7fe59342870cd65c9ef953966
+  languageName: node
+  linkType: hard
+
+"@docsearch/react@npm:4.5.3":
+  version: 4.5.3
+  resolution: "@docsearch/react@npm:4.5.3"
+  dependencies:
+    "@docsearch/core": "npm:4.5.3"
+    "@docsearch/css": "npm:4.5.3"
+  peerDependencies:
+    "@types/react": ">= 16.8.0 < 20.0.0"
+    react: ">= 16.8.0 < 20.0.0"
+    react-dom: ">= 16.8.0 < 20.0.0"
+    search-insights: ">= 1 < 3"
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+    search-insights:
+      optional: true
+  checksum: 10c0/a5e5137298402a685557f88957c9ad8f8fe86b7937e8f0c3b84b523f28ceb4173a0c7ca04e2d1d0aca4edc1f5bcc679aa1f9d08ee790854f06fa0d0241e96916
+  languageName: node
+  linkType: hard
+
 "@dotenvx/dotenvx@npm:^1.25.1":
   version: 1.50.1
   resolution: "@dotenvx/dotenvx@npm:1.50.1"
@@ -19342,6 +19391,8 @@ __metadata:
     "@babel/preset-env": "npm:^7.22.0"
     "@babel/preset-typescript": "npm:^7.22.0"
     "@clickhouse/client": "npm:^1.16.0"
+    "@docsearch/css": "npm:4.5.3"
+    "@docsearch/react": "npm:4.5.3"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@esbuild-plugins/node-globals-polyfill": "npm:^0.2.3"
     "@esbuild-plugins/node-modules-polyfill": "npm:^0.2.2"
