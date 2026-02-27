@@ -19,6 +19,11 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 	return func(ctx *gin.Context) {
 		ctx.Next()
 
+		// Do not override the response if it has already been written
+		if ctx.Writer.Written() {
+			return
+		}
+
 		errs := ctx.Errors
 		if len(errs) > 0 {
 			var errorResponse ErrorResponse
