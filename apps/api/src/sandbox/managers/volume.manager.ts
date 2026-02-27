@@ -223,9 +223,11 @@ export class VolumeManager
             },
           }),
         )
-      } catch (taggingError) {
+      } catch (taggingError: unknown) {
         this.logger.warn(
-          `Volume ${volume.id}: bucket tagging not supported by backend, skipping: ${taggingError.message}`,
+          `Volume ${volume.id}: bucket tagging not supported by backend, skipping: ${
+            taggingError instanceof Error ? taggingError.message : String(taggingError)
+          }`,
         )
       }
 

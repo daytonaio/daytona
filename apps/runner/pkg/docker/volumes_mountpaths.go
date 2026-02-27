@@ -201,18 +201,22 @@ func (d *DockerClient) getRcloneMountCmd(ctx context.Context, volume string, sub
 		"--daemon",
 	}
 
+	cmd := exec.CommandContext(ctx, "rclone", args...)
+
+	cmd.Env = append(cmd.Env, "RCLONE_S3_PATH_STYLE=true") // s3proxy does not support virtual-hosted style
+
 	if d.awsEndpointUrl != "" {
-		args = append(args, "--s3-endpoint="+d.awsEndpointUrl)
-	}
-	if d.awsAccessKeyId != "" {
-		args = append(args, "--s3-access-key-id="+d.awsAccessKeyId)
-	}
-	if d.awsSecretAccessKey != "" {
-		args = append(args, "--s3-secret-access-key="+d.awsSecretAccessKey)
+		cmd.Env = append(cmd.Env, "RCLONE_S3_ENDPOINT="+d.awsEndpointUrl)
 	}
 
-	cmd := exec.CommandContext(ctx, "rclone", args...)
-	cmd.Env = append(os.Environ(), "RCLONE_S3_PATH_STYLE=true") // s3proxy does not support virtual-hosted style
+	if d.awsAccessKeyId != "" {
+		cmd.Env = append(cmd.Env, "RCLONE_S3_ACCESS_KEY_ID="+d.awsAccessKeyId)
+	}
+
+	if d.awsSecretAccessKey != "" {
+		cmd.Env = append(cmd.Env, "RCLONE_S3_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
+	}
+
 	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
 	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
 
