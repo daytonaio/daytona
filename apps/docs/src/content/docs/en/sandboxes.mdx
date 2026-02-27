@@ -5,9 +5,15 @@ title: Sandboxes
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 import SandboxDiagram from '@components/SandboxDiagram.astro'
 
-Sandboxes are isolated runtime environments managed by Daytona. This guide covers the lifecycle of Sandboxes and how to create, manage, and remove them using the Daytona SDK.
+Daytona provides **full composable computers** &mdash; **sandboxes** &mdash; for AI agents. Sandboxes are isolated runtime environments you can manage programmatically to run code. Each sandbox runs with container-level isolation, giving it a dedicated kernel, filesystem, network stack, and allocated vCPU, RAM, and disk. Agents get access to a full composable computer environment where they can install packages, run servers, compile code, and manage processes.
 
-Daytona Sandboxes use **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. [Organizations](/docs/en/organizations) get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**. For more power, contact [support@daytona.io](mailto:support@daytona.io).
+Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. [Organizations](/docs/en/organizations) get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**. For more power, see [resources](#resources) or contact [support@daytona.io](mailto:support@daytona.io).
+
+Sandboxes are built from OCI-compliant container images. A [snapshot](/docs/en/snapshots) captures a fully configured environment: base OS, installed packages, dependencies, and configuration to create new sandboxes.
+
+Each sandbox has its own network stack with per-sandbox firewall rules. By default, sandboxes follow standard network policies, but you can restrict egress to a specific set of allowed destinations or block all outbound traffic entirely. For details on configuring network access, see [network settings](/docs/en/network-limits).
+
+For a detailed overview of the Daytona platform, see [architecture](/docs/en/architecture).
 
 ## Sandbox lifecycle
 
@@ -152,10 +158,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 
 ### Resources
 
-Daytona Sandbox uses **1 vCPU**, **1GB RAM**, and **3GiB disk** by default.
-
-Daytona keeps a pool of warm sandboxes using default snapshots.
-When available, sandboxes launch within milliseconds instead of cold-booting.
+Sandboxes have **1 vCPU**, **1GB RAM**, and **3GiB disk** by default. Organizations get a maximum sandbox resource limit of **4 vCPUs**, **8GB RAM**, and **10GB disk**.
 
 To set custom sandbox resources (CPU, memory, and disk space), use the `Resources` class:
 
@@ -267,7 +270,15 @@ curl 'https://app.daytona.io/api/sandbox' \
 </TabItem>
 </Tabs>
 
-All resource parameters are optional. If not specified, Daytona will use default values appropriate for the selected language and use case.
+All resource parameters are optional and must be integers. If not specified, Daytona will use the default values listed below.
+
+| **Resource** | **Unit** | **Default** | **Minimum** | **Maximum** |
+| ------------ | -------- | ----------- | ----------- | ----------- |
+| CPU          | vCPU     | **`1`**     | **`1`**     | **`4`**     |
+| Memory       | GiB      | **`1`**     | **`1`**     | **`8`**     |
+| Disk         | GiB      | **`3`**     | **`1`**     | **`10`**    |
+
+Maximum values are per-sandbox limits set at the [organization](/docs/en/organizations) level. Contact [support@daytona.io](mailto:support@daytona.io) to increase limits.
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/daytona#resources), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/) references:
 

@@ -146,6 +146,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/architecture', locale),
+          label: t('sidebarconfig.architecture'),
+          description: t('sidebarconfig.architectureDescription'),
+          attrs: {
+            icon: 'architecture.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/getting-started', locale),
           label: t('sidebarconfig.gettingStarted'),
           description: t('sidebarconfig.gettingStartedDescription'),

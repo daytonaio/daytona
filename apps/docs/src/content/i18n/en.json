@@ -34,6 +34,8 @@
   "pagefind.search_suggestion": "No results for [SEARCH_TERM]. Try one of the following searches:",
   "pagefind.searching": "Searching for [SEARCH_TERM]...",
   "sidebarconfig.home": "Home",
+  "sidebarconfig.architecture": "Architecture",
+  "sidebarconfig.architectureDescription": "Learn about the Daytona platform architecture.",
   "sidebarconfig.quickStart": "Quick Start",
   "sidebarconfig.reference": "Reference",
   "sidebarconfig.documentation": "Docs",
