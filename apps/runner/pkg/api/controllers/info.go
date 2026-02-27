@@ -22,7 +22,11 @@ import (
 //
 //	@id				RunnerInfo
 func RunnerInfo(ctx *gin.Context) {
-	runnerInstance := runner.GetInstance(nil)
+	runnerInstance, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
 	if err != nil {

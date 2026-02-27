@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/internal/metrics"
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
+	"github.com/daytonaio/runner/pkg/docker"
 )
 
 type HealthcheckServiceConfig struct {
@@ -26,6 +27,7 @@ type HealthcheckServiceConfig struct {
 	ApiPort    int
 	ProxyPort  int
 	TlsEnabled bool
+	Docker     *docker.DockerClient
 }
 
 // Service handles healthcheck reporting to the API
@@ -39,6 +41,7 @@ type Service struct {
 	apiPort    int
 	proxyPort  int
 	tlsEnabled bool
+	docker     *docker.DockerClient
 }
 
 // NewService creates a new healthcheck service
@@ -46,6 +49,10 @@ func NewService(cfg *HealthcheckServiceConfig) (*Service, error) {
 	apiClient, err := runnerapiclient.GetApiClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create API client: %w", err)
+	}
+
+	if cfg.Docker == nil {
+		return nil, fmt.Errorf("docker client is required for healthcheck service")
 	}
 
 	return &Service{
@@ -58,6 +65,7 @@ func NewService(cfg *HealthcheckServiceConfig) (*Service, error) {
 		apiPort:    cfg.ApiPort,
 		proxyPort:  cfg.ProxyPort,
 		tlsEnabled: cfg.TlsEnabled,
+		docker:     cfg.Docker,
 	}, nil
 }
 
@@ -91,32 +99,10 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	reqCtx, cancel := context.WithTimeout(ctx, s.timeout)
 	defer cancel()
 
-	// Collect metrics
-	m, err := s.collector.Collect(reqCtx)
-	if err != nil {
-		return err
-	}
-
-	metricsPtr := &apiclient.RunnerHealthMetrics{
-		CurrentCpuLoadAverage:        m.CPULoadAverage,
-		CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
-		CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
-		CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
-		CurrentAllocatedCpu:          m.AllocatedCPU,
-		CurrentAllocatedMemoryGiB:    m.AllocatedMemoryGiB,
-		CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
-		CurrentSnapshotCount:         m.SnapshotCount,
-		CurrentStartedSandboxes:      m.StartedSandboxCount,
-		Cpu:                          m.TotalCPU,
-		MemoryGiB:                    m.TotalRAMGiB,
-		DiskGiB:                      m.TotalDiskGiB,
-	}
-
 	// Build healthcheck request
 	healthcheck := apiclient.NewRunnerHealthcheck(internal.Version)
-	healthcheck.SetMetrics(*metricsPtr)
-
 	healthcheck.SetDomain(s.domain)
+
 	proxyUrl := fmt.Sprintf("http://%s:%d", s.domain, s.proxyPort)
 	apiUrl := fmt.Sprintf("http://%s:%d", s.domain, s.apiPort)
 
@@ -127,6 +113,43 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 
 	healthcheck.SetProxyUrl(proxyUrl)
 	healthcheck.SetApiUrl(apiUrl)
+
+	dockerHealth := apiclient.RunnerServiceHealth{
+		ServiceName: "docker",
+		Healthy:     true,
+	}
+
+	err := s.docker.Ping(reqCtx)
+	if err != nil {
+		s.log.WarnContext(ctx, "Failed to ping Docker daemon", "error", err)
+
+		errStr := err.Error()
+		dockerHealth.Healthy = false
+		dockerHealth.Error = &errStr
+	}
+
+	healthcheck.SetServiceHealth([]apiclient.RunnerServiceHealth{dockerHealth})
+
+	// Collect metrics
+	m, err := s.collector.Collect(reqCtx)
+	if err != nil {
+		s.log.WarnContext(ctx, "Failed to collect metrics for healthcheck", "error", err)
+	} else {
+		healthcheck.SetMetrics(apiclient.RunnerHealthMetrics{
+			CurrentCpuLoadAverage:        m.CPULoadAverage,
+			CurrentCpuUsagePercentage:    m.CPUUsagePercentage,
+			CurrentMemoryUsagePercentage: m.MemoryUsagePercentage,
+			CurrentDiskUsagePercentage:   m.DiskUsagePercentage,
+			CurrentAllocatedCpu:          m.AllocatedCPU,
+			CurrentAllocatedMemoryGiB:    m.AllocatedMemoryGiB,
+			CurrentAllocatedDiskGiB:      m.AllocatedDiskGiB,
+			CurrentSnapshotCount:         m.SnapshotCount,
+			CurrentStartedSandboxes:      m.StartedSandboxCount,
+			Cpu:                          m.TotalCPU,
+			MemoryGiB:                    m.TotalRAMGiB,
+			DiskGiB:                      m.TotalDiskGiB,
+		})
+	}
 
 	req := s.client.RunnersAPI.RunnerHealthcheck(reqCtx).RunnerHealthcheck(*healthcheck)
 	_, err = req.Execute()

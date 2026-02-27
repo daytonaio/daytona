@@ -161,6 +161,13 @@ export class Runner {
   })
   draining: boolean
 
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: null,
+  })
+  serviceHealth: Array<{ serviceName: string; healthy: boolean; error?: string }> | null
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
   })

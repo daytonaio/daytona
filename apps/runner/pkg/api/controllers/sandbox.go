@@ -39,7 +39,11 @@ func Create(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	_, daemonVersion, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
@@ -75,9 +79,13 @@ func Create(ctx *gin.Context) {
 func Destroy(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
@@ -117,7 +125,11 @@ func CreateBackup(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
@@ -156,7 +168,11 @@ func Resize(ctx *gin.Context) {
 
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
@@ -197,7 +213,11 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	}
 
 	sandboxId := ctx.Param("sandboxId")
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.UpdateNetworkSettings(ctx.Request.Context(), sandboxId, updateNetworkSettingsDto)
 	if err != nil {
@@ -264,10 +284,14 @@ func GetNetworkSettings(ctx *gin.Context) {
 func Start(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	var metadata map[string]string
-	err := ctx.ShouldBindJSON(&metadata)
+	err = ctx.ShouldBindJSON(&metadata)
 	if err != nil {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
@@ -310,9 +334,13 @@ func Start(ctx *gin.Context) {
 func Stop(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-	err := runner.Docker.Stop(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		ctx.Error(err)
@@ -341,7 +369,11 @@ func Stop(ctx *gin.Context) {
 func Info(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	info := runner.SandboxService.GetSandboxStatesInfo(ctx.Request.Context(), sandboxId)
 
@@ -395,7 +427,11 @@ func Recover(ctx *gin.Context) {
 	}
 
 	sandboxId := ctx.Param("sandboxId")
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.RecoverSandbox(ctx.Request.Context(), sandboxId, recoverDto)
 	if err != nil {
@@ -425,9 +461,13 @@ func Recover(ctx *gin.Context) {
 func RemoveDestroyed(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-	err := runner.SandboxService.RemoveDestroyedSandbox(ctx.Request.Context(), sandboxId)
+	err = runner.SandboxService.RemoveDestroyedSandbox(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		if !common_errors.IsNotFoundError(err) {
 			ctx.Error(err)

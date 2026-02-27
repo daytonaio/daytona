@@ -104,7 +104,7 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		default:
 			metrics, err := c.collect(ctx)
 			if err != nil {
-				c.log.WarnContext(ctx, "Failed to collect metrics", "error", err)
+				c.log.DebugContext(ctx, "Failed to collect metrics", "error", err)
 				time.Sleep(1 * time.Second)
 				continue
 			}

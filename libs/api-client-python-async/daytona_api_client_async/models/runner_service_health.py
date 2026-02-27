@@ -18,25 +18,20 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_api_client.models.runner_health_metrics import RunnerHealthMetrics
-from daytona_api_client.models.runner_service_health import RunnerServiceHealth
 from typing import Optional, Set
 from typing_extensions import Self
 
-class RunnerHealthcheck(BaseModel):
+class RunnerServiceHealth(BaseModel):
     """
-    RunnerHealthcheck
+    RunnerServiceHealth
     """ # noqa: E501
-    metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
-    service_health: Optional[List[RunnerServiceHealth]] = Field(default=None, description="Health status of individual services on the runner", serialization_alias="serviceHealth")
-    domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", serialization_alias="proxyUrl")
-    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", serialization_alias="apiUrl")
-    app_version: StrictStr = Field(description="Runner app version", serialization_alias="appVersion")
+    service_name: StrictStr = Field(description="Name of the service being checked", serialization_alias="serviceName")
+    healthy: StrictBool = Field(description="Whether the service is healthy")
+    error: Optional[StrictStr] = Field(default=None, description="Error message if the service is unhealthy")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["metrics", "serviceHealth", "domain", "proxyUrl", "apiUrl", "appVersion"]
+    __properties: ClassVar[List[str]] = ["serviceName", "healthy", "error"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -56,7 +51,7 @@ class RunnerHealthcheck(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of RunnerHealthcheck from a JSON string"""
+        """Create an instance of RunnerServiceHealth from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -79,16 +74,6 @@ class RunnerHealthcheck(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of metrics
-        if self.metrics:
-            _dict['metrics'] = self.metrics.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of each item in service_health (list)
-        _items = []
-        if self.service_health:
-            for _item_service_health in self.service_health:
-                if _item_service_health:
-                    _items.append(_item_service_health.to_dict())
-            _dict['serviceHealth'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -98,7 +83,7 @@ class RunnerHealthcheck(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of RunnerHealthcheck from a dict"""
+        """Create an instance of RunnerServiceHealth from a dict"""
         if obj is None:
             return None
 
@@ -106,12 +91,9 @@ class RunnerHealthcheck(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
-            "service_health": [RunnerServiceHealth.from_dict(_item) for _item in obj["serviceHealth"]] if obj.get("serviceHealth") is not None else None,
-            "domain": obj.get("domain"),
-            "proxy_url": obj.get("proxyUrl"),
-            "api_url": obj.get("apiUrl"),
-            "app_version": obj.get("appVersion")
+            "service_name": obj.get("serviceName"),
+            "healthy": obj.get("healthy"),
+            "error": obj.get("error")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
