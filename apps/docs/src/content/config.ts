@@ -564,15 +564,32 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/guides/reinforcement-learning', locale),
+          label: t('sidebarconfig.reinforcementLearning'),
+          disablePagination: true,
+          attrs: {
+            icon: 'nabla.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath(
             '/docs/guides/reinforcement-learning/trl-grpo-training',
             locale
           ),
           label: t('sidebarconfig.trlGrpo'),
           disablePagination: true,
-          attrs: {
-            icon: 'trl-logo.svg',
-          },
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
+            '/docs/guides/reinforcement-learning/openenv-finqa',
+            locale
+          ),
+          label: t('sidebarconfig.openenvFinqa'),
+          disablePagination: true,
+          hideInSidebar: true,
         },
         {
           type: 'link',
