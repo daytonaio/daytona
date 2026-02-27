@@ -3,19 +3,21 @@ title: Webhooks
 description: Connect your applications to Daytona events in real-time with webhooks for automation, monitoring, and integrations.
 ---
 
-import { TabItem, Tabs } from '@astrojs/starlight/components'
-
 Webhooks are HTTP callbacks that Daytona sends to your specified endpoints when specific events occur.
 Think of them as "reverse API calls" - instead of your application asking Daytona for updates, Daytona
 proactively notifies your application when something important happens.
 
 Webhooks enable powerful automation and integration scenarios:
 
-- **Real-time Notifications**: Get instant alerts when sandboxes are created, started, or stopped
-- **Automated Workflows**: Trigger deployment pipelines when snapshots are created
-- **Monitoring & Analytics**: Track usage patterns and resource utilization across your organization
-- **Integration**: Connect Daytona with your existing tools like Slack, Discord, or custom applications
-- **Audit & Compliance**: Maintain detailed logs of all important changes
+- **Real-time notifications**: get instant alerts when sandboxes are created, started, or stopped
+- **Automated workflows**: trigger deployment pipelines when snapshots are created
+- **Monitoring & analytics**: track usage patterns and resource utilization across organizations
+- **Integration**: connect Daytona with existing tools like Slack, Discord, or custom applications
+- **Audit & compliance**: maintain detailed logs of all important changes
+
+:::note
+Webhooks are available to organization admins and members with appropriate permissions. If you don't see **Webhooks** in [Daytona Dashboard ↗](https://app.daytona.io/dashboard), contact [support@daytona.io](mailto:support@daytona.io) to enable webhooks for your organization. Provide your organization ID (found in your organization settings) when requesting access.
+:::
 
 ## Accessing webhooks
 
@@ -24,9 +26,36 @@ Daytona provides a webhook management interface to access and manage webhook end
 1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
 2. Click **Webhooks** in the sidebar
 
-:::note
-Webhooks are available to organization admins and members with appropriate permissions. If you don't see **Webhooks** in [Daytona Dashboard ↗](https://app.daytona.io/dashboard), contact [support@daytona.io](mailto:support@daytona.io) to enable webhooks for your organization. Provide your organization ID (found in your organization settings) when requesting access.
-:::
+The webhooks management interface contains two tabs: [Endpoints](#endpoints) and [Messages](#messages).
+
+### Endpoints
+
+The endpoints tab lists all the webhook endpoints for the organization. Each endpoint has the following details:
+
+- **Name**: the name of the webhook endpoint
+- **URL**: the URL of the webhook endpoint
+- **Status**: the status of the webhook endpoint
+- **Created**: the timestamp when the webhook endpoint was created
+
+Clicking on an endpoint opens the endpoint details page with additional endpoint configuration details: **name**, **URL**, **events**, **status**, **delivery statistics**, and **event history**.
+
+### Messages
+
+The messages tab lists all the webhook messages for the organization. Each message has the following details:
+
+- **Message ID**: the ID of the webhook message
+- **Event type**: the event type of the webhook message
+- **Timestamp**: the timestamp when the webhook message was created
+
+Clicking on a message opens the message details dialog with additional message details: **message ID**, **event type**, **timestamp**, **payload**, and **delivery attempts**.
+
+Delivery attempts are shown in a separate table with the following columns:
+
+- **Status**: the status of the delivery attempt
+- **URL**: the URL of the delivery attempt
+- **Timestamp**: the timestamp when the delivery attempt was created
+
+Expanding a delivery attempt displays additional delivery attempt details: **status code**, **duration**, **trigger**, **endpoint ID**, and **response body**.
 
 ## Create webhook endpoints
 
@@ -37,25 +66,11 @@ Daytona provides a webhook management interface to create webhook endpoints.
 3. Click **Add Endpoint**
 4. Configure your endpoint:
 
+- **Endpoint name**: a unique name for this endpoint
 - **Endpoint URL**: HTTPS endpoint where you want to receive events
-- **Description**: description for this endpoint
-- **Subscribe to events**: select which events you want to receive
+- [Events](#webhook-events): select which events to subscribe to
 
 5. Click **Create**
-
-The new webhook endpoint is created and you are redirected to the endpoint details page. You can now test your endpoint by sending a test event.
-
-## Test webhook endpoints
-
-Daytona provides a testing interface to test your webhook endpoints. You can configure a test event and send it to your endpoint to verify that it receives the test payload correctly.
-
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
-2. Click **Webhooks** in the sidebar
-3. Select a webhook endpoint from the **Endpoints** list
-4. Navigate to the **Testing** tab
-5. Select an event type and click **Send Example**
-6. Verify that the endpoint receives the test payload correctly
-7. Check that your application handles the webhook format properly
 
 ## Edit webhook endpoints
 
@@ -63,8 +78,8 @@ Daytona provides a webhook management interface to edit webhook endpoints.
 
 1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
 2. Click **Webhooks** in the sidebar
-3. Select a webhook endpoint from the **Endpoints** list
-4. Click **Edit** next to the option you want to update
+3. Select a webhook endpoint from the [Endpoints](#endpoints) tab
+4. Click the three dots menu (**⋮**) and select **Edit**
 5. Update the endpoint details
 6. Click **Save**
 
@@ -74,10 +89,9 @@ Daytona provides a webhook management interface to delete webhook endpoints.
 
 1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
 2. Click **Webhooks** in the sidebar
-3. Select a webhook endpoint from the **Endpoints** list
-4. Click the three dots menu (**⋮**)
-5. Click **Delete**
-6. Confirm the deletion
+3. Select a webhook endpoint from the [Endpoints](#endpoints) tab
+4. Click the three dots menu (**⋮**) and select **Delete**
+5. Confirm the deletion
 
 ## Webhook events
 
@@ -291,13 +305,3 @@ Sent when a volume's state changes.
 | **`oldState`**       | string | Previous volume state                               |
 | **`newState`**       | string | New volume state                                    |
 | **`updatedAt`**      | string | ISO 8601 timestamp when the volume was last updated |
-
-## Webhook logs
-
-Daytona provides a webhook management interface to view webhook logs.
-
-1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
-2. Click **Webhooks** in the sidebar
-3. Click **Logs** in the sidebar
-
-The logs page shows detailed information about webhook deliveries, including message logs, event types, message IDs, and timestamps.
