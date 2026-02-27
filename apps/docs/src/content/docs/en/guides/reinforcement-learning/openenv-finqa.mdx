@@ -508,6 +508,43 @@ The `parse_tool_call` function handles multiple output formats from the model:
   </TabItem>
 </Tabs>
 
+#### Stale WebSocket Cleanup After Cancellation
+
+When rollout collection reaches its target episode count, it cancels any in-flight tasks (episode starts, step requests, forced terminations). But cancellation creates a subtle problem: cancelled tasks leave stale responses queued on their WebSocket connections. If the next iteration reuses that socket, a step response could pick up a stale message from a cancelled task, corrupting the episode.
+
+To prevent this, the code tracks which envs had in-flight WebSocket requests at cancellation time, then force-disconnects those specific sockets. The next `reconnect_envs()` call reopens them cleanly:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Cancel excess in-flight work once target sample count is reached
+    pending_cancel = list(start_tasks.keys()) + list(step_tasks.keys()) + list(force_tasks.keys())
+
+    # Track envs with in-flight WS requests — cancellation leaves stale
+    # responses queued on the socket, corrupting subsequent communication
+    stale_env_indices = set()
+    for env_idx in start_tasks.values():
+        stale_env_indices.add(env_idx)
+    for meta in step_tasks.values():
+        stale_env_indices.add(meta[0].sandbox_idx)
+    for fep in force_tasks.values():
+        stale_env_indices.add(fep.sandbox_idx)
+
+    for task in pending_cancel:
+        task.cancel()
+    await asyncio.gather(*pending_cancel, return_exceptions=True)
+
+    # Force-disconnect envs whose WebSocket has stale responses from
+    # cancelled tasks. The next reconnect_envs() will reopen them cleanly.
+    for idx in stale_env_indices:
+        try:
+            await envs[idx].disconnect()
+        except Exception:
+            pass
+    ```
+  </TabItem>
+</Tabs>
+
 #### GRPO: Grouping and Advantages
 
 Episodes are grouped by the same question (identified by `question_id`). Groups must be exact size (default 6). Leftover episodes carry over to the next iteration:
