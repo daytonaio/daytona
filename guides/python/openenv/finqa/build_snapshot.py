@@ -67,7 +67,7 @@ def main():
     )
 
     print(f"\nSnapshot ready: {snapshot.name} (state={snapshot.state})")
-    print("Use it with: python run/run.py")
+    print("Use it with: python run.py")
 
 
 if __name__ == "__main__":
