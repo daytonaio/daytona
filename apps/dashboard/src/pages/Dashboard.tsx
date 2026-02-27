@@ -22,12 +22,26 @@ import { useDocsSearchCommands } from '@/hooks/useDocsSearchCommands'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
-import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
+import { BookOpen, BookSearchIcon, SlackIcon, SunMoon, TrashIcon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { CookieBanner } from '@/components/CookieBanner'
 
 function useDashboardCommands() {
   const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
+
+  const accountCommands: CommandConfig[] = useMemo(
+    () => [
+      {
+        id: 'delete-account',
+        label: 'Delete Account',
+        icon: <TrashIcon className="w-4 h-4" />,
+        onSelect: () => navigate(RoutePath.ACCOUNT_SETTINGS),
+      },
+    ],
+    [navigate],
+  )
+  useRegisterCommands(accountCommands, { groupId: 'account', groupLabel: 'Account', groupOrder: 4 })
 
   const helpCommands: CommandConfig[] = useMemo(
     () => [

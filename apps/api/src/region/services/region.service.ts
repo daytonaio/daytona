@@ -25,6 +25,9 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { RegionEvents } from '../constants/region-events.constant'
 import { RegionCreatedEvent } from '../events/region-created.event'
 import { RegionDeletedEvent } from '../events/region-deleted.event'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationDeletedEvent } from '../../organization/events/organization-deleted.event'
+import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { SnapshotManagerCredentialsDto } from '../dto/snapshot-manager-credentials.dto'
 import {
   RegionSnapshotManagerCredsRegeneratedEvent,
@@ -419,5 +422,21 @@ export class RegionService {
       username: newUsername,
       password: newPassword,
     })
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    const regions = await entityManager.find(Region, {
+      where: { organizationId, regionType: RegionType.CUSTOM },
+    })
+
+    for (const region of regions) {
+      await this.eventEmitter.emitAsync(RegionEvents.DELETED, new RegionDeletedEvent(entityManager, region))
+      await entityManager.remove(region)
+    }
   }
 }

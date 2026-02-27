@@ -39,6 +39,7 @@ import { DefaultRegionRequiredException } from '../../organization/exceptions/De
 import { Region } from '../../region/entities/region.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
+import { OrganizationAssertDeletableEvent } from '../../organization/events/organization-assert-deletable.event'
 import { RunnerEvents } from '../constants/runner-events'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { SnapshotRegion } from '../entities/snapshot-region.entity'
@@ -762,5 +763,31 @@ export class SnapshotService {
       { runnerId: payload.runnerId },
       { state: SnapshotRunnerState.REMOVING },
     )
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.ASSERT_NO_SNAPSHOTS,
+  })
+  async handleAssertNoSnapshots(event: OrganizationAssertDeletableEvent): Promise<void> {
+    let count = 0
+
+    try {
+      count = await this.snapshotRepository.count({
+        where: {
+          organizationId: event.organizationId,
+          state: Not(In([SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
+        },
+      })
+    } catch (error) {
+      this.logger.error(
+        `Failed to check if the organization ${event.organizationId} has snapshots that must be deleted`,
+        error,
+      )
+      throw new Error('Failed to check if the organization has snapshots that must be deleted')
+    }
+
+    if (count > 0) {
+      throw new Error(`Organization has ${count} snapshot(s) that must be deleted`)
+    }
   }
 }
