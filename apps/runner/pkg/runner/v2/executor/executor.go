@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"net/http"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -17,6 +18,7 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/internal/metrics"
 	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
@@ -195,8 +197,21 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status api
 		updateStatus.SetResultMetadata(string(resultMetadataJSON))
 	}
 
-	req := e.client.JobsAPI.UpdateJobStatus(ctx, jobID).UpdateJobStatus(*updateStatus)
-	_, _, err := req.Execute()
+	err := utils.RetryWithExponentialBackoff(
+		ctx,
+		fmt.Sprintf("update job %s status to %s", jobID, status),
+		utils.DEFAULT_MAX_RETRIES,
+		utils.DEFAULT_BASE_DELAY,
+		utils.DEFAULT_MAX_DELAY,
+		func() error {
+			req := e.client.JobsAPI.UpdateJobStatus(ctx, jobID).UpdateJobStatus(*updateStatus)
+			_, httpResp, err := req.Execute()
+			if err != nil && httpResp != nil && httpResp.StatusCode >= http.StatusBadRequest && httpResp.StatusCode < http.StatusInternalServerError {
+				return &utils.NonRetryableError{Err: fmt.Errorf("HTTP %d: %w", httpResp.StatusCode, err)}
+			}
+			return err
+		},
+	)
 
 	if err != nil {
 		span.RecordError(err)
