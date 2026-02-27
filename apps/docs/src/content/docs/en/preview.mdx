@@ -4,31 +4,28 @@ title: Preview
 
 import { Tabs, TabItem } from '@astrojs/starlight/components'
 
-The Daytona SDK provides methods to generate preview links for accessing Sandboxes. Any process listening for HTTP traffic on ports 3000–9999 can be previewed.
+Daytona provides preview URLs for accessing services running in your sandboxes. Any process listening for HTTP traffic on ports `3000` - `9999` can be previewed through a generated URL.
 
-Daytona offers two approaches for preview URLs, each with different authentication mechanisms: **Standard Preview URL** and **Signed Preview URL**.
+Daytona supports two types of preview URLs, each with a different authentication mechanism:
+
+- [Standard preview URL](#standard-preview-url) uses the sandbox ID in the URL and requires a token sent via header
+- [Signed preview URL](#signed-preview-url) embeds the authentication token directly in the URL, requiring no headers
 
 ## Authentication
 
-If the Sandbox has its `public` property set to `true`, preview links will be publicly accessible without authentication. Otherwise, authentication is required.
+If a sandbox has its `public` property set to `true`, preview links are publicly accessible without authentication. Otherwise, authentication is required. The authentication mechanism depends on the preview URL type.
 
-For private sandboxes, the authentication differs based on the preview URL type.
+:::note
+Standard and signed preview tokens are not interchangeable. The token from `get_preview_link()` must be sent via the `x-daytona-preview-token` header. The token from `create_signed_preview_url()` is embedded in the URL itself: it cannot be used as a header value, and vice versa.
+:::
 
-## Standard Preview URL
+## Standard preview URL
 
-The standard preview URL uses your sandbox ID in the URL structure and requires a separate authentication token sent via header.
+The standard preview URL includes your sandbox ID in the URL and provides a separate token for authentication via the `x-daytona-preview-token` request header.
 
-**URL Structure:** `https://{port}-{sandboxId}.{daytonaProxyDomain}`
+URL structure: `https://{port}-{sandboxId}.{daytonaProxyDomain}`
 
-**How it works:**
-- The URL contains the port and your sandbox ID
-- A separate authentication token is provided
-- The token must be sent in the `x-daytona-preview-token` request header
-- The token automatically resets when the sandbox restarts
-
-**When to use:**
-- Programmatic access and API integrations where you control the HTTP headers
-- Internal tools where token management through headers is straightforward
+The token resets automatically when the sandbox restarts. Any previously issued standard preview tokens become invalid. Call the `get_preview_link()` method again after starting the sandbox to obtain a fresh token. Use standard preview URLs for programmatic access and API integrations where you control the HTTP headers.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -63,47 +60,64 @@ const response = await fetch(previewInfo.url, {
 </TabItem>
 <TabItem label="Ruby" icon="seti:ruby">
 ```ruby
-
 preview_info = sandbox.preview_url(3000)
 
 puts "Preview link url: #{preview_info.url}"
 puts "Preview link token: #{preview_info.token}"
+```
 
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+```go
+url, err := sandbox.GetPreviewLink(ctx, 3000)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("URL: %s\n", url)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/preview-url' \
+  --header 'Authorization: Bearer <API_KEY>'
 ```
 
 </TabItem>
 </Tabs>
 
-See: [get_preview_link (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxget_preview_link), [getPreviewLink (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getpreviewlink), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
+
+> [**get_preview_link (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxget_preview_link)
+>
+> [**getPreviewLink (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#getpreviewlink)
+>
+> [**preview_url (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#preview_url)
+>
+> [**GetPreviewLink (Go SDK)**](/docs/en/go-sdk/daytona#Sandbox.GetPreviewLink)
+>
+> [**Get Port Preview URL (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}/ports/{port}/preview-url)
 
 ### Authentication
 
-The URL uses the sandbox ID, and authentication is done via header:
+Authenticate by sending the token in the `x-daytona-preview-token` header:
 
 ```bash
-# URL structure: port-sandboxid.domain
 curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
   https://3000-sandbox-123456.proxy.daytona.work
 ```
 
-## Signed Preview URL
+## Signed preview URL
 
-The signed preview URL embeds the authentication token directly into the URL structure itself, eliminating the need for separate authentication headers.
+The signed preview URL embeds the authentication token directly in the URL, eliminating the need for separate headers. You can set a custom expiry time for the token (defaults to 60 seconds). The token persists across sandbox restarts until it expires. Tokens can be revoked manually before expiry if needed.
 
-**URL Structure:** `https://{port}-{token}.{daytonaProxyDomain}`
+:::tip
+Always set the `expires_in_seconds` parameter explicitly. The default of 60 seconds is short due to security considerations. Most use cases should use at least 3600 (1 hour).
+:::
 
-**How it works:**
-- The URL contains the port and the signed authentication token (instead of the sandbox ID)
-- Authentication is embedded in the URL - no headers needed
-- You set a custom expiry time for the token (defaults to 60 seconds)
-- The token persists across sandbox restarts until it expires
-- You can manually revoke tokens before they expire if needed
+URL structure: `https://{port}-{token}.{daytonaProxyDomain}`
 
-**When to use:**
-- Sharing preview links with users who can't easily set custom headers
-- Embedding in iframes, emails, or other contexts where header control is limited
-- Creating time-limited shareable links with explicit expiration
-- Webhooks and integrations that don't support custom headers
+Use signed preview URLs when sharing links with users who cannot set custom headers, embedding previews in iframes or emails, or creating time-limited shareable links.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -142,38 +156,123 @@ await sandbox.expireSignedPreviewUrl(3000, signedUrl.token);
 <TabItem label="Ruby" icon="seti:ruby">
 ```ruby
 # Create a signed preview URL that expires in 3600 seconds (1 hour)
-signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+signed_url = sandbox.create_signed_preview_url(3000, 3600)
 
 puts "URL: #{signed_url.url}"
 puts "Token: #{signed_url.token}"
 ```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+```bash
+daytona preview-url <sandbox-name> --port 3000 --expires 3600
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/signed-preview-url?expiresInSeconds=3600' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
 </TabItem>
 </Tabs>
 
-See: [create_signed_preview_url (Python SDK)](/docs/python-sdk/sync/sandbox/#sandboxcreate_signed_preview_url), [getSignedPreviewUrl (TypeScript SDK)](/docs/typescript-sdk/sandbox/#getsignedpreviewurl), [preview_url (Ruby SDK)](/docs/ruby-sdk/sandbox/#preview_url)
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
+
+> [**create_signed_preview_url (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_signed_preview_url)
+>
+> [**getSignedPreviewUrl (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#getsignedpreviewurl)
+>
+> [**create_signed_preview_url (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_signed_preview_url)
+>
+> [**Get Signed Preview URL (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url)
 
 ### Authentication
 
-The URL embeds the token in place of the sandbox ID - no headers needed:
+The token is embedded in the URL itself, so no additional headers are required:
 
 ```bash
-# URL structure: port-token.domain (token is in the URL itself)
-curl https://3000-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.proxy.daytona.work
+curl https://3000-<value>.proxy.daytona.work
 ```
 
 :::tip
-If you want to serve the previews under your own domain instead of using Daytona's URLs, check out the [Custom Domain/Authentication](/docs/en/custom-domain-authentication) section.
+Port `22222` is used by the [web terminal](/docs/en/web-terminal) to access the terminal using preview URLs.
 :::
 
-## Warning Page
+## Warning page
 
-When opening the preview link in a browser, a warning page will be shown for the first time.
-This warning serves as a security measure to inform users about the potential risks of visiting the preview URL.
+When opening a preview link in a browser for the first time, Daytona displays a warning page. This warning informs users about potential risks of visiting the preview URL and only appears when loading the link in a browser.
 
-The warning page will only be shown when loading the preview link in a browser.
-
-To avoid this warning you can do one of the following:
+To skip the warning page:
 
 - Send the `X-Daytona-Skip-Preview-Warning: true` header
 - Upgrade to [Tier 3](/docs/en/limits)
-- Deploy your own [custom preview proxy](/docs/en/custom-domain-authentication)
+- Deploy a [custom preview proxy](#custom-preview-proxy)
+
+## Custom preview proxy
+
+You can deploy your own preview proxy to handle preview URLs for sandboxes. This gives you full control over the preview experience, including custom domains, authentication, error handling, and styling.
+
+- **Custom domain**: host your proxy under your own domain (e.g., `preview.yourcompany.com`)
+- **User authentication**: implement custom authentication logic for private previews
+- **Sandbox management**: automatically start stopped sandboxes before forwarding users
+- **Custom error pages**: style error pages to match your brand
+- **Preview warning control**: disable Daytona's preview warning
+- **CORS management**: override Daytona's default CORS settings
+
+### How it works
+
+When a user visits a preview URL, your custom proxy receives the request and can:
+
+1. Authenticate the user using custom logic
+2. Check sandbox status and start it if needed
+3. Forward the request to the actual sandbox
+4. Handle responses with custom styling and error pages
+5. Send custom headers to control Daytona's behavior
+
+### Proxy headers
+
+Your proxy can send special headers to control Daytona's behavior.
+
+#### Disable preview warning
+
+To disable Daytona's preview warning page, send:
+
+```
+X-Daytona-Skip-Preview-Warning: true
+```
+
+#### Disable CORS
+
+To override Daytona's default CORS settings, send:
+
+```
+X-Daytona-Disable-CORS: true
+```
+
+#### Disable last activity update
+
+To prevent sandbox last activity updates when previewing, set the `X-Daytona-Skip-Last-Activity-Update` header to `true`. This prevents Daytona from keeping sandboxes that have [auto-stop enabled](/docs/en/sandboxes#auto-stop-interval) in a started state:
+
+```bash
+curl -H "X-Daytona-Skip-Last-Activity-Update: true" \
+  https://3000-sandbox-123456.proxy.daytona.work
+```
+
+#### Authentication
+
+For private preview links, send:
+
+```
+X-Daytona-Preview-Token: {sandboxToken}
+```
+
+The `sandboxToken` can be fetched through the Daytona SDK or API using the [standard preview URL](#standard-preview-url) methods.
+
+### Examples
+
+You can find examples of custom preview proxies on [GitHub](https://github.com/daytonaio/daytona-proxy-samples):
+
+- [TypeScript Example](https://github.com/daytonaio/daytona-proxy-samples/tree/main/typescript)
+- [Golang Example](https://github.com/daytonaio/daytona-proxy-samples/tree/main/go)

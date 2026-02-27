@@ -106,8 +106,6 @@
   "sidebarconfig.playgroundDescription": "Playground for Daytona Sandboxes.",
   "sidebarconfig.preview": "Preview",
   "sidebarconfig.previewDescription": "Preview URLs and authentication tokens.",
-  "sidebarconfig.customDomainAuthentication": "Custom Domain Authentication",
-  "sidebarconfig.customDomainAuthenticationDescription": "Customize the preview proxy with your own domain and logic.",
   "sidebarconfig.auditLogs": "Audit Logs",
   "sidebarconfig.auditLogsDescription": "Monitor and track activities across your Daytona organization.",
   "sidebarconfig.securityExhibit": "Security Exhibit",
