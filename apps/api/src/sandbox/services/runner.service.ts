@@ -40,6 +40,7 @@ import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
+import { RunnersByRegionDto } from '../dto/runners-by-region.dto'
 import { Snapshot } from '../entities/snapshot.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
@@ -188,6 +189,34 @@ export class RunnerService {
     })
 
     return runners.map(RunnerDto.fromRunner)
+  }
+
+  async getRunnersBreakdownByRegion(): Promise<RunnersByRegionDto> {
+    const regions = await this.regionService.findAllByRegionTypes([RegionType.SHARED, RegionType.DEDICATED])
+    const regionIds = regions.map((region) => region.id)
+
+    if (regionIds.length === 0) {
+      return {}
+    }
+
+    const runners = await this.runnerRepository.find({
+      where: {
+        region: In(regionIds),
+      },
+      select: ['domain', 'region'],
+    })
+
+    const result: RunnersByRegionDto = {}
+    for (const runner of runners) {
+      if (!result[runner.region]) {
+        result[runner.region] = []
+      }
+      if (runner.domain) {
+        result[runner.region].push(runner.domain)
+      }
+    }
+
+    return result
   }
 
   async findDrainingPaginated(skip: number, take: number): Promise<Runner[]> {
