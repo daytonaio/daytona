@@ -52,8 +52,6 @@ The proxy is a dedicated HTTP proxy that routes external traffic to the correct 
 
 The snapshot builder is part of the API process and orchestrates the creation of sandbox [snapshots](/docs/en/snapshots) from a Dockerfile or a pre-built image from a [container registry](#container-registry). It coordinates with runners to build or pull images, which are then pushed to an internal snapshot registry that implements the OCI distribution specification.
 
-Daytona maintains a warm pool of pre-created sandboxes using [default snapshots](/docs/en/snapshots#default-snapshots). When a sandbox request matches a warm pool configuration, an already-running sandbox is assigned instead of cold-booting a new one, reducing creation time to milliseconds.
-
 #### Sandbox manager
 
 The sandbox manager is part of the API process and schedules sandboxes onto runners, reconciles states, and enforces [sandbox lifecycle management](/docs/en/sandboxes#sandbox-lifecycle) policies.
@@ -69,7 +67,7 @@ The compute plane is the infrastructure layer where sandboxes run. Sandboxes run
 
 #### Sandbox runners
 
-Runners are container nodes that power Daytona's compute plane, providing the underlying infrastructure for running sandbox workloads. Each runner exposes an API that the control plane calls to create, start, stop, destroy, resize, and back up sandboxes. Runners interact with S3-compatible object storage for snapshot and volume data, and with the internal Docker registry for snapshot images.
+Runners are container nodes that power Daytona's compute plane, providing the underlying infrastructure for running sandbox workloads. Each runner polls the control plane API for jobs and executes sandbox operations: creating, starting, stopping, destroying, resizing, and backing up sandboxes. Runners interact with S3-compatible object storage for snapshot and volume data, and with the internal Docker registry for snapshot images.
 
 Each sandbox runs as an isolated container with its own Linux namespaces for processes, network, filesystem mounts, and inter-process communication. Each runner allocates dedicated vCPU, RAM, and disk resources per sandbox.
 
