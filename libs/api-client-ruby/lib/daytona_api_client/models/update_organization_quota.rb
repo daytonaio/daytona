@@ -39,8 +39,8 @@ module DaytonaApiClient
 
     attr_accessor :sandbox_lifecycle_rate_limit_ttl_seconds
 
-    # Time in seconds before an unused snapshot is deactivated
-    attr_accessor :snapshot_deactivation_timeout
+    # Time in minutes before an unused snapshot is deactivated
+    attr_accessor :snapshot_deactivation_timeout_minutes
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
@@ -57,7 +57,7 @@ module DaytonaApiClient
         :'authenticated_rate_limit_ttl_seconds' => :'authenticatedRateLimitTtlSeconds',
         :'sandbox_create_rate_limit_ttl_seconds' => :'sandboxCreateRateLimitTtlSeconds',
         :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'sandboxLifecycleRateLimitTtlSeconds',
-        :'snapshot_deactivation_timeout' => :'snapshotDeactivationTimeout'
+        :'snapshot_deactivation_timeout_minutes' => :'snapshotDeactivationTimeoutMinutes'
       }
     end
 
@@ -86,7 +86,7 @@ module DaytonaApiClient
         :'authenticated_rate_limit_ttl_seconds' => :'Float',
         :'sandbox_create_rate_limit_ttl_seconds' => :'Float',
         :'sandbox_lifecycle_rate_limit_ttl_seconds' => :'Float',
-        :'snapshot_deactivation_timeout' => :'Float'
+        :'snapshot_deactivation_timeout_minutes' => :'Float'
       }
     end
 
@@ -105,7 +105,7 @@ module DaytonaApiClient
         :'authenticated_rate_limit_ttl_seconds',
         :'sandbox_create_rate_limit_ttl_seconds',
         :'sandbox_lifecycle_rate_limit_ttl_seconds',
-        :'snapshot_deactivation_timeout'
+        :'snapshot_deactivation_timeout_minutes'
       ])
     end
 
@@ -197,10 +197,10 @@ module DaytonaApiClient
         self.sandbox_lifecycle_rate_limit_ttl_seconds = nil
       end
 
-      if attributes.key?(:'snapshot_deactivation_timeout')
-        self.snapshot_deactivation_timeout = attributes[:'snapshot_deactivation_timeout']
+      if attributes.key?(:'snapshot_deactivation_timeout_minutes')
+        self.snapshot_deactivation_timeout_minutes = attributes[:'snapshot_deactivation_timeout_minutes']
       else
-        self.snapshot_deactivation_timeout = nil
+        self.snapshot_deactivation_timeout_minutes = nil
       end
     end
 
@@ -236,7 +236,7 @@ module DaytonaApiClient
           authenticated_rate_limit_ttl_seconds == o.authenticated_rate_limit_ttl_seconds &&
           sandbox_create_rate_limit_ttl_seconds == o.sandbox_create_rate_limit_ttl_seconds &&
           sandbox_lifecycle_rate_limit_ttl_seconds == o.sandbox_lifecycle_rate_limit_ttl_seconds &&
-          snapshot_deactivation_timeout == o.snapshot_deactivation_timeout
+          snapshot_deactivation_timeout_minutes == o.snapshot_deactivation_timeout_minutes
     end
 
     # @see the `==` method
@@ -248,7 +248,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds, snapshot_deactivation_timeout].hash
+      [max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_quota, max_snapshot_size, volume_quota, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds, snapshot_deactivation_timeout_minutes].hash
     end
 
     # Builds the object from hash

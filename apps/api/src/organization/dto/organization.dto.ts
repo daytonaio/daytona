@@ -79,10 +79,10 @@ export class OrganizationDto {
   maxDiskPerSandbox: number
 
   @ApiProperty({
-    description: 'Time in seconds before an unused snapshot is deactivated',
-    default: 1209600,
+    description: 'Time in minutes before an unused snapshot is deactivated',
+    default: 20160,
   })
-  snapshotDeactivationTimeout: number
+  snapshotDeactivationTimeoutMinutes: number
 
   @ApiProperty({
     description: 'Sandbox default network block all',
@@ -163,7 +163,7 @@ export class OrganizationDto {
       maxCpuPerSandbox: organization.maxCpuPerSandbox,
       maxMemoryPerSandbox: organization.maxMemoryPerSandbox,
       maxDiskPerSandbox: organization.maxDiskPerSandbox,
-      snapshotDeactivationTimeout: organization.snapshotDeactivationTimeout,
+      snapshotDeactivationTimeoutMinutes: organization.snapshotDeactivationTimeoutMinutes,
       sandboxLimitedNetworkEgress: organization.sandboxLimitedNetworkEgress,
       defaultRegionId: organization.defaultRegionId,
       authenticatedRateLimit: organization.authenticatedRateLimit,

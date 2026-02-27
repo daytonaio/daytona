@@ -10,11 +10,11 @@ export class Migration1770900000000 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "organization" ADD "snapshot_deactivation_timeout" integer NOT NULL DEFAULT 1209600`,
+      `ALTER TABLE "organization" ADD "snapshot_deactivation_timeout_minutes" integer NOT NULL DEFAULT 20160`,
     )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE "organization" DROP COLUMN "snapshot_deactivation_timeout"`)
+    await queryRunner.query(`ALTER TABLE "organization" DROP COLUMN "snapshot_deactivation_timeout_minutes"`)
   }
 }

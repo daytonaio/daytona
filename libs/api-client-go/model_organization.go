@@ -50,8 +50,8 @@ type Organization struct {
 	MaxMemoryPerSandbox float32 `json:"maxMemoryPerSandbox"`
 	// Max disk per sandbox
 	MaxDiskPerSandbox float32 `json:"maxDiskPerSandbox"`
-	// Time in seconds before an unused snapshot is deactivated
-	SnapshotDeactivationTimeout float32 `json:"snapshotDeactivationTimeout"`
+	// Time in minutes before an unused snapshot is deactivated
+	SnapshotDeactivationTimeoutMinutes float32 `json:"snapshotDeactivationTimeoutMinutes"`
 	// Sandbox default network block all
 	SandboxLimitedNetworkEgress bool `json:"sandboxLimitedNetworkEgress"`
 	// Default region ID
@@ -79,7 +79,7 @@ type _Organization Organization
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, snapshotDeactivationTimeout float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32) *Organization {
+func NewOrganization(id string, name string, createdBy string, personal bool, createdAt time.Time, updatedAt time.Time, suspended bool, suspendedAt time.Time, suspensionReason string, suspendedUntil time.Time, suspensionCleanupGracePeriodHours float32, maxCpuPerSandbox float32, maxMemoryPerSandbox float32, maxDiskPerSandbox float32, snapshotDeactivationTimeoutMinutes float32, sandboxLimitedNetworkEgress bool, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, experimentalConfig map[string]interface{}, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32) *Organization {
 	this := Organization{}
 	this.Id = id
 	this.Name = name
@@ -95,7 +95,7 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
-	this.SnapshotDeactivationTimeout = snapshotDeactivationTimeout
+	this.SnapshotDeactivationTimeoutMinutes = snapshotDeactivationTimeoutMinutes
 	this.SandboxLimitedNetworkEgress = sandboxLimitedNetworkEgress
 	this.AuthenticatedRateLimit = authenticatedRateLimit
 	this.SandboxCreateRateLimit = sandboxCreateRateLimit
@@ -112,8 +112,8 @@ func NewOrganization(id string, name string, createdBy string, personal bool, cr
 // but it doesn't guarantee that properties required by API are set
 func NewOrganizationWithDefaults() *Organization {
 	this := Organization{}
-	var snapshotDeactivationTimeout float32 = 1209600
-	this.SnapshotDeactivationTimeout = snapshotDeactivationTimeout
+	var snapshotDeactivationTimeoutMinutes float32 = 20160
+	this.SnapshotDeactivationTimeoutMinutes = snapshotDeactivationTimeoutMinutes
 	return &this
 }
 
@@ -453,28 +453,28 @@ func (o *Organization) SetMaxDiskPerSandbox(v float32) {
 	o.MaxDiskPerSandbox = v
 }
 
-// GetSnapshotDeactivationTimeout returns the SnapshotDeactivationTimeout field value
-func (o *Organization) GetSnapshotDeactivationTimeout() float32 {
+// GetSnapshotDeactivationTimeoutMinutes returns the SnapshotDeactivationTimeoutMinutes field value
+func (o *Organization) GetSnapshotDeactivationTimeoutMinutes() float32 {
 	if o == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.SnapshotDeactivationTimeout
+	return o.SnapshotDeactivationTimeoutMinutes
 }
 
-// GetSnapshotDeactivationTimeoutOk returns a tuple with the SnapshotDeactivationTimeout field value
+// GetSnapshotDeactivationTimeoutMinutesOk returns a tuple with the SnapshotDeactivationTimeoutMinutes field value
 // and a boolean to check if the value has been set.
-func (o *Organization) GetSnapshotDeactivationTimeoutOk() (*float32, bool) {
+func (o *Organization) GetSnapshotDeactivationTimeoutMinutesOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.SnapshotDeactivationTimeout, true
+	return &o.SnapshotDeactivationTimeoutMinutes, true
 }
 
-// SetSnapshotDeactivationTimeout sets field value
-func (o *Organization) SetSnapshotDeactivationTimeout(v float32) {
-	o.SnapshotDeactivationTimeout = v
+// SetSnapshotDeactivationTimeoutMinutes sets field value
+func (o *Organization) SetSnapshotDeactivationTimeoutMinutes(v float32) {
+	o.SnapshotDeactivationTimeoutMinutes = v
 }
 
 // GetSandboxLimitedNetworkEgress returns the SandboxLimitedNetworkEgress field value
@@ -737,7 +737,7 @@ func (o Organization) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
-	toSerialize["snapshotDeactivationTimeout"] = o.SnapshotDeactivationTimeout
+	toSerialize["snapshotDeactivationTimeoutMinutes"] = o.SnapshotDeactivationTimeoutMinutes
 	toSerialize["sandboxLimitedNetworkEgress"] = o.SandboxLimitedNetworkEgress
 	if !IsNil(o.DefaultRegionId) {
 		toSerialize["defaultRegionId"] = o.DefaultRegionId
@@ -776,7 +776,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
-		"snapshotDeactivationTimeout",
+		"snapshotDeactivationTimeoutMinutes",
 		"sandboxLimitedNetworkEgress",
 		"authenticatedRateLimit",
 		"sandboxCreateRateLimit",
@@ -828,7 +828,7 @@ func (o *Organization) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
-		delete(additionalProperties, "snapshotDeactivationTimeout")
+		delete(additionalProperties, "snapshotDeactivationTimeoutMinutes")
 		delete(additionalProperties, "sandboxLimitedNetworkEgress")
 		delete(additionalProperties, "defaultRegionId")
 		delete(additionalProperties, "authenticatedRateLimit")

@@ -57,8 +57,8 @@ module DaytonaApiClient
     # Max disk per sandbox
     attr_accessor :max_disk_per_sandbox
 
-    # Time in seconds before an unused snapshot is deactivated
-    attr_accessor :snapshot_deactivation_timeout
+    # Time in minutes before an unused snapshot is deactivated
+    attr_accessor :snapshot_deactivation_timeout_minutes
 
     # Sandbox default network block all
     attr_accessor :sandbox_limited_network_egress
@@ -104,7 +104,7 @@ module DaytonaApiClient
         :'max_cpu_per_sandbox' => :'maxCpuPerSandbox',
         :'max_memory_per_sandbox' => :'maxMemoryPerSandbox',
         :'max_disk_per_sandbox' => :'maxDiskPerSandbox',
-        :'snapshot_deactivation_timeout' => :'snapshotDeactivationTimeout',
+        :'snapshot_deactivation_timeout_minutes' => :'snapshotDeactivationTimeoutMinutes',
         :'sandbox_limited_network_egress' => :'sandboxLimitedNetworkEgress',
         :'default_region_id' => :'defaultRegionId',
         :'authenticated_rate_limit' => :'authenticatedRateLimit',
@@ -144,7 +144,7 @@ module DaytonaApiClient
         :'max_cpu_per_sandbox' => :'Float',
         :'max_memory_per_sandbox' => :'Float',
         :'max_disk_per_sandbox' => :'Float',
-        :'snapshot_deactivation_timeout' => :'Float',
+        :'snapshot_deactivation_timeout_minutes' => :'Float',
         :'sandbox_limited_network_egress' => :'Boolean',
         :'default_region_id' => :'String',
         :'authenticated_rate_limit' => :'Float',
@@ -269,10 +269,10 @@ module DaytonaApiClient
         self.max_disk_per_sandbox = nil
       end
 
-      if attributes.key?(:'snapshot_deactivation_timeout')
-        self.snapshot_deactivation_timeout = attributes[:'snapshot_deactivation_timeout']
+      if attributes.key?(:'snapshot_deactivation_timeout_minutes')
+        self.snapshot_deactivation_timeout_minutes = attributes[:'snapshot_deactivation_timeout_minutes']
       else
-        self.snapshot_deactivation_timeout = 1209600
+        self.snapshot_deactivation_timeout_minutes = 20160
       end
 
       if attributes.key?(:'sandbox_limited_network_egress')
@@ -389,8 +389,8 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "max_disk_per_sandbox", max_disk_per_sandbox cannot be nil.')
       end
 
-      if @snapshot_deactivation_timeout.nil?
-        invalid_properties.push('invalid value for "snapshot_deactivation_timeout", snapshot_deactivation_timeout cannot be nil.')
+      if @snapshot_deactivation_timeout_minutes.nil?
+        invalid_properties.push('invalid value for "snapshot_deactivation_timeout_minutes", snapshot_deactivation_timeout_minutes cannot be nil.')
       end
 
       if @sandbox_limited_network_egress.nil?
@@ -422,7 +422,7 @@ module DaytonaApiClient
       return false if @max_cpu_per_sandbox.nil?
       return false if @max_memory_per_sandbox.nil?
       return false if @max_disk_per_sandbox.nil?
-      return false if @snapshot_deactivation_timeout.nil?
+      return false if @snapshot_deactivation_timeout_minutes.nil?
       return false if @sandbox_limited_network_egress.nil?
       return false if @experimental_config.nil?
       true
@@ -569,13 +569,13 @@ module DaytonaApiClient
     end
 
     # Custom attribute writer method with validation
-    # @param [Object] snapshot_deactivation_timeout Value to be assigned
-    def snapshot_deactivation_timeout=(snapshot_deactivation_timeout)
-      if snapshot_deactivation_timeout.nil?
-        fail ArgumentError, 'snapshot_deactivation_timeout cannot be nil'
+    # @param [Object] snapshot_deactivation_timeout_minutes Value to be assigned
+    def snapshot_deactivation_timeout_minutes=(snapshot_deactivation_timeout_minutes)
+      if snapshot_deactivation_timeout_minutes.nil?
+        fail ArgumentError, 'snapshot_deactivation_timeout_minutes cannot be nil'
       end
 
-      @snapshot_deactivation_timeout = snapshot_deactivation_timeout
+      @snapshot_deactivation_timeout_minutes = snapshot_deactivation_timeout_minutes
     end
 
     # Custom attribute writer method with validation
@@ -617,7 +617,7 @@ module DaytonaApiClient
           max_cpu_per_sandbox == o.max_cpu_per_sandbox &&
           max_memory_per_sandbox == o.max_memory_per_sandbox &&
           max_disk_per_sandbox == o.max_disk_per_sandbox &&
-          snapshot_deactivation_timeout == o.snapshot_deactivation_timeout &&
+          snapshot_deactivation_timeout_minutes == o.snapshot_deactivation_timeout_minutes &&
           sandbox_limited_network_egress == o.sandbox_limited_network_egress &&
           default_region_id == o.default_region_id &&
           authenticated_rate_limit == o.authenticated_rate_limit &&
@@ -638,7 +638,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_deactivation_timeout, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
+      [id, name, created_by, personal, created_at, updated_at, suspended, suspended_at, suspension_reason, suspended_until, suspension_cleanup_grace_period_hours, max_cpu_per_sandbox, max_memory_per_sandbox, max_disk_per_sandbox, snapshot_deactivation_timeout_minutes, sandbox_limited_network_egress, default_region_id, authenticated_rate_limit, sandbox_create_rate_limit, sandbox_lifecycle_rate_limit, experimental_config, authenticated_rate_limit_ttl_seconds, sandbox_create_rate_limit_ttl_seconds, sandbox_lifecycle_rate_limit_ttl_seconds].hash
     end
 
     # Builds the object from hash

@@ -45,7 +45,7 @@ import { SnapshotInfoResponse } from '@daytonaio/runner-api-client'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
-const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_SECONDS = 14 * 24 * 60 * 60 // 14 days
+const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
@@ -1047,7 +1047,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
-      const cutoff = `NOW() - INTERVAL '1 second' * COALESCE(org."snapshot_deactivation_timeout", ${DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_SECONDS})`
+      const cutoff = `NOW() - INTERVAL '1 minute' * COALESCE(org."snapshot_deactivation_timeout_minutes", ${DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES})`
 
       const oldSnapshots = await this.snapshotRepository
         .createQueryBuilder('snapshot')

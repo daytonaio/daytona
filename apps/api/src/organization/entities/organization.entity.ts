@@ -171,10 +171,10 @@ export class Organization {
 
   @Column({
     type: 'int',
-    default: 1209600,
-    name: 'snapshot_deactivation_timeout',
+    default: 20160,
+    name: 'snapshot_deactivation_timeout_minutes',
   })
-  snapshotDeactivationTimeout: number
+  snapshotDeactivationTimeoutMinutes: number
 
   @Column({
     default: false,
