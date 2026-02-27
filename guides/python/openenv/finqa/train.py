@@ -7,7 +7,7 @@ FinQA OpenEnv environment.
 Uses Group Relative Policy Optimization (GRPO):
 1. Collect multi-turn tool-calling episodes via batched vLLM generation (TP=2)
 2. Compute group-relative advantages (episodes from same prompt)
-3. Policy gradient update with KL penalty (frozen base = reference via adapter toggle)
+3. Policy gradient update (group-relative advantages)
 4. Export LoRA adapter, swap actor adapter in vLLM for next iteration
 
 Requires 4 GPUs: vLLM on cuda:0-1 (tensor_parallel=2),
@@ -17,7 +17,7 @@ Usage:
     # Build snapshot first (once)
     python build_snapshot.py
 
-    # Train (default: 1000 sandboxes, 20 iterations)
+    # Train (default: 500 sandboxes, 10 iterations)
     python train.py
 
     # Quick smoke test
@@ -30,11 +30,11 @@ import json
 import logging
 import os
 import re
-import shutil
 import tempfile
 import time
 from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Any
 
 import numpy as np
@@ -51,9 +51,9 @@ from vllm import LLM, SamplingParams
 # Constants
 # ---------------------------------------------------------------------------
 SANDBOX_COUNT = 500
-EPISODES_PER_GROUP = 4
-TRAINING_ITERATIONS = 20
-MIN_USE_PCT = 90.0  # Stop collecting rollout rounds once this % of episodes are in groups
+EPISODES_PER_GROUP = 6
+TRAINING_ITERATIONS = 10
+TARGET_GROUPS_PER_ITER = 100  # 0 => use all rollout rounds (bounded by MAX_ROLLOUT_ROUNDS)
 MAX_ROLLOUT_ROUNDS = 8
 MAX_CONCURRENT_CREATE = 100
 MAX_CONCURRENT_PLAY = 200
@@ -62,20 +62,18 @@ MAX_EPISODE_STEPS = 20
 MAX_GEN_TOKENS = 512
 STOP_STRINGS = ["</tool_call>"]
 TEMPERATURE = 1.0
-ROLLOUT_MIN_GEN_BATCH = 0  # 0 => auto-tune from sandbox count
 ROLLOUT_DISPATCH_WAIT_MS = 500
 ROLLOUT_RECONNECT_EVERY_BATCHES = 1
-LEARNING_RATE = 1e-4  # Higher LR for LoRA (only adapter weights update)
-KL_BETA = 0.1
 MODEL_NAME = "Qwen/Qwen3-14B"
-GPU_MEMORY_UTILIZATION = 0.9  # vLLM gets its own GPUs, use most of them
+GPU_MEMORY_UTILIZATION = 0.85
 TENSOR_PARALLEL_SIZE = 2  # vLLM tensor parallelism across cuda:0-1
 SYNC_EVERY = 1  # Export/switch actor LoRA adapter every N training iterations
-GRPO_UPDATE_BATCH_SIZE = 8
+GRPO_UPDATE_BATCH_SIZE = 12
 
 # LoRA configuration
-LORA_RANK = 32
-LORA_ALPHA = 64
+LORA_RANK = 16
+LORA_ALPHA = 32
+LEARNING_RATE = 3e-4
 LORA_DROPOUT = 0.0
 LORA_TARGET_MODULES = [
     "q_proj",
@@ -103,96 +101,51 @@ When submitting your final answer:
 - For single values, just submit the number (e.g., 0.895 or -77 or 63)
 - If the question is yes/no, answer Yes or No"""
 
-# Static tool schemas (list_tools bug workaround — defined in OpenAI format)
-FINQA_TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_descriptions",
-            "description": "Get a list of available table names for a company.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "company_name": {
-                        "type": "string",
-                        "description": "The name of the company",
-                    }
-                },
-                "required": ["company_name"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "get_table_info",
-            "description": "Get table metadata: description, columns, types, unique values.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "company_name": {
-                        "type": "string",
-                        "description": "The name of the company",
-                    },
-                    "table_name": {
-                        "type": "string",
-                        "description": "The name of the table",
-                    },
-                },
-                "required": ["company_name", "table_name"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "sql_query",
-            "description": (
-                "Execute a SQL query on a table. Select * not allowed. "
-                + "Filters are required: WHERE, HAVING, IN, NOT IN, EXISTS, NOT EXISTS, "
-                + "ANY, SOME, ALL, LIKE, NOT LIKE, BETWEEN, NOT BETWEEN, IS NULL, "
-                + "IS NOT NULL, CASE, FILTER."
-            ),
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "company_name": {
-                        "type": "string",
-                        "description": "The name of the company",
-                    },
-                    "table_name": {
-                        "type": "string",
-                        "description": "The name of the table",
-                    },
-                    "query": {
-                        "type": "string",
-                        "description": "SQL query to execute (must include filters)",
-                    },
-                },
-                "required": ["company_name", "table_name", "query"],
-            },
-        },
-    },
-    {
-        "type": "function",
-        "function": {
-            "name": "submit_answer",
-            "description": "Submit a final answer for the question.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "answer": {
-                        "type": "string",
-                        "description": "The final answer to submit",
-                    }
-                },
-                "required": ["answer"],
-            },
-        },
-    },
-]
+# Tool schemas and names — populated at runtime via fetch_tools_from_env().
+FINQA_TOOLS: list[dict] = []
+TOOL_NAMES: set[str] = set()
 
-TOOL_NAMES = {t["function"]["name"] for t in FINQA_TOOLS}
+
+async def fetch_tools_from_env(env: FinQAEnv) -> list[dict]:
+    """Retrieve tool schemas from a connected env via MCP JSON-RPC over WebSocket.
+
+    Returns tools in OpenAI function-calling format.
+    """
+    resp = await env._send_and_receive(
+        {
+            "type": "mcp",
+            "data": {"jsonrpc": "2.0", "method": "tools/list", "params": {}, "id": 1},
+        }
+    )
+    mcp_tools = resp["data"]["result"]["tools"]
+    openai_tools = []
+    for t in mcp_tools:
+        schema = t.get("inputSchema") or t.get("input_schema") or {}
+        properties = {}
+        required = []
+        if "properties" in schema:
+            for name, prop in schema["properties"].items():
+                properties[name] = {
+                    "type": prop.get("type", "string"),
+                    "description": prop.get("description", ""),
+                }
+            required = schema.get("required", [])
+        openai_tools.append(
+            {
+                "type": "function",
+                "function": {
+                    "name": t["name"],
+                    "description": t.get("description", ""),
+                    "parameters": {
+                        "type": "object",
+                        "properties": properties,
+                        "required": required,
+                    },
+                },
+            }
+        )
+    return openai_tools
+
 
 DEBUG_LOG_FILE = "debug.log"
 DEBUG_LOG_SAMPLE_LIMIT = 5
@@ -205,6 +158,46 @@ if not debug_logger.handlers:
     debug_logger.addHandler(debug_handler)
 debug_logger.setLevel(logging.INFO)
 debug_logger.propagate = False
+
+
+# ---------------------------------------------------------------------------
+# Persistent JSONL logging helpers
+# ---------------------------------------------------------------------------
+def _append_jsonl(filepath: str, obj: dict) -> None:
+    """Append one JSON object as a line to a JSONL file (flush-safe)."""
+    with open(filepath, "a", encoding="utf-8") as f:
+        f.write(json.dumps(obj, default=str) + "\n")
+        f.flush()
+
+
+def _episode_to_dict(ep: "Episode", save_token_ids: bool = False) -> dict:
+    """Serialize an Episode to a JSON-friendly dict."""
+    turns = []
+    for t in ep.turns:
+        td: dict[str, Any] = {
+            "tool_name": t.tool_name,
+            "tool_args": t.tool_args,
+            "tool_result": t.tool_result,
+        }
+        if save_token_ids:
+            td["prompt_token_ids"] = t.prompt_token_ids
+            td["completion_token_ids"] = t.completion_token_ids
+        turns.append(td)
+    return {
+        "question": ep.question,
+        "company": ep.company,
+        "question_id": ep.question_id,
+        "reward": ep.reward,
+        "sandbox_idx": ep.sandbox_idx,
+        "num_turns": len(ep.turns),
+        "turns": turns,
+    }
+
+
+def save_episodes(filepath: str, episodes: list["Episode"], save_token_ids: bool = False) -> None:
+    """Append a batch of episodes to a JSONL file."""
+    for ep in episodes:
+        _append_jsonl(filepath, _episode_to_dict(ep, save_token_ids))
 
 
 def summarize_exception_samples(
@@ -259,6 +252,19 @@ class ActiveEpisode:
     question_id: str = ""
     done: bool = False
     reward: float = 0.0
+
+
+@dataclass
+class PreparedTrainBatch:
+    """Rollout/ref-logprob data prepared for one GRPO update."""
+
+    eps_flat: list[Episode]
+    advs_flat: list[float]
+    groups_count: int
+    rolled_eps: int
+    rounds_used: int
+    carry_in_count: int
+    leftover_eps: list[Episode]
 
 
 # ---------------------------------------------------------------------------
@@ -577,7 +583,6 @@ async def collect_rollouts(
     max_episode_steps: int = MAX_EPISODE_STEPS,
     temperature: float = TEMPERATURE,
     max_gen_tokens: int = MAX_GEN_TOKENS,
-    min_gen_batch: int = ROLLOUT_MIN_GEN_BATCH,
     dispatch_wait_ms: int = ROLLOUT_DISPATCH_WAIT_MS,
     reconnect_every_batches: int = ROLLOUT_RECONNECT_EVERY_BATCHES,
 ) -> list[list[Episode]]:
@@ -592,11 +597,8 @@ async def collect_rollouts(
         return groups
 
     target_episodes = n_envs * max(1, group_size)
-    if min_gen_batch <= 0:
-        # Auto-tune: favor larger decode batches while still dispatching quickly.
-        effective_min_batch = max(1, min(n_envs, max(8, n_envs // 4)))
-    else:
-        effective_min_batch = max(1, min(n_envs, min_gen_batch))
+    # Auto-tune: favor larger decode batches while still dispatching quickly.
+    effective_min_batch = max(1, min(n_envs, max(8, n_envs // 4)))
 
     wait_s = max(0.0, dispatch_wait_ms / 1000.0)
     reconnect_every_batches = max(1, reconnect_every_batches)
@@ -1004,7 +1006,7 @@ async def collect_rollouts(
 
 
 # ---------------------------------------------------------------------------
-# GRPO: strict same-prompt grouping, advantages, reference logprobs, update
+# GRPO: strict same-prompt grouping, advantages, update
 # ---------------------------------------------------------------------------
 def episode_prompt_key(ep: Episode) -> tuple[str, str]:
     """Stable prompt identity for grouping rollouts."""
@@ -1053,92 +1055,25 @@ def compute_group_advantages(groups: list[list[Episode]]) -> list[list[float]]:
     return all_advantages
 
 
-def compute_reference_logprobs(
-    vllm_model: LLM,
-    episodes_flat: list[Episode],
-) -> list[list[list[float]]]:
-    """Compute per-token reference logprobs using vLLM (no LoRA = base model).
-
-    Sends full sequences (prompt + completion) with prompt_logprobs enabled,
-    then extracts logprobs for the completion portion. Much faster than
-    sequential HF forward passes since vLLM handles batching and KV caching.
-
-    Returns: list (per episode) of list (per turn) of list (per token) of float.
-    """
-    # Flatten all non-empty turns, tracking their episode/turn indices
-    turn_map = []  # (ep_idx, turn_idx, prompt_len)
-    all_token_ids = []
-
-    for ep_idx, ep in enumerate(episodes_flat):
-        for turn_idx, turn in enumerate(ep.turns):
-            if not turn.completion_token_ids:
-                continue
-            full_ids = turn.prompt_token_ids + turn.completion_token_ids
-            turn_map.append((ep_idx, turn_idx, len(turn.prompt_token_ids)))
-            all_token_ids.append(full_ids)
-
-    # Initialize result structure
-    all_ref_lps = [[[] for _ in ep.turns] for ep in episodes_flat]
-
-    if not all_token_ids:
-        return all_ref_lps
-
-    # Run through vLLM without LoRA request (= base/reference model)
-    sampling_params = SamplingParams(
-        max_tokens=1,
-        prompt_logprobs=1,
-        temperature=0.0,
-    )
-    prompts = [{"prompt_token_ids": ids} for ids in all_token_ids]
-    outputs = vllm_model.generate(
-        prompts,
-        sampling_params=sampling_params,
-        # No lora_request → base model weights = reference
-    )
-
-    # Extract completion token logprobs
-    for (ep_idx, turn_idx, prompt_len), output in zip(turn_map, outputs):
-        turn = episodes_flat[ep_idx].turns[turn_idx]
-        full_ids = turn.prompt_token_ids + turn.completion_token_ids
-        prompt_lps = output.prompt_logprobs
-
-        turn_lps = []
-        for pos in range(prompt_len, len(full_ids)):
-            if pos < len(prompt_lps) and prompt_lps[pos] is not None:
-                token_id = full_ids[pos]
-                lp_dict = prompt_lps[pos]
-                if token_id in lp_dict:
-                    turn_lps.append(lp_dict[token_id].logprob)
-                else:
-                    turn_lps.append(-20.0)
-            else:
-                turn_lps.append(-20.0)
-        all_ref_lps[ep_idx][turn_idx] = turn_lps
-
-    return all_ref_lps
-
-
 def grpo_update(
     train_model,
     optimizer: torch.optim.Optimizer,
     episodes_flat: list[Episode],
     advantages_flat: list[float],
-    ref_logprobs: list[list[list[float]]],
-    kl_beta: float = KL_BETA,
     batch_size: int = GRPO_UPDATE_BATCH_SIZE,
 ) -> float:
-    """GRPO policy gradient update with KL penalty.
+    """GRPO policy gradient update.
 
     For each episode turn:
-      loss_turn = -(advantage * policy_logprob) + beta * KL(policy || ref)
+      loss_turn = -(advantage * policy_logprob)
 
     Micro-batches by episode to fit in GPU memory.
     Device is derived from the model parameters (supports device_map="auto").
     """
     train_model.train()
     optimizer.zero_grad(set_to_none=True)
-    total_loss = 0.0
-    total_tokens = 0
+    total_loss_t = None
+    total_tokens_t = None
     input_device = next(train_model.parameters()).device
     batch_size = max(1, int(batch_size))
 
@@ -1148,7 +1083,7 @@ def grpo_update(
     for ep_idx, (ep, adv) in enumerate(zip(episodes_flat, advantages_flat)):
         if not ep.turns or adv == 0.0:
             continue
-        for turn_idx, turn in enumerate(ep.turns):
+        for _, turn in enumerate(ep.turns):
             if not turn.completion_token_ids:
                 continue
             comp_len = len(turn.completion_token_ids)
@@ -1160,7 +1095,6 @@ def grpo_update(
                     "prompt_len": len(turn.prompt_token_ids),
                     "input_ids": turn.prompt_token_ids + turn.completion_token_ids,
                     "completion_ids": turn.completion_token_ids,
-                    "ref_lps": ref_logprobs[ep_idx][turn_idx],
                 }
             )
 
@@ -1195,37 +1129,69 @@ def grpo_update(
 
         outputs = train_model(input_ids=input_t, attention_mask=attn_mask)
         logits = outputs.logits
-        batch_loss = torch.tensor(0.0, device=logits.device)
+        prompt_lens = [int(sample["prompt_len"]) for sample in chunk]
+        comp_lens = [len(sample["completion_ids"]) for sample in chunk]
+        max_comp_len = max(comp_lens)
 
+        comp_targets = torch.full((bs, max_comp_len), -100, dtype=torch.long, device=logits.device)
+
+        sample_advs = []
+        sample_scales = []
         for i, sample in enumerate(chunk):
-            prompt_len = sample["prompt_len"]
-            comp_ids = sample["completion_ids"]
-            comp_len = len(comp_ids)
-            if comp_len == 0 or prompt_len <= 0:
-                continue
+            comp_len = comp_lens[i]
+            if comp_len > 0:
+                comp_targets[i, :comp_len] = torch.tensor(
+                    sample["completion_ids"], dtype=torch.long, device=logits.device
+                )
+            sample_advs.append(float(sample["adv"]))
+            sample_scales.append(1.0 / (n_contributing * ep_token_counts[sample["ep_idx"]]))
 
-            completion_logits = logits[i, prompt_len - 1 : prompt_len - 1 + comp_len]
-            comp_t = torch.tensor(comp_ids, dtype=torch.long, device=logits.device)
-            # cross_entropy returns per-token NLL = -log pi(a_t|s_t)
-            policy_lps = -F.cross_entropy(completion_logits, comp_t, reduction="none")
+        prompt_lens_t = torch.tensor(prompt_lens, dtype=torch.long, device=logits.device)
+        comp_lens_t = torch.tensor(comp_lens, dtype=torch.long, device=logits.device)
+        batch_idx = torch.arange(bs, device=logits.device)[:, None]
+        token_offsets = torch.arange(max_comp_len, device=logits.device)[None, :]
+        valid_prompt_mask = prompt_lens_t > 0
+        valid_mask = (token_offsets < comp_lens_t[:, None]) & valid_prompt_mask[:, None]
 
-            ref_lps = torch.tensor(sample["ref_lps"], device=logits.device, dtype=policy_lps.dtype)
-            log_ratio = policy_lps - ref_lps
-            kl = torch.exp(-log_ratio) + log_ratio - 1.0
+        # Clamp invalid prompt rows to a safe index; valid_mask zeroes them out.
+        gather_pos = torch.clamp(prompt_lens_t - 1, min=0)[:, None] + token_offsets
+        gather_pos = torch.clamp(gather_pos, max=logits.shape[1] - 1)
+        completion_logits = logits[batch_idx, gather_pos]
 
-            turn_loss = (-sample["adv"] * policy_lps + kl_beta * kl).sum()
-            total_loss += float(turn_loss.detach().item())
-            total_tokens += comp_len
+        vocab_size = completion_logits.shape[-1]
+        nll = F.cross_entropy(
+            completion_logits.reshape(-1, vocab_size),
+            comp_targets.reshape(-1),
+            reduction="none",
+            ignore_index=-100,
+        ).reshape(bs, max_comp_len)
+        policy_lps = -nll
 
-            # Match prior objective: mean per-token per episode, then mean across episodes.
-            scale = 1.0 / (n_contributing * ep_token_counts[sample["ep_idx"]])
-            batch_loss = batch_loss + turn_loss * scale
+        valid_f = valid_mask.to(dtype=policy_lps.dtype)
+        adv_t = torch.tensor(sample_advs, device=logits.device, dtype=policy_lps.dtype)[:, None]
+        scale_t = torch.tensor(sample_scales, device=logits.device, dtype=policy_lps.dtype)[:, None]
+
+        token_loss = (-adv_t * policy_lps) * valid_f
+
+        if total_loss_t is None:
+            total_loss_t = torch.zeros((), device=logits.device, dtype=torch.float32)
+            total_tokens_t = torch.zeros((), device=logits.device, dtype=torch.long)
+
+        total_loss_t = total_loss_t + token_loss.detach().sum().to(torch.float32)
+        total_tokens_t = total_tokens_t + valid_mask.sum()
+
+        # Match prior objective: mean per-token per episode, then mean across episodes.
+        batch_loss = (token_loss * scale_t).sum()
 
         batch_loss.backward()
 
     torch.nn.utils.clip_grad_norm_(train_model.parameters(), max_norm=1.0)
     optimizer.step()
 
+    if total_loss_t is None or total_tokens_t is None:
+        return 0.0
+    total_tokens = int(total_tokens_t.item())
+    total_loss = float(total_loss_t.item())
     return total_loss / max(total_tokens, 1)
 
 
@@ -1257,11 +1223,163 @@ def export_lora_adapter(
     return out_dir
 
 
+def run_grpo_update_and_maybe_export(
+    train_model,
+    optimizer: torch.optim.Optimizer,
+    prepared_batch: PreparedTrainBatch,
+    batch_size: int,
+    export_root: str,
+    iteration: int,
+    do_export: bool,
+) -> tuple[float, str | None]:
+    """Run GRPO update on training GPUs and optionally export adapter weights."""
+    loss = grpo_update(
+        train_model,
+        optimizer,
+        prepared_batch.eps_flat,
+        prepared_batch.advs_flat,
+        batch_size=batch_size,
+    )
+    new_lora_dir = export_lora_adapter(train_model, export_root, iteration) if do_export else None
+    return loss, new_lora_dir
+
+
+async def prepare_train_batch(
+    *,
+    iter_idx: int,
+    total_iters: int,
+    envs: list[FinQAEnv],
+    pool,
+    vllm_model: LLM,
+    tokenizer,
+    args,
+    lora_request: Any | None,
+    reconnect_before_collect: bool,
+    carry_pending_eps: list[Episode] | None = None,
+) -> PreparedTrainBatch:
+    """Prepare one training batch: rollouts, grouping, advantages, ref logprobs."""
+    if reconnect_before_collect:
+        await reconnect_envs(envs, pool)
+
+    print(f"\n  Iteration {iter_idx + 1}/{total_iters}: collecting rollouts...")
+    groups: list[list[Episode]] = []
+    pending_eps: list[Episode] = list(carry_pending_eps or [])
+    carry_in_count = len(pending_eps)
+    rolled_eps = 0
+    rounds_used = 0
+
+    for rr in range(args.max_rollout_rounds):
+        if rr > 0:
+            await reconnect_envs(envs, pool)
+
+        round_t0 = time.time()
+        round_groups = await collect_rollouts(
+            envs,
+            pool,
+            vllm_model,
+            tokenizer,
+            1,
+            lora_request=lora_request,
+            max_episode_steps=args.max_steps,
+            temperature=args.temperature,
+            max_gen_tokens=args.max_gen_tokens,
+            dispatch_wait_ms=args.rollout_dispatch_wait_ms,
+        )
+        round_eps = [ep for g in round_groups for ep in g]
+        rolled_eps += len(round_eps)
+        pending_eps.extend(round_eps)
+
+        # Persist trajectories immediately (crash-safe)
+        save_episodes(
+            os.path.join(args.run_dir, "trajectories.jsonl"),
+            round_eps,
+            args.save_token_ids,
+        )
+
+        new_groups, pending_eps = build_strict_prompt_groups(pending_eps, args.group_size)
+        groups.extend(new_groups)
+        rounds_used = rr + 1
+
+        grouped_eps = len(groups) * args.group_size
+        elapsed_round = time.time() - round_t0
+        print(
+            f"    Round {rr + 1}/{args.max_rollout_rounds}: "
+            + f"rolled={len(round_eps)} total_rolled={rolled_eps} "
+            + f"groups={len(groups)} grouped_eps={grouped_eps} "
+            + f"pending={len(pending_eps)} "
+            + f"{elapsed_round:.1f}s"
+        )
+
+        # Persist rollout round summary
+        _append_jsonl(
+            os.path.join(args.run_dir, "rollouts.jsonl"),
+            {
+                "iteration": iter_idx + 1,
+                "round": rr + 1,
+                "round_eps": len(round_eps),
+                "correct": sum(1 for ep in round_eps if ep.reward > 0),
+                "avg_turns": (float(np.mean([len(ep.turns) for ep in round_eps])) if round_eps else 0.0),
+                "elapsed_s": round(elapsed_round, 2),
+                "groups": len(groups),
+                "grouped_eps": grouped_eps,
+                "pending": len(pending_eps),
+            },
+        )
+
+        if args.target_groups_per_iter > 0 and len(groups) >= args.target_groups_per_iter:
+            break
+
+    if not groups:
+        print("  No strict same-question groups collected, skipping update.")
+        return PreparedTrainBatch(
+            eps_flat=[],
+            advs_flat=[],
+            groups_count=0,
+            rolled_eps=rolled_eps,
+            rounds_used=rounds_used,
+            carry_in_count=carry_in_count,
+            leftover_eps=pending_eps,
+        )
+
+    advs = compute_group_advantages(groups)
+    eps_flat = [ep for g in groups for ep in g]
+    advs_flat = [a for ag in advs for a in ag]
+    if not eps_flat:
+        print("  No episodes collected, skipping update.")
+        return PreparedTrainBatch(
+            eps_flat=[],
+            advs_flat=[],
+            groups_count=len(groups),
+            rolled_eps=rolled_eps,
+            rounds_used=rounds_used,
+            carry_in_count=carry_in_count,
+            leftover_eps=pending_eps,
+        )
+
+    return PreparedTrainBatch(
+        eps_flat=eps_flat,
+        advs_flat=advs_flat,
+        groups_count=len(groups),
+        rolled_eps=rolled_eps,
+        rounds_used=rounds_used,
+        carry_in_count=carry_in_count,
+        leftover_eps=pending_eps,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Main training loop
 # ---------------------------------------------------------------------------
 async def train(args):
     load_dotenv()
+
+    # --- Set up persistent run directory for JSONL logs ---
+    if args.run_dir is None:
+        args.run_dir = os.path.join("runs", datetime.now().strftime("%Y%m%d_%H%M%S"))
+    os.makedirs(args.run_dir, exist_ok=True)
+    with open(os.path.join(args.run_dir, "config.json"), "w", encoding="utf-8") as f:
+        json.dump(vars(args), f, indent=2, default=str)
+    print(f"Run directory: {args.run_dir}")
 
     tp_size = args.tensor_parallel_size
     n_gpus = torch.cuda.device_count()
@@ -1273,9 +1391,8 @@ async def train(args):
     print(f"Sandboxes: {args.sandboxes}")
     print(f"Iterations: {args.iterations}")
     print(f"GRPO group size K: {args.group_size}")
-    print(f"Min use %: {args.min_use_pct}")
+    print(f"Target groups/iter: {args.target_groups_per_iter} (0=use all rollout rounds)")
     print(f"Max rollout rounds/iter: {args.max_rollout_rounds}")
-    print(f"Rollout min gen batch: {args.rollout_min_gen_batch} (0=auto)")
     print(f"Rollout dispatch wait: {args.rollout_dispatch_wait_ms} ms")
     print(f"Actor LoRA sync every: {args.sync_every} iter(s)")
     print()
@@ -1340,7 +1457,6 @@ async def train(args):
         train_model.gradient_checkpointing_enable()
     train_model.train()
 
-    # No separate reference model — disable_adapter_layers() exposes frozen base
     optimizer = torch.optim.AdamW(
         [p for p in train_model.parameters() if p.requires_grad],
         lr=args.lr,
@@ -1354,6 +1470,7 @@ async def train(args):
     active_lora_request = None
     lora_request_seq = 1
     lora_request_cls = None
+    inflight_update_task = None
     try:
         lora_request_cls = resolve_lora_request_class()
         # Seed the actor with the initial adapter so rollout-1 matches
@@ -1372,139 +1489,160 @@ async def train(args):
         envs = await connect_envs(pool, play_sem)
         print(f"All {len(envs)} connections ready.\n")
 
+        # --- Fetch tool schemas from the env ---
+        global FINQA_TOOLS, TOOL_NAMES  # noqa: PLW0603  # pylint: disable=global-statement
+        FINQA_TOOLS = await fetch_tools_from_env(envs[0])
+        TOOL_NAMES = {t["function"]["name"] for t in FINQA_TOOLS}
+        print(f"Tools: {sorted(TOOL_NAMES)}\n")
+
         # --- Training loop ---
         header = (
             f"{'iter':>6}  {'accuracy':>9}  {'avg_steps':>10}  "
-            + f"{'loss':>9}  {'groups':>7}  {'use%':>7}  {'eps/s':>8}  {'time':>7}"
+            + f"{'loss':>9}  {'groups':>7}  {'eps/s':>8}  {'time':>7}"
         )
         print(header)
         print("-" * len(header))
 
+        # Warm up one prepared batch so subsequent iterations can overlap
+        # (update/export on train GPUs) with (next rollouts + ref logprobs on vLLM).
+        prepared_batch = None
+        pending_eps_carry: list[Episode] = []
+        if args.iterations > 0:
+            prepared_batch = await prepare_train_batch(
+                iter_idx=0,
+                total_iters=args.iterations,
+                envs=envs,
+                pool=pool,
+                vllm_model=vllm_model,
+                tokenizer=tokenizer,
+                args=args,
+                lora_request=active_lora_request,
+                reconnect_before_collect=False,
+                carry_pending_eps=pending_eps_carry,
+            )
+            pending_eps_carry = prepared_batch.leftover_eps
+
         for it in range(args.iterations):
             t0 = time.time()
+            batch = prepared_batch
+            if batch is None:
+                break
 
-            # 0. Reconnect stale WebSocket connections
-            if it > 0:
-                await reconnect_envs(envs, pool)
-
-            # 1. Collect rollouts across multiple rounds and form strict
-            # same-prompt groups of size K (args.group_size).
-            print(f"\n  Iteration {it + 1}/{args.iterations}: collecting rollouts...")
-            groups: list[list[Episode]] = []
-            pending_eps: list[Episode] = []
-            rolled_eps = 0
-            rounds_used = 0
-
-            for rr in range(args.max_rollout_rounds):
-                if rr > 0:
-                    await reconnect_envs(envs, pool)
-
-                round_t0 = time.time()
-                round_groups = await collect_rollouts(
-                    envs,
-                    pool,
-                    vllm_model,
-                    tokenizer,
-                    1,
-                    lora_request=active_lora_request,
-                    max_episode_steps=args.max_steps,
-                    temperature=args.temperature,
-                    max_gen_tokens=args.max_gen_tokens,
-                    min_gen_batch=args.rollout_min_gen_batch,
-                    dispatch_wait_ms=args.rollout_dispatch_wait_ms,
+            # 1. Start GRPO update/export for the current prepared batch.
+            update_task = None
+            if batch.eps_flat:
+                print("  Running GRPO update...")
+                if (it + 1) % args.sync_every == 0:
+                    print("  Exporting LoRA adapter for vLLM actor...")
+                update_task = asyncio.create_task(
+                    asyncio.to_thread(
+                        run_grpo_update_and_maybe_export,
+                        train_model,
+                        optimizer,
+                        batch,
+                        args.grpo_update_batch_size,
+                        lora_export_root,
+                        it + 1,
+                        (it + 1) % args.sync_every == 0,
+                    )
                 )
-                round_eps = [ep for g in round_groups for ep in g]
-                rolled_eps += len(round_eps)
-                pending_eps.extend(round_eps)
+                inflight_update_task = update_task
 
-                new_groups, pending_eps = build_strict_prompt_groups(pending_eps, args.group_size)
-                groups.extend(new_groups)
-                rounds_used = rr + 1
+            # 2. While the train GPUs update iteration t, use vLLM + envs to
+            # prepare iteration t+1 (lag-1 actor pipeline).
+            try:
+                if it + 1 < args.iterations:
+                    prepared_batch = await prepare_train_batch(
+                        iter_idx=it + 1,
+                        total_iters=args.iterations,
+                        envs=envs,
+                        pool=pool,
+                        vllm_model=vllm_model,
+                        tokenizer=tokenizer,
+                        args=args,
+                        lora_request=active_lora_request,
+                        reconnect_before_collect=True,
+                        carry_pending_eps=pending_eps_carry,
+                    )
+                    pending_eps_carry = prepared_batch.leftover_eps
+                else:
+                    prepared_batch = None
+            except Exception:
+                if inflight_update_task is not None:
+                    try:
+                        await asyncio.shield(inflight_update_task)
+                    except Exception as e:
+                        print(f"  Warning: in-flight update failed during prep error: {type(e).__name__}: {e}")
+                    inflight_update_task = None
+                raise
 
-                grouped_eps = len(groups) * args.group_size
-                use_pct = 100.0 * grouped_eps / max(rolled_eps, 1)
-                elapsed_round = time.time() - round_t0
-                print(
-                    f"    Round {rr + 1}/{args.max_rollout_rounds}: "
-                    + f"rolled={len(round_eps)} total_rolled={rolled_eps} "
-                    + f"groups={len(groups)} grouped_eps={grouped_eps} "
-                    + f"pending={len(pending_eps)} use={use_pct:.1f}% "
-                    + f"{elapsed_round:.1f}s"
-                )
-
-                if args.min_use_pct > 0 and use_pct >= args.min_use_pct:
-                    break
-
-            # 2. Compute advantages
-            if not groups:
-                print("  No strict same-question groups collected, skipping update.")
-                continue
-            advs = compute_group_advantages(groups)
-
-            # Flatten
-            eps_flat = [ep for g in groups for ep in g]
-            advs_flat = [a for ag in advs for a in ag]
-
-            if not eps_flat:
-                print("  No episodes collected, skipping update.")
+            if update_task is None:
                 continue
 
-            # 3. Compute reference logprobs (base model with adapter disabled)
-            print("  Computing reference logprobs...")
-            ref_lps = compute_reference_logprobs(vllm_model, eps_flat)
+            loss, new_lora_dir = await update_task
+            inflight_update_task = None
 
-            # 4. GRPO update (LoRA adapter on cuda:2-3)
-            print("  Running GRPO update...")
-            loss = grpo_update(
-                train_model,
-                optimizer,
-                eps_flat,
-                advs_flat,
-                ref_lps,
-                kl_beta=args.beta,
-                batch_size=args.grpo_update_batch_size,
-            )
-
-            # 5. Export adapter-only weights and update vLLM LoRA request.
-            if (it + 1) % args.sync_every == 0:
-                print("  Exporting LoRA adapter for vLLM actor...")
-                new_lora_dir = export_lora_adapter(train_model, lora_export_root, it + 1)
+            # 3. Publish the newly exported adapter to vLLM for future rollouts.
+            if new_lora_dir:
                 active_lora_request = lora_request_cls(
                     f"grpo_iter_{it + 1}",
                     lora_request_seq,
                     new_lora_dir,
                 )
                 lora_request_seq += 1
-
-                if active_lora_dir and active_lora_dir != new_lora_dir:
-                    shutil.rmtree(active_lora_dir, ignore_errors=True)
                 active_lora_dir = new_lora_dir
 
             # Metrics
             elapsed = time.time() - t0
-            rewards = [ep.reward for ep in eps_flat]
+            rewards = [ep.reward for ep in batch.eps_flat]
             accuracy = np.mean(rewards) if rewards else 0.0
-            avg_steps = np.mean([len(ep.turns) for ep in eps_flat]) if eps_flat else 0
-            grouped_eps = len(eps_flat)
-            use_pct = 100.0 * grouped_eps / max(rolled_eps, 1)
+            avg_steps = np.mean([len(ep.turns) for ep in batch.eps_flat]) if batch.eps_flat else 0
+            grouped_eps = len(batch.eps_flat)
             eps_sec = grouped_eps / elapsed if elapsed > 0 else 0
 
             print(
-                f"  Rollout summary: rounds={rounds_used}, rolled={rolled_eps}, "
-                + f"grouped={grouped_eps}, groups={len(groups)}, pending={len(pending_eps)}"
+                f"  Rollout summary: rounds={batch.rounds_used}, rolled={batch.rolled_eps}, "
+                + f"grouped={grouped_eps}, groups={batch.groups_count}, "
+                + f"carry_in={batch.carry_in_count}, carry_out={len(batch.leftover_eps)}"
             )
 
             print(
                 f"{it + 1:>4}/{args.iterations}  {accuracy:>9.3f}  "
-                + f"{avg_steps:>10.1f}  {loss:>9.4f}  {len(groups):>7d}  "
-                + f"{use_pct:>6.1f}%  {eps_sec:>8.1f}  {elapsed:>6.0f}s"
+                + f"{avg_steps:>10.1f}  {loss:>9.4f}  {batch.groups_count:>7d}  "
+                + f"{eps_sec:>8.1f}  {elapsed:>6.0f}s"
             )
 
+            # Persist iteration metrics
+            _append_jsonl(
+                os.path.join(args.run_dir, "metrics.jsonl"),
+                {
+                    "iteration": it + 1,
+                    "accuracy": round(float(accuracy), 4),
+                    "avg_steps": round(float(avg_steps), 2),
+                    "loss": round(float(loss), 6),
+                    "groups_count": batch.groups_count,
+                    "eps_sec": round(float(eps_sec), 2),
+                    "elapsed_s": round(elapsed, 2),
+                    "rounds_used": batch.rounds_used,
+                    "rolled_eps": batch.rolled_eps,
+                    "grouped_eps": grouped_eps,
+                    "carry_in": batch.carry_in_count,
+                    "carry_out": len(batch.leftover_eps),
+                },
+            )
+
+        if pending_eps_carry:
+            print(f"\nDropping {len(pending_eps_carry)} unmatched leftover episodes at end of training.")
+
     finally:
+        if inflight_update_task is not None:
+            try:
+                await asyncio.shield(inflight_update_task)
+            except Exception as e:
+                print(f"  Warning: in-flight update failed during shutdown: {type(e).__name__}: {e}")
         print(f"\nCleaning up {len(pool)} sandboxes ...")
         await disconnect_envs(envs)
         await destroy_sandbox_pool(pool)
-        shutil.rmtree(lora_export_root, ignore_errors=True)
         try:
             vllm_model.llm_engine.engine_core.shutdown()
         except Exception as e:
@@ -1533,13 +1671,13 @@ def main():
         help=f"Strict GRPO group size K (same-question episodes per group, default: {EPISODES_PER_GROUP}).",
     )
     parser.add_argument(
-        "--min-use-pct",
-        type=float,
-        default=MIN_USE_PCT,
+        "--target-groups-per-iter",
+        type=int,
+        default=TARGET_GROUPS_PER_ITER,
         help=(
-            "Stop rollout collection early once this percentage of episodes are "
-            + f"in complete groups (default: {MIN_USE_PCT}). Set <=0 to always "
-            + "use all rollout rounds."
+            "Stop rollout collection once this many strict same-question groups "
+            + "are formed for the update (default: "
+            + f"{TARGET_GROUPS_PER_ITER}). Set <=0 to use all rollout rounds."
         ),
     )
     parser.add_argument(
@@ -1568,12 +1706,6 @@ def main():
         help=f"Learning rate (default: {LEARNING_RATE}).",
     )
     parser.add_argument(
-        "--beta",
-        type=float,
-        default=KL_BETA,
-        help=f"KL penalty coefficient (default: {KL_BETA}).",
-    )
-    parser.add_argument(
         "--temperature",
         type=float,
         default=TEMPERATURE,
@@ -1590,12 +1722,6 @@ def main():
         type=int,
         default=MAX_GEN_TOKENS,
         help=f"Max generation tokens (default: {MAX_GEN_TOKENS}).",
-    )
-    parser.add_argument(
-        "--rollout-min-gen-batch",
-        type=int,
-        default=ROLLOUT_MIN_GEN_BATCH,
-        help=f"Minimum ready episodes before dispatching vLLM generation (default: {ROLLOUT_MIN_GEN_BATCH}, 0=auto).",
     )
     parser.add_argument(
         "--rollout-dispatch-wait-ms",
@@ -1662,13 +1788,23 @@ def main():
             + f"more memory (default: {GRPO_UPDATE_BATCH_SIZE})."
         ),
     )
+    parser.add_argument(
+        "--run-dir",
+        default=None,
+        help="Directory for persistent JSONL logs (default: runs/YYYYMMDD_HHMMSS/).",
+    )
+    parser.add_argument(
+        "--save-token-ids",
+        action="store_true",
+        help="Include prompt/completion token ID lists in trajectory logs (large).",
+    )
     args = parser.parse_args()
     if args.group_size <= 0:
         raise ValueError("--group-size must be >= 1.")
     if args.max_rollout_rounds <= 0:
         raise ValueError("--max-rollout-rounds must be >= 1.")
-    if args.rollout_min_gen_batch < 0:
-        raise ValueError("--rollout-min-gen-batch must be >= 0.")
+    if args.target_groups_per_iter < 0:
+        raise ValueError("--target-groups-per-iter must be >= 0.")
     if args.rollout_dispatch_wait_ms < 0:
         raise ValueError("--rollout-dispatch-wait-ms must be >= 0.")
     if args.sync_every <= 0:
