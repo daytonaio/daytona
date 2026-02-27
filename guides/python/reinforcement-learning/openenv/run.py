@@ -10,7 +10,7 @@ Demonstrates the full OpenEnv + Daytona integration pattern:
 Prerequisites:
   - DAYTONA_API_KEY set in environment (or .env file)
   - The "openenv-finqa" snapshot already built (see build_snapshot.py)
-  - Dependencies installed (see setup.sh)
+  - Dependencies installed (pip install -e .)
 
 Usage:
     python run.py

@@ -9,6 +9,7 @@ dependencies = [
     "daytona",
     "python-dotenv>=1.2.0",
     "openenv-core @ git+https://github.com/meta-pytorch/OpenEnv.git",
+    "openenv-finqa-env @ git+https://github.com/meta-pytorch/OpenEnv.git#subdirectory=envs/finqa_env",
 ]
 
 [project.optional-dependencies]

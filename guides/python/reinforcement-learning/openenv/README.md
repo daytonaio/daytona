@@ -42,7 +42,7 @@ source venv/bin/activate
 2. Install dependencies:
 
 ```bash
-bash setup.sh
+pip install -e .
 ```
 
 3. Set your Daytona API key:
