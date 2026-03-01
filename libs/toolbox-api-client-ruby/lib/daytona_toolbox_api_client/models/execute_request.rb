@@ -20,7 +20,7 @@ module DaytonaToolboxApiClient
     # Current working directory
     attr_accessor :cwd
 
-    # Timeout in seconds, defaults to 10 seconds
+    # Timeout in seconds, defaults to 360 seconds (6 minutes)
     attr_accessor :timeout
 
     # Attribute mapping from ruby-style variable name to JSON key.

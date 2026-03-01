@@ -28,7 +28,7 @@ class ExecuteRequest(BaseModel):
     """ # noqa: E501
     command: StrictStr
     cwd: Optional[StrictStr] = Field(default=None, description="Current working directory")
-    timeout: Optional[StrictInt] = Field(default=None, description="Timeout in seconds, defaults to 10 seconds")
+    timeout: Optional[StrictInt] = Field(default=None, description="Timeout in seconds, defaults to 360 seconds (6 minutes)")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["command", "cwd", "timeout"]
 
