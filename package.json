@@ -194,7 +194,7 @@
     "tailwind-merge": "^3.4.0",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
-    "tar": "^7.5.7",
+    "tar": "^7.5.8",
     "typeorm": "^0.3.20",
     "usehooks-ts": "^3.1.1",
     "uuid": "^11.0.3",
