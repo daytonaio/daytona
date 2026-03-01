@@ -1027,6 +1027,66 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 >
 > [**delete (API)**](/docs/en/tools/api/#daytona/tag/sandbox/DELETE/sandbox/{sandboxIdOrName})
 
+## Fork Sandboxes
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona provides methods to fork sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Forking creates a duplicate of your sandbox that operates completely independently. Forks are organized in a tree structure: you can fork a fork, building out branches as needed. If the parent sandbox is deleted, all its forks continue to run unaffected.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the three-dot menu (**⋮**) next to the sandbox you want to fork.
+3. Select **Fork**
+
+### View Forks
+
+Daytona provides methods to view forks using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). You can view the fork hierarchy for a sandbox and all its related sandboxes.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the three-dot menu (**⋮**) next to a forked sandbox
+3. Select **View Forks**
+
+The fork tree displays each sandbox in the hierarchy along with its current state and creation time, allowing you to trace the lineage of any fork back to its origin.
+
+## Clone Sandboxes
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona provides methods to clone sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Cloning creates a one-off duplicate of your sandbox. Unlike [forking](#fork-sandboxes), there is no parent-child relationship or tree structure — the result is a standalone copy.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the three-dot menu (**⋮**) next to the sandbox you want to clone
+3. Select **Clone**
+
+## Create Snapshot from Sandbox
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona provides methods to create [snapshots](/docs/en/snapshots) from sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Creating a snapshot captures the current state of your sandbox at a point in time. You can then use that snapshot as a base to spin up new sandboxes, effectively templating a known-good environment for reuse.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the three-dot menu (**⋮**) next to the sandbox you want to snapshot
+3. Select **Create Snapshot**
+
+## Screen Recordings
+
+:::caution[Experimental]
+This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+Daytona provides methods to view and manage screen recordings for sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Screen recordings are part of the [computer use](/docs/en/computer-use) feature and capture visual activity within a sandbox, allowing you to capture desktop sessions for debugging, documentation, or automation workflows. For more information, see [screen recordings](/docs/en/computer-use#screen-recording).
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click the three-dot menu (**⋮**) next to the sandbox you want to view recordings for
+3. Select **Screen Recordings**
+
+The screen recordings are accessible in the [recording dashboard](/docs/en/computer-use#recording-dashboard), providing a list of all recordings for the sandbox, including filename, duration, size, status, and date. You can delete individual recordings or bulk-delete selected recordings.
+
 ## Automated lifecycle management
 
 Daytona Sandboxes can be automatically stopped, archived, and deleted based on user-defined intervals.
@@ -1394,3 +1454,4 @@ sandbox, err := client.Create(ctx, params)
 
 </TabItem>
 </Tabs>
+
