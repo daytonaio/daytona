@@ -13,7 +13,7 @@ def main():
     daytona = Daytona()
 
     params = CreateSandboxFromImageParams(
-        image="python:3.9.23-slim",
+        image="python:3.10",
         language="python",
         resources=Resources(
             cpu=1,

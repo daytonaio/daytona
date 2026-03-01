@@ -44,12 +44,21 @@ module Daytona
       @snapshots_api = DaytonaApiClient::SnapshotsApi.new(api_client)
       @snapshot = SnapshotService.new(snapshots_api:, object_storage_api:, default_region_id: config.target,
                                       otel_state:)
+      # Event subscriber for real-time sandbox updates
+      @event_subscriber = nil
+
+      # Start WebSocket event subscriber connection in the background (non-blocking).
+      # By the time the first create()/get() call completes its HTTP request,
+      # the subscriber will already be connected and ready.
+      init_event_subscriber_background
     end
 
     # Shuts down OTel providers, flushing any pending telemetry data.
     #
     # @return [void]
     def close
+      @event_subscriber&.disconnect
+      @event_subscriber = nil
       ::Daytona.shutdown_otel(@otel_state)
       @otel_state = nil
     end
@@ -259,13 +268,53 @@ module Daytona
     # @param sandbox_dto [DaytonaApiClient::Sandbox]
     # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @return [Daytona::Sandbox]
+    def init_event_subscriber_background
+      token = config.api_key || config.jwt_token
+      return unless token
+
+      subscriber = EventSubscriber.new(
+        api_url: config.api_url,
+        token: token,
+        organization_id: config.organization_id
+      )
+      @event_subscriber = subscriber
+
+      Thread.new do
+        subscriber.connect
+      rescue StandardError
+        # Connection failure handled when methods try to use subscriber
+      end
+    end
+
+    def init_event_subscriber
+      return if @event_subscriber&.connected?
+      token = config.api_key || config.jwt_token
+      return unless token
+
+      subscriber = EventSubscriber.new(
+        api_url: config.api_url,
+        token: token,
+        organization_id: config.organization_id
+      )
+
+      begin
+        subscriber.connect
+        @event_subscriber = subscriber
+      rescue StandardError
+        # Connection failure handled when methods try to use subscriber
+      end
+    end
+
     def to_sandbox(sandbox_dto:, code_toolbox:)
+      init_event_subscriber
+
       Sandbox.new(
         sandbox_dto:,
         config:,
         sandbox_api:,
         code_toolbox:,
-        otel_state: @otel_state
+        otel_state: @otel_state,
+        event_subscriber: @event_subscriber
       )
     end
 

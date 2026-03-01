@@ -23,6 +23,7 @@ import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
+import { EventSubscriber } from './EventSubscriber'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
@@ -240,6 +241,8 @@ export class Daytona implements AsyncDisposable {
   private readonly organizationId?: string
   private readonly apiUrl: string
   private otelSdk?: NodeSDK
+  private eventSubscriber: EventSubscriber | null = null
+  private eventSubscriberInitPromise: Promise<void> | null = null
   public readonly volume: VolumeService
   public readonly snapshot: SnapshotService
 
@@ -319,6 +322,11 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
+    // Start WebSocket event subscriber connection in the background (non-blocking).
+    // By the time the first create()/get() call completes its HTTP request,
+    // the subscriber will already be connected and ready.
+    this.initEventSubscriber()
+
     if (!config?._experimental?.otelEnabled && process.env.DAYTONA_EXPERIMENTAL_OTEL_ENABLED !== 'true') {
       return
     }
@@ -353,11 +361,43 @@ export class Daytona implements AsyncDisposable {
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    if (!this.otelSdk) {
-      return
+    if (this.eventSubscriber) {
+      this.eventSubscriber.disconnect()
+      this.eventSubscriber = null
     }
 
-    await this.otelSdk.shutdown()
+    if (this.otelSdk) {
+      await this.otelSdk.shutdown()
+    }
+  }
+
+  /**
+   * Initializes the EventSubscriber for real-time sandbox events.
+   * Called from the constructor (non-blocking) so the connection is ready
+   * by the time the first sandbox operation completes.
+   * Also called from create/get/list to reconnect if previously auto-disconnected.
+   */
+  private async initEventSubscriber(): Promise<void> {
+    if (this.eventSubscriber?.isConnected) return
+    if (this.eventSubscriberInitPromise) return this.eventSubscriberInitPromise
+
+    this.eventSubscriberInitPromise = (async () => {
+      try {
+        const token = this.apiKey || this.jwtToken
+        if (!token) return
+
+        const subscriber = new EventSubscriber(this.apiUrl, token, this.organizationId)
+        await subscriber.connect()
+        this.eventSubscriber = subscriber
+      } catch {
+        // WebSocket connection failed - sandbox operations will throw
+        // when they try to use the subscriber
+      } finally {
+        this.eventSubscriberInitPromise = null
+      }
+    })()
+
+    return this.eventSubscriberInitPromise
   }
 
   /**
@@ -569,12 +609,16 @@ export class Daytona implements AsyncDisposable {
         )
       }
 
+      // Ensure the event subscriber is initializing (non-blocking)
+      await this.initEventSubscriber()
+
       const sandbox = new Sandbox(
         sandboxInstance,
         new Configuration(structuredClone(this.clientConfig)),
         this.createAxiosInstance(),
         this.sandboxApi,
         codeToolbox,
+        this.eventSubscriber,
       )
 
       if (sandbox.state !== 'started') {
@@ -606,6 +650,9 @@ export class Daytona implements AsyncDisposable {
    */
   @WithInstrumentation()
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
+    // Ensure the event subscriber is initializing (non-blocking)
+    await this.initEventSubscriber()
+
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
@@ -617,6 +664,7 @@ export class Daytona implements AsyncDisposable {
       this.createAxiosInstance(),
       this.sandboxApi,
       codeToolbox,
+      this.eventSubscriber,
     )
   }
 
@@ -660,6 +708,9 @@ export class Daytona implements AsyncDisposable {
    */
   @WithInstrumentation()
   public async list(labels?: Record<string, string>, page?: number, limit?: number): Promise<PaginatedSandboxes> {
+    // Ensure the event subscriber is initializing (non-blocking)
+    await this.initEventSubscriber()
+
     const response = await this.sandboxApi.listSandboxesPaginated(
       undefined,
       page,
@@ -678,6 +729,7 @@ export class Daytona implements AsyncDisposable {
           this.createAxiosInstance(),
           this.sandboxApi,
           this.getCodeToolbox(language),
+          this.eventSubscriber,
         )
       }),
       total: response.data.total,

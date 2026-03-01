@@ -16,6 +16,8 @@ import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { JwtStrategy } from '../../auth/jwt.strategy'
+import { ApiKeyStrategy } from '../../auth/api-key.strategy'
+import { isAuthContext } from '../../common/interfaces/auth-context.interface'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeState } from '../../sandbox/enums/volume-state.enum'
@@ -36,6 +38,7 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   constructor(
     private readonly jwtStrategy: JwtStrategy,
+    private readonly apiKeyStrategy: ApiKeyStrategy,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 
@@ -55,6 +58,7 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
         return next(new UnauthorizedException())
       }
 
+      // Try JWT authentication first
       try {
         const payload = await this.jwtStrategy.verifyToken(token)
 
@@ -67,9 +71,30 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
           await socket.join(organizationId)
         }
 
-        next()
-      } catch (error) {
-        next(new UnauthorizedException())
+        return next()
+      } catch {
+        // JWT failed, try API key authentication
+      }
+
+      // Try API key authentication
+      try {
+        const authContext = await this.apiKeyStrategy.validate(token)
+
+        if (isAuthContext(authContext)) {
+          // Join the user room for user scoped notifications
+          await socket.join(authContext.userId)
+
+          // Join the organization room for organization scoped notifications
+          if (authContext.organizationId) {
+            await socket.join(authContext.organizationId)
+          }
+
+          return next()
+        }
+
+        return next(new UnauthorizedException())
+      } catch {
+        return next(new UnauthorizedException())
       }
     })
   }

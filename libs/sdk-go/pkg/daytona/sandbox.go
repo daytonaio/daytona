@@ -89,7 +89,7 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 	if client != nil {
 		otelSt = client.Otel
 	}
-	return &Sandbox{
+	s := &Sandbox{
 		client:              client,
 		otel:                otelSt,
 		ID:                  id,
@@ -106,6 +106,150 @@ func NewSandbox(client *Client, toolboxClient *toolbox.APIClient, id string, nam
 		Process:             NewProcessService(toolboxClient, otelSt),
 		CodeInterpreter:     NewCodeInterpreterService(toolboxClient, otelSt),
 		ComputerUse:         NewComputerUseService(toolboxClient, otelSt),
+	}
+
+	// Subscribe to real-time events for this sandbox to auto-update state
+	s.subscribeToEvents()
+
+	return s
+}
+
+// subscribeToEvents registers this sandbox with the client's EventSubscriber
+// for real-time state updates.
+func (s *Sandbox) subscribeToEvents() {
+	if s.client == nil {
+		return
+	}
+	subscriber := s.client.getEventSubscriber()
+	if subscriber == nil {
+		return
+	}
+
+	subscriber.Subscribe(s.ID, func(event SandboxEvent) {
+		switch event.Type {
+		case SandboxEventStateUpdated:
+			if event.StateEvent != nil {
+				s.updateFromAPIResponse(&event.StateEvent.Sandbox)
+			}
+		case SandboxEventDesiredStateUpdated:
+			if event.DesiredStateEvent != nil {
+				s.updateFromAPIResponse(&event.DesiredStateEvent.Sandbox)
+			}
+		case SandboxEventCreated:
+			if event.CreatedEvent != nil {
+				s.updateFromAPIResponse(event.CreatedEvent)
+			}
+		}
+	})
+}
+
+// updateFromAPIResponse updates sandbox fields from an API sandbox response.
+func (s *Sandbox) updateFromAPIResponse(resp *apiclient.Sandbox) {
+	s.Name = resp.GetName()
+	s.State = resp.GetState()
+	s.Target = resp.GetTarget()
+
+	if resp.AutoArchiveInterval != nil {
+		s.AutoArchiveInterval = int(*resp.AutoArchiveInterval)
+	}
+	if resp.AutoDeleteInterval != nil {
+		s.AutoDeleteInterval = int(*resp.AutoDeleteInterval)
+	}
+
+	s.NetworkBlockAll = resp.GetNetworkBlockAll()
+	s.NetworkAllowList = resp.NetworkAllowList
+}
+
+const pollSafetyInterval = 3 * time.Second
+
+// waitForStateWithPolling waits for the sandbox to reach a target state using WebSocket events
+// with periodic polling as a safety net for missed events.
+func (s *Sandbox) waitForStateWithPolling(
+	ctx context.Context,
+	targetStates []apiclient.SandboxState,
+	errorStates []apiclient.SandboxState,
+) error {
+	subscriber := s.client.getEventSubscriber()
+	if subscriber == nil || !subscriber.IsConnected() {
+		return errors.NewDaytonaError("WebSocket connection not available for sandbox event subscription", 0, nil)
+	}
+
+	type result struct {
+		state apiclient.SandboxState
+		err   error
+	}
+	resultCh := make(chan result, 1)
+
+	// Subscribe to WebSocket events
+	ch := make(chan SandboxEvent, 16)
+	unsubscribe := subscriber.Subscribe(s.ID, func(event SandboxEvent) {
+		select {
+		case ch <- event:
+		default:
+		}
+	})
+	defer unsubscribe()
+
+	// Run periodic polling in a goroutine
+	pollDone := make(chan struct{})
+	go func() {
+		defer close(pollDone)
+		ticker := time.NewTicker(pollSafetyInterval)
+		defer ticker.Stop()
+
+		for {
+			// Poll immediately on first iteration, then on ticker
+			if err := s.doRefreshData(ctx); err == nil {
+				for _, target := range targetStates {
+					if s.State == target {
+						select {
+						case resultCh <- result{state: s.State}:
+						default:
+						}
+						return
+					}
+				}
+				for _, errState := range errorStates {
+					if s.State == errState {
+						select {
+						case resultCh <- result{state: s.State, err: fmt.Errorf("sandbox entered error state: %s", s.State)}:
+						default:
+						}
+						return
+					}
+				}
+			}
+
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
+		}
+	}()
+
+	// Wait for either WebSocket event, poll result, or context cancellation
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case r := <-resultCh:
+			return r.err
+		case event := <-ch:
+			if event.Type == SandboxEventStateUpdated && event.StateEvent != nil {
+				newState := event.StateEvent.NewState
+				for _, target := range targetStates {
+					if newState == target {
+						return nil
+					}
+				}
+				for _, errState := range errorStates {
+					if newState == errState {
+						return fmt.Errorf("sandbox entered error state: %s", newState)
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -400,26 +544,17 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 		defer cancel()
 	}
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
+	err := s.waitForStateWithPolling(ctx,
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STARTED},
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
+	)
+	if err != nil {
+		if ctx.Err() != nil {
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not start within %s", timeout))
-		case <-ticker.C:
-			if err := s.RefreshData(ctx); err != nil {
-				return err
-			}
-
-			if s.State == apiclient.SANDBOXSTATE_STARTED {
-				return nil
-			}
-			if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-				return errors.NewDaytonaError("Sandbox failed to start", 0, nil)
-			}
 		}
+		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to start: %v", err), 0, nil)
 	}
+	return nil
 }
 
 // WaitForStop waits for the sandbox to reach the "stopped" state.
@@ -447,23 +582,17 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 		defer cancel()
 	}
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ctx.Done():
+	err := s.waitForStateWithPolling(ctx,
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STOPPED},
+		nil,
+	)
+	if err != nil {
+		if ctx.Err() != nil {
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not stop within %s", timeout))
-		case <-ticker.C:
-			if err := s.RefreshData(ctx); err != nil {
-				return err
-			}
-
-			if s.State == apiclient.SANDBOXSTATE_STOPPED {
-				return nil
-			}
 		}
+		return errors.NewDaytonaError(fmt.Sprintf("Sandbox failed to stop: %v", err), 0, nil)
 	}
+	return nil
 }
 
 // SetLabels sets custom labels on the sandbox.
@@ -728,25 +857,20 @@ func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) erro
 			defer cancel()
 		}
 
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-ctx.Done():
+		err := s.waitForStateWithPolling(ctx,
+			[]apiclient.SandboxState{
+				apiclient.SANDBOXSTATE_STARTED,
+				apiclient.SANDBOXSTATE_STOPPED,
+				apiclient.SANDBOXSTATE_ARCHIVED,
+			},
+			[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
+		)
+		if err != nil {
+			if ctx.Err() != nil {
 				return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
-			case <-ticker.C:
-				if err := s.RefreshData(ctx); err != nil {
-					return err
-				}
-
-				if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
-					return errors.NewDaytonaError("Sandbox resize failed", 0, nil)
-				}
-				if s.State != apiclient.SANDBOXSTATE_RESIZING {
-					return nil
-				}
 			}
+			return errors.NewDaytonaError(fmt.Sprintf("Sandbox resize failed: %v", err), 0, nil)
 		}
+		return nil
 	})
 }

@@ -119,12 +119,13 @@ module Daytona
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
     # @params otel_state [Daytona::OtelState, nil]
-    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, otel_state: nil) # rubocop:disable Metrics/MethodLength
+    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, otel_state: nil, event_subscriber: nil) # rubocop:disable Metrics/MethodLength,Metrics/ParameterLists
       process_response(sandbox_dto)
       @code_toolbox = code_toolbox
       @config = config
       @sandbox_api = sandbox_api
       @otel_state = otel_state
+      @event_subscriber = event_subscriber
 
       # Create toolbox API clients with dynamic configuration
       toolbox_api_config = build_toolbox_api_config
@@ -165,6 +166,9 @@ module Daytona
       )
       @lsp_api = lsp_api
       @info_api = info_api
+
+      # Subscribe to real-time events for this sandbox
+      subscribe_to_events
     end
 
     # Archives the sandbox, making it inactive and preserving its state. When sandboxes are
@@ -554,20 +558,111 @@ module Daytona
     # @return [void]
     # @raise [Daytona::Sdk::Error]
     def wait_for_states(operation:, target_states:)
-      loop do
-        case state
-        when *target_states then return
-        when DaytonaApiClient::SandboxState::ERROR, DaytonaApiClient::SandboxState::BUILD_FAILED
-          raise Sdk::Error, "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
-        end
+      error_states = [DaytonaApiClient::SandboxState::ERROR, DaytonaApiClient::SandboxState::BUILD_FAILED]
+      target_strings = target_states.map(&:to_s)
+      error_strings = error_states.map(&:to_s)
 
-        sleep(IDLE_DURATION)
-        refresh
+      unless @event_subscriber&.connected?
+        raise Sdk::Error, 'WebSocket connection not available for sandbox event subscription'
+      end
+
+      wait_for_states_via_events(
+        target_strings:, error_strings:,
+        operation:
+      )
+    end
+
+    def subscribe_to_events
+      return unless @event_subscriber&.connected?
+
+      @event_subscriber.subscribe(id) do |event_type, data|
+        next unless data.is_a?(Hash)
+
+        sandbox_data = case event_type
+                       when 'state.updated', 'desired-state.updated'
+                         data['sandbox']
+                       when 'created'
+                         data
+                       end
+
+        update_from_event_data(sandbox_data) if sandbox_data.is_a?(Hash)
       end
     end
 
-    IDLE_DURATION = 0.1
-    private_constant :IDLE_DURATION
+    def update_from_event_data(data)
+      field_map = {
+        'id' => :@id, 'name' => :@name, 'organizationId' => :@organization_id,
+        'snapshot' => :@snapshot, 'user' => :@user, 'env' => :@env,
+        'labels' => :@labels, 'public' => :@public, 'target' => :@target,
+        'cpu' => :@cpu, 'gpu' => :@gpu, 'memory' => :@memory, 'disk' => :@disk,
+        'state' => :@state, 'desiredState' => :@desired_state,
+        'errorReason' => :@error_reason, 'backupState' => :@backup_state,
+        'backupCreatedAt' => :@backup_created_at,
+        'autoStopInterval' => :@auto_stop_interval,
+        'autoArchiveInterval' => :@auto_archive_interval,
+        'autoDeleteInterval' => :@auto_delete_interval,
+        'createdAt' => :@created_at, 'updatedAt' => :@updated_at,
+        'networkBlockAll' => :@network_block_all, 'networkAllowList' => :@network_allow_list
+      }
+      field_map.each do |camel_key, ivar|
+        instance_variable_set(ivar, data[camel_key]) if data.key?(camel_key)
+      end
+    end
+
+    def wait_for_states_via_events(target_strings:, error_strings:, operation:)
+      return if target_strings.include?(state.to_s)
+
+      if error_strings.include?(state.to_s)
+        raise Sdk::Error, "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
+      end
+
+      result_queue = Queue.new
+
+      unsubscribe = @event_subscriber.subscribe(id) do |event_type, data|
+        next unless event_type == 'state.updated' && data.is_a?(Hash)
+
+        new_state = data['newState']
+        next unless new_state
+
+        if target_strings.include?(new_state)
+          result_queue.push(:success)
+        elsif error_strings.include?(new_state)
+          result_queue.push(:error)
+        end
+      end
+
+      begin
+        # Poll periodically as safety net for missed WebSocket events
+        loop do
+          refresh rescue nil # rubocop:disable Style/RescueModifier
+          return if target_strings.include?(state.to_s)
+
+          if error_strings.include?(state.to_s)
+            raise Sdk::Error, "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
+          end
+
+          # Wait for event or poll interval, whichever comes first (timeout handled by outer with_timeout)
+          result = nil
+          begin
+            Timeout.timeout(POLL_SAFETY_INTERVAL) { result = result_queue.pop }
+          rescue Timeout::Error
+            next # Poll interval elapsed, loop back to refresh
+          end
+
+          if result == :error
+            raise Sdk::Error,
+                  "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
+          end
+
+          return if result == :success
+        end
+      ensure
+        unsubscribe.call
+      end
+    end
+
+    POLL_SAFETY_INTERVAL = 3
+    private_constant :POLL_SAFETY_INTERVAL
 
     NO_TIMEOUT = 0
     private_constant :NO_TIMEOUT

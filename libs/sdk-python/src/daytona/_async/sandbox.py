@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any
 
 from daytona_api_client_async import BuildInfo
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
@@ -37,6 +38,7 @@ from ..common.errors import DaytonaError, DaytonaNotFoundError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
+from ..internal.event_subscriber import AsyncEventSubscriber
 from ..internal.toolbox_api_client_proxy import ToolboxApiClientProxy
 from .code_interpreter import AsyncCodeInterpreter
 from .computer_use import AsyncComputerUse
@@ -100,6 +102,7 @@ class AsyncSandbox(SandboxDto):
         toolbox_api: ApiClient,
         sandbox_api: SandboxApi,
         code_toolbox: SandboxCodeToolbox,
+        event_subscriber: AsyncEventSubscriber | None = None,
     ):
         """Initialize a new Sandbox instance.
 
@@ -108,11 +111,13 @@ class AsyncSandbox(SandboxDto):
             toolbox_api (ApiClient): API client for toolbox operations.
             sandbox_api (SandboxApi): API client for Sandbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
+            event_subscriber: Optional AsyncEventSubscriber for real-time updates.
         """
         super().__init__(**sandbox_dto.model_dump())
         self.__process_sandbox_dto(sandbox_dto)
         self._sandbox_api: SandboxApi = sandbox_api
         self._code_toolbox: SandboxCodeToolbox = code_toolbox
+        self._event_subscriber: AsyncEventSubscriber | None = event_subscriber
         # Wrap the toolbox API client to inject the sandbox ID into the resource path
         self._toolbox_api: ToolboxApiClientProxy[ApiClient] = ToolboxApiClientProxy(
             toolbox_api, self.id, self.toolbox_proxy_url
@@ -124,6 +129,9 @@ class AsyncSandbox(SandboxDto):
         self._computer_use = AsyncComputerUse(ComputerUseApi(self._toolbox_api))
         self._code_interpreter = AsyncCodeInterpreter(InterpreterApi(self._toolbox_api))
         self._info_api: InfoApi = InfoApi(self._toolbox_api)
+
+        # Subscribe to real-time events for this sandbox
+        self._subscribe_to_events()
 
     @property
     def fs(self) -> AsyncFileSystem:
@@ -349,28 +357,22 @@ class AsyncSandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
-        reaches the 'started' state, encounters an error or times out.
+        """Waits for the Sandbox to reach the 'started' state via WebSocket events.
 
         Args:
             timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
-            DaytonaError: If timeout is negative; If Sandbox fails to start or times out
+            DaytonaError: If timeout is negative; If Sandbox fails to start or times out;
+                If WebSocket connection is not available
         """
-        while self.state != "started":
-            await self.refresh_data()
+        if self.state == "started":
+            return
 
-            if self.state == "started":
-                return
+        if not self._event_subscriber or not self._event_subscriber.is_connected:
+            raise DaytonaError("WebSocket connection not available for sandbox event subscription")
 
-            if self.state in ["error", "build_failed"]:
-                err_msg = (
-                    f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
-                )
-                raise DaytonaError(err_msg)
-
-            await asyncio.sleep(0.1)  # Wait 100ms between checks
+        await self._wait_for_state_via_events(["started"], ["error", "build_failed"])
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout()
@@ -379,9 +381,7 @@ class AsyncSandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
-        reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
-        for the Sandbox to stop.
+        """Waits for the Sandbox to reach the 'stopped' state via WebSocket events.
         Treats destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping.
 
         Args:
@@ -389,22 +389,15 @@ class AsyncSandbox(SandboxDto):
 
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
+                If WebSocket connection is not available.
         """
-        while self.state not in ["stopped", "destroyed"]:
-            try:
-                await self.__refresh_data_safe()
+        if self.state in ["stopped", "destroyed"]:
+            return
 
-                if self.state in ["error", "build_failed"]:
-                    err_msg = (
-                        f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
-                    )
-                    raise DaytonaError(err_msg)
-            except Exception as e:
-                # If there's a validation error, continue waiting
-                if "validation error" not in str(e):
-                    raise e
+        if not self._event_subscriber or not self._event_subscriber.is_connected:
+            raise DaytonaError("WebSocket connection not available for sandbox event subscription")
 
-            await asyncio.sleep(0.1)  # Wait 100ms between checks
+        await self._wait_for_state_via_events(["stopped", "destroyed"], ["error", "build_failed"])
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     @with_instrumentation()
@@ -598,26 +591,24 @@ class AsyncSandbox(SandboxDto):
         self,
         timeout: float | None = 60,  # pylint: disable=unused-argument # pyright: ignore[reportUnusedParameter]
     ) -> None:
-        """Waits for the Sandbox resize operation to complete. Polls the Sandbox status until
-        the state is no longer 'resizing'.
+        """Waits for the Sandbox resize operation to complete via WebSocket events.
 
         Args:
             timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
 
         Raises:
             DaytonaError: If timeout is negative. If resize operation times out.
+                If WebSocket connection is not available.
         """
-        while self.state == "resizing":
-            await self.refresh_data()
+        if self.state != "resizing":
+            return
 
-            if self.state != "resizing":
-                return
+        if not self._event_subscriber or not self._event_subscriber.is_connected:
+            raise DaytonaError("WebSocket connection not available for sandbox event subscription")
 
-            if self.state in ["error", "build_failed"]:
-                err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
-                raise DaytonaError(err_msg)
-
-            await asyncio.sleep(0.1)  # Wait 100ms between checks
+        await self._wait_for_state_via_events(
+            ["started", "stopped", "archived"], ["error", "build_failed"]
+        )
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     @with_instrumentation()
@@ -662,6 +653,115 @@ class AsyncSandbox(SandboxDto):
             ```
         """
         await self._sandbox_api.update_last_activity(self.id)
+
+    def _subscribe_to_events(self) -> None:
+        """Subscribe to real-time events for this sandbox, auto-updating metadata."""
+        if not self._event_subscriber or not self._event_subscriber.is_connected:
+            return
+
+        def _handle_event(event_type: str, data: Any) -> None:
+            sandbox_data: dict[str, Any] | None = None
+            if event_type in ("state.updated", "desired-state.updated") and isinstance(data, dict):
+                raw: object = data.get("sandbox")  # pyright: ignore[reportUnknownVariableType]
+                if isinstance(raw, dict):
+                    sandbox_data = dict(raw)  # pyright: ignore[reportUnknownArgumentType]
+            elif event_type == "created" and isinstance(data, dict):
+                sandbox_data = dict(data)  # pyright: ignore[reportUnknownArgumentType]
+
+            if sandbox_data is not None:
+                self._update_from_event_data(sandbox_data)
+
+        _ = self._event_subscriber.subscribe(self.id, _handle_event)
+
+    def _update_from_event_data(self, data: dict[str, Any]) -> None:
+        """Update sandbox fields from a camelCase event payload dict."""
+        # Map camelCase keys from Socket.IO events to snake_case attributes
+        field_map = {
+            "id": "id",
+            "name": "name",
+            "organizationId": "organization_id",
+            "snapshot": "snapshot",
+            "user": "user",
+            "env": "env",
+            "labels": "labels",
+            "public": "public",
+            "target": "target",
+            "cpu": "cpu",
+            "gpu": "gpu",
+            "memory": "memory",
+            "disk": "disk",
+            "state": "state",
+            "errorReason": "error_reason",
+            "recoverable": "recoverable",
+            "backupState": "backup_state",
+            "backupCreatedAt": "backup_created_at",
+            "autoStopInterval": "auto_stop_interval",
+            "autoArchiveInterval": "auto_archive_interval",
+            "autoDeleteInterval": "auto_delete_interval",
+            "createdAt": "created_at",
+            "updatedAt": "updated_at",
+            "networkBlockAll": "network_block_all",
+            "networkAllowList": "network_allow_list",
+        }
+        for camel_key, snake_key in field_map.items():
+            if camel_key in data:
+                setattr(self, snake_key, data[camel_key])
+
+    _POLL_SAFETY_INTERVAL: float = 3.0
+
+    async def _wait_for_state_via_events(
+        self, target_states: list[str], error_states: list[str]
+    ) -> None:
+        """Wait for sandbox to reach a target state via WebSocket events with periodic polling safety net."""
+        if self.state in target_states:
+            return
+        if self.state in error_states:
+            raise DaytonaError(
+                f"Sandbox {self.id} is in error state: {self.state}, error reason: {self.error_reason}"
+            )
+
+        assert self._event_subscriber is not None
+
+        event = asyncio.Event()
+        result: dict[str, str] = {}
+
+        def _handler(event_type: str, data: Any) -> None:
+            if event_type != "state.updated":
+                return
+            raw_state: object = data.get("newState") if isinstance(data, dict) else None  # pyright: ignore[reportUnknownVariableType]
+            new_state: str | None = str(raw_state) if isinstance(raw_state, str) else None
+            if new_state and (new_state in target_states or new_state in error_states):
+                result["state"] = new_state
+                _ = event.set()
+
+        unsubscribe = self._event_subscriber.subscribe(self.id, _handler)
+        try:
+            # Poll periodically as safety net for missed WebSocket events
+            while not event.is_set():
+                try:
+                    await self.refresh_data()
+                except Exception:
+                    pass  # Poll failed, will retry on next interval
+                if self.state in target_states:
+                    return
+                if self.state in error_states:
+                    raise DaytonaError(
+                        f"Sandbox {self.id} is in error state: {self.state}, error reason: {self.error_reason}"
+                    )
+                # Wait for event or poll interval, whichever comes first
+                # (timeout is handled by outer @with_timeout decorator)
+                try:
+                    _ = await asyncio.wait_for(event.wait(), timeout=self._POLL_SAFETY_INTERVAL)
+                except asyncio.TimeoutError:
+                    continue  # Poll interval elapsed, loop back to refresh
+
+            final_state: str | None = result.get("state")
+            if final_state in error_states:
+                raise DaytonaError(
+                    f"Sandbox {self.id} entered error state: {final_state}, error reason: {self.error_reason}"
+                )
+        finally:
+            unsubscribe()
 
     def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
         self.id: str = sandbox_dto.id

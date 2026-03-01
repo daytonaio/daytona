@@ -38,6 +38,7 @@ from .._utils.enum import to_enum
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
+from ..internal.event_subscriber import AsyncEventSubscriber
 from .._utils.timeout import http_timeout, with_timeout
 from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
 from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
@@ -229,6 +230,15 @@ class AsyncDaytona:
             self._target,
         )
 
+        # Event subscriber for real-time sandbox updates
+        self._event_subscriber: AsyncEventSubscriber | None = None
+        self._event_subscriber_init_task: asyncio.Task[None] | None = None
+
+        # Start WebSocket event subscriber connection in the background (non-blocking).
+        # By the time the first create()/get() call completes its HTTP request,
+        # the subscriber will already be connected and ready.
+        self._init_event_subscriber()
+
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or os.environ.get(
             "DAYTONA_EXPERIMENTAL_OTEL_ENABLED"
@@ -310,6 +320,35 @@ class AsyncDaytona:
         # Close the toolbox API client
         if hasattr(self, "_toolbox_api_client") and self._toolbox_api_client:
             await self._toolbox_api_client.close()
+
+        # Disconnect event subscriber
+        if self._event_subscriber:
+            await self._event_subscriber.disconnect()
+            self._event_subscriber = None
+
+    def _init_event_subscriber(self) -> None:
+        """Lazily initialize the event subscriber in the background. Non-blocking."""
+        if (self._event_subscriber is not None and self._event_subscriber.is_connected) or self._event_subscriber_init_task is not None:
+            return
+
+        token = self._api_key or self._jwt_token
+        if not token:
+            return
+
+        subscriber = AsyncEventSubscriber(self._api_url, token, self._organization_id)
+        self._event_subscriber = subscriber
+
+        async def _connect():
+            try:
+                await subscriber.connect()
+            except Exception:
+                pass  # Connection failure is handled when methods try to use subscriber
+
+        try:
+            loop = asyncio.get_running_loop()
+            self._event_subscriber_init_task = loop.create_task(_connect())
+        except RuntimeError:
+            pass  # No running event loop, subscriber will connect on first use
 
     @overload
     async def create(
@@ -420,6 +459,9 @@ class AsyncDaytona:
         timeout: float = 60,
         on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> AsyncSandbox:
+        # Ensure the event subscriber is initializing (non-blocking)
+        self._init_event_subscriber()
+
         # If no params provided, create default params for Python
         if not params:
             params = CreateSandboxFromSnapshotParams(language=self.default_language)
@@ -527,6 +569,7 @@ class AsyncDaytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -616,11 +659,15 @@ class AsyncDaytona:
 
         # Create and return sandbox with Python code toolbox as default
         code_toolbox = SandboxPythonCodeToolbox()
+        # Ensure the event subscriber is initializing (non-blocking)
+        self._init_event_subscriber()
+
         return AsyncSandbox(
             sandbox_instance,
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -675,6 +722,9 @@ class AsyncDaytona:
                 print(f"{sandbox.id}: {sandbox.state}")
             ```
         """
+        # Ensure the event subscriber is initializing (non-blocking)
+        self._init_event_subscriber()
+
         if page is not None and page < 1:
             raise DaytonaError("page must be a positive integer")
 
@@ -690,6 +740,7 @@ class AsyncDaytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    event_subscriber=self._event_subscriber,
                 )
                 for sandbox in response.items
             ],

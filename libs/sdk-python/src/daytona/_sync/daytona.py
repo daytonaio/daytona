@@ -37,6 +37,7 @@ from opentelemetry.semconv.attributes import service_attributes
 
 from .._utils.enum import to_enum
 from .._utils.errors import intercept_errors
+from ..internal.event_subscriber import SyncEventSubscriber
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import http_timeout, with_timeout
@@ -225,6 +226,14 @@ class Daytona:
             SnapshotsApi(self._api_client), self._object_storage_api, self._target
         )
 
+        # Event subscriber for real-time sandbox updates
+        self._event_subscriber: SyncEventSubscriber | None = None
+
+        # Start WebSocket event subscriber connection in the background (non-blocking).
+        # By the time the first create()/get() call completes its HTTP request,
+        # the subscriber will already be connected and ready.
+        self._init_event_subscriber_background()
+
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or os.environ.get(
             "DAYTONA_EXPERIMENTAL_OTEL_ENABLED"
@@ -256,6 +265,43 @@ class Daytona:
 
         # Set the global tracer provider
         trace.set_tracer_provider(self._tracer_provider)
+
+    def _init_event_subscriber_background(self) -> None:
+        """Start the event subscriber connection in a background thread."""
+        import threading
+
+        token = self._api_key or self._jwt_token
+        if not token:
+            return
+
+        subscriber = SyncEventSubscriber(self._api_url, token, self._organization_id)
+        self._event_subscriber = subscriber
+
+        def _connect() -> None:
+            try:
+                subscriber.connect()
+            except Exception:
+                pass  # Connection failure handled when methods try to use subscriber
+
+        thread = threading.Thread(target=_connect, daemon=True)
+        thread.start()
+
+    def _init_event_subscriber(self) -> None:
+        """Reconnect the event subscriber if it was auto-disconnected."""
+        if self._event_subscriber and self._event_subscriber.is_connected:
+            return
+
+        token = self._api_key or self._jwt_token
+        if not token:
+            return
+
+        subscriber = SyncEventSubscriber(self._api_url, token, self._organization_id)
+
+        try:
+            subscriber.connect()
+            self._event_subscriber = subscriber
+        except Exception:
+            pass  # Connection failure handled when methods try to use subscriber
 
     @overload
     def create(
@@ -366,6 +412,9 @@ class Daytona:
         timeout: float = 60,
         on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> Sandbox:
+        # Ensure the event subscriber is initializing (non-blocking)
+        self._init_event_subscriber()
+
         # If no params provided, create default params for Python
         if not params:
             params = CreateSandboxFromSnapshotParams(language=self.default_language)
@@ -473,6 +522,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -562,11 +612,15 @@ class Daytona:
 
         # Create and return sandbox with Python code toolbox as default
         code_toolbox = SandboxPythonCodeToolbox()
+        # Ensure the event subscriber is initializing (non-blocking)
+        self._init_event_subscriber()
+
         return Sandbox(
             sandbox_instance,
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -634,6 +688,7 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    event_subscriber=self._event_subscriber,
                 )
                 for sandbox in response.items
             ],

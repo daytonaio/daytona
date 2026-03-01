@@ -114,6 +114,9 @@ type Client struct {
 	// apiClient is the underlying OpenAPI-generated client
 	apiClient *apiclient.APIClient
 
+	// eventSubscriber handles WebSocket event subscriptions for real-time sandbox updates
+	eventSubscriber *EventSubscriber
+
 	// Volume provides methods for managing persistent volumes.
 	Volume *VolumeService
 
@@ -257,6 +260,11 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	client.Volume = NewVolumeService(client)
 	client.Snapshot = NewSnapshotService(client)
 
+	// Start WebSocket event subscriber connection in the background (non-blocking).
+	// By the time the first Create()/Get() call completes its HTTP request,
+	// the subscriber will already be connected and ready.
+	go client.initEventSubscriber()
+
 	return client, nil
 }
 
@@ -264,7 +272,42 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 // When OpenTelemetry is enabled, Close flushes and shuts down the OTel providers.
 // It is safe to call Close even when OTel is not enabled.
 func (c *Client) Close(ctx context.Context) error {
+	if c.eventSubscriber != nil {
+		c.eventSubscriber.Disconnect()
+		c.eventSubscriber = nil
+	}
 	return shutdownOtel(ctx, c.Otel)
+}
+
+// initEventSubscriber lazily initializes the EventSubscriber.
+// Re-creates the subscriber if it was auto-disconnected after all sandboxes unsubscribed.
+func (c *Client) initEventSubscriber() {
+	// Skip if already connected
+	if c.eventSubscriber != nil && c.eventSubscriber.IsConnected() {
+		return
+	}
+
+	token := c.apiKey
+	if token == "" {
+		token = c.jwtToken
+	}
+	if token == "" {
+		return
+	}
+
+	subscriber := NewEventSubscriber(c.apiURL, token, c.organizationID)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := subscriber.Connect(ctx); err == nil {
+		c.eventSubscriber = subscriber
+	}
+}
+
+// getEventSubscriber returns the event subscriber, initializing it if needed.
+func (c *Client) getEventSubscriber() *EventSubscriber {
+	c.initEventSubscriber()
+	return c.eventSubscriber
 }
 
 // getAuthContext returns a context with authentication for api-client-go
@@ -371,6 +414,9 @@ func (c *Client) Create(ctx context.Context, params any, opts ...func(*options.C
 }
 
 func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options.CreateSandbox)) (*Sandbox, error) {
+	// Ensure the event subscriber is initializing (non-blocking)
+	c.initEventSubscriber()
+
 	// Apply options with defaults
 	createOpts := &options.CreateSandbox{
 		WaitForStart: true, // default to true
@@ -615,6 +661,9 @@ func (c *Client) Get(ctx context.Context, sandboxIDOrName string) (*Sandbox, err
 }
 
 func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, error) {
+	// Ensure the event subscriber is initializing (non-blocking)
+	c.initEventSubscriber()
+
 	if sandboxIDOrName == "" {
 		return nil, errors.NewDaytonaError("sandbox ID or name is required", 0, nil)
 	}
@@ -733,6 +782,9 @@ func (c *Client) List(ctx context.Context, labels map[string]string, page *int, 
 }
 
 func (c *Client) doList(ctx context.Context, labels map[string]string, page *int, limit *int) (*PaginatedSandboxes, error) {
+	// Ensure the event subscriber is initializing (non-blocking)
+	c.initEventSubscriber()
+
 	if page != nil && *page < 1 {
 		return nil, errors.NewDaytonaError("page must be a positive integer", 0, nil)
 	}

@@ -37,6 +37,7 @@ import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
+import { EventSubscriber, SandboxEvent } from './EventSubscriber'
 
 /**
  * Interface defining methods that a code toolbox must implement
@@ -122,6 +123,8 @@ export class Sandbox implements SandboxDto {
   public toolboxProxyUrl: string
 
   private infoApi: InfoApi
+  private eventSubscriber: EventSubscriber | null
+  private unsubscribeEvents: (() => void) | null = null
 
   /**
    * Creates a new Sandbox instance
@@ -130,6 +133,7 @@ export class Sandbox implements SandboxDto {
    * @param {SandboxApi} sandboxApi - API client for Sandbox operations
    * @param {InfoApi} infoApi - API client for info operations
    * @param {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
+   * @param {EventSubscriber | null} eventSubscriber - Optional event subscriber for real-time updates
    */
   constructor(
     sandboxDto: SandboxDto,
@@ -137,8 +141,13 @@ export class Sandbox implements SandboxDto {
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
+    eventSubscriber: EventSubscriber | null = null,
   ) {
+    this.eventSubscriber = eventSubscriber
     this.processSandboxDto(sandboxDto)
+
+    // Subscribe to real-time events for this sandbox
+    this.subscribeToEvents()
 
     // Set the toolbox base URL
     let baseUrl = this.toolboxProxyUrl
@@ -357,28 +366,21 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
-    const startTime = Date.now()
-
-    while (this.state !== 'started') {
-      await this.refreshData()
-
-      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === 'started') {
-        return
-      }
-
-      if (this.state === 'error') {
-        const errMsg = `Sandbox ${this.id} failed to start with status: ${this.state}, error reason: ${this.errorReason}`
-        throw new DaytonaError(errMsg)
-      }
-
-      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox failed to become ready within the timeout period')
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+    if (this.state === 'started') {
+      return
     }
+
+    if (!this.eventSubscriber?.isConnected) {
+      throw new DaytonaError('WebSocket connection not available for sandbox event subscription')
+    }
+
+    return this.waitForStateViaEvents(
+      [SandboxState.STARTED],
+      [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      timeout,
+      'Sandbox failed to become ready within the timeout period',
+      (state) => `Sandbox ${this.id} failed to start with status: ${state}, error reason: ${this.errorReason}`,
+    )
   }
 
   /**
@@ -398,29 +400,22 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
-    const startTime = Date.now()
-
     // Treat destroyed as stopped to cover ephemeral sandboxes that are automatically deleted after stopping
-    while (this.state !== 'stopped' && this.state !== 'destroyed') {
-      this.refreshDataSafe()
-
-      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === 'stopped' || this.state === 'destroyed') {
-        return
-      }
-
-      if (this.state === 'error') {
-        const errMsg = `Sandbox failed to stop with status: ${this.state}, error reason: ${this.errorReason}`
-        throw new DaytonaError(errMsg)
-      }
-
-      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox failed to become stopped within the timeout period')
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+    if (this.state === 'stopped' || this.state === 'destroyed') {
+      return
     }
+
+    if (!this.eventSubscriber?.isConnected) {
+      throw new DaytonaError('WebSocket connection not available for sandbox event subscription')
+    }
+
+    return this.waitForStateViaEvents(
+      [SandboxState.STOPPED, SandboxState.DESTROYED],
+      [SandboxState.ERROR],
+      timeout,
+      'Sandbox failed to become stopped within the timeout period',
+      (state) => `Sandbox failed to stop with status: ${state}, error reason: ${this.errorReason}`,
+    )
   }
 
   /**
@@ -644,29 +639,27 @@ export class Sandbox implements SandboxDto {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
 
-    const checkInterval = 100 // Wait 100 ms between checks
-    const startTime = Date.now()
-
-    while (this.state === SandboxState.RESIZING) {
-      await this.refreshData()
-
-      // @ts-expect-error this.refreshData() can modify this.state so this check is fine
-      if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
-        throw new DaytonaError(
-          `Sandbox ${this.id} resize failed with state: ${this.state}, error reason: ${this.errorReason}`,
-        )
-      }
-
-      if (this.state !== SandboxState.RESIZING) {
-        return
-      }
-
-      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox resize did not complete within the timeout period')
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, checkInterval))
+    if (this.state !== SandboxState.RESIZING) {
+      return
     }
+
+    if (!this.eventSubscriber?.isConnected) {
+      throw new DaytonaError('WebSocket connection not available for sandbox event subscription')
+    }
+
+    // For resize, any state that is NOT resizing is a target (resize is done)
+    // We use a custom approach: wait for state to change away from RESIZING
+    return this.waitForStateViaEvents(
+      [
+        SandboxState.STARTED,
+        SandboxState.STOPPED,
+        SandboxState.ARCHIVED,
+      ],
+      [SandboxState.ERROR, SandboxState.BUILD_FAILED],
+      timeout,
+      'Sandbox resize did not complete within the timeout period',
+      (state) => `Sandbox ${this.id} resize failed with state: ${state}, error reason: ${this.errorReason}`,
+    )
   }
 
   /**
@@ -700,6 +693,116 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async validateSshAccess(token: string): Promise<SshAccessValidationDto> {
     return (await this.sandboxApi.validateSshAccess(token)).data
+  }
+
+  /**
+   * Subscribes to real-time events for this sandbox via the EventSubscriber.
+   * Auto-updates sandbox metadata on every event.
+   */
+  private subscribeToEvents(): void {
+    if (!this.eventSubscriber?.isConnected) return
+
+    this.unsubscribeEvents = this.eventSubscriber.subscribe(this.id, (event: SandboxEvent) => {
+      switch (event.type) {
+        case 'state.updated':
+        case 'desired-state.updated':
+          this.processSandboxDto(event.data.sandbox)
+          break
+        case 'created':
+          this.processSandboxDto(event.data)
+          break
+      }
+    })
+  }
+
+  /**
+   * Waits for the sandbox to reach one of the target states via WebSocket events.
+   * Throws on error states, timeout, or connection failure.
+   */
+  private static readonly POLL_SAFETY_INTERVAL_MS = 3000
+
+  private waitForStateViaEvents(
+    targetStates: SandboxState[],
+    errorStates: SandboxState[],
+    timeout: number,
+    timeoutMessage: string,
+    errorMessageFn: (state: string) => string,
+  ): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      let timeoutTimer: ReturnType<typeof setTimeout> | null = null
+      let pollTimer: ReturnType<typeof setInterval> | null = null
+      let unsubscribe: (() => void) | null = null
+      let settled = false
+
+      const checkState = () => {
+        if (this.state && targetStates.includes(this.state)) {
+          cleanup()
+          resolve()
+          return true
+        }
+        if (this.state && errorStates.includes(this.state)) {
+          cleanup()
+          reject(new DaytonaError(errorMessageFn(this.state)))
+          return true
+        }
+        return false
+      }
+
+      const cleanup = () => {
+        if (timeoutTimer) clearTimeout(timeoutTimer)
+        if (pollTimer) clearInterval(pollTimer)
+        if (unsubscribe) unsubscribe()
+        settled = true
+      }
+
+      // Check if already in target/error state
+      if (checkState()) return
+
+      // Check if subscriber has failed
+      if (this.eventSubscriber?.isFailed) {
+        return reject(new DaytonaError(this.eventSubscriber.failError || 'WebSocket connection failed'))
+      }
+
+      if (timeout !== 0) {
+        timeoutTimer = setTimeout(() => {
+          if (!settled) {
+            cleanup()
+            reject(new DaytonaError(timeoutMessage))
+          }
+        }, timeout * 1000)
+      }
+
+      // Subscribe to WebSocket events for instant detection
+      unsubscribe = this.eventSubscriber!.subscribe(this.id, (event: SandboxEvent) => {
+        if (settled) return
+        if (event.type === 'state.updated') {
+          const newState = event.data.newState
+          if (newState && targetStates.includes(newState)) {
+            cleanup()
+            resolve()
+          } else if (newState && errorStates.includes(newState)) {
+            cleanup()
+            reject(new DaytonaError(errorMessageFn(newState)))
+          }
+        }
+      })
+
+      // Periodic poll as safety net for missed events
+      const doPoll = () => {
+        if (settled) return
+        this.refreshData()
+          .then(() => {
+            if (!settled) checkState()
+          })
+          .catch(() => {
+            // Poll failed, will retry on next interval
+          })
+      }
+
+      // Initial poll to catch state changes before subscribing
+      doPoll()
+      pollTimer = setInterval(doPoll, Sandbox.POLL_SAFETY_INTERVAL_MS)
+    })
   }
 
   /**

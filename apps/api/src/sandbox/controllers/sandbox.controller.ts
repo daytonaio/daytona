@@ -294,7 +294,7 @@ export class SandboxController {
         return sandbox
       }
 
-      await this.waitForSandboxStarted(sandbox, 30)
+      // await this.waitForSandboxStarted(sandbox, 30)
     }
 
     return sandbox
@@ -440,11 +440,11 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const recoveredSandbox = await this.sandboxService.recover(sandboxIdOrName, authContext.organization)
-    let sandboxDto = await this.sandboxService.toSandboxDto(recoveredSandbox)
+    const sandboxDto = await this.sandboxService.toSandboxDto(recoveredSandbox)
 
-    if (sandboxDto.state !== SandboxState.STARTED) {
-      sandboxDto = await this.waitForSandboxStarted(sandboxDto, 30)
-    }
+    // if (sandboxDto.state !== SandboxState.STARTED) {
+    //   sandboxDto = await this.waitForSandboxStarted(sandboxDto, 30)
+    // }
 
     return sandboxDto
   }
@@ -480,11 +480,11 @@ export class SandboxController {
     @Param('sandboxIdOrName') sandboxIdOrName: string,
   ): Promise<SandboxDto> {
     const sbx = await this.sandboxService.start(sandboxIdOrName, authContext.organization)
-    let sandbox = await this.sandboxService.toSandboxDto(sbx)
+    const sandbox = await this.sandboxService.toSandboxDto(sbx)
 
-    if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
-      sandbox = await this.waitForSandboxStarted(sandbox, 30)
-    }
+    // if (![SandboxState.ARCHIVED, SandboxState.RESTORING, SandboxState.STARTED].includes(sandbox.state)) {
+    //   sandbox = await this.waitForSandboxStarted(sandbox, 30)
+    // }
 
     return sandbox
   }
@@ -1255,42 +1255,42 @@ export class SandboxController {
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
-  private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
-    let latestSandbox: Sandbox
-    const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
-      // eslint-disable-next-line
-      let timeout: NodeJS.Timeout
-      const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
-        if (event.sandbox.id !== sandbox.id) {
-          return
-        }
-        latestSandbox = event.sandbox
-        if (event.sandbox.state === SandboxState.STARTED) {
-          this.sandboxCallbacks.delete(sandbox.id)
-          clearTimeout(timeout)
-          resolve(this.sandboxService.toSandboxDto(event.sandbox))
-        }
-        if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
-          this.sandboxCallbacks.delete(sandbox.id)
-          clearTimeout(timeout)
-          reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
-        }
-      }
+  // private async waitForSandboxStarted(sandbox: SandboxDto, timeoutSeconds: number): Promise<SandboxDto> {
+  //   let latestSandbox: Sandbox
+  //   const waitForStarted = new Promise<SandboxDto>((resolve, reject) => {
+  //     // eslint-disable-next-line
+  //     let timeout: NodeJS.Timeout
+  //     const handleStateUpdated = (event: SandboxStateUpdatedEvent) => {
+  //       if (event.sandbox.id !== sandbox.id) {
+  //         return
+  //       }
+  //       latestSandbox = event.sandbox
+  //       if (event.sandbox.state === SandboxState.STARTED) {
+  //         this.sandboxCallbacks.delete(sandbox.id)
+  //         clearTimeout(timeout)
+  //         resolve(this.sandboxService.toSandboxDto(event.sandbox))
+  //       }
+  //       if (event.sandbox.state === SandboxState.ERROR || event.sandbox.state === SandboxState.BUILD_FAILED) {
+  //         this.sandboxCallbacks.delete(sandbox.id)
+  //         clearTimeout(timeout)
+  //         reject(new BadRequestError(`Sandbox failed to start: ${event.sandbox.errorReason}`))
+  //       }
+  //     }
 
-      this.sandboxCallbacks.set(sandbox.id, handleStateUpdated)
+  //     this.sandboxCallbacks.set(sandbox.id, handleStateUpdated)
 
-      timeout = setTimeout(() => {
-        this.sandboxCallbacks.delete(sandbox.id)
-        if (latestSandbox) {
-          resolve(this.sandboxService.toSandboxDto(latestSandbox))
-        } else {
-          resolve(sandbox)
-        }
-      }, timeoutSeconds * 1000)
-    })
+  //     timeout = setTimeout(() => {
+  //       this.sandboxCallbacks.delete(sandbox.id)
+  //       if (latestSandbox) {
+  //         resolve(this.sandboxService.toSandboxDto(latestSandbox))
+  //       } else {
+  //         resolve(sandbox)
+  //       }
+  //     }, timeoutSeconds * 1000)
+  //   })
 
-    return waitForStarted
-  }
+  //   return waitForStarted
+  // }
 
   private handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
     const callback = this.sandboxCallbacks.get(event.sandbox.id)
