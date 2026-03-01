@@ -75,6 +75,20 @@ def intercept_errors(
                     )
                 ) from e
 
+            # aiohttp raises a bare AssertionError (no message) when a request is made
+            # on a session whose _connector has been set to None by close().
+            # str(AssertionError()) == "" so it falls through to the generic handler and
+            # produces a completely empty DaytonaError message. Catch it here and produce
+            # the same helpful "client is closed" message instead.
+            if isinstance(e, AssertionError) and not str(e):
+                raise DaytonaError(
+                    (
+                        f"{message_prefix}Daytona client is closed"
+                        " — sandbox is used outside its parent's context. "
+                        "Ensure sandboxes are only used within the scope of their parent Daytona object."
+                    )
+                ) from e
+
             msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
             raise DaytonaError(msg)  # pylint: disable=raise-missing-from
 
