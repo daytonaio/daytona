@@ -5,12 +5,11 @@ from __future__ import annotations
 import io
 import os
 from contextlib import ExitStack
-from typing import cast, overload
+from typing import Any, overload
 
 import aiofiles
 import aiofiles.os
 import httpx
-import multipart
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
 from daytona_toolbox_api_client_async import (
     FileInfo,
@@ -21,7 +20,7 @@ from daytona_toolbox_api_client_async import (
     ReplaceResult,
     SearchFilesResponse,
 )
-from multipart import MultipartSegment, PushMultipartParser
+from multipart.multipart import MultipartParser, parse_options_header
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
@@ -226,78 +225,133 @@ class AsyncFileSystem:
                 ) as resp:
                     _ = resp.raise_for_status()
 
-                    content_type, options = multipart.parse_options_header(resp.headers.get("Content-Type", ""))
-                    if not (content_type == "multipart/form-data" and "boundary" in options):
-                        raise DaytonaError(f"Unexpected Content-Type: {content_type}")
-                    boundary = cast(str | bytes, options["boundary"])
+                    content_type_raw, options = parse_options_header(resp.headers.get("Content-Type", ""))
+                    if not (content_type_raw == b"multipart/form-data" and b"boundary" in options):
+                        raise DaytonaError(f"Unexpected Content-Type: {content_type_raw!r}")
+                    boundary = options[b"boundary"]
 
-                    with PushMultipartParser(boundary) as parser:
-                        writer = None
-                        mode = None  # "file" or "error"
-                        source = None
+                    writer: io.BytesIO | AsyncBufferedIOBase | None = None
+                    mode: str | None = None
+                    source: str | None = None
+                    header_field = bytearray()
+                    header_value = bytearray()
+                    part_headers: dict[str, str] = {}
+                    error_buffer = bytearray()
+                    events: list[tuple[str, Any]] = []
 
-                        async for chunk in resp.aiter_bytes(64 * 1024):
-                            if parser.closed:
-                                raise DaytonaError("Unexpected end of multipart data")
+                    def on_part_begin() -> None:
+                        events.append(("begin", None))
 
-                            for result in parser.parse(chunk):  # pyright: ignore[reportUnknownVariableType]
-                                if isinstance(result, MultipartSegment):  # New part starting
-                                    writer = None
-                                    mode = None
-                                    source = result.filename
-                                    if not source:
-                                        raise DaytonaError(f"No source path found for this file {result.filename}")
+                    def on_header_field(data: bytes, start: int, end: int) -> None:
+                        header_field.extend(data[start:end])
 
-                                    if result.name == "error":
-                                        mode = "error"
-                                    elif result.name == "file":
-                                        mode = "file"
-                                        meta = src_file_meta_dict[source]
-                                        if meta.dst:
-                                            parent = os.path.dirname(meta.dst)
-                                            if parent:
-                                                await aiofiles.os.makedirs(parent, exist_ok=True)
-                                            # pylint: disable=consider-using-with
-                                            writer = await aiofiles.open(meta.dst, mode="wb")
-                                            file_writers.append(writer)
-                                            meta.result = meta.dst
-                                        else:
-                                            writer = io.BytesIO()
-                                            meta.result = writer
+                    def on_header_value(data: bytes, start: int, end: int) -> None:
+                        header_value.extend(data[start:end])
 
-                                elif result:  # Non-empty bytearray with content
-                                    if mode == "error":
-                                        raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                        error_text = raw.decode("utf-8", errors="ignore").strip()
+                    def on_header_end() -> None:
+                        field = bytes(header_field).decode("utf-8", errors="ignore").lower()
+                        value = bytes(header_value).decode("utf-8", errors="ignore")
+                        part_headers[field] = value
+                        header_field.clear()
+                        header_value.clear()
+
+                    def on_headers_finished() -> None:
+                        events.append(("headers_finished", dict(part_headers)))
+
+                    def on_part_data(data: bytes, start: int, end: int) -> None:
+                        events.append(("data", bytes(data[start:end])))
+
+                    def on_part_end() -> None:
+                        events.append(("end", None))
+
+                    parser = MultipartParser(
+                        boundary,
+                        callbacks={
+                            "on_part_begin": on_part_begin,
+                            "on_header_field": on_header_field,
+                            "on_header_value": on_header_value,
+                            "on_header_end": on_header_end,
+                            "on_headers_finished": on_headers_finished,
+                            "on_part_data": on_part_data,
+                            "on_part_end": on_part_end,
+                        },
+                    )
+
+                    async def _process_events() -> None:
+                        nonlocal writer, mode, source
+                        for event_tag, event_payload in events:
+                            if event_tag == "begin":
+                                part_headers.clear()
+                                error_buffer.clear()
+                                writer = None
+                                mode = None
+                                source = None
+
+                            elif event_tag == "headers_finished":
+                                hdrs: dict[str, str] = event_payload
+                                cd = hdrs.get("content-disposition", "")
+                                _, cd_params = parse_options_header(cd)
+                                name = cd_params.get(b"name", b"").decode("utf-8", errors="ignore")
+                                source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
+                                if not source:
+                                    raise DaytonaError("No source path found for this file")
+
+                                if name == "error":
+                                    mode = "error"
+                                elif name == "file":
+                                    mode = "file"
+                                    meta = src_file_meta_dict[source]
+                                    if meta.dst:
+                                        parent = os.path.dirname(meta.dst)
+                                        if parent:
+                                            await aiofiles.os.makedirs(parent, exist_ok=True)
+                                        # pylint: disable=consider-using-with
+                                        writer = await aiofiles.open(meta.dst, mode="wb")
+                                        file_writers.append(writer)
+                                        meta.result = meta.dst
+                                    else:
+                                        writer = io.BytesIO()
+                                        meta.result = writer
+
+                            elif event_tag == "data":
+                                part_data: bytes = event_payload
+                                if mode == "error":
+                                    error_buffer.extend(part_data)
+                                elif mode == "file":
+                                    try:
+                                        if isinstance(writer, io.BytesIO):
+                                            _ = writer.write(part_data)
+                                        elif writer:
+                                            _ = await writer.write(part_data)
+                                    except Exception as e:
                                         if source:
-                                            src_file_meta_dict[source].error = error_text
+                                            src_file_meta_dict[source].error = f"Write failed: {e}"
                                         else:
-                                            raise DaytonaError(
-                                                f"Error happened for unknown file with error {error_text}"
-                                            )
-                                    elif mode == "file":
-                                        try:
-                                            if isinstance(writer, io.BytesIO):
-                                                raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                                _ = writer.write(raw)
-                                            elif writer:
-                                                raw = bytes(result)  # pyright: ignore[reportUnknownArgumentType]
-                                                _ = await writer.write(raw)
-                                        except Exception as e:
-                                            if source:
-                                                src_file_meta_dict[source].error = f"Write failed: {e}"
-                                            else:
-                                                raise DaytonaError(
-                                                    (f"Write failed for unknown file with error {e}")
-                                                ) from e
-                                            mode = None
+                                            raise DaytonaError(f"Write failed for unknown file with error {e}") from e
+                                        mode = None
 
-                                else:  # None - end of current part
-                                    if writer and not isinstance(writer, io.BytesIO):
-                                        await writer.close()
-                                    writer = None
-                                    mode = None
-                                    source = None
+                            elif event_tag == "end":
+                                if mode == "error" and error_buffer:
+                                    error_text = bytes(error_buffer).decode("utf-8", errors="ignore").strip()
+                                    if source:
+                                        src_file_meta_dict[source].error = error_text
+                                    else:
+                                        raise DaytonaError(f"Error happened for unknown file with error {error_text}")
+                                    error_buffer.clear()
+                                if writer and not isinstance(writer, io.BytesIO):
+                                    await writer.close()
+                                writer = None
+                                mode = None
+                                source = None
+
+                    async for chunk in resp.aiter_bytes(64 * 1024):
+                        events.clear()
+                        _ = parser.write(chunk)
+                        await _process_events()
+
+                    events.clear()
+                    parser.finalize()
+                    await _process_events()
         finally:
             for writer in file_writers:
                 await writer.close()

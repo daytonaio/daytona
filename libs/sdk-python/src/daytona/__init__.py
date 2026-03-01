@@ -4,6 +4,7 @@
 from daytona_api_client import SandboxState
 from daytona_toolbox_api_client import SessionExecuteResponse
 
+from . import _check_deps  # pyright: ignore[reportUnusedImport]
 from ._async.computer_use import AsyncComputerUse, AsyncDisplay, AsyncKeyboard, AsyncMouse, AsyncScreenshot
 from ._async.daytona import AsyncDaytona
 from ._async.sandbox import AsyncPaginatedSandboxes, AsyncSandbox
