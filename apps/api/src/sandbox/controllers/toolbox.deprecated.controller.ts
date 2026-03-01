@@ -1093,9 +1093,10 @@ export class ToolboxController {
   @ApiOperation({
     summary: '[DEPRECATED] Execute command',
     description: 'Execute command synchronously inside sandbox',
-    operationId: 'executeCommand_deprecated',
+    operationId: 'executeToolboxCommand_deprecated',
     deprecated: true,
   })
+  @ApiBody({ type: ExecuteRequestDto })
   @ApiResponse({
     status: 200,
     description: 'Command executed successfully',

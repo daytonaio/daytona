@@ -31,6 +31,7 @@ import {
   ApiOAuth2,
   ApiResponse,
   ApiQuery,
+  ApiBody,
   ApiOperation,
   ApiParam,
   ApiTags,
@@ -129,6 +130,7 @@ export class WorkspaceController {
     description: 'The workspace has been successfully created.',
     type: WorkspaceDto,
   })
+  @ApiBody({ type: CreateWorkspaceDto })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.CREATE,
@@ -325,6 +327,7 @@ export class WorkspaceController {
     description: 'Labels have been successfully replaced',
     type: WorkspaceLabelsDto,
   })
+  @ApiBody({ type: WorkspaceLabelsDto })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
   @Audit({
