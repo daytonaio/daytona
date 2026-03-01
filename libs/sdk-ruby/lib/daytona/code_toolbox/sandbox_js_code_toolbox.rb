@@ -12,8 +12,9 @@ module Daytona
       argv = ''
       argv = params.argv.join(' ') if params&.argv && !params.argv.empty?
 
-      # Combine everything into the final command for JavaScript
-      " sh -c 'echo #{base64_code} | base64 --decode | node -e \"$(cat)\" #{argv} 2>&1 | grep -vE \"npm notice\"' "
+      # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+      # Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
+      "echo '#{base64_code}' | base64 --decode | node /dev/stdin #{argv} 2>&1 | grep -vE 'npm notice'"
     end
   end
 end

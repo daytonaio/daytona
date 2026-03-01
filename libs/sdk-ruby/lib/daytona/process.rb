@@ -54,17 +54,13 @@ module Daytona
     #
     #   # Command with timeout
     #   result = sandbox.process.exec("sleep 10", timeout: 5)
-    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-      command = "echo '#{Base64.encode64(command)}' | base64 -d | sh"
-
+    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
       if env && !env.empty?
         safe_env_exports = env.map do |key, value|
-          "export #{key}=$(echo '#{Base64.encode64(value)}' | base64 -d)"
-        end.join(';')
+          "export #{key}=\"$(echo '#{Base64.strict_encode64(value)}' | base64 -d)\""
+        end.join('; ')
         command = "#{safe_env_exports}; #{command}"
       end
-
-      command = "sh -c \"#{command}\""
 
       response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
       # Post-process the output to extract ExecutionArtifacts

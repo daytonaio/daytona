@@ -10,14 +10,13 @@ module Daytona
     # @param params [Daytona::CodeRunParams, nil] Optional parameters for code execution
     # @return [String] The command to run the TypeScript code
     def get_run_command(code, params = nil)
-      encoded_code = Base64.encode64(code)
+      encoded_code = Base64.strict_encode64(code)
 
       argv = params&.argv&.join(' ') || ''
 
-      # Execute TypeScript code using ts-node with ESM support
-      " sh -c 'echo #{encoded_code} | base64 --decode | npx ts-node -O " \
-        "\"{\\\"module\\\":\\\"CommonJS\\\"}\" -e \"$(cat)\" x #{argv} 2>&1 | grep -vE " \
-        "\"npm notice\"' "
+      # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+      # Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
+      "echo '#{encoded_code}' | base64 --decode | npx ts-node -O '{\"module\":\"CommonJS\"}' /dev/stdin #{argv} 2>&1 | grep -vE 'npm notice'"
     end
   end
 end
