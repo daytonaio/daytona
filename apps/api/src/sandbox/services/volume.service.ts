@@ -131,7 +131,7 @@ export class VolumeService {
     }
   }
 
-  async delete(volumeId: string): Promise<void> {
+  async delete(volumeId: string, force = false): Promise<void> {
     const volume = await this.volumeRepository.findOne({
       where: {
         id: volumeId,
@@ -142,7 +142,18 @@ export class VolumeService {
       throw new NotFoundException(`Volume with ID ${volumeId} not found`)
     }
 
-    if (volume.state !== VolumeState.READY) {
+    // Allow deletion of READY volumes, or ERROR volumes when force=true
+    const allowedStates = [VolumeState.READY]
+    if (force) {
+      allowedStates.push(VolumeState.ERROR)
+    }
+
+    if (!allowedStates.includes(volume.state)) {
+      if (volume.state === VolumeState.ERROR && !force) {
+        throw new BadRequestError(
+          `Volume is in '${VolumeState.ERROR}' state. Use force=true to retry deletion.`,
+        )
+      }
       throw new BadRequestError(`Volume must be in '${VolumeState.READY}' state in order to be deleted`)
     }
 
@@ -169,8 +180,9 @@ export class VolumeService {
 
     // Update state to mark as deleting
     volume.state = VolumeState.PENDING_DELETE
+    volume.errorReason = null
     await this.volumeRepository.save(volume)
-    this.logger.debug(`Marked volume ${volumeId} for deletion`)
+    this.logger.debug(`Marked volume ${volumeId} for deletion${force ? ' (force)' : ''}`)
   }
 
   async findOne(volumeId: string): Promise<Volume> {
