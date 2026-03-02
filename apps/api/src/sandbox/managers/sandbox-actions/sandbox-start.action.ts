@@ -779,9 +779,9 @@ export class SandboxStartAction extends SandboxAction {
           //  last snapshot is the current snapshot, so we don't need to check it
           //  just in case, we'll use the value from the backupSnapshot property
           validBackup = sandbox.backupSnapshot
-          existingBackups.pop()
+          existingBackups.shift()
         } else {
-          validBackup = existingBackups.pop()
+          validBackup = existingBackups.shift()
         }
 
         await runnerAdapter.inspectSnapshotInRegistry(validBackup, registry)
