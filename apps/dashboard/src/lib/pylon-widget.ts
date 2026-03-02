@@ -19,7 +19,7 @@ export const addPylonWidget = (appId: string) => {
     // @ts-expect-error ignore
     n.q.push(e)
   }
-  // @ts-expect-error ignore
+
   e.Pylon = n
   var r = function () {
     var e = t.createElement('script')
