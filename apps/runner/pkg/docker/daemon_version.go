@@ -26,7 +26,7 @@ func (d *DockerClient) GetDaemonVersion(ctx context.Context, sandboxId string) (
 		return "", err
 	}
 
-	containerIP := common.GetContainerIpAddress(ctx, &c)
+	containerIP := common.GetContainerIpAddress(ctx, c)
 	if containerIP == "" {
 		return "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}

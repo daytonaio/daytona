@@ -139,11 +139,11 @@ func run() int {
 		return 2
 	}
 
-	statesCache := cache.GetStatesCache(ctx, cfg.CacheRetentionDays)
+	backupInfoCache := cache.NewBackupInfoCache(ctx, cfg.BackupInfoCacheRetention)
 
 	dockerClient, err := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:                    cli,
-		StatesCache:                  statesCache,
+		BackupInfoCache:              backupInfoCache,
 		Logger:                       logger,
 		AWSRegion:                    cfg.AWSRegion,
 		AWSEndpointUrl:               cfg.AWSEndpointUrl,
@@ -182,7 +182,7 @@ func run() int {
 	}()
 	defer monitor.Stop()
 
-	sandboxService := services.NewSandboxService(logger, statesCache, dockerClient)
+	sandboxService := services.NewSandboxService(logger, backupInfoCache, dockerClient)
 
 	// Initialize sandbox state synchronization service
 	sandboxSyncService := services.NewSandboxSyncService(services.SandboxSyncServiceConfig{
@@ -218,7 +218,7 @@ func run() int {
 	metricsCollector.Start(ctx)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
-		StatesCache:        statesCache,
+		BackupInfoCache:    backupInfoCache,
 		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
 		Docker:             dockerClient,
 		SandboxService:     sandboxService,

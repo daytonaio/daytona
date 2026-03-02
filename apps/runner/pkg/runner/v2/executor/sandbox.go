@@ -23,8 +23,6 @@ func (e *Executor) createSandbox(ctx context.Context, job *apiclient.Job) (any, 
 
 	_, daemonVersion, err := e.docker.Create(ctx, createSandboxDto)
 	if err != nil {
-		// TODO: is this needed?
-		// runner.StatesCache.SetSandboxState(ctx, createSandboxDto.Id, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("create", string(common.PrometheusOperationStatusFailure)).Inc()
 		return nil, common.FormatRecoverableError(err)
 	}
@@ -65,8 +63,6 @@ func (e *Executor) stopSandbox(ctx context.Context, job *apiclient.Job) (any, er
 func (e *Executor) destroySandbox(ctx context.Context, job *apiclient.Job) (any, error) {
 	err := e.docker.Destroy(ctx, job.ResourceId)
 	if err != nil {
-		// TODO: is this needed?
-		// runner.StatesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateError)
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
 		return nil, common.FormatRecoverableError(err)
 	}

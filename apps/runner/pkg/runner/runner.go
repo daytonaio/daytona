@@ -15,7 +15,7 @@ import (
 )
 
 type RunnerInstanceConfig struct {
-	StatesCache        *cache.StatesCache
+	BackupInfoCache    *cache.BackupInfoCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
 	MetricsCollector   *metrics.Collector
@@ -25,7 +25,7 @@ type RunnerInstanceConfig struct {
 }
 
 type Runner struct {
-	StatesCache        *cache.StatesCache
+	BackupInfoCache    *cache.BackupInfoCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
 	MetricsCollector   *metrics.Collector
@@ -47,7 +47,7 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 
 		runner = &Runner{
-			StatesCache:        config.StatesCache,
+			BackupInfoCache:    config.BackupInfoCache,
 			SnapshotErrorCache: config.SnapshotErrorCache,
 			Docker:             config.Docker,
 			SandboxService:     config.SandboxService,

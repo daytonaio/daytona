@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
-	"github.com/daytonaio/runner/pkg/models/enums"
 
 	"github.com/docker/docker/api/types/container"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
@@ -43,15 +42,6 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 		return nil // Nothing to resize
 	}
 
-	// Get the current state to restore after resize
-	originalState, err := d.DeduceSandboxState(ctx, sandboxId)
-	if err != nil {
-		// Default to started if we can't deduce state
-		originalState = enums.SandboxStateStarted
-	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateResizing)
-
 	// Build resources with only the fields that need to change (0 = don't change)
 	resources := container.Resources{}
 	if sandboxDto.Cpu > 0 {
@@ -63,15 +53,12 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 		resources.MemorySwap = resources.Memory // Disable swap
 	}
 
-	_, err = d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
+	_, err := d.apiClient.ContainerUpdate(ctx, sandboxId, container.UpdateConfig{
 		Resources: resources,
 	})
 	if err != nil {
-		d.statesCache.SetSandboxState(ctx, sandboxId, originalState)
 		return err
 	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, originalState)
 
 	return nil
 }
@@ -167,8 +154,6 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 		_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
 		return fmt.Errorf("failed to create new container: %w", err)
 	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxId, enums.SandboxStateStopped)
 
 	// Copy data directly between overlay2 layers using rsync
 	if overlayDiffPath != "" {
