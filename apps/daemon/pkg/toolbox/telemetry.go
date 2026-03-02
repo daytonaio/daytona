@@ -77,12 +77,12 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 			case <-s.ctx.Done():
 				return
 			case line := <-stdoutChan:
-				s.logger.InfoContext(ctx, string(line), "daytona-entrypoint", true)
+				s.logger.InfoContext(telemetryContext, string(line), "daytona-entrypoint", true)
 			case line := <-stderrChan:
-				s.logger.ErrorContext(ctx, string(line), "daytona-entrypoint", true)
+				s.logger.ErrorContext(telemetryContext, string(line), "daytona-entrypoint", true)
 			case err := <-errChan:
 				if err != nil {
-					s.logger.ErrorContext(ctx, "Error reading entrypoint log file", "error", err, "daytona-entrypoint", true)
+					s.logger.ErrorContext(telemetryContext, "Error reading entrypoint log file", "error", err, "daytona-entrypoint", true)
 				}
 				return
 			}
