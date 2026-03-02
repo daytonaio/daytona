@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/log"
 )
 
 func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
@@ -52,8 +53,8 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput,
 		logFilePath, // %q  -> log
 		logDir,      // %q  -> dir
 		command.InputFilePath(session.Dir(s.configDir)), // %q  -> input
-		toOctalEscapes(STDOUT_PREFIX),                   // %s  -> stdout prefix
-		toOctalEscapes(STDERR_PREFIX),                   // %s  -> stderr prefix
+		toOctalEscapes(log.STDOUT_PREFIX),               // %s  -> stdout prefix
+		toOctalEscapes(log.STDERR_PREFIX),               // %s  -> stderr prefix
 		cmd,                                             // %s  -> verbatim script body
 		exitCodeFilePath,                                // %q
 	)
@@ -110,7 +111,7 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput,
 
 			if isCombinedOutput {
 				// remove prefixes from log bytes
-				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
+				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
 				logContent = string(logBytes)
 			}
 

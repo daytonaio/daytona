@@ -4,10 +4,12 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
+
+	"github.com/daytonaio/common-go/pkg/log"
 )
 
 func ReadEntrypointLogs(entrypointLogFilePath string) error {
@@ -21,10 +23,30 @@ func ReadEntrypointLogs(entrypointLogFilePath string) error {
 	}
 	defer logFile.Close()
 
-	_, err = io.Copy(os.Stdout, logFile)
-	if err != nil {
-		return fmt.Errorf("failed to read entrypoint log file: %w", err)
+	errChan := make(chan error, 1)
+	stdoutChan := make(chan []byte)
+	stderrChan := make(chan []byte)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	go log.ReadMultiplexedLog(ctx, logFile, true, stdoutChan, stderrChan, errChan)
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case line := <-stdoutChan:
+			_, err := os.Stdout.Write(line)
+			if err != nil {
+				return fmt.Errorf("failed to write entrypoint log line to stdout: %w", err)
+			}
+		case line := <-stderrChan:
+			_, err := os.Stderr.Write(line)
+			if err != nil {
+				return fmt.Errorf("failed to write entrypoint log line to stderr: %w", err)
+			}
+		case err := <-errChan:
+			if err != nil {
+				return err
+			}
+		}
 	}
-
-	return nil
 }
