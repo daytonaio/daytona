@@ -186,7 +186,7 @@ After building, create a test project and add a plugin file to load the built pl
 mkdir -p ~/myproject && cd ~/myproject
 mkdir -p .opencode/plugins
 cat > .opencode/plugins/daytona-local.js << 'EOF'
-module.exports = require('[ABSOLUTE_PATH_TO_DAYTONA]/dist/libs/opencode-plugin')
+module.exports = require('[ABSOLUTE_PATH_TO_DAYTONA]/dist/libs/opencode-plugin/.opencode/plugin')
 EOF
 ```
 
