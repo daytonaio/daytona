@@ -11,14 +11,12 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/timer"
 	"github.com/daytonaio/runner/pkg/common"
-	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
 )
 
 func (d *DockerClient) Start(ctx context.Context, containerId string, authToken *string, metadata map[string]string) (*container.InspectResponse, string, error) {
 	defer timer.Timer()()
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
 	// Cancel a backup if it's already in progress
 	backup_context, ok := backup_context_map.Get(containerId)
@@ -32,7 +30,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	}
 
 	if c.State.Running {
-		containerIP := common.GetContainerIpAddress(ctx, &c)
+		containerIP := common.GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
 			return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
@@ -42,8 +40,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 			return nil, "", err
 		}
 
-		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-		return &c, daemonVersion, nil
+		return c, daemonVersion, nil
 	}
 
 	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
@@ -79,8 +76,6 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 		return nil, "", err
 	}
 
-	d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-
 	if metadata["limitNetworkEgress"] == "true" {
 		go func() {
 			containerShortId := c.ID[:12]
@@ -115,7 +110,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			}
 
 			if c.State.Running {
-				return &c, nil
+				return c, nil
 			}
 		}
 	}

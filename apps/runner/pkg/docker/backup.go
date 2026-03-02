@@ -65,43 +65,43 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 	backup_context_map.Set(containerId, backupContext{ctx, cancel})
 
-	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+	d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
 
 	err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
 			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			d.logger.ErrorContext(ctx, "Backup timed out during commit", "containerId", containerId)
 			return err
 		}
 		d.logger.ErrorContext(ctx, "Error committing container", "containerId", containerId, "error", err)
-		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 		return err
 	}
 
 	err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
 			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
 		if errors.Is(err, context.DeadlineExceeded) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 			d.logger.ErrorContext(ctx, "Backup timed out during push", "containerId", containerId)
 			return err
 		}
 		d.logger.ErrorContext(ctx, "Error pushing image", "image", backupDto.Snapshot, "error", err)
-		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
 		return err
 	}
 
-	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
+	d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
 
 	d.logger.InfoContext(ctx, "Backup created successfully", "snapshot", backupDto.Snapshot, "containerId", containerId)
 

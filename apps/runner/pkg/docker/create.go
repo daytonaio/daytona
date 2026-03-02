@@ -11,7 +11,6 @@ import (
 
 	"github.com/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/timer"
-	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
@@ -32,7 +31,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}()
 
-	state, err := d.DeduceSandboxState(ctx, sandboxDto.Id)
+	state, err := d.GetSandboxState(ctx, sandboxDto.Id)
 	if err != nil && state == enums.SandboxStateError {
 		return "", "", err
 	}
@@ -55,15 +54,10 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, daemonVersion, nil
 	}
 
-	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
-
-	ctx = context.WithValue(ctx, constants.ID_KEY, sandboxDto.Id)
 	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
 	if err != nil {
 		return "", "", err
 	}
-
-	d.statesCache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	err = d.validateImageArchitecture(image)
 	if err != nil {

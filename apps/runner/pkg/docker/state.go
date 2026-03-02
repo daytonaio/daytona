@@ -8,22 +8,23 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/containerd/errdefs"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
+
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 )
 
-func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
+func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
 	if sandboxId == "" {
 		return enums.SandboxStateUnknown, nil
 	}
 
 	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
-		if errdefs.IsNotFound(err) {
+		if common_errors.IsNotFoundError(err) {
 			return enums.SandboxStateDestroyed, nil
 		}
-		return enums.SandboxStateError, fmt.Errorf("failed to inspect sandbox: %w", err)
+		return enums.SandboxStateError, err
 	}
 
 	switch container.State.Status {
