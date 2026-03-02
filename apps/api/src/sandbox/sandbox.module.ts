@@ -61,6 +61,8 @@ import { RegionSandboxAccessGuard } from './guards/region-sandbox-access.guard'
 import { ProxyGuard } from './guards/proxy.guard'
 import { SshGatewayGuard } from './guards/ssh-gateway.guard'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { SandboxLastActivity } from './entities/sandbox-last-activity.entity'
+import { SandboxActivityService } from './services/sandbox-activity.service'
 
 @Module({
   imports: [
@@ -81,6 +83,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
       SshAccess,
       Region,
       Job,
+      SandboxLastActivity,
     ]),
   ],
   controllers: [
@@ -117,6 +120,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
     SandboxArchiveAction,
     JobService,
     JobStateHandlerService,
+    SandboxActivityService,
     SandboxAccessGuard,
     RunnerAccessGuard,
     RegionRunnerAccessGuard,
@@ -142,6 +146,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
     VolumeManager,
     SandboxRepository,
     RunnerAdapterFactory,
+    SandboxActivityService,
   ],
 })
 export class SandboxModule {}

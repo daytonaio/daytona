@@ -5,7 +5,7 @@
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
+import { In, IsNull, Not } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -48,6 +48,9 @@ import { TypedConfigService } from '../../config/typed-config.service'
 import { BackupManager } from './backup.manager'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
+import { InjectDataSource } from '@nestjs/typeorm'
+import { DataSource } from 'typeorm'
+import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -69,6 +72,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly backupManager: BackupManager,
     @InjectRedis() private readonly redis: Redis,
+    @InjectDataSource() private readonly dataSource: DataSource,
   ) {}
 
   async onApplicationShutdown() {
@@ -97,21 +101,23 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       // Process all runners in parallel
       await Promise.all(
         readyRunners.map(async (runner) => {
-          const sandboxes = await this.sandboxRepository.find({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              state: SandboxState.STARTED,
+          const sandboxes = await this.sandboxRepository
+            .createQueryBuilder('sandbox')
+            .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+            .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
+            .andWhere('sandbox."organizationId" != :warmPoolOrg', {
+              warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+            })
+            .andWhere('sandbox.state = :state', { state: SandboxState.STARTED })
+            .andWhere('sandbox."desiredState" = :desiredState', {
               desiredState: SandboxDesiredState.STARTED,
-              pending: Not(true),
-              autoStopInterval: Not(0),
-              lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoStopInterval"`),
-            },
-            order: {
-              lastBackupAt: 'ASC',
-            },
-            take: 100,
-          })
+            })
+            .andWhere('sandbox.pending != true')
+            .andWhere('sandbox."autoStopInterval" != 0')
+            .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoStopInterval"')
+            .orderBy('sandbox."lastBackupAt"', 'ASC')
+            .take(100)
+            .getMany()
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
@@ -164,19 +170,21 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
 
     try {
-      const sandboxes = await this.sandboxRepository.find({
-        where: {
-          organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-          state: SandboxState.STOPPED,
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+        .where('sandbox."organizationId" != :warmPoolOrg', {
+          warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+        })
+        .andWhere('sandbox.state = :state', { state: SandboxState.STOPPED })
+        .andWhere('sandbox."desiredState" = :desiredState', {
           desiredState: SandboxDesiredState.STOPPED,
-          pending: Not(true),
-          lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
-        },
-        order: {
-          lastBackupAt: 'ASC',
-        },
-        take: 100,
-      })
+        })
+        .andWhere('sandbox.pending != true')
+        .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoArchiveInterval"')
+        .orderBy('sandbox."lastBackupAt"', 'ASC')
+        .take(100)
+        .getMany()
 
       await Promise.all(
         sandboxes.map(async (sandbox) => {
@@ -225,21 +233,23 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       // Process all runners in parallel
       await Promise.all(
         readyRunners.map(async (runner) => {
-          const sandboxes = await this.sandboxRepository.find({
-            where: {
-              runnerId: runner.id,
-              organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
-              state: SandboxState.STOPPED,
+          const sandboxes = await this.sandboxRepository
+            .createQueryBuilder('sandbox')
+            .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+            .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
+            .andWhere('sandbox."organizationId" != :warmPoolOrg', {
+              warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+            })
+            .andWhere('sandbox.state = :state', { state: SandboxState.STOPPED })
+            .andWhere('sandbox."desiredState" = :desiredState', {
               desiredState: SandboxDesiredState.STOPPED,
-              pending: Not(true),
-              autoDeleteInterval: MoreThanOrEqual(0),
-              lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoDeleteInterval"`),
-            },
-            order: {
-              lastActivityAt: 'ASC',
-            },
-            take: 100,
-          })
+            })
+            .andWhere('sandbox.pending != true')
+            .andWhere('sandbox."autoDeleteInterval" >= 0')
+            .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoDeleteInterval"')
+            .orderBy('activity."lastActivityAt"', 'ASC')
+            .take(100)
+            .getMany()
 
           await Promise.all(
             sandboxes.map(async (sandbox) => {
