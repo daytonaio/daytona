@@ -23,16 +23,10 @@ func ReadEntrypointLogs(entrypointLogFilePath string) error {
 	}
 	defer logFile.Close()
 
-	entrypointLogFile, err := os.Open(entrypointLogFilePath)
-	if err != nil {
-		return err
-	}
-	defer entrypointLogFile.Close()
-
 	errChan := make(chan error, 1)
 	stdoutChan := make(chan []byte)
 	stderrChan := make(chan []byte)
-	go log.ReadMultiplexedLog(context.Background(), entrypointLogFile, true, stdoutChan, stderrChan, errChan)
+	go log.ReadMultiplexedLog(context.Background(), logFile, true, stdoutChan, stderrChan, errChan)
 	for {
 		select {
 		case line := <-stdoutChan:

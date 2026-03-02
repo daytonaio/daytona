@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"time"
 )
 
 // Stream prefixes for multiplexing stdout/stderr in logs
@@ -146,6 +147,7 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 						return
 					}
 					// If following, just continue waiting for more data.
+					time.Sleep(50 * time.Millisecond) // Avoid busy loop when following
 				}
 			}
 		}

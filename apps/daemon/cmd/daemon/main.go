@@ -117,7 +117,7 @@ func run() int {
 		var entrypointErrLogWriter io.Writer = os.Stderr
 
 		if c.EntrypointLogFilePath != "" {
-			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				logger.Error("Failed to open log file, fallback to STDOUT and STDERR",
 					"path", c.EntrypointLogFilePath,
@@ -178,6 +178,7 @@ func run() int {
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
 		RecordingService:                     recordingService,
+		EntrypointLogFilePath:                c.EntrypointLogFilePath,
 	})
 
 	// Start the toolbox server in a go routine

@@ -57,6 +57,10 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 	s.logger = newLogger
 
 	go func() {
+		if entrypointLogFilePath == "" {
+			return
+		}
+
 		entrypointLogFile, err := os.Open(entrypointLogFilePath)
 		if err != nil {
 			s.logger.ErrorContext(ctx, "Failed to open entrypoint log file", "error", err, "daytona-entrypoint", true)
