@@ -571,79 +571,55 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @WithInstrumentation()
   @LogExecution('sync-states')
   async syncStates(): Promise<void> {
-    const globalLockKey = 'sync-states'
-    const lockTtl = 10 * 60 // seconds (10 min)
-    if (!(await this.redisLockProvider.lock(globalLockKey, lockTtl))) {
-      return
-    }
+    const readyRunners = await this.runnerService.findAllReady()
 
-    try {
-      const queryBuilder = this.sandboxRepository
-        .createQueryBuilder('sandbox')
-        .select(['sandbox.id'])
-        .where('sandbox.state NOT IN (:...excludedStates)', {
-          excludedStates: [
-            SandboxState.DESTROYED,
-            SandboxState.ERROR,
-            SandboxState.BUILD_FAILED,
-            SandboxState.RESIZING,
-          ],
-        })
-        .andWhere('sandbox."desiredState"::text != sandbox.state::text')
-        .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
-        .orderBy('sandbox."lastActivityAt"', 'DESC')
+    const runnerIds: (string | null)[] = [null, ...readyRunners.map((r) => r.id)]
+    const lockTtl = 5 * 60 // seconds
 
-      const stream = await queryBuilder.stream()
-      let processedCount = 0
-      const maxProcessPerRun = 1000
-      const pendingProcesses: Promise<void>[] = []
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          stream.on('data', async (row: any) => {
-            if (processedCount >= maxProcessPerRun) {
-              resolve()
-              return
-            }
-
-            const lockKey = getStateChangeLockKey(row.sandbox_id)
-            if (await this.redisLockProvider.isLocked(lockKey)) {
-              // Sandbox is already being processed, skip it
-              return
-            }
-
-            // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id)
-            pendingProcesses.push(processPromise)
-            processedCount++
-
-            // Limit concurrent processing to avoid overwhelming the system
-            if (pendingProcesses.length >= 10) {
-              stream.pause()
-              Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
-                .then(() => stream.resume())
-                .catch(reject)
-            }
-          })
-
-          stream.on('end', () => {
-            Promise.all(pendingProcesses)
-              .then(() => {
-                resolve()
-              })
-              .catch(reject)
-          })
-
-          stream.on('error', reject)
-        })
-      } finally {
-        if (!stream.destroyed) {
-          stream.destroy()
+    await Promise.all(
+      runnerIds.map(async (runnerId) => {
+        const runnerLockKey = `sync-states:${runnerId ?? 'unassigned'}`
+        if (!(await this.redisLockProvider.lock(runnerLockKey, lockTtl))) {
+          return
         }
-      }
-    } finally {
-      await this.redisLockProvider.unlock(globalLockKey)
-    }
+
+        try {
+          const maxSandboxesPerRunner = runnerId === null ? 250 : 50
+
+          const sandboxes = await this.sandboxRepository.find({
+            where: {
+              runnerId: runnerId === null ? IsNull() : runnerId,
+              pending: true,
+            },
+            select: ['id'],
+            take: maxSandboxesPerRunner,
+          })
+
+          const pendingProcesses: Promise<void>[] = []
+          const concurrencyLimit = 10
+
+          for (const sandbox of sandboxes) {
+            const lockKey = getStateChangeLockKey(sandbox.id)
+            if (await this.redisLockProvider.isLocked(lockKey)) {
+              continue
+            }
+
+            const processPromise = this.syncInstanceState(sandbox.id)
+            pendingProcesses.push(processPromise)
+
+            if (pendingProcesses.length >= concurrencyLimit) {
+              await Promise.allSettled(pendingProcesses.splice(0, pendingProcesses.length))
+            }
+          }
+
+          if (pendingProcesses.length > 0) {
+            await Promise.allSettled(pendingProcesses)
+          }
+        } finally {
+          await this.redisLockProvider.unlock(runnerLockKey)
+        }
+      }),
+    )
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
