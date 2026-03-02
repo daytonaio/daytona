@@ -775,7 +775,7 @@ export class SandboxStartAction extends SandboxAction {
 
     while (existingBackups.length > 0) {
       try {
-        if (!validBackup) {
+        if (!validBackup && sandbox.backupSnapshot) {
           //  last snapshot is the current snapshot, so we don't need to check it
           //  just in case, we'll use the value from the backupSnapshot property
           validBackup = sandbox.backupSnapshot
@@ -784,14 +784,15 @@ export class SandboxStartAction extends SandboxAction {
           validBackup = existingBackups.shift()
         }
 
+        if (!validBackup) {
+          continue
+        }
+
         await runnerAdapter.inspectSnapshotInRegistry(validBackup, registry)
         exists = true
         break
       } catch (error) {
-        this.logger.error(
-          `Failed to check if backup snapshot ${sandbox.backupSnapshot} exists in registry ${registry.id}:`,
-          error,
-        )
+        this.logger.error(`Failed to check if backup snapshot ${validBackup} exists in registry ${registry.id}:`, error)
       }
     }
 
