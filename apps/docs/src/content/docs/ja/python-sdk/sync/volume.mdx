@@ -3,45 +3,43 @@ title: "ボリューム"
 hideTitleOnPage: true
 ---
 
-## ボリューム
+## ボリューム \{#volume\}
 
 ```python
 class Volume(VolumeDto)
 ```
 
-Daytona のボリュームを表し、サンドボックス向けの共有ストレージボリュームです。
+サンドボックス向けの共有ストレージである Daytona のボリュームを表します。
 
 **属性**:
 
-- `id` _StrictStr_ - ボリュームの一意の識別子。
-- `name` _StrictStr_ - ボリューム名。
-- `organization_id` _StrictStr_ - ボリュームの組織ID。
-- `state` _StrictStr_ - ボリュームの状態。
-- `created_at` _StrictStr_ - ボリュームの作成日時。
-- `updated_at` _StrictStr_ - ボリュームの最終更新日時。
-- `last_used_at` _StrictStr_ - ボリュームの最終使用日時。
+* `id` *str* - ボリュームの一意の識別子。
+* `name` *str* - ボリューム名。
+* `organization_id` *str* - ボリュームの組織 ID。
+* `state` *str* - ボリュームの状態。
+* `created_at` *str* - ボリュームの作成日時。
+* `updated_at` *str* - ボリュームの最終更新日時。
+* `last_used_at` *str* - ボリュームの最終使用日時。
 
-
-## VolumeService
+## VolumeService \{#volumeservice\}
 
 ```python
 class VolumeService()
 ```
 
-Daytonaのボリュームを管理するサービス。ボリュームの一覧、取得、作成、削除に利用できます。
+Daytona のボリュームを管理するサービス。ボリュームの一覧表示、取得、作成、削除に使用できます。
 
-#### VolumeService.list
+#### VolumeService.list（ボリュームの一覧） \{#volumeservicelist\}
 
 ```python
-def list() -> List[Volume]
+def list() -> list[Volume]
 ```
 
 すべてのボリュームを一覧表示します。
 
 **戻り値**:
 
-- `List[Volume]` - すべてのボリュームのリスト。
-  
+* `list[Volume]` - すべてのボリュームのリスト。
 
 **例**:
 
@@ -52,24 +50,23 @@ for volume in volumes:
     print(f"{volume.name} ({volume.id})")
 ```
 
-#### VolumeService.get
+#### VolumeService.get \{#volumeserviceget\}
 
 ```python
+@with_instrumentation()
 def get(name: str, create: bool = False) -> Volume
 ```
 
-ボリューム名を指定して取得します。
+名前を指定してボリュームを取得します。
 
 **引数**:
 
-- `name` _str_ - 取得するボリュームの名前。
-- `create` _bool_ - True の場合、存在しないときは新規に作成します。
-  
+* `name` *str* - 取得するボリュームの名前。
+* `create` *bool* - True の場合、存在しない場合は新しいボリュームを作成します。
 
 **戻り値**:
 
-- `Volume` - 取得したボリュームオブジェクト。
-  
+* `Volume` - Volume オブジェクト。
 
 **例**:
 
@@ -79,9 +76,10 @@ volume = daytona.volume.get("test-volume-name", create=True)
 print(f"{volume.name} ({volume.id})")
 ```
 
-#### VolumeService.create
+#### VolumeService.create \{#volumeservicecreate\}
 
 ```python
+@with_instrumentation()
 def create(name: str) -> Volume
 ```
 
@@ -89,25 +87,24 @@ def create(name: str) -> Volume
 
 **引数**:
 
-- `name` _str_ - 作成するボリュームの名前。
-  
+* `name` *str* - 作成するボリュームの名前。
 
 **戻り値**:
 
-- `Volume` - 作成されたボリュームオブジェクト。
-  
+* `Volume` - Volume オブジェクト。
 
 **例**:
 
 ```python
 daytona = Daytona()
 volume = daytona.volume.create("test-volume")
-print(f"{volume.name} ({volume.id}); state: {volume.state}")
+print(f"{volume.name} ({volume.id}); 状態: {volume.state}")
 ```
 
-#### VolumeService.delete
+#### VolumeService.delete（ボリュームを削除） \{#volumeservicedelete\}
 
 ```python
+@with_instrumentation()
 def delete(volume: Volume) -> None
 ```
 
@@ -115,8 +112,7 @@ def delete(volume: Volume) -> None
 
 **引数**:
 
-- `volume` _Volume_ - 削除するボリューム。
-  
+* `volume` *ボリューム* - 削除するボリューム。
 
 **例**:
 
@@ -124,6 +120,21 @@ def delete(volume: Volume) -> None
 daytona = Daytona()
 volume = daytona.volume.get("test-volume")
 daytona.volume.delete(volume)
-print("Volume deleted")
+print("ボリュームが削除されました")
 ```
 
+## VolumeMount \{#volumemount\}
+
+```python
+class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount)
+```
+
+サンドボックス用のボリュームマウント設定を表します。
+
+**属性**:
+
+* `volume_id` *str* - マウントするボリュームのID。
+* `mount_path` *str* - サンドボックス内でボリュームがマウントされるパス。
+* `subpath` *str | None* - ボリューム内でマウントするS3のサブパス/プレフィックス（任意）。
+  指定した場合、このプレフィックスのみがアクセス可能になります。省略した場合は、
+  ボリューム全体がマウントされます。
