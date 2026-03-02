@@ -20,11 +20,9 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
-import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
-import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
@@ -42,24 +40,23 @@ import {
   HardDrive,
   Joystick,
   KeyRound,
+  LifeBuoyIcon,
   ListChecks,
   LockKeyhole,
   LogOut,
   Mail,
   MapPinned,
-  Moon,
   PackageOpen,
   SearchIcon,
   Server,
   Settings,
   Slack,
   SquareUserRound,
-  Sun,
   TextSearch,
   Users,
 } from 'lucide-react'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
-import React, { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
@@ -103,8 +100,6 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const posthog = usePostHog()
-  const config = useConfig()
-  const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
   const sidebar = useSidebar()
@@ -327,6 +322,22 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
+  const [pylonOpen, setPylonOpen] = useState(false)
+  const [pylonUnreadCount, setPylonUnreadCount] = useState(0)
+
+  useEffect(() => {
+    if (!window.Pylon) return
+    window.Pylon('onShow', () => setPylonOpen(true))
+    window.Pylon('onHide', () => setPylonOpen(false))
+    window.Pylon('onChangeUnreadMessagesCount', (count) => setPylonUnreadCount(count))
+    return () => {
+      if (!window.Pylon) return
+      window.Pylon('onShow', null)
+      window.Pylon('onHide', null)
+      window.Pylon('onChangeUnreadMessagesCount', null)
+    }
+  }, [])
+
   const commandPaletteActions = useCommandPaletteActions()
 
   useNavCommands(commandItems)
@@ -403,15 +414,25 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarContent>
       <SidebarFooter className="pb-4">
         <SidebarMenu>
-          <SidebarMenuItem key="theme-toggle">
+          <SidebarMenuItem key="slack">
             <SidebarMenuButton
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-8 py-0"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              tooltip="Toggle theme"
+              tooltip="Support"
+              onClick={() => {
+                if (!window.Pylon) return
+                if (pylonOpen) {
+                  window.Pylon('hide')
+                } else {
+                  window.Pylon('show')
+                }
+              }}
             >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+              <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
+              Support
+              {pylonUnreadCount > 0 && (
+                <div className={cn('w-2 h-2 bg-green-500 rounded-full transition-all')}>
+                  <div className={cn('w-full h-full bg-green-500 rounded-full animate-ping')} />
+                </div>
+              )}
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem key="slack">
