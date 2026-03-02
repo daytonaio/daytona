@@ -23,6 +23,7 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
+import { usePylon } from '@/hooks/usePylon'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
@@ -56,10 +57,11 @@ import {
   Users,
 } from 'lucide-react'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
+import { usePylonCommands } from './usePylonCommands'
 import { Button } from './ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
@@ -322,23 +324,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
-  const [pylonOpen, setPylonOpen] = useState(false)
-  const [pylonUnreadCount, setPylonUnreadCount] = useState(0)
-
-  useEffect(() => {
-    if (!window.Pylon) return
-    window.Pylon('onShow', () => setPylonOpen(true))
-    window.Pylon('onHide', () => setPylonOpen(false))
-    window.Pylon('onChangeUnreadMessagesCount', (count) => setPylonUnreadCount(count))
-    return () => {
-      if (!window.Pylon) return
-      window.Pylon('onShow', null)
-      window.Pylon('onHide', null)
-      window.Pylon('onChangeUnreadMessagesCount', null)
-    }
-  }, [])
+  const { unreadCount: pylonUnreadCount, toggle: togglePylon } = usePylon()
 
   const commandPaletteActions = useCommandPaletteActions()
+
+  usePylonCommands(togglePylon)
 
   useNavCommands(commandItems)
 
@@ -418,12 +408,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
             <SidebarMenuButton
               tooltip="Support"
               onClick={() => {
-                if (!window.Pylon) return
-                if (pylonOpen) {
-                  window.Pylon('hide')
-                } else {
-                  window.Pylon('show')
-                }
+                togglePylon()
               }}
             >
               <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
