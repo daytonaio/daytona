@@ -90,6 +90,8 @@ type server struct {
 	recordingService                     *recording.RecordingService
 	entrypointLogFilePath                string
 	httpServer                           *http.Server
+	ctx                                  context.Context
+	cancel                               context.CancelFunc
 }
 
 type Telemetry struct {
@@ -99,6 +101,9 @@ type Telemetry struct {
 }
 
 func (s *server) Start() error {
+	s.ctx, s.cancel = context.WithCancel(context.Background())
+	defer s.cancel()
+
 	docs.SwaggerInfo.Description = "Daytona Toolbox API"
 	docs.SwaggerInfo.Title = "Daytona Toolbox API"
 	docs.SwaggerInfo.BasePath = "/"

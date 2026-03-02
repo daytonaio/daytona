@@ -148,6 +148,9 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 					}
 					// If following, just continue waiting for more data.
 					time.Sleep(50 * time.Millisecond) // Avoid busy loop when following
+				} else {
+					// Err already sent to channel above
+					return
 				}
 			}
 		}

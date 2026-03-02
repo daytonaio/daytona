@@ -71,9 +71,11 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 		errChan := make(chan error, 1)
 		stdoutChan := make(chan []byte)
 		stderrChan := make(chan []byte)
-		go log.ReadMultiplexedLog(context.Background(), entrypointLogFile, true, stdoutChan, stderrChan, errChan)
+		go log.ReadMultiplexedLog(s.ctx, entrypointLogFile, true, stdoutChan, stderrChan, errChan)
 		for {
 			select {
+			case <-s.ctx.Done():
+				return
 			case line := <-stdoutChan:
 				s.logger.InfoContext(ctx, string(line), "daytona-entrypoint", true)
 			case line := <-stderrChan:
