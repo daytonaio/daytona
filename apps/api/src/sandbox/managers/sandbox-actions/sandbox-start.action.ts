@@ -773,15 +773,14 @@ export class SandboxStartAction extends SandboxAction {
     let validBackup: string | null = null
     let exists = false
 
-    while (existingBackups.length > 0) {
+    for (const existingBackup of existingBackups) {
       try {
         if (!validBackup && sandbox.backupSnapshot) {
           //  last snapshot is the current snapshot, so we don't need to check it
           //  just in case, we'll use the value from the backupSnapshot property
           validBackup = sandbox.backupSnapshot
-          existingBackups.shift()
         } else {
-          validBackup = existingBackups.shift()
+          validBackup = existingBackup
         }
 
         if (!validBackup) {
