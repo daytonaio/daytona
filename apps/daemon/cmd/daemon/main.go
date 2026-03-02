@@ -113,8 +113,8 @@ func run() int {
 	var entrypointWg sync.WaitGroup
 	if len(args) > 0 {
 		// used for logging in case of errors starting/waiting for the command
-		entrypointLogWriter := os.Stdout
-		entrypointErrLogWriter := os.Stderr
+		var entrypointLogWriter io.Writer = os.Stdout
+		var entrypointErrLogWriter io.Writer = os.Stderr
 
 		if c.EntrypointLogFilePath != "" {
 			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -124,8 +124,10 @@ func run() int {
 					"error", err)
 			} else {
 				defer entrypointLogFile.Close()
-				entrypointLogWriter = entrypointLogFile
-				entrypointErrLogWriter = entrypointLogFile
+				stdoutWriter := log.NewPrefixWriter(log.STDOUT_PREFIX, entrypointLogFile)
+				stderrWriter := log.NewPrefixWriter(log.STDERR_PREFIX, entrypointLogFile)
+				entrypointLogWriter = stdoutWriter
+				entrypointErrLogWriter = stderrWriter
 			}
 		}
 

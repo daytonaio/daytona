@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/log"
 )
 
 // SendInput sends data to the session's stdin for a specific running command
@@ -62,7 +63,7 @@ func (s *SessionService) SendInput(sessionId, commandId string, data string) err
 		} else {
 			defer logFile.Close()
 			// Write with STDOUT prefix to maintain log format consistency
-			dataWithPrefix := append(STDOUT_PREFIX, []byte(data)...)
+			dataWithPrefix := append(log.STDOUT_PREFIX, []byte(data)...)
 			_, err = logFile.Write(dataWithPrefix)
 			if err != nil {
 				s.logger.Error("failed to echo input to log file", "error", err)

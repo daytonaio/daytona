@@ -6,12 +6,14 @@ package toolbox
 import (
 	"context"
 	"fmt"
+	"os"
 
+	"github.com/daytonaio/common-go/pkg/log"
 	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/daemon/internal"
 )
 
-func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
+func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFilePath string) error {
 	if s.otelEndpoint == nil {
 		s.logger.InfoContext(ctx, "Otel endpoint not provided, skipping telemetry initialization")
 		return nil
@@ -53,6 +55,33 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 		return fmt.Errorf("failed to initialize logger: %w", err)
 	}
 	s.logger = newLogger
+
+	go func() {
+		entrypointLogFile, err := os.Open(entrypointLogFilePath)
+		if err != nil {
+			s.logger.ErrorContext(ctx, "Failed to open entrypoint log file", "error", err, "daytona-entrypoint", true)
+			return
+		}
+		defer entrypointLogFile.Close()
+
+		errChan := make(chan error, 1)
+		stdoutChan := make(chan []byte)
+		stderrChan := make(chan []byte)
+		go log.ReadMultiplexedLog(context.Background(), entrypointLogFile, true, stdoutChan, stderrChan, errChan)
+		for {
+			select {
+			case line := <-stdoutChan:
+				s.logger.InfoContext(ctx, string(line), "daytona-entrypoint", true)
+			case line := <-stderrChan:
+				s.logger.ErrorContext(ctx, string(line), "daytona-entrypoint", true)
+			case err := <-errChan:
+				if err != nil {
+					s.logger.ErrorContext(ctx, "Error reading entrypoint log file", "error", err, "daytona-entrypoint", true)
+				}
+				return
+			}
+		}
+	}()
 
 	// Initialize OpenTelemetry metrics
 	mp, err := telemetry.InitMetrics(ctx, config, "daytona.sandbox")
