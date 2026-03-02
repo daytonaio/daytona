@@ -10,6 +10,7 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
@@ -22,6 +23,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { SandboxVolume } from '../dto/sandbox.dto'
 import { BuildInfo } from './build-info.entity'
 import { nanoid } from 'nanoid'
+import { SandboxLastActivity } from './sandbox-last-activity.entity'
 
 @Entity()
 @Unique(['organizationId', 'name'])
@@ -185,7 +187,8 @@ export class Sandbox {
   updatedAt: Date
 
   @Column({ nullable: true, type: 'timestamp with time zone' })
-  lastActivityAt?: Date
+  @OneToOne(() => SandboxLastActivity, (lastActivity) => lastActivity.sandbox)
+  lastActivityAt?: SandboxLastActivity
 
   //  this is the interval in minutes after which the sandbox will be stopped if lastActivityAt is not updated
   //  if set to 0, auto stop will be disabled

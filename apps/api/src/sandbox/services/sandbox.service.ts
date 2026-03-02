@@ -87,6 +87,7 @@ import {
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 import { Region } from '../../region/entities/region.entity'
+import { SandboxActivityService } from './sandbox-activity.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -120,6 +121,7 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    private readonly sandboxActivityService: SandboxActivityService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -335,6 +337,7 @@ export class SandboxService {
     sandbox.pending = true
 
     await this.sandboxRepository.insert(sandbox)
+    await this.sandboxActivityService.initializeActivity(sandbox.id, sandbox.createdAt ?? new Date())
     return sandbox
   }
 
@@ -514,6 +517,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      await this.sandboxActivityService.initializeActivity(insertedSandbox.id, insertedSandbox.createdAt ?? new Date())
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -737,6 +741,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      await this.sandboxActivityService.initializeActivity(insertedSandbox.id, insertedSandbox.createdAt ?? new Date())
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -1621,14 +1626,7 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    // Prevent spamming updates
-    const lockKey = `sandbox:update-last-activity:${sandboxId}`
-    const acquired = await this.redisLockProvider.lock(lockKey, 45)
-    if (!acquired) {
-      return
-    }
-
-    await this.sandboxRepository.update(sandboxId, { updateData: { lastActivityAt } }, true)
+    await this.sandboxActivityService.updateLastActivityAt(sandboxId, lastActivityAt)
   }
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {
