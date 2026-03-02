@@ -1790,7 +1790,7 @@ export class SandboxService {
     return await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-destroyed-sandboxes' })
   @LogExecution('cleanup-destroyed-sandboxes')
   @WithInstrumentation()
   async cleanupDestroyedSandboxes() {
@@ -1822,6 +1822,42 @@ export class SandboxService {
 
     if (destroyedSandboxs.affected > 0) {
       this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-build-failed-sandboxes' })
+  @LogExecution('cleanup-stale-build-failed-sandboxes')
+  @WithInstrumentation()
+  async cleanupStaleBuildFailedSandboxes() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const result = await this.sandboxRepository.delete({
+      state: SandboxState.BUILD_FAILED,
+      desiredState: SandboxDesiredState.STARTED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-error-sandboxes' })
+  @LogExecution('cleanup-stale-error-sandboxes')
+  @WithInstrumentation()
+  async cleanupStaleErrorSandboxes() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const result = await this.sandboxRepository.delete({
+      state: SandboxState.ERROR,
+      desiredState: SandboxDesiredState.DESTROYED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} stale error sandboxes`)
     }
   }
 
