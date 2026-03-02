@@ -8,11 +8,11 @@ import { Sandbox } from './sandbox.entity'
 
 @Entity('sandbox_last_activity')
 export class SandboxLastActivity {
-  @PrimaryColumn('uuid')
+  @PrimaryColumn()
   sandboxId: string
 
-  @Column({ type: 'timestamp with time zone' })
-  lastActivityAt: Date
+  @Column({ nullable: true, type: 'timestamp with time zone' })
+  lastActivityAt?: Date
 
   @OneToOne(() => Sandbox, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'sandboxId' })
