@@ -50,7 +50,6 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource } from 'typeorm'
-import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 
 @Injectable()
 export class SandboxManager implements TrackableJobExecutions, OnApplicationShutdown {
@@ -103,7 +102,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         readyRunners.map(async (runner) => {
           const sandboxes = await this.sandboxRepository
             .createQueryBuilder('sandbox')
-            .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+            .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
             .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
             .andWhere('sandbox."organizationId" != :warmPoolOrg', {
               warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
@@ -116,7 +115,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             .andWhere('sandbox."autoStopInterval" != 0')
             .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoStopInterval"')
             .orderBy('sandbox."lastBackupAt"', 'ASC')
-            .take(100)
+            .limit(100)
             .getMany()
 
           await Promise.all(
@@ -172,7 +171,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     try {
       const sandboxes = await this.sandboxRepository
         .createQueryBuilder('sandbox')
-        .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+        .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
         .where('sandbox."organizationId" != :warmPoolOrg', {
           warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
         })
@@ -183,7 +182,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         .andWhere('sandbox.pending != true')
         .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoArchiveInterval"')
         .orderBy('sandbox."lastBackupAt"', 'ASC')
-        .take(100)
+        .limit(100)
         .getMany()
 
       await Promise.all(
@@ -235,7 +234,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         readyRunners.map(async (runner) => {
           const sandboxes = await this.sandboxRepository
             .createQueryBuilder('sandbox')
-            .innerJoin(SandboxLastActivity, 'activity', 'activity."sandboxId" = sandbox.id')
+            .innerJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
             .where('sandbox."runnerId" = :runnerId', { runnerId: runner.id })
             .andWhere('sandbox."organizationId" != :warmPoolOrg', {
               warmPoolOrg: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
@@ -248,7 +247,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             .andWhere('sandbox."autoDeleteInterval" >= 0')
             .andWhere('activity."lastActivityAt" < NOW() - INTERVAL \'1 minute\' * sandbox."autoDeleteInterval"')
             .orderBy('activity."lastActivityAt"', 'ASC')
-            .take(100)
+            .limit(100)
             .getMany()
 
           await Promise.all(
@@ -591,6 +590,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       const queryBuilder = this.sandboxRepository
         .createQueryBuilder('sandbox')
         .select(['sandbox.id'])
+        .leftJoin('sandbox_last_activity', 'activity', 'activity."sandboxId" = sandbox.id')
         .where('sandbox.state NOT IN (:...excludedStates)', {
           excludedStates: [
             SandboxState.DESTROYED,
@@ -601,7 +601,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         })
         .andWhere('sandbox."desiredState"::text != sandbox.state::text')
         .andWhere('sandbox."desiredState"::text != :archived', { archived: SandboxDesiredState.ARCHIVED })
-        .orderBy('sandbox."lastActivityAt"', 'DESC')
+        .orderBy('activity."lastActivityAt"', 'DESC', 'NULLS LAST')
 
       const stream = await queryBuilder.stream()
       let processedCount = 0

@@ -13,6 +13,10 @@ import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
+import { OnEvent } from '@nestjs/event-emitter'
+import { SandboxEvents } from '../constants/sandbox-events.constants'
+import { SandboxCreatedEvent } from '../events/sandbox-create.event'
+import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 
 const REDIS_ACTIVITY_KEY = 'sandbox:activity'
 const ACTIVITY_THROTTLE_TTL = 45
@@ -29,14 +33,20 @@ export class SandboxActivityService {
   ) {}
 
   /**
-   * Buffer a last-activity update in Redis. Throttled to at most once per 45s per sandbox.
-   * The buffered value is flushed to the `sandbox_last_activity` PG table periodically.
+   * Update last-activity for a sandbox.
+   * By default, buffers in Redis (throttled to once per 45s) and relies on the periodic flush to PG.
+   * When `immediate` is true, writes directly to PG as well, bypassing the throttle.
+   * Use immediate for state transitions where stale PG data could cause premature autostop/autoarchive.
    */
-  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    const lockKey = `sandbox:update-last-activity:${sandboxId}`
-    const acquired = await this.redisLockProvider.lock(lockKey, ACTIVITY_THROTTLE_TTL)
-    if (!acquired) {
-      return
+  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date, immediate = false): Promise<void> {
+    if (immediate) {
+      await this.dataSource.getRepository(SandboxLastActivity).upsert({ sandboxId, lastActivityAt }, ['sandboxId'])
+    } else {
+      const lockKey = `sandbox:update-last-activity:${sandboxId}`
+      const acquired = await this.redisLockProvider.lock(lockKey, ACTIVITY_THROTTLE_TTL)
+      if (!acquired) {
+        return
+      }
     }
 
     await this.redis.zadd(REDIS_ACTIVITY_KEY, lastActivityAt.getTime(), sandboxId)
@@ -152,5 +162,19 @@ export class SandboxActivityService {
     if (updates.length === 0) return
 
     await this.dataSource.getRepository(SandboxLastActivity).upsert(updates, ['sandboxId'])
+  }
+
+  @OnEvent(SandboxEvents.CREATED)
+  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent): Promise<void> {
+    this.initializeActivity(event.sandbox.id, event.sandbox.createdAt).catch((error) => {
+      this.logger.error(`Failed to initialize activity for sandbox ${event.sandbox.id}: ${error}`)
+    })
+  }
+
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  private async handleSandboxStateUpdatedEvent(event: SandboxStateUpdatedEvent): Promise<void> {
+    this.updateLastActivityAt(event.sandbox.id, new Date(), true).catch((error) => {
+      this.logger.error(`Failed to update activity for sandbox ${event.sandbox.id}: ${error}`)
+    })
   }
 }

@@ -517,7 +517,6 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
-      await this.sandboxActivityService.initializeActivity(insertedSandbox.id, insertedSandbox.createdAt ?? new Date())
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -550,7 +549,6 @@ export class SandboxService {
       labels: createSandboxDto.labels || {},
       organizationId: organization.id,
       createdAt: now,
-      lastActivityAt: now,
     }
 
     if (createSandboxDto.name) {
@@ -741,7 +739,6 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
-      await this.sandboxActivityService.initializeActivity(insertedSandbox.id, insertedSandbox.createdAt ?? new Date())
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -866,7 +863,7 @@ export class SandboxService {
     baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
     baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
     baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
-    baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
+    baseFindOptions.updatedAt = createRangeFilter(lastEventAfter, lastEventBefore)
 
     const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
