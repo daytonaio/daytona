@@ -1,0 +1,532 @@
+---
+title: OpenTelemetry によるテレメトリ収集
+description: OpenTelemetry を使用して、Daytona SDK の操作に対して分散トレーシングを有効化します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+OpenTelemetry (OTEL) トレーシングを使用すると、分散トレースを収集することで Daytona SDK の各種処理を監視およびデバッグできます。これはパフォーマンスボトルネックの特定、問題のデバッグ、サンドボックス内での処理状況の可視化に特に有用です。
+
+:::caution
+OpenTelemetry データの収集は現在実験的な機能であり、今後のリリースで変更される可能性があります。この機能の利用を希望される場合は、[support@daytona.io](mailto:support@daytona.io) までご連絡ください。
+:::
+
+***
+
+## サンドボックスのテレメトリ収集 \{#sandbox-telemetry-collection\}
+
+Daytona は、サンドボックスからトレース、ログ、メトリクスを直接収集できます。これにより、[SDK 呼び出し](#sdk-tracing-configuration) からサンドボックスの実行時動作に至るまで、Daytona 環境全体に対する完全な可観測性を実現します。
+
+### サンドボックスのテレメトリ収集を設定する \{#configure-sandbox-collection\}
+
+サンドボックスからのテレメトリ収集を有効にするには、次の手順を実行します。
+
+1. [Daytona Dashboard](https://app.daytona.io) を開きます
+2. **Settings** → **Experimental** に移動します
+3. 次のフィールドを設定します:
+   * **OTLP Endpoint**: OpenTelemetry コレクターのエンドポイント (例: `https://otlp.nr-data.net`)
+   * **OTLP Headers**: `key=value` 形式の認証ヘッダー (例: `api-key=YOUR_API_KEY`)
+
+設定が完了すると、すべてのサンドボックスからのテレメトリデータが、指定した OTLP エンドポイントに自動的にエクスポートされます。
+
+### サンドボックスから収集される内容 \{#what-gets-collected-from-sandboxes\}
+
+サンドボックスのテレメトリが有効になっている場合、次のデータが収集されます。
+
+**メトリクス:**
+
+* `daytona.sandbox.cpu.utilization` - CPU 使用率 (0〜100%)
+* `daytona.sandbox.cpu.limit` - CPU コア数の上限
+* `daytona.sandbox.memory.utilization` - メモリ使用率 (0〜100%)
+* `daytona.sandbox.memory.usage` - 使用メモリ量 (バイト単位)
+* `daytona.sandbox.memory.limit` - メモリ上限 (バイト単位)
+* `daytona.sandbox.filesystem.utilization` - ディスク使用率 (0〜100%)
+* `daytona.sandbox.filesystem.usage` - 使用ディスク容量 (バイト単位)
+* `daytona.sandbox.filesystem.available` - 利用可能なディスク容量 (バイト単位)
+* `daytona.sandbox.filesystem.total` - 総ディスク容量 (バイト単位)
+
+**トレース:**
+
+* HTTP リクエストおよびレスポンス
+* アプリケーションコードで生成されるカスタムスパン
+
+**ログ:**
+
+* アプリケーションログ (stdout/stderr)
+* システムログ
+* ランタイムエラーおよび警告
+
+### ダッシュボードでのテレメトリの閲覧 \{#viewing-telemetry-in-the-dashboard\}
+
+サンドボックスから収集されたログ、トレース、メトリクスは、Daytona ダッシュボード上で直接表示できます。任意のサンドボックスの **Sandbox Details** シートを開き、**Logs**、**Traces**、**Metrics** タブを選択して、収集されたテレメトリデータを確認します。
+
+:::note
+Daytona はサンドボックスのテレメトリデータを **3 日間** 保持します。より長期間データを保持する必要がある場合は、[sandbox collection configuration](#configure-sandbox-collection) を使用して、OTLP 互換の独自コレクターを接続することを推奨します。
+:::
+
+:::tip
+サンドボックスのテレメトリ収集は、SDK トレーシングとは独立して動作します。オブザーバビリティの要件に応じて、一方のみ、または両方を有効化できます。
+
+* **SDK tracing のみ**: Daytona API の操作および SDK 呼び出しを監視
+* **Sandbox telemetry のみ**: サンドボックス内のアプリケーション動作を監視
+* **両方**: スタック全体にわたるエンドツーエンドの包括的なオブザーバビリティを実現
+  :::
+
+***
+
+## SDK トレーシング設定 \{#sdk-tracing-configuration\}
+
+有効化すると、Daytona SDK は、以下を含むすべての SDK 操作を自動的に計測（インストルメンテーション）します：
+
+* サンドボックスの作成、起動、停止、および削除
+* ファイルシステム操作
+* コード実行
+* プロセス管理
+* Daytona API への HTTP リクエスト
+
+トレースは OTLP（OpenTelemetry Protocol）形式でエクスポートされ、New Relic、Jaeger、Zipkin などの OTLP 互換バックエンドに送信できます。
+
+### 1. SDK で OTEL を有効化する \{#1-enable-otel-in-sdk\}
+
+OpenTelemetry トレーシングを有効にするには、Daytona クライアントを初期化する際に実験的フラグ `otelEnabled` を指定します:
+
+または、設定オプションを渡す代わりに、環境変数 `DAYTONA_EXPERIMENTAL_OTEL_ENABLED` を `true` に設定します:
+
+```bash
+export DAYTONA_EXPERIMENTAL_OTEL_ENABLED=true
+```
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+
+    # 非同期コンテキストマネージャーを使用（推奨）
+    async with Daytona(DaytonaConfig(
+        _experimental={"otelEnabled": True}
+    )) as daytona:
+        sandbox = await daytona.create()
+        # すべての操作がトレースされます
+    # OpenTelemetry のトレースはクローズ時にフラッシュされます
+    ```
+
+    またはコンテキストマネージャーを使わない場合:
+
+    ```python
+    daytona = Daytona(DaytonaConfig(
+        _experimental={"otelEnabled": True}
+    ))
+    try:
+        sandbox = await daytona.create()
+        # すべての操作がトレースされます
+    finally:
+        await daytona.close()  # トレースをフラッシュします
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    // 非同期 dispose を使用（推奨）
+    await using daytona = new Daytona({
+      _experimental: { otelEnabled: true }
+    })
+
+    const sandbox = await daytona.create()
+    // すべての操作がトレースされます
+    // dispose 時にトレースは自動的にフラッシュされます
+    ```
+
+    または明示的に dispose する場合:
+
+    ```typescript
+    const daytona = new Daytona({
+      _experimental: { otelEnabled: true }
+    })
+
+    try {
+      const sandbox = await daytona.create()
+      // すべての操作がトレースされます
+    } finally {
+      await daytona[Symbol.asyncDispose]()  // トレースをフラッシュします
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
+        Experimental: &types.ExperimentalConfig{
+            OtelEnabled: true,
+        },
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer client.Close(context.Background()) // トレースをフラッシュします
+
+    sandbox, err := client.Create(context.Background(), nil)
+    // すべての操作がトレースされます
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    config = Daytona::Config.new(
+      _experimental: { 'otel_enabled' => true }
+    )
+    daytona = Daytona::Daytona.new(config)
+
+    sandbox = daytona.create
+    # すべての操作がトレースされます
+
+    daytona.close # トレースをフラッシュします
+    ```
+
+    または `ensure` ブロックを使用する場合:
+
+    ```ruby
+    daytona = Daytona::Daytona.new(
+      Daytona::Config.new(_experimental: { 'otel_enabled' => true })
+    )
+    begin
+      sandbox = daytona.create
+      # すべての操作がトレースされます
+    ensure
+      daytona.close # トレースをフラッシュします
+    end
+    ```
+  </TabItem>
+</Tabs>
+
+### 2. OTLP Exporter を構成する \{#2-configure-otlp-exporter\}
+
+SDK は設定に標準の OpenTelemetry 環境変数を使用します。アプリケーションを実行する前に、これらの環境変数を設定してください:
+
+#### 必須環境変数 \{#required-environment-variables\}
+
+```bash
+# OTLP endpoint (without the /v1/traces path)
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net:4317
+
+# 認証ヘッダー(形式: key1=value1,key2=value2)
+OTEL_EXPORTER_OTLP_HEADERS="api-key=your-api-key-here"
+```
+
+***
+
+## プロバイダーごとの例 \{#provider-specific-examples\}
+
+### New Relic \{#new-relic\}
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net:4317
+OTEL_EXPORTER_OTLP_HEADERS="api-key=YOUR_NEW_RELIC_LICENSE_KEY"
+```
+
+### Jaeger（ローカル環境） \{#jaeger-local\}
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+```
+
+### Grafana Cloud \{#grafana-cloud\}
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-<region>.grafana.net/otlp
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Basic <BASE64_ENCODED_CREDENTIALS>"
+```
+
+セットアップ: [Grafana Cloud Portal](https://grafana.com) → **Connections** → **Add new connection** → **OpenTelemetry (OTLP)** で検索し、ウィザードに従ってアクセストークンを作成します。エンドポイントおよびヘッダーはインストルメンテーションの手順で提供されます。詳細なセットアップ手順については、[Grafana ダッシュボードの例](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana)を参照してください。
+
+***
+
+## 完全な例 \{#complete-example\}
+
+Daytona SDK で OpenTelemetry のトレーシングを使用する方法を示す、完全な例を以下に示します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import asyncio
+    import os
+    from daytona import Daytona, DaytonaConfig
+
+    # OTEL設定を設定
+    os.environ["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://otlp.nr-data.net:4317"
+    os.environ["OTEL_EXPORTER_OTLP_HEADERS"] = "api-key=YOUR_API_KEY"
+
+    async def main():
+        # OTELを有効化してDaytonaを初期化
+        async with Daytona(DaytonaConfig(
+            _experimental={"otelEnabled": True}
+        )) as daytona:
+
+            # サンドボックスを作成 - この操作はトレースされます
+            sandbox = await daytona.create()
+            print(f"Created sandbox: {sandbox.id}")
+
+            # コードを実行 - この操作はトレースされます
+            result = await sandbox.process.code_run(""
+
+    import numpy as np
+    print(f"NumPy version: {np.__version__}")
+            "")
+            print(f"Execution result: {result.result}")
+
+            # ファイルをアップロード - この操作はトレースされます
+            await sandbox.fs.upload_file("local.txt", "/home/daytona/remote.txt")
+
+            # サンドボックスを削除 - この操作はトレースされます
+            await daytona.delete(sandbox)
+
+        # コンテキストマネージャー終了時にトレースは自動的にフラッシュされます
+
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // OTEL設定を設定
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT = "https://otlp.nr-data.net:4317"
+    process.env.OTEL_EXPORTER_OTLP_HEADERS = "api-key=YOUR_API_KEY"
+
+    import { Daytona } from '@daytonaio/sdk'
+
+    async function main() {
+      // OTELを有効化してDaytonaを初期化
+      await using daytona = new Daytona({
+        _experimental: { otelEnabled: true }
+      })
+
+      // サンドボックスを作成 - この操作はトレースされます
+      const sandbox = await daytona.create()
+      console.log(`Created sandbox: ${sandbox.id}`)
+
+      // コードを実行 - この操作はトレースされます
+      const result = await sandbox.process.codeRun(`
+
+    import numpy as np
+    print(f"NumPy version: {np.__version__}")
+      `)
+      console.log(`Execution result: ${result.result}`)
+
+      // ファイルをアップロード - この操作はトレースされます
+      await sandbox.fs.uploadFile('local.txt', '/home/daytona/remote.txt')
+
+      // サンドボックスを削除 - この操作はトレースされます
+      await daytona.delete(sandbox)
+
+      // daytonaインスタンスが破棄されると、トレースは自動的にフラッシュされます
+    }
+
+    main().catch(console.error)
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        // OTEL設定を設定
+        os.Setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "https://otlp.nr-data.net:4317")
+        os.Setenv("OTEL_EXPORTER_OTLP_HEADERS", "api-key=YOUR_API_KEY")
+
+        ctx := context.Background()
+
+        // OTELを有効化してDaytonaを初期化
+        client, err := daytona.NewClientWithConfig(&types.DaytonaConfig{
+          Experimental: &types.ExperimentalConfig{
+            OtelEnabled: true,
+          },
+        })
+        if err != nil {
+          log.Fatal(err)
+        }
+        defer client.Close(ctx) // 終了時にトレースをフラッシュ
+
+        // サンドボックスを作成 - この操作はトレースされます
+        sandbox, err := client.Create(ctx, nil)
+        if err != nil {
+          log.Fatal(err)
+        }
+        fmt.Printf("Created sandbox: %s\n", sandbox.ID)
+
+        // コードを実行 - この操作はトレースされます
+        result, err := sandbox.Process.CodeRun(ctx, &types.CodeRunParams{
+            Code: `
+
+    import numpy as np
+    print(f"NumPy version: {np.__version__}")
+            `,
+        })
+        if err != nil {
+          log.Fatal(err)
+        }
+        fmt.Printf("Execution result: %s\n", result.Result)
+
+        // ファイルをアップロード - この操作はトレースされます
+        err = sandbox.Fs.UploadFile(ctx, "local.txt", "/home/daytona/remote.txt")
+        if err != nil {
+          log.Fatal(err)
+        }
+
+        // サンドボックスを削除 - この操作はトレースされます
+        err = client.Delete(ctx, sandbox, nil)
+        if err != nil {
+          log.Fatal(err)
+        }
+
+        // deferによってclient.Closeが呼び出されるとトレースがフラッシュされます
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # OTEL設定を設定
+    ENV["OTEL_EXPORTER_OTLP_ENDPOINT"] = "https://otlp.nr-data.net:4317"
+    ENV["OTEL_EXPORTER_OTLP_HEADERS"] = "api-key=YOUR_API_KEY"
+
+    # OTELを有効化してDaytonaを初期化
+    config = Daytona::Config.new(
+      _experimental: { 'otel_enabled' => true }
+    )
+    daytona = Daytona::Daytona.new(config)
+
+    begin
+      # サンドボックスを作成 - この操作はトレースされます
+      sandbox = daytona.create
+      puts "Created sandbox: #{sandbox.id}"
+
+      # コードを実行 - この操作はトレースされます
+      result = sandbox.process.code_run("
+
+    import numpy as np
+    print(f'NumPy version: {np.__version__}')
+      ")
+      puts "Execution result: #{result.result}"
+
+      # ファイルをアップロード - この操作はトレースされます
+      sandbox.fs.upload_file("local.txt", "/home/daytona/remote.txt")
+
+      # サンドボックスを削除 - この操作はトレースされます
+      daytona.delete(sandbox)
+    ensure
+      daytona.close # トレースをフラッシュします
+    end
+    ```
+  </TabItem>
+</Tabs>
+
+***
+
+## トレース対象 \{#what-gets-traced\}
+
+Daytona SDK は自動的に次の操作を計測対象とします。
+
+### SDK レベルの操作 \{#sdk-level-operations\}
+
+* `create()` - サンドボックスの作成と初期化
+* `get()` - サンドボックスインスタンスの取得
+* `findOne()` - フィルター条件によるサンドボックスの検索
+* `list()` - サンドボックス一覧の取得
+* `start()` - サンドボックスの起動
+* `stop()` - サンドボックスの停止
+* `delete()` - サンドボックスの削除
+* すべてのサンドボックス、スナップショット、およびボリュームに対する操作（ファイルシステム、コード実行、プロセス管理など）
+
+### HTTP リクエスト \{#http-requests\}
+
+* Daytona バックエンドへのすべての API 呼び出し
+* リクエストの処理時間とレスポンスステータスコード
+* 失敗したリクエストのエラー情報
+
+### トレース属性 \{#trace-attributes\}
+
+各トレースには、次のような有用なメタデータが含まれます:
+
+* サービス名とバージョン
+* HTTP メソッド、URL、ステータスコード
+* リクエストおよびレスポンスの所要時間
+* エラーの詳細（該当する場合）
+* カスタム SDK のオペレーションメタデータ
+
+***
+
+## ダッシュボードのサンプル \{#dashboard-examples\}
+
+* [New Relic](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/new-relic)
+* [Grafana](https://github.com/daytonaio/daytona/tree/main/examples/otel-dashboards/grafana)
+
+## トラブルシューティング \{#troubleshooting\}
+
+### トレースが送信されていることを確認する \{#verify-traces-are-being-sent\}
+
+1. 環境変数が正しく設定されていることを確認する
+2. OTLP エンドポイントにアクセスできることを確認する
+3. API キーやヘッダーが有効であることを確認する
+4. オブザーバビリティプラットフォームでトレースが受信されているか確認する
+5. アプリケーションログに接続エラーが記録されていないか確認する
+
+### よくある問題 \{#common-issues\}
+
+**トレースが表示されない場合:**
+
+* 設定で `otelEnabled: true` が指定されていることを確認する
+* OTLP エンドポイントとヘッダーが正しいことを確認する
+* トレースをフラッシュするために、Daytona インスタンスを適切にクローズまたは破棄しているか確認する
+
+**接続が拒否される場合:**
+
+* OTLP エンドポイント URL が正しいことを確認する
+* エンドポイントがアプリケーションから到達可能であることを確認する
+* 制限のある環境で実行している場合は、ファイアウォールのルールを確認する
+
+**認証エラーが発生する場合:**
+
+* API キーの形式がプロバイダーの要件に合致していることを確認する
+* `OTEL_EXPORTER_OTLP_HEADERS` の形式が正しいことを確認する（key=value 形式のペア）
+
+***
+
+## ベストプラクティス \{#best-practices\}
+
+1. **必ずクライアントを閉じる**: トレースが正しくフラッシュされるように、`async with` (Python)、`await using` (TypeScript)、`defer client.Close()` (Go)、`ensure daytona.close` (Ruby) を使用する
+2. **トレース量を監視する**: トレース機能を有効にすると、オブザーバビリティプラットフォームにおけるネットワークトラフィックとストレージ使用量が増加することに留意する
+3. **まず開発環境で使用する**: 本番環境で有効化する前に、開発環境で OTEL 設定をテストする
+4. **サンプリングを設定する**: トラフィック量の多いアプリケーションでは、コスト削減のためにトレースサンプリングの設定を検討する
+
+***
+
+## 追加リソース \{#additional-resources\}
+
+* [OpenTelemetry のドキュメント](https://opentelemetry.io/docs/)
+* [OTLP 仕様](https://opentelemetry.io/docs/specs/otlp/)
+* [Daytona SDK のドキュメント](/docs/ja/introduction/)
