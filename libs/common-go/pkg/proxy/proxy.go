@@ -48,6 +48,17 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 			return
 		}
 
+		wrappedModifyResponse := func(res *http.Response) error {
+			if res.StatusCode >= 400 {
+				res.Header.Set("Cache-Control", "no-store, no-cache, must-revalidate")
+				res.Header.Set("Pragma", "no-cache")
+			}
+			if modifyResponse != nil {
+				return modifyResponse(res)
+			}
+			return nil
+		}
+
 		reverseProxy := &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				req.Host = target.Host
@@ -64,7 +75,7 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 				}
 			},
 			Transport:      proxyTransport,
-			ModifyResponse: modifyResponse,
+			ModifyResponse: wrappedModifyResponse,
 		}
 
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)

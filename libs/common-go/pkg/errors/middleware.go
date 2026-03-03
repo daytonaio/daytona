@@ -150,6 +150,8 @@ func NewErrorMiddleware(defaultErrorHandler func(ctx *gin.Context, err error) Er
 
 			// Set explicit content type header
 			ctx.Header("Content-Type", "application/json")
+			ctx.Header("Cache-Control", "no-store, no-cache, must-revalidate")
+			ctx.Header("Pragma", "no-cache")
 			ctx.JSON(errorResponse.StatusCode, errorResponse)
 		}
 	}
