@@ -1,413 +1,99 @@
 ---
-title: はじめに
+title: はじめよう
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona SDKはDaytonaと連携するための公式[Python](/docs/ja/python-sdk)および[TypeScript](/docs/ja/typescript-sdk)インターフェースを提供し、開発環境をプログラムで管理し、コードを実行できます。[Python SDK](/docs/ja/python-sdk)は同期・非同期の両方のプログラミングモデルをサポートしており、非同期クラスには`Async`の接頭辞が付きます。
+このセクションでは、Daytona を利用するための基本概念、典型的なワークフロー、そして次のステップを紹介します。
 
-手順に従って、AIエージェント向けの最初のDaytona サンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成・実行しましょう。
+## Dashboard \{#dashboard\}
 
-環境変数の設定やステージング環境での実験的機能へのアクセスなど、追加の設定手順については[Configuration](/docs/ja/configuration)を参照してください。
+[Daytona Dashboard ↗](https://app.daytona.io/) は、サンドボックスの管理、API キーの確認・管理、利用状況の閲覧などを行えるビジュアルなユーザーインターフェースです。
+Daytona リソースを管理するための中核的なコンソールとして機能します。
 
-## Daytona SDK をインストールする
+## SDKs \{#sdks\}
 
-Daytona は、Daytona プラットフォームと連携するための公式 Python および TypeScript の SDK を提供しています。お好みの方法で SDK をインストールしてください。
+Daytona は、サンドボックスをプログラムから操作するための [Python](/docs/ja/python-sdk)、[TypeScript](/docs/ja/typescript-sdk)、[Ruby](/docs/ja/ruby-sdk)、および [Go](/docs/ja/go-sdk) の SDK を提供しています。これらは、サンドボックスのライフサイクル管理、コード実行、リソースへのアクセスなどをサポートします。
+
+## CLI \{#cli\}
+
+Daytona は、Daytona サンドボックスを操作するための、ライフサイクル管理やスナップショット管理などのコア機能にアクセスできるコマンドラインインターフェイスを提供します。
+
+コマンドラインから Daytona サンドボックスを操作するには、Daytona CLI をインストールします。
 
 <Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
+  <TabItem label="Mac/Linux">
     ```bash
-    pip install daytona
+    brew install daytonaio/cli/daytona
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
+  <TabItem label="Windows">
     ```bash
-    # npm を使用
-    npm install @daytonaio/sdk
-
-    # yarn を使用
-    yarn add @daytonaio/sdk
-
-    # pnpm を使用
-    pnpm add @daytonaio/sdk
+    powershell -Command "irm https://get.daytona.io/windows | iex"
     ```
   </TabItem>
 </Tabs>
 
-## サンドボックス内でコードを実行する
+Daytona CLI をインストールしたら、`daytona` コマンドを使用してコマンドラインから Daytona サンドボックスを操作できます。
 
-次のコードを実行して、Daytona のサンドボックスを作成し、コマンドを実行します。
+Daytona CLI を最新バージョンにアップグレードするには、次を実行します。
 
 <Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, DaytonaConfig
-
-    # Daytona クライアントを初期化
-    daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
-
-    # サンドボックスのインスタンスを作成
-    sandbox = daytona.create()
-
-    # サンドボックス内で安全にコードを実行
-    response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-    if response.exit_code != 0:
-        print(f"Error running code: {response.exit_code} {response.result}")
-    else:
-        print(response.result)
-
-    # サンドボックスをクリーンアップ
-    sandbox.delete()
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew upgrade daytonaio/cli/daytona
     ```
   </TabItem>
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona } from '@daytonaio/sdk'
-
-    async function main() {
-      // Daytona クライアントを初期化
-      const daytona = new Daytona({
-        apiKey: 'YOUR_API_KEY',
-      })
-
-      let sandbox;
-      try {
-        // サンドボックスのインスタンスを作成
-        sandbox = await daytona.create({
-          language: "python",
-        });
-        // サンドボックス内で安全にコードを実行
-        const response = await sandbox.process.codeRun(
-          'print("Sum of 3 and 4 is " + str(3 + 4))'
-        );
-        if (response.exitCode !== 0) {
-          console.error("Error running code:", response.exitCode, response.result);
-        } else {
-          console.log(response.result);
-        }
-      } catch (error) {
-        console.error("Sandbox flow error:", error);
-      } finally {
-        // サンドボックスをクリーンアップ
-        if (sandbox) {
-          await sandbox.delete();
-        }
-      }
-    }
-
-    main().catch(console.error)
-
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex"
     ```
   </TabItem>
 </Tabs>
 
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```bash
-    python main.py
-    ```
-  </TabItem>
+利用可能なすべてのコマンドとフラグを確認するには、[CLI リファレンス](/docs/ja/tools/cli)を参照してください。
 
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```bash
-    npx tsx ./index.ts
-    ```
-  </TabItem>
-</Tabs>
+## API \{#api\}
 
-## アプリをプレビュー
+Daytona は、サンドボックスのライフサイクル管理やスナップショットの操作などを行うための RESTful API を提供しています。
+この API は、独自のアプリケーションから Daytona と連携するための柔軟かつ強力な手段です。
 
-次のスニペットは、シンプルな Flask アプリを含むファイルを Daytona のサンドボックスにアップロードします。Web サーバーはポート `3000` で起動し、提供されたプレビューURLからアクセスできます。
+API 経由で Daytona のサンドボックスを操作する方法については、[API reference](/docs/ja/tools/api) を参照してください。
 
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ```python
-    from daytona import Daytona, DaytonaConfig, SessionExecuteRequest
+## MCP サーバー \{#mcp-server\}
 
-    daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
+Daytona は、AI エージェントが Daytona のサンドボックスをプログラムから操作できるようにする Model Context Protocol (MCP) サーバーを提供します。MCP サーバーは、Claude、Cursor、Windsurf を含む主要な AI エージェントと統合されています。
 
-    sandbox = daytona.create()
+AI エージェントで MCP サーバーをセットアップするには、次の手順に従います。
 
-    app_code = b'''
-    from flask import Flask
+```bash
+daytona mcp init [claude/cursor/windsurf]
+```
 
-    app = Flask(__name__)
+詳細については、[MCP サーバーのドキュメント](/docs/ja/mcp) をご覧ください。
 
-    @app.route('/')
-    def hello():
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Hello World</title>
-            <link rel="icon" href="https://www.daytona.io/favicon.ico">
-        </head>
-        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
-            <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
-                <p>This web app is running in a Daytona sandbox!</p>
-            </div>
-        </body>
-        </html>
-        """
+## 複数ランタイムのサポート \{#multiple-runtime-support\}
 
-    if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=3000)
-    '''
+Daytona は、サンドボックス内でコードを直接実行するために、複数のプログラミング言語ランタイムをサポートしています。
 
-    # Save the Flask app to a file
+[TypeScript SDK](/docs/ja/typescript-sdk) は、**Node.js**、**ブラウザ**、**サーバーレスプラットフォーム**（Cloudflare Workers、AWS Lambda、Azure Functions など）を含む複数の **JavaScript ランタイム** で動作します。
 
-    sandbox.fs.upload_file(app_code, "app.py")
+ブラウザベースの環境や、[**Vite**](/docs/ja/getting-started#daytona-in-vite-projects)、[**Next.js**](/docs/ja/getting-started#daytona-in-nextjs-projects) のようなフレームワークで Daytona SDK を使用する場合は、Node.js のポリフィルを設定する必要があります。
 
-    # Create a new session and execute a command
+### ViteプロジェクトでのDaytona \{#daytona-in-vite-projects\}
 
-    exec_session_id = "python-app-session"
-    sandbox.process.create_session(exec_session_id)
+ViteベースのプロジェクトでDaytona SDKを使用する場合、互換性を確保するためにNodeのポリフィルを設定する必要があります。
 
-    sandbox.process.execute_session_command(exec_session_id, SessionExecuteRequest(
-        command="python /app.py",
-        var_async=True
-    ))
-
-    # Get the preview link for the Flask app
-
-    preview_info = sandbox.get_preview_link(3000)
-    print(f"Flask app is available at: {preview_info.url}")
-
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ```typescript
-    import { Daytona } from '@daytonaio/sdk';
-
-    const daytona = new Daytona(({
-      apiKey: "YOUR_API_KEY"
-    }));
-
-    async function main() {
-      const sandbox = await daytona.create();
-
-      const appCode = Buffer.from(`
-    from flask import Flask
-
-    app = Flask(__name__)
-
-    @app.route('/')
-    def hello():
-        return """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>Hello World</title>
-            <link rel="icon" href="https://www.daytona.io/favicon.ico">
-        </head>
-        <body style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #0a0a0a; font-family: Arial, sans-serif;">
-            <div style="text-align: center; padding: 2rem; border-radius: 10px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                <img src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png" alt="Daytona Logo" style="width: 180px; margin: 10px 0px;">
-                <p>This web app is running in a Daytona sandbox!</p>
-            </div>
-        </body>
-        </html>
-        """
-
-    if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=3000)
-      `);
-
-      // Save the Flask app to a file
-      await sandbox.fs.uploadFile(appCode, "app.py");
-
-      // Create a new session and execute a command
-      const execSessionId = "python-app-session";
-      await sandbox.process.createSession(execSessionId);
-
-      await sandbox.process.executeSessionCommand(execSessionId, ({
-        command: `python app.py`,
-        async: true,
-      }));
-
-      // Get the preview link for the Flask app
-      const previewInfo = await sandbox.getPreviewLink(3000);
-      console.log(`Flask app is available at: ${previewInfo.url}`);
-    }
-
-    main().catch(error => console.error("Error:", error));
-
-    ```
-  </TabItem>
-</Tabs>
-
-このエンドポイントにプログラムからアクセスする必要がありますか？[プレビューと認証](/docs/ja/preview-and-authentication)をご覧ください。
-
-:::tip
-ポート `22222` のプレビューURLを表示するか、Dashboard -> Sandboxes に移動して Terminal のアイコンをクリックすると、サンドボックスの[Web Terminal](/docs/ja/web-terminal)にアクセスできます。
-:::
-
-## LLM に接続する
-
-次のスニペットは、Anthropic API を用いて LLM に接続し、Claude に 25 の階乗を求めるコードの生成を依頼し、そのコードを Daytona のサンドボックス（Daytonaが管理する隔離された一時的な実行環境）内で実行します。
-
-<Tabs syncKey="language">
-  <TabItem label="Python" icon="seti:python">
-    ````python
-    import os
-    import re
-    import requests
-    from daytona import Daytona, DaytonaConfig
-    from dotenv import load_dotenv
-
-    load_dotenv()
-
-    daytona = Daytona(DaytonaConfig())
-
-    sandbox = daytona.create()
-
-    def get_claude_response(api_key, prompt):
-        url = "https://api.anthropic.com/v1/messages"
-        headers = {
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "model": "claude-3-7-sonnet-latest",
-            "max_tokens": 256,
-            "messages": [{"role": "user", "content": prompt}]
-        }
-        response = requests.post(url, json=data, headers=headers)
-        if response.status_code == 200:
-            content = response.json().get("content", [])
-            return "".join([item["text"] for item in content if item["type"] == "text"])
-        else:
-            return f"Error {response.status_code}: {response.text}"
-
-    prompt = "25 の階乗を返す Python コード。出力はコードのみ。説明なし。前置きなし。コメントなし。単一のコードブロックで生のコードのみ。"
-
-    result = get_claude_response(os.environ["ANTHROPIC_API_KEY"], prompt)
-
-    code_match = re.search(r"```python\n(.*?)```", result, re.DOTALL)
-
-    code = code_match.group(1) if code_match else result
-    code = code.replace('\\', '\\\\')
-
-    # サンドボックス内で Python コードを実行し、結果を取得
-
-    response = sandbox.process.code_run(code)
-    print("The factorial of 25 is", response.result)
-
-    ````
-
-    スニペットを実行する:
-
-    ```bash
-    ANTHROPIC_API_KEY="your-anthropic-api-key"
-    DAYTONA_API_KEY="your-daytona-api-key"
-    DAYTONA_TARGET=us
-    python claude-example.py
-    ```
-
-    ```bash
-    > 25 の階乗は 15511210043330985984000000 です
-    ```
-  </TabItem>
-
-  <TabItem label="TypeScript" icon="seti:typescript">
-    ````typescript
-    import { Daytona } from '@daytonaio/sdk'
-    import * as dotenv from 'dotenv'
-    import axios from 'axios'
-
-    dotenv.config()
-
-    const daytona = new Daytona()
-
-    async function getClaudeResponse(apiKey: string, prompt: string): Promise<string> {
-      const url = "https://api.anthropic.com/v1/messages"
-      const headers = {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "Content-Type": "application/json"
-      }
-      const data = {
-        "model": "claude-3-7-sonnet-latest",
-        "max_tokens": 256,
-        "messages": [{"role": "user", "content": prompt}]
-      }
-
-      try {
-        const response = await axios.post(url, data, { headers })
-        if (response.status === 200) {
-          const content = response.data.content || []
-          return content
-            .filter((item: any) => item.type === "text")
-            .map((item: any) => item.text)
-            .join("")
-        } else {
-          return `Error ${response.status}: ${response.statusText}`
-        }
-      } catch (error: any) {
-        return `Error: ${error.message}`
-      }
-    }
-
-    async function main() {
-      const sandbox = await daytona.create()
-
-      const prompt = "25 の階乗を返す Python コード。コードのみを出力。説明なし。前置きなし。コメントなし。単一のコードブロックに生のコードのみ。"
-      
-      const result = await getClaudeResponse(process.env.ANTHROPIC_API_KEY || "", prompt)
-      
-      // レスポンスから正規表現でコードを抽出
-      const codeMatch = result.match(/```python\n(.*?)```/s)
-      
-      let code = codeMatch ? codeMatch[1] : result
-      code = code.replace(/\\/g, '\\\\')
-      
-      // 抽出したコードをサンドボックスで実行
-      const response = await sandbox.process.codeRun(code)
-      console.log("The factorial of 25 is", response.result)
-    }
-
-    main().catch(console.error)
-
-    ````
-
-    スニペットを実行する:
-
-    ```bash
-    ANTHROPIC_API_KEY="your-anthropic-api-key"
-    DAYTONA_API_KEY="your-daytona-api-key"
-    DAYTONA_TARGET=us
-    npx ts-node claude-example.ts
-    ```
-
-    ```bash
-    > 25の階乗は 15511210043330985984000000 です
-    ```
-  </TabItem>
-</Tabs>
-
-## 追加の例
-
-Daytona SDK の [Python の例](https://github.com/daytonaio/daytona/tree/main/examples/python) または [TypeScript/JavaScript の例](https://github.com/daytonaio/daytona/tree/main/examples/typescript) を使ってサンドボックス（Daytonaが管理する隔離された一時的な実行環境）を作成し、コードを実行しましょう。
-
-LLM を活用して Daytona 上での開発を加速できます。/llms.txt ファイルをコピーし、プロジェクトやチャットのコンテキストに含めてください: [llms-full.txt](https://www.daytona.io/docs/llms-full.txt) または [llms.txt](https://www.daytona.io/docs/llms.txt)
-
-[GitHub](https://github.com/daytonaio/daytona) 上の Daytona SDK リポジトリを参照して、さらに詳しく学びましょう。
-
-## ViteプロジェクトでのDaytona
-
-ViteベースのプロジェクトでDaytona SDKを使用する場合、互換性を確保するためにNodeのポリフィルを設定する必要があります。`vite.config.ts` のplugins配列に以下の設定を追加してください：
+`vite.config.ts` の `plugins` 配列に次の設定を追加してください。
 
 ```typescript
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
   plugins: [
-    // ... other plugins
+    // ... その他のプラグイン
     nodePolyfills({
       globals: { global: true, process: true, Buffer: true },
       overrides: {
@@ -415,13 +101,15 @@ export default defineConfig({
       },
     }),
   ],
-  // ... rest of your config
+  // ... 設定の残りの部分
 })
 ```
 
-## Next.js プロジェクトにおける Daytona
+### Next.js プロジェクトでの Daytona \{#daytona-in-nextjs-projects\}
 
-Next.js プロジェクトで Daytona SDK を使用する場合、利用中のバンドラーに応じて Webpack や Turbopack との互換性を保つため、Node のポリフィルを設定する必要があります。次の設定を `next.config.ts` に追加してください:
+Next.js プロジェクトで Daytona SDK を使用する場合、Webpack および Turbopack のバンドラとの互換性を確保するために、Node のポリフィルを設定する必要があります。
+
+次の設定を `next.config.ts` ファイルに追加してください。
 
 ```typescript
 import type { NextConfig } from 'next'
@@ -451,20 +139,912 @@ const nextConfig: NextConfig = {
 export default nextConfig
 ```
 
-## Daytona CLI のセットアップ
+## ガイド \{#guides\}
 
-[ローカルデバイス上のイメージ](/docs/ja/snapshots#using-a-local-image)を使用する場合、またはコマンドラインインターフェースでサンドボックスを管理したい場合は、次のコマンドで Daytona CLI をインストールしてください:
+Daytona は、スムーズに使い始められるよう支援する包括的なガイド一式を提供しています。これらのガイドでは、基本的な使い方から高度なトピックまで幅広い内容を扱い、Daytona と他のツールとのさまざまな連携パターンを紹介しています。
+
+詳しくは、[ガイド](/docs/ja/guides)を参照してください。
+
+## 例 \{#examples\}
+
+Daytona では、一般的なサンドボックス操作やベストプラクティスを素早く理解するための簡潔な例を提供しています。<br />
+これらの例は、Daytona の [Python SDK](/docs/ja/python-sdk/sync/process)、[TypeScript SDK](/docs/ja/typescript-sdk/process)、[Go SDK](/docs/ja/go-sdk/daytona#type-processservice)、[Ruby SDK](/docs/ja/ruby-sdk/process)、[CLI](/docs/ja/tools/cli)、および [API](/docs/ja/tools/api) のリファレンスに基づいています。さらに多くの例は [GitHub リポジトリ ↗](https://github.com/daytonaio/daytona/tree/main/examples) で確認できます。
+
+### サンドボックスを作成 \{#create-a-sandbox\}
+
+デフォルト設定で[サンドボックス](/docs/ja/sandboxes)を作成します。
 
 <Tabs syncKey="language">
-  <TabItem label="Mac/Linux">
-    ```bash
-    brew install daytonaio/cli/daytona
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+    print(f"Sandbox ID: {sandbox.id}")
     ```
   </TabItem>
 
-  <TabItem label="Windows">
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create();
+    console.log(`Sandbox ID: ${sandbox.id}`);
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox, err := client.Create(context.Background(), nil)
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("Sandbox ID: %s\n", sandbox.ID)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+    puts "Sandbox ID: #{sandbox.id}"
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
     ```bash
-    powershell -Command "irm https://get.daytona.io/windows | iex"
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{}'
+    ```
+  </TabItem>
+</Tabs>
+
+### サンドボックスを作成してコードを実行する \{#create-and-run-code-in-a-sandbox\}
+
+[サンドボックス](/docs/ja/sandboxes) を作成し、その中でコードを安全に実行します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+    response = sandbox.process.exec("echo 'Hello, World!'")
+    print(response.result)
+    sandbox.delete()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create();
+    const response = await sandbox.process.executeCommand('echo "Hello, World!"');
+    console.log(response.result);
+    await sandbox.delete();
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox, err := client.Create(context.Background(), nil)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        response, err := sandbox.Process.ExecuteCommand(context.Background(), "echo 'Hello, World!'")
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Println(response.Result)
+        sandbox.Delete(context.Background())
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+    response = sandbox.process.exec(command: "echo 'Hello, World!'")
+    puts response.result
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --name my-sandbox
+    daytona exec my-sandbox -- echo 'Hello, World!'
+    daytona delete my-sandbox
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # サンドボックスを作成する
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{}'
+
+    # サンドボックス内でコマンドを実行する
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/execute' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "command": "echo '\''Hello, World!'\''"
+    }'
+
+    # サンドボックスを削除する
+    curl 'https://app.daytona.io/api/sandbox/{sandboxId}' \
+      --request DELETE \
+      --header 'Authorization: Bearer <API_KEY>'
+    ```
+  </TabItem>
+</Tabs>
+
+### カスタムリソースを設定したサンドボックスを作成する \{#create-a-sandbox-with-custom-resources\}
+
+[カスタムリソース](/docs/ja/sandboxes#resources)（CPU、メモリ、ディスクなど）を指定してサンドボックスを作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromImageParams, Image, Resources
+
+    daytona = Daytona()
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(
+            image=Image.debian_slim("3.12"),
+            resources=Resources(cpu=2, memory=4, disk=8)
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create({
+        image: Image.debianSlim('3.12'),
+        resources: { cpu: 2, memory: 4, disk: 8 }
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox, err := client.Create(context.Background(), types.ImageParams{
+            Image: daytona.DebianSlim(nil),
+            Resources: &types.Resources{
+                CPU:    2,
+                Memory: 4,
+                Disk:   8,
+            },
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromImageParams.new(
+            image: Daytona::Image.debian_slim('3.12'),
+            resources: Daytona::Resources.new(cpu: 2, memory: 4, disk: 8)
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --class small
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "cpu": 2,
+      "memory": 4,
+      "disk": 8
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+### エフェメラルサンドボックスを作成する \{#create-an-ephemeral-sandbox\}
+
+停止時に自動的に削除される[エフェメラルサンドボックス](/docs/ja/sandboxes#ephemeral-sandboxes)を作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(ephemeral=True, auto_stop_interval=5)
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create({
+        ephemeral: true,
+        autoStopInterval: 5
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        autoStop := 5
+        sandbox, err := client.Create(context.Background(), types.SnapshotParams{
+            SandboxBaseParams: types.SandboxBaseParams{
+                Ephemeral:        true,
+                AutoStopInterval: &autoStop,
+            },
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromSnapshotParams.new(ephemeral: true, auto_stop_interval: 5)
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --auto-stop 5 --auto-delete 0
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "autoStopInterval": 5,
+      "autoDeleteInterval": 0
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+### スナップショットからサンドボックスを作成する \{#create-a-sandbox-from-a-snapshot\}
+
+事前に作成された[スナップショット](/docs/ja/snapshots)からサンドボックスを作成すると、依存関係があらかじめインストールされているため、より高速にサンドボックスを用意できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(
+            snapshot="my-snapshot-name",
+            language="python"
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create({
+        snapshot: 'my-snapshot-name',
+        language: 'typescript'
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox, err := client.Create(context.Background(), types.SnapshotParams{
+            Snapshot: "my-snapshot-name",
+            SandboxBaseParams: types.SandboxBaseParams{
+                Language: types.CodeLanguagePython,
+            },
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromSnapshotParams.new(
+            snapshot: 'my-snapshot-name',
+            language: Daytona::CodeLanguage::PYTHON
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --snapshot my-snapshot-name
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "snapshot": "my-snapshot-name"
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+### 宣言的イメージでサンドボックスを作成する \{#create-a-sandbox-with-a-declarative-image\}
+
+依存関係をプログラムから定義できる[宣言的イメージ](/docs/ja/declarative-builder)を使ってサンドボックスを作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromImageParams, Image
+
+    daytona = Daytona()
+    image = (
+        Image.debian_slim("3.12")
+        .pip_install(["requests", "pandas", "numpy"])
+        .workdir("/home/daytona")
+    )
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(image=image),
+        on_snapshot_create_logs=print
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, Image } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const image = Image.debianSlim('3.12')
+        .pipInstall(['requests', 'pandas', 'numpy'])
+        .workdir('/home/daytona');
+    const sandbox = await daytona.create(
+        { image },
+        { onSnapshotCreateLogs: console.log }
+    );
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        image := daytona.DebianSlim(nil).
+            PipInstall([]string{"requests", "pandas", "numpy"}).
+            Workdir("/home/daytona")
+        sandbox, err := client.Create(context.Background(), types.ImageParams{
+            Image: image,
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    image = Daytona::Image
+        .debian_slim('3.12')
+        .pip_install(['requests', 'pandas', 'numpy'])
+        .workdir('/home/daytona')
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromImageParams.new(image: image),
+        on_snapshot_create_logs: proc { |chunk| puts chunk }
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --dockerfile ./Dockerfile
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "buildInfo": {
+        "dockerfileContent": "FROM python:3.12-slim\nRUN pip install requests pandas numpy\nWORKDIR /home/daytona"
+      }
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+### ボリューム付きサンドボックスを作成する \{#create-a-sandbox-with-volumes\}
+
+サンドボックス間でデータを共有するために、[ボリューム](/docs/ja/volumes) をマウントしたサンドボックスを作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams, VolumeMount
+
+    daytona = Daytona()
+    volume = daytona.volume.get("my-volume", create=True)
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(
+            volumes=[VolumeMount(volume_id=volume.id, mount_path="/home/daytona/data")]
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const volume = await daytona.volume.get('my-volume', true);
+    const sandbox = await daytona.create({
+        volumes: [{ volumeId: volume.id, mountPath: '/home/daytona/data' }]
+    });
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        volume, err := client.Volume.Get(context.Background(), "my-volume")
+        if err != nil {
+            volume, err = client.Volume.Create(context.Background(), "my-volume")
+            if err != nil {
+                log.Fatal(err)
+            }
+        }
+
+        sandbox, err := client.Create(context.Background(), types.SnapshotParams{
+            SandboxBaseParams: types.SandboxBaseParams{
+                Volumes: []types.VolumeMount{{
+                    VolumeID:  volume.ID,
+                    MountPath: "/home/daytona/data",
+                }},
+            },
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    volume = daytona.volume.get('my-volume', create: true)
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromSnapshotParams.new(
+            volumes: [DaytonaApiClient::SandboxVolume.new(
+                volume_id: volume.id,
+                mount_path: '/home/daytona/data'
+            )]
+        )
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona volume create my-volume
+    daytona create --volume my-volume:/home/daytona/data
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "volumes": [
+        {
+          "volumeId": "<VOLUME_ID>",
+          "mountPath": "/home/daytona/data"
+        }
+      ]
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+### Git リポジトリをクローンしたサンドボックスを作成する \{#create-a-sandbox-with-a-git-repository-cloned\}
+
+バージョン管理を行うために、[Git リポジトリ](/docs/ja/typescript-sdk/git) をクローンした状態のサンドボックスを作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    daytona = Daytona()
+    sandbox = daytona.create()
+
+    sandbox.git.clone("https://github.com/daytonaio/daytona.git", "/home/daytona/daytona")
+    status = sandbox.git.status("/home/daytona/daytona")
+    print(f"Branch: {status.current_branch}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create();
+
+    await sandbox.git.clone('https://github.com/daytonaio/daytona.git', '/home/daytona/daytona');
+    const status = await sandbox.git.status('/home/daytona/daytona');
+    console.log(`Branch: ${status.currentBranch}`);
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox, err := client.Create(context.Background(), nil)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        sandbox.Git.Clone(context.Background(), "https://github.com/daytonaio/daytona.git", "/home/daytona/daytona")
+        status, err := sandbox.Git.Status(context.Background(), "/home/daytona/daytona")
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("Branch: %s\n", status.CurrentBranch)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    sandbox.git.clone(url: "https://github.com/daytonaio/daytona.git", path: "/home/daytona/daytona")
+    status = sandbox.git.status("/home/daytona/daytona")
+    puts "Branch: #{status.current_branch}"
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    # サンドボックスを作成
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{}'
+
+    # サンドボックス内で Git リポジトリをクローン
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "url": "https://github.com/daytonaio/daytona.git",
+      "path": "/home/daytona/daytona"
+    }'
+
+    # リポジトリの状態を取得
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/status?path=/home/daytona/daytona' \
+      --header 'Authorization: Bearer <API_KEY>'
+    ```
+  </TabItem>
+</Tabs>
+
+### ラベル付きサンドボックスを作成する \{#create-a-sandbox-with-labels\}
+
+サンドボックスを整理・検索しやすくするために、[labels](/docs/ja/sandboxes#create-sandboxes) を指定してサンドボックスを作成します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+    daytona = Daytona()
+    sandbox = daytona.create(
+        CreateSandboxFromSnapshotParams(labels={"project": "my-app", "env": "dev"})
+    )
+
+    found = daytona.find_one(labels={"project": "my-app"})
+    print(f"Found sandbox: {found.id}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    const daytona = new Daytona();
+    const sandbox = await daytona.create({
+        labels: { project: 'my-app', env: 'dev' }
+    });
+
+    const found = await daytona.findOne({ labels: { project: 'my-app' } });
+    console.log(`Found sandbox: ${found.id}`);
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    package main
+
+    import (
+        "context"
+        "fmt"
+        "log"
+
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+        "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+    )
+
+    func main() {
+        client, err := daytona.NewClient()
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        labels := map[string]string{"project": "my-app", "env": "dev"}
+        sandbox, err := client.Create(context.Background(), types.SnapshotParams{
+            SandboxBaseParams: types.SandboxBaseParams{Labels: labels},
+        })
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        found, err := client.FindOne(context.Background(), nil, map[string]string{"project": "my-app"})
+        if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("Found sandbox: %s\n", found.ID)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create(
+        Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'project' => 'my-app', 'env' => 'dev' })
+    )
+
+    found = daytona.find_one(labels: { 'project' => 'my-app' })
+    puts "Found sandbox: #{found.id}"
+    ```
+  </TabItem>
+
+  <TabItem label="CLI" icon="seti:shell">
+    ```shell
+    daytona create --label project=my-app --label env=dev
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://app.daytona.io/api/sandbox' \
+      --request POST \
+      --header 'Authorization: Bearer <API_KEY>' \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "labels": {
+        "project": "my-app",
+        "env": "dev"
+      }
+    }'
     ```
   </TabItem>
 </Tabs>

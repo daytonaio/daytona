@@ -4,92 +4,49 @@ title: 宣言的ビルダー
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona（サンドボックスの作成・管理プラットフォーム）の宣言的ビルダーは、サンドボックス（Daytonaが管理する隔離された一時的な実行環境）の依存関係をコードファーストで定義する強力な手法を提供します。コンテナレジストリからイメージを取り込む代わりに、SDKを用いてプログラム的に定義できます。
+Declarative Builder は、Daytona サンドボックス向けの依存関係を定義するための、強力なコードファースト アプローチを提供します。コンテナレジストリからイメージをインポートする代わりに、Daytona SDK を使ってプログラムからイメージを定義できます。
 
-## 概要
+Declarative Builder システムは、主に次の 2 つのワークフローをサポートします。
 
-宣言的ビルダーシステムは、主に次の2つのワークフローをサポートします。
+1. [**宣言的イメージ**](#declarative-image-building): サンドボックスを作成するときに、さまざまな依存関係を持つイメージを *オンデマンドで* ビルドする
+2. [**事前ビルド済みスナップショット**](#creating-pre-built-snapshots): 複数のサンドボックス間で共有できる、*すぐに使える* [スナップショット](/docs/snapshots) を作成して登録する
 
-1. **動的イメージ**: サンドボックス（Daytonaが管理する隔離された一時的な実行環境）作成時に、依存関係の異なるイメージをオンデマンドでビルド
-2. **事前構築済みスナップショット**: 複数のサンドボックスで共有可能な、すぐに使えるスナップショット（サンドボックス作成に使う事前設定済みの再利用可能なイメージ／テンプレート）を作成・登録
+## 宣言的イメージをビルドする \{#build-declarative-images\}
 
-以下の機能を提供します。完全なAPIリファレンスとメソッドシグネチャについては、[Python](/docs/ja/python-sdk/common/image) および [TypeScript](/docs/ja/typescript-sdk/image) のSDKリファレンスを参照してください。
+Daytona では、サンドボックスを作成する際に、その場で宣言的イメージを作成できるオプションを用意しています。これは、個別のスナップショットを作成することなく、素早く反復開発を行いたい場合に最適です。
 
-### ベースイメージの選択
-
-- **Debianベースの環境**（Pythonと必須のビルドツールをプリインストール）
-- **カスタムベースイメージ**（任意のDockerレジストリまたは既存のコンテナイメージ由来）
-- **Dockerfileの取り込み**（既存のDockerfileのインポートと拡張）
-
-### パッケージ管理
-
-- **Pythonパッケージのインストール**（`pip`、`requirements.txt`、`pyproject.toml`に対応）
-- **高度なpipオプション**（カスタムインデックス、find-links、オプション依存関係など）
-
-### ファイルシステム操作
-
-- **ファイルのコピー**（ローカル開発環境からイメージへ）
-- **ディレクトリのコピー**（大量ファイル転送やプロジェクトセットアップに対応）
-- **作業ディレクトリの設定**（デフォルトの実行コンテキストを指定）
-
-### 環境構成
-
-- **環境変数**（アプリケーション設定やシークレット用）
-- **シェルコマンドの実行**（イメージビルド中）
-- **コンテナのランタイム設定**（エントリポイントやデフォルトコマンドを含む）
-
-詳細なメソッドシグネチャや使用例については、[Python](/docs/ja/python-sdk/common/image) および [TypeScript](/docs/ja/typescript-sdk/image) のSDKリファレンスを参照してください。
-
-## 動的イメージビルド
-
-サンドボックス作成時に、その場でイメージを生成できます。既存のどのイメージにも含まれていない特定の依存関係を持つ新しいサンドボックスを用意したい場合に有用です。
-
-新規のイメージを定義することも、既存のイメージに特定の依存関係を追加することも可能です（例: `pip` パッケージや `apt-get install` コマンド）。\
-これにより、ビルド処理のために自前のコンピュートリソースを使う必要がなくなり、Daytonaのインフラストラクチャにオフロードできます。\
-各バージョンごとに個別のスナップショットを登録・検証する必要もありません。依存関係リストを素早く反復しやすくなり、また、数十〜数百の類似ユースケース/セットアップ向けにわずかに異なるバージョンを用意することもできます。
+宣言的イメージは 24 時間キャッシュされ、同じスクリプトを実行する際に自動的に再利用されます。そのため、同じランナー上での後続の実行はほぼ瞬時に完了します。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
-    # Define the dynamic image
-    dynamic_image = (
-        Image.debian_slim("3.12")
-        .pip_install(["pytest", "pytest-cov", "mypy", "ruff", "black", "gunicorn"])
-        .run_commands("apt-get update && apt-get install -y git curl", "mkdir -p /home/daytona/project")
-        .workdir("/home/daytona/project")
-        .env({"ENV_VAR": "My Environment Variable"})
-        .add_local_file("file_example.txt", "/home/daytona/project/file_example.txt")
+    # Python パッケージを含む宣言的イメージを定義
+    declarative_image = (
+      Image.debian_slim("3.12")
+      .pip_install(["requests", "pytest"])
+      .workdir("/home/daytona")
     )
 
-    # Create a new Sandbox with the dynamic image and stream the build logs
-
+    # 宣言的イメージで新しいサンドボックスを作成し、ビルドログをストリームする
     sandbox = daytona.create(
-        CreateSandboxFromImageParams(
-            image=dynamic_image,
-        ),
-        timeout=0,
-        on_snapshot_create_logs=print,
+      CreateSandboxFromImageParams(image=declarative_image),
+      timeout=0,
+      on_snapshot_create_logs=print,
     )
-
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    // Define the dynamic image
-    const dynamicImage = Image.debianSlim('3.13')
-        .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
-        .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
-        .workdir('/home/daytona/project')
-        .env({
-          NODE_ENV: 'development',
-        })
-        .addLocalFile('file_example.txt', '/home/daytona/project/file_example.txt')
+    // Python パッケージを含む宣言的イメージを定義
+    const declarativeImage = Image.debianSlim('3.12')
+      .pipInstall(['requests', 'pytest'])
+      .workdir('/home/daytona')
 
-    // Create a new Sandbox with the dynamic image and stream the build logs
+    // 宣言的イメージで新しいサンドボックスを作成し、ビルドログをストリームする
     const sandbox = await daytona.create(
       {
-        image: dynamicImage,
+        image: declarativeImage,
       },
       {
         timeout: 0,
@@ -98,69 +55,77 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
     )
     ```
   </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Python パッケージを含むシンプルな宣言的イメージを定義
+    declarative_image = Daytona::Image
+      .debian_slim('3.12')
+      .pip_install(['requests', 'pytest'])
+      .workdir('/home/daytona')
+
+    # 宣言的イメージで新しいサンドボックスを作成し、ビルドログをストリームする
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromImageParams.new(image: declarative_image),
+      timeout: 0,
+      on_snapshot_create_logs: proc { |chunk| puts chunk }
+    )
+    ```
+  </TabItem>
 </Tabs>
 
-:::tip
-動的イメージからのサンドボックス作成を一度実行すると、そのイメージは24時間キャッシュされ、同じランナー上での後続のサンドボックス作成はほぼ即時に完了します。
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
 
-つまり、毎回同じスクリプトを使えば、Daytonaがイメージのキャッシュを適切に処理します。
-:::
+> [**CreateSandboxFromImageParams (Python SDK)**](/docs/python-sdk/sync/daytona#createsandboxfromimageparams)
+>
+> [**CreateSandboxFromImageParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createsandboxfromimageparams)
+>
+> [**CreateSandboxFromImageParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromimageparams)
 
-## 事前ビルド済みスナップショットの作成
+:::note
+宣言的ビルダーを使用する際は、次のベストプラクティスに従ってください。
 
-特定の依存関係を含む新しいDaytonaのスナップショットを準備し、必要なときに複数のサンドボックスで即座に使いたい場合は、事前ビルド済みのスナップショットを作成できます。
+* **レイヤー最適化**: 関連する処理をまとめて、Docker レイヤー数を最小限に抑える
 
-このスナップショットはDaytonaダッシュボード上に表示され続け、永続的にキャッシュされるため、再ビルドは不要です。
+* **キャッシュ活用**: 同一のビルドコマンドとコンテキストはキャッシュされ、後続のビルドはほぼ瞬時に完了する
+
+* **セキュリティ**: アプリケーションのワークロード用に非 root ユーザーを作成する
+
+* **リソース効率**: 適切な場合は slim ベースイメージを使用する
+
+* **コンテキストの最小化**: ビルドコンテキストには必要なファイルのみを含める
+  :::
+
+## 事前ビルド済みスナップショットを作成する \{#create-pre-built-snapshots\}
+
+Daytona では、複数のサンドボックスで再利用できる [事前ビルド済みスナップショットを作成](/docs/snapshots#create-snapshots)する機能を提供しています。
+
+スナップショットは [Daytona Dashboard ↗](https://app.daytona.io/dashboard/snapshots) 上に表示され、永続的にキャッシュされるため、再ビルドなしで即時に利用できます。
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
-    # スナップショット用の一意の名前を生成
-    snapshot_name = f"python-example:{int(time.time())}"
-
-    # イメージに追加するデータを含むローカルファイルを作成
-
-    with open("file_example.txt", "w") as f:
-        f.write("Hello, World!")
-
-    # 一般的なデータサイエンスパッケージを含むPythonイメージを作成
+    # Python データサイエンス用イメージを作成
+    snapshot_name = "data-science-snapshot"
 
     image = (
-        Image.debian_slim("3.12")
-        .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
-        .run_commands(
-            "apt-get update && apt-get install -y git",
-            "groupadd -r daytona && useradd -r -g daytona -m daytona",
-            "mkdir -p /home/daytona/workspace",
-        )
-        .dockerfile_commands(["USER daytona"])
-        .workdir("/home/daytona/workspace")
-        .env({"MY_ENV_VAR": "My Environment Variable"})
-        .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
+      Image.debian_slim("3.12")
+      .pip_install(["pandas", "numpy"])
+      .workdir("/home/daytona")
     )
 
-    # スナップショットを作成し、ビルドログをストリーミング出力
-
-    print(f"=== Creating Snapshot: {snapshot_name} ===")
+    # スナップショットを作成し、ビルドログをストリーミングする
     daytona.snapshot.create(
-        CreateSnapshotParams(
-            name=snapshot_name,
-            image=image,
-            resources=Resources(
-                cpu=1,
-                memory=1,
-                disk=3,
-            ),
-        ),
-        on_logs=print,
+      CreateSnapshotParams(
+        name=snapshot_name,
+        image=image,
+      ),
+    on_logs=print,
     )
 
-    # 事前ビルド済みのスナップショットを使って新しいサンドボックスを作成
-
+    # 事前ビルド済みスナップショットを使って新しいサンドボックスを作成
     sandbox = daytona.create(
-        CreateSandboxFromSnapshotParams(
-            snapshot=snapshot_name
-        )
+    CreateSandboxFromSnapshotParams(snapshot=snapshot_name)
     )
 
     ```
@@ -168,79 +133,387 @@ Daytona（サンドボックスの作成・管理プラットフォーム）の�
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
-    // イメージ用の一意の名前を生成
-    const snapshotName = `node-example:${Date.now()}`
-    console.log(`Creating Snapshot with name: ${snapshotName}`)
+    // Python データサイエンス用イメージを作成
+    const snapshotName = 'data-science-snapshot'
 
-    // スナップショットに追加するデータを含むローカルファイルを作成
-    const localFilePath = 'file_example.txt'
-    const localFileContent = 'Hello, World!'
-    fs.writeFileSync(localFilePath, localFileContent)
-
-    // 一般的なデータサイエンスパッケージを含むPythonイメージを作成
     const image = Image.debianSlim('3.12')
-        .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-        .runCommands(
-          'apt-get update && apt-get install -y git',
-          'groupadd -r daytona && useradd -r -g daytona -m daytona',
-          'mkdir -p /home/daytona/workspace'
-        )
-        .dockerfileCommands(['USER daytona'])
-        .workdir('/home/daytona/workspace')
-        .env({
-            MY_ENV_VAR: 'My Environment Variable',
-        })
-        .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
+      .pipInstall(['pandas', 'numpy'])
+      .workdir('/home/daytona')
 
-    # スナップショットを作成し、ビルドログをストリーミング出力
-    console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+    // スナップショットを作成し、ビルドログをストリーミングする
     await daytona.snapshot.create(
-        {
-          name: snapshotName,
-          image,
-          resources: {
-            cpu: 1,
-            memory: 1,
-            disk: 3,
-          },
-        },
-        {
-          onLogs: console.log,
-        },
-      )
+      {
+        name: snapshotName,
+        image,
+      },
+      {
+        onLogs: console.log,
+      }
+    )
 
-    // 事前ビルド済みのスナップショットを使って新しいサンドボックスを作成
+    // 事前ビルド済みスナップショットを使って新しいサンドボックスを作成
     const sandbox = await daytona.create({
-        snapshot: snapshotName,
+      snapshot: snapshotName,
     })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # シンプルな Python データサイエンス用イメージを作成
+    snapshot_name = 'data-science-snapshot'
+
+    image = Daytona::Image
+      .debian_slim('3.12')
+      .pip_install(['pandas', 'numpy'])
+      .workdir('/home/daytona')
+
+    # スナップショットを作成し、ビルドログをストリーミングする
+    daytona.snapshot.create(
+      Daytona::CreateSnapshotParams.new(
+        name: snapshot_name,
+        image: image
+      ),
+      on_logs: proc { |chunk| puts chunk }
+    )
+
+    # 事前ビルド済みスナップショットを使って新しいサンドボックスを作成
+    sandbox = daytona.create(
+      Daytona::CreateSandboxFromSnapshotParams.new(snapshot: snapshot_name)
+    )
     ```
   </TabItem>
 </Tabs>
 
-## 既存の Dockerfile を利用する
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
 
-既存の Dockerfile をイメージのベースとして使いたい場合は、次のようにインポートできます。
+> [**CreateSnapshotParams (Python SDK)**](/docs/python-sdk/sync/snapshot#createsnapshotparams)
+>
+> [**CreateSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/snapshot#createsnapshotparams)
+>
+> [**CreateSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/snapshot#createsnapshotparams)
+
+## イメージの構成 \{#image-configuration\}
+
+Daytona では、Daytona SDK を使用してイメージをプログラムで定義するためのオプションが提供されています。ベースイメージの指定、パッケージのインストール、ファイルの追加、環境変数の設定などを行えます。
+
+完全な API リファレンスとメソッドシグネチャについては、[Python](/docs/python-sdk/common/image) および [TypeScript](/docs/typescript-sdk/image) の SDK リファレンスを参照してください。
+
+### ベースイメージの選択 \{#base-image-selection\}
+
+Daytona では、ベースイメージを選択するオプションを提供しています。次のスニペットは、ベースイメージの選択と構成方法を示します：
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
     ```python
+    # ベースイメージから作成
+    image = Image.base("python:3.12-slim-bookworm")
+
+    # Python 3.12 を含む Debian slim イメージを使用
+    image = Image.debian_slim("3.12")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ベースイメージから作成
+    const image = Image.base('python:3.12-slim-bookworm')
+
+    // Python 3.12 を含む Debian slim イメージを使用
+    const image = Image.debianSlim('3.12')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ベースイメージから作成
+    image = Daytona::Image.base('python:3.12-slim-bookworm')
+
+    # Python 3.12 を含む Debian slim イメージを使用
+    image = Daytona::Image.debian_slim('3.12')
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/) および [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください:
+
+> [**base (Python SDK)**](/docs/python-sdk/common/image#imagebase)
+>
+> [**base (TypeScript SDK)**](/docs/typescript-sdk/image#base)
+>
+> [**debian&#95;slim (Python SDK)**](/docs/python-sdk/common/image#imagedebian_slim)
+>
+> [**debianSlim (TypeScript SDK)**](/docs/typescript-sdk/image#debianslim)
+
+### パッケージ管理 \{#package-management\}
+
+Daytona では、イメージにパッケージおよび依存関係をインストールするための機能を提供しています。
+次のスニペットは、イメージにパッケージと依存関係をインストールする方法を示しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # pip パッケージを追加
+    image = Image.debian_slim("3.12").pip_install("requests", "pandas")
+
+    # requirements.txt からインストール
+    image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.txt")
+
+    # pyproject.toml からインストール（オプション依存関係あり）
+    image = Image.debian_slim("3.12").pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // pip パッケージを追加
+    const image = Image.debianSlim('3.12').pipInstall(['requests', 'pandas'])
+
+    // requirements.txt からインストール
+    const image = Image.debianSlim('3.12').pipInstallFromRequirements('requirements.txt')
+
+    // pyproject.toml からインストール（オプション依存関係あり）
+    const image = Image.debianSlim('3.12').pipInstallFromPyproject('pyproject.toml', {
+      optionalDependencies: ['dev']
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # pip パッケージを追加
+    image = Daytona::Image.debian_slim('3.12').pip_install(['requests', 'pandas'])
+
+    # requirements.txt からインストール
+    image = Daytona::Image.debian_slim('3.12').pip_install_from_requirements('requirements.txt')
+
+    # pyproject.toml からインストール（オプション依存関係あり）
+    image = Daytona::Image.debian_slim('3.12').pip_install_from_pyproject('pyproject.toml', 
+      optional_dependencies: ['dev']
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/) および [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください。
+
+> [**pip&#95;install (Python SDK)**](/docs/python-sdk/common/image#imagepip_install)
+>
+> [**pipInstall (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstall)
+>
+> [**pip&#95;install&#95;from&#95;requirements (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_requirements)
+>
+> [**pipInstallFromRequirements (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfromrequirements)
+>
+> [**pip&#95;install&#95;from&#95;pyproject (Python SDK)**](/docs/python-sdk/common/image#imagepip_install_from_pyproject)
+>
+> [**pipInstallFromPyproject (TypeScript SDK)**](/docs/typescript-sdk/image#pipinstallfrompyproject)
+
+### ファイルシステム操作 \{#file-system-operations\}
+
+Daytona では、イメージにファイルやディレクトリを追加するための機能を提供しています。
+以下のスニペットでは、イメージにファイルやディレクトリを追加する方法を示します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ローカルファイルを追加
+    image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/package.json")
+
+    # ローカルディレクトリを追加
+    image = Image.debian_slim("3.12").add_local_dir("src", "/home/daytona/src")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ローカルファイルを追加
+    const image = Image.debianSlim('3.12').addLocalFile('package.json', '/home/daytona/package.json')
+
+    // ローカルディレクトリを追加
+    const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ローカルファイルを追加
+    image = Daytona::Image.debian_slim('3.12').add_local_file('package.json', '/home/daytona/package.json')
+
+    # ローカルディレクトリを追加
+    image = Daytona::Image.debian_slim('3.12').add_local_dir('src', '/home/daytona/src')
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/) および [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください:
+
+> [**add&#95;local&#95;file (Python SDK)**](/docs/python-sdk/common/image#imageadd_local_file)
+>
+> [**add&#95;local&#95;dir (Python SDK)**](/docs/python-sdk/common/image#imageadd_local_dir)
+>
+> [**addLocalFile (TypeScript SDK)**](/docs/typescript-sdk/image#addlocalfile)
+>
+> [**addLocalDir (TypeScript SDK)**](/docs/typescript-sdk/image#addlocaldir)
+
+### 環境設定 \{#environment-configuration\}
+
+Daytona では、環境変数と作業ディレクトリを設定するためのオプションを提供しています。以下のスニペットは、環境変数と作業ディレクトリを設定する方法を示しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 環境変数を設定
+    image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
+
+    # 作業ディレクトリを設定
+    image = Image.debian_slim("3.12").workdir("/home/daytona")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 環境変数を設定
+    const image = Image.debianSlim('3.12').env({ PROJECT_ROOT: '/home/daytona' })
+
+    // 作業ディレクトリを設定
+    const image = Image.debianSlim('3.12').workdir('/home/daytona')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 環境変数を設定
+    image = Daytona::Image.debian_slim('3.12').env('PROJECT_ROOT': '/home/daytona')
+
+    # 作業ディレクトリを設定
+    image = Daytona::Image.debian_slim('3.12').workdir('/home/daytona')
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/) および [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください。
+
+> [**env（Python SDK）**](/docs/python-sdk/common/image#imageenv)
+>
+> [**workdir（Python SDK）**](/docs/python-sdk/common/image#imageworkdir)
+>
+> [**env（TypeScript SDK）**](/docs/typescript-sdk/image#env)
+>
+> [**workdir（TypeScript SDK）**](/docs/typescript-sdk/image#workdir)
+
+### コマンドとエントリポイント \{#commands-and-entrypoints\}
+
+Daytona では、ビルド時にコマンドを実行し、コンテナの起動時の挙動を設定するためのオプションを提供しています。\
+次のスニペットは、ビルド時にコマンドを実行し、コンテナの起動時の挙動を設定する方法を示しています:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ビルド時にシェルコマンドを実行
+    image = Image.debian_slim("3.12").run_commands(
+        'apt-get update && apt-get install -y git',
+        'groupadd -r daytona && useradd -r -g daytona -m daytona',
+        'mkdir -p /home/daytona/workspace'
+    )
+
+    # エントリポイントを設定
+    image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
+
+    # デフォルトのコマンドを設定
+    image = Image.debian_slim("3.12").cmd(["/bin/bash"])
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ビルド時にシェルコマンドを実行
+    const image = Image.debianSlim('3.12').runCommands(
+        'apt-get update && apt-get install -y git',
+        'groupadd -r daytona && useradd -r -g daytona -m daytona',
+        'mkdir -p /home/daytona/workspace'
+    )
+
+    // エントリポイントを設定
+    const image = Image.debianSlim('3.12').entrypoint(['/bin/bash'])
+
+    // デフォルトのコマンドを設定
+    const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ビルド時にシェルコマンドを実行
+    image = Daytona::Image.debian_slim('3.12').run_commands(
+      'apt-get update && apt-get install -y git',
+      'groupadd -r daytona && useradd -r -g daytona -m daytona',
+      'mkdir -p /home/daytona/workspace'
+    )
+
+    # エントリポイントを設定
+    image = Daytona::Image.debian_slim('3.12').entrypoint(['/bin/bash'])
+
+    # デフォルトのコマンドを設定
+    image = Daytona::Image.debian_slim('3.12').cmd(['/bin/bash'])
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/) と [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください:
+
+> [**run&#95;commands (Python SDK)**](/docs/python-sdk/common/image#imagerun_commands)
+>
+> [**entrypoint (Python SDK)**](/docs/python-sdk/common/image#imageentrypoint)
+>
+> [**cmd (Python SDK)**](/docs/python-sdk/common/image#imagecmd)
+>
+> [**runCommands (TypeScript SDK)**](/docs/typescript-sdk/image#runcommands)
+>
+> [**entrypoint (TypeScript SDK)**](/docs/typescript-sdk/image#entrypoint)
+>
+> [**cmd (TypeScript SDK)**](/docs/typescript-sdk/image#cmd)
+
+### Dockerfile の統合 \{#dockerfile-integration\}
+
+Daytona では、既存の Dockerfile を取り込んだり、カスタムの Dockerfile コマンドを追加したりするためのオプションを提供しています。
+次のスニペットは、既存の Dockerfile を取り込む方法と、カスタムの Dockerfile コマンドを追加する方法を示しています:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # カスタムの Dockerfile コマンドを追加
+    image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
+
+    # 既存の Dockerfile を使用
+    image = Image.from_dockerfile("Dockerfile")
+
+    # 既存の Dockerfile を拡張
     image = Image.from_dockerfile("app/Dockerfile").pip_install(["numpy"])
     ```
   </TabItem>
 
   <TabItem label="TypeScript" icon="seti:typescript">
     ```typescript
+    // カスタムの Dockerfile コマンドを追加
+    const image = Image.debianSlim('3.12').dockerfileCommands(['RUN echo "Hello, world!"'])
+
+    // 既存の Dockerfile を使用
+    const image = Image.fromDockerfile('Dockerfile')
+
+    // 既存の Dockerfile を拡張
     const image = Image.fromDockerfile("app/Dockerfile").pipInstall(['numpy'])
     ```
   </TabItem>
 </Tabs>
 
-## ベストプラクティス
+詳細については、[Python SDK](/docs/ja/python-sdk/) および [TypeScript SDK](/docs/ja/typescript-sdk/) のリファレンスを参照してください:
 
-1. **レイヤー最適化**: 関連する操作をまとめて、Dockerのレイヤー数を抑える
-2. **キャッシュの活用**: 同一のビルドコマンドとコンテキストはキャッシュされ、以降のビルドはほぼ即時に完了する
-3. **セキュリティ**: アプリケーションのワークロード用に非rootユーザーを作成する
-4. **リソース効率**: 適切な場合はスリムなベースイメージを使用する
-5. **コンテキストの最小化**: ビルドコンテキストには必要なファイルだけを含める
-
-宣言的ビルダーは、Dockerの強力さと柔軟性を損なうことなく、コンテナイメージ作成に対するプログラム的で保守しやすいアプローチを提供し、開発ワークフローを効率化します。
+> [**dockerfile&#95;commands (Python SDK)**](/docs/python-sdk/common/image#imagedockerfile_commands)
+>
+> [**from&#95;dockerfile (Python SDK)**](/docs/python-sdk/common/image#imagefrom_dockerfile)
+>
+> [**dockerfileCommands (TypeScript SDK)**](/docs/typescript-sdk/image#dockerfilecommands)
+>
+> [**fromDockerfile (TypeScript SDK)**](/docs/typescript-sdk/image#fromdockerfile)

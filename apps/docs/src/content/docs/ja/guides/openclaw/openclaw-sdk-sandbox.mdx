@@ -1,0 +1,96 @@
+---
+title: Daytona SDK を使って Daytona サンドボックス上で OpenClaw を実行する
+description: Daytona SDK を使用して Daytona サンドボックス内で OpenClaw を実行する方法を学びます。サンドボックスをプログラムで作成し、プレビュー URL 経由でダッシュボードにアクセスします。
+---
+
+import { Image } from 'astro:assets'
+
+import openclawSandbox from '../../../../../assets/docs/images/openclaw-sandbox.gif'
+
+このガイドでは、Daytona SDK を使用して Daytona のサンドボックス内で [OpenClaw](https://openclaw.ai/) を実行する方法を説明します。スクリプトは OpenClaw があらかじめ構成されたサンドボックスを自動的に作成・設定し、ブラウザで OpenClaw を利用するための認証済みの [プレビュー URL](/docs/ja/preview/) を提供します。
+
+***
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+スクリプトを実行すると、Daytona サンドボックスが作成され、その中で OpenClaw ゲートウェイが起動し、ダッシュボード用のプレビューリンクが表示されます。
+
+```
+$ npm start
+Creating Daytona sandbox...
+Configuring OpenClaw...
+Starting OpenClaw...
+(Ctrl+C to shut down and delete the sandbox)
+
+🔗 Secret link to Control UI: https://18789-xxxx.proxy.daytona.works?token=...
+```
+
+ブラウザで提供されたリンクを開き、OpenClaw Control UI に接続します。このリンクには設定トークンが含まれており、誰でもデバイス承認なしに OpenClaw に接続できます。
+
+<Image src={openclawSandbox} alt="Daytona のサンドボックスで実行中の OpenClaw Control UI" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+Control UI を使ってアシスタントとチャットしたり、Telegram や WhatsApp を設定したり、セッションを管理したりできます。スクリプトを終了（Ctrl+C）しても、[サンドボックスの永続化を無効にしていない限り](/docs/ja/guides/openclaw/openclaw-sdk-sandbox#4-key-constants)、サンドボックスは削除されません。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+Daytona の[リポジトリ](https://github.com/daytonaio/daytona)をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/openclaw
+```
+
+#### 環境設定 \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から API キーを取得します。
+
+`.env.example` を `.env` にコピーし、Daytona の API キーを追記します:
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+```
+
+デフォルトの OpenClaw の設定は `openclaw.json` に保存されています。[設定リファレンス](https://docs.openclaw.ai/gateway/configuration-reference) に従ってカスタマイズできます。また、`.env.sandbox` に追加の環境変数（例: Claude 用の `ANTHROPIC_API_KEY`）を追加することもでき、それらはサンドボックスに自動的に読み込まれます。
+
+#### サンプルを実行する \{#run-the-example\}
+
+:::note[Node.js]
+Node.js 18 以上が必要です。
+:::
+
+依存関係をインストールして実行します：
+
+```bash
+npm install
+npm start
+```
+
+このスクリプトはサンドボックスを作成し、OpenClaw ゲートウェイを起動し、URL にトークンを含むシークレットリンクを表示します。
+
+### 3. 仕組み \{#3-how-it-works\}
+
+1. スクリプトは `DAYTONA_SNAPSHOT`（例: `daytona-medium`）を使用して [Daytona サンドボックス](/docs/ja/sandboxes) を作成し、`.env.sandbox` から環境変数を読み込みます。
+2. ローカルの `openclaw.json` は組み込みの設定とマージされ、サンドボックス内の `~/.openclaw/openclaw.json` に書き込まれます。
+3. OpenClaw ゲートウェイは、[プロセス実行](/docs/ja/process-code-execution) を介してサンドボックス内で `OPENCLAW_PORT` 番ポート上に起動されます。
+4. 署名付きの [プレビューリンク](/docs/ja/preview/) が生成され、トークンが `?token=...` として付加されます。このリンクが出力されるので、それを開いて Control UI にアクセスできます。
+5. Ctrl+C を押すと、`PERSIST_SANDBOX` が `true` でない限りサンドボックスは削除されます。
+
+### 4. 主要な定数 \{#4-key-constants\}
+
+[`src/index.ts`](https://github.com/daytonaio/daytona/blob/main/guides/typescript/openclaw/src/index.ts) 内の定数を編集することで、動作を変更できます。
+
+| Constant | Default | Description |
+|----------|---------|-------------|
+| `PERSIST_SANDBOX` | true | true の場合、スクリプト終了時にサンドボックスは削除されません |
+| `MAKE_PUBLIC` | true | Daytona 組織内に限定せず、誰でもサンドボックスへアクセスできるようにします |
+| `OPENCLAW_PORT` | 18789 | OpenClaw Gateway および Control UI が利用するポート |
+| `SHOW_LOGS` | true | OpenClaw の stdout/stderr をターミナルへストリーミングします |
+
+**主な利点:**
+
+* Daytona サンドボックス内での安全かつ分離された環境での実行
+* デバイス承認は不要 — URL 内のトークンと `allowInsecureAuth` によりペアリングをスキップします
+* 秘密のプレビューリンク経由で Control UI とチャネルへアクセス可能
+* オプション: 終了後もサンドボックスを稼働させ続けることが可能 (`PERSIST_SANDBOX`)
