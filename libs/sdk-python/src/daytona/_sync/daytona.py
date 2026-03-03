@@ -53,6 +53,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
+from ..internal.event_subscriber import SyncEventSubscriber
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -224,6 +225,12 @@ class Daytona:
         self.snapshot: SnapshotService = SnapshotService(
             SnapshotsApi(self._api_client), self._object_storage_api, self._target
         )
+
+        # Event subscriber for real-time sandbox updates
+        self._event_subscriber: SyncEventSubscriber = SyncEventSubscriber(
+            self._api_url, self._api_key or self._jwt_token or "", self._organization_id
+        )
+        self._event_subscriber.ensure_connected()
 
         # Initialize OpenTelemetry if enabled
         otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or os.environ.get(
@@ -473,6 +480,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -567,6 +575,7 @@ class Daytona:
             self._toolbox_api_client,
             self._sandbox_api,
             code_toolbox,
+            event_subscriber=self._event_subscriber,
         )
 
     @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -634,6 +643,7 @@ class Daytona:
                     self._toolbox_api_client,
                     self._sandbox_api,
                     self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    event_subscriber=self._event_subscriber,
                 )
                 for sandbox in response.items
             ],
