@@ -72,10 +72,9 @@ export class SandboxActivityService {
    * Called during sandbox creation to seed the initial activity timestamp.
    */
   async initializeActivity(sandboxId: string, timestamp: Date): Promise<void> {
-    await this.dataSource.getRepository(SandboxLastActivity).insert({
-      sandboxId,
-      lastActivityAt: timestamp,
-    })
+    await this.dataSource
+      .getRepository(SandboxLastActivity)
+      .upsert({ sandboxId, lastActivityAt: timestamp }, ['sandboxId'])
     await this.redis.zadd(REDIS_ACTIVITY_KEY, timestamp.getTime(), sandboxId)
   }
 
