@@ -32,7 +32,6 @@ class AsyncEventSubscriber:
     _fail_error: str | None
     _listeners: dict[str, list[AsyncEventHandler]]
     _registered_events: set[str]
-    _lock: asyncio.Lock
     _disconnect_task: asyncio.Task[None] | None
 
     _DISCONNECT_DELAY: float = 30.0
@@ -47,7 +46,6 @@ class AsyncEventSubscriber:
         self._fail_error = None
         self._listeners = {}
         self._registered_events = set()
-        self._lock = asyncio.Lock()
         self._disconnect_task = None
         self._connect_task: asyncio.Task[None] | None = None
 

@@ -5,6 +5,7 @@ package daytona
 
 import (
 	"context"
+	stderrors "errors"
 	"fmt"
 	"time"
 
@@ -224,6 +225,14 @@ func (s *Sandbox) waitForState(
 
 		// Poll: refresh data and check state
 		refreshErr := s.doRefreshData(ctx)
+		if refreshErr != nil && safeRefresh {
+			// When safeRefresh is true and the sandbox returns 404,
+			// treat it as success — the sandbox has been destroyed.
+			var notFoundErr *errors.DaytonaNotFoundError
+			if stderrors.As(refreshErr, &notFoundErr) {
+				s.State = apiclient.SANDBOXSTATE_DESTROYED
+			}
+		}
 		if refreshErr == nil || safeRefresh {
 			for _, target := range targetStates {
 				if s.State == target {
@@ -572,7 +581,7 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 	}
 
 	err := s.waitForState(ctx,
-		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STOPPED},
+		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_STOPPED, apiclient.SANDBOXSTATE_DESTROYED},
 		[]apiclient.SandboxState{apiclient.SANDBOXSTATE_ERROR, apiclient.SANDBOXSTATE_BUILD_FAILED},
 		false,
 	)

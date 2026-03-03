@@ -618,7 +618,7 @@ module Daytona
       state_changed = ConditionVariable.new
       result_state = nil
 
-      unsubscribe = @event_subscriber.subscribe(id, events: ['sandbox.state.updated']) do |_event_name, data|
+      unsubscribe = @event_subscriber&.subscribe(id, events: ['sandbox.state.updated']) do |_event_name, data|
         next unless data.is_a?(Hash)
         next if result_state # Already resolved
 
@@ -669,12 +669,14 @@ module Daytona
                 "Sandbox #{id} entered error state: #{result_state}, error reason: #{error_reason}"
         end
       ensure
-        unsubscribe.call
+        unsubscribe&.call
       end
     end
 
     def subscribe_to_events
-      @event_subscriber&.ensure_connected
+      return unless @event_subscriber
+
+      @event_subscriber.ensure_connected
 
       @event_subscriber.subscribe(
         id,
