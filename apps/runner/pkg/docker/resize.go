@@ -30,7 +30,7 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 			return fmt.Errorf("disk resize requires stopped container")
 		}
 
-		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize")
+		err = d.ContainerDiskResize(ctx, sandboxId, float64(sandboxDto.Disk), sandboxDto.Cpu, sandboxDto.Memory, "resize", nil)
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func (d *DockerClient) Resize(ctx context.Context, sandboxId string, sandboxDto 
 // Optionally updates CPU/memory at the same time (0 = don't change).
 // Used by both storage recovery and disk resize.
 // Container must be stopped before calling this function.
-func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string, newStorageGB float64, cpu int64, memory int64, operationName string) error {
+func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string, newStorageGB float64, cpu int64, memory int64, operationName string, registry *dto.RegistryDTO) error {
 	if d.filesystem != "xfs" {
 		return fmt.Errorf("%s requires XFS filesystem, current filesystem: %s", operationName, d.filesystem)
 	}
@@ -112,13 +112,24 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 	}
 
 	// Ensure the image is available for container recreation.
-	// If the image tag was pruned (e.g., declarative-build or backup snapshot),
-	// fall back to the image ID — Docker retains layers while the container exists.
+	// ImageInspect works for both tags and IDs, unlike ImageExists which only matches tags.
+	// If the image was removed (e.g., after a backup push), pull it from the registry if provided.
 	imageRef := originalContainer.Config.Image
-	imageExists, _ := d.ImageExists(ctx, imageRef, true)
-	if !imageExists {
-		d.logger.Warn("Image is not found by tag, falling back to image ID", "imageRef", imageRef, "imageID", originalContainer.Image)
-		originalContainer.Config.Image = originalContainer.Image
+	_, err = d.apiClient.ImageInspect(ctx, imageRef)
+	if err != nil {
+		if registry == nil {
+			d.logger.WarnContext(ctx, "Image not found by tag, falling back to image ID",
+				"imageRef", imageRef, "imageID", originalContainer.Image)
+			originalContainer.Config.Image = originalContainer.Image
+		} else {
+			d.logger.WarnContext(ctx, "Image not found locally, pulling from registry before resize",
+				"sandboxId", sandboxId, "imageRef", imageRef)
+			_, pullErr := d.PullImage(ctx, imageRef, registry)
+			if pullErr != nil {
+				_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
+				return fmt.Errorf("image %s not available locally and pull failed: %w", imageRef, pullErr)
+			}
+		}
 	}
 
 	// Create new container with new storage

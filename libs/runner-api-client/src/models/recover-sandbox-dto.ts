@@ -16,6 +16,9 @@
 // May contain unused imports in some cases
 // @ts-ignore
 import type { DtoVolumeDTO } from './dto-volume-dto';
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RegistryDTO } from './registry-dto';
 
 /**
  * 
@@ -83,6 +86,12 @@ export interface RecoverSandboxDTO {
      * @memberof RecoverSandboxDTO
      */
     'osUser': string;
+    /**
+     * 
+     * @type {RegistryDTO}
+     * @memberof RecoverSandboxDTO
+     */
+    'registry'?: RegistryDTO;
     /**
      * 
      * @type {string}

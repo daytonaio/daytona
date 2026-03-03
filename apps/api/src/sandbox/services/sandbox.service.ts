@@ -87,6 +87,7 @@ import {
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 import { Region } from '../../region/entities/region.entity'
+import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -120,6 +121,7 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    private readonly dockerRegistryService: DockerRegistryService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -1359,7 +1361,7 @@ export class SandboxService {
     return updatedSandbox
   }
 
-  async recover(sandboxIdOrName: string, organization: Organization): Promise<Sandbox> {
+  async recover(sandboxIdOrName: string, organization: Organization, skipStart = false): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organization.id)
 
     if (sandbox.state !== SandboxState.ERROR) {
@@ -1385,8 +1387,12 @@ export class SandboxService {
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
+    const backupRegistry = sandbox.backupRegistryId
+      ? ((await this.dockerRegistryService.findOne(sandbox.backupRegistryId)) ?? undefined)
+      : undefined
+
     try {
-      await runnerAdapter.recoverSandbox(sandbox)
+      await runnerAdapter.recoverSandbox(sandbox, backupRegistry)
     } catch (error) {
       if (error instanceof Error && error.message.includes('storage cannot be further expanded')) {
         const errorMsg = `Sandbox storage cannot be further expanded. Maximum expansion of ${(sandbox.disk * 0.1).toFixed(2)}GB (10% of original ${sandbox.disk.toFixed(2)}GB) has been reached. Please contact support for further assistance.`
@@ -1406,6 +1412,10 @@ export class SandboxService {
       updateData,
       whereCondition: { state: SandboxState.ERROR },
     })
+
+    if (skipStart) {
+      return await this.findOneByIdOrName(sandbox.id, organization.id)
+    }
 
     // Now that sandbox is in STOPPED state, use the normal start flow
     // This handles quota validation, pending usage, event emission, etc.

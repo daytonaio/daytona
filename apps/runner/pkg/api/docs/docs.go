@@ -1740,6 +1740,9 @@ const docTemplate = `{
                 "osUser": {
                     "type": "string"
                 },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
                     "type": "string"
                 },
