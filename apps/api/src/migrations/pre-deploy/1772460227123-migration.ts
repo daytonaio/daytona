@@ -64,6 +64,7 @@ export class Migration1772460227123 implements MigrationInterface {
       SET "lastActivityAt" = s."lastActivityAt"
       FROM "sandbox" s
       WHERE sla."sandboxId" = s.id
+        AND s."lastActivityAt" IS NOT NULL
         AND sla."lastActivityAt" IS DISTINCT FROM s."lastActivityAt"
     `)
   }
