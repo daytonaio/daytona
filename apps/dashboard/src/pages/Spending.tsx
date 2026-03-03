@@ -5,35 +5,37 @@
 
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { UsageChart, UsageChartData } from '@/components/UsageChart'
-import { AggregatedUsageChart } from '@/components/spending/AggregatedUsageChart'
+import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
 import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useConfig } from '@/hooks/useConfig'
-import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { FeatureFlags } from '@/enums/FeatureFlags'
-import { useCallback, useEffect, useState } from 'react'
+import { UsageChart, UsageChartData } from '@/components/spending/UsageChart'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
-import { DateRange } from 'react-day-picker'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { FeatureFlags } from '@/enums/FeatureFlags'
+import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
+import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
+import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizationUsageQuery'
+import { useConfig } from '@/hooks/useConfig'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { subDays } from 'date-fns'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 
 const analyticsQuickRanges: QuickRangesConfig = {
   hours: [1, 6, 12, 24],
   days: [7, 14, 30],
 }
 
+const SKELETON_ROWS = 10
+
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
-  const { billingApi } = useApi()
   const config = useConfig()
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const analyticsAvailable = spendingEnabled && !!config.analyticsApiUrl
-  const [currentOrganizationUsage, setCurrentOrganizationUsage] = useState<OrganizationUsage | null>(null)
-  const [currentOrganizationUsageLoading, setCurrentOrganizationUsageLoading] = useState(true)
-  const [pastOrganizationUsage, setPastOrganizationUsage] = useState<OrganizationUsage[]>([])
-  const [pastOrganizationUsageLoading, setPastOrganizationUsageLoading] = useState(true)
 
   const [analyticsDateRange, setAnalyticsDateRange] = useState<DateRange>(() => {
     const now = new Date()
@@ -49,43 +51,28 @@ const Spending = () => {
   const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams)
   const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams)
 
-  const fetchOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setCurrentOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getOrganizationUsage(selectedOrganization.id)
-      setCurrentOrganizationUsage(data)
-    } catch (error) {
-      console.error('Failed to fetch organization usage data:', error)
-    } finally {
-      setCurrentOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
+  const { data: currentOrganizationUsage } = useOrganizationUsageQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: !!selectedOrganization,
+  })
 
-  const fetchPastOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setPastOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getPastOrganizationUsage(selectedOrganization.id)
-      setPastOrganizationUsage(data.sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()))
-    } catch (error) {
-      console.error('Failed to fetch past organization usage data:', error)
-    } finally {
-      setPastOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
+  const { data: pastOrganizationUsage } = usePastOrganizationUsageQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: !!selectedOrganization,
+  })
 
-  useEffect(() => {
-    if (!selectedOrganization) {
-      return
-    }
-    fetchOrganizationUsage()
-    fetchPastOrganizationUsage()
-  }, [fetchOrganizationUsage, fetchPastOrganizationUsage, selectedOrganization])
+  const sortedPastUsage = useMemo(
+    () => [...(pastOrganizationUsage ?? [])].sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()),
+    [pastOrganizationUsage],
+  )
+
+  const usageChartData = useMemo(
+    () =>
+      [...sortedPastUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
+        convertUsageToChartData,
+      ),
+    [sortedPastUsage, currentOrganizationUsage],
+  )
 
   return (
     <PageLayout>
@@ -93,11 +80,13 @@ const Spending = () => {
         <PageTitle>Spending</PageTitle>
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent>
         {analyticsAvailable && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold shrink-0">Resource Usage</h2>
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b p-4">
+              <div className="flex-1">
+                <CardTitle>Resource Usage</CardTitle>
+              </div>
               <DateRangePicker
                 value={analyticsDateRange}
                 onChange={setAnalyticsDateRange}
@@ -106,23 +95,71 @@ const Spending = () => {
                 timeSelection
                 defaultSelectedQuickRange="Last 30 days"
                 className="w-auto"
+                contentAlign="end"
               />
-            </div>
-
+            </CardHeader>
+            <UsageSummary data={aggregatedUsage} isLoading={aggregatedLoading} />
+            <Separator />
             <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
-            <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
-          </div>
+            <Separator />
+            <ResourceUsageBreakdown data={aggregatedUsage} />
+            <Separator />
+            <div className="p-4">
+              <p className="text-xl font-semibold leading-none tracking-tight">Per-Sandbox Usage</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Resource consumption broken down by individual sandbox.
+              </p>
+            </div>
+            {sandboxesLoading ? (
+              <SandboxUsageTableSkeleton />
+            ) : (
+              <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
+            )}
+          </Card>
         )}
 
-        <UsageChart
-          title="Monthly Breakdown"
-          usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-            convertUsageToChartData,
-          )}
-          showTotal
-        />
+        <UsageChart title="Monthly Cost Breakdown" usageData={usageChartData} showTotal />
       </PageContent>
     </PageLayout>
+  )
+}
+
+function SandboxUsageTableSkeleton() {
+  return (
+    <div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Sandbox ID</TableHead>
+            <TableHead className="text-right">Total Price</TableHead>
+            <TableHead className="text-right">CPU (seconds)</TableHead>
+            <TableHead className="text-right">RAM (GB-seconds)</TableHead>
+            <TableHead className="text-right">Disk (GB-seconds)</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <Skeleton className="h-4 w-[200px]" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="h-4 w-12 ml-auto" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="h-4 w-16 ml-auto" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="h-4 w-16 ml-auto" />
+              </TableCell>
+              <TableCell className="text-right">
+                <Skeleton className="h-4 w-16 ml-auto" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
 

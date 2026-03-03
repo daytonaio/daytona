@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CalendarIcon } from 'lucide-react'
-import { format } from 'date-fns'
-import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import { format, subDays, subHours, subMinutes } from 'date-fns'
+import { CalendarIcon } from 'lucide-react'
+import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import { DateRange } from 'react-day-picker'
-import { useState, forwardRef, useImperativeHandle, useEffect } from 'react'
-import { subMinutes, subHours, subDays } from 'date-fns'
 
 // Simple configuration object
 export interface QuickRangesConfig {
@@ -68,6 +67,7 @@ export interface DateRangePickerProps {
   timeSelection?: boolean
   disabled?: boolean
   defaultSelectedQuickRange?: string
+  contentAlign?: 'start' | 'end'
 }
 
 export interface DateRangePickerRef {
@@ -85,6 +85,7 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
       timeSelection = true,
       disabled = false,
       defaultSelectedQuickRange,
+      contentAlign = 'start',
     },
     ref,
   ) => {
@@ -196,7 +197,7 @@ export const DateRangePicker = forwardRef<DateRangePickerRef, DateRangePickerPro
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align={contentAlign}>
           <div className="flex">
             {/* Quick ranges panel */}
             {quickRangesEnabled && (

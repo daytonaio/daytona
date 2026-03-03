@@ -13,11 +13,12 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { formatMoney } from '@/lib/utils'
 import { subMonths } from 'date-fns'
 import * as React from 'react'
 import { useCallback, useMemo } from 'react'
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
-import { FacetFilter } from './ui/facet-filter'
+import { FacetFilter } from '../ui/facet-filter'
 
 export type UsageChartData = {
   date: string
@@ -43,7 +44,7 @@ const getShortDate = (value: string) => {
 
 export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
   const [timeRange, setTimeRange] = React.useState(12)
-  const [chartType, setChartType] = React.useState<'bar' | 'area'>('area')
+  const [chartType, setChartType] = React.useState<'bar' | 'area'>('bar')
   const [filters, setFilters] = React.useState<Set<string>>(new Set(['ramGB', 'cpu', 'diskGB']))
 
   const filterFromObject = useCallback(
@@ -54,7 +55,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
   )
 
   const data = useMemo(() => {
-    const referenceDate = new Date(Date.now())
+    const referenceDate = new Date()
 
     let monthsToSubtract = 12
     if (timeRange === 6) {
@@ -89,22 +90,18 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
 
   const chartConfig = useMemo(() => {
     const mapped: Record<string, { label: string; color: string }> = {
-      diskGB: {
-        label: 'Storage',
+      cpu: {
+        label: 'CPU',
         color: 'hsl(var(--chart-1))',
       },
       ramGB: {
         label: 'RAM',
         color: 'hsl(var(--chart-2))',
       },
-      cpu: {
-        label: 'CPU',
+      diskGB: {
+        label: 'Disk',
         color: 'hsl(var(--chart-3))',
       },
-      // gpu: {
-      //   label: 'GPU',
-      //   color: 'hsl(var(--chart-4))',
-      // },
     }
 
     return filterFromObject(mapped)
@@ -112,59 +109,42 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b p-4 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center gap-2 space-y-0 border-b p-4">
+        <div className="flex-1">
           <CardTitle>{title}</CardTitle>
         </div>
-        <FacetFilter
-          title="Filters"
-          options={[
-            {
-              label: 'RAM',
-              value: 'ramGB',
-            },
-            {
-              label: 'CPU',
-              value: 'cpu',
-            },
-            {
-              label: 'Storage',
-              value: 'diskGB',
-            },
-            // {
-            //   label: 'GPU',
-            //   value: 'gpu',
-            // },
-          ]}
-          selectedValues={filters}
-          setSelectedValues={setFilters}
-        />
-
-        <Select value={chartType} onValueChange={(value) => setChartType(value as 'bar' | 'area')}>
-          <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Select a chart type">
-            <SelectValue placeholder="Bar" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="bar">Bar</SelectItem>
-            <SelectItem value="area">Area</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={timeRange.toString()} onValueChange={(value) => setTimeRange(Number(value))}>
-          <SelectTrigger className="w-[160px] rounded-lg sm:ml-auto" aria-label="Select the range of months">
-            <SelectValue placeholder="Last 12 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl">
-            <SelectItem value="12" className="rounded-lg">
-              Last 12 months
-            </SelectItem>
-            <SelectItem value="6" className="rounded-lg">
-              Last 6 months
-            </SelectItem>
-            <SelectItem value="3" className="rounded-lg">
-              Last 3 months
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 flex-wrap">
+          <FacetFilter
+            title="Filters"
+            className="h-8 pr-1"
+            options={[
+              { label: 'CPU', value: 'cpu' },
+              { label: 'RAM', value: 'ramGB' },
+              { label: 'Disk', value: 'diskGB' },
+            ]}
+            selectedValues={filters}
+            setSelectedValues={setFilters}
+          />
+          <Select value={chartType} onValueChange={(value) => setChartType(value as 'bar' | 'area')}>
+            <SelectTrigger size="sm" className="w-[80px] rounded-lg" aria-label="Select a chart type">
+              <SelectValue placeholder="Bar" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="bar">Bar</SelectItem>
+              <SelectItem value="area">Area</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={timeRange.toString()} onValueChange={(value) => setTimeRange(Number(value))}>
+            <SelectTrigger size="sm" className="w-[150px] rounded-lg" aria-label="Select the range of months">
+              <SelectValue placeholder="Last 12 months" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              <SelectItem value="12">Last 12 months</SelectItem>
+              <SelectItem value="6">Last 6 months</SelectItem>
+              <SelectItem value="3">Last 3 months</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         {chartType === 'bar' ? (
@@ -175,14 +155,15 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
                 tickCount={4}
+                width={45}
                 tickFormatter={(value) => {
                   if (!showTotal) {
                     return value
                   }
 
-                  return `$${value}`
+                  return formatMoney(value)
                 }}
               />
               <ChartTooltip
@@ -192,16 +173,15 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                     indicator="dot"
                     hideLabel={!showTotal}
                     labelFormatter={(label, payload) => {
-                      return `${getShortDate(label)}: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
+                      return `${getShortDate(label)}: ${formatMoney(payload.reduce((acc, curr) => acc + (curr.value as number), 0))}`
                     }}
                   />
                 }
               />
               <ChartLegend content={<ChartLegendContent />} />
-              <Bar dataKey="diskGB" stackId="a" fill="var(--color-diskGB)" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="cpu" stackId="a" fill="var(--color-cpu)" radius={[0, 0, 0, 0]} />
               <Bar dataKey="ramGB" stackId="a" fill="var(--color-ramGB)" radius={[0, 0, 0, 0]} />
-              <Bar dataKey="cpu" stackId="a" fill="var(--color-cpu)" radius={[4, 4, 0, 0]} />
-              {/* <Bar dataKey="gpu" stackId="a" fill="var(--color-gpu)" radius={[0, 0, 0, 0]} /> */}
+              <Bar dataKey="diskGB" stackId="a" fill="var(--color-diskGB)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ChartContainer>
         ) : (
@@ -220,10 +200,6 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                   <stop offset="5%" stopColor="var(--color-cpu)" stopOpacity={0.8} />
                   <stop offset="95%" stopColor="var(--color-cpu)" stopOpacity={0.1} />
                 </linearGradient>
-                {/* <linearGradient id="fillGpu" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-gpu)" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="var(--color-gpu)" stopOpacity={0.1} />
-                </linearGradient> */}
               </defs>
               <CartesianGrid vertical={false} />
               <XAxis
@@ -237,11 +213,10 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickMargin={8}
+                tickMargin={4}
                 tickCount={4}
-                tickFormatter={(value) => {
-                  return `$${value}`
-                }}
+                width={45}
+                tickFormatter={(value) => formatMoney(value)}
               />
               <ChartTooltip
                 cursor={false}
@@ -249,7 +224,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                   <ChartTooltipContent
                     indicator="dot"
                     labelFormatter={(label, payload) => {
-                      return `${getShortDate(label)}: $${payload.reduce((acc, curr) => acc + (curr.value as number), 0)}`
+                      return `${getShortDate(label)}: ${formatMoney(payload.reduce((acc, curr) => acc + (curr.value as number), 0))}`
                     }}
                   />
                 }
@@ -261,9 +236,8 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
                 stroke="var(--color-diskGB)"
                 stackId="a"
               />
-              <Area dataKey="ramGB" type="monotoneX" fill="url(#fillRamGB)" stroke="var(--color-ramGB)" stackId="b" />
-              <Area dataKey="cpu" type="monotoneX" fill="url(#fillCpu)" stroke="var(--color-cpu)" stackId="c" />
-              {/* <Area dataKey="gpu" type="monotoneX" fill="url(#fillGpu)" stroke="var(--color-gpu)" stackId="d" /> */}
+              <Area dataKey="ramGB" type="monotoneX" fill="url(#fillRamGB)" stroke="var(--color-ramGB)" stackId="a" />
+              <Area dataKey="cpu" type="monotoneX" fill="url(#fillCpu)" stroke="var(--color-cpu)" stackId="a" />
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
