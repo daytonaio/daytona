@@ -208,6 +208,9 @@ export class Sandbox {
   @Column({ default: () => 'MD5(random()::text)', type: 'text' })
   authToken = nanoid(32).toLocaleLowerCase()
 
+  @Column({ default: false })
+  cleanupCompleted: boolean
+
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
   })

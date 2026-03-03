@@ -20,7 +20,6 @@ import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxBackupCreatedEvent } from '../events/sandbox-backup-created.event'
 import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
@@ -521,10 +520,53 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     this.setBackupPending(event.sandbox)
   }
 
-  @OnEvent(SandboxEvents.DESTROYED)
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-sandbox-artifacts', waitForCompletion: true })
   @TrackJobExecution()
-  private async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
-    this.deleteSandboxBackupRepositoryFromRegistry(event.sandbox)
+  @LogExecution('cleanup-sandbox-artifacts')
+  @WithInstrumentation()
+  async cleanupDestroyedSandboxes(): Promise<void> {
+    const lockKey = 'cleanup-sandbox-artifacts'
+    const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+    if (!hasLock) {
+      return
+    }
+
+    try {
+      const sandboxes = await this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .where('sandbox.state = :state', { state: SandboxState.DESTROYED })
+        .andWhere('sandbox.cleanupCompleted != :cleanupCompleted', { cleanupCompleted: true })
+        .orderBy('CASE WHEN sandbox."backupRegistryId" IS NOT NULL THEN 0 ELSE 1 END', 'ASC')
+        .take(100)
+        .getMany()
+
+      await Promise.allSettled(
+        sandboxes.map(async (sandbox) => {
+          const lockKey = `sandbox-artifacts-cleanup-${sandbox.id}`
+          const hasLock = await this.redisLockProvider.lock(lockKey, 60)
+          if (!hasLock) {
+            return
+          }
+
+          try {
+            // Only attempt repository cleanup if backupRegistryId exists
+            if (sandbox.backupRegistryId) {
+              await this.deleteSandboxBackupRepositoryFromRegistry(sandbox)
+            }
+            sandbox.cleanupCompleted = true
+            await this.sandboxRepository.save(sandbox)
+          } catch (error) {
+            this.logger.error(`Error cleaning up sandbox ${sandbox.id}:`, fromAxiosError(error))
+          } finally {
+            await this.redisLockProvider.unlock(lockKey)
+          }
+        }),
+      )
+    } catch (error) {
+      this.logger.error(`Error processing destroyed sandbox cleanup: `, error)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @OnEvent(SandboxEvents.BACKUP_CREATED)
