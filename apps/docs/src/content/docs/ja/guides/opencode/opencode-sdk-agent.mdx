@@ -1,0 +1,195 @@
+---
+title: OpenCode SDK と Daytona を用いてコーディングエージェントを構築する
+description: OpenCode と Daytona のサンドボックスを使用して自律型コーディングエージェントを構築するためのステップバイステップガイド。
+---
+
+import { Image } from 'astro:assets'
+
+import opencodeSdkSyncboard from '../../../../../assets/docs/images/opencode-sdk-syncboard.gif'
+
+このガイドでは、安全な Daytona サンドボックス内で [OpenCode](https://opencode.ai/) 自律型コーディングエージェントを実行する手順を説明します。OpenCode サーバーはサンドボックス内で完全に分離された状態で動作し、スクリプトは [OpenCode SDK](https://www.npmjs.com/package/@opencode-ai/sdk) を使ってサーバーに接続します。
+
+このエージェントは、フルスタック Web アプリを開発し、任意の言語でコードを書き、依存関係をインストールし、スクリプトを実行できます。また、開発サーバーを起動・管理し、稼働中のアプリ向けに[プレビューリンク](/docs/ja/preview/)を生成することもできます。
+
+### 1. ワークフローの概要 \{#1-workflow-overview\}
+
+スクリプトを実行すると、Daytona のサンドボックスが作成され、OpenCode がインストールされ、サンドボックス内で OpenCode サーバーが起動します。ターミナル上からプロンプトを送信し、その応答を確認できます。終了すると、サンドボックスは削除されます。
+
+```
+$ npm run start
+Creating sandbox...
+Installing OpenCode in sandbox...
+Preview: https://4096-0626a08c-08e7-4fbe-9799-d160bac66b08.daytonaproxy01.net
+Press Ctrl+C at any time to exit.
+User: Create a minimalist collaborative whiteboard app
+Thinking...
+🔨 ✓ Run: Check current directory structure
+✓ 3 todos
+📝 Add home/daytona/SPEC.md
+✓ 2 todos
+📝 Add home/daytona/index.html
+✓ 1 todos
+✓ home/daytona/SPEC.md
+✓ https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;700&display=swap (text/css; charset=utf-8)
+✓ home/daytona/index.html
+🔨 ✓ Run: List files in directory
+🔨 ✓ Run: Start HTTP server for whiteboard
+🔨 ✓ Run: Check if server is running
+✓ 0 todos
+Your minimalist collaborative whiteboard app is ready!
+
+**Preview URL:** https://8080-0626a08c-08e7-4fbe-9799-d160bac66b08.daytonaproxy01.net
+
+## SyncBoard - Features
+
+**Drawing Tools:**
+- Pencil (freehand drawing)
+- Line, Rectangle, Ellipse (shape tools with preview)
+- Eraser (removes intersecting strokes)
+
+**Customization:**
+- 6 vibrant color presets
+- 3 stroke widths (thin/medium/thick)
+- Keyboard shortcuts: `P` `L` `R` `E` `X` for tools, `1` `2` `3` for stroke widths
+
+**Collaboration:**
+- Simulated real-time collaboration with other users
+- Unique user colors for each participant
+- Auto-saves to localStorage every 2 seconds
+
+**Actions:**
+- Undo/Redo (stores 20 actions, Ctrl+Z / Ctrl+Shift+Z)
+- Clear canvas (with confirmation dialog)
+- Coordinates display in status bar
+
+**Design:**
+- Dark theme with coral/teal accents
+- Dot grid background pattern
+- Smooth animations and hover effects
+- Responsive layout for mobile devices
+
+User: 
+Cleaning up...
+```
+
+タスクで Web アプリケーションを実行したりプレビューしたりする必要がある場合、エージェントはアプリをホストし、動作中の結果を確認できるように [プレビューリンク](/docs/ja/preview/) を生成できます。
+
+<Image src={opencodeSdkSyncboard} alt="OpenCode エージェントによって生成された SyncBoard 共同作業用ホワイトボードアプリ" width={600} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+作業が完了するまで、エージェントとの対話を続けることができます。プログラムを終了すると、サンドボックスは自動的に削除されます。
+
+### 2. プロジェクトのセットアップ \{#2-project-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+まず、Daytonaの[リポジトリ](https://github.com/daytonaio/daytona.git)をクローンし、OpenCode SDK のサンプルディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/opencode/opencode-sdk
+```
+
+#### 環境を設定する \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から API キーを取得します。
+
+`.env.example` を `.env` にコピーし、取得したキーを追加します。
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+```
+
+#### ローカル環境での利用 \{#local-usage\}
+
+:::note[Node.js のバージョン]
+この例を実行するには Node.js 18 以上が必要です。続行する前に、お使いの環境がこの要件を満たしていることを確認してください。
+:::
+
+依存関係をインストールして、このサンプルを実行します。
+
+```bash
+npm install
+npm run start
+```
+
+エージェントが起動し、プロンプトの入力待ち状態になります。
+
+### 3. スクリプトを理解する \{#3-understanding-the-script\}
+
+OpenCode はクライアント・サーバーモデルを採用しています。[サーバー](https://opencode.ai/docs/server/) はコーディングエージェント、セッション、および設定を管理します。クライアントは [HTTP 経由](https://opencode.ai/docs/server/#apis) でサーバーと通信し、セッション内でプロンプトを実行してストリーミング形式のレスポンスを受信します。
+
+#### 初期化 \{#initialization\}
+
+起動時、このスクリプトは次の処理を行います。
+
+1. 新しい [Daytona サンドボックス](/docs/ja/sandboxes) を作成します。
+2. サンドボックス内に OpenCode をグローバルにインストールします。
+3. サンドボックス内で OpenCode サーバーを起動します。
+4. サーバーのプレビュー URL を取得し、そのベース URL を使ってクライアントを作成します。
+5. `readline` ループに入り、プロンプトをサーバーに送信してストリーミング形式のレスポンスを受信します。
+6. Ctrl+C が押されたときにサンドボックスを削除し、終了します。
+
+#### OpenCode Server \{#opencode-server\}
+
+OpenCode サーバーはサンドボックス内で実行され、すべてのエージェントの処理（LLM 呼び出し、ツール（bash、write など）、コード実行）を扱います。スクリプトでは、次のようにしてこのサーバーを起動します：
+
+```ts
+const envVar = injectEnvVar('OPENCODE_CONFIG_CONTENT', opencodeConfig)
+const command = await sandbox.process.executeSessionCommand(sessionId, {
+  command: `${envVar} opencode serve --port ${PORT} --hostname ${HOSTNAME}`,
+  runAsync: true,
+})
+```
+
+システムプロンプトを含むカスタム設定が注入されます。システムプロンプトは、エージェントがサンドボックス内で実行されていること、ファイル操作には `/home/daytona` を使用すること、および正しいプレビューリンクを提供できるようにプレビューURLのパターンをエージェントに指示します。
+
+#### OpenCode クライアント \{#opencode-client\}
+
+クライアントはローカルマシン上で動作し、[OpenCode SDK](https://opencode.ai/docs/sdk/) を使ってサーバーと通信します。`Session.create` は SDK クライアントを初期化し、イベントストリームを購読して、エージェントの動作中にクライアントがツールのアクティビティ（例: 「✓ Run: …」「📝 Add …」）を表示できるようにします。
+
+```ts
+const client = createOpencodeClient({ baseUrl })
+const sessionRes = await client.session.create({ body: { title: 'Daytona query' } })
+const sessionId = sessionRes.data?.id
+if (!sessionId) throw new Error('Failed to create OpenCode session:' + sessionRes.error)
+const events = await client.event.subscribe()
+```
+
+プロンプトを送信するには、クライアントが `session.prompt` を呼び出し、既存のストリームからのイベントを処理してツールの実行状況を表示します。
+
+```ts
+const promptPromise = this.client.session.prompt({
+  path: { id: this.sessionId },
+  body: { parts: [{ type: 'text', text: query } satisfies TextPartInput] },
+})
+
+for await (const event of takeUntil(this.events.stream, promptPromise)) {
+  printEvent(this.sessionId, event)
+}
+```
+
+#### メインループ \{#main-loop\}
+
+サーバーの準備が整うと、スクリプトはセッションを作成し、readline ループを実行します。
+
+```ts
+const session = await Session.create(baseUrl)
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+
+while (true) {
+  const query = await new Promise<string>((resolve) => rl.question('User: ', resolve))
+  if (!query.trim()) continue
+  await session.runQuery(query)
+}
+```
+
+`readline` ループはユーザー入力を待ち、エージェントへ送り、その応答を表示します。
+
+**主な利点:**
+
+* Daytona サンドボックス内での、安全で分離された環境での実行
+* ターミナルでの OpenCode SDK クライアント利用（サーバーはサンドボックス内で稼働）
+* 75 以上の LLM プロバイダーをサポート
+* すべてのエージェントコードの実行はサンドボックス内で行われる
+* デプロイ済みサービス向けプレビューリンクの自動生成
+* Daytona 固有のワークフロー向けにエージェントのカスタム構成が可能

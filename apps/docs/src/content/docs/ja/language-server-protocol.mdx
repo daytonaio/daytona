@@ -1,110 +1,567 @@
 ---
-title: Language Server Protocol
+title: LSP (言語サーバープロトコル)
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona（デイトナ）SDKは、サンドボックスインスタンス経由でLSP（Language Server Protocol）をサポートします。これにより、コード補完や診断などの高度な言語機能を利用できます。
+Daytonaは、サンドボックスインスタンスを介してLSP (言語サーバープロトコル) をサポートします。これにより、コード補完や診断などの高度な言語機能を利用できます。
 
-## LSPサーバーの作成
+## LSP サーバーの作成 \{#create-lsp-servers\}
 
-Daytona（デイトナ）SDKは、PythonおよびTypeScriptでLSPサーバーを作成する機能を提供します。`path_to_project` の基準パスはデフォルトで現在のサンドボックスユーザーのホーム直下です。たとえば `workspace/project` は `/home/[username]/workspace/project` を指します。先頭を `/` にすることで絶対パスも指定できます。
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import Daytona, LspLanguageId
-
-# サンドボックスを作成
-
-daytona = Daytona()
-sandbox = daytona.create()
-
-# Python用のLSPサーバーを作成
-
-lsp_server = sandbox.create_lsp_server(
-    language_id=LspLanguageId.PYTHON,
-    path_to_project="workspace/project"
-)
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona, LspLanguageId } from '@daytonaio/sdk'
-
-// サンドボックスを作成
-const daytona = new Daytona()
-const sandbox = await daytona.create({
-    language: 'typescript'
-})
-
-// TypeScript用のLSPサーバーを作成
-const lspServer = await sandbox.createLspServer(
-    LspLanguageId.TYPESCRIPT,
-    "workspace/project"
-)
-```
-
-</TabItem>
-</Tabs>
-
-## サポート対象の言語
-
-Daytona SDK では、Python および TypeScript の `LspLanguageId` 列挙体を使用して、各種言語向けの LSP サーバーを作成できます。
+Daytona は、LSP サーバーを作成するためのメソッドを提供します。先頭に `/` がない場合、`path_to_project` 引数は現在のサンドボックスの作業ディレクトリからの相対パスとして解釈されます。作業ディレクトリは、Dockerfile に WORKDIR が指定されていればその値が使用され、指定がない場合はユーザーのホームディレクトリが使用されます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-from daytona import LspLanguageId
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, LspLanguageId
 
-# 利用可能な言語 ID
+    # Create Sandbox
+    daytona = Daytona()
+    sandbox = daytona.create()
 
-LspLanguageId.PYTHON
-LspLanguageId.TYPESCRIPT
+    # Create LSP server for Python
+    lsp_server = sandbox.create_lsp_server(
+        language_id=LspLanguageId.PYTHON,
+        path_to_project="workspace/project"
+    )
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { LspLanguageId } from '@daytonaio/sdk'
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona, LspLanguageId } from '@daytonaio/sdk'
 
-// 利用可能な言語 ID
-LspLanguageId.PYTHON      
-LspLanguageId.TYPESCRIPT    
-```
+    // Create sandbox
+    const daytona = new Daytona()
+    const sandbox = await daytona.create({
+      language: 'typescript',
+    })
 
-</TabItem>
+    // Create LSP server for TypeScript
+    const lspServer = await sandbox.createLspServer(
+      LspLanguageId.TYPESCRIPT,
+      'workspace/project'
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    # サンドボックスを作成
+    daytona = Daytona::Daytona.new
+    sandbox = daytona.create
+
+    # Python 向けの LSP サーバーを作成
+    lsp_server = sandbox.create_lsp_server(
+      language_id: Daytona::LspServer::Language::PYTHON,
+      path_to_project: 'workspace/project'
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // サンドボックスを作成
+    client, err := daytona.NewClient()
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    ctx := context.Background()
+    sandbox, err := client.Create(ctx, nil)
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // Python 向けの LSP サービスを取得
+    lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+    ```
+  </TabItem>
 </Tabs>
 
-- `LspLanguageId.PYTHON`: Python 向け言語サーバー。
-- `LspLanguageId.TYPESCRIPT`: TypeScript/JavaScript 向け言語サーバー。
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、および [Go SDK](/docs/ja/go-sdk/) のリファレンスを参照してください:
 
-## LSP 機能
+> [**create&#95;lsp&#95;server (Python SDK)**](/docs/ja/python-sdk/sync/sandbox#sandboxcreate_lsp_server)
+>
+> [**createLspServer (TypeScript SDK)**](/docs/ja/typescript-sdk/sandbox#createlspserver)
+>
+> [**create&#95;lsp&#95;server (Ruby SDK)**](/docs/ja/ruby-sdk/sandbox#create_lsp_server)
 
-Daytona SDK は、コード解析や編集のための各種 LSP 機能を提供します。
+### サポートされている言語 \{#supported-languages\}
 
-### コード補完
+Daytona で LSP サーバーを作成する際に利用可能な言語は、`LspLanguageId` 列挙型によって定義されています：
 
-Daytona SDK では、Python と TypeScript を用いて、ファイル内の特定位置のコード補完候補を取得できます。
+| Enum Value                     | 説明                                   |
+| ------------------------------ | -------------------------------------- |
+| **`LspLanguageId.PYTHON`**     | Python 言語サーバー                   |
+| **`LspLanguageId.TYPESCRIPT`** | TypeScript/JavaScript 言語サーバー    |
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/lsp-server/#lsplanguageid) および [TypeScript SDK](/docs/ja/typescript-sdk/lsp-server/#lsplanguageid) のリファレンスを参照してください：
+
+> [**LspLanguageId (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lsplanguageid)
+>
+> [**LspLanguageId (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#lsplanguageid)
+
+## LSP サーバーを起動する \{#start-lsp-servers\}
+
+Daytona は、LSP サーバーを起動するためのメソッドを提供しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-completions = lsp_server.completions(
-    path="workspace/project/main.py",
-    position={"line": 10, "character": 15}
-)
-print(f"Completions: {completions}")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const completions = await lspServer.completions(
-    "workspace/project/main.ts",
-    { line: 10, character: 15 }
-)
-console.log('Completions:', completions)
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    lsp = sandbox.create_lsp_server("typescript", "workspace/project")
+    lsp.start()  # サーバーを初期化します
+    # これで LSP の操作を行う準備ができました
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+    await lsp.start() // サーバーを初期化します
+    // これで LSP の操作を行う準備ができました
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    lsp = sandbox.create_lsp_server(
+      language_id: Daytona::LspServer::Language::PYTHON,
+      path_to_project: 'workspace/project'
+    )
+    lsp.start  # サーバーを初期化します
+    # これで LSP の操作を行う準備ができました
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    lsp := sandbox.Lsp(types.LspLanguagePython, "workspace/project")
+    err := lsp.Start(ctx)  // サーバーを初期化します
+    if err != nil {
+    	log.Fatal(err)
+    }
+    // これで LSP の操作を行う準備ができました
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/start' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "languageId": "",
+      "pathToProject": ""
+    }'
+    ```
+  </TabItem>
 </Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) のリファレンスを参照してください。
+
+> [**start (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserverstart)
+>
+> [**start (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#start)
+>
+> [**start (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#start)
+>
+> [**Start (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.Start)
+>
+> [**start (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/start)
+
+## LSP サーバーを停止する \{#stop-lsp-servers\}
+
+Daytona は LSP サーバーを停止するためのメソッドを提供します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # LSP 機能の利用が完了したら
+    lsp.stop()  # リソースを解放する
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // LSP 機能の利用が完了したら
+    await lsp.stop() // リソースを解放する
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # LSP 機能の利用が完了したら
+    lsp.stop  # リソースを解放する
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // LSP 機能の利用が完了したら
+    err := lsp.Stop(ctx)  // リソースを解放する
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/stop' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "languageId": "",
+      "pathToProject": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) のリファレンスを参照してください。
+
+> [**stop (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserverstop)
+>
+> [**stop (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#stop)
+>
+> [**stop (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#stop)
+>
+> [**Stop (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.Stop)
+>
+> [**stop (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/stop)
+
+## コード補完 \{#code-completions\}
+
+Daytona では、ファイル内の特定の位置に対するコード補完を取得するためのメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    completions = lsp_server.completions(
+        path="workspace/project/main.py",
+        position={"line": 10, "character": 15}
+    )
+    print(f"Completions: {completions}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const completions = await lspServer.completions('workspace/project/main.ts', {
+      line: 10,
+      character: 15,
+    })
+    console.log('Completions:', completions)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    completions = lsp_server.completions(
+      path: 'workspace/project/main.py',
+      position: { line: 10, character: 15 }
+    )
+    puts "Completions: #{completions}"
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    completions, err := lsp.Completions(ctx, "workspace/project/main.py",
+    	types.Position{Line: 10, Character: 15},
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Completions: %v\n", completions)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/completions' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "context": {
+        "triggerCharacter": "",
+        "triggerKind": 1
+      },
+      "languageId": "",
+      "pathToProject": "",
+      "position": {
+        "character": 1,
+        "line": 1
+      },
+      "uri": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) のリファレンスを参照してください。
+
+> [**completions (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspservercompletions)
+>
+> [**completions (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#completions)
+>
+> [**completions (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#completions)
+>
+> [**Completions (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.Completions)
+>
+> [**completions (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/completions)
+
+## ファイル通知 \{#file-notifications\}
+
+Daytona は、ファイルを開いたり閉じたりした際に LSP サーバーへ通知するためのメソッドを提供します。これにより、指定されたファイルに対する診断や補完処理の追跡といった機能が有効になります。
+
+### ファイルを開く \{#open-file\}
+
+編集のためにファイルが開かれたことを言語サーバーに通知します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Notify server that a file is open
+    lsp_server.did_open("workspace/project/main.py")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Notify server that a file is open
+    await lspServer.didOpen('workspace/project/main.ts')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Notify server that a file is open
+    lsp_server.did_open('workspace/project/main.py')
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Notify server that a file is open
+    err := lsp.DidOpen(ctx, "workspace/project/main.py")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-open' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "languageId": "",
+      "pathToProject": "",
+      "uri": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) の各リファレンスを参照してください。
+
+> [**did&#95;open (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserverdid_open)
+>
+> [**didOpen (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#didopen)
+>
+> [**did&#95;open (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#did_open)
+>
+> [**DidOpen (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.DidOpen)
+>
+> [**did&#95;open (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-open)
+
+### ファイルを閉じる \{#close-file\}
+
+言語サーバーにファイルが閉じられたことを通知します。これにより、サーバーはそのファイルに関連付けられたリソースを解放できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Notify server that a file is closed
+    lsp_server.did_close("workspace/project/main.py")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Notify server that a file is closed
+    await lspServer.didClose('workspace/project/main.ts')
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Notify server that a file is closed
+    lsp_server.did_close('workspace/project/main.py')
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Notify server that a file is closed
+    err := lsp.DidClose(ctx, "workspace/project/main.py")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/did-close' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "languageId": "",
+      "pathToProject": "",
+      "uri": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) のリファレンスを参照してください。
+
+> [**did&#95;close (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserverdid_close)
+>
+> [**didClose (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#didclose)
+>
+> [**did&#95;close (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#did_close)
+>
+> [**DidClose (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.DidClose)
+>
+> [**did&#95;close (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/POST/lsp/did-close)
+
+## ドキュメント内のシンボル \{#document-symbols\}
+
+Daytona は、ドキュメントからシンボル（関数、クラス、変数など）を取得するメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    symbols = lsp_server.document_symbols("workspace/project/main.py")
+    for symbol in symbols:
+        print(f"Symbol: {symbol.name}, Kind: {symbol.kind}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const symbols = await lspServer.documentSymbols('workspace/project/main.ts')
+    symbols.forEach((symbol) => {
+      console.log(`Symbol: ${symbol.name}, Kind: ${symbol.kind}`)
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    symbols = lsp_server.document_symbols('workspace/project/main.py')
+    symbols.each do |symbol|
+      puts "Symbol: #{symbol.name}, Kind: #{symbol.kind}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    symbols, err := lsp.DocumentSymbols(ctx, "workspace/project/main.py")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    for _, symbol := range symbols {
+    	fmt.Printf("Symbol: %v\n", symbol)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/document-symbols?languageId=&pathToProject=&uri='
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/) の各リファレンスを参照してください。
+
+> [**document&#95;symbols (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserverdocument_symbols)
+>
+> [**documentSymbols (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#documentsymbols)
+>
+> [**document&#95;symbols (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#document_symbols)
+>
+> [**DocumentSymbols (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.DocumentSymbols)
+>
+> [**document&#95;symbols (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/document-symbols)
+
+## サンドボックスのシンボル \{#sandbox-symbols\}
+
+Daytona は、サンドボックス内のすべてのファイルを対象にシンボルを検索するメソッドを提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    symbols = lsp_server.sandbox_symbols("MyClass")
+    for symbol in symbols:
+        print(f"Found: {symbol.name} at {symbol.location}")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const symbols = await lspServer.sandboxSymbols('MyClass')
+    symbols.forEach((symbol) => {
+      console.log(`Found: ${symbol.name} at ${symbol.location}`)
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    symbols = lsp_server.sandbox_symbols('MyClass')
+    symbols.each do |symbol|
+      puts "Found: #{symbol.name} at #{symbol.location}"
+    end
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    symbols, err := lsp.SandboxSymbols(ctx, "MyClass")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    for _, symbol := range symbols {
+    	fmt.Printf("Found: %v\n", symbol)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/lsp/workspacesymbols?query=&languageId=&pathToProject='
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、[Ruby SDK](/docs/ja/ruby-sdk/lsp-server/)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox/tag/lsp) のリファレンスを参照してください。
+
+> [**sandbox&#95;symbols (Python SDK)**](/docs/ja/python-sdk/sync/lsp-server/#lspserversandbox_symbols)
+>
+> [**sandboxSymbols (TypeScript SDK)**](/docs/ja/typescript-sdk/lsp-server/#sandboxsymbols)
+>
+> [**sandbox&#95;symbols (Ruby SDK)**](/docs/ja/ruby-sdk/lsp-server/#sandbox_symbols)
+>
+> [**SandboxSymbols (Go SDK)**](/docs/ja/go-sdk/daytona#LspServerService.SandboxSymbols)
+>
+> [**sandbox&#95;symbols (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/lsp/GET/lsp/workspacesymbols)
