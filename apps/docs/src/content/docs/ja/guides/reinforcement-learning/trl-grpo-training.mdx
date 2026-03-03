@@ -1,0 +1,707 @@
+---
+title: TRL と Daytona を用いた強化学習による LLM の訓練
+description: Daytona のサンドボックスを並列実行し、TRL の GRPO トレーナーを使ってコード生成 LLM を訓練します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Image } from 'astro:assets'
+
+import rewardsPlot from '../../../../../assets/docs/images/trl-grpo-rewards-plot.png'
+
+このガイドでは、Daytonaサンドボックスを使用して、強化学習のトレーニング中に数百件のコード補完を安全に並列実行する方法を説明します。
+
+[TRL](https://huggingface.co/docs/trl/) の GRPOTrainer と 500 個の Daytona サンドボックスを組み合わせて補完結果を同時に評価し、`Qwen3-1.7B-Base` モデルをいくつかの基本的なコード生成タスクで学習させます。
+
+***
+
+### 1. ワークフロー概要 \{#1-workflow-overview\}
+
+このガイドでは、`Qwen3-1.7B-Base` に対して強化学習トレーニングを行う、シンプルで自己完結型のスクリプトを紹介します。特にここでは、**検証可能な報酬を用いた強化学習** を使用し、モデルが生成した関数のテスト合格率から報酬を算出します。
+
+トレーニングループは次のステップで構成されます。
+
+1. **Generate**: モデルが各プロンプトに対して多数のコード補完を生成します（例: ステップごとにプロンプトあたり 250 個の補完）
+2. **Evaluate**: 各補完は、それぞれ独立した Daytona のサンドボックス内でテストスイートを実行します
+3. **Reward**: より多くのテストに合格した補完ほど高い報酬を得て、エラーや禁止パターンには負の報酬が与えられます
+4. **Update**: GRPO により、グループ平均を上回った補完が強化されます
+
+評価ステップは、500 個すべてのサンドボックスで並列に実行されます。サンドボックスはトレーニング開始時に一度だけ生成され、トレーニング全体を通して再利用され、トレーニング完了後にクリーンアップされます。
+
+### 2. セットアップ \{#2-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+:::note[GPU 要件]
+このガイドは、VRAM 80GB の単一 GPU 上での実行を前提として記述されています。より少ない VRAM の GPU で実行したい場合は、`per_device_train_batch_size` パラメータを小さくし、効果的なバッチサイズを 500 に保ちたい場合は、それに比例して `gradient_accumulation_steps` を増やしてください。
+:::
+
+[Daytona リポジトリ](https://github.com/daytonaio/daytona.git)をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/python/reinforcement-learning/trl
+```
+
+#### 仮想環境の作成 \{#create-virtual-environment\}
+
+:::note[Python のバージョン]
+Python 3.10 以上が必要です。学習には 80GB 以上の VRAM を搭載した GPU を推奨します。
+:::
+
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Windows の場合: venv\Scripts\activate
+```
+
+#### 依存関係をインストール \{#install-dependencies\}
+
+```bash
+pip install -e .
+```
+
+これにより次のパッケージがインストールされます:
+
+* `daytona` - サンドボックス管理用の Daytona SDK
+* `trl[vllm]` - 高速推論のための vLLM 統合版 TRL
+* `datasets` - Hugging Face のデータセットライブラリ
+* `python-dotenv` - 環境変数を管理するためのライブラリ
+
+#### 環境の設定 \{#configure-environment\}
+
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から Daytona の API キーを取得し、`.env` ファイルを作成します：
+
+```bash
+DAYTONA_API_KEY=your_daytona_api_key
+```
+
+### 3. コードを理解する \{#3-understanding-the-code\}
+
+トレーニングスクリプトの主要な構成要素を順に見ていきます。
+
+#### タスク定義 \{#task-definitions\}
+
+このスクリプトでは、コーディングタスクをテストケース付きのプロンプトとして定義しています。`Qwen3-1.7B-Base` は instruct モデルではなく base モデルであるため、プロンプトは QA モードではなく completion モードで記述されている点に注意してください。各タスクでは、モデルが何を生成すべきかと、その正しさをどのように検証するかを定義します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    SORTING_PROMPT = """# I've been fiddling with different ways to sort numbers in Python.
+    # At first I just used sorted() and list.sort(), but then I decided to try
+    # my hand at writing some original sorting functions. And I succeeded!
+    # I don't call sorted(), list.sort(), heapq, or use any imports here - just plain
+    # Python and an original algorithm.
+    def sort_numbers(xs: list[int]) -> list[int]:
+        \"\"\"Sort a list of integers in ascending order.
+
+        Args:
+            xs: A list of integers to be sorted.
+
+        Returns:
+            A new list containing the same integers, sorted from smallest to largest.
+        \"\"\"
+    """
+
+    TASKS = {
+        "sorting": {
+            "prompt": SORTING_PROMPT,
+            "func_name": "sort_numbers",
+            "banned_patterns": ["sorted(", ".sort(", "heapq", "import ", "__import__"],
+            "tests": [
+                "[]",
+                "[1, 3, 2]",
+                "[random.randint(-1000, 1000) for _ in range(200)]",
+                "[random.randint(-100, 100) for _ in range(1000)]",
+                "list(range(0, 100)) + list(range(200, 100, -1)) + list(range(200, 300))",
+            ],
+            "reference": "sorted",
+        },
+        # Additional tasks can be added here...
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+各タスクには次の内容が含まれます:
+
+* **prompt**: モデルが続きのコードを生成するためのコードのコンテキスト
+* **func&#95;name**: 実装対象となる関数名
+* **banned&#95;patterns**: 生成結果を失格とするパターン（例: 組み込みの `sorted()` の使用）
+* **tests**: 正しさを検証するためのテスト入力
+* **reference**: 比較対象となるリファレンス実装
+
+#### プロンプトがどのように補完へと変わるか \{#how-prompts-become-completions\}
+
+モデルがソート用のプロンプトを受け取ると、Python ファイルを補完しているかのようにテキストを続けます。典型的なモデル出力は次のようになります。
+
+```
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[len(xs) // 2]
+    left = [x for x in xs if x < pivot]
+    middle = [x for x in xs if x == pivot]
+    right = [x for x in xs if x > pivot]
+    return sort_numbers(left) + middle + sort_numbers(right)
+
+# 使用例:
+print(sort_numbers([3, 1, 4, 1, 5, 9, 2, 6]))
+```
+
+モデルはインデントされた関数本体を生成しますが、その後に余分な内容（コメント、使用例など）を追加する場合があります。`sanitize_completion` 関数は、関数本体を構成するインデントされた行だけを抽出します：
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def sanitize_completion(text: str) -> str:
+        # 最初のインデントされていない行が現れるまでの行を取得する
+        lines = text.splitlines()
+        kept: List[str] = []
+        for line in lines:
+            if line and (not line.startswith("    ")):
+                break
+            kept.append(line)
+        return "\n".join(kept).rstrip()
+    ```
+  </TabItem>
+</Tabs>
+
+サニタイズ後、上記の例は関数本体だけになります。
+
+```python
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[len(xs) // 2]
+    left = [x for x in xs if x < pivot]
+    middle = [x for x in xs if x == pivot]
+    right = [x for x in xs if x > pivot]
+    return sort_numbers(left) + middle + sort_numbers(right)
+```
+
+#### サンドボックスプールの管理 \{#sandbox-pool-management\}
+
+学習全体を通して再利用するサンドボックスプールをあらかじめ作成しておきます。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    EFFECTIVE_BATCH_SIZE = 500
+    # 各補完を、それぞれ専用のサンドボックス内で並行評価するため、
+    # EFFECTIVE_BATCH_SIZE 個のサンドボックスを起動します。
+
+    async def _create_sandbox_pool_async(
+        daytona: AsyncDaytona, n: int = 10
+    ) -> List[AsyncSandbox]:
+        print(f"Creating {n} sandboxes...")
+        tasks = [daytona.create() for _ in range(n)]
+        sandboxes = await asyncio.gather(*tasks)
+        print(f"Successfully created all {len(sandboxes)} sandboxes")
+        return list(sandboxes)
+
+
+    async def _cleanup_sandbox_pool_async(sandbox_pool: List[AsyncSandbox]) -> None:
+        if not sandbox_pool:
+            return
+        print("Cleaning up sandboxes...")
+        tasks = [sandbox.delete() for sandbox in sandbox_pool]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        for r in results:
+            if isinstance(r, Exception):
+                print(f"  Sandbox delete error: {type(r).__name__}: {r}")
+        print("All sandboxes cleaned up")
+    ```
+  </TabItem>
+</Tabs>
+
+プールサイズ（500）は、バッチ全体のサイズ（`per_device_train_batch_size * gradient_accumulation_steps`）に合わせて選択されており、バッチ内のすべての補完を並列に評価できるようにするためのものです。
+
+#### コード評価 \{#code-evaluation\}
+
+メインの評価関数は、評価処理全体を統括します。補完結果をサニタイズし、禁止パターンをチェックし、テストハーネスを構築し、それをサンドボックス内で実行して、結果を解析します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    async def evaluate_single_completion_async(
+        sandbox: AsyncSandbox,
+        raw_completion: str,
+        prompt: str,
+    ) -> EvalResult:
+        task = PROMPT_TO_TASK[prompt]
+        num_task_tests = len(task["tests"])
+        body = sanitize_completion(raw_completion)
+
+        if not body.strip():
+            return _fail_result(num_task_tests)
+        if has_banned_pattern(body, task):
+            return _fail_result(num_task_tests)
+
+        code = build_test_harness(task, body)
+
+        try:
+            response = await sandbox.code_interpreter.run_code(
+                code, timeout=MAX_TIMEOUT_SECONDS
+            )
+        except DaytonaTimeoutError:
+            print(
+                f"Completion timed out after {MAX_TIMEOUT_SECONDS}s "
+                f"in sandbox {getattr(sandbox, 'id', '?')}"
+            )
+            return _fail_result(num_task_tests)
+        except Exception as e:
+            print(
+                f"Error evaluating completion in sandbox {getattr(sandbox, 'id', '?')}: "
+                f"{type(e).__name__}: {e}",
+            )
+            return _fail_result(num_task_tests)
+
+        if response.error is not None:
+            return _fail_result(num_task_tests)
+        raw_output = response.stdout.strip()
+        if not raw_output:
+            return _fail_result(num_task_tests)
+        last_line = raw_output.splitlines()[-1]
+        try:
+            results = json.loads(last_line)
+        except Exception:
+            return _fail_result(num_task_tests)
+        correct = results.get("results", [])
+
+        return {
+            "no_error": True,
+            "num_passed": sum(bool(x) for x in correct),
+            "num_tests": len(correct),
+        }
+    ```
+  </TabItem>
+</Tabs>
+
+#### テストハーネス \{#the-test-harness\}
+
+`build_test_harness` 関数は、元のプロンプト、モデルの出力、およびテストランナーを Python コードとして組み立て、最終的にサンドボックス上で実行されるようにします。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def build_test_harness(task: Dict[str, Any], function_body: str) -> str:
+        prompt = task["prompt"]
+        func_name = task["func_name"]
+        reference_function = task["reference"]
+        tests = task["tests"]
+
+        tests_tuple = ",\n        ".join(tests)
+
+        return f"""{prompt}
+    {function_body}
+
+    import json
+    import random
+    random.seed(0)
+
+    def _kadane(xs):
+        max_sum = current = xs[0]
+        for x in xs[1:]:
+            current = max(x, current + x)
+            max_sum = max(max_sum, current)
+        return max_sum
+
+    def _run_tests():
+        tests = (
+            {tests_tuple}
+        )
+        results = []
+        for xs in tests:
+            try:
+                out = {func_name}(xs.copy())
+                expected = {reference_function}(xs.copy())
+                results.append(out == expected)
+            except Exception:
+                results.append(False)
+        print(json.dumps({{"results": results}}))
+
+    if __name__ == "__main__":
+        _run_tests()
+    """
+    ```
+  </TabItem>
+</Tabs>
+
+クイックソートを実装した出力を用いたソートタスクの場合、組み立てられたコードは次のようになります。
+
+```python
+# Pythonで数値をソートするさまざまな方法を試しています...
+def sort_numbers(xs: list[int]) -> list[int]:
+    """整数のリストを昇順にソートします..."""
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[len(xs) // 2]
+    left = [x for x in xs if x < pivot]
+    middle = [x for x in xs if x == pivot]
+    right = [x for x in xs if x > pivot]
+    return sort_numbers(left) + middle + sort_numbers(right)
+
+import json
+import random
+random.seed(0)
+
+def _run_tests():
+    tests = (
+        [],
+        [1, 3, 2],
+        [random.randint(-1000, 1000) for _ in range(200)],
+        # ... その他のテスト
+    )
+    results = []
+    for xs in tests:
+        try:
+            out = sort_numbers(xs.copy())
+            expected = sorted(xs.copy())
+            results.append(out == expected)
+        except Exception:
+            results.append(False)
+    print(json.dumps({"results": results}))
+
+if __name__ == "__main__":
+    _run_tests()
+```
+
+サンドボックス内で実行すると、JSON が標準出力に出力されます：
+
+```json
+{"results": [true, true, true, false, true]}
+```
+
+評価関数はこの JSON データを解析し、何件のテストが成功したかをカウントします。
+
+#### 禁止パターンの検出 \{#banned-pattern-detection\}
+
+サンドボックス内でコードを実行する前に、禁止パターンをチェックします。これは、モデルが組み込み関数を使って「抜け道」を使うのを防ぐためです。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def has_banned_pattern(text: str, task: Dict[str, Any]) -> bool:
+        banned = task.get("banned_patterns", [])
+        if not banned:
+            return False
+        lowered = text.lower()
+        return any(p.lower() in lowered for p in banned)
+    ```
+  </TabItem>
+</Tabs>
+
+ソートタスクでは、禁止パターンには `sorted(`、`.sort(`、`heapq`、`import` が含まれます。モデルが `return sorted(xs)` を生成した場合、そのコードは実行されず、代わりに報酬が -1.0 に設定されます。これは、モデルに組み込み関数を呼び出させるのではなく、実際のソートアルゴリズムを書くことを学習させるためです。
+
+#### 並列バッチ評価 \{#parallel-batch-evaluation\}
+
+バッチ評価機能は、サンドボックスプール全体に補完結果を分散します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    async def _evaluate_batch_async(
+        sandbox_pool: List[AsyncSandbox], completions: List[str], prompts: List[str]
+    ) -> List[EvalResult]:
+        print(
+            f"Evaluating {len(completions)} completions in parallel across "
+            f"{len(sandbox_pool)} sandboxes..."
+        )
+
+        async def run_one(
+            i: int, sandbox: AsyncSandbox, completion: str, prompt: str
+        ) -> EvalResult:
+            task = PROMPT_TO_TASK[prompt]
+            num_task_tests = len(task["tests"])
+            try:
+                stats = await evaluate_single_completion_async(sandbox, completion, prompt)
+                print(f"  Completion {i + 1}/{len(completions)} done")
+                return stats
+            except Exception as e:
+                print(
+                    f"  Completion {i + 1}/{len(completions)} failed: "
+                    f"{type(e).__name__}: {e}"
+                )
+                return _fail_result(num_task_tests)
+
+        tasks = [
+            run_one(i, sandbox_pool[i % len(sandbox_pool)], completion, prompt)
+            for i, (completion, prompt) in enumerate(zip(completions, prompts))
+        ]
+
+        stats_list = await asyncio.gather(*tasks)
+        print(f"  Done: {len(completions)}/{len(completions)} completions evaluated")
+
+        return stats_list
+    ```
+  </TabItem>
+</Tabs>
+
+各補完結果はラウンドロビン方式（`i % len(sandbox_pool)`）でサンドボックスに割り当てられ、負荷が均等に分散されるようになっています。
+
+#### 報酬関数 \{#reward-function\}
+
+報酬関数はサンドボックスからの結果を受け取り、対応するスカラー報酬を計算します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def reward_func(prompts, completions, **kwargs):
+        stats_list = run_async(
+            _evaluate_batch_async(sandbox_pool, completions, prompts)
+        )
+        rewards = []
+        for s in stats_list:
+            if not s["no_error"]:
+                rewards.append(-1.0)
+            elif s["num_tests"] == 0:
+                rewards.append(0.0)
+            else:
+                rewards.append(s["num_passed"] / s["num_tests"])
+        return rewards
+    ```
+  </TabItem>
+</Tabs>
+
+報酬の定義は次のとおりです：
+
+* **-1.0**：エラー、タイムアウト、または禁止パターンが検出された場合
+* **0.0**：テストが存在しない場合（有効なタスクでは発生しないはず）
+* **0.0〜1.0**：合格したテストの割合
+
+#### Sync と Async の橋渡し \{#bridging-sync-and-async\}
+
+TRL の `GRPOTrainer` は同期的な報酬関数を想定していますが、Daytona SDK はサンドボックスの並列操作のために async/await を使用します。これら 2 つの世界の橋渡しを行うために、次のようなヘルパー関数を使います:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    def main():
+        # 非同期処理用の専用イベントループを作成
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        def run_async(coro: Awaitable[Any]) -> Any:
+            """同期コンテキストから非同期コードを実行する。"""
+            return loop.run_until_complete(coro)
+
+        # ... training code ...
+
+        def reward_func(prompts, completions, **kwargs):
+            # この同期関数は TRL によって呼び出される
+            # run_async を使って非同期評価を呼び出す
+            stats_list = run_async(
+                _evaluate_batch_async(sandbox_pool, completions, prompts)
+            )
+            # ... 報酬を計算 ...
+            return rewards
+    ```
+  </TabItem>
+</Tabs>
+
+このパターンにより、TRL の同期的なトレーニングループの中でも、Daytona SDK の非同期並列処理の利点を活かしたままにできます。`run_async` ヘルパーは、500 個のサンドボックスの並列評価がすべて完了するまでブロックし、その後に結果を返します。
+
+#### トレーニング設定 \{#training-configuration\}
+
+GRPO トレーナーは次のパラメータで設定されています:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    training_args = GRPOConfig(
+        output_dir="training_results",
+        per_device_train_batch_size=20,
+        # 単一の 80GB GPU 上で無理なくトレーニングを実行できるように選択したバッチサイズ。
+        # メモリ容量がこれより少ない GPU で実行する場合は、それに応じてバッチサイズを減らしてください。
+        gradient_accumulation_steps=25,
+        num_generations=EFFECTIVE_BATCH_SIZE // len(TASKS),
+        max_prompt_length=256,
+        max_completion_length=512,
+        learning_rate=8e-6,
+        num_train_epochs=1,
+        logging_steps=1,
+        report_to="none",
+        max_steps=8,
+        bf16=True,
+        use_vllm=True,
+        vllm_mode="colocate",
+        vllm_gpu_memory_utilization=0.15,
+        gradient_checkpointing=True,
+        loss_type="dapo",
+        beta=0.01,
+    )
+    ```
+  </TabItem>
+</Tabs>
+
+主な設定項目の説明:
+
+**バッチサイズとサンドボックスプールの整合性:**
+
+```
+per_device_train_batch_size (20) × gradient_accumulation_steps (25) = 500
+```
+
+これは `EFFECTIVE_BATCH_SIZE` と同じ値です。各トレーニングステップでは completion がちょうど 500 個生成され、サンドボックスもちょうど 500 個あるため、すべての completion を待ち時間なく並列に評価できます。サンドボックスが少なければ、一部の completion はキューに溜まります。逆に多ければ、その分のサンドボックスはアイドル状態のままになります。
+
+**vLLM の colocate モード:**
+
+```python
+use_vllm=True,
+vllm_mode="colocate",
+vllm_gpu_memory_utilization=0.15,
+```
+
+これは、学習と同じ GPU 上で高速な推論を行うために vLLM を実行します。GPU メモリの 15% をモデル生成に使用し、残りを学習（オプティマイザーの状態）に使用します。
+
+**生成設定:**
+
+* `num_generations=EFFECTIVE_BATCH_SIZE // len(TASKS)`: プロンプトごとに 250 個の生成結果を生成します（500 / 2 タスク）。2 つのプロンプト（sorting と max&#95;subarray）があるので、1 ステップあたり合計 500 個になります
+* `max_completion_length=512`: 生成が際限なく続いてしまうのを防ぐために、生成結果の長さを制限します
+
+### 4. トレーニングの実行 \{#4-running-the-training\}
+
+次のコマンドでトレーニングを開始します：
+
+```bash
+python train.py
+```
+
+次のような出力が得られます：
+
+```
+Creating 500 sandboxes...
+Successfully created all 500 sandboxes
+Evaluating 500 completions in parallel across 500 sandboxes...
+  Completion 1/500 done
+  Completion 2/500 done
+  ...
+  Done: 500/500 completions evaluated
+```
+
+トレーニングが完了すると、評価指標は `training_results/metrics.jsonl` に保存され、モデルは `training_results/checkpoint-8` として保存されます。
+
+### 5. 評価の例ウォークスルー \{#5-example-evaluation-walkthrough\}
+
+単一の生成結果を評価するときに何が起こるかを追ってみましょう。
+
+**ステップ 1: モデルが生成結果を出力する**
+
+モデルはソート用のプロンプトを受け取り、次のような出力を生成します。
+
+```
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[0]
+    less = [x for x in xs[1:] if x <= pivot]
+    greater = [x for x in xs[1:] if x > pivot]
+    return sort_numbers(less) + [pivot] + sort_numbers(greater)
+
+# テスト
+print(sort_numbers([3, 1, 2]))
+```
+
+**ステップ 2: サニタイズ処理で関数本体を抽出する**
+
+`sanitize_completion` はインデントされている行のみを残します。
+
+```python
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[0]
+    less = [x for x in xs[1:] if x <= pivot]
+    greater = [x for x in xs[1:] if x > pivot]
+    return sort_numbers(less) + [pivot] + sort_numbers(greater)
+```
+
+**ステップ3: 禁止パターンの確認**
+
+`has_banned_pattern` は `sorted(`、`.sort(`、`heapq`、`import` が含まれていないかをスキャンします。いずれも検出されなかったため、処理を続行します。
+
+**ステップ4: テストハーネスの構築**
+
+`build_test_harness` は、プロンプト + completion + テストランナーから成る完全なスクリプトを組み立てます。これにより、約 50 行の実行可能な Python スクリプトが生成されます。
+
+**ステップ5: サンドボックス内で実行**
+
+```python
+response = await sandbox.code_interpreter.run_code(code, timeout=1)
+```
+
+サンドボックスはコードを実行し、1 秒のタイムアウト内に処理を終えて結果を返します。
+
+**ステップ 6: 結果をパースする**
+
+テストランナーは次のように出力しました：
+
+```json
+{"results": [true, true, true, true, true]}
+```
+
+これは `response.stdout` から解析します。
+
+```python
+results = json.loads(response.stdout.strip().splitlines()[-1])
+# {"results": [true, true, true, true, true]}
+```
+
+**ステップ7：報酬の計算**
+
+5つすべてのテストに合格しました:
+
+```python
+reward = 5 / 5  # = 1.0
+```
+
+このcompletionには報酬1.0（満点）が与えられ、モデルは同様のクイックソート実装を生成するように強化されます。
+
+### 6. 学習結果 \{#6-training-results\}
+
+以下のプロットは、学習ステップごとの平均報酬を示しています。学習の初期段階では、モデルがタスク仕様を満たす関数を書くことはほとんどなく、多くの場合、エラーが発生したりタイムアウトしたりするコードを生成します。有効バッチサイズが 500 と非常に大きいため、モデルはわずか 8 ステップでほぼ完全な性能に到達します。
+
+<Image src={rewardsPlot} alt="学習ステップごとの報酬（性能向上を示すプロット）" width={700} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+### 7. カスタムタスクの追加 \{#7-adding-custom-tasks\}
+
+新しいコーディングタスクを追加するには、`TASKS` 辞書にエントリを追加します。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    TASKS = {
+        "your_task": {
+            "prompt": "Your prompt here...",
+            "func_name": "function_name",
+            "banned_patterns": ["patterns", "to", "ban"],
+            "tests": [
+                "test_input_1",
+                "test_input_2",
+            ],
+            "reference": "reference_function",
+        },
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+参照関数は、`build_test_harness` が生成するテストハーネス内で定義しておく必要があります。
+
+### 8. Configuration Options \{#8-configuration-options\}
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `EFFECTIVE_BATCH_SIZE` | 500 | 実効バッチサイズ。並列サンドボックス数と同じ値 |
+| `MAX_TIMEOUT_SECONDS` | 1 | コード実行ごとのタイムアウト時間（秒） |
+| `MODEL_NAME` | `Qwen/Qwen3-1.7B-Base` | 学習に使用するベースモデル |
+
+:::tip[Scaling Tips]
+
+* 最適な並列処理のために、`per_device_train_batch_size * gradient_accumulation_steps` が `EFFECTIVE_BATCH_SIZE` と等しくなるように設定する
+* アルゴリズム的に複雑なテストケースを含むタスクでは、`MAX_TIMEOUT_SECONDS` を増やす
+  :::
+
+***
+
+**このアプローチの主な利点:**
+
+* **大規模な並列処理**: 500 個のサンドボックスが同時に生成結果を評価する
+* **安全な実行**: 生成されたコードは分離された環境で実行され、ホストシステムを保護できる
+* **高速なフィードバック**: vLLM と並列評価により、学習イテレーション時間を最小化できる
+* **拡張性**: プロンプトとテストケースを定義することで、新しいコーディングタスクを容易に追加できる

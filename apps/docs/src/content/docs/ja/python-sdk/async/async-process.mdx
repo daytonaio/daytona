@@ -1,0 +1,747 @@
+---
+title: "AsyncProcess"
+hideTitleOnPage: true
+---
+
+## AsyncProcess \{#asyncprocess\}
+
+```python
+class AsyncProcess()
+```
+
+サンドボックス内でのプロセスおよびコードの実行を管理します。
+
+#### AsyncProcess.**init** \{#asyncprocess__init__\}
+
+```python
+def __init__(code_toolbox: SandboxCodeToolbox, api_client: ProcessApi)
+```
+
+新しい Process インスタンスを初期化します。
+
+**引数**:
+
+* `code_toolbox` *SandboxCodeToolbox* - 言語固有のコード実行ツールボックス。
+* `api_client` *ProcessApi* - プロセス操作用の API クライアント。
+
+#### AsyncProcess.exec \{#asyncprocessexec\}
+
+```python
+@intercept_errors(message_prefix="Failed to execute command: ")
+@with_instrumentation()
+async def exec(command: str,
+               cwd: str | None = None,
+               env: dict[str, str] | None = None,
+               timeout: int | None = None) -> ExecuteResponse
+```
+
+サンドボックス内でシェルコマンドを実行します。
+
+**引数**:
+
+* `command` *str* - 実行するシェルコマンド。
+* `cwd` *str | None* - コマンドを実行する作業ディレクトリ。指定しない場合は、
+  サンドボックスの作業ディレクトリが使用されます。
+* `env` *dict[str, str] | None* - コマンドに設定する環境変数。
+* `timeout` *int | None* - コマンドの完了を待機する最大時間（秒）。0 の場合は、
+  完了するまで無期限に待機します。
+
+**戻り値**:
+
+* `ExecuteResponse` - コマンド実行結果を含むオブジェクト:
+  * exit&#95;code: コマンドの終了ステータス
+  * result: コマンドの標準出力
+  * artifacts: `stdout`（result と同じ）および `charts`（matplotlib のチャートのメタデータ）を
+    含む ExecutionArtifacts オブジェクト
+
+**例**:
+
+```python
+# Simple command
+response = await sandbox.process.exec("echo 'Hello'")
+print(response.artifacts.stdout)  # 出力: Hello
+
+# Command with working directory
+result = await sandbox.process.exec("ls", cwd="workspace/src")
+
+# Command with timeout
+result = await sandbox.process.exec("sleep 10", timeout=5)
+```
+
+#### AsyncProcess.code_run \{#asyncprocesscode_run\}
+
+```python
+@with_instrumentation()
+async def code_run(code: str,
+                   params: CodeRunParams | None = None,
+                   timeout: int | None = None) -> ExecuteResponse
+```
+
+適切な言語ランタイムを使用して、サンドボックス内でコードを実行します。
+
+**引数**:
+
+* `code` *str* - 実行するコード。
+* `params` *CodeRunParams | None* - コード実行のパラメーター。
+* `timeout` *int | None* - コードの完了を待機する最大時間（秒）。0 は無期限に待機することを意味します。
+
+**戻り値**:
+
+* `ExecuteResponse` - 次を含むコード実行結果:
+  * exit&#95;code: 実行の終了ステータス
+  * result: コードからの標準出力
+  * artifacts: `stdout`（result と同じ）と `charts`（matplotlib のチャートメタデータ）を含む ExecutionArtifacts オブジェクト
+
+**例**:
+
+```python
+# Run Python code
+response = await sandbox.process.code_run('''
+    x = 10
+    y = 20
+    print(f"Sum: {x + y}")
+''')
+print(response.artifacts.stdout)  # 出力: Sum: 30
+```
+
+Matplotlib のチャートは自動的に検出され、`ExecutionArtifacts` オブジェクトの `charts` フィールドとして返されます。
+
+```python
+code = '''
+import matplotlib.pyplot as plt
+import numpy as np
+
+x = np.linspace(0, 10, 30)
+y = np.sin(x)
+
+plt.figure(figsize=(8, 5))
+plt.plot(x, y, 'b-', linewidth=2)
+plt.title('Line Chart')
+plt.xlabel('X-axis (seconds)')
+plt.ylabel('Y-axis (amplitude)')
+plt.grid(True)
+plt.show()
+'''
+
+response = await sandbox.process.code_run(code)
+chart = response.artifacts.charts[0]
+
+print(f"Type: {chart.type}")
+print(f"Title: {chart.title}")
+if chart.type == ChartType.LINE and isinstance(chart, LineChart):
+    print(f"X Label: {chart.x_label}")
+    print(f"Y Label: {chart.y_label}")
+    print(f"X Ticks: {chart.x_ticks}")
+    print(f"X Tick Labels: {chart.x_tick_labels}")
+    print(f"X Scale: {chart.x_scale}")
+    print(f"Y Ticks: {chart.y_ticks}")
+    print(f"Y Tick Labels: {chart.y_tick_labels}")
+    print(f"Y Scale: {chart.y_scale}")
+    print("Elements:")
+    for element in chart.elements:
+        print(f"Label: {element.label}")
+        print(f"Points: {element.points}")
+```
+
+#### AsyncProcess.create_session \{#asyncprocesscreate_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to create session: ")
+@with_instrumentation()
+async def create_session(session_id: str) -> None
+```
+
+サンドボックス内に新しい長時間実行のバックグラウンドセッションを作成します。
+
+セッションはコマンド間で状態を保持するバックグラウンドプロセスであり、複数の関連コマンドの実行や永続的な環境構築が必要なシナリオに最適です。長時間実行されるコマンドを実行し、プロセスのステータスを監視できます。
+
+**引数**:
+
+* `session_id` *str* - 新しいセッションの一意の識別子。
+
+**例**:
+
+```python
+# 新しいセッションを作成
+session_id = "my-session"
+await sandbox.process.create_session(session_id)
+session = await sandbox.process.get_session(session_id)
+# Do work...
+await sandbox.process.delete_session(session_id)
+```
+
+#### AsyncProcess.get_session \{#asyncprocessget_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to get session: ")
+async def get_session(session_id: str) -> Session
+```
+
+サンドボックス内のセッションを取得します。
+
+**引数**:
+
+* `session_id` *str* - 取得するセッションの一意の識別子。
+
+**戻り値**:
+
+* `Session` - 以下を含むセッション情報:
+  * session&#95;id: セッションの一意の識別子
+  * commands: セッション内で実行されたコマンドのリスト
+
+**例**:
+
+```python
+session = await sandbox.process.get_session("my-session")
+for cmd in session.commands:
+    print(f"Command: {cmd.command}")
+```
+
+#### AsyncProcess.get_session_command \{#asyncprocessget_session_command\}
+
+```python
+@intercept_errors(message_prefix="Failed to get session command: ")
+@with_instrumentation()
+async def get_session_command(session_id: str, command_id: str) -> Command
+```
+
+セッション内で実行された特定のコマンドに関する情報を取得します。
+
+**引数**:
+
+* `session_id` *str* - セッションの一意の識別子。
+* `command_id` *str* - コマンドの一意の識別子。
+
+**戻り値**:
+
+* `Command` - 次の情報を含むコマンド情報：
+  * id: コマンドの一意の識別子
+  * command: 実行されたコマンド文字列
+  * exit&#95;code: コマンドの終了コード（完了している場合）
+
+**例**:
+
+```python
+cmd = await sandbox.process.get_session_command("my-session", "cmd-123")
+if cmd.exit_code == 0:
+    print(f"Command {cmd.command} completed successfully")
+```
+
+#### AsyncProcess.execute_session_command \{#asyncprocessexecute_session_command\}
+
+```python
+@intercept_errors(message_prefix="セッションコマンドの実行に失敗しました: ")
+@with_instrumentation()
+async def execute_session_command(
+        session_id: str,
+        req: SessionExecuteRequest,
+        timeout: int | None = None) -> SessionExecuteResponse
+```
+
+セッションでコマンドを実行します。
+
+**引数**:
+
+* `session_id` *str* - 使用するセッションの一意の識別子。
+* `req` *SessionExecuteRequest* - 次を含むコマンド実行リクエスト:
+  * command: 実行するコマンド
+  * run&#95;async: 非同期で実行するかどうか
+
+**戻り値**:
+
+* `SessionExecuteResponse` - 次を含むコマンド実行結果:
+  * cmd&#95;id: 実行されたコマンドの一意の識別子
+  * output: コマンドの標準出力および標準エラー出力をまとめた出力（同期実行の場合）
+  * stdout: コマンドからの標準出力
+  * stderr: コマンドからの標準エラー出力
+  * exit&#95;code: コマンドの終了ステータス（同期実行の場合）
+
+**例**:
+
+```python
+# コマンドを順次実行し、状態を維持する
+session_id = "my-session"
+
+# Change directory
+req = SessionExecuteRequest(command="cd /workspace")
+await sandbox.process.execute_session_command(session_id, req)
+
+# Create a file
+req = SessionExecuteRequest(command="echo 'Hello' > test.txt")
+await sandbox.process.execute_session_command(session_id, req)
+
+# Read the file
+req = SessionExecuteRequest(command="cat test.txt")
+result = await sandbox.process.execute_session_command(session_id, req)
+print(f"Command stdout: {result.stdout}")
+print(f"Command stderr: {result.stderr}")
+```
+
+#### AsyncProcess.get_session_command_logs \{#asyncprocessget_session_command_logs\}
+
+```python
+@intercept_errors(message_prefix="Failed to get session command logs: ")
+@with_instrumentation()
+async def get_session_command_logs(
+        session_id: str, command_id: str) -> SessionCommandLogsResponse
+```
+
+セッション内で実行されたコマンドのログを取得します。
+
+**引数**:
+
+* `session_id` *str* - セッションの一意の識別子。
+* `command_id` *str* - コマンドの一意の識別子。
+
+**戻り値**:
+
+* `SessionCommandLogsResponse` - 以下を含むコマンドログ:
+  * output: コマンドの出力（stdout と stderr を結合したもの）
+  * stdout: コマンドからの標準出力
+  * stderr: コマンドからの標準エラー出力
+
+**例**:
+
+```python
+logs = await sandbox.process.get_session_command_logs(
+    "my-session",
+    "cmd-123"
+)
+print(f"Command stdout: {logs.stdout}")
+print(f"Command stderr: {logs.stderr}")
+```
+
+#### AsyncProcess.get_session_command_logs_async \{#asyncprocessget_session_command_logs_async\}
+
+```python
+@intercept_errors(message_prefix="セッションコマンドログの取得に失敗しました: ")
+async def get_session_command_logs_async(
+        session_id: str, command_id: str, on_stdout: OutputHandler[str],
+        on_stderr: OutputHandler[str]) -> None
+```
+
+セッションで実行されたコマンドのログを、利用可能になり次第、非同期に取得して処理します。
+
+同期および非同期の両方のコールバックを受け付けます。非同期コールバックは `await` されます。
+コールバック内でブロッキングな同期処理を行うと、WebSocket が切断される可能性があります — これを避けるために、非同期コールバックおよび非同期ライブラリを使用してください。
+
+**引数**:
+
+* `session_id` *str* - セッションの一意な識別子。
+* `command_id` *str* - コマンドの一意な識別子。
+* `on_stdout` *OutputHandler[str]* - 受信した stdout ログチャンクを処理するためのコールバック関数。
+* `on_stderr` *OutputHandler[str]* - 受信した stderr ログチャンクを処理するためのコールバック関数。
+
+**例**:
+
+```python
+await sandbox.process.get_session_command_logs_async(
+    "my-session",
+    "cmd-123",
+    lambda log: print(f"[STDOUT]: {log}"),
+    lambda log: print(f"[STDERR]: {log}"),
+)
+```
+
+#### AsyncProcess.send_session_command_input \{#asyncprocesssend_session_command_input\}
+
+```python
+@intercept_errors(message_prefix="Failed to send session command input: ")
+async def send_session_command_input(session_id: str, command_id: str,
+                                     data: str) -> None
+```
+
+セッション内で実行中のコマンドに入力データを送信します。
+
+**引数**:
+
+* `session_id` *str* - セッションの一意の識別子。
+* `command_id` *str* - コマンドの一意の識別子。
+* `data` *str* - 送信する入力データ。
+
+#### AsyncProcess.list_sessions \{#asyncprocesslist_sessions\}
+
+```python
+@intercept_errors(message_prefix="セッション一覧の取得に失敗しました: ")
+@with_instrumentation()
+async def list_sessions() -> list[Session]
+```
+
+サンドボックス内のすべてのセッションを一覧表示します。
+
+**戻り値**:
+
+* `list[Session]` - サンドボックス内の全セッションのリスト。
+
+**例**:
+
+```python
+sessions = await sandbox.process.list_sessions()
+for session in sessions:
+    print(f"Session {session.session_id}:")
+    print(f"  コマンド: {len(session.commands)}")
+```
+
+#### AsyncProcess.delete_session \{#asyncprocessdelete_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to delete session: ")
+@with_instrumentation()
+async def delete_session(session_id: str) -> None
+```
+
+サンドボックス内のセッションを終了して削除し、そのセッションに関連するすべてのリソースをクリーンアップします。
+
+**引数**:
+
+* `session_id` *str* - 削除するセッションの一意の識別子。
+
+**例**:
+
+```python
+# セッションを作成して使用する
+await sandbox.process.create_session("temp-session")
+# ... セッションを使用する ...
+
+# 完了後にクリーンアップする
+await sandbox.process.delete_session("temp-session")
+```
+
+#### AsyncProcess.create_pty_session \{#asyncprocesscreate_pty_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to create PTY session: ")
+@with_instrumentation()
+async def create_pty_session(
+        id: str,
+        on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]],
+        cwd: str | None = None,
+        envs: dict[str, str] | None = None,
+        pty_size: PtySize | None = None) -> AsyncPtyHandle
+```
+
+サンドボックス内に新しい PTY（擬似端末）セッションを作成します。
+
+コマンドの実行とユーザー入力の処理が可能な対話型ターミナルセッションを作成します。
+PTY セッションは実際のターミナルのように動作し、コマンド履歴などの機能をサポートします。
+
+**引数**:
+
+* `id` - PTY セッションの一意の識別子。サンドボックス内で一意である必要があります。
+  on&#95;data (Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]):
+  PTY の出力データを処理するためのコールバック関数。
+* `cwd` - PTY セッションの作業ディレクトリ。指定しない場合は、サンドボックスの作業ディレクトリが使用されます。
+* `env` - PTY セッション内で設定する環境変数。サンドボックスのデフォルト環境変数と統合されます。
+* `pty_size` - ターミナルのサイズ設定。指定しない場合は 80x24 がデフォルトです。
+
+**戻り値**:
+
+* `AsyncPtyHandle` - 作成された PTY セッションを管理するためのハンドル。これを使用して入力の送信、
+  出力の受信、ターミナルのリサイズ、およびセッションライフサイクルの管理を行います。
+
+**例外**:
+
+* `DaytonaError` - PTY セッションの作成に失敗した場合、またはセッション ID がすでに使用されている場合にスローされます。
+
+#### AsyncProcess.connect_pty_session \{#asyncprocessconnect_pty_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to connect PTY session: ")
+@with_instrumentation()
+async def connect_pty_session(
+    session_id: str,
+    on_data: Callable[[bytes], None] | Callable[[bytes], Awaitable[None]]
+) -> AsyncPtyHandle
+```
+
+サンドボックス内の既存の PTY セッションに接続します。
+
+既存の PTY セッションへの WebSocket 接続を確立し、事前に作成されたターミナルセッションと
+対話できるようにします。
+
+**引数**:
+
+* `session_id` - 接続対象となる PTY セッションの一意の識別子。
+
+**戻り値**:
+
+* `AsyncPtyHandle` - 接続された PTY セッションを管理するためのハンドル。
+
+**例外**:
+
+* `DaytonaError` - PTY セッションが存在しない場合、または接続に失敗した場合。
+
+#### AsyncProcess.list_pty_sessions \{#asyncprocesslist_pty_sessions\}
+
+```python
+@intercept_errors(message_prefix="Failed to list PTY sessions: ")
+@with_instrumentation()
+async def list_pty_sessions() -> list[PtySessionInfo]
+```
+
+サンドボックス内のすべての PTY セッションを列挙します。
+
+このサンドボックス内のすべての PTY セッションに関する情報を取得します。
+
+**戻り値**:
+
+* `list[PtySessionInfo]` - 各セッションの状態、作成時刻、および設定に関する
+  詳細を含む PTY セッション情報オブジェクトのリスト。
+
+**例**:
+
+```python
+# List all PTY sessions
+sessions = await sandbox.process.list_pty_sessions()
+
+for session in sessions:
+    print(f"Session ID: {session.id}")
+    print(f"Active: {session.active}")
+    print(f"作成日時: {session.created_at}")
+```
+
+#### AsyncProcess.get_pty_session_info \{#asyncprocessget_pty_session_info\}
+
+```python
+@intercept_errors(message_prefix="PTYセッション情報の取得に失敗しました: ")
+@with_instrumentation()
+async def get_pty_session_info(session_id: str) -> PtySessionInfo
+```
+
+特定の PTY セッションに関する詳細情報を取得します。
+
+PTY セッションの現在の状態、設定、メタデータなどを含む包括的な情報を返します。
+
+**Arguments**:
+
+* `session_id` - 情報を取得する対象の PTY セッションを一意に識別する ID。
+
+**Returns**:
+
+* `PtySessionInfo` - ID、状態、作成時刻、作業ディレクトリ、環境変数などを含む、
+  PTY セッションに関する詳細情報。
+
+**Raises**:
+
+* `DaytonaError` - PTY セッションが存在しない場合に発生します。
+
+**Example**:
+
+```python
+# 特定のPTYセッションに関する詳細を取得
+session_info = await sandbox.process.get_pty_session_info("my-session")
+
+print(f"Session ID: {session_info.id}")
+print(f"Active: {session_info.active}")
+print(f"Working Directory: {session_info.cwd}")
+print(f"Terminal Size: {session_info.cols}x{session_info.rows}")
+```
+
+#### AsyncProcess.kill_pty_session \{#asyncprocesskill_pty_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to kill PTY session: ")
+@with_instrumentation()
+async def kill_pty_session(session_id: str) -> None
+```
+
+PTY セッションを終了し、そのセッションに関連付けられたプロセスを停止します。
+
+PTY セッションを強制終了し、関連するすべてのリソースを解放します。
+これにより、すべてのアクティブな接続が閉じられ、背後で動作しているシェルプロセスが強制終了されます。
+この操作は元に戻せません。ターミナルセッション内で保存されていない作業はすべて失われます。
+
+**引数**:
+
+* `session_id` - 終了する PTY セッションを一意に識別する ID。
+
+**送出される例外**:
+
+* `DaytonaError` - PTY セッションが存在しないか、終了できない場合に送出されます。
+
+**例**:
+
+```python
+# Kill a specific PTY session
+await sandbox.process.kill_pty_session("my-session")
+
+# セッションが存在しないことを確認する
+pty_sessions = await sandbox.process.list_pty_sessions()
+for pty_session in pty_sessions:
+    print(f"PTY session: {pty_session.id}")
+```
+
+#### AsyncProcess.resize_pty_session \{#asyncprocessresize_pty_session\}
+
+```python
+@intercept_errors(message_prefix="Failed to resize PTY session: ")
+@with_instrumentation()
+async def resize_pty_session(session_id: str,
+                             pty_size: PtySize) -> PtySessionInfo
+```
+
+PTY セッションのターミナルのサイズを変更します。
+
+アクティブな PTY セッションのターミナルサイズを変更します。これは、クライアント側のターミナルウィンドウがリサイズされた場合や、出力要件に応じて表示を調整する必要がある場合に便利です。
+
+**Arguments**:
+
+* `session_id` - サイズ変更する PTY セッションの一意の識別子。
+* `pty_size` - 希望する列数および行数を含む、新しいターミナルサイズ。
+
+**Returns**:
+
+* `PtySessionInfo` - 新しいターミナルサイズを反映した更新済みセッション情報。
+
+**Raises**:
+
+* `DaytonaError` - PTY セッションが存在しない場合、またはサイズ変更処理が失敗した場合。
+
+**Example**:
+
+```python
+from daytona.common.pty import PtySize
+
+# Resize a PTY session to a larger terminal
+new_size = PtySize(rows=40, cols=150)
+updated_info = await sandbox.process.resize_pty_session("my-session", new_size)
+
+print(f"Terminal resized to {updated_info.cols}x{updated_info.rows}")
+
+# AsyncPtyHandleのresizeメソッドも使用できます
+await pty_handle.resize(new_size)
+```
+
+## CodeRunParams \{#coderunparams\}
+
+```python
+@dataclass
+class CodeRunParams()
+```
+
+コード実行用のパラメータ。
+
+**属性**:
+
+* `argv` *list[str] | None* - コマンドライン引数
+* `env` *dict[str, str] | None* - 環境変数
+
+## SessionExecuteRequest \{#sessionexecuterequest\}
+
+```python
+class SessionExecuteRequest(ApiSessionExecuteRequest,
+                            AsyncApiSessionExecuteRequest)
+```
+
+セッション内でコマンドを実行するためのリクエストを表します。
+
+**属性**:
+
+* `command` *str* - 実行するコマンド。
+* `run_async` *bool | None* - コマンドを非同期で実行するかどうか。
+* `var_async` *bool | None* - 非推奨です。代わりに `run_async` を使用してください。
+* `suppress_input_echo` *bool | None* - 入力エコーを抑制するかどうか。デフォルトは `False` です。
+
+## ExecutionArtifacts \{#executionartifacts\}
+
+```python
+@dataclass
+class ExecutionArtifacts()
+```
+
+コマンド実行によって生成されたアーティファクト。
+
+**属性**:
+
+* `stdout` *str* - コマンドの標準出力。`ExecuteResponse` における `result` と同じ
+* `charts` *list[Chart] | None* - matplotlib によるチャートメタデータのリスト
+
+## ExecuteResponse \{#executeresponse\}
+
+```python
+class ExecuteResponse(BaseModel)
+```
+
+コマンド実行の結果。
+
+**属性**:
+
+* `exit_code` *int* - コマンド実行の終了コード
+* `result` *str* - コマンド実行の出力
+* `artifacts` *ExecutionArtifacts | None* - コマンド実行で生成されたアーティファクト
+
+## SessionExecuteResponse \{#sessionexecuteresponse\}
+
+```python
+class SessionExecuteResponse(ApiSessionExecuteResponse)
+```
+
+セッションコマンド実行のレスポンス。
+
+**属性**:
+
+* `cmd_id` *str* - 実行されたコマンドの ID
+* `stdout` *str | None* - コマンド実行の標準出力
+* `stderr` *str | None* - コマンド実行の標準エラー出力
+* `output` *str* - コマンド実行の出力
+* `exit_code` *int* - コマンド実行の終了コード
+
+## SessionCommandLogsResponse \{#sessioncommandlogsresponse\}
+
+```python
+@dataclass
+class SessionCommandLogsResponse()
+```
+
+コマンドログのレスポンス。
+
+**属性**:
+
+* `output` *str | None* - コマンドの出力を結合したもの
+* `stdout` *str | None* - コマンドの標準出力
+* `stderr` *str | None* - コマンドの標準エラー出力
+
+#### parse_session_command_logs \{#parse_session_command_logs\}
+
+```python
+def parse_session_command_logs(data: bytes) -> SessionCommandLogsResponse
+```
+
+結合された stdout/stderr の出力を個別のストリームに解析します。
+
+**Arguments**:
+
+* `data` - STDOUT&#95;PREFIX および STDERR&#95;PREFIX のマーカーを含む結合されたログのバイト列
+
+**Returns**:
+
+個別の stdout と stderr を含む SessionCommandLogsResponse
+
+#### demux_log \{#demux_log\}
+
+```python
+def demux_log(data: bytes) -> tuple[bytes, bytes]
+```
+
+結合された stdout/stderr ログデータをデマルチプレックスします。
+
+**引数**:
+
+* `data` - STDOUT&#95;PREFIX および STDERR&#95;PREFIX マーカーを含む結合済みログのバイト列
+
+**戻り値**:
+
+(stdout&#95;bytes, stderr&#95;bytes) のタプル
+
+##### OutputHandler \{#outputhandler\}
+
+```python
+OutputHandler = Union[
+    Callable[[T], None],
+    Callable[[T], Awaitable[None]],
+]
+```
+
+同期および非同期ハンドラーの両方を受け付けるコールバック型です。
+
+ハンドラー内でブロッキングな同期処理を行うと、WebSocket が切断される可能性があります。

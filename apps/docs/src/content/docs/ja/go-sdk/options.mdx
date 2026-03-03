@@ -1,0 +1,972 @@
+---
+title: "オプション"
+hideTitleOnPage: true
+---
+
+{/* このコードは gomarkdoc によって生成されました。編集しないでください。 */}
+
+# オプション \{#options\}
+
+```go
+import "github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
+```
+
+options パッケージは、SDK の各種操作を設定するための関数型オプション型を提供します。
+
+このパッケージは functional options パターンを用いて、オプションパラメータを設定するためのクリーンで拡張性の高い API を提供します。各オプション関数は、対応する options 構造体を変更するクロージャを返します。
+
+### 使用方法 \{#usage\}
+
+Options は可変長引数として SDK メソッドに渡します。
+
+```
+err := sandbox.Git.Clone(ctx, url, path,
+    options.WithBranch("develop"),
+    options.WithUsername("user"),
+    options.WithPassword("token"),
+)
+```
+
+### 汎用的な Apply 関数 \{#generic-apply-function\}
+
+[Apply](#Apply) 関数は新しいオプション構造体を作成し、指定されたすべてのオプション関数をその構造体に適用します。
+
+```
+opts := options.Apply(
+    options.WithBranch("main"),
+    options.WithUsername("user"),
+)
+// opts.Branch == "main", opts.Username == "user"
+```
+
+## インデックス \{#index\}
+
+* [func Apply[T any](opts ...func(*T)) *T](#Apply)
+* [func WithAllowEmpty(allowEmpty bool) func(*GitCommit)](#WithAllowEmpty)
+* [func WithBranch(branch string) func(*GitClone)](#WithBranch)
+* [func WithCodeRunParams(params types.CodeRunParams) func(*CodeRun)](#WithCodeRunParams)
+* [func WithCodeRunTimeout(timeout time.Duration) func(*CodeRun)](#WithCodeRunTimeout)
+* [func WithCommandEnv(env map[string]string) func(*ExecuteCommand)](#WithCommandEnv)
+* [func WithCommitId(commitID string) func(*GitClone)](#WithCommitId)
+* [func WithCreatePtyEnv(env map[string]string) func(*CreatePty)](#WithCreatePtyEnv)
+* [func WithCreatePtySize(ptySize types.PtySize) func(*CreatePty)](#WithCreatePtySize)
+* [func WithCustomContext(contextID string) func(*RunCode)](#WithCustomContext)
+* [func WithCwd(cwd string) func(*ExecuteCommand)](#WithCwd)
+* [func WithEnv(env map[string]string) func(*RunCode)](#WithEnv)
+* [func WithExecuteTimeout(timeout time.Duration) func(*ExecuteCommand)](#WithExecuteTimeout)
+* [func WithExtraIndexURLs(urls ...string) func(*PipInstall)](#WithExtraIndexURLs)
+* [func WithExtraOptions(options string) func(*PipInstall)](#WithExtraOptions)
+* [func WithFindLinks(links ...string) func(*PipInstall)](#WithFindLinks)
+* [func WithForce(force bool) func(*GitDeleteBranch)](#WithForce)
+* [func WithGroup(group string) func(*SetFilePermissions)](#WithGroup)
+* [func WithIndexURL(url string) func(*PipInstall)](#WithIndexURL)
+* [func WithInterpreterTimeout(timeout time.Duration) func(*RunCode)](#WithInterpreterTimeout)
+* [func WithLogChannel(logChannel chan string) func(*CreateSandbox)](#WithLogChannel)
+* [func WithMode(mode string) func(*CreateFolder)](#WithMode)
+* [func WithOwner(owner string) func(*SetFilePermissions)](#WithOwner)
+* [func WithPassword(password string) func(*GitClone)](#WithPassword)
+* [func WithPermissionMode(mode string) func(*SetFilePermissions)](#WithPermissionMode)
+* [func WithPre() func(*PipInstall)](#WithPre)
+* [func WithPtyEnv(env map[string]string) func(*PtySession)](#WithPtyEnv)
+* [func WithPtySize(size types.PtySize) func(*PtySession)](#WithPtySize)
+* [func WithPullPassword(password string) func(*GitPull)](#WithPullPassword)
+* [func WithPullUsername(username string) func(*GitPull)](#WithPullUsername)
+* [func WithPushPassword(password string) func(*GitPush)](#WithPushPassword)
+* [func WithPushUsername(username string) func(*GitPush)](#WithPushUsername)
+* [func WithTimeout(timeout time.Duration) func(*CreateSandbox)](#WithTimeout)
+* [func WithUsername(username string) func(*GitClone)](#WithUsername)
+* [func WithWaitForStart(waitForStart bool) func(*CreateSandbox)](#WithWaitForStart)
+* [CodeRun 型](#CodeRun)
+* [CreateFolder 型](#CreateFolder)
+* [CreatePty 型](#CreatePty)
+* [型 CreateSandbox](#CreateSandbox)
+* [ExecuteCommand 型](#ExecuteCommand)
+* [GitClone 型](#GitClone)
+* [GitCommit 型](#GitCommit)
+* [type GitDeleteBranch](#GitDeleteBranch)
+* [タイプ GitPull](#GitPull)
+* [type GitPush](#GitPush)
+* [PipInstall 型](#PipInstall)
+* [type PtySession](#PtySession)
+* [RunCode 型](#RunCode)
+* [型 SetFilePermissions](#SetFilePermissions)
+
+<a name="Apply" />
+
+## func Apply \{#func-apply\}
+
+```go
+func Apply[T any](opts ...func(*T)) *T
+```
+
+Apply は、型 T の新しいインスタンスを作成し、指定されたすべてのオプション関数を適用します。
+
+このジェネリック関数により、さまざまなオプション型に対して関数ベースのオプションを適用するための一貫したパターンが提供されます。まず T のゼロ値インスタンスを割り当て、その後、各オプション関数を順番に適用します。
+
+例:
+
+```
+opts := options.Apply(
+    options.WithBranch("main"),
+    options.WithUsername("user"),
+)
+```
+
+<a name="WithAllowEmpty" />
+
+## func WithAllowEmpty \{#func-withallowempty\}
+
+```go
+func WithAllowEmpty(allowEmpty bool) func(*GitCommit)
+```
+
+WithAllowEmpty を指定すると、ステージされた変更がない場合でもコミットを作成できます。
+
+これは、実際のコード変更がなくても CI/CD パイプラインをトリガーしたり、履歴上の特定の時点をマークしたりするのに有用です。
+
+例:
+
+```
+resp, err := sandbox.Git.Commit(ctx, path, "Trigger rebuild", author, email,
+    options.WithAllowEmpty(true),
+)
+```
+
+<a name="WithBranch" />
+
+## func WithBranch \{#func-withbranch\}
+
+```go
+func WithBranch(branch string) func(*GitClone)
+```
+
+WithBranch は、リポジトリのデフォルトブランチではなく、クローン対象とするブランチを指定します。
+
+例:
+
+```
+err := sandbox.Git.Clone(ctx, url, path, options.WithBranch("develop"))
+```
+
+<a name="WithCodeRunParams" />
+
+## func WithCodeRunParams \{#func-withcoderunparams\}
+
+```go
+func WithCodeRunParams(params types.CodeRunParams) func(*CodeRun)
+```
+
+WithCodeRunParams は、コード実行のパラメータを設定します。
+
+例：
+
+```
+result, err := sandbox.Process.CodeRun(ctx, code,
+    options.WithCodeRunParams(types.CodeRunParams{Language: "python"}),
+)
+```
+
+<a name="WithCodeRunTimeout" />
+
+## func WithCodeRunTimeout \{#func-withcoderuntimeout\}
+
+```go
+func WithCodeRunTimeout(timeout time.Duration) func(*CodeRun)
+```
+
+WithCodeRunTimeout は、コード実行のタイムアウト時間を設定します。
+
+例：
+
+```
+result, err := sandbox.Process.CodeRun(ctx, code,
+    options.WithCodeRunTimeout(30*time.Second),
+)
+```
+
+<a name="WithCommandEnv" />
+
+## func WithCommandEnv \{#func-withcommandenv\}
+
+```go
+func WithCommandEnv(env map[string]string) func(*ExecuteCommand)
+```
+
+WithCommandEnv は、コマンドの実行環境に設定する環境変数を指定します。
+
+これらの変数は、サンドボックスのデフォルトの環境変数に加えて、コマンドの実行環境に追加されます。
+
+例:
+
+```
+result, err := sandbox.Process.ExecuteCommand(ctx, "echo $MY_VAR",
+    options.WithCommandEnv(map[string]string{"MY_VAR": "hello"}),
+)
+```
+
+<a name="WithCommitId" />
+
+## func WithCommitId \{#func-withcommitid\}
+
+```go
+func WithCommitId(commitID string) func(*GitClone)
+```
+
+WithCommitId は、クローン後にチェックアウトする特定のコミット SHA を設定します。
+
+まずリポジトリがクローンされ、その後に指定されたコミットがチェックアウトされるため、HEAD は detached HEAD 状態になります。
+
+例:
+
+```
+err := sandbox.Git.Clone(ctx, url, path, options.WithCommitId("abc123def"))
+```
+
+<a name="WithCreatePtyEnv" />
+
+## func WithCreatePtyEnv \{#func-withcreateptyenv\}
+
+```go
+func WithCreatePtyEnv(env map[string]string) func(*CreatePty)
+```
+
+WithCreatePtyEnv は、CreatePty の環境変数を指定します。
+
+例:
+
+```
+handle, err := sandbox.Process.CreatePty(ctx, "my-pty",
+    options.WithCreatePtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+```
+
+<a name="WithCreatePtySize" />
+
+## func WithCreatePtySize \{#func-withcreateptysize\}
+
+```go
+func WithCreatePtySize(ptySize types.PtySize) func(*CreatePty)
+```
+
+WithCreatePtySize は、CreatePty 用の PTY 端末サイズを設定します。
+
+例:
+
+```
+handle, err := sandbox.Process.CreatePty(ctx, "my-pty",
+    options.WithCreatePtySize(types.PtySize{Rows: 24, Cols: 80}),
+)
+```
+
+<a name="WithCustomContext" />
+
+## func WithCustomContext \{#func-withcustomcontext\}
+
+```go
+func WithCustomContext(contextID string) func(*RunCode)
+```
+
+WithCustomContext は、コード実行に使用するインタープリターのコンテキスト ID を設定します。
+
+コンテキストを使用すると、複数回のコード実行にわたって状態（変数、インポートなど）を保持できます。まず CreateContext を使ってコンテキストを作成してください。
+
+例：
+
+```
+ctx, _ := sandbox.CodeInterpreter.CreateContext(ctx, nil)
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, "x = 42",
+    options.WithCustomContext(ctx["id"].(string)),
+)
+```
+
+<a name="WithCwd" />
+
+## func WithCwd \{#func-withcwd\}
+
+```go
+func WithCwd(cwd string) func(*ExecuteCommand)
+```
+
+WithCwd は、コマンドを実行する際の作業ディレクトリを設定します。
+
+例:
+
+```
+result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la",
+    options.WithCwd("/home/user/project"),
+)
+```
+
+<a name="WithEnv" />
+
+## func WithEnv \{#func-withenv\}
+
+```go
+func WithEnv(env map[string]string) func(*RunCode)
+```
+
+WithEnv は、コード実行時に使用する環境変数を設定します。
+
+設定した変数は、コードの実行中に参照できます。
+
+例:
+
+```
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, "import os; print(os.environ['API_KEY'])",
+    options.WithEnv(map[string]string{"API_KEY": "secret"}),
+)
+```
+
+<a name="WithExecuteTimeout" />
+
+## func WithExecuteTimeout \{#func-withexecutetimeout\}
+
+```go
+func WithExecuteTimeout(timeout time.Duration) func(*ExecuteCommand)
+```
+
+WithExecuteTimeout は、コマンド実行のタイムアウトを指定します。
+
+コマンドがタイムアウト時間内に完了しない場合、強制終了されます。
+
+例:
+
+```
+result, err := sandbox.Process.ExecuteCommand(ctx, "sleep 60",
+    options.WithExecuteTimeout(5*time.Second),
+)
+```
+
+<a name="WithExtraIndexURLs" />
+
+## func WithExtraIndexURLs \{#func-withextraindexurls\}
+
+```go
+func WithExtraIndexURLs(urls ...string) func(*PipInstall)
+```
+
+WithExtraIndexURLs は、pip install に対して追加のインデックス URL を指定します。
+
+追加インデックスは、メインのインデックス URL に加えて参照されます。PyPI とプライベートインデックスの両方からパッケージをインストールする場合に便利です。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"mypackage"},
+    options.WithExtraIndexURLs("https://private.example.com/simple/"),
+)
+```
+
+<a name="WithExtraOptions" />
+
+## func WithExtraOptions \{#func-withextraoptions\}
+
+```go
+func WithExtraOptions(options string) func(*PipInstall)
+```
+
+WithExtraOptions は、pip install のための追加のコマンドラインオプションを指定します。
+
+他の With* 関数で扱われていない pip オプションを渡す場合に使用します。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"mypackage"},
+    options.WithExtraOptions("--no-cache-dir --upgrade"),
+)
+```
+
+<a name="WithFindLinks" />
+
+## func WithFindLinks \{#func-withfindlinks\}
+
+```go
+func WithFindLinks(links ...string) func(*PipInstall)
+```
+
+WithFindLinks は、pip install 用の find-links URL を追加します。
+
+find-links の URL は、パッケージインデックスより前にパッケージ検索に使用されます。ローカルディレクトリやカスタム URL からパッケージをインストールする際に役立ちます。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"mypackage"},
+    options.WithFindLinks("/path/to/wheels", "https://example.com/wheels/"),
+)
+```
+
+<a name="WithForce" />
+
+## func WithForce \{#func-withforce\}
+
+```go
+func WithForce(force bool) func(*GitDeleteBranch)
+```
+
+WithForce を有効にすると、ブランチが完全にマージされていない場合でも、そのブランチを強制的に削除できます。
+
+ブランチに他の場所へマージされていない作業が含まれている場合、コミットが失われる可能性があるため、注意して使用してください。
+
+例:
+
+```
+err := sandbox.Git.DeleteBranch(ctx, path, "feature/abandoned",
+    options.WithForce(true),
+)
+```
+
+<a name="WithGroup" />
+
+## func WithGroup \{#func-withgroup\}
+
+```go
+func WithGroup(group string) func(*SetFilePermissions)
+```
+
+WithGroup はファイルグループを設定します。
+
+グループはサンドボックスシステム上の有効なグループ名である必要があります。
+
+例:
+
+```
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/file.txt",
+    options.WithGroup("users"),
+)
+```
+
+<a name="WithIndexURL" />
+
+## func WithIndexURL \{#func-withindexurl\}
+
+```go
+func WithIndexURL(url string) func(*PipInstall)
+```
+
+WithIndexURL は、Python Package Index のベース URL を設定します。
+
+デフォルトの PyPI (https://pypi.org/simple) を独自のインデックス URL に置き換えます。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"mypackage"},
+    options.WithIndexURL("https://my-pypi.example.com/simple/"),
+)
+```
+
+<a name="WithInterpreterTimeout" />
+
+## func WithInterpreterTimeout \{#func-withinterpretertimeout\}
+
+```go
+func WithInterpreterTimeout(timeout time.Duration) func(*RunCode)
+```
+
+WithInterpreterTimeout は、コードの実行タイムアウトを設定します。
+
+コードがタイムアウト時間内に完了しない場合、その実行は強制終了されます。
+
+例:
+
+```
+channels, err := sandbox.CodeInterpreter.RunCode(ctx, "import time; time.sleep(60)",
+    options.WithInterpreterTimeout(5*time.Second),
+)
+```
+
+<a name="WithLogChannel" />
+
+## func WithLogChannel \{#func-withlogchannel\}
+
+```go
+func WithLogChannel(logChannel chan string) func(*CreateSandbox)
+```
+
+WithLogChannel は、サンドボックス作成時のビルドログを受信するためのチャネルを提供します。
+
+ビルドが必要なカスタムイメージからサンドボックスを作成する場合、ビルドログは指定されたチャネルにストリーミングされます。ストリーミングが完了すると、そのチャネルはクローズされます。ビルドが不要な場合はログは送信されず、そのチャネルは使用されません。
+
+例:
+
+```
+logChan := make(chan string)
+go func() {
+    for log := range logChan {
+        fmt.Println(log)
+    }
+}()
+sandbox, err := client.Create(ctx, params,
+    options.WithLogChannel(logChan),
+)
+```
+
+<a name="WithMode" />
+
+## func WithMode \{#func-withmode\}
+
+```go
+func WithMode(mode string) func(*CreateFolder)
+```
+
+WithMode は、作成されるフォルダの Unix ファイルパーミッションを設定します。
+
+mode は 8 進数文字列（例: &quot;0755&quot;、&quot;0700&quot;）として指定する必要があります。指定しない場合は、デフォルトで &quot;0755&quot; が使用されます。
+
+例:
+
+```
+err := sandbox.FileSystem.CreateFolder(ctx, "/home/user/mydir",
+    options.WithMode("0700"),
+)
+```
+
+<a name="WithOwner" />
+
+## func WithOwner \{#func-withowner\}
+
+```go
+func WithOwner(owner string) func(*SetFilePermissions)
+```
+
+WithOwner はファイルの所有者を設定します。
+
+所有者はサンドボックス内のシステムで有効なユーザー名である必要があります。
+
+例：
+
+```
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/file.txt",
+    options.WithOwner("root"),
+)
+```
+
+<a name="WithPassword" />
+
+## func WithPassword \{#func-withpassword\}
+
+```go
+func WithPassword(password string) func(*GitClone)
+```
+
+WithPassword は、リポジトリのクローン時に HTTPS 認証で使用するパスワードまたはアクセストークンを設定します。
+
+GitHub では Personal Access Token (PAT) を使用してください。GitLab では Project Access Token または Personal Access Token を使用してください。Bitbucket では App Password を使用してください。
+
+例：
+
+```
+err := sandbox.Git.Clone(ctx, url, path,
+    options.WithUsername("username"),
+    options.WithPassword("ghp_xxxxxxxxxxxx"),
+)
+```
+
+<a name="WithPermissionMode" />
+
+## func WithPermissionMode \{#func-withpermissionmode\}
+
+```go
+func WithPermissionMode(mode string) func(*SetFilePermissions)
+```
+
+WithPermissionMode は Unix のファイルパーミッションを設定します。
+
+モードは 8 進数表記の文字列として指定する必要があります（例: &quot;0644&quot;、&quot;0755&quot;）。
+
+例:
+
+```
+err := sandbox.FileSystem.SetFilePermissions(ctx, "/home/user/file.txt",
+    options.WithPermissionMode("0644"),
+)
+```
+
+<a name="WithPre" />
+
+## func WithPre \{#func-withpre\}
+
+```go
+func WithPre() func(*PipInstall)
+```
+
+WithPre を有効にすると、プレリリース版や開発版をインストールできるようになります。
+
+例:
+
+```
+image := daytona.Base("python:3.11").PipInstall(
+    []string{"mypackage"},
+    options.WithPre(),
+)
+```
+
+<a name="WithPtyEnv" />
+
+## func WithPtyEnv \{#func-withptyenv\}
+
+```go
+func WithPtyEnv(env map[string]string) func(*PtySession)
+```
+
+WithPtyEnv は PTY セッションの環境変数を設定します。
+
+例：
+
+```
+session, err := sandbox.Process.CreatePtySession(ctx, "my-session",
+    options.WithPtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+```
+
+<a name="WithPtySize" />
+
+## func WithPtySize \{#func-withptysize\}
+
+```go
+func WithPtySize(size types.PtySize) func(*PtySession)
+```
+
+WithPtySize は PTY 端末の画面サイズ（行数と列数）を設定します。
+
+例：
+
+```
+session, err := sandbox.Process.CreatePtySession(ctx, "my-session",
+    options.WithPtySize(types.PtySize{Rows: 24, Cols: 80}),
+)
+```
+
+<a name="WithPullPassword" />
+
+## func WithPullPassword \{#func-withpullpassword\}
+
+```go
+func WithPullPassword(password string) func(*GitPull)
+```
+
+WithPullPassword は、プル時の HTTPS 認証に使用するパスワードまたはアクセストークンを設定します。
+
+例:
+
+```
+err := sandbox.Git.Pull(ctx, path,
+    options.WithPullUsername("username"),
+    options.WithPullPassword("ghp_xxxxxxxxxxxx"),
+)
+```
+
+<a name="WithPullUsername" />
+
+## func WithPullUsername \{#func-withpullusername\}
+
+```go
+func WithPullUsername(username string) func(*GitPull)
+```
+
+WithPullUsername は、HTTPS でプルする際の認証に使用するユーザー名を設定します。
+
+例：
+
+```
+err := sandbox.Git.Pull(ctx, path,
+    options.WithPullUsername("username"),
+    options.WithPullPassword("github_token"),
+)
+```
+
+<a name="WithPushPassword" />
+
+## func WithPushPassword \{#func-withpushpassword\}
+
+```go
+func WithPushPassword(password string) func(*GitPush)
+```
+
+WithPushPassword は、HTTPS 経由でプッシュする際の認証に使用するパスワードまたはアクセストークンを設定します。
+
+例：
+
+```
+err := sandbox.Git.Push(ctx, path,
+    options.WithPushUsername("username"),
+    options.WithPushPassword("ghp_xxxxxxxxxxxx"),
+)
+```
+
+<a name="WithPushUsername" />
+
+## func WithPushUsername \{#func-withpushusername\}
+
+```go
+func WithPushUsername(username string) func(*GitPush)
+```
+
+WithPushUsername は、プッシュ時の HTTPS 認証に使用されるユーザー名を設定します。
+
+例：
+
+```
+err := sandbox.Git.Push(ctx, path,
+    options.WithPushUsername("username"),
+    options.WithPushPassword("github_token"),
+)
+```
+
+<a name="WithTimeout" />
+
+## func WithTimeout \{#func-withtimeout\}
+
+```go
+func WithTimeout(timeout time.Duration) func(*CreateSandbox)
+```
+
+WithTimeout は、サンドボックスの作成が完了するまでに待機する最大時間を設定します。
+
+タイムアウトに達するまでにサンドボックスの準備が整わなかった場合、Create はエラーを返します。デフォルトのタイムアウトは 60 秒です。
+
+例:
+
+```
+sandbox, err := client.Create(ctx, params,
+    options.WithTimeout(5*time.Minute),
+)
+```
+
+<a name="WithUsername" />
+
+## func WithUsername \{#func-withusername\}
+
+```go
+func WithUsername(username string) func(*GitClone)
+```
+
+WithUsername は、リポジトリをクローンするときの HTTPS 認証に使用するユーザー名を設定します。
+
+GitHub や GitLab などのサービスでは、ユーザー名は通常、自分のアカウントのユーザー名か、トークンを使用する場合は &quot;git&quot; のようなダミーのユーザー名になります。
+
+例:
+
+```
+err := sandbox.Git.Clone(ctx, url, path,
+    options.WithUsername("username"),
+    options.WithPassword("github_token"),
+)
+```
+
+<a name="WithWaitForStart" />
+
+## func WithWaitForStart \{#func-withwaitforstart\}
+
+```go
+func WithWaitForStart(waitForStart bool) func(*CreateSandbox)
+```
+
+WithWaitForStart は、[daytona.Client.Create] がサンドボックスが started 状態に到達するまで待機してから戻るかどうかを制御します。
+
+true（デフォルト）の場合、Create はサンドボックスが完全に起動して使用可能になるまで処理をブロックします。false の場合、サンドボックスが作成されるとすぐに Create は戻りますが、その時点では pending または building 状態の場合があります。
+
+例:
+
+```
+// サンドボックスの起動を待たずにすぐに戻る
+sandbox, err := client.Create(ctx, params,
+    options.WithWaitForStart(false),
+)
+```
+
+<a name="CodeRun" />
+
+## type CodeRun \{#type-coderun\}
+
+CodeRun は、[daytona.ProcessService.CodeRun] のオプションのパラメータを保持します。
+
+```go
+type CodeRun struct {
+    Params  *types.CodeRunParams // コード実行パラメータ
+    Timeout *time.Duration       // 実行タイムアウト
+}
+```
+
+<a name="CreateFolder" />
+
+## type CreateFolder \{#type-createfolder\}
+
+CreateFolder は [daytona.FileSystemService.CreateFolder] のオプションパラメータを格納します。
+
+```go
+type CreateFolder struct {
+    Mode *string // Unixファイルパーミッション（例："0755"）
+}
+```
+
+<a name="CreatePty" />
+
+## type CreatePty \{#type-createpty\}
+
+CreatePty は [daytona.ProcessService.CreatePty] のための省略可能なパラメータを保持します。
+
+```go
+type CreatePty struct {
+    PtySize *types.PtySize    // ターミナルのサイズ（行数と列数）
+    Env     map[string]string // PTYセッションの環境変数
+}
+```
+
+<a name="CreateSandbox" />
+
+## type CreateSandbox \{#type-createsandbox\}
+
+CreateSandbox は、[daytona.Client.Create] のオプションパラメーターを保持する型です。
+
+```go
+type CreateSandbox struct {
+    Timeout      *time.Duration // サンドボックス作成を待機する最大時間
+    WaitForStart bool           // サンドボックスが開始状態になるまで待機するかどうか
+    LogChannel   chan string    // イメージビルド中にビルドログを受信するチャネル
+}
+```
+
+<a name="ExecuteCommand" />
+
+## type ExecuteCommand \{#type-executecommand\}
+
+ExecuteCommand は [daytona.ProcessService.ExecuteCommand] のオプションのパラメータを格納します。
+
+```go
+type ExecuteCommand struct {
+    Cwd     *string           // コマンド実行時の作業ディレクトリ
+    Env     map[string]string // Environment variables
+    Timeout *time.Duration    // Command execution timeout
+}
+```
+
+<a name="GitClone" />
+
+## type GitClone \{#type-gitclone\}
+
+GitClone は、[daytona.GitService.Clone] のためのオプションパラメーターを保持します。
+
+各フィールドは、未設定の値とゼロ値を区別するためにポインターになっています。これらのオプションを設定するには、対応する With* 関数を使用してください。
+
+```go
+type GitClone struct {
+    Branch   *string // クローンするブランチ（デフォルトはリポジトリのデフォルトブランチ）
+    CommitId *string // クローン後にチェックアウトする特定のコミットSHA
+    Username *string // HTTPS認証のユーザー名
+    Password *string // HTTPS認証のパスワードまたはトークン
+}
+```
+
+<a name="GitCommit" />
+
+## type GitCommit \{#type-gitcommit\}
+
+GitCommit は、[daytona.GitService.Commit] のオプションパラメータを表します。
+
+```go
+type GitCommit struct {
+    AllowEmpty *bool // ステージされていない変更でコミットを作成することを許可
+}
+```
+
+<a name="GitDeleteBranch" />
+
+## type GitDeleteBranch \{#type-gitdeletebranch\}
+
+GitDeleteBranch は、[daytona.GitService.DeleteBranch] のオプションのパラメーターを指定するための型です。
+
+```go
+type GitDeleteBranch struct {
+    Force *bool // ブランチが完全にマージされていない場合でも強制削除
+}
+```
+
+<a name="GitPull" />
+
+## type GitPull \{#type-gitpull\}
+
+GitPull は、[daytona.GitService.Pull] に対するオプションパラメーターを格納します。
+
+```go
+type GitPull struct {
+    Username *string // Username for HTTPS authentication
+    Password *string // HTTPS認証用のパスワードまたはトークン
+}
+```
+
+<a name="GitPush" />
+
+## type GitPush \{#type-gitpush\}
+
+GitPush は、[daytona.GitService.Push] のオプションパラメーターを保持する型です。
+
+```go
+type GitPush struct {
+    Username *string // Username for HTTPS authentication
+    Password *string // HTTPS認証用のパスワードまたはトークン
+}
+```
+
+<a name="PipInstall" />
+
+## type PipInstall \{#type-pipinstall\}
+
+PipInstall は、[daytona.Image.PipInstall] のオプションパラメーターを保持します。
+
+```go
+type PipInstall struct {
+    FindLinks      []string // パッケージを検索するURL
+    IndexURL       string   // Python Package IndexのベースURL
+    ExtraIndexURLs []string // パッケージ検索用の追加インデックスURL
+    Pre            bool     // プレリリース版および開発版を許可
+    ExtraOptions   string   // pipコマンドラインの追加オプション
+}
+```
+
+<a name="PtySession" />
+
+## type PtySession \{#type-ptysession\}
+
+PtySession は、[daytona.ProcessService.CreatePtySession] のオプションパラメーターを保持する型です。
+
+```go
+type PtySession struct {
+    PtySize *types.PtySize    // ターミナルのサイズ（行数と列数）
+    Env     map[string]string // PTYセッションの環境変数
+}
+```
+
+<a name="RunCode" />
+
+## type RunCode \{#type-runcode\}
+
+RunCode は、[daytona.CodeInterpreterService.RunCode] のオプションパラメータを保持する型です。
+
+```go
+type RunCode struct {
+    ContextID string            // 永続的な状態を保持するためのインタープリターコンテキストID
+    Env       map[string]string // Environment variables for code execution
+    Timeout   *time.Duration    // Execution timeout
+}
+```
+
+<a name="SetFilePermissions" />
+
+## type SetFilePermissions \{#type-setfilepermissions\}
+
+SetFilePermissions は、[daytona.FileSystemService.SetFilePermissions] のオプションのパラメータを保持する型です。
+
+```go
+type SetFilePermissions struct {
+    Mode  *string // Unixファイルパーミッション (例: "0644")
+    Owner *string // ファイル所有者のユーザー名
+    Group *string // ファイルのグループ名
+}
+```
