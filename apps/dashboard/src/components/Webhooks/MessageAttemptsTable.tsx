@@ -45,11 +45,17 @@ function AttemptExpandedRow({ attempt }: { attempt: MessageAttemptOut }) {
       <div className="flex flex-col gap-2 text-sm">
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Status Code</span>
-          <Badge
-            variant={attempt.responseStatusCode >= 200 && attempt.responseStatusCode < 300 ? 'success' : 'destructive'}
-          >
-            {attempt.responseStatusCode}
-          </Badge>
+          {!attempt.responseStatusCode ? (
+            <span className="text-muted-foreground italic">No Response</span>
+          ) : (
+            <Badge
+              variant={
+                attempt.responseStatusCode >= 200 && attempt.responseStatusCode < 300 ? 'success' : 'destructive'
+              }
+            >
+              {attempt.responseStatusCode}
+            </Badge>
+          )}
         </div>
         <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Duration</span>
