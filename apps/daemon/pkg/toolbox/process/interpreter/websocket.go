@@ -8,17 +8,21 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/daytonaio/daemon/internal/util"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 // attachWebSocket connects a WebSocket client to the interpreter context
 func (c *Context) attachWebSocket(ws *websocket.Conn) {
+	pongCh := util.SetupWSKeepAlive(ws, c.logger)
+
 	clientId := uuid.NewString()
 	cl := &wsClient{
 		id:     clientId,
 		conn:   ws,
 		send:   make(chan wsFrame, 1024),
+		pongCh: pongCh,
 		done:   make(chan struct{}),
 		logger: c.logger.With(slog.String("clientId", clientId)),
 	}
@@ -33,6 +37,17 @@ func (c *Context) attachWebSocket(ws *websocket.Conn) {
 	c.logger.Debug("Client attached to interpreter context", "clientId", cl.id, "contextId", c.info.ID)
 
 	go c.clientWriter(cl)
+	// Continuously read from the WebSocket so that gorilla/websocket's
+	// PingHandler is invoked for incoming ping frames. Without this,
+	// client keepalive pings go unanswered and the connection is closed
+	// with code 1011 after ~50s.
+	go func() {
+		for {
+			if _, _, err := ws.ReadMessage(); err != nil {
+				return
+			}
+		}
+	}()
 
 	// Wait for clientWriter to exit (signals disconnection)
 	<-cl.done
@@ -52,9 +67,18 @@ func (c *Context) clientWriter(cl *wsClient) {
 	defer close(cl.done)
 
 	for {
+		// Priority: always flush pending pong responses before writing data.
+		// This ensures keepalive pongs are never delayed by data writes.
+		util.WritePendingPongs(cl.conn, cl.pongCh, writeWait, cl.logger)
+
 		select {
 		case <-c.ctx.Done():
 			return
+		case pong := <-cl.pongCh:
+			// Pong arrived while waiting for data — write it immediately.
+			if err := cl.conn.WriteControl(websocket.PongMessage, pong, time.Now().Add(writeWait)); err != nil {
+				cl.logger.Debug("failed to write pong", "error", err)
+			}
 		case frame, ok := <-cl.send:
 			if !ok {
 				return
@@ -114,19 +138,11 @@ func (cl *wsClient) close() {
 			cl.logger.Debug("Timeout waiting for client writer to finish")
 		}
 
-		// Wait for client's close frame response (proper WebSocket handshake)
-		// Set a read deadline to prevent hanging if client doesn't respond
-		_ = cl.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-
-		// Drain any remaining messages until we get close frame or timeout
-		// This ensures proper WebSocket close handshake per RFC 6455
-		for {
-			_, _, err := cl.conn.NextReader()
-			if err != nil {
-				break
-			}
-		}
-
+		// Close the connection. The background read goroutine started in
+		// attachWebSocket is the sole reader — gorilla's default CloseHandler
+		// (invoked during ReadMessage) handles the RFC 6455 close handshake.
+		// We must not call NextReader/ReadMessage here to avoid violating
+		// gorilla's single-concurrent-reader rule.
 		_ = cl.conn.Close()
 	})
 }

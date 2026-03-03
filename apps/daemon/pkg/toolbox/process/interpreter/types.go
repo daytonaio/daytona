@@ -145,6 +145,7 @@ type wsClient struct {
 	id        string
 	conn      *websocket.Conn
 	send      chan wsFrame
+	pongCh    <-chan []byte // queued pong payloads from PingHandler, drained by clientWriter
 	done      chan struct{} // signals when clientWriter exits
 	closeOnce sync.Once
 	logger    *slog.Logger
