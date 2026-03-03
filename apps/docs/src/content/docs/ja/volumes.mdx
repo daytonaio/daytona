@@ -2,135 +2,319 @@
 title: ボリューム
 ---
 
+import { TabItem, Tabs } from '@astrojs/starlight/components'
 import Label from '@components/Label.astro'
-import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-ボリュームは、サンドボックス間でファイルを共有してアクセスできる、FUSE ベースのマウントです。これにより、サンドボックスは大容量ファイルを即座に読み取れ、各サンドボックスへ手動でアップロードする必要がありません。ボリュームのデータは S3 互換のオブジェクトストレージに保存されます。
+ボリュームは、Daytona のサンドボックス間でファイル共有アクセスを提供する FUSE ベースのマウントです。これにより、サンドボックスは大きなファイルを即座に読み取ることができ、各サンドボックスへ手動でファイルをアップロードする必要がありません。ボリュームのデータは S3 互換のオブジェクトストレージに保存されます。
 
-- 複数のボリュームを 1 つのサンドボックスにマウント可能  
-- 1 つのボリュームを複数のサンドボックスにマウント可能
+* 1 つのサンドボックスに複数のボリュームをマウントできます
+* 1 つのボリュームを複数のサンドボックスにマウントできます
 
-## ボリュームの作成
+## ボリュームを作成する \{#create-volumes\}
 
-サンドボックスにボリュームをマウントする前に、先に作成しておく必要があります。
+Daytona は、サンドボックス向けの共有ストレージソリューションとしてボリュームを提供します。ボリュームを作成するには、次の手順を実行します。
 
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```bash
-volume = daytona.volume.get("my-volume", create=True)
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```bash
-const volume = await daytona.volume.get('my-volume', true)
-```
-</TabItem>
-</Tabs>
+1. [Daytona Volumes ↗](https://app.daytona.io/dashboard/volumes) にアクセスします
+2. **Create Volume** ボタンをクリックします
+3. ボリューム名を入力します
 
-## ボリュームのマウント
-
-ボリュームを作成したら、`CreateSandboxFromSnapshotParams` オブジェクトで指定してサンドボックスにマウントできます:
+次のコードスニペットは、Daytona SDK を使用してボリュームを作成する方法を示しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-import os
-from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    volume = daytona.volume.create("my-awesome-volume")
+    ```
+  </TabItem>
 
-daytona = Daytona()
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona();
+    const volume = await daytona.volume.create("my-awesome-volume");
+    ```
+  </TabItem>
 
-# 新しいボリュームを作成するか、既存のボリュームを取得する
-volume = daytona.volume.get("my-volume", create=True)
-
-# ボリュームをサンドボックスにマウントする
-mount_dir_1 = "/home/daytona/volume"
-
-params = CreateSandboxFromSnapshotParams(
-    language="python",
-    volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
-)
-sandbox = daytona.create(params)
-
-# サンドボックスの利用が終わったら、削除できます
-# サンドボックスを削除しても、ボリュームは保持されます
-sandbox.delete()
-
-# ボリューム内の特定のサブパスをマウントします
-# これは、データの分離やマルチテナントの実装に役立ちます
-params = CreateSandboxFromSnapshotParams(
-    language="python",
-    volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1, subpath="users/alice")],
-)
-sandbox2 = daytona.create(params)
-
-sandbox2.delete()
-```
-
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-import { Daytona } from '@daytonaio/sdk'
-import path from 'path'
-
-async function main() {
-  const daytona = new Daytona()
-
-  // 新しいボリュームを作成するか、既存のボリュームを取得する
-  const volume = await daytona.volume.get('my-volume', true)
-
-  // ボリュームをサンドボックスにマウントする
-  const mountDir1 = '/home/daytona/volume'
-
-  const sandbox1 = await daytona.create({
-    language: 'typescript',
-    volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
-  })
-  
-  // サンドボックスの利用が終わったら、削除できます
-  // サンドボックスを削除しても、ボリュームは保持されます
-  await sandbox1.delete()
-
-  // ボリューム内の特定のサブパスをマウントします
-  // これは、データの分離やマルチテナントの実装に役立ちます
-  const sandbox2 = await daytona.create({
-    language: 'typescript',
-    volumes: [{ volumeId: volume.id, mountPath: mountDir1, subpath: 'users/alice' }],
-  })
-
-  await sandbox2.delete()
-}
-
-main()
-
-```
-
-</TabItem>
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    daytona = Daytona::Daytona.new
+    volume = daytona.volume.create("my-awesome-volume")
+    ```
+  </TabItem>
 </Tabs>
 
-## ボリュームの削除
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
 
-ボリュームが不要になった場合は削除できます。
+> [**volume.get (Python SDK)**](/docs/python-sdk/sync/volume/#volumeserviceget)
+>
+> [**volume.get (TypeScript SDK)**](/docs/typescript-sdk/volume/#get)
+>
+> [**volume.get (Ruby SDK)**](/docs/ruby-sdk/volume/#get)
+
+## ボリュームのマウント \{#mount-volumes\}
+
+Daytona では、ボリュームをサンドボックスにマウントするための機能を提供しています。ボリュームが作成されたら、`CreateSandboxFromSnapshotParams` オブジェクトで指定することでサンドボックスにマウントできます。ボリュームのマウントパスは、次の要件を満たす必要があります。
+
+* **絶対パスである必要があります**: マウントパスは `/` で始まらなければなりません（例: `/home/daytona/volume`）
+* **ルートディレクトリは指定できません**: `/` や `//` にマウントすることはできません
+* **相対パス成分を含めてはいけません**: `/../` や `/./` を含んだり、`/..` または `/.` で終わってはいけません
+* **連続したスラッシュは使用できません**: 先頭以外で `//` のように、複数のスラッシュが連続するパターンを含めてはいけません
+* **システムディレクトリにはマウントできません**: 次のシステムディレクトリはマウント先として使用できません: `/proc`, `/sys`, `/dev`, `/boot`, `/etc`, `/bin`, `/sbin`, `/lib`, `/lib64`
+
+次のコードスニペットは、ボリュームをサンドボックスにマウントする方法を示しています。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-volume = daytona.volume.get("my-volume", create=True)
-daytona.volume.delete(volume)
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-const volume = await daytona.volume.get('my-volume', true)
-await daytona.volume.delete(volume)
-```
-</TabItem>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import os
+    from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
+
+    daytona = Daytona()
+
+    # 新しいボリュームを作成するか、既存のボリュームを取得する
+    volume = daytona.volume.get("my-volume", create=True)
+
+    # ボリュームをサンドボックスにマウントする
+    mount_dir_1 = "/home/daytona/volume"
+
+    params = CreateSandboxFromSnapshotParams(
+        language="python",
+        volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1)],
+    )
+    sandbox = daytona.create(params)
+
+    # ボリューム内の特定のサブパスをマウントする
+    # データを分離したり、マルチテナンシーを実装する際に便利です
+    params = CreateSandboxFromSnapshotParams(
+        language="python",
+        volumes=[VolumeMount(volume_id=volume.id, mount_path=mount_dir_1, subpath="users/alice")],
+    )
+    sandbox2 = daytona.create(params)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+    import path from 'path'
+
+    const daytona = new Daytona()
+
+    //  新しいボリュームを作成するか、既存のボリュームを取得する
+    const volume = await daytona.volume.get('my-volume', true)
+
+    // ボリュームをサンドボックスにマウントする
+    const mountDir1 = '/home/daytona/volume'
+
+    const sandbox1 = await daytona.create({
+      language: 'typescript',
+      volumes: [{ volumeId: volume.id, mountPath: mountDir1 }],
+    })
+
+    // ボリューム内の特定のサブパスをマウントする
+    // データを分離したり、マルチテナンシーを実装する際に便利です
+    const sandbox2 = await daytona.create({
+      language: 'typescript',
+      volumes: [
+        { volumeId: volume.id, mountPath: mountDir, subpath: 'users/alice' },
+      ],
+    })
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    require 'daytona'
+
+    daytona = Daytona::Daytona.new
+
+    # 新しいボリュームを作成するか、既存のボリュームを取得する
+    volume = daytona.volume.get('my-volume', create: true)
+
+    # ボリュームをサンドボックスにマウントする
+    mount_dir = '/home/daytona/volume'
+
+    params = Daytona::CreateSandboxFromSnapshotParams.new(
+      language: Daytona::CodeLanguage::PYTHON,
+      volumes: [DaytonaApiClient::SandboxVolume.new(volume_id: volume.id, mount_path: mount_dir)]
+    )
+    sandbox = daytona.create(params)
+
+    # ボリューム内の特定のサブパスをマウントする
+    # データを分離したり、マルチテナンシーを実装する際に便利です
+    params2 = Daytona::CreateSandboxFromSnapshotParams.new(
+      language: Daytona::CodeLanguage::PYTHON,
+      volumes: [DaytonaApiClient::SandboxVolume.new(
+        volume_id: volume.id,
+        mount_path: mount_dir,
+        subpath: 'users/alice'
+      )]
+    )
+    sandbox2 = daytona.create(params2)
+    ```
+  </TabItem>
 </Tabs>
 
-## ボリュームの操作
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください:
 
-マウントされると、サンドボックスのファイルシステム内の他のディレクトリと同様に、そのボリュームへの読み書きが行えます。ボリュームに書き込まれたファイルは、個々のサンドボックスのライフサイクルを超えて保持されます。
+> [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
+>
+> [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+>
+> [**CreateSandboxFromSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
 
-## 制限事項
+## ボリュームの取り扱い \{#work-with-volumes\}
+
+Daytona では、サンドボックスのファイルシステム内の他のディレクトリと同様に、ボリュームを読み書きできます。ボリュームに書き込まれたファイルは、個々のサンドボックスのライフサイクルを超えて保持されます。
+
+次のスニペットは、ボリュームからの読み取りと書き込みの方法を示します:
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # マウントしたボリューム内のファイルに書き込む
+    with open("/home/daytona/volume/example.txt", "w") as f:
+        f.write("Hello from Daytona volume!")
+
+    # 作業が終わったらサンドボックスを削除できます
+    # サンドボックスを削除してもボリュームは保持されます
+    sandbox.delete()
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import fs from 'fs/promises'
+
+    // マウントしたボリューム内のファイルに書き込む
+    await fs.writeFile('/home/daytona/volume/example.txt', 'Hello from Daytona volume!')
+
+    // 作業が終わったらサンドボックスを削除できます
+    // サンドボックスを削除してもボリュームは保持されます
+    await daytona.delete(sandbox1)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Sandbox ファイルシステム API を使用してマウントしたボリューム内のファイルに書き込む
+    sandbox.fs.upload_file('Hello from Daytona volume!', '/home/daytona/volume/example.txt')
+
+    # 作業が終わったらサンドボックスを削除できます
+    # サンドボックスを削除してもボリュームは保持されます
+    daytona.delete(sandbox)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+## 名前でボリュームを取得する \{#get-a-volume-by-name\}
+
+Daytona では、ボリュームを名前で取得する機能を提供しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    volume = daytona.volume.get("my-awesome-volume", create=True)
+    print(f"{volume.name} ({volume.id})")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona()
+    const volume = await daytona.volume.get('my-awesome-volume', true)
+    console.log(`Volume ${volume.name} is in state ${volume.state}`)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**volume.get (Python SDK)**](/docs/ja/python-sdk/sync/volume#volumeserviceget)
+>
+> [**volume.get (TypeScript SDK)**](/docs/ja/typescript-sdk/volume#get)
+>
+> [**volume.get (Ruby SDK)**](/docs/ja/ruby-sdk/volume#get)
+
+## ボリュームの一覧表示 \{#list-volumes\}
+
+Daytona では、すべてのボリュームを一覧表示できます。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    daytona = Daytona()
+    volumes = daytona.volume.list()
+    for volume in volumes:
+        print(f"{volume.name} ({volume.id})")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const daytona = new Daytona()
+    const volumes = await daytona.volume.list()
+    console.log(`Found ${volumes.length} volumes`)
+    volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`))
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**volume.list (Python SDK)**](/docs/ja/python-sdk/sync/volume#volumeservicelist)
+>
+> [**volume.list (TypeScript SDK)**](/docs/ja/typescript-sdk/volume#list)
+>
+> [**volume.list (Ruby SDK)**](/docs/ja/ruby-sdk/volume#list)
+
+## ボリュームの削除 \{#delete-volumes\}
+
+Daytona ではボリュームを削除できます。削除したボリュームは復元できません。
+
+次のコードスニペットでは、ボリュームを削除する方法を示します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    volume = daytona.volume.get("my-volume", create=True)
+    daytona.volume.delete(volume)
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    const volume = await daytona.volume.get('my-volume', true)
+    await daytona.volume.delete(volume)
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    volume = daytona.volume.get('my-volume', create: true)
+    daytona.volume.delete(volume)
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/)、[TypeScript SDK](/docs/ja/typescript-sdk/)、および [Ruby SDK](/docs/ja/ruby-sdk/) のリファレンスを参照してください。
+
+> [**volume.delete (Python SDK)**](/docs/python-sdk/sync/volume/#volumeservicedelete)
+>
+> [**volume.delete (TypeScript SDK)**](/docs/typescript-sdk/volume/#delete)
+>
+> [**volume.delete (Ruby SDK)**](/docs/ruby-sdk/volume/#delete)
+
+## 制限事項 \{#limitations\}
 
 ボリュームはFUSEベースのマウントであるため、ブロックストレージへのアクセスを必要とするアプリケーション（データベースのテーブルなど）では使用できません。
 ボリュームは、ローカルのサンドボックスのファイルシステムと比べて、読み取り・書き込みの両方の操作が一般的に遅くなります。
+
+## 料金と制限 \{#pricing-limits\}
+
+Daytona ボリュームは追加料金なしで利用できます。各組織は最大 100 個までボリュームを作成でき、ボリュームのデータはストレージクォータには含まれません。
+
+現在のボリューム使用状況は [Daytona ダッシュボード ↗](https://app.daytona.io/dashboard/volumes) で確認できます。

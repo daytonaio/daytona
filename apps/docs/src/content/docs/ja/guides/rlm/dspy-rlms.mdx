@@ -1,0 +1,224 @@
+---
+title: Daytona 上で DSPy RLM を実行する
+description: Daytona をバックエンドにしたインタープリターで DSPy の RLM モジュールを使用し、分離されたクラウド上のサンドボックス内で LLM 生成の Python コードを安全に実行します。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+import { Image } from 'astro:assets'
+
+import wealthTrajectories from '../../../../../assets/docs/images/wealth-trajectories.png'
+
+[DSPy](https://dspy.ai/) の RLM は [recursive language models](https://arxiv.org/abs/2512.24601) を実装しています。これは、LLM が Python コードを書き、そのコードを通じてコンテキストの一部を LLM 呼び出しに渡すことで、長大なコンテキストを扱う推論能力を大幅に強化するシステムです。
+
+生成されたコードは REPL 上で実行され、このガイドではコード実行バックエンドとして DSPy に接続する `DaytonaInterpreter` を使用し、その内容を紹介します。これにより、すべての生成コードはローカルマシン上ではなく、分離された Daytona のクラウド上のサンドボックス内で実行されます。
+
+***
+
+### 1. セットアップ \{#1-setup\}
+
+#### リポジトリをクローンする \{#clone-the-repository\}
+
+[Daytona リポジトリ](https://github.com/daytonaio/daytona.git) をクローンし、example ディレクトリに移動します。
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/python/dspy-rlms
+```
+
+#### 仮想環境の作成 \{#create-virtual-environment\}
+
+```bash
+python3.10 -m venv venv
+source venv/bin/activate  # Windows の場合: venv\Scripts\activate
+```
+
+#### 依存関係のインストール \{#install-dependencies\}
+
+```bash
+pip install -e .
+```
+
+これにより DSPy フレームワークと Daytona SDK がインストールされます。含まれているデモ（matplotlib を使って結果をプロットします）も実行する場合は、次を実行してください。
+
+```bash
+pip install -e ".[demo]"
+```
+
+#### 環境の設定 \{#configure-environment\}
+
+API キーを記載した `.env` ファイルを作成します:
+
+```bash
+cp .env.example .env
+# キーを設定するために.envを編集してください
+```
+
+ファイルには2つの変数が必要です：
+
+```bash
+DAYTONA_API_KEY=your_daytona_api_key
+OPENROUTER_API_KEY=your_openrouter_api_key  # または OPENAI_API_KEY / ANTHROPIC_API_KEY
+```
+
+:::note
+[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から Daytona の API キーを取得してください。LLM プロバイダーのキーは、コードで設定するモデルに応じて異なります。このドキュメントの例では OpenRouter を使用します。
+:::
+
+### 2. 基本的な使用方法 \{#2-basic-usage\}
+
+次の例は基本的なセットアップを示しています。モデルを構成し、`DaytonaInterpreter` を作成して RLM に渡します。生成されたコードは、`llm_query()` を呼び出してセマンティックな処理を LLM に委譲できます。
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    import dspy
+    from dotenv import load_dotenv
+    from daytona_interpreter import DaytonaInterpreter
+
+    load_dotenv()
+
+    lm = dspy.LM("openrouter/google/gemini-3-flash-preview")
+    dspy.configure(lm=lm)
+
+    interpreter = DaytonaInterpreter()
+
+    rlm = dspy.RLM(
+        signature="documents: list[str], question: str -> answer: str",
+        interpreter=interpreter,
+        verbose=True,
+    )
+
+    documents = [...]  # 利用するドキュメント
+    result = rlm(documents=documents, question="Summarize the key findings across these documents.")
+    print(result.answer)
+
+    interpreter.shutdown()
+    ```
+  </TabItem>
+</Tabs>
+
+サンドボックス内では、RLM がドキュメントをループ処理し、それぞれを要約するために `llm_query()` を呼び出し、その後 Python で結果を集約してから `SUBMIT(answer=...)` を呼び出す場合があります。
+
+### 3. ワークフロー概要 \{#3-workflow-overview\}
+
+各 RLM 呼び出しは反復する REPL ループとして実行されます。LLM は Python コードを生成し、そのコードは Daytona のサンドボックス内で実行され、その出力が次の反復のために LLM にフィードバックされます。重要な点として、生成されたコードは `llm_query()` を呼び出してサブ LLM 呼び出しを実行できます。これにより、LLM はオーケストレーションロジックを Python に保ったまま、自身に対してセマンティックな処理（理解、抽出、分類）を委譲できます。
+
+1. **Prompt** — RLM がタスク入力とこれまでの対話履歴を LLM に送信する
+2. **Code** — LLM が推論過程と Python のコードスニペットを返す
+3. **Execute** — コードが Daytona のサンドボックス内で実行され、任意の `llm_query()` 呼び出しはホスト LLM へブリッジされる
+4. **Repeat** — コードが `SUBMIT()` を呼び出すか反復回数の上限に達するまで、ステップ 1〜3 を繰り返す
+
+#### ブリッジの仕組み \{#how-bridging-works\}
+
+上記のステップ 3 では、`llm_query()` 呼び出しが「ホスト側へブリッジされる」とありました。以下は、その仕組みを示す図と説明です。
+
+```
+Host Process                                    Daytona Sandbox
+┌──────────────────────────────┐                ┌──────────────────────────────┐
+│      DaytonaInterpreter      │                │    Broker Server (Flask)     │
+│                              │                │                              │
+│  • polls the broker for      │   tool call,   │  • accepts requests from     │
+│    pending requests          │ e.g. llm_query │    the wrapper functions     │
+│                              │◄───────────────│                              │
+│  • calls the LLM API         │                │  • queues them for the host  │
+│    or runs tool functions    │    result      │  • returns results once the  │
+│  • posts results back        │───────────────►│    host replies              │
+│                              │                │                              │
+└──────────────────────────────┘                │      Generated Code          │
+               │                                │  • llm_query()               │
+               ▼                                │  • llm_query_batched()       │
+           LLM API                              │  • custom tool wrappers      │
+                                                └──────────────────────────────┘
+```
+
+`DaytonaInterpreter` が起動すると、サンドボックス内で小さな Flask ブローカーサーバーを立ち上げ、ラッパー関数（`llm_query`、`llm_query_batched`、および提供されたカスタムツール）を注入します。これらのラッパーはブローカーに対して POST リクエストを送り、結果が返ってくるまでブロックします。ホスト側ではポーリングループが保留中のリクエストを取得して実行（例：LLM API の呼び出しやツール関数の実行）し、その結果を POST でブローカーに送り返します。生成されたコードの視点から見ると、これらのラッパーは通常の Python 関数と同じように見え、同じように振る舞います。
+
+`tools` 辞書を通じて渡されたカスタムツールも同じ仕組みを使用するため、ホストはサンドボックス内に対応するラッパーを生成し、呼び出しを同様にブリッジします。
+
+状態は反復処理をまたいで永続化されます。変数、インポート、関数定義はすべて引き継がれます。
+
+#### サブ LLM 呼び出し \{#sub-llm-calls\}
+
+サンドボックス内では、次の 2 つの組み込み関数が利用できます。
+
+* **`llm_query(prompt)`** — 1 つの自然言語プロンプトを LLM に送信し、文字列を返す
+* **`llm_query_batched(prompts)`** — 複数のプロンプトを同時に送信し、文字列のリストを返す
+
+これらはホスト上で実行され（LLM API へのアクセスが必要です）、サンドボックスから利用できるようにブリッジされています。生成されたコードの視点から見ると、これらは文字列を受け取り文字列を返すだけの通常の Python 関数です。このことが、このパターンを強力なものにしています。LLM は 100 個の章に対して `for` ループを書き、`llm_query_batched()` を呼び出して各章から構造化データを並列に抽出し、その結果を集約して追加の Python コードとともに利用できます。
+
+### 4. Example Walkthrough \{#4-example-walkthrough\}
+
+同梱されている `demo.py` では、サブLLM呼び出しの現実的な利用例として、『モンテ・クリスト伯』の文芸分析を行います。この小説は全117章、約1,300ページにおよぶ長編であり、5人の主要登場人物の富の推移を追跡します。RLM は `llm_query_batched()` を用いて章を複数のバッチに分けて並列処理し、その結果を Python で集約します。
+
+#### デモの仕組み \{#how-the-demo-works\}
+
+このスクリプトは Project Gutenberg から小説の全文テキストを取得し、章ごとに分割したうえで、型付きシグネチャを持つ RLM に渡します:
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    interpreter = DaytonaInterpreter()
+
+    rlm = dspy.RLM(
+        signature="chapters: list[str], task: str -> wealth_data: list[dict]",
+        interpreter=interpreter,
+        max_iterations=40,
+        max_llm_calls=500,
+        verbose=True,
+    )
+
+    chapters = fetch_chapters()
+    print(f"Fetched {len(chapters)} chapters")
+
+    TASK = (
+        "小説全体を通して、各主要登場人物の経済状況の推移を分析せよ。"
+        "登場人物の財産状況が言及されている、または示唆されている各章について、"
+        "次のキーを持つ dict を生成せよ: chapter（int）、character（str）、"
+        "wealth（int 1〜10。1=極貧、10=パリで最も裕福）、event（str。その章で何が変化"
+        "したかの簡潔な説明）。次の登場人物を追跡すること: Dantès、Danglars、"
+        "Fernand/Morcerf、Villefort、Mercédès。書籍中のすべての章を対象とすること。"
+    )
+
+    result = rlm(chapters=chapters, task=TASK)
+    wealth_data = result.wealth_data
+    ```
+  </TabItem>
+</Tabs>
+
+#### RLM が行うこと \{#what-the-rlm-does\}
+
+RLM が生成するコードは、サブ LLM のワークロードで典型的なパターンに従います：
+
+1. **入力をバッチ化する** — 117 章を扱いやすいグループに分割する
+2. **`llm_query_batched()` でファンアウトする** — 各バッチに対して、*「これらの章から資産イベントを JSON で抽出せよ」* のようなプロンプトを送る — サブ LLM 呼び出しはホスト上で並行して実行される
+3. **パースして蓄積する** — 各サブ呼び出しは文字列を返し、コードはその JSON をパースして蓄積中のリストに追記する
+4. **反復する** — 次のバッチに対して繰り返す。状態（蓄積されたリスト）は REPL の各イテレーションをまたいで保持される
+5. **送信する** — すべての章を処理し終えたら、`SUBMIT(wealth_data=accumulated_results)` を呼び出す
+
+これが RLM の基本的なパターンです。Python がデータの受け渡し（バッチ化、パース、集約）を担当し、`llm_query_batched()` が言語理解を必要とする部分（散文の読解、資産イベントの特定、重要度の評価）を担当します。
+
+#### デモの実行 \{#running-the-demo\}
+
+```bash
+python demo.py
+```
+
+RLM の実行が終了すると、スクリプトは matplotlib を使って結果をプロットします。
+
+:::tip
+このデモは最大 40 回のイテレーションと 500 回のサブ LLM 呼び出しを実行します。モデルやプロバイダーによっては、1 回のフル実行に数分かかり、かなりの量の API クレジットを消費する可能性があります。
+:::
+
+#### 結果 \{#results\}
+
+出力は `{chapter, character, wealth, event}` からなるディクショナリのリストであり、スクリプトによって平滑化された時系列としてプロットされます：
+
+<Image src={wealthTrajectories} alt="『モンテ・クリスト伯』全117章にわたる、5人の登場人物の資産推移を示すチャート。" width={700} style="max-width: 100%; height: auto; margin: 1rem 0;" />
+
+### 5. 結論 \{#5-conclusion\}
+
+RLM は、LLM の言語理解能力と、Python のループ処理、分岐、集約といった機能を組み合わせたものであり、生成されたコードは意味的な推論が必要なときに LLM を呼び出し、それ以外は通常の計算で処理します。`DaytonaInterpreter` は、生成されたコードをすべて分離された Daytona のクラウドサンドボックス内で実行することで、安全に動作させます。
+
+* **サブ LLM 再帰** — `llm_query()` と `llm_query_batched()` はサンドボックスからホストへブリッジされ、生成されたコードが抽出・分類・要約などの意味的タスクのために LLM を呼び出せるようにします
+* **分離** — すべての生成コードは、あなたのマシン上ではなく Daytona のクラウドサンドボックス内で実行されます
+* **永続的な状態** — 変数、インポート、定義は REPL のイテレーションをまたいで保持されるため、LLM はバッチをまたいで結果を蓄積できます
