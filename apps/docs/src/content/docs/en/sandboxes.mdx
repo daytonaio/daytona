@@ -46,18 +46,21 @@ You can specify [programming language runtime](/docs/en/sandboxes#multiple-runti
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the **Create Sandbox** button
 3. Enter the name of the sandbox
-4. Select a [snapshot](/docs/en/snapshots): if not specified, the [default snapshot](/docs/en/snapshots#default-snapshots) will be used
+4. Select a source for the sandbox:
+
+- [Snapshot](/docs/en/snapshots): a pre-configured sandbox template
+- **Image**: OCI-compliant container image ([public](/docs/en/snapshots#using-public-images), [local](/docs/en/snapshots#using-local-images), [private registries](/docs/en/snapshots#using-images-from-private-registries)). Images require setting [sandbox resources](/docs/en/sandboxes#resources). Default: **1 vCPU**, **1GB RAM**, **3GiB disk**.
+
 5. Select a [region](/docs/en/regions): if not specified, your organization's default region will be used
-6. Define [resources](/docs/en/sandboxes#resources): if not specified, default values will be used: 1 vCPU, 1GB RAM, 3GiB disk
-7. Define sandbox lifecycle management options: [auto-stop](#auto-stop-interval), [auto-archive](#auto-archive-interval), [auto-delete](#auto-delete-interval)
-8. Add environment variables in key-value pairs
-9. Add labels in key-value pairs
-10. Select network settings:
+6. Define [sandbox lifecycle management](#automated-lifecycle-management) options or set as an [ephemeral sandbox](#ephemeral-sandboxes)
+7. Add environment variables in key-value pairs
+8. Add labels in key-value pairs
+9. Select network settings:
 
-    - **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
-    - **Block all network access**: block all outbound network access
+- **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
+- **Block all network access**: block all outbound network access
 
-11. Click the **Create Sandbox** button to create the sandbox
+10. Click the **Create** button to create the sandbox
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
