@@ -1,220 +1,794 @@
 ---
-title: Git操作
+title: Git 操作
 ---
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona SDKは、Sandbox内の`git`モジュールを通じてGitの組み込みサポートを提供します。本ガイドでは、利用可能なすべてのGit操作とベストプラクティスを解説します。
+Daytonaは、サンドボックス内の`git`モジュールを通じて、Gitの標準サポートを提供します。
 
-## 基本操作
+## 基本操作 \{#basic-operations\}
 
-Daytona SDKは、Sandbox（Daytonaが管理する隔離された一時的な実行環境）内でGitリポジトリのクローン、ステータス確認、管理を行う機能を提供します。`git`モジュールを使ってGitリポジトリを操作できます。
+Daytona では、サンドボックス内の Git リポジトリのクローン、ステータス確認、および管理を行うためのメソッドが提供されています。
 
-ファイル操作と同様に、クローンの基準ディレクトリは現在のSandboxユーザーのホームです。例えば、`workspace/repo` は `/home/[username]/workspace/repo` を意味します。先頭を `/` にすることで作業ディレクトリに絶対パスも指定できます。
+[ファイルシステム操作](/docs/ja/file-system-operations)と同様に、クローンの開始ディレクトリは現在のサンドボックスの作業ディレクトリです。Dockerfile に WORKDIR が指定されている場合はそれを使用し、指定されていない場合はユーザーのホームディレクトリが使用されます。たとえば `workspace/repo` は `/my-work-dir/workspace/repo` を意味します。なお、パスを `/` で始めれば、絶対パスの `workDir` を指定することもできます。
 
-### リポジトリのクローン
+### リポジトリのクローン \{#clone-repositories\}
 
-Daytona SDKは、PythonおよびTypeScriptからSandboxにGitリポジトリをクローンできます。パブリック/プライベートリポジトリ、特定ブランチのクローンに対応し、Personal Access Tokenを用いた認証も可能です。
-
-<Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Basic clone
-sandbox.git.clone(
-    url="https://github.com/user/repo.git",
-    path="workspace/repo"
-)
-
-# Clone with authentication
-
-sandbox.git.clone(
-    url="https://github.com/user/repo.git",
-    path="workspace/repo",
-    username="git",
-    password="personal_access_token"
-)
-
-# Clone specific branch
-
-sandbox.git.clone(
-    url="https://github.com/user/repo.git",
-    path="workspace/repo",
-    branch="develop"
-)
-
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Basic clone
-await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo"
-);
-
-// Clone with authentication
-await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo",
-    undefined,
-    undefined,
-    "git",
-    "personal_access_token"
-);
-
-// Clone specific branch
-await sandbox.git.clone(
-    "https://github.com/user/repo.git",
-    "workspace/repo",
-    "develop"
-);
-```
-
-</TabItem>
-</Tabs>
-
-### リポジトリのステータス
-
-Daytona SDKは、Sandbox内のGitリポジトリのステータス確認にも対応しています。PythonおよびTypeScriptで、現在のブランチ、変更ファイル、メインブランチに対する先行/遅行コミット数を取得できます。
+Daytona は、Git リポジトリをサンドボックスへクローンするためのメソッドを提供します。公開・非公開リポジトリ、特定ブランチのクローンに対応し、Personal Access Token による認証も可能です。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# Get repository status
-status = sandbox.git.status("workspace/repo")
-print(f"Current branch: {status.current_branch}")
-print(f"Commits ahead: {status.ahead}")
-print(f"Commits behind: {status.behind}")
-for file in status.file_status:
-    print(f"File: {file.name}")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 基本的なクローン
+    sandbox.git.clone(
+        url="https://github.com/user/repo.git",
+        path="workspace/repo"
+    )
 
-# List branches
+    # 認証付きクローン
+    sandbox.git.clone(
+        url="https://github.com/user/repo.git",
+        path="workspace/repo",
+        username="git",
+        password="personal_access_token"
+    )
 
-response = sandbox.git.branches("workspace/repo")
-for branch in response.branches:
-    print(f"Branch: {branch}")
+    # 特定ブランチのクローン
+    sandbox.git.clone(
+        url="https://github.com/user/repo.git",
+        path="workspace/repo",
+        branch="develop"
+    )
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// Get repository status
-const status = await sandbox.git.status("workspace/repo");
-console.log(`Current branch: ${status.currentBranch}`);
-console.log(`Commits ahead: ${status.ahead}`);
-console.log(`Commits behind: ${status.behind}`);
-status.fileStatus.forEach(file => {
-    console.log(`File: ${file.name}`);
-});
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 基本的なクローン
+    await sandbox.git.clone(
+        "https://github.com/user/repo.git",
+        "workspace/repo"
+    );
 
-// List branches
-const response = await sandbox.git.branches("workspace/repo");
-response.branches.forEach(branch => {
-    console.log(`Branch: ${branch}`);
-});
-```
+    // 認証付きクローン
+    await sandbox.git.clone(
+        "https://github.com/user/repo.git",
+        "workspace/repo",
+        undefined,
+        undefined,
+        "git",
+        "personal_access_token"
+    );
 
-</TabItem>
+    // 特定ブランチのクローン
+    await sandbox.git.clone(
+        "https://github.com/user/repo.git",
+        "workspace/repo",
+        "develop"
+    );
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 基本的なクローン
+    sandbox.git.clone(
+      url: 'https://github.com/user/repo.git',
+      path: 'workspace/repo'
+    )
+
+    # 認証付きクローン
+    sandbox.git.clone(
+      url: 'https://github.com/user/repo.git',
+      path: 'workspace/repo',
+      username: 'git',
+      password: 'personal_access_token'
+    )
+
+    # 特定ブランチのクローン
+    sandbox.git.clone(
+      url: 'https://github.com/user/repo.git',
+      path: 'workspace/repo',
+      branch: 'develop'
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 基本的なクローン
+    err := sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "workspace/repo")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 認証付きクローン
+    err = sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "workspace/repo",
+    	options.WithUsername("git"),
+    	options.WithPassword("personal_access_token"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 特定ブランチのクローン
+    err = sandbox.Git.Clone(ctx, "https://github.com/user/repo.git", "workspace/repo",
+    	options.WithBranch("develop"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/clone' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "branch": "",
+      "commit_id": "",
+      "password": "",
+      "path": "",
+      "url": "",
+      "username": ""
+    }'
+    ```
+  </TabItem>
 </Tabs>
 
-## ブランチ操作
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください:
 
-Daytona SDK は、Git リポジトリのブランチ管理機能を提供します。ブランチの作成・切り替え・削除が可能です。
+> [**clone（Python SDK）**](/docs/ja/python-sdk/sync/git/#gitclone)
+>
+> [**clone（TypeScript SDK）**](/docs/ja/typescript-sdk/git/#clone)
+>
+> [**clone（Ruby SDK）**](/docs/ja/ruby-sdk/git/#clone)
+>
+> [**clone（Go SDK）**](/docs/ja/go-sdk/daytona/#GitService.Clone)
+>
+> [**clone repository（API）**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/clone)
 
-### ブランチの管理
+### リポジトリの状態を取得 \{#get-repository-status\}
 
-Daytona SDK では、Python と TypeScript から Git リポジトリのブランチを作成・切り替え・削除できます。
+Daytona では、サンドボックス内の Git リポジトリの状態を確認するためのメソッドを提供しています。現在のブランチ、変更されたファイル、メインブランチに対して先行/遅延しているコミット数を取得できます。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# 新しいブランチを作成
-sandbox.git.create_branch("workspace/repo", "feature/new-feature")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # リポジトリの状態を取得
+    status = sandbox.git.status("workspace/repo")
+    print(f"Current branch: {status.current_branch}")
+    print(f"Commits ahead: {status.ahead}")
+    print(f"Commits behind: {status.behind}")
+    for file in status.file_status:
+        print(f"File: {file.name}")
 
-# ブランチを切り替え
-sandbox.git.checkout_branch("workspace/repo", "feature/new-feature")
+    # ブランチの一覧
+    response = sandbox.git.branches("workspace/repo")
+    for branch in response.branches:
+        print(f"Branch: {branch}")
+    ```
+  </TabItem>
 
-# ブランチを削除
-sandbox.git.delete_branch("workspace/repo", "feature/old-feature")
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // リポジトリの状態を取得
+    const status = await sandbox.git.status("workspace/repo");
+    console.log(`Current branch: ${status.currentBranch}`);
+    console.log(`Commits ahead: ${status.ahead}`);
+    console.log(`Commits behind: ${status.behind}`);
+    status.fileStatus.forEach(file => {
+        console.log(`File: ${file.name}`);
+    });
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// 新しいブランチを作成
-await sandbox.git.createBranch("workspace/repo", "feature/new-feature");
+    // ブランチの一覧
+    const response = await sandbox.git.branches("workspace/repo");
+    response.branches.forEach(branch => {
+        console.log(`Branch: ${branch}`);
+    });
+    ```
+  </TabItem>
 
-// ブランチを切り替え
-await sandbox.git.checkoutBranch("workspace/repo", "feature/new-feature");
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # リポジトリの状態を取得
+    status = sandbox.git.status('workspace/repo')
+    puts "Current branch: #{status.current_branch}"
+    puts "Commits ahead: #{status.ahead}"
+    puts "Commits behind: #{status.behind}"
+    status.file_status.each do |file|
+      puts "File: #{file.name}"
+    end
 
-// ブランチを削除
-await sandbox.git.deleteBranch("workspace/repo", "feature/old-feature");
-```
+    # ブランチの一覧
+    response = sandbox.git.branches('workspace/repo')
+    response.branches.each do |branch|
+      puts "Branch: #{branch}"
+    end
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // リポジトリの状態を取得
+    status, err := sandbox.Git.Status(ctx, "workspace/repo")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Current branch: %s\n", status.CurrentBranch)
+    fmt.Printf("Commits ahead: %d\n", status.Ahead)
+    fmt.Printf("Commits behind: %d\n", status.Behind)
+    for _, file := range status.FileStatus {
+    	fmt.Printf("File: %s\n", file.Path)
+    }
+
+    // ブランチの一覧
+    branches, err := sandbox.Git.Branches(ctx, "workspace/repo")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    for _, branch := range branches {
+    	fmt.Printf("Branch: %s\n", branch)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/status?path='
+    ```
+  </TabItem>
 </Tabs>
 
-## ステージングとコミット
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
 
-Daytona SDK では、Git リポジトリの変更をステージしてコミットできます。Python と TypeScript から、特定のファイルのみ、またはすべての変更をステージし、メッセージ付きでコミットできます。
+> [**status (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitstatus)
+>
+> [**status (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#status)
+>
+> [**status (Ruby SDK)**](/docs/ja/ruby-sdk/git/#status)
+>
+> [**Status (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Status)
+>
+> [**Git リポジトリの状態を取得 (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/GET/git/status)
 
-### 変更の扱い
+## ブランチ操作 \{#branch-operations\}
+
+Daytona では、Git リポジトリのブランチを管理するためのメソッドを提供します。ブランチの作成・切り替え・削除に対応しています。
+
+### ブランチの作成 \{#create-branches\}
+
+Daytona は、Git リポジトリに新しいブランチを作成するためのメソッドを提供します。次のスニペットでは、`new-feature` という新しいブランチを作成します。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# 特定のファイルをステージ
-sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"])
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Create a new branch
+    sandbox.git.create_branch("workspace/repo", "new-feature")
+    ```
+  </TabItem>
 
-# すべての変更をステージ
-sandbox.git.add("workspace/repo", ["."])
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Create new branch
+    await git.createBranch('workspace/repo', 'new-feature');
+    ```
+  </TabItem>
 
-# 変更をコミット
-sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com")
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// 特定のファイルをステージ
-await sandbox.git.add("workspace/repo", ["file1.txt", "file2.txt"]);
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Create a new branch
+    sandbox.git.create_branch('workspace/repo', 'new-feature')
+    ```
+  </TabItem>
 
-// すべての変更をステージ
-await sandbox.git.add("workspace/repo", ["."]);
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Create a new branch
+    err := sandbox.Git.CreateBranch(ctx, "workspace/repo", "new-feature")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
 
-// 変更をコミット
-await sandbox.git.commit("workspace/repo", "feat: add new feature", "John Doe", "john@example.com");
-```
-
-</TabItem>
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "name": "",
+      "path": ""
+    }'
+    ```
+  </TabItem>
 </Tabs>
 
-## リモート操作
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
 
-Daytona SDK は Git のリモートリポジトリを扱う機能を提供します。変更のプッシュ、変更のプル、リモートの一覧表示が可能です。
+> [**create&#95;branch (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitcreate_branch)
+>
+> [**createBranch (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#createbranch)
+>
+> [**create&#95;branch (Ruby SDK)**](/docs/ja/ruby-sdk/git/#create_branch)
+>
+> [**CreateBranch (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.CreateBranch)
+>
+> [**create branch (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/branches)
 
-### リモートの操作
+### ブランチをチェックアウトする \{#checkout-branches\}
 
-Daytona SDK は、Python と TypeScript から Git リポジトリに対してプッシュ、プル、リモートの一覧表示を行う機能を提供します。
+Daytona は、Git リポジトリ内のブランチをチェックアウトするためのメソッドを提供します。以下のスニペットでは、`feature-branch` という名前のブランチをチェックアウトします。
 
 <Tabs syncKey="language">
-<TabItem label="Python" icon="seti:python">
-```python
-# 変更をプッシュ
-sandbox.git.push("workspace/repo")
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # ブランチをチェックアウトする
+    sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+    ```
+  </TabItem>
 
-# 変更をプル
-sandbox.git.pull("workspace/repo")
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // ブランチをチェックアウトする
+    await git.checkoutBranch('workspace/repo', 'feature-branch');
+    ```
+  </TabItem>
 
-```
-</TabItem>
-<TabItem label="TypeScript" icon="seti:typescript">
-```typescript
-// 変更をプッシュ
-await sandbox.git.push("workspace/repo");
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # ブランチをチェックアウトする
+    sandbox.git.checkout_branch('workspace/repo', 'feature-branch')
+    ```
+  </TabItem>
 
-// 変更をプル
-await sandbox.git.pull("workspace/repo");
-```
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // ブランチをチェックアウトする
+    err := sandbox.Git.Checkout(ctx, "workspace/repo", "feature-branch")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
 
-</TabItem>
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/checkout' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "branch": "",
+      "path": ""
+    }'
+    ```
+  </TabItem>
 </Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**checkout&#95;branch (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitcheckout_branch)
+>
+> [**checkoutBranch (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#checkoutbranch)
+>
+> [**checkout&#95;branch (Ruby SDK)**](/docs/ja/ruby-sdk/git/#checkout_branch)
+>
+> [**Checkout (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Checkout)
+>
+> [**checkout branch (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/checkout)
+
+### ブランチを削除する \{#delete-branches\}
+
+Daytona は Git リポジトリのブランチを削除するためのメソッドを提供します。次のコードスニペットは、`old-feature` という名前のブランチを削除します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Delete a branch
+    sandbox.git.delete_branch("workspace/repo", "old-feature")
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Delete a branch
+    await git.deleteBranch('workspace/repo', 'old-feature');
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Delete a branch
+    sandbox.git.delete_branch('workspace/repo', 'old-feature')
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Delete a branch
+    err := sandbox.Git.DeleteBranch(ctx, "workspace/repo", "old-feature")
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/branches' \
+      --request DELETE \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "name": "",
+      "path": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**delete&#95;branch (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitdelete_branch)
+>
+> [**deleteBranch (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#deletebranch)
+>
+> [**delete&#95;branch (Ruby SDK)**](/docs/ja/ruby-sdk/git/#delete_branch)
+>
+> [**DeleteBranch (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.DeleteBranch)
+>
+> [**delete branch (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/DELETE/git/branches)
+
+## 変更をステージングする \{#stage-changes\}
+
+Daytona は、Git リポジトリ内の変更をステージするためのメソッドを提供します。特定のファイルのみ、またはすべての変更をステージし、メッセージ付きでコミットできます。次のコードスニペットでは、`file.txt` ファイルと `src` ディレクトリをステージします。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # Stage a single file
+    sandbox.git.add("workspace/repo", ["file.txt"])
+
+    # Stage multiple files
+    sandbox.git.add("workspace/repo", [
+        "src/main.py",
+        "tests/test_main.py",
+        "README.md"
+    ])
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // Stage a single file
+    await git.add('workspace/repo', ['file.txt']);
+    // Stage whole repository
+    await git.add('workspace/repo', ['.']);
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # Stage a single file
+    sandbox.git.add('workspace/repo', ['file.txt'])
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // Stage a single file
+    err := sandbox.Git.Add(ctx, "workspace/repo", []string{"file.txt"})
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // Stage multiple files
+    err = sandbox.Git.Add(ctx, "workspace/repo", []string{
+    	"src/main.py",
+    	"tests/test_main.py",
+    	"README.md",
+    })
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // Stage whole repository
+    err = sandbox.Git.Add(ctx, "workspace/repo", []string{"."})
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/add' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "files": [
+        ""
+      ],
+      "path": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、[API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**add (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitadd)
+>
+> [**add (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#add)
+>
+> [**add (Ruby SDK)**](/docs/ja/ruby-sdk/git/#add)
+>
+> [**Add (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Add)
+>
+> [**add (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/add)
+
+## 変更をコミットする \{#commit-changes\}
+
+Daytona は、Git リポジトリ内の変更をコミットするためのメソッドを提供します。コミットメッセージ、作成者名、メールアドレスを指定してコミットできます。次のコードスニペットでは、メッセージ `Update documentation`、作成者 `John Doe`、メールアドレス `john@example.com` で変更をコミットします。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 変更をステージしてコミットする
+    sandbox.git.add("workspace/repo", ["README.md"])
+    sandbox.git.commit(
+        path="workspace/repo",
+        message="Update documentation",
+        author="John Doe",
+        email="john@example.com",
+        allow_empty=True
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 変更をステージしてコミットする
+    await git.add('workspace/repo', ['README.md']);
+    await git.commit(
+      'workspace/repo',
+      'Update documentation',
+      'John Doe',
+      'john@example.com',
+      true
+    );
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 変更をステージしてコミットする
+    sandbox.git.add('workspace/repo', ['README.md'])
+    sandbox.git.commit('workspace/repo', 'Update documentation', 'John Doe', 'john@example.com', true)
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 変更をステージしてコミットする
+    err := sandbox.Git.Add(ctx, "workspace/repo", []string{"README.md"})
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    response, err := sandbox.Git.Commit(ctx, "workspace/repo",
+    	"Update documentation",
+    	"John Doe",
+    	"john@example.com",
+    	options.WithAllowEmpty(true),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    fmt.Printf("Commit SHA: %s\n", response.SHA)
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/commit' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "allow_empty": true,
+      "author": "",
+      "email": "",
+      "message": "",
+      "path": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**commit (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitcommit)
+>
+> [**commit (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#commit)
+>
+> [**commit (Ruby SDK)**](/docs/ja/ruby-sdk/git/#commit)
+>
+> [**Commit (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Commit)
+>
+> [**commit (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/commit)
+
+## リモート操作 \{#remote-operations\}
+
+Daytona は、Git のリモートリポジトリを扱うためのメソッドを提供します。リモートリポジトリとの間で変更を push および pull できます。
+
+### 変更をプッシュ \{#push-changes\}
+
+Daytona は、変更をリモートリポジトリにプッシュするためのメソッドを提供します。次のスニペットは、変更をパブリックリポジトリにプッシュする例です。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 認証なしでプッシュ（パブリックリポジトリまたは SSH 用）
+    sandbox.git.push("workspace/repo")
+
+    # 認証ありでプッシュ
+    sandbox.git.push(
+        path="workspace/repo",
+        username="user",
+        password="github_token"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // パブリックリポジトリにプッシュ
+    await git.push('workspace/repo');
+
+    // プライベートリポジトリにプッシュ
+    await git.push(
+      'workspace/repo',
+      'user',
+      'token'
+    );
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 変更をプッシュ
+    sandbox.git.push('workspace/repo')
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 認証なしでプッシュ（パブリックリポジトリまたは SSH 用）
+    err := sandbox.Git.Push(ctx, "workspace/repo")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 認証ありでプッシュ
+    err = sandbox.Git.Push(ctx, "workspace/repo",
+    	options.WithPushUsername("user"),
+    	options.WithPushPassword("github_token"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/push' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "password": "",
+      "path": "",
+      "username": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳細については、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/) および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**push (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitpush)
+>
+> [**push (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#push)
+>
+> [**push (Ruby SDK)**](/docs/ja/ruby-sdk/git/#push)
+>
+> [**Push (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Push)
+>
+> [**push (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/push)
+
+### 変更をプルする \{#pull-changes\}
+
+Daytona は、リモートリポジトリから変更をプルするためのメソッドを提供します。次のスニペットは、公開リポジトリから変更をプルする例です。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    # 認証なしでプル
+    sandbox.git.pull("workspace/repo")
+
+    # 認証ありでプル
+    sandbox.git.pull(
+        path="workspace/repo",
+        username="user",
+        password="github_token"
+    )
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    // 公開リポジトリからプル
+    await git.pull('workspace/repo');
+
+    // プライベートリポジトリからプル
+    await git.pull(
+      'workspace/repo',
+      'user',
+      'token'
+    );
+    ```
+  </TabItem>
+
+  <TabItem label="Ruby" icon="seti:ruby">
+    ```ruby
+    # 変更をプル
+    sandbox.git.pull('workspace/repo')
+    ```
+  </TabItem>
+
+  <TabItem label="Go" icon="seti:go">
+    ```go
+    // 認証なしでプル
+    err := sandbox.Git.Pull(ctx, "workspace/repo")
+    if err != nil {
+    	log.Fatal(err)
+    }
+
+    // 認証ありでプル
+    err = sandbox.Git.Pull(ctx, "workspace/repo",
+    	options.WithPullUsername("user"),
+    	options.WithPullPassword("github_token"),
+    )
+    if err != nil {
+    	log.Fatal(err)
+    }
+    ```
+  </TabItem>
+
+  <TabItem label="API" icon="seti:json">
+    ```bash
+    curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/git/pull' \
+      --request POST \
+      --header 'Content-Type: application/json' \
+      --data '{
+      "password": "",
+      "path": "",
+      "username": ""
+    }'
+    ```
+  </TabItem>
+</Tabs>
+
+詳しくは、[Python SDK](/docs/ja/python-sdk/sync/git)、[TypeScript SDK](/docs/ja/typescript-sdk/git)、[Ruby SDK](/docs/ja/ruby-sdk/git)、[Go SDK](/docs/ja/go-sdk/)、および [API](/docs/ja/tools/api/#daytona-toolbox) のリファレンスを参照してください。
+
+> [**pull (Python SDK)**](/docs/ja/python-sdk/sync/git/#gitpull)
+>
+> [**pull (TypeScript SDK)**](/docs/ja/typescript-sdk/git/#pull)
+>
+> [**pull (Ruby SDK)**](/docs/ja/ruby-sdk/git/#pull)
+>
+> [**Pull (Go SDK)**](/docs/ja/go-sdk/daytona/#GitService.Pull)
+>
+> [**pull (API)**](/docs/ja/tools/api/#daytona-toolbox/tag/git/POST/git/pull)

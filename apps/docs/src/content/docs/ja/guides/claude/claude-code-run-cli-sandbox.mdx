@@ -1,0 +1,85 @@
+---
+title: CLI 経由で Daytona サンドボックス内で Claude Code を実行する
+description: Daytona CLI を使用して Daytona サンドボックス内で Claude Code を実行し、安全かつ分離された形でタスクを実行する方法を学びます。
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+このガイドでは、Daytona CLI を使用して Daytona サンドボックス内で Claude Code を実行する手順を説明します。
+
+### 前提条件 \{#prerequisites\}
+
+* Daytona アカウントと API キー（[Daytona Dashboard](https://app.daytona.io/dashboard/keys) から取得できます）
+* ローカル環境のターミナル（macOS、Linux、または Windows）
+
+### Daytona CLI をインストールする \{#install-the-daytona-cli\}
+
+<Tabs syncKey="os">
+  <TabItem label="Mac/Linux">
+    ```bash
+    brew install daytonaio/cli/daytona
+    ```
+  </TabItem>
+
+  <TabItem label="Windows">
+    ```bash
+    powershell -Command "irm https://get.daytona.io/windows | iex" 
+    ```
+  </TabItem>
+</Tabs>
+
+:::note
+すでに CLI をインストールしていますか？ `daytona --version` でバージョンを確認してください。バージョンが **0.135.0** 未満の場合は、[最新バージョンにアップデート](https://www.daytona.io/docs/en/getting-started/#cli)してください。
+:::
+
+### Daytona で認証する \{#authenticate-with-daytona\}
+
+API キーを使用して Daytona アカウントにログインします。
+
+```bash
+daytona login --api-key=YOUR_API_KEY
+```
+
+`YOUR_API_KEY` をご自身の Daytona API キーに置き換えてください。
+
+### サンドボックスを作成する \{#create-a-sandbox\}
+
+Claude Code 用の新しいサンドボックスを作成します：
+
+```bash
+daytona sandbox create --name claude-sandbox
+```
+
+これにより、`claude-sandbox` という名前のサンドボックスが作成され、[Dashboard](https://app.daytona.io/dashboard/sandboxes) に表示されます。Daytona のデフォルトスナップショットには Claude Code が含まれているため、上記のコマンドだけで十分です。
+
+:::tip
+より高い性能が必要ですか？`--snapshot daytona-large` または `--snapshot daytona-medium` フラグを指定すると、サンドボックスのリソースを増やせます。リソースの詳細については、[デフォルトスナップショット](https://www.daytona.io/docs/en/snapshots/#default-snapshots) を参照してください。
+:::
+
+### サンドボックスに接続する \{#connect-to-the-sandbox\}
+
+サンドボックスに SSH で接続します:
+
+```bash
+daytona ssh claude-sandbox
+```
+
+これでサンドボックス内で対話的なターミナルセッションが利用できます。
+
+### Claude Code を実行する \{#run-claude-code\}
+
+SSH セッション内で Claude Code を起動します：
+
+```bash
+claude
+```
+
+初回実行時には、Claude Code が認証を求めるプロンプトを表示します：
+
+1. ターミナルに表示される認証用 URL をコピーする
+2. ローカルのブラウザでその URL を開く
+3. 表示される認証フローを完了する
+4. ブラウザに表示されたコードをコピーする
+5. コードをターミナルに貼り付ける
+
+認証が完了すれば、準備は整います。Claude Code はサンドボックス内で実行され、ターミナルから操作できます。

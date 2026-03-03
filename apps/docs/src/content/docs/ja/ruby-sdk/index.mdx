@@ -1,0 +1,79 @@
+---
+title: Ruby SDK リファレンス
+description: Ruby SDK を使用して Daytona サンドボックスを操作する
+next: /docs/ruby-sdk/daytona
+---
+
+Daytona Ruby SDK は、Daytona サンドボックスをプログラムから操作するための堅牢なインターフェースを提供します。
+
+## インストール \{#installation\}
+
+Bundler を使用して Daytona Ruby SDK をインストールするには、Gemfile に次を追加します。
+
+```ruby
+gem 'daytona'
+```
+
+次に、以下を実行してください：
+
+```bash
+bundle install
+```
+
+または、直接インストールしてください:
+
+```bash
+gem install daytona
+```
+
+## はじめに \{#getting-started\}
+
+Daytona Ruby SDK の利用を開始するにあたっての簡単な例を次に示します。
+
+```ruby
+require 'daytona'
+
+# SDKを初期化します（デフォルトで環境変数を使用します）
+daytona = Daytona::Daytona.new
+
+# 新しいサンドボックスを作成します
+sandbox = daytona.create
+
+# コマンドを実行します
+response = sandbox.process.exec(command: "echo 'Hello, World!'")
+puts response.result
+
+# クリーンアップします
+daytona.delete(sandbox)
+```
+
+## 設定 \{#configuration\}
+
+SDK は、環境変数を使用するか、コンストラクタにオプションを渡すことで構成できます。
+
+```ruby
+require 'daytona'
+
+# 環境変数を使用する (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+daytona = Daytona::Daytona.new
+
+# Using explicit configuration
+config = Daytona::Config.new(
+  api_key: 'your-api-key',
+  api_url: 'https://app.daytona.io/api',
+  target: 'us'
+)
+daytona = Daytona::Daytona.new(config)
+```
+
+## 環境変数 \{#environment-variables\}
+
+SDK は次の環境変数をサポートしています。
+
+| Variable | Description |
+|----------|-------------|
+| `DAYTONA_API_KEY` | 認証用の API キー |
+| `DAYTONA_API_URL` | Daytona API の URL（デフォルトは `https://app.daytona.io/api`） |
+| `DAYTONA_TARGET` | サンドボックスの配置先 |
+| `DAYTONA_JWT_TOKEN` | 認証用の JWT トークン（API キーの代わりに使用可能） |
+| `DAYTONA_ORGANIZATION_ID` | 組織 ID（JWT トークンを使用する場合に必須） |

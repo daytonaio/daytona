@@ -1,0 +1,853 @@
+---
+title: VPN 接続
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+VPN 接続は、Daytona のサンドボックスをプライベートネットワークに接続する方法です。VPN 接続を確立することで、サンドボックスはプライベート IP アドレスを使用してネットワークリソースへアクセスでき、同じ VPN ネットワーク上の他のデバイスからサンドボックスへアクセスすることも可能になります。
+
+この統合機能により、開発環境と既存インフラストラクチャ間の通信が可能になり、プライベートネットワーク内のサービスに対するアプリケーションのテスト、共有開発リソースへのアクセス、チームメンバーとの共同作業が行えるようになります。
+
+Daytona は、次の VPN ネットワークプロバイダーをサポートしています:
+
+* [Tailscale](#tailscale)
+* [OpenVPN](#openvpn)
+
+:::note
+VPN ネットワークに接続するには、[Daytona サンドボックスを作成または開く](/docs/ja/sandboxes) 必要があり、さらに **使用する VPN ネットワークプロバイダーの認証情報にアクセスできる必要があります**。加えて、[**Tier 3** 以上](/docs/ja/limits#resources) のプランをご利用である必要があります。
+:::
+
+## Tailscale \{#tailscale\}
+
+Daytona は、Tailscale ネットワークを利用して Daytona サンドボックスに接続するための複数の方法を提供しています。
+
+* [Connect with browser login](#connect-with-browser-login)
+* [Connect with auth key](#connect-with-auth-key)
+* [Connect with web terminal](#connect-with-web-terminal)
+
+Daytona サンドボックスを Tailscale ネットワークに接続すると、そのサンドボックスはプライベートな Tailscale ネットワークの一部となり、ネットワーク内で利用可能なリソースへアクセスできるようになるとともに、ネットワーク上の他のデバイスからもサンドボックスへアクセスできるようになります。
+
+この連携により、サンドボックスは Tailscale ネットワーク内の 1 台のデバイスとして認識され、独自の Tailscale IP アドレスを持ち、ネットワーク上の他のデバイスやサービスへアクセスできるようになります。
+
+### ブラウザログインで接続する \{#connect-with-browser-login\}
+
+ブラウザログイン方式では、対話型の認証フローを開始し、Tailscale が一意のログイン URL を生成します。この URL に Web ブラウザでアクセスして、Daytona サンドボックスの認証を行います。
+
+このプロセスには、Tailscale のインストール、デーモンの起動、ログイン処理の開始、そして接続が確立されるまで認証状態をポーリングすることが含まれます。
+
+次のコードスニペットは、ブラウザログインを使用して Tailscale ネットワークに接続する方法を示しています。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+    import time
+    import re
+
+    # 設定
+    DAYTONA_API_KEY = "YOUR_API_KEY" # APIキーに置き換えてください
+
+    # Daytonaクライアントを初期化
+    config = DaytonaConfig(api_key=DAYTONA_API_KEY)
+    daytona = Daytona(config)
+
+    def setup_tailscale_vpn_interactive():
+        """
+        Python SDKを使用してDaytonaサンドボックスをTailscaleネットワークに接続します。
+        ブラウザURLを介した対話型ログインを使用します(認証キーは不要)。
+        """
+        # サンドボックスを作成
+        print("Creating sandbox...")
+        sandbox = daytona.create()
+        print(f"Sandbox created: {sandbox.id}")
+
+        # ステップ1: Tailscaleをインストール
+        print("\nInstalling Tailscale (this may take a few minutes)...")
+        response = sandbox.process.exec(
+            "curl -fsSL https://tailscale.com/install.sh | sh",
+            timeout=300
+        )
+        if response.exit_code != 0:
+            print(f"Error installing Tailscale: {response.result}")
+            return sandbox
+        print("Tailscale installed successfully.")
+
+        # ステップ2: tailscaledデーモンをバックグラウンドで起動
+        print("\nStarting tailscaled daemon...")
+        sandbox.process.exec("nohup sudo tailscaled > /dev/null 2>&1 &", timeout=10)
+
+        # デーモンの初期化を待機
+        time.sleep(3)
+
+        # ステップ3: tailscale upをバックグラウンドで実行し、出力をファイルにキャプチャ
+        print("\nInitiating Tailscale login...")
+        sandbox.process.exec(
+            "sudo tailscale up > /tmp/tailscale-login.txt 2>&1 &",
+            timeout=10
+        )
+
+        # ログインURLがファイルに書き込まれるまで待機
+        time.sleep(3)
+
+        # 出力ファイルからログインURLを読み取る
+        response = sandbox.process.exec("cat /tmp/tailscale-login.txt", timeout=10)
+        output = response.result
+        url_match = re.search(r'https://login\.tailscale\.com/a/[^\s]+', output)
+
+        if url_match:
+            login_url = url_match.group(0)
+            print(f"\n{'='*60}")
+            print("To authenticate, visit this URL in your browser:")
+            print(f"\n  {login_url}")
+            print(f"\n{'='*60}")
+            print("\nWaiting for authentication...")
+
+            # 接続ステータスをポーリング
+            max_wait = 300
+            poll_interval = 5
+            waited = 0
+
+            while waited < max_wait:
+                time.sleep(poll_interval)
+                waited += poll_interval
+
+                status_response = sandbox.process.exec("tailscale status 2>&1", timeout=30)
+                status_output = status_response.result
+
+                # 接続されているか確認
+                if status_response.exit_code == 0 and "logged out" not in status_output.lower():
+                    # IPが割り当てられているか検証
+                    ip_response = sandbox.process.exec("tailscale ip -4 2>&1", timeout=10)
+                    if ip_response.exit_code == 0 and ip_response.result.strip():
+                        print(f"\nConnected to Tailscale network!")
+                        print(f"Tailscale IP: {ip_response.result.strip()}")
+                        break
+
+                print(f"  Still waiting... ({waited}s)")
+            else:
+                print("\nTimeout waiting for authentication. Please try again.")
+                return sandbox
+        else:
+            # すでに接続済み、または異なる出力
+            print(f"Output from tailscale up:\n{output}")
+
+            # すでに接続されているか確認
+            status_response = sandbox.process.exec("tailscale status", timeout=30)
+            if status_response.exit_code == 0:
+                print("\nTailscale status:")
+                print(status_response.result)
+
+        # 最終ステータス確認
+        print("\nFinal Tailscale status:")
+        response = sandbox.process.exec("tailscale status", timeout=30)
+        print(response.result)
+
+        return sandbox
+
+    if __name__ == "__main__":
+        sandbox = setup_tailscale_vpn_interactive()
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    // 設定
+    const DAYTONA_API_KEY = 'YOUR_API_KEY' // 自身のAPIキーに置き換えてください
+
+    // Daytonaクライアントを初期化します
+    const daytona = new Daytona({
+      apiKey: DAYTONA_API_KEY,
+    })
+
+    function sleep(ms: number): Promise<void> {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    async function setupTailscaleVpnInteractive(): Promise<void> {
+      /**
+       * TypeScript SDKを使用して、DaytonaのサンドボックスをTailscaleネットワークに接続します。
+       * ブラウザのURLを用いた対話的ログインを利用します（認証キーは不要です）。
+       */
+
+      // サンドボックスを作成
+      console.log('サンドボックスを作成しています...')
+      const sandbox = await daytona.create()
+      console.log(`サンドボックスを作成しました: ${sandbox.id}`)
+
+      // 手順1: Tailscaleをインストール
+      console.log('\nTailscaleをインストールしています（数分かかる場合があります）...')
+      let response = await sandbox.process.executeCommand(
+        'curl -fsSL https://tailscale.com/install.sh | sh',
+        undefined, // カレントディレクトリ(cwd)
+        undefined, // 環境変数(env)
+        300 // タイムアウト
+      )
+      if (response.exitCode !== 0) {
+        console.log(`Tailscaleのインストール中にエラーが発生しました: ${response.result}`)
+        return
+      }
+      console.log('Tailscaleは正常にインストールされました。')
+
+      // 手順2: tailscaledデーモンをバックグラウンドで起動
+      console.log('\ntailscaledデーモンを起動しています...')
+      await sandbox.process.executeCommand(
+        'nohup sudo tailscaled > /dev/null 2>&1 &',
+        undefined, // カレントディレクトリ(cwd)
+        undefined, // 環境変数(env)
+        10 // タイムアウト
+      )
+
+      // デーモンの初期化が完了するまで待機
+      await sleep(3000)
+
+      // 手順3: tailscale upをバックグラウンドで実行し、出力をファイルに保存
+      console.log('\nTailscaleへのログイン処理を開始しています...')
+      await sandbox.process.executeCommand(
+        'sudo tailscale up > /tmp/tailscale-login.txt 2>&1 &',
+        undefined, // カレントディレクトリ(cwd)
+        undefined, // 環境変数(env)
+        10 // タイムアウト
+      )
+
+      // ログインURLがファイルに書き込まれるまで待機
+      await sleep(3000)
+
+      // 出力ファイルからログインURLを読み取り
+      response = await sandbox.process.executeCommand(
+        'cat /tmp/tailscale-login.txt',
+        undefined, // カレントディレクトリ(cwd)
+        undefined, // 環境変数(env)
+        10 // タイムアウト
+      )
+      const output = response.result || ''
+      const urlMatch = output.match(/https:\/\/login\.tailscale\.com\/a\/[^\s]+/)
+
+      if (urlMatch) {
+        const loginUrl = urlMatch[0]
+        console.log('\n' + '='.repeat(60))
+        console.log('認証するには、このURLにブラウザでアクセスしてください:')
+        console.log(`\n  ${loginUrl}`)
+        console.log('\n' + '='.repeat(60))
+        console.log('\n認証が完了するまで待機しています...')
+
+        // 接続状態をポーリング
+        const maxWait = 300 // 最大待機時間は5分
+        const pollInterval = 5
+        let waited = 0
+
+        while (waited < maxWait) {
+          await sleep(pollInterval * 1000)
+          waited += pollInterval
+
+          const statusResponse = await sandbox.process.executeCommand(
+            'tailscale status 2>&1',
+            undefined, // カレントディレクトリ(cwd)
+            undefined, // 環境変数(env)
+            30 // タイムアウト
+          )
+          const statusOutput = statusResponse.result || ''
+
+          // 接続済みか確認（ログインプロンプトなしで自マシンがstatusに表示されるか）
+          if (
+            statusResponse.exitCode === 0 &&
+            !statusOutput.toLowerCase().includes('logged out')
+          ) {
+            // IPアドレスが割り当てられていることを確認
+            const ipResponse = await sandbox.process.executeCommand(
+              'tailscale ip -4 2>&1',
+              undefined, // カレントディレクトリ(cwd)
+              undefined, // 環境変数(env)
+              10 // タイムアウト
+            )
+            if (ipResponse.exitCode === 0 && ipResponse.result?.trim()) {
+              console.log('\nTailscaleネットワークに接続されました!')
+              console.log(`TailscaleのIPアドレス: ${ipResponse.result.trim()}`)
+              break
+            }
+          }
+
+          console.log(`  まだ待機中です... (${waited}秒)`)
+        }
+
+        if (waited >= maxWait) {
+          console.log('\n認証の待機中にタイムアウトしました。もう一度お試しください。')
+          return
+        }
+      } else {
+        // すでに接続済みであるか、出力内容が異なる可能性があります
+        console.log(`tailscale upの出力:\n${output}`)
+
+        // すでに接続されているか確認
+        const statusResponse = await sandbox.process.executeCommand(
+          'tailscale status',
+          undefined, // カレントディレクトリ(cwd)
+          undefined, // 環境変数(env)
+          30 // タイムアウト
+        )
+        if (statusResponse.exitCode === 0) {
+          console.log('\nTailscaleのステータス:')
+          console.log(statusResponse.result)
+        }
+      }
+
+      // 最終的なステータス確認
+      console.log('\n最終的なTailscaleのステータス:')
+      response = await sandbox.process.executeCommand(
+        'tailscale status',
+        undefined, // カレントディレクトリ(cwd)
+        undefined, // 環境変数(env)
+        30 // タイムアウト
+      )
+      console.log(response.result)
+    }
+
+    // メイン関数を実行
+    setupTailscaleVpnInteractive().catch(console.error)
+    ```
+  </TabItem>
+</Tabs>
+
+接続が確立され、認証が完了すると、サービスが稼働している限り、サンドボックスは接続状態を維持し続けます。
+
+### 認証キーで接続する \{#connect-with-auth-key\}
+
+認証キーを使用すると、Daytona のサンドボックスを Tailscale に対話なしで接続できるため、ブラウザを使った手動操作が行えない自動スクリプトや CI/CD パイプラインなどのシナリオに適しています。
+
+1. [Tailscale admin console ↗](https://login.tailscale.com/admin/machines) にアクセスします
+2. **Add device** をクリックし、**Linux server** を選択します
+3. 設定を適用し、**Generate install script** をクリックします
+
+これにより、Tailscale をインストールして Tailscale ネットワークに接続するために使用できるスクリプトが生成されます。
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key=tskey-auth-<AUTH_KEY>
+```
+
+生成されたスクリプトから認証キーをコピーし、それを使って Daytona のサンドボックスを Tailscale に接続します。
+
+<Tabs syncKey="language">
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+    import time
+
+    # 設定
+    DAYTONA_API_KEY = "YOUR_API_KEY" # ご自身のAPIキーに置き換えてください
+    TAILSCALE_AUTH_KEY = "YOUR_AUTH_KEY" # ご自身の認証キーに置き換えてください
+
+    # Daytonaクライアントを初期化
+    config = DaytonaConfig(api_key=DAYTONA_API_KEY)
+    daytona = Daytona(config)
+
+
+    def setup_tailscale_vpn(auth_key: str):
+    """
+    Python SDKを使用してDaytonaサンドボックスをTailscaleネットワークに接続します。
+    非対話型認証に認証キーを使用します。
+    """
+    # サンドボックスを作成
+    print("サンドボックスを作成中...")
+    sandbox = daytona.create()
+    print(f"サンドボックスが作成されました: {sandbox.id}")
+
+    # ステップ1: Tailscaleをインストール
+    print("\nTailscaleをインストール中(数分かかる場合があります)...")
+    response = sandbox.process.exec(
+        "curl -fsSL https://tailscale.com/install.sh | sh",
+        timeout=300
+    )
+    if response.exit_code != 0:
+        print(f"Tailscaleのインストールエラー: {response.result}")
+        return sandbox
+    print("Tailscaleが正常にインストールされました。")
+
+    # ステップ2: tailscaledデーモンを手動で起動(systemdはサンドボックス内で自動起動しません)
+    print("\ntailscaledデーモンを起動中...")
+    sandbox.process.exec("nohup sudo tailscaled > /dev/null 2>&1 &", timeout=10)
+
+    # デーモンの初期化を待機
+    time.sleep(3)
+
+      # ステップ3: 認証キーで接続
+      print("\nTailscaleネットワークに接続中...")
+      response = sandbox.process.exec(
+          f"sudo tailscale up --auth-key={auth_key}",
+          timeout=60
+      )
+
+      if response.exit_code != 0:
+          print(f"接続エラー: {response.result}")
+          return sandbox
+
+      print("Tailscaleネットワークに接続されました。")
+
+      # 接続状態を確認
+      print("\nTailscaleの状態を確認中...")
+      response = sandbox.process.exec("tailscale status", timeout=30)
+      print(f"ステータス:\n{response.result}")
+
+      return sandbox
+
+
+    if __name__ == "__main__":
+      sandbox = setup_tailscale_vpn(TAILSCALE_AUTH_KEY)
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk'
+
+    // 設定
+    const DAYTONA_API_KEY = 'YOUR_API_KEY' // ご自身のAPIキーに置き換えてください
+    const TAILSCALE_AUTH_KEY = 'YOUR_AUTH_KEY' // ご自身の認証キーに置き換えてください
+
+    // Daytonaクライアントを初期化
+    const daytona = new Daytona({
+      apiKey: DAYTONA_API_KEY,
+    })
+
+    function sleep(ms: number): Promise<void> {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    async function setupTailscaleVpn(authKey: string): Promise<void> {
+      /**
+       * TypeScript SDKを使用してDaytonaサンドボックスをTailscaleネットワークに接続します。
+       * 非対話型認証に認証キーを使用します。
+       */
+
+      // サンドボックスを作成
+      console.log('Creating sandbox...')
+      const sandbox = await daytona.create()
+      console.log(`Sandbox created: ${sandbox.id}`)
+
+      // ステップ1: Tailscaleをインストール
+      console.log('\nInstalling Tailscale (this may take a few minutes)...')
+      let response = await sandbox.process.executeCommand(
+        'curl -fsSL https://tailscale.com/install.sh | sh',
+        undefined, // 作業ディレクトリ
+        undefined, // 環境変数
+        300 // タイムアウト
+      )
+      if (response.exitCode !== 0) {
+        console.log(`Error installing Tailscale: ${response.result}`)
+        return
+      }
+      console.log('Tailscale installed successfully.')
+
+      // ステップ2: tailscaledデーモンを手動で起動(systemdはサンドボックス内で自動起動しません)
+      console.log('\nStarting tailscaled daemon...')
+      await sandbox.process.executeCommand(
+        'nohup sudo tailscaled > /dev/null 2>&1 &',
+        undefined, // 作業ディレクトリ
+        undefined, // 環境変数
+        10 // タイムアウト
+      )
+
+      // デーモンの初期化を待機
+      await sleep(3000)
+
+      // ステップ3: 認証キーで接続
+      console.log('\nConnecting to Tailscale network...')
+      response = await sandbox.process.executeCommand(
+        `sudo tailscale up --auth-key=${authKey}`,
+        undefined, // 作業ディレクトリ
+        undefined, // 環境変数
+        60 // タイムアウト
+      )
+
+      if (response.exitCode !== 0) {
+        console.log(`Error connecting: ${response.result}`)
+        return
+      }
+
+      console.log('Connected to Tailscale network.')
+
+      // 接続ステータスを確認
+      console.log('\nChecking Tailscale status...')
+      response = await sandbox.process.executeCommand(
+        'tailscale status',
+        undefined, // 作業ディレクトリ
+        undefined, // 環境変数
+        30 // タイムアウト
+      )
+      console.log(`Status:\n${response.result}`)
+    }
+
+    // メイン関数を実行
+    setupTailscaleVpn(TAILSCALE_AUTH_KEY).catch(console.error)
+    ```
+  </TabItem>
+</Tabs>
+
+接続が確立され、認証が完了すると、サービスが稼働している限り、サンドボックスは接続状態を維持し続けます。
+
+### ウェブターミナルで接続する \{#connect-with-web-terminal\}
+
+ターミナルで直接作業したい場合や、Tailscale の接続プロセスをより細かく制御したい場合は、Daytona の[ウェブターミナル](/docs/ja/web-terminal)または[SSH](/docs/ja/ssh-access) を使用して、Tailscale を手動でセットアップできます。
+
+この方法では、インストールおよび接続プロセスの各手順を確認でき、必要に応じてセットアップをカスタマイズすることもできます。このプロセスには、Tailscale のインストール、tmux を使用して永続セッション内でデーモンを起動すること、そして対話型ログインフローを通じて認証を行うことが含まれます。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/) でサンドボックスの[ウェブターミナル](/docs/ja/web-terminal)を開くか、[SSH 経由でアクセス](/docs/ja/ssh-access)します
+2. 公式のインストールスクリプトを使用して Tailscale をインストールします：
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+```
+
+これにより Tailscale のインストールプロセスが開始され、サンドボックス内で Tailscale CLI が初期化されます。Daytona では、サンドボックスを Tailscale ネットワークに接続するために、バックグラウンドで Tailscale デーモンが動作している必要があります。
+
+推奨される方法は、デーモンがバックグラウンドで動作し続けるように、切り離された tmux（または類似のツール）のセッションで実行することです。
+
+3. tmux をインストールする
+
+```bash
+sudo apt install tmux
+```
+
+4. デタッチした tmux セッション内で Tailscale デーモンを起動する
+
+```bash
+tmux new -d -s tailscale 'sudo tailscaled'
+```
+
+5. サンドボックスを Tailscale ネットワークに接続し、認証する
+
+```bash
+sudo tailscale up
+```
+
+6. Webブラウザで認証URLにアクセスし、画面の指示に従って認証を完了します
+
+```txt
+認証するには、以下のURLにアクセスしてください:
+https://login.tailscale.com/a/<id>
+```
+
+認証に成功すると、次の確認メッセージが表示されます。
+
+```txt
+デバイス <id> は <address> tailnet にログインしています。
+```
+
+これで、Daytona のサンドボックスが Tailscale ネットワークに正常に接続されました。サンドボックスは [Tailscale ダッシュボード](https://login.tailscale.com/admin/machines) に表示されるはずです。
+
+## OpenVPN \{#openvpn\}
+
+Daytona では、OpenVPN ネットワークを介して Daytona サンドボックスに接続するための複数の方法を提供しています。
+
+* [クライアント設定で接続](#connect-with-client-configuration)
+* [ウェブターミナルで接続](#connect-with-web-terminal)
+
+OpenVPN はクライアントサーバーモデルを採用しており、Daytona サンドボックスは OpenVPN サーバーに接続するクライアントとして機能します。この方法は、既存の企業 VPN への接続、ファイアウォールの背後にあるリソースへのアクセス、すでに OpenVPN を使用しているインフラストラクチャとの統合に適しています。
+
+:::note
+Daytona サンドボックスを OpenVPN ネットワークに接続するには、[クライアント設定ファイル](#client-configuration-file)が必要です。
+:::
+
+### クライアント設定ファイル \{#client-configuration-file\}
+
+クライアント設定ファイルには、OpenVPN サーバーへの安全な接続を確立するために必要な接続パラメーター、証明書、鍵が含まれます。このファイルは通常、ネットワーク管理者から提供されるか、OpenVPN サーバーのセットアップ時に生成されます。
+
+設定ファイルの名前は `client.ovpn` などとし、サーバーアドレス、ポート、プロトコル、暗号化設定、認証情報など、必要なすべての接続設定を含める必要があります。このファイルを作成するには、nano や vim のようなテキストエディタを使用するか、別の場所で用意してある場合は、そのファイルをサンドボックスにアップロードしてください。
+
+以下のスニペットはクライアント設定ファイルの例です。プレースホルダーを、OpenVPN サーバーから提供された実際の値に置き換えてください。
+
+```bash
+client
+proto udp
+explicit-exit-notify
+remote <YOUR_OPENVPN_SERVER_IP> <YOUR_OPENVPN_SERVER_PORT>
+dev tun
+resolv-retry infinite
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+verify-x509-name <YOUR_OPENVPN_SERVER_NAME> name
+auth SHA256
+auth-nocache
+cipher AES-128-GCM
+ignore-unknown-option data-ciphers
+data-ciphers AES-128-GCM
+ncp-ciphers AES-128-GCM
+tls-client
+tls-version-min 1.2
+tls-cipher TLS-ECDHE-ECDSA-WITH-AES-128-GCM-SHA256
+tls-ciphersuites TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256
+ignore-unknown-option block-outside-dns
+setenv opt block-outside-dns # Windows 10 の DNS リークを防止
+verb 3
+<ca>
+-----BEGIN CERTIFICATE-----
+<YOUR_OPENVPN_SERVER_CERTIFICATE>
+-----END CERTIFICATE-----
+</ca>
+<cert>
+-----BEGIN CERTIFICATE-----
+<YOUR_OPENVPN_CLIENT_CERTIFICATE>
+-----END CERTIFICATE-----
+</cert>
+<key>
+-----BEGIN PRIVATE KEY-----
+<YOUR_OPENVPN_CLIENT_PRIVATE_KEY>
+-----END PRIVATE KEY-----
+</key>
+<tls-crypt-v2>
+-----BEGIN OpenVPN tls-crypt-v2 client key-----
+<YOUR_OPENVPN_TLS_CRYPT_V2_CLIENT_KEY>
+-----END OpenVPN tls-crypt-v2 client key-----
+</tls-crypt-v2>
+```
+
+### クライアント設定を使用して接続する \{#connect-with-client-configuration\}
+
+<Tabs>
+  <TabItem label="Python" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+    import time
+
+    # 設定
+    DAYTONA_API_KEY = "YOUR_API_KEY" # ご自身の API キーに置き換えてください
+
+    # OpenVPN クライアント設定（ここに .ovpn の設定内容を貼り付けてください）
+    OPENVPN_CONFIG = """
+    """.strip()
+
+    # Daytona クライアントを初期化します
+    config = DaytonaConfig(api_key=DAYTONA_API_KEY)
+    daytona = Daytona(config)
+
+
+    def setup_openvpn(ovpn_config: str):
+    """
+    Connect a Daytona sandbox to an OpenVPN network using the Python SDK.
+    """
+    # サンドボックスを作成します
+    print("Creating sandbox...")
+    sandbox = daytona.create()
+    print(f"Sandbox created: {sandbox.id}")
+
+    # ステップ 1: OpenVPN をインストールします
+    print("\nInstalling OpenVPN...")
+    response = sandbox.process.exec(
+        "sudo apt update && sudo apt install -y openvpn",
+        timeout=120
+    )
+    if response.exit_code != 0:
+        print(f"Error installing OpenVPN: {response.result}")
+        return sandbox
+    print("OpenVPN installed successfully.")
+
+    # ステップ 2: OpenVPN 設定ファイルを書き込みます
+    print("\nWriting OpenVPN configuration...")
+    sandbox.fs.upload_file(ovpn_config.encode(), "/home/daytona/client.ovpn")
+    print("Configuration written to /home/daytona/client.ovpn")
+
+    # ステップ 3: OpenVPN をバックグラウンドで起動します
+    print("\nStarting OpenVPN tunnel...")
+    sandbox.process.exec(
+        "nohup sudo openvpn /home/daytona/client.ovpn > /tmp/openvpn.log 2>&1 &",
+        timeout=10
+    )
+
+    # 接続が確立されるまで待機します
+    print("Waiting for VPN connection to establish...")
+    time.sleep(10)
+
+    # ステップ 4: 接続を確認します
+    print("\nVerifying OpenVPN connection...")
+
+    # tun インターフェースが存在するか確認します
+    response = sandbox.process.exec("ip addr show tun0", timeout=10)
+    if response.exit_code == 0:
+        print("VPN tunnel interface (tun0) is up:")
+        print(response.result)
+    else:
+        print("Warning: tun0 interface not found. Checking OpenVPN logs...")
+        log_response = sandbox.process.exec("cat /tmp/openvpn.log", timeout=10)
+        print(f"OpenVPN log:\n{log_response.result}")
+        return sandbox
+
+    # VPN 経由でパブリック IP を取得します
+    print("\nChecking public IP (should be VPN server IP)...")
+    response = sandbox.process.exec("curl -s ifconfig.me", timeout=30)
+    if response.exit_code == 0:
+        print(f"Public IP: {response.result}")
+    else:
+        print(f"Could not determine public IP: {response.result}")
+
+    print("\nOpenVPN connection established successfully.")
+    return sandbox
+
+
+    if __name__ == "__main__":
+    sandbox = setup_openvpn(OPENVPN_CONFIG)
+
+    ```
+  </TabItem>
+
+  <TabItem label="TypeScript" icon="seti:typescript">
+    ```typescript
+    import { Daytona } from '@daytonaio/sdk';
+
+    // 設定
+    const DAYTONA_API_KEY = "YOUR_API_KEY"; // 実際の API キーに置き換えてください
+
+    // OpenVPN クライアント設定（ここに .ovpn 設定を貼り付けてください）
+    const OPENVPN_CONFIG = `
+    `.trim();
+
+    // Daytona クライアントを初期化します
+    const daytona = new Daytona({
+    apiKey: DAYTONA_API_KEY,
+    });
+
+    function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function setupOpenvpn(ovpnConfig: string): Promise<void> {
+    /**
+    * TypeScript SDK を使用して、Daytona のサンドボックスを OpenVPN ネットワークに接続します。
+    */
+
+    // サンドボックスを作成
+    console.log("Creating sandbox...");
+    const sandbox = await daytona.create();
+    console.log(`Sandbox created: ${sandbox.id}`);
+
+    // 手順 1: OpenVPN をインストールする
+    console.log("\nInstalling OpenVPN...");
+    let response = await sandbox.process.executeCommand(
+    "sudo apt update && sudo apt install -y openvpn",
+    undefined,  // カレントディレクトリ (cwd)
+    undefined,  // 環境変数 (env)
+    120         // タイムアウト
+    );
+    if (response.exitCode !== 0) {
+    console.log(`Error installing OpenVPN: ${response.result}`);
+    return;
+    }
+    console.log("OpenVPN installed successfully.");
+
+    // 手順 2: OpenVPN の設定ファイルを書き込む
+    console.log("\nWriting OpenVPN configuration...");
+    // heredoc を使用して設定ファイルを書き込みます
+    await sandbox.process.executeCommand(
+    `cat << 'OVPNEOF' > /home/daytona/client.ovpn
+    ${ovpnConfig}
+    OVPNEOF`,
+    undefined,
+    undefined,
+    30
+    );
+    console.log("Configuration written to /home/daytona/client.ovpn");
+
+    // 手順 3: バックグラウンドで OpenVPN を起動する
+    console.log("\nStarting OpenVPN tunnel...");
+    await sandbox.process.executeCommand(
+    "nohup sudo openvpn /home/daytona/client.ovpn > /tmp/openvpn.log 2>&1 &",
+    undefined,  // カレントディレクトリ (cwd)
+    undefined,  // 環境変数 (env)
+    10          // タイムアウト
+    );
+
+    // 接続が確立されるまで待機
+    console.log("Waiting for VPN connection to establish...");
+    await sleep(10000);
+
+    // 手順 4: 接続を検証する
+    console.log("\nVerifying OpenVPN connection...");
+
+    // tun インターフェースが存在するか確認する
+    response = await sandbox.process.executeCommand(
+    "ip addr show tun0",
+    undefined,  // カレントディレクトリ (cwd)
+    undefined,  // 環境変数 (env)
+    10          // タイムアウト
+    );
+    if (response.exitCode === 0) {
+    console.log("VPN tunnel interface (tun0) is up:");
+    console.log(response.result);
+    } else {
+    console.log("Warning: tun0 interface not found. Checking OpenVPN logs...");
+    const logResponse = await sandbox.process.executeCommand(
+      "cat /tmp/openvpn.log",
+      undefined,  // カレントディレクトリ (cwd)
+      undefined,  // 環境変数 (env)
+      10          // タイムアウト
+    );
+    console.log(`OpenVPN log:\n${logResponse.result}`);
+    return;
+    }
+
+    // VPN 経由でパブリック IP を取得する
+    console.log("\nChecking public IP (should be VPN server IP)...");
+    response = await sandbox.process.executeCommand(
+    "curl -s ifconfig.me",
+    undefined,  // カレントディレクトリ (cwd)
+    undefined,  // 環境変数 (env)
+    30          // タイムアウト
+    );
+    if (response.exitCode === 0) {
+    console.log(`Public IP: ${response.result}`);
+    } else {
+    console.log(`Could not determine public IP: ${response.result}`);
+    }
+
+    console.log("\nOpenVPN connection established successfully.");
+    }
+
+    // メイン関数を実行する
+    setupOpenvpn(OPENVPN_CONFIG).catch(console.error);
+
+    ```
+  </TabItem>
+</Tabs>
+
+### ウェブターミナルで接続する \{#connect-with-web-terminal\}
+
+Daytona はサンドボックスを操作するための[ウェブターミナル](/docs/ja/web-terminal)を提供しており、これを使って OpenVPN をインストールし、OpenVPN ネットワークに接続できます。
+
+1. [Daytona Dashboard ↗](https://app.daytona.io/) で Terminal アイコン `>_` をクリックしてサンドボックスの[ウェブターミナル](/docs/ja/web-terminal)にアクセスするか、[SSH 経由でアクセス](/docs/ja/ssh-access)します
+
+2. OpenVPN と tmux をインストールします
+
+```bash
+sudo apt update && sudo apt install -y openvpn tmux
+```
+
+3. Daytona サンドボックス用の OpenVPN クライアント構成ファイル（[client configuration file](#client-configuration-file)）を作成します
+
+```bash
+sudo nano client.ovpn
+```
+
+4. `Ctrl+O` を押してファイルを保存し、`Enter` を押した後、`Ctrl+X` を押して終了します
+
+Daytona は、サンドボックスを OpenVPN ネットワークに接続するために、OpenVPN トンネルがバックグラウンドで動作している必要があります。推奨される方法は、デタッチした tmux（または同様のもの）のセッションで実行することです。
+
+5. バックグラウンドの tmux セッションで OpenVPN トンネルを起動します
+
+```bash
+tmux new -d -s openvpn 'sudo openvpn client.ovpn'
+```
+
+これにより、バックグラウンドで実行される tmux セッション内で OpenVPN トンネルが開始され、サンドボックスから切断してもセッションは維持されます。
+
+6. 次のコマンドを実行して、OpenVPN 接続を確認します
+
+```bash
+curl ifconfig.me
+```
+
+これにより、OpenVPN ネットワークに接続されているサンドボックスの IP アドレスが返されます。
+
+これで、Daytona サンドボックスが OpenVPN ネットワークに正常に接続されました。
