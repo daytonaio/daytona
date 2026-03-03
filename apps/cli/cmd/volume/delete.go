@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var forceFlag bool
+
 var DeleteCmd = &cobra.Command{
 	Use:     "delete [VOLUME_ID]",
 	Short:   "Delete a volume",
@@ -26,7 +28,7 @@ var DeleteCmd = &cobra.Command{
 			return err
 		}
 
-		res, err := apiClient.VolumesAPI.DeleteVolume(ctx, args[0]).Execute()
+		res, err := apiClient.VolumesAPI.DeleteVolume(ctx, args[0]).Force(forceFlag).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -34,4 +36,8 @@ var DeleteCmd = &cobra.Command{
 		view_common.RenderInfoMessageBold(fmt.Sprintf("Volume %s deleted", args[0]))
 		return nil
 	},
+}
+
+func init() {
+	DeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force deletion of volume even if it contains data or is in error state")
 }

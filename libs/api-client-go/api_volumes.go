@@ -212,11 +212,18 @@ type VolumesAPIDeleteVolumeRequest struct {
 	ApiService VolumesAPI
 	volumeId string
 	xDaytonaOrganizationID *string
+	force                  *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r VolumesAPIDeleteVolumeRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) VolumesAPIDeleteVolumeRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Force deletion of volume even if it contains data
+func (r VolumesAPIDeleteVolumeRequest) Force(force bool) VolumesAPIDeleteVolumeRequest {
+	r.force = &force
 	return r
 }
 
@@ -259,6 +266,9 @@ func (a *VolumesAPIService) DeleteVolumeExecute(r VolumesAPIDeleteVolumeRequest)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
