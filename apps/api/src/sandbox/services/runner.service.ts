@@ -46,6 +46,7 @@ import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Injectable()
 export class RunnerService {
@@ -375,10 +376,10 @@ export class RunnerService {
 
   async updateRunnerHealth(
     runnerId: string,
-    serviceHealth?: Array<{ serviceName: string; healthy: boolean; error?: string }>,
     domain?: string,
     apiUrl?: string,
     proxyUrl?: string,
+    serviceHealth?: RunnerServiceInfo[],
     metrics?: {
       currentCpuLoadAverage?: number
       currentCpuUsagePercentage?: number
@@ -433,15 +434,14 @@ export class RunnerService {
 
     const unhealthyServices = serviceHealth?.filter((s) => !s.healthy) ?? []
     if (unhealthyServices.length > 0) {
-      for (const s of unhealthyServices) {
-        this.logger.warn(
-          `Runner ${runnerId} service "${s.serviceName}" reported unhealthy` + (s.error ? `: ${s.error}` : ''),
-        )
-      }
+      const unhealthySummary = unhealthyServices
+        .map((s) => `"${s.serviceName}"${s.errorReason ? ` (${s.errorReason})` : ''}`)
+        .join(', ')
+      this.logger.warn(`Runner ${runnerId} services reported unhealthy: ${unhealthySummary}`)
       updateData.state = RunnerState.UNRESPONSIVE
     }
 
-    if (updateData.state === RunnerState.READY && metrics) {
+    if (metrics) {
       updateData.currentCpuLoadAverage = metrics.currentCpuLoadAverage || 0
       updateData.currentCpuUsagePercentage = metrics.currentCpuUsagePercentage || 0
       updateData.currentMemoryUsagePercentage = metrics.currentMemoryUsagePercentage || 0
@@ -571,10 +571,10 @@ export class RunnerService {
 
                   await this.updateRunnerHealth(
                     runner.id,
-                    [{ serviceName: 'runner', healthy: true }], // v0 runners don't report service health directly; reachability implies healthy
                     undefined,
                     undefined,
                     undefined,
+                    runnerInfo?.serviceHealth,
                     runnerInfo?.metrics,
                     runnerInfo?.appVersion,
                   )

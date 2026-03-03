@@ -218,6 +218,7 @@ func run() int {
 	metricsCollector.Start(ctx)
 
 	_, err = runner.GetInstance(&runner.RunnerInstanceConfig{
+		Logger:             logger,
 		StatesCache:        statesCache,
 		SnapshotErrorCache: cache.NewSnapshotErrorCache(ctx, cfg.SnapshotErrorCacheRetention),
 		Docker:             dockerClient,

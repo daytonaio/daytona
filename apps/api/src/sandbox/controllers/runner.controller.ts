@@ -364,10 +364,10 @@ export class RunnerController {
   ): Promise<void> {
     await this.runnerService.updateRunnerHealth(
       runnerContext.runnerId,
-      healthcheck.serviceHealth,
       healthcheck.domain,
       healthcheck.apiUrl,
       healthcheck.proxyUrl,
+      healthcheck.serviceHealth,
       healthcheck.metrics,
       healthcheck.appVersion,
     )

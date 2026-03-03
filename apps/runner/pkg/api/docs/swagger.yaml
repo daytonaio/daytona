@@ -235,6 +235,10 @@ definitions:
         type: string
       metrics:
         $ref: '#/definitions/RunnerMetrics'
+      serviceHealth:
+        items:
+          $ref: '#/definitions/RunnerServiceInfo'
+        type: array
     type: object
   RunnerMetrics:
     properties:
@@ -256,6 +260,15 @@ definitions:
         type: integer
       currentStartedSandboxes:
         type: integer
+    type: object
+  RunnerServiceInfo:
+    properties:
+      errorReason:
+        type: string
+      healthy:
+        type: boolean
+      serviceName:
+        type: string
     type: object
   SandboxInfoResponse:
     properties:
