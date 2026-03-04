@@ -19,6 +19,7 @@ env:
   DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
   DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
+  GONOSUMDB: github.com/daytonaio/daytona
 
 jobs:
   publish:
