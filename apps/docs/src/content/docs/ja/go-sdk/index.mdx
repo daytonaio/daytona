@@ -1,0 +1,82 @@
+---
+title: Go SDK リファレンス
+description: Go SDK を使用して Daytona サンドボックスを操作する
+next: /docs/go-sdk/daytona
+---
+
+Daytona Go SDK は、プログラムから Daytona サンドボックスを操作するための強力なインターフェースを提供します。
+
+## インストール \{#installation\}
+
+`go get` コマンドを使用して Daytona の Go SDK をインストールします：
+
+```bash
+go get github.com/daytonaio/daytona/libs/sdk-go
+```
+
+## はじめに \{#getting-started\}
+
+### サンドボックスの作成 \{#create-a-sandbox\}
+
+Daytona サンドボックスを作成し、コードを隔離された安全な環境で実行します。以下のスニペットは、Daytona サンドボックス内で安全に実行される「Hello World」プログラムの例です。
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+)
+
+func main() {
+	// SDKを初期化(デフォルトで環境変数を使用)
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// 新しいサンドボックスを作成
+	sandbox, err := client.Create(context.Background(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// コマンドを実行
+	response, err := sandbox.Process.ExecuteCommand(context.Background(), "echo 'Hello, World!'")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(response.Result)
+}
+```
+
+## 設定 \{#configuration\}
+
+Daytona SDK は、環境変数を使用するか、コンストラクターにオプションを渡して設定できます。
+
+```go
+package main
+
+import (
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	// 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+	client, _ := daytona.NewClient()
+
+	// 明示的な設定を使用
+	config := &types.DaytonaConfig{
+		APIKey: "YOUR_API_KEY",
+		APIUrl: "https://app.daytona.io/api",
+		Target: "us",
+	}
+	client, _ = daytona.NewClientWithConfig(config)
+}
+```
+
+Daytona SDK の設定方法の詳細については、[設定](/docs/ja/configuration) を参照してください。
