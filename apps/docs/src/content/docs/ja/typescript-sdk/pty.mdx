@@ -1,0 +1,41 @@
+---
+title: "Pty"
+hideTitleOnPage: true
+---
+
+## PtyConnectOptions \{#ptyconnectoptions\}
+
+PTY セッションへの接続オプション
+
+**プロパティ**:
+
+* `onData()` *(data: Uint8Array) =&gt; void | Promise&lt;void&gt;* - PTY の出力データを処理するコールバック
+
+  **パラメータ**:
+
+  * `data` *Uint8Array*
+
+  ##### 戻り値 \{#returns\}
+
+  `void` | `Promise<void>`
+
+## PtyCreateOptions \{#ptycreateoptions\}
+
+PTY セッションを作成するためのオプション
+
+**プロパティ**:
+
+* `cols?` *number* - 端末の列数
+* `cwd?` *string* - PTY セッションの開始ディレクトリ。既定はサンドボックスの作業ディレクトリ
+* `envs?` *Record&lt;string, string&gt;* - PTY セッションの環境変数
+* `id` *string* - PTY セッションの一意の識別子
+* `rows?` *number* - 端末の行数
+
+## PtyResult \{#ptyresult\}
+
+終了時の PTY セッションの結果
+
+**プロパティ**:
+
+* `error?` *string* - PTY が失敗した場合のエラーメッセージ
+* `exitCode?` *number* - PTY プロセス終了時の終了コード
