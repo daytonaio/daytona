@@ -102,7 +102,7 @@ func (c *Collector) Collect(ctx context.Context) (*Metrics, error) {
 		case <-timeoutCtx.Done():
 			return nil, errors.New("timeout collecting metrics")
 		default:
-			metrics, err := c.collect(ctx)
+			metrics, err := c.collect(timeoutCtx)
 			if err != nil {
 				c.log.DebugContext(ctx, "Failed to collect metrics", "error", err)
 				time.Sleep(1 * time.Second)
