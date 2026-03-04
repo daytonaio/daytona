@@ -1,0 +1,190 @@
+---
+title: "設定"
+hideTitleOnPage: true
+---
+
+## Config \{#config\}
+
+新しい Daytona::Config オブジェクトを表すメインクラスです。
+
+### コンストラクター \{#constructors\}
+
+#### new Config() \{#new-config\}
+
+```ruby
+def initialize(api_key:, jwt_token:, api_url:, organization_id:, target:, _experimental:)
+
+```
+
+新しい Daytona::Config オブジェクトを初期化します。
+
+**パラメーター**:
+
+* `api_key` *String, nil* - Daytona の API キー。デフォルトは ENV[&#39;DAYTONA&#95;API&#95;KEY&#39;] です。
+* `jwt_token` *String, nil* - Daytona の JWT トークン。デフォルトは ENV[&#39;DAYTONA&#95;JWT&#95;TOKEN&#39;] です。
+* `api_url` *String, nil* - Daytona の API URL。デフォルトは ENV[&#39;DAYTONA&#95;API&#95;URL&#39;] または Daytona::Config::API&#95;URL です。
+* `organization_id` *String, nil* - Daytona の組織 ID。デフォルトは ENV[&#39;DAYTONA&#95;ORGANIZATION&#95;ID&#39;] です。
+* `target` *String, nil* - Daytona のターゲット。デフォルトは ENV[&#39;DAYTONA&#95;TARGET&#39;] です。
+* `_experimental` *Hash, nil* - 実験的な設定オプション。
+
+**戻り値**:
+
+* `Config` - 新しい Config インスタンス
+
+### メソッド \{#methods\}
+
+#### api_key() \{#api_key\}
+
+```ruby
+def api_key()
+
+```
+
+Daytona API での認証に使用する API キー
+
+**戻り値**:
+
+* `String, nil` - Daytona API キー
+
+#### api_key=() \{#api_key\}
+
+```ruby
+def api_key=(value)
+
+```
+
+Daytona API との認証に使用する API キー
+
+**戻り値**:
+
+* `String, nil` - Daytona API キー
+
+#### jwt_token() \{#jwt_token\}
+
+```ruby
+def jwt_token()
+
+```
+
+Daytona API への認証に使用する JWT トークン
+
+**戻り値**:
+
+* `String, nil` - Daytona の JWT トークン
+
+#### jwt_token=() \{#jwt_token\}
+
+```ruby
+def jwt_token=(value)
+
+```
+
+Daytona API の認証に使用する JWT トークン
+
+**返り値**:
+
+* `String, nil` - Daytona の JWT トークン
+
+#### api_url() \{#api_url\}
+
+```ruby
+def api_url()
+
+```
+
+Daytona API の URL
+
+**戻り値**:
+
+* `String, nil` - Daytona API の URL
+
+#### api_url=() \{#api_url\}
+
+```ruby
+def api_url=(value)
+
+```
+
+Daytona API の URL
+
+**戻り値**:
+
+* `String, nil` - Daytona API の URL
+
+#### organization_id() \{#organization_id\}
+
+```ruby
+def organization_id()
+
+```
+
+Daytona API との認証に使用する組織 ID
+
+**戻り値**:
+
+* `String, nil` - Daytona API URL
+
+#### organization_id=() \{#organization_id\}
+
+```ruby
+def organization_id=(value)
+
+```
+
+Daytona API での認証に使用する組織 ID
+
+**戻り値**:
+
+* `String, nil` - Daytona API URL
+
+#### target() \{#target\}
+
+```ruby
+def target()
+
+```
+
+サンドボックス用のターゲット環境
+
+**戻り値**:
+
+* `String, nil` - Daytona のターゲット
+
+#### target=() \{#target\}
+
+```ruby
+def target=(value)
+
+```
+
+サンドボックス用のターゲット環境
+
+**戻り値**:
+
+* `String, nil` - Daytona のターゲット
+
+#### _experimental() \{#_experimental\}
+
+```ruby
+def _experimental()
+
+```
+
+実験的な設定オプション
+
+**戻り値**:
+
+* `Hash, nil` - 実験的な設定用ハッシュ
+
+#### _experimental=() \{#_experimental\}
+
+```ruby
+def _experimental=(value)
+
+```
+
+実験的設定オプション
+
+**戻り値**:
+
+* `Hash, nil` - 実験的設定を表すハッシュ
