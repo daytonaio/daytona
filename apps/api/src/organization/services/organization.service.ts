@@ -190,6 +190,8 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
       updateDto.sandboxCreateRateLimitTtlSeconds ?? organization.sandboxCreateRateLimitTtlSeconds
     organization.sandboxLifecycleRateLimitTtlSeconds =
       updateDto.sandboxLifecycleRateLimitTtlSeconds ?? organization.sandboxLifecycleRateLimitTtlSeconds
+    organization.snapshotDeactivationTimeoutMinutes =
+      updateDto.snapshotDeactivationTimeoutMinutes ?? organization.snapshotDeactivationTimeoutMinutes
 
     await this.organizationRepository.save(organization)
   }
