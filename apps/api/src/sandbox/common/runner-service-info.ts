@@ -4,7 +4,7 @@
  */
 
 export type RunnerServiceInfo = {
-  serviceName?: string
-  healthy?: boolean
+  serviceName: string
+  healthy: boolean
   errorReason?: string
 }

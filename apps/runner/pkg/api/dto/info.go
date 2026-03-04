@@ -16,8 +16,8 @@ type RunnerMetrics struct {
 } //	@name	RunnerMetrics
 
 type RunnerServiceInfo struct {
-	ServiceName string  `json:"serviceName"`
-	Healthy     bool    `json:"healthy"`
+	ServiceName string  `json:"serviceName" validate:"required"`
+	Healthy     bool    `json:"healthy" validate:"required"`
 	ErrorReason *string `json:"errorReason,omitempty"`
 } // @name RunnerServiceInfo
 

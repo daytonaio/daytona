@@ -1850,6 +1850,10 @@ const docTemplate = `{
         },
         "RunnerServiceInfo": {
             "type": "object",
+            "required": [
+                "healthy",
+                "serviceName"
+            ],
             "properties": {
                 "errorReason": {
                     "type": "string"

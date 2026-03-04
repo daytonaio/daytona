@@ -269,6 +269,9 @@ definitions:
         type: boolean
       serviceName:
         type: string
+    required:
+      - healthy
+      - serviceName
     type: object
   SandboxInfoResponse:
     properties:

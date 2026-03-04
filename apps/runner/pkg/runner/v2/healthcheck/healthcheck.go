@@ -55,8 +55,13 @@ func NewService(cfg *HealthcheckServiceConfig) (*Service, error) {
 		return nil, fmt.Errorf("docker client is required for healthcheck service")
 	}
 
+	logger := slog.Default()
+	if cfg.Logger != nil {
+		logger = cfg.Logger
+	}
+
 	return &Service{
-		log:        cfg.Logger.With(slog.String("component", "healthcheck")),
+		log:        logger.With(slog.String("component", "healthcheck")),
 		client:     apiClient,
 		interval:   cfg.Interval,
 		timeout:    cfg.Timeout,

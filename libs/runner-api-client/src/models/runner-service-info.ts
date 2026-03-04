@@ -31,12 +31,12 @@ export interface RunnerServiceInfo {
      * @type {boolean}
      * @memberof RunnerServiceInfo
      */
-    'healthy'?: boolean;
+    'healthy': boolean;
     /**
      * 
      * @type {string}
      * @memberof RunnerServiceInfo
      */
-    'serviceName'?: string;
+    'serviceName': string;
 }
 

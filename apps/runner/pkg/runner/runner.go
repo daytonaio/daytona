@@ -52,8 +52,13 @@ func GetInstance(config *RunnerInstanceConfig) (*Runner, error) {
 			return nil, errors.New("runner instance not initialized and no config provided")
 		}
 
+		logger := slog.Default()
+		if config.Logger != nil {
+			logger = config.Logger
+		}
+
 		runner = &Runner{
-			Logger:             config.Logger.With(slog.String("component", "runner")),
+			Logger:             logger.With(slog.String("component", "runner")),
 			StatesCache:        config.StatesCache,
 			SnapshotErrorCache: config.SnapshotErrorCache,
 			Docker:             config.Docker,
