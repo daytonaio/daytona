@@ -39,11 +39,6 @@ export class WebhookController {
     description: 'App Portal access generated successfully',
     type: WebhookAppPortalAccessDto,
   })
-  @Audit({
-    action: AuditAction.GET_WEBHOOK_APP_PORTAL_ACCESS,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-  })
   async getAppPortalAccess(@Param('organizationId') organizationId: string): Promise<WebhookAppPortalAccessDto> {
     return this.webhookService.getAppPortalAccess(organizationId)
   }
