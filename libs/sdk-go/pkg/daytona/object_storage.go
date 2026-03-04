@@ -70,12 +70,14 @@ func NewObjectStorage(config objectStorageConfig) *objectStorage {
 		aws.ToString(sessionToken),
 	)
 
-	// Create S3 client
+	// s3proxy does not implement AWS SDK v2 checksum headers — suppress unless required by protocol.
 	client := s3.New(s3.Options{
-		Region:       region,
-		Credentials:  creds,
-		BaseEndpoint: aws.String(config.EndpointURL),
-		UsePathStyle: true,
+		Region:                     region,
+		Credentials:                creds,
+		BaseEndpoint:               aws.String(config.EndpointURL),
+		UsePathStyle:               true,
+		RequestChecksumCalculation: aws.RequestChecksumCalculationWhenRequired,
+		ResponseChecksumValidation: aws.ResponseChecksumValidationWhenRequired,
 	})
 
 	return &objectStorage{

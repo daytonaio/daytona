@@ -26,12 +26,16 @@ module Daytona
     def initialize(endpoint_url:, aws_access_key_id:, aws_secret_access_key:, aws_session_token:, # rubocop:disable Metrics/ParameterLists
                    bucket_name: DEFAULT_BUCKET_NAME, region: DEFAULT_REGION)
       @bucket_name = bucket_name
+      # s3proxy requires path-style addressing and does not implement AWS SDK checksum headers.
       @s3_client = Aws::S3::Client.new(
         region:,
         endpoint: endpoint_url,
         access_key_id: aws_access_key_id,
         secret_access_key: aws_secret_access_key,
-        session_token: aws_session_token
+        session_token: aws_session_token,
+        force_path_style: true,
+        request_checksum_calculation: 'when_required',
+        response_checksum_validation: 'when_required'
       )
     end
 

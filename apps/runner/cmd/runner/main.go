@@ -159,6 +159,7 @@ func run() int {
 		VolumeCleanupExclusionPeriod: cfg.VolumeCleanupExclusionPeriod,
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
+		VolumeMountDriver:            cfg.VolumeMountDriver,
 	})
 	if err != nil {
 		logger.Error("Error creating Docker client wrapper", "error", err)
