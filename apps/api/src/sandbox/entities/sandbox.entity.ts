@@ -11,7 +11,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Unique,
   UpdateDateColumn,
 } from 'typeorm'
@@ -48,7 +48,7 @@ import { SandboxLastActivity } from './sandbox-last-activity.entity'
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
-  @PrimaryColumn({ default: () => 'uuid_generate_v4()' })
+  @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({
