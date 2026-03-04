@@ -41,9 +41,10 @@ class AuditLog(BaseModel):
     user_agent: Optional[StrictStr] = Field(default=None, serialization_alias="userAgent")
     source: Optional[StrictStr] = None
     metadata: Optional[Dict[str, Any]] = None
+    duration: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Duration of the request in milliseconds")
     created_at: datetime = Field(serialization_alias="createdAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "actorId", "actorEmail", "organizationId", "action", "targetType", "targetId", "statusCode", "errorMessage", "ipAddress", "userAgent", "source", "metadata", "createdAt"]
+    __properties: ClassVar[List[str]] = ["id", "actorId", "actorEmail", "organizationId", "action", "targetType", "targetId", "statusCode", "errorMessage", "ipAddress", "userAgent", "source", "metadata", "duration", "createdAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -116,6 +117,7 @@ class AuditLog(BaseModel):
             "user_agent": obj.get("userAgent"),
             "source": obj.get("source"),
             "metadata": obj.get("metadata"),
+            "duration": obj.get("duration"),
             "created_at": obj.get("createdAt")
         })
         # store additional fields in additional_properties

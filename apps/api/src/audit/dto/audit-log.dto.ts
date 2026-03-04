@@ -50,6 +50,9 @@ export class AuditLogDto {
   })
   metadata?: AuditLogMetadata
 
+  @ApiPropertyOptional({ description: 'Duration of the request in milliseconds' })
+  duration?: number
+
   @ApiProperty()
   createdAt: Date
 
@@ -68,6 +71,7 @@ export class AuditLogDto {
       userAgent: auditLog.userAgent,
       source: auditLog.source,
       metadata: auditLog.metadata,
+      duration: auditLog.duration,
       createdAt: auditLog.createdAt,
     }
   }

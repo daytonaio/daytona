@@ -99,6 +99,12 @@ export interface AuditLog {
      */
     'metadata'?: { [key: string]: any; };
     /**
+     * Duration of the request in milliseconds
+     * @type {number}
+     * @memberof AuditLog
+     */
+    'duration'?: number;
+    /**
      * 
      * @type {Date}
      * @memberof AuditLog
