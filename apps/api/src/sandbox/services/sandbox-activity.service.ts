@@ -19,7 +19,7 @@ import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 
 const REDIS_ACTIVITY_KEY = 'sandbox:activity'
-const ACTIVITY_THROTTLE_TTL = 45
+const ACTIVITY_THROTTLE_TTL = 5
 const FLUSH_BATCH_SIZE = 1000
 
 @Injectable()
