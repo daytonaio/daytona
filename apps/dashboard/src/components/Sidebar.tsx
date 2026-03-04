@@ -20,6 +20,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
+import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
@@ -47,12 +48,14 @@ import {
   LogOut,
   Mail,
   MapPinned,
+  MoonIcon,
   PackageOpen,
   SearchIcon,
   Server,
   Settings,
   Slack,
   SquareUserRound,
+  SunIcon,
   TextSearch,
   Users,
 } from 'lucide-react'
@@ -61,11 +64,16 @@ import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
-import { usePylonCommands } from './usePylonCommands'
-import { Button } from './ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
+import { usePylonCommands } from './usePylonCommands'
 
 interface SidebarProps {
   isBannerVisible: boolean
@@ -102,6 +110,7 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const posthog = usePostHog()
+  const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
   const sidebar = useSidebar()
@@ -465,40 +474,41 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.ACCOUNT_SETTINGS}>
-                      <Settings className="w-4 h-4" />
-                      Account Settings
-                    </Link>
-                  </Button>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.ACCOUNT_SETTINGS}>
+                    <Settings className="size-4" />
+                    Account Settings
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.USER_INVITATIONS}>
-                      <Mail className="w-4 h-4" />
-                      Invitations
-                      {organizationInvitationsCount > 0 && (
-                        <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
-                          {organizationInvitationsCount}
-                        </span>
-                      )}
-                    </Link>
-                  </Button>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
+                  {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.ONBOARDING}>
-                      <ListChecks className="w-4 h-4" />
-                      Onboarding
-                    </Link>
-                  </Button>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.USER_INVITATIONS}>
+                    <Mail className="size-4" />
+                    Invitations
+                    {organizationInvitationsCount > 0 && (
+                      <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
+                        {organizationInvitationsCount}
+                      </span>
+                    )}
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4" />
-                    Sign out
-                  </Button>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.ONBOARDING}>
+                    <ListChecks className="size-4" />
+                    Onboarding
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
+                  <LogOut className="size-4" />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
