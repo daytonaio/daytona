@@ -1,0 +1,346 @@
+---
+title: "画像"
+hideTitleOnPage: true
+---
+
+## Image \{#image\}
+
+Daytona サンドボックス用のイメージ定義を表します。
+このクラスのインスタンスを直接生成しないでください。代わりに、`Image.base()`、`Image.debian_slim()`、`Image.from_dockerfile()` などの静的ファクトリーメソッドのいずれかを使用してください。
+
+### コンストラクタ \{#constructors\}
+
+#### new Image() \{#new-image\}
+
+```ruby
+def initialize(dockerfile:, context_list:)
+
+```
+
+**パラメーター**:
+
+* `dockerfile` *String, nil* - Dockerfile の内容
+* `context_list` *Array&lt;Context&gt;* - コンテキストファイルのリスト
+
+**戻り値**:
+
+* `Image` - 新しい Image インスタンス
+
+### メソッド \{#methods\}
+
+#### dockerfile() \{#dockerfile\}
+
+```ruby
+def dockerfile()
+
+```
+
+**戻り値**:
+
+* `String, nil` - イメージ向けに生成された Dockerfile
+
+#### context_list() \{#context_list\}
+
+```ruby
+def context_list()
+
+```
+
+**戻り値**:
+
+* `Array\<Context\>` - 画像用のコンテキストファイルのリスト
+
+#### pip_install() \{#pip_install\}
+
+```ruby
+def pip_install(*packages, find_links:, index_url:, extra_index_urls:, pre:, extra_options:)
+
+```
+
+pip でパッケージをインストールするコマンドを追加します
+
+**Parameters**:
+
+* `packages` *Array&lt;String&gt;* - インストールするパッケージ
+* `find_links` *Array&lt;String&gt;, nil* - 使用する find-links
+* `index_url` *String, nil* - 使用するインデックス URL
+* `extra_index_urls` *Array&lt;String&gt;, nil* - 使用する追加インデックス URL
+* `pre` *Boolean* - プレリリースパッケージをインストールするかどうか
+* `extra_options` *String* - pip に渡す追加オプション
+
+**Returns**:
+
+* `Image` - pip install コマンドが追加された Image
+
+**Examples:**
+
+```ruby
+image = Image.debian_slim("3.12").pip_install("requests", "pandas")
+
+```
+
+#### pip_install_from_requirements() \{#pip_install_from_requirements\}
+
+```ruby
+def pip_install_from_requirements(requirements_txt, find_links:, index_url:, extra_index_urls:, pre:, extra_options:)
+
+```
+
+requirements.txt ファイルから依存関係をインストールします
+
+**パラメーター**:
+
+* `requirements_txt` *String* - requirements.txt ファイルへのパス
+* `find_links` *Array&lt;String&gt;, nil* - 使用する find-links オプション
+* `index_url` *String, nil* - 使用するインデックス URL
+* `extra_index_urls` *Array&lt;String&gt;, nil* - 使用する追加のインデックス URL
+* `pre` *Boolean* - プレリリースパッケージをインストールするかどうか
+* `extra_options` *String* - pip に渡す追加オプション
+
+**戻り値**:
+
+* `Image` - pip install コマンドが追加された Image
+
+**発生する例外**:
+
+* `Sdk:Error` - requirements.txt ファイルが存在しない場合
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.txt")
+
+```
+
+#### pip_install_from_pyproject() \{#pip_install_from_pyproject\}
+
+```ruby
+def pip_install_from_pyproject(pyproject_toml, optional_dependencies:, find_links:, index_url:, extra_index_url:, pre:, extra_options:)
+
+```
+
+pyproject.toml ファイルから依存関係をインストールします
+
+**パラメーター**:
+
+* `pyproject_toml` *String* - pyproject.toml ファイルへのパス
+* `optional_dependencies` *Array&lt;String&gt;* - インストールする任意の依存関係
+* `find_links` *String, nil* - 使用する find-links の値
+* `index_url` *String, nil* - 使用するインデックス URL
+* `extra_index_url` *String, nil* - 使用する追加インデックス URL
+* `pre` *Boolean* - プレリリースパッケージをインストールするかどうか
+* `extra_options` *String* - pip に渡す追加オプション
+
+**戻り値**:
+
+* `Image` - pip install コマンドが追加された `Image`
+
+**例外**:
+
+* `Sdk:Error` - pyproject.toml の解析がサポートされていない場合
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").pip_install_from_pyproject("pyproject.toml", optional_dependencies: ["dev"])
+
+```
+
+#### add_local_file() \{#add_local_file\}
+
+```ruby
+def add_local_file(local_path, remote_path)
+
+```
+
+ローカルファイルをイメージに追加します
+
+**パラメータ**:
+
+* `local_path` *String* - ローカルファイルのパス
+* `remote_path` *String* - イメージ内のファイルパス
+
+**戻り値**:
+
+* `Image` - ローカルファイルが追加されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/package.json")
+
+```
+
+#### add_local_dir() \{#add_local_dir\}
+
+```ruby
+def add_local_dir(local_path, remote_path)
+
+```
+
+イメージにローカルディレクトリを追加します。
+
+**パラメータ**:
+
+* `local_path` *String* - ローカルディレクトリのパス
+* `remote_path` *String* - イメージ内のディレクトリのパス
+
+**戻り値**:
+
+* `Image` - ローカルディレクトリが追加されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").add_local_dir("src", "/home/daytona/src")
+
+```
+
+#### run_commands() \{#run_commands\}
+
+```ruby
+def run_commands(*commands)
+
+```
+
+イメージでコマンドを実行します
+
+**パラメータ**:
+
+* `commands` *Array&lt;String&gt;* - 実行するコマンドの配列
+
+**戻り値**:
+
+* `Image` - コマンドが追加されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").run_commands('echo "Hello, world!"', 'echo "Hello again!"')
+
+```
+
+#### env() \{#env\}
+
+```ruby
+def env(env_vars)
+
+```
+
+イメージに環境変数を設定します。
+
+**パラメータ**:
+
+* `env_vars` *Hash&lt;String, String&gt;* - 設定する環境変数
+
+**戻り値**:
+
+* `Image` - 環境変数が追加されたイメージ
+
+**例外**:
+
+* `Sdk:Error` -
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").env({"PROJECT_ROOT" => "/home/daytona"})
+
+```
+
+#### workdir() \{#workdir\}
+
+```ruby
+def workdir(path)
+
+```
+
+イメージ内の作業ディレクトリを設定します
+
+**パラメーター**:
+
+* `path` *String* - 作業ディレクトリへのパス
+
+**戻り値**:
+
+* `Image` - 作業ディレクトリが設定されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").workdir("/home/daytona")
+
+```
+
+#### entrypoint() \{#entrypoint\}
+
+```ruby
+def entrypoint(entrypoint_commands)
+
+```
+
+イメージのエントリーポイントを設定します
+
+**パラメータ**:
+
+* `entrypoint_commands` *Array&lt;String&gt;* - エントリーポイントとして設定するコマンドの配列
+
+**戻り値**:
+
+* `Image` - エントリーポイントが設定されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
+
+```
+
+#### cmd() \{#cmd\}
+
+```ruby
+def cmd(cmd)
+
+```
+
+イメージのデフォルトコマンドを設定します
+
+**パラメーター**:
+
+* `cmd` *Array&lt;String&gt;* - デフォルトコマンドとして設定するコマンド群
+
+**戻り値**:
+
+* `Image` - デフォルトコマンドが追加されたイメージ
+
+**使用例:**
+
+```ruby
+image = Image.debian_slim("3.12").cmd(["/bin/bash"])
+
+```
+
+#### dockerfile_commands() \{#dockerfile_commands\}
+
+```ruby
+def dockerfile_commands(dockerfile_commands, context_dir:)
+
+```
+
+イメージに任意の Dockerfile 風コマンドを追加します
+
+**パラメータ**:
+
+* `dockerfile_commands` *Array&lt;String&gt;* - Dockerfile に追加するコマンド
+* `context_dir` *String, nil* - コンテキストディレクトリへのパス
+
+**戻り値**:
+
+* `Image` - Dockerfile コマンドが追加されたイメージ
+
+**例:**
+
+```ruby
+image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
+
+```
