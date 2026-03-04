@@ -3,23 +3,22 @@ title: "イメージ"
 hideTitleOnPage: true
 ---
 
-
-## Image
+## Image \{#image\}
 
 Daytona のサンドボックス用イメージ定義を表します。
 このクラスを直接インスタンス化しないでください。代わりに `Image.base()`、`Image.debianSlim()`、`Image.fromDockerfile()` などの静的ファクトリメソッドを使用してください。
 
-### Accessors
+### Accessors \{#accessors\}
 
-#### contextList
+#### contextList \{#contextlist\}
 
-##### Get Signature
+##### Get Signature \{#get-signature\}
 
 ```ts
 get contextList(): Context[]
 ```
 
-###### Returns
+###### Returns \{#returns\}
 
 `Context`[]
 
@@ -27,9 +26,9 @@ get contextList(): Context[]
 
 ***
 
-#### dockerfile
+#### dockerfile \{#dockerfile\}
 
-##### Get Signature
+##### Get Signature \{#get-signature\}
 
 ```ts
 get dockerfile(): string
@@ -37,11 +36,11 @@ get dockerfile(): string
 
 **Returns**:
 
-- `string` - Dockerfile の内容。
+* `string` - Dockerfile の内容。
 
-### Methods
+### Methods \{#methods\}
 
-#### base()
+#### base() \{#base\}
 
 ```ts
 static base(image: string): Image
@@ -51,12 +50,11 @@ static base(image: string): Image
 
 **Parameters**:
 
-- `image` _string_ - 使用するベースイメージ。
-
+* `image` *string* - 使用するベースイメージ。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -66,7 +64,7 @@ const image = Image.base('python:3.12-slim-bookworm')
 
 ***
 
-#### debianSlim()
+#### debianSlim() \{#debianslim\}
 
 ```ts
 static debianSlim(pythonVersion?: "3.9" | "3.10" | "3.11" | "3.12" | "3.13"): Image
@@ -76,12 +74,11 @@ static debianSlim(pythonVersion?: "3.9" | "3.10" | "3.11" | "3.12" | "3.13"): Im
 
 **Parameters**:
 
-- `pythonVersion?` _使用する Python のバージョン。_ - `"3.9"` | `"3.10"` | `"3.11"` | `"3.12"` | `"3.13"`
-
+* `pythonVersion?` *使用する Python のバージョン。* - `"3.9"` | `"3.10"` | `"3.11"` | `"3.12"` | `"3.13"`
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -91,7 +88,7 @@ const image = Image.debianSlim('3.12')
 
 ***
 
-#### fromDockerfile()
+#### fromDockerfile() \{#fromdockerfile\}
 
 ```ts
 static fromDockerfile(path: string): Image
@@ -101,12 +98,11 @@ static fromDockerfile(path: string): Image
 
 **Parameters**:
 
-- `path` _string_ - Dockerfile へのパス。
-
+* `path` *string* - Dockerfile へのパス。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -116,7 +112,7 @@ const image = Image.fromDockerfile('Dockerfile')
 
 ***
 
-#### addLocalDir()
+#### addLocalDir() \{#addlocaldir\}
 
 ```ts
 addLocalDir(localPath: string, remotePath: string): Image
@@ -126,13 +122,12 @@ addLocalDir(localPath: string, remotePath: string): Image
 
 **Parameters**:
 
-- `localPath` _string_ - ローカルディレクトリのパス。
-- `remotePath` _string_ - イメージ内のディレクトリのパス。
-
+* `localPath` *string* - ローカルディレクトリのパス。
+* `remotePath` *string* - イメージ内のディレクトリのパス。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -144,7 +139,7 @@ const image = Image
 
 ***
 
-#### addLocalFile()
+#### addLocalFile() \{#addlocalfile\}
 
 ```ts
 addLocalFile(localPath: string, remotePath: string): Image
@@ -154,13 +149,12 @@ addLocalFile(localPath: string, remotePath: string): Image
 
 **Parameters**:
 
-- `localPath` _string_ - ローカルファイルのパス。
-- `remotePath` _string_ - イメージ内のファイルのパス。
-
+* `localPath` *string* - ローカルファイルのパス。
+* `remotePath` *string* - イメージ内のファイルのパス。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -172,7 +166,7 @@ const image = Image
 
 ***
 
-#### cmd()
+#### cmd() \{#cmd\}
 
 ```ts
 cmd(cmd: string[]): Image
@@ -182,12 +176,11 @@ cmd(cmd: string[]): Image
 
 **Parameters**:
 
-- `cmd` _string\[\]_ - デフォルトとして設定するコマンド。
-
+* `cmd` *string[]* - デフォルトとして設定するコマンド。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -199,7 +192,7 @@ const image = Image
 
 ***
 
-#### dockerfileCommands()
+#### dockerfileCommands() \{#dockerfilecommands\}
 
 ```ts
 dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
@@ -209,13 +202,12 @@ dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
 
 **Parameters**:
 
-- `dockerfileCommands` _string\[\]_ - Dockerfile に追加するコマンド。
-- `contextDir?` _string_ - コンテキストディレクトリのパス。
-
+* `dockerfileCommands` *string[]* - Dockerfile に追加するコマンド。
+* `contextDir?` *string* - コンテキストディレクトリのパス。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -227,7 +219,7 @@ const image = Image
 
 ***
 
-#### entrypoint()
+#### entrypoint() \{#entrypoint\}
 
 ```ts
 entrypoint(entrypointCommands: string[]): Image
@@ -237,12 +229,11 @@ entrypoint(entrypointCommands: string[]): Image
 
 **Parameters**:
 
-- `entrypointCommands` _string\[\]_ - エントリーポイントとして設定するコマンド。
-
+* `entrypointCommands` *string[]* - エントリーポイントとして設定するコマンド。
 
 **Returns**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **Example:**
 
@@ -254,7 +245,7 @@ const image = Image
 
 ***
 
-#### env()
+#### env() \{#env\}
 
 ```ts
 env(envVars: Record<string, string>): Image
@@ -264,11 +255,11 @@ env(envVars: Record<string, string>): Image
 
 **パラメーター**:
 
-- `envVars` _Record\<string, string\>_ - 設定する環境変数。
+* `envVars` *Record&lt;string, string&gt;* - 設定する環境変数。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -280,7 +271,7 @@ const image = Image
 
 ***
 
-#### pipInstall()
+#### pipInstall() \{#pipinstall\}
 
 ```ts
 pipInstall(packages: string | string[], options?: PipInstallOptions): Image
@@ -290,12 +281,12 @@ pip を使用してパッケージをインストールするコマンドを追�
 
 **パラメーター**:
 
-- `packages` _インストールするパッケージ_ - `string` | `string`[]
-- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
+* `packages` *インストールするパッケージ* - `string` | `string`[]
+* `options?` *PipInstallOptions* - pip インストールコマンドのオプション。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -305,7 +296,7 @@ const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https:
 
 ***
 
-#### pipInstallFromPyproject()
+#### pipInstallFromPyproject() \{#pipinstallfrompyproject\}
 
 ```ts
 pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image
@@ -315,12 +306,12 @@ pyproject.toml ファイルから依存関係をインストールします。
 
 **パラメーター**:
 
-- `pyprojectToml` _string_ - pyproject.toml ファイルのパス。
-- `options?` _PyprojectOptions_ - pip インストールコマンドのオプション。
+* `pyprojectToml` *string* - pyproject.toml ファイルのパス。
+* `options?` *PyprojectOptions* - pip インストールコマンドのオプション。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -331,7 +322,7 @@ image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] 
 
 ***
 
-#### pipInstallFromRequirements()
+#### pipInstallFromRequirements() \{#pipinstallfromrequirements\}
 
 ```ts
 pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image
@@ -341,12 +332,12 @@ requirements.txt ファイルから依存関係をインストールします。
 
 **パラメーター**:
 
-- `requirementsTxt` _string_ - requirements.txt ファイルのパス。
-- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
+* `requirementsTxt` *string* - requirements.txt ファイルのパス。
+* `options?` *PipInstallOptions* - pip インストールコマンドのオプション。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -357,7 +348,7 @@ image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi
 
 ***
 
-#### runCommands()
+#### runCommands() \{#runcommands\}
 
 ```ts
 runCommands(...commands: (string | string[])[]): Image
@@ -367,11 +358,11 @@ runCommands(...commands: (string | string[])[]): Image
 
 **パラメーター**:
 
-- `commands` _...\(string \| string\[\]\)\[\]_ - 実行するコマンド。
+* `commands` *...(string | string[])[]* - 実行するコマンド。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -386,7 +377,7 @@ const image = Image
 
 ***
 
-#### workdir()
+#### workdir() \{#workdir\}
 
 ```ts
 workdir(dirPath: string): Image
@@ -396,11 +387,11 @@ workdir(dirPath: string): Image
 
 **パラメーター**:
 
-- `dirPath` _string_ - 作業ディレクトリのパス。
+* `dirPath` *string* - 作業ディレクトリのパス。
 
 **戻り値**:
 
-- `Image` - Image インスタンス。
+* `Image` - Image インスタンス。
 
 **例:**
 
@@ -412,54 +403,49 @@ const image = Image
 
 ***
 
-
-## コンテキスト
+## コンテキスト \{#context\}
 
 イメージに追加するコンテキストファイルを表します。
 
 **プロパティ**:
 
-- `archivePath` _string_ - オブジェクトストレージ内のアーカイブの内部パス。
-- `sourcePath` _string_ - ソースファイルまたはディレクトリへのパス。
-## PipInstallOptions
+* `archivePath` *string* - オブジェクトストレージ内のアーカイブの内部パス。
+* `sourcePath` *string* - ソースファイルまたはディレクトリへのパス。
+
+## PipInstallOptions \{#pipinstalloptions\}
 
 pip install コマンド用のオプション。
 
 **プロパティ**:
 
-- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
-- `extraOptions?` _string_ - pip install コマンドで使用する追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
-- `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
-- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
-- `pre?` _boolean_ - プレリリース版をインストールするかどうか。
-    
+* `extraIndexUrls?` *string[]* - pip install コマンドで使用する追加のインデックス URL。
+* `extraOptions?` *string* - pip install コマンドで使用する追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+* `findLinks?` *string[]* - pip install コマンドで使用する find-links。
+* `indexUrl?` *string* - pip install コマンドで使用するインデックス URL。
+* `pre?` *boolean* - プレリリース版をインストールするかどうか。
 
+### により拡張 \{#extended-by\}
 
+* `PyprojectOptions`
 
-
-### により拡張
-
-- `PyprojectOptions`
-## PyprojectOptions
+## PyprojectOptions \{#pyprojectoptions\}
 
 pyproject.toml からの pip install コマンド用オプション。
 
 **プロパティ**:
 
-- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
-    - _継承元_: `PipInstallOptions.extraIndexUrls`
-- `extraOptions?` _string_ - pip install コマンドに渡す追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
-    - _継承元_: `PipInstallOptions.extraOptions`
-- `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
-    - _継承元_: `PipInstallOptions.findLinks`
-- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
-    - _継承元_: `PipInstallOptions.indexUrl`
-- `optionalDependencies?` _string\[\]_ - 任意でインストールする依存関係。
-- `pre?` _boolean_ - プレリリース版をインストールするかどうか。
-    - _継承元_: `PipInstallOptions.pre`
+* `extraIndexUrls?` *string[]* - pip install コマンドで使用する追加のインデックス URL。
+  * *継承元*: `PipInstallOptions.extraIndexUrls`
+* `extraOptions?` *string* - pip install コマンドに渡す追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+  * *継承元*: `PipInstallOptions.extraOptions`
+* `findLinks?` *string[]* - pip install コマンドで使用する find-links。
+  * *継承元*: `PipInstallOptions.findLinks`
+* `indexUrl?` *string* - pip install コマンドで使用するインデックス URL。
+  * *継承元*: `PipInstallOptions.indexUrl`
+* `optionalDependencies?` *string[]* - 任意でインストールする依存関係。
+* `pre?` *boolean* - プレリリース版をインストールするかどうか。
+  * *継承元*: `PipInstallOptions.pre`
 
+**継承:**
 
-
-**継承:** 
-
-- `PipInstallOptions`
+* `PipInstallOptions`

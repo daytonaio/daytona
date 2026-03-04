@@ -1,0 +1,171 @@
+---
+title: "エラー"
+hideTitleOnPage: true
+---
+
+{/* gomarkdoc によって生成されたコードです。編集しないでください。 */}
+
+# エラー \{#errors\}
+
+```go
+import "github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
+```
+
+## 目次 \{#index\}
+
+* [func ConvertAPIError(err error, httpResp *http.Response) error](#ConvertAPIError)
+* [func ConvertToolboxError(err error, httpResp *http.Response) error](#ConvertToolboxError)
+* [type DaytonaError](#DaytonaError)
+  * [func NewDaytonaError(message string, statusCode int, headers http.Header) *DaytonaError](#NewDaytonaError)
+  * [func (e *DaytonaError) Error() string](#DaytonaError.Error)
+* [type DaytonaNotFoundError](#DaytonaNotFoundError)
+  * [func NewDaytonaNotFoundError(message string, headers http.Header) *DaytonaNotFoundError](#NewDaytonaNotFoundError)
+  * [func (e *DaytonaNotFoundError) Error() string](#DaytonaNotFoundError.Error)
+* [type DaytonaRateLimitError](#DaytonaRateLimitError)
+  * [func NewDaytonaRateLimitError(message string, headers http.Header) *DaytonaRateLimitError](#NewDaytonaRateLimitError)
+  * [func (e *DaytonaRateLimitError) Error() string](#DaytonaRateLimitError.Error)
+* [type DaytonaTimeoutError](#DaytonaTimeoutError)
+  * [func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError](#NewDaytonaTimeoutError)
+  * [func (e *DaytonaTimeoutError) Error() string](#DaytonaTimeoutError.Error)
+
+<a name="ConvertAPIError" />
+
+## func ConvertAPIError \{#func-convertapierror\}
+
+```go
+func ConvertAPIError(err error, httpResp *http.Response) error
+```
+
+ConvertAPIError は、api-client-go のエラーを SDK のエラー型に変換します。
+
+<a name="ConvertToolboxError" />
+
+## func ConvertToolboxError \{#func-converttoolboxerror\}
+
+```go
+func ConvertToolboxError(err error, httpResp *http.Response) error
+```
+
+ConvertToolboxError は、toolbox-api-client-go のエラーを SDK のエラー型に変換する関数です
+
+<a name="DaytonaError" />
+
+## type DaytonaError \{#type-daytonaerror\}
+
+DaytonaError は、Daytona SDK のすべてのエラーで使用される基本となるエラー型です
+
+```go
+type DaytonaError struct {
+    Message    string
+    StatusCode int
+    Headers    http.Header
+}
+```
+
+<a name="NewDaytonaError" />
+
+### func NewDaytonaError \{#func-newdaytonaerror\}
+
+```go
+func NewDaytonaError(message string, statusCode int, headers http.Header) *DaytonaError
+```
+
+NewDaytonaError は新しい DaytonaError を生成します。
+
+<a name="DaytonaError.Error" />
+
+### func (*DaytonaError) Error \{#func-daytonaerror-error\}
+
+```go
+func (e *DaytonaError) Error() string
+```
+
+<a name="DaytonaNotFoundError" />
+
+## type DaytonaNotFoundError \{#type-daytonanotfounderror\}
+
+DaytonaNotFoundError は、リソースが存在しないエラー (404) を表します
+
+```go
+type DaytonaNotFoundError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaNotFoundError" />
+
+### func NewDaytonaNotFoundError \{#func-newdaytonanotfounderror\}
+
+```go
+func NewDaytonaNotFoundError(message string, headers http.Header) *DaytonaNotFoundError
+```
+
+NewDaytonaNotFoundError は、新しい DaytonaNotFoundError を生成します
+
+<a name="DaytonaNotFoundError.Error" />
+
+### func (*DaytonaNotFoundError) Error \{#func-daytonanotfounderror-error\}
+
+```go
+func (e *DaytonaNotFoundError) Error() string
+```
+
+<a name="DaytonaRateLimitError" />
+
+## type DaytonaRateLimitError \{#type-daytonaratelimiterror\}
+
+DaytonaRateLimitError は、HTTP ステータスコード 429 のレート制限エラーを表します
+
+```go
+type DaytonaRateLimitError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaRateLimitError" />
+
+### func NewDaytonaRateLimitError \{#func-newdaytonaratelimiterror\}
+
+```go
+func NewDaytonaRateLimitError(message string, headers http.Header) *DaytonaRateLimitError
+```
+
+NewDaytonaRateLimitError は、新しい DaytonaRateLimitError を生成します
+
+<a name="DaytonaRateLimitError.Error" />
+
+### func (*DaytonaRateLimitError) Error \{#func-daytonaratelimiterror-error\}
+
+```go
+func (e *DaytonaRateLimitError) Error() string
+```
+
+<a name="DaytonaTimeoutError" />
+
+## type DaytonaTimeoutError \{#type-daytonatimeouterror\}
+
+DaytonaTimeoutError は、タイムアウトエラーを表すエラー型です
+
+```go
+type DaytonaTimeoutError struct {
+    *DaytonaError
+}
+```
+
+<a name="NewDaytonaTimeoutError" />
+
+### func NewDaytonaTimeoutError \{#func-newdaytonatimeouterror\}
+
+```go
+func NewDaytonaTimeoutError(message string) *DaytonaTimeoutError
+```
+
+NewDaytonaTimeoutError は、新しい DaytonaTimeoutError を生成します
+
+<a name="DaytonaTimeoutError.Error" />
+
+### func (*DaytonaTimeoutError) Error \{#func-daytonatimeouterror-error\}
+
+```go
+func (e *DaytonaTimeoutError) Error() string
+```
