@@ -1,0 +1,42 @@
+[package]
+name = "daytona"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/daytonaio/daytona"
+description = "Daytona SDK for Rust"
+keywords = ["daytona", "sdk", "sandbox", "dev-environment"]
+categories = ["api-bindings", "development-tools"]
+
+[dependencies]
+base64 = "0.22"
+regex = "1"
+reqwest = { version = "0.12", features = ["json", "multipart", "stream"] }
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "2.0"
+async-trait = "0.1"
+futures = "0.3"
+urlencoding = "2.1"
+# OpenTelemetry dependencies (optional)
+opentelemetry = { version = "0.28", optional = true }
+opentelemetry_sdk = { version = "0.28", features = ["rt-tokio"], optional = true }
+opentelemetry-otlp = { version = "0.28", features = ["http-proto", "reqwest-client"], optional = true }
+tracing = { version = "0.1", optional = true }
+tracing-opentelemetry = { version = "0.28", optional = true }
+
+# Image builder dependencies (optional)
+sha2 = { version = "0.10", optional = true }
+tar = { version = "0.4", optional = true }
+rust-s3 = { version = "0.35", optional = true }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []
+otel = ["opentelemetry", "opentelemetry_sdk", "opentelemetry-otlp", "tracing", "tracing-opentelemetry"]
+image-builder = ["sha2", "tar", "rust-s3"]
+full = ["otel", "image-builder"]

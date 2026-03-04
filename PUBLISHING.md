@@ -1,6 +1,6 @@
 # Publishing Daytona SDKs
 
-This document describes how to publish the Daytona SDKs (Python, TypeScript, and Ruby) to their respective package registries.
+This document describes how to publish the Daytona SDKs (Python, TypeScript, Ruby, and Rust) to their respective package registries.
 
 ## Table of Contents
 
@@ -8,6 +8,7 @@ This document describes how to publish the Daytona SDKs (Python, TypeScript, and
 - [Python SDK (PyPI)](#python-sdk-pypi)
 - [TypeScript SDK (npm)](#typescript-sdk-npm)
 - [Ruby SDK (RubyGems)](#ruby-sdk-rubygems)
+- [Rust SDK (crates.io)](#rust-sdk-cratesio)
 - [Automated Publishing (CI/CD)](#automated-publishing-cicd)
 - [Version Management](#version-management)
 
@@ -20,6 +21,7 @@ Before publishing any SDK, ensure you have:
    - PyPI: Token with upload permissions
    - npm: Token with publish permissions
    - RubyGems: API key with push permissions
+   - crates.io: API token for Cargo
 3. **Local Development Setup**:
    - All dependencies installed (`yarn install`)
    - SDKs built successfully
@@ -65,6 +67,31 @@ yarn nx publish sdk-ruby
 
 **Note**: [Guide](https://guides.rubygems.org/patterns/#prerelease-gems) for versioning Ruby gems.
 
+## Rust SDK (crates.io)
+
+### Using Nx
+
+```bash
+# From repository root
+export CARGO_REGISTRIES_CRATES_IO_TOKEN="your-crates-io-token"
+export CARGO_PKG_VERSION="X.Y.Z" # pre-release format: "X.Y.Z-alpha.1"
+yarn nx publish sdk-rust
+```
+
+**Note**: [Cargo publish guide](https://doc.rust-lang.org/cargo/reference/publishing.html) for versioning Rust crates. Pre-release versions use `MAJOR.MINOR.PATCH-PREREL.NUMBER` format.
+
+### Manual Publishing
+
+```bash
+cd libs/sdk-rust
+cargo publish
+```
+
+For dry-run:
+```bash
+cargo publish --dry-run
+```
+
 ## Automated Publishing (CI/CD)
 
 ### GitHub Actions Workflow
@@ -80,6 +107,7 @@ The repository includes a GitHub Actions workflow for automated publishing: `.gi
    - **pypi_pkg_version**: (Optional) Override PyPI version
    - **npm_pkg_version**: (Optional) Override npm version
    - **rubygems_pkg_version**: (Optional) Override RubyGems version
+   - **cargo_pkg_version**: (Optional) Override Cargo version
    - **npm_tag**: npm dist-tag (default: `latest`)
 
 #### Required Secrets
@@ -89,16 +117,16 @@ Ensure these secrets are configured in GitHub repository settings:
 - `PYPI_TOKEN`: PyPI API token
 - `NPM_TOKEN`: npm access token
 - `RUBYGEMS_API_KEY`: RubyGems API key
+- `CARGO_REGISTRIES_CRATES_IO_TOKEN`: crates.io API token
 - `GITHUBBOT_TOKEN`: GitHub token for Homebrew tap updates
 
 ### What the Workflow Does
 
 1. Checks out the code
-2. Sets up all required environments (Go, Java, Python, Node.js, Ruby)
-3. Installs dependencies
-4. Configures credentials for all package registries
-5. Runs `yarn publish` which uses Nx to publish all SDKs in the correct order
-6. Updates the Homebrew tap (for the CLI)
+2. Sets up all required environments (Go, Java, Python, Node.js, Ruby, Rust)
+3. Configures credentials for all package registries
+4. Runs `yarn publish` which uses Nx to publish all SDKs in the correct order
+5. Updates the Homebrew tap (for the CLI)
 
 ## Version Management
 
@@ -136,6 +164,13 @@ Prerelease formats depend on SDK language:
    - `0.126.0.beta.1` - Beta release
    - `0.126.0.rc.1` - Release candidate
 
+4. For **Rust** (crates.io) follow [Cargo semantic versioning](https://doc.rust-lang.org/cargo/reference/publishing.html):
+
+   For pre-releases, use:
+   - `0.126.0-alpha.1` - Alpha release
+   - `0.126.0-beta.1` - Beta release
+   - `0.126.0-rc.1` - Release candidate
+
 ### Checking Published Versions
 
 #### PyPI
@@ -160,6 +195,14 @@ npm info @daytonaio/sdk
 gem search daytona --remote --exact
 # or
 gem info daytona --remote
+```
+
+#### crates.io
+
+```bash
+cargo search daytona
+# or
+curl -s https://crates.io/api/v1/crates/daytona | jq -r .crate.max_version
 ```
 
 ## References
