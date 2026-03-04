@@ -89,8 +89,10 @@ export class SandboxActivityService {
   /**
    * Flush buffered activity timestamps from Redis to PG in bulk.
    * Runs every 60 seconds. Processes entries in batches to avoid oversized transactions.
+   *
+   * Frequency must be < 1min to prevent unintended auto-lifecycle actions.
    */
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'flush-activity-to-pg' })
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'flush-activity-to-pg' })
   @LogExecution('flush-activity-to-pg')
   @WithInstrumentation()
   async flushActivityToPg(): Promise<void> {
