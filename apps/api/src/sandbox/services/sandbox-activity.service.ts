@@ -34,7 +34,7 @@ export class SandboxActivityService {
 
   /**
    * Update last-activity for a sandbox.
-   * By default, buffers in Redis (throttled to once per 45s) and relies on the periodic flush to PG.
+   * By default, buffers in Redis (throttled to once per ACTIVITY_THROTTLE_TTL) and relies on the periodic flush to PG.
    * When `immediate` is true, writes directly to PG as well, bypassing the throttle.
    * Use immediate for state transitions where stale PG data could cause premature autostop/autoarchive.
    */
