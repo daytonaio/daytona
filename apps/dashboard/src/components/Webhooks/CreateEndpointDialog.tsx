@@ -39,7 +39,7 @@ import { z } from 'zod'
 
 const formSchema = z.object({
   url: z.string().min(1, 'URL is required').url('Must be a valid URL'),
-  description: z.string().min(1, 'Name is required'),
+  description: z.string(),
   filterTypes: z.array(z.string()).min(1, 'At least one event is required'),
 })
 

@@ -7,6 +7,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { getRelativeTimeString } from '@/lib/utils'
@@ -76,8 +77,7 @@ export function EventDetailsSheet({
         </SheetHeader>
 
         <Separator />
-
-        <div className="flex-1 min-h-0 overflow-auto">
+        <ScrollArea fade="mask" className="flex-1 min-h-0">
           <div className="flex flex-col px-5 py-4 gap-3">
             <span className="text-base font-medium">Overview</span>
             <div className="flex items-center justify-between">
@@ -181,7 +181,7 @@ export function EventDetailsSheet({
           <div className="flex flex-col px-5 py-4">
             <MessageAttemptsTable messageId={event.id} reloadKey={attemptsReloadKey} />
           </div>
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   )
