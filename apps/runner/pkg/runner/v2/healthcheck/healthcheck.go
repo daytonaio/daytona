@@ -125,7 +125,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 
 		errStr := err.Error()
 		dockerHealth.Healthy = false
-		dockerHealth.Error = &errStr
+		dockerHealth.ErrorReason = &errStr
 	}
 
 	healthcheck.SetServiceHealth([]apiclient.RunnerServiceHealth{dockerHealth})
