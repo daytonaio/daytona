@@ -427,6 +427,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
             undefined,
             undefined,
             sandboxInfo.backupErrorReason,
+            sandboxInfo.recoverable,
           )
           break
         }

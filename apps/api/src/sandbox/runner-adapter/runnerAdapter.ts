@@ -19,6 +19,7 @@ export interface RunnerSandboxInfo {
   daemonVersion?: string
   backupState?: BackupState
   backupErrorReason?: string
+  recoverable?: boolean
 }
 
 export interface RunnerSnapshotInfo {

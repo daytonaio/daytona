@@ -111,7 +111,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     return {
       state,
       backupState: sandbox.backupState,
-      backupErrorReason: sandbox.backupErrorReason,
+      backupErrorReason: sandbox.backupErrorReason ?? undefined,
+      recoverable: sandbox.recoverable,
       daemonVersion,
     }
   }

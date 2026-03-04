@@ -11,6 +11,7 @@ import (
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/common"
 )
 
 func (e *Executor) createBackup(ctx context.Context, job *apiclient.Job) (any, error) {
@@ -21,5 +22,9 @@ func (e *Executor) createBackup(ctx context.Context, job *apiclient.Job) (any, e
 	}
 
 	// TODO: is state cache needed?
-	return nil, e.docker.CreateBackup(ctx, job.ResourceId, createBackupDto)
+	err = e.docker.CreateBackup(ctx, job.ResourceId, createBackupDto)
+	if err != nil {
+		return nil, common.FormatRecoverableError(err)
+	}
+	return nil, nil
 }

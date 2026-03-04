@@ -267,6 +267,8 @@ definitions:
         $ref: '#/definitions/enums.BackupState'
       daemonVersion:
         type: string
+      recoverable:
+        type: boolean
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object
