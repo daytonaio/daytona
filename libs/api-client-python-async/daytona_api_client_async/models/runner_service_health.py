@@ -29,9 +29,9 @@ class RunnerServiceHealth(BaseModel):
     """ # noqa: E501
     service_name: StrictStr = Field(description="Name of the service being checked", serialization_alias="serviceName")
     healthy: StrictBool = Field(description="Whether the service is healthy")
-    error: Optional[StrictStr] = Field(default=None, description="Error message if the service is unhealthy")
+    error_reason: Optional[StrictStr] = Field(default=None, description="Error reason if the service is unhealthy", serialization_alias="errorReason")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["serviceName", "healthy", "error"]
+    __properties: ClassVar[List[str]] = ["serviceName", "healthy", "errorReason"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -93,7 +93,7 @@ class RunnerServiceHealth(BaseModel):
         _obj = cls.model_validate({
             "service_name": obj.get("serviceName"),
             "healthy": obj.get("healthy"),
-            "error": obj.get("error")
+            "error_reason": obj.get("errorReason")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

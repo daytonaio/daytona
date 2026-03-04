@@ -25,8 +25,8 @@ type RunnerServiceHealth struct {
 	ServiceName string `json:"serviceName"`
 	// Whether the service is healthy
 	Healthy bool `json:"healthy"`
-	// Error message if the service is unhealthy
-	Error *string `json:"error,omitempty"`
+	// Error reason if the service is unhealthy
+	ErrorReason *string `json:"errorReason,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
 
@@ -99,36 +99,36 @@ func (o *RunnerServiceHealth) SetHealthy(v bool) {
 	o.Healthy = v
 }
 
-// GetError returns the Error field value if set, zero value otherwise.
-func (o *RunnerServiceHealth) GetError() string {
-	if o == nil || IsNil(o.Error) {
+// GetErrorReason returns the ErrorReason field value if set, zero value otherwise.
+func (o *RunnerServiceHealth) GetErrorReason() string {
+	if o == nil || IsNil(o.ErrorReason) {
 		var ret string
 		return ret
 	}
-	return *o.Error
+	return *o.ErrorReason
 }
 
-// GetErrorOk returns a tuple with the Error field value if set, nil otherwise
+// GetErrorReasonOk returns a tuple with the ErrorReason field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RunnerServiceHealth) GetErrorOk() (*string, bool) {
-	if o == nil || IsNil(o.Error) {
+func (o *RunnerServiceHealth) GetErrorReasonOk() (*string, bool) {
+	if o == nil || IsNil(o.ErrorReason) {
 		return nil, false
 	}
-	return o.Error, true
+	return o.ErrorReason, true
 }
 
-// HasError returns a boolean if a field has been set.
-func (o *RunnerServiceHealth) HasError() bool {
-	if o != nil && !IsNil(o.Error) {
+// HasErrorReason returns a boolean if a field has been set.
+func (o *RunnerServiceHealth) HasErrorReason() bool {
+	if o != nil && !IsNil(o.ErrorReason) {
 		return true
 	}
 
 	return false
 }
 
-// SetError gets a reference to the given string and assigns it to the Error field.
-func (o *RunnerServiceHealth) SetError(v string) {
-	o.Error = &v
+// SetErrorReason gets a reference to the given string and assigns it to the ErrorReason field.
+func (o *RunnerServiceHealth) SetErrorReason(v string) {
+	o.ErrorReason = &v
 }
 
 func (o RunnerServiceHealth) MarshalJSON() ([]byte, error) {
@@ -143,8 +143,8 @@ func (o RunnerServiceHealth) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["serviceName"] = o.ServiceName
 	toSerialize["healthy"] = o.Healthy
-	if !IsNil(o.Error) {
-		toSerialize["error"] = o.Error
+	if !IsNil(o.ErrorReason) {
+		toSerialize["errorReason"] = o.ErrorReason
 	}
 
 	for key, value := range o.AdditionalProperties {
@@ -192,7 +192,7 @@ func (o *RunnerServiceHealth) UnmarshalJSON(data []byte) (err error) {
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "serviceName")
 		delete(additionalProperties, "healthy")
-		delete(additionalProperties, "error")
+		delete(additionalProperties, "errorReason")
 		o.AdditionalProperties = additionalProperties
 	}
 

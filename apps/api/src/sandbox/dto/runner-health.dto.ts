@@ -111,12 +111,12 @@ export class RunnerServiceHealthDto {
   healthy: boolean
 
   @ApiPropertyOptional({
-    description: 'Error message if the service is unhealthy',
+    description: 'Error reason if the service is unhealthy',
     example: 'Cannot connect to the runner',
   })
   @IsOptional()
   @IsString()
-  error?: string
+  errorReason?: string
 }
 
 @ApiSchema({ name: 'RunnerHealthcheck' })

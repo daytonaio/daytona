@@ -18,7 +18,7 @@ type RunnerMetrics struct {
 type RunnerServiceInfo struct {
 	ServiceName string  `json:"serviceName"`
 	Healthy     bool    `json:"healthy"`
-	ErrorReason *string `json:"errorReason"`
+	ErrorReason *string `json:"errorReason,omitempty"`
 } // @name RunnerServiceInfo
 
 type RunnerInfoResponseDTO struct {

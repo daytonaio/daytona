@@ -6,7 +6,6 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/daytonaio/daytona/cli/util"
 	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models"
@@ -61,11 +60,17 @@ func mapRunnerServiceInfoToDTO(servicesInfo []models.RunnerServiceInfo) []*dto.R
 	runnerServicesInfoDTO := make([]*dto.RunnerServiceInfo, 0)
 
 	for _, serviceInfo := range servicesInfo {
-		runnerServicesInfoDTO = append(runnerServicesInfoDTO, &dto.RunnerServiceInfo{
+		serviceInfoDto := &dto.RunnerServiceInfo{
 			ServiceName: serviceInfo.ServiceName,
 			Healthy:     serviceInfo.Healthy,
-			ErrorReason: util.Pointer(serviceInfo.Err.Error()),
-		})
+		}
+
+		if serviceInfo.Err != nil {
+			errReason := serviceInfo.Err.Error()
+			serviceInfoDto.ErrorReason = &errReason
+		}
+
+		runnerServicesInfoDTO = append(runnerServicesInfoDTO, serviceInfoDto)
 	}
 
 	return runnerServicesInfoDTO

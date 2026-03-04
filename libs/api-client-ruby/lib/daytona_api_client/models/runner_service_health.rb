@@ -21,15 +21,15 @@ module DaytonaApiClient
     # Whether the service is healthy
     attr_accessor :healthy
 
-    # Error message if the service is unhealthy
-    attr_accessor :error
+    # Error reason if the service is unhealthy
+    attr_accessor :error_reason
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'service_name' => :'serviceName',
         :'healthy' => :'healthy',
-        :'error' => :'error'
+        :'error_reason' => :'errorReason'
       }
     end
 
@@ -48,7 +48,7 @@ module DaytonaApiClient
       {
         :'service_name' => :'String',
         :'healthy' => :'Boolean',
-        :'error' => :'String'
+        :'error_reason' => :'String'
       }
     end
 
@@ -86,8 +86,8 @@ module DaytonaApiClient
         self.healthy = nil
       end
 
-      if attributes.key?(:'error')
-        self.error = attributes[:'error']
+      if attributes.key?(:'error_reason')
+        self.error_reason = attributes[:'error_reason']
       end
     end
 
@@ -143,7 +143,7 @@ module DaytonaApiClient
       self.class == o.class &&
           service_name == o.service_name &&
           healthy == o.healthy &&
-          error == o.error
+          error_reason == o.error_reason
     end
 
     # @see the `==` method
@@ -155,7 +155,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [service_name, healthy, error].hash
+      [service_name, healthy, error_reason].hash
     end
 
     # Builds the object from hash

@@ -11566,8 +11566,8 @@ components:
     RunnerServiceHealth:
       example:
         healthy: false
+        errorReason: Cannot connect to the runner
         serviceName: runner
-        error: Cannot connect to the runner
       properties:
         serviceName:
           description: Name of the service being checked
@@ -11577,8 +11577,8 @@ components:
           description: Whether the service is healthy
           example: false
           type: boolean
-        error:
-          description: Error message if the service is unhealthy
+        errorReason:
+          description: Error reason if the service is unhealthy
           example: Cannot connect to the runner
           type: string
       required:
@@ -11593,11 +11593,11 @@ components:
         domain: runner-123.daytona.example.com
         serviceHealth:
         - healthy: false
+          errorReason: Cannot connect to the runner
           serviceName: runner
-          error: Cannot connect to the runner
         - healthy: false
+          errorReason: Cannot connect to the runner
           serviceName: runner
-          error: Cannot connect to the runner
         metrics: ""
       properties:
         metrics:

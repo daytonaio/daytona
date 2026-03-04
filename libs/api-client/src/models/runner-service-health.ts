@@ -33,10 +33,10 @@ export interface RunnerServiceHealth {
      */
     'healthy': boolean;
     /**
-     * Error message if the service is unhealthy
+     * Error reason if the service is unhealthy
      * @type {string}
      * @memberof RunnerServiceHealth
      */
-    'error'?: string;
+    'errorReason'?: string;
 }
 
