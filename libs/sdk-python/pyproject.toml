@@ -25,7 +25,8 @@ dependencies = [
     "opentelemetry-api>=1.27.0,<2.0.0",
     "opentelemetry-sdk>=1.27.0,<2.0.0",
     "opentelemetry-exporter-otlp-proto-http>=1.27.0,<2.0.0",
-    "opentelemetry-instrumentation-aiohttp-client>=0.59b0"
+    "opentelemetry-instrumentation-aiohttp-client>=0.59b0",
+    "python-socketio[asyncio]>=5.0.0,<6.0.0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
