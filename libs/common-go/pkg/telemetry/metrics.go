@@ -22,17 +22,13 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	sdk_metric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 // InitMetrics initializes OpenTelemetry Metrics with an OTLP HTTP exporter.
 func InitMetrics(ctx context.Context, config Config, meterName string) (*sdk_metric.MeterProvider, error) {
 	// Resource describing this service
 	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceName(config.ServiceName),
-			semconv.ServiceVersion(config.ServiceVersion),
-		),
+		resource.WithAttributes(config.Attributes()...),
 	)
 	if err != nil {
 		return nil, err

@@ -6,7 +6,6 @@ package telemetry
 import (
 	"context"
 	"log/slog"
-	"os"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -14,7 +13,6 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 // InitTracer initializes OpenTelemetry with Jaeger exporter
@@ -24,19 +22,9 @@ func InitTracer(ctx context.Context, config Config, exporterFilters ...ExporterF
 		slog.Error("OpenTelemetry error", "error", err)
 	}))
 
-	hostname, err := os.Hostname()
-	if err != nil || hostname == "" {
-		hostname = "unknown"
-	}
-
 	// Create a new resource with service information
 	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceName(config.ServiceName),
-			semconv.ServiceVersion(config.ServiceVersion),
-			semconv.ServiceInstanceID(hostname),
-			semconv.DeploymentEnvironmentName(config.Environment),
-		),
+		resource.WithAttributes(config.Attributes()...),
 		resource.WithTelemetrySDK(),
 	)
 	if err != nil {

@@ -52,6 +52,14 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO,
 		envVars = append(envVars, "DAYTONA_OTEL_ENDPOINT="+*sandboxDto.OtelEndpoint)
 	}
 
+	if sandboxDto.OrganizationId != nil && *sandboxDto.OrganizationId != "" {
+		envVars = append(envVars, "DAYTONA_ORGANIZATION_ID="+*sandboxDto.OrganizationId)
+	}
+
+	if sandboxDto.RegionId != nil && *sandboxDto.RegionId != "" {
+		envVars = append(envVars, "DAYTONA_REGION_ID="+*sandboxDto.RegionId)
+	}
+
 	labels := make(map[string]string)
 	if len(sandboxDto.Volumes) > 0 {
 		volumeMountPaths := make([]string, len(sandboxDto.Volumes))

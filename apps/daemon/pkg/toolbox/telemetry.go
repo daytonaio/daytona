@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daemon/internal"
 )
 
-func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
+func (s *server) initTelemetry(ctx context.Context, serviceName string, organizationId, regionId *string) error {
 	if s.otelEndpoint == nil {
 		s.logger.InfoContext(ctx, "Otel endpoint not provided, skipping telemetry initialization")
 		return nil
@@ -42,6 +42,19 @@ func (s *server) initTelemetry(ctx context.Context, serviceName string) error {
 		Headers: map[string]string{
 			"sandbox-auth-token": s.authToken,
 		},
+	}
+
+	extraLabels := make(map[string]string)
+	if organizationId != nil && *organizationId != "" {
+		extraLabels["daytona_organization_id"] = *organizationId
+	}
+
+	if regionId != nil && *regionId != "" {
+		extraLabels["daytona_region_id"] = *regionId
+	}
+
+	if len(extraLabels) > 0 {
+		config.ExtraLabels = extraLabels
 	}
 
 	// Use a background context
