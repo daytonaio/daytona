@@ -111,9 +111,17 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 							out := make([]byte, len(buf))
 							copy(out, buf)
 							if currentStream == streamStdout {
-								stdoutChan <- out
+								select {
+								case <-ctx.Done():
+									return
+								case stdoutChan <- out:
+								}
 							} else if currentStream == streamStderr {
-								stderrChan <- out
+								select {
+								case <-ctx.Done():
+									return
+								case stderrChan <- out:
+								}
 							}
 						}
 						buf = nil
@@ -128,9 +136,17 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 					chunkData := make([]byte, idx)
 					copy(chunkData, buf[:idx])
 					if currentStream == streamStdout {
-						stdoutChan <- chunkData
+						select {
+						case <-ctx.Done():
+							return
+						case stdoutChan <- chunkData:
+						}
 					} else if currentStream == streamStderr {
-						stderrChan <- chunkData
+						select {
+						case <-ctx.Done():
+							return
+						case stderrChan <- chunkData:
+						}
 					}
 				}
 
@@ -147,7 +163,11 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 						return
 					}
 					// If following, just continue waiting for more data.
-					time.Sleep(50 * time.Millisecond) // Avoid busy loop when following
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.After(50 * time.Millisecond):
+					}
 				} else {
 					// Err already sent to channel above
 					return
