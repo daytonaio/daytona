@@ -99,21 +99,22 @@ export class Process {
     env?: Record<string, string>,
     timeout?: number,
   ): Promise<ExecuteResponse> {
-    const base64UserCmd = Buffer.from(command).toString('base64')
-    command = `echo '${base64UserCmd}' | base64 -d | sh`
-
     if (env && Object.keys(env).length > 0) {
+      const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
+      for (const key of Object.keys(env)) {
+        if (!validKeyPattern.test(key)) {
+          throw new Error(`Invalid environment variable name: '${key}'`)
+        }
+      }
       const safeEnvExports =
         Object.entries(env)
           .map(([key, value]) => {
             const encodedValue = Buffer.from(value).toString('base64')
-            return `export ${key}=$(echo '${encodedValue}' | base64 -d)`
+            return `export ${key}="$(echo '${encodedValue}' | base64 -d)"`
           })
-          .join(';') + ';'
-      command = `${safeEnvExports} ${command}`
+          .join('; ') + '; '
+      command = `${safeEnvExports}${command}`
     }
-
-    command = `sh -c "${command}"`
 
     const response = await this.apiClient.executeCommand({
       command,
