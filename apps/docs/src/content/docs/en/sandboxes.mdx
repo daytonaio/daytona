@@ -1405,3 +1405,142 @@ sandbox, err := client.Create(ctx, params)
 
 </TabItem>
 </Tabs>
+
+## Operations cookbook (10 practical recipes)
+
+The following recipes are short, production-focused patterns that map directly to SDK capabilities and repository examples.
+
+### 1) Paginate sandbox lists for UI pages
+
+Use `page` and `limit` to avoid loading a full organization sandbox list at once.
+
+```typescript
+const page = 2
+const limit = 10
+const result = await daytona.list({ env: 'dev' }, page, limit)
+
+for (const sandbox of result.items) {
+  console.log(`${sandbox.id} ${sandbox.state}`)
+}
+```
+
+### 2) Label sandboxes and query by labels
+
+Set labels after creation, then list only matching workloads.
+
+```typescript
+const sandbox = await daytona.create()
+await sandbox.setLabels({
+  project: 'docs',
+  owner: 'platform',
+  env: 'staging',
+})
+
+const tagged = await daytona.list({ project: 'docs', env: 'staging' })
+console.log(`Found ${tagged.items.length} matching sandboxes`)
+```
+
+### 3) Keep long-running jobs alive with activity heartbeats
+
+Use activity refresh when the user is still active but your workload is long running.
+
+```python
+import time
+from daytona import Daytona
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+for _ in range(6):
+    sandbox.refresh_activity()
+    time.sleep(60)
+```
+
+### 4) Block all egress for strict workloads
+
+Create a sandbox with network disabled when external access is not required.
+
+```typescript
+const sandbox = await daytona.create({
+  networkBlockAll: true,
+})
+console.log(sandbox.networkBlockAll) // true
+```
+
+### 5) Allow only specific CIDR ranges
+
+Use `networkAllowList` to restrict egress to approved private ranges.
+
+```typescript
+const sandbox = await daytona.create({
+  networkAllowList: '192.168.1.0/16,10.0.0.0/24',
+})
+console.log(sandbox.networkAllowList)
+```
+
+### 6) Configure staged retention with auto-archive and auto-delete
+
+Archive first for cost control, then delete later for full cleanup.
+
+```typescript
+const sandbox = await daytona.create({
+  autoArchiveInterval: 60,   // archive after 1 hour stopped
+  autoDeleteInterval: 10080, // delete after 7 days stopped
+})
+```
+
+### 7) Delete immediately after stop for short-lived test runs
+
+Set `autoDeleteInterval` to `0` for one-off validation tasks.
+
+```typescript
+const sandbox = await daytona.create({
+  autoDeleteInterval: 0,
+})
+
+await sandbox.stop()
+await sandbox.waitUntilStopped()
+```
+
+### 8) Recover only when the sandbox is recoverable
+
+Check recoverability before calling recovery logic.
+
+```python
+sandbox.refresh_data()
+if sandbox.recoverable:
+    sandbox.recover()
+else:
+    print(f"Manual intervention required: {sandbox.error_reason}")
+```
+
+### 9) Issue a short-lived preview URL and revoke it
+
+Generate temporary preview access and invalidate it when no longer needed.
+
+```typescript
+const preview = await sandbox.getSignedPreviewUrl(3000, 300)
+console.log(preview.url)
+
+await sandbox.expireSignedPreviewUrl(3000, preview.token)
+```
+
+### 10) Resize safely when disk changes are required
+
+Increase CPU and memory on started sandboxes. Stop first when changing disk.
+
+```typescript
+await sandbox.resize({ cpu: 2, memory: 4 })
+
+await sandbox.stop()
+await sandbox.waitUntilStopped()
+await sandbox.resize({ cpu: 2, memory: 4, disk: 20 })
+await sandbox.start()
+```
+
+For method-level details, see:
+
+- [TypeScript Sandbox reference](/docs/en/typescript-sdk/sandbox)
+- [Python Sandbox reference](/docs/en/python-sdk/sync/sandbox)
+- [Network limits](/docs/en/network-limits)
+- [Preview and authentication](/docs/en/preview)
