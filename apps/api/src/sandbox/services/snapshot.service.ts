@@ -494,8 +494,10 @@ export class SnapshotService {
     const usageOverview = await this.organizationUsageService.getSnapshotUsageOverview(organization.id)
 
     try {
-      if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.snapshotQuota) {
-        throw new ForbiddenException(`Snapshot quota exceeded. Maximum allowed: ${organization.snapshotQuota}`)
+      if (usageOverview.currentSnapshotUsage + usageOverview.pendingSnapshotUsage > organization.activeSnapshotQuota) {
+        throw new ForbiddenException(
+          `Active snapshot quota exceeded. Maximum allowed: ${organization.activeSnapshotQuota}`,
+        )
       }
     } catch (error) {
       await this.rollbackPendingUsage(organization.id, addedSnapshotCount)

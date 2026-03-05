@@ -30,6 +30,7 @@ class UpdateOrganizationQuota(BaseModel):
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
+    active_snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="activeSnapshotQuota")
     snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="snapshotQuota")
     max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxSnapshotSize")
     volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="volumeQuota")
@@ -41,7 +42,7 @@ class UpdateOrganizationQuota(BaseModel):
     sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
     snapshot_deactivation_timeout_minutes: Optional[Union[StrictFloat, StrictInt]] = Field(description="Time in minutes before an unused snapshot is deactivated", serialization_alias="snapshotDeactivationTimeoutMinutes")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeoutMinutes"]
+    __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "activeSnapshotQuota", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeoutMinutes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,6 +104,11 @@ class UpdateOrganizationQuota(BaseModel):
         # and model_fields_set contains the field
         if self.max_disk_per_sandbox is None and "max_disk_per_sandbox" in self.model_fields_set:
             _dict['maxDiskPerSandbox'] = None
+
+        # set to None if active_snapshot_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.active_snapshot_quota is None and "active_snapshot_quota" in self.model_fields_set:
+            _dict['activeSnapshotQuota'] = None
 
         # set to None if snapshot_quota (nullable) is None
         # and model_fields_set contains the field
@@ -169,6 +175,7 @@ class UpdateOrganizationQuota(BaseModel):
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),
+            "active_snapshot_quota": obj.get("activeSnapshotQuota"),
             "snapshot_quota": obj.get("snapshotQuota"),
             "max_snapshot_size": obj.get("maxSnapshotSize"),
             "volume_quota": obj.get("volumeQuota"),

@@ -26,6 +26,8 @@ type CreateOrganizationQuota struct {
 	MaxCpuPerSandbox *float32 `json:"maxCpuPerSandbox,omitempty"`
 	MaxMemoryPerSandbox *float32 `json:"maxMemoryPerSandbox,omitempty"`
 	MaxDiskPerSandbox *float32 `json:"maxDiskPerSandbox,omitempty"`
+	ActiveSnapshotQuota *float32 `json:"activeSnapshotQuota,omitempty"`
+	// Deprecated
 	SnapshotQuota *float32 `json:"snapshotQuota,omitempty"`
 	MaxSnapshotSize *float32 `json:"maxSnapshotSize,omitempty"`
 	VolumeQuota *float32 `json:"volumeQuota,omitempty"`
@@ -243,7 +245,40 @@ func (o *CreateOrganizationQuota) SetMaxDiskPerSandbox(v float32) {
 	o.MaxDiskPerSandbox = &v
 }
 
+// GetActiveSnapshotQuota returns the ActiveSnapshotQuota field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetActiveSnapshotQuota() float32 {
+	if o == nil || IsNil(o.ActiveSnapshotQuota) {
+		var ret float32
+		return ret
+	}
+	return *o.ActiveSnapshotQuota
+}
+
+// GetActiveSnapshotQuotaOk returns a tuple with the ActiveSnapshotQuota field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateOrganizationQuota) GetActiveSnapshotQuotaOk() (*float32, bool) {
+	if o == nil || IsNil(o.ActiveSnapshotQuota) {
+		return nil, false
+	}
+	return o.ActiveSnapshotQuota, true
+}
+
+// HasActiveSnapshotQuota returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasActiveSnapshotQuota() bool {
+	if o != nil && !IsNil(o.ActiveSnapshotQuota) {
+		return true
+	}
+
+	return false
+}
+
+// SetActiveSnapshotQuota gets a reference to the given float32 and assigns it to the ActiveSnapshotQuota field.
+func (o *CreateOrganizationQuota) SetActiveSnapshotQuota(v float32) {
+	o.ActiveSnapshotQuota = &v
+}
+
 // GetSnapshotQuota returns the SnapshotQuota field value if set, zero value otherwise.
+// Deprecated
 func (o *CreateOrganizationQuota) GetSnapshotQuota() float32 {
 	if o == nil || IsNil(o.SnapshotQuota) {
 		var ret float32
@@ -254,6 +289,7 @@ func (o *CreateOrganizationQuota) GetSnapshotQuota() float32 {
 
 // GetSnapshotQuotaOk returns a tuple with the SnapshotQuota field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *CreateOrganizationQuota) GetSnapshotQuotaOk() (*float32, bool) {
 	if o == nil || IsNil(o.SnapshotQuota) {
 		return nil, false
@@ -271,6 +307,7 @@ func (o *CreateOrganizationQuota) HasSnapshotQuota() bool {
 }
 
 // SetSnapshotQuota gets a reference to the given float32 and assigns it to the SnapshotQuota field.
+// Deprecated
 func (o *CreateOrganizationQuota) SetSnapshotQuota(v float32) {
 	o.SnapshotQuota = &v
 }
@@ -367,6 +404,9 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.MaxDiskPerSandbox) {
 		toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	}
+	if !IsNil(o.ActiveSnapshotQuota) {
+		toSerialize["activeSnapshotQuota"] = o.ActiveSnapshotQuota
+	}
 	if !IsNil(o.SnapshotQuota) {
 		toSerialize["snapshotQuota"] = o.SnapshotQuota
 	}
@@ -404,6 +444,7 @@ func (o *CreateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "activeSnapshotQuota")
 		delete(additionalProperties, "snapshotQuota")
 		delete(additionalProperties, "maxSnapshotSize")
 		delete(additionalProperties, "volumeQuota")

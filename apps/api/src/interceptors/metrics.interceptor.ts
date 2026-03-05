@@ -740,7 +740,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       organization_max_cpu_per_sandbox: request.maxCpuPerSandbox,
       organization_max_memory_per_sandbox_mb: request.maxMemoryPerSandbox ? request.maxMemoryPerSandbox * 1024 : null,
       organization_max_disk_per_sandbox_gb: request.maxDiskPerSandbox,
-      organization_snapshot_quota: request.snapshotQuota,
+      organization_active_snapshot_quota: request.activeSnapshotQuota ?? request.snapshotQuota,
       organization_max_snapshot_size_mb: request.maxSnapshotSize ? request.maxSnapshotSize * 1024 : null,
       organization_volume_quota: request.volumeQuota,
     })

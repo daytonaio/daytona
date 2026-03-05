@@ -29,12 +29,13 @@ class OrganizationUsageOverview(BaseModel):
     OrganizationUsageOverview
     """ # noqa: E501
     region_usage: List[RegionUsageOverview] = Field(serialization_alias="regionUsage")
+    total_active_snapshot_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalActiveSnapshotQuota")
     total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalSnapshotQuota")
     current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentSnapshotUsage")
     total_volume_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalVolumeQuota")
     current_volume_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentVolumeUsage")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["regionUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
+    __properties: ClassVar[List[str]] = ["regionUsage", "totalActiveSnapshotQuota", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -102,6 +103,7 @@ class OrganizationUsageOverview(BaseModel):
 
         _obj = cls.model_validate({
             "region_usage": [RegionUsageOverview.from_dict(_item) for _item in obj["regionUsage"]] if obj.get("regionUsage") is not None else None,
+            "total_active_snapshot_quota": obj.get("totalActiveSnapshotQuota"),
             "total_snapshot_quota": obj.get("totalSnapshotQuota"),
             "current_snapshot_usage": obj.get("currentSnapshotUsage"),
             "total_volume_quota": obj.get("totalVolumeQuota"),

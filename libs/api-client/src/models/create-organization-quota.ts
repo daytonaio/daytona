@@ -61,6 +61,13 @@ export interface CreateOrganizationQuota {
      * @type {number}
      * @memberof CreateOrganizationQuota
      */
+    'activeSnapshotQuota'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateOrganizationQuota
+     * @deprecated
+     */
     'snapshotQuota'?: number;
     /**
      * 

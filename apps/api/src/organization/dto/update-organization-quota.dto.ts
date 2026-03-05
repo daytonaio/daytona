@@ -17,6 +17,10 @@ export class UpdateOrganizationQuotaDto {
   maxDiskPerSandbox?: number
 
   @ApiProperty({ nullable: true })
+  activeSnapshotQuota?: number
+
+  /** @deprecated Use activeSnapshotQuota instead */
+  @ApiProperty({ nullable: true, deprecated: true })
   snapshotQuota?: number
 
   @ApiProperty({ nullable: true })

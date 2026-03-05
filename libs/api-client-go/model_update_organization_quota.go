@@ -24,6 +24,8 @@ type UpdateOrganizationQuota struct {
 	MaxCpuPerSandbox NullableFloat32 `json:"maxCpuPerSandbox"`
 	MaxMemoryPerSandbox NullableFloat32 `json:"maxMemoryPerSandbox"`
 	MaxDiskPerSandbox NullableFloat32 `json:"maxDiskPerSandbox"`
+	ActiveSnapshotQuota NullableFloat32 `json:"activeSnapshotQuota"`
+	// Deprecated
 	SnapshotQuota NullableFloat32 `json:"snapshotQuota"`
 	MaxSnapshotSize NullableFloat32 `json:"maxSnapshotSize"`
 	VolumeQuota NullableFloat32 `json:"volumeQuota"`
@@ -44,11 +46,12 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32, snapshotDeactivationTimeoutMinutes NullableFloat32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(maxCpuPerSandbox NullableFloat32, maxMemoryPerSandbox NullableFloat32, maxDiskPerSandbox NullableFloat32, activeSnapshotQuota NullableFloat32, snapshotQuota NullableFloat32, maxSnapshotSize NullableFloat32, volumeQuota NullableFloat32, authenticatedRateLimit NullableFloat32, sandboxCreateRateLimit NullableFloat32, sandboxLifecycleRateLimit NullableFloat32, authenticatedRateLimitTtlSeconds NullableFloat32, sandboxCreateRateLimitTtlSeconds NullableFloat32, sandboxLifecycleRateLimitTtlSeconds NullableFloat32, snapshotDeactivationTimeoutMinutes NullableFloat32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.MaxCpuPerSandbox = maxCpuPerSandbox
 	this.MaxMemoryPerSandbox = maxMemoryPerSandbox
 	this.MaxDiskPerSandbox = maxDiskPerSandbox
+	this.ActiveSnapshotQuota = activeSnapshotQuota
 	this.SnapshotQuota = snapshotQuota
 	this.MaxSnapshotSize = maxSnapshotSize
 	this.VolumeQuota = volumeQuota
@@ -148,8 +151,35 @@ func (o *UpdateOrganizationQuota) SetMaxDiskPerSandbox(v float32) {
 	o.MaxDiskPerSandbox.Set(&v)
 }
 
+// GetActiveSnapshotQuota returns the ActiveSnapshotQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
+func (o *UpdateOrganizationQuota) GetActiveSnapshotQuota() float32 {
+	if o == nil || o.ActiveSnapshotQuota.Get() == nil {
+		var ret float32
+		return ret
+	}
+
+	return *o.ActiveSnapshotQuota.Get()
+}
+
+// GetActiveSnapshotQuotaOk returns a tuple with the ActiveSnapshotQuota field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *UpdateOrganizationQuota) GetActiveSnapshotQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ActiveSnapshotQuota.Get(), o.ActiveSnapshotQuota.IsSet()
+}
+
+// SetActiveSnapshotQuota sets field value
+func (o *UpdateOrganizationQuota) SetActiveSnapshotQuota(v float32) {
+	o.ActiveSnapshotQuota.Set(&v)
+}
+
 // GetSnapshotQuota returns the SnapshotQuota field value
 // If the value is explicit nil, the zero value for float32 will be returned
+// Deprecated
 func (o *UpdateOrganizationQuota) GetSnapshotQuota() float32 {
 	if o == nil || o.SnapshotQuota.Get() == nil {
 		var ret float32
@@ -162,6 +192,7 @@ func (o *UpdateOrganizationQuota) GetSnapshotQuota() float32 {
 // GetSnapshotQuotaOk returns a tuple with the SnapshotQuota field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
+// Deprecated
 func (o *UpdateOrganizationQuota) GetSnapshotQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
@@ -170,6 +201,7 @@ func (o *UpdateOrganizationQuota) GetSnapshotQuotaOk() (*float32, bool) {
 }
 
 // SetSnapshotQuota sets field value
+// Deprecated
 func (o *UpdateOrganizationQuota) SetSnapshotQuota(v float32) {
 	o.SnapshotQuota.Set(&v)
 }
@@ -421,6 +453,7 @@ func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox.Get()
 	toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox.Get()
 	toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox.Get()
+	toSerialize["activeSnapshotQuota"] = o.ActiveSnapshotQuota.Get()
 	toSerialize["snapshotQuota"] = o.SnapshotQuota.Get()
 	toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize.Get()
 	toSerialize["volumeQuota"] = o.VolumeQuota.Get()
@@ -447,6 +480,7 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		"maxCpuPerSandbox",
 		"maxMemoryPerSandbox",
 		"maxDiskPerSandbox",
+		"activeSnapshotQuota",
 		"snapshotQuota",
 		"maxSnapshotSize",
 		"volumeQuota",
@@ -489,6 +523,7 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "maxCpuPerSandbox")
 		delete(additionalProperties, "maxMemoryPerSandbox")
 		delete(additionalProperties, "maxDiskPerSandbox")
+		delete(additionalProperties, "activeSnapshotQuota")
 		delete(additionalProperties, "snapshotQuota")
 		delete(additionalProperties, "maxSnapshotSize")
 		delete(additionalProperties, "volumeQuota")

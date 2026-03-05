@@ -22,6 +22,8 @@ var _ MappedNullable = &OrganizationUsageOverview{}
 // OrganizationUsageOverview struct for OrganizationUsageOverview
 type OrganizationUsageOverview struct {
 	RegionUsage []RegionUsageOverview `json:"regionUsage"`
+	TotalActiveSnapshotQuota float32 `json:"totalActiveSnapshotQuota"`
+	// Deprecated
 	TotalSnapshotQuota float32 `json:"totalSnapshotQuota"`
 	CurrentSnapshotUsage float32 `json:"currentSnapshotUsage"`
 	TotalVolumeQuota float32 `json:"totalVolumeQuota"`
@@ -35,9 +37,10 @@ type _OrganizationUsageOverview OrganizationUsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewOrganizationUsageOverview(regionUsage []RegionUsageOverview, totalSnapshotQuota float32, currentSnapshotUsage float32, totalVolumeQuota float32, currentVolumeUsage float32) *OrganizationUsageOverview {
+func NewOrganizationUsageOverview(regionUsage []RegionUsageOverview, totalActiveSnapshotQuota float32, totalSnapshotQuota float32, currentSnapshotUsage float32, totalVolumeQuota float32, currentVolumeUsage float32) *OrganizationUsageOverview {
 	this := OrganizationUsageOverview{}
 	this.RegionUsage = regionUsage
+	this.TotalActiveSnapshotQuota = totalActiveSnapshotQuota
 	this.TotalSnapshotQuota = totalSnapshotQuota
 	this.CurrentSnapshotUsage = currentSnapshotUsage
 	this.TotalVolumeQuota = totalVolumeQuota
@@ -77,7 +80,32 @@ func (o *OrganizationUsageOverview) SetRegionUsage(v []RegionUsageOverview) {
 	o.RegionUsage = v
 }
 
+// GetTotalActiveSnapshotQuota returns the TotalActiveSnapshotQuota field value
+func (o *OrganizationUsageOverview) GetTotalActiveSnapshotQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.TotalActiveSnapshotQuota
+}
+
+// GetTotalActiveSnapshotQuotaOk returns a tuple with the TotalActiveSnapshotQuota field value
+// and a boolean to check if the value has been set.
+func (o *OrganizationUsageOverview) GetTotalActiveSnapshotQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TotalActiveSnapshotQuota, true
+}
+
+// SetTotalActiveSnapshotQuota sets field value
+func (o *OrganizationUsageOverview) SetTotalActiveSnapshotQuota(v float32) {
+	o.TotalActiveSnapshotQuota = v
+}
+
 // GetTotalSnapshotQuota returns the TotalSnapshotQuota field value
+// Deprecated
 func (o *OrganizationUsageOverview) GetTotalSnapshotQuota() float32 {
 	if o == nil {
 		var ret float32
@@ -89,6 +117,7 @@ func (o *OrganizationUsageOverview) GetTotalSnapshotQuota() float32 {
 
 // GetTotalSnapshotQuotaOk returns a tuple with the TotalSnapshotQuota field value
 // and a boolean to check if the value has been set.
+// Deprecated
 func (o *OrganizationUsageOverview) GetTotalSnapshotQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
@@ -97,6 +126,7 @@ func (o *OrganizationUsageOverview) GetTotalSnapshotQuotaOk() (*float32, bool) {
 }
 
 // SetTotalSnapshotQuota sets field value
+// Deprecated
 func (o *OrganizationUsageOverview) SetTotalSnapshotQuota(v float32) {
 	o.TotalSnapshotQuota = v
 }
@@ -184,6 +214,7 @@ func (o OrganizationUsageOverview) MarshalJSON() ([]byte, error) {
 func (o OrganizationUsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["regionUsage"] = o.RegionUsage
+	toSerialize["totalActiveSnapshotQuota"] = o.TotalActiveSnapshotQuota
 	toSerialize["totalSnapshotQuota"] = o.TotalSnapshotQuota
 	toSerialize["currentSnapshotUsage"] = o.CurrentSnapshotUsage
 	toSerialize["totalVolumeQuota"] = o.TotalVolumeQuota
@@ -202,6 +233,7 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"regionUsage",
+		"totalActiveSnapshotQuota",
 		"totalSnapshotQuota",
 		"currentSnapshotUsage",
 		"totalVolumeQuota",
@@ -236,6 +268,7 @@ func (o *OrganizationUsageOverview) UnmarshalJSON(data []byte) (err error) {
 
 	if err = json.Unmarshal(data, &additionalProperties); err == nil {
 		delete(additionalProperties, "regionUsage")
+		delete(additionalProperties, "totalActiveSnapshotQuota")
 		delete(additionalProperties, "totalSnapshotQuota")
 		delete(additionalProperties, "currentSnapshotUsage")
 		delete(additionalProperties, "totalVolumeQuota")

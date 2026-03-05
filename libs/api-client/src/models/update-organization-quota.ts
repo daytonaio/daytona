@@ -43,6 +43,13 @@ export interface UpdateOrganizationQuota {
      * @type {number}
      * @memberof UpdateOrganizationQuota
      */
+    'activeSnapshotQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     * @deprecated
+     */
     'snapshotQuota': number | null;
     /**
      * 

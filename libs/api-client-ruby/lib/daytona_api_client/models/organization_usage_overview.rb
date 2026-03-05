@@ -17,6 +17,8 @@ module DaytonaApiClient
   class OrganizationUsageOverview
     attr_accessor :region_usage
 
+    attr_accessor :total_active_snapshot_quota
+
     attr_accessor :total_snapshot_quota
 
     attr_accessor :current_snapshot_usage
@@ -29,6 +31,7 @@ module DaytonaApiClient
     def self.attribute_map
       {
         :'region_usage' => :'regionUsage',
+        :'total_active_snapshot_quota' => :'totalActiveSnapshotQuota',
         :'total_snapshot_quota' => :'totalSnapshotQuota',
         :'current_snapshot_usage' => :'currentSnapshotUsage',
         :'total_volume_quota' => :'totalVolumeQuota',
@@ -50,6 +53,7 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'region_usage' => :'Array<RegionUsageOverview>',
+        :'total_active_snapshot_quota' => :'Float',
         :'total_snapshot_quota' => :'Float',
         :'current_snapshot_usage' => :'Float',
         :'total_volume_quota' => :'Float',
@@ -87,6 +91,12 @@ module DaytonaApiClient
         self.region_usage = nil
       end
 
+      if attributes.key?(:'total_active_snapshot_quota')
+        self.total_active_snapshot_quota = attributes[:'total_active_snapshot_quota']
+      else
+        self.total_active_snapshot_quota = nil
+      end
+
       if attributes.key?(:'total_snapshot_quota')
         self.total_snapshot_quota = attributes[:'total_snapshot_quota']
       else
@@ -121,6 +131,10 @@ module DaytonaApiClient
         invalid_properties.push('invalid value for "region_usage", region_usage cannot be nil.')
       end
 
+      if @total_active_snapshot_quota.nil?
+        invalid_properties.push('invalid value for "total_active_snapshot_quota", total_active_snapshot_quota cannot be nil.')
+      end
+
       if @total_snapshot_quota.nil?
         invalid_properties.push('invalid value for "total_snapshot_quota", total_snapshot_quota cannot be nil.')
       end
@@ -145,6 +159,7 @@ module DaytonaApiClient
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
       return false if @region_usage.nil?
+      return false if @total_active_snapshot_quota.nil?
       return false if @total_snapshot_quota.nil?
       return false if @current_snapshot_usage.nil?
       return false if @total_volume_quota.nil?
@@ -160,6 +175,16 @@ module DaytonaApiClient
       end
 
       @region_usage = region_usage
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] total_active_snapshot_quota Value to be assigned
+    def total_active_snapshot_quota=(total_active_snapshot_quota)
+      if total_active_snapshot_quota.nil?
+        fail ArgumentError, 'total_active_snapshot_quota cannot be nil'
+      end
+
+      @total_active_snapshot_quota = total_active_snapshot_quota
     end
 
     # Custom attribute writer method with validation
@@ -208,6 +233,7 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           region_usage == o.region_usage &&
+          total_active_snapshot_quota == o.total_active_snapshot_quota &&
           total_snapshot_quota == o.total_snapshot_quota &&
           current_snapshot_usage == o.current_snapshot_usage &&
           total_volume_quota == o.total_volume_quota &&
@@ -223,7 +249,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [region_usage, total_snapshot_quota, current_snapshot_usage, total_volume_quota, current_volume_usage].hash
+      [region_usage, total_active_snapshot_quota, total_snapshot_quota, current_snapshot_usage, total_volume_quota, current_volume_usage].hash
     end
 
     # Builds the object from hash

@@ -41,6 +41,12 @@ export class CreateOrganizationQuotaDto {
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
+  activeSnapshotQuota?: number
+
+  /** @deprecated Use activeSnapshotQuota instead */
+  @ApiPropertyOptional({ deprecated: true })
+  @IsNumber()
+  @IsOptional()
   snapshotQuota?: number
 
   @ApiPropertyOptional()

@@ -34,6 +34,13 @@ export interface OrganizationUsageOverview {
      * @type {number}
      * @memberof OrganizationUsageOverview
      */
+    'totalActiveSnapshotQuota': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof OrganizationUsageOverview
+     * @deprecated
+     */
     'totalSnapshotQuota': number;
     /**
      * 

@@ -119,7 +119,8 @@ export class OrganizationUsageService {
 
     return {
       regionUsage,
-      totalSnapshotQuota: organization.snapshotQuota,
+      totalActiveSnapshotQuota: organization.activeSnapshotQuota,
+      totalSnapshotQuota: organization.activeSnapshotQuota,
       totalVolumeQuota: organization.volumeQuota,
       currentSnapshotUsage: snapshotUsage.currentSnapshotUsage,
       currentVolumeUsage: volumeUsage.currentVolumeUsage,

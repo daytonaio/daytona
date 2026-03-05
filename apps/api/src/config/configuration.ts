@@ -274,7 +274,10 @@ const configuration = {
     maxCpuPerSandbox: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_CPU_PER_SANDBOX || '4', 10),
     maxMemoryPerSandbox: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_MEMORY_PER_SANDBOX || '8', 10),
     maxDiskPerSandbox: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_DISK_PER_SANDBOX || '10', 10),
-    snapshotQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA || '100', 10),
+    activeSnapshotQuota: parseInt(
+      process.env.DEFAULT_ORG_QUOTA_ACTIVE_SNAPSHOT_QUOTA || process.env.DEFAULT_ORG_QUOTA_SNAPSHOT_QUOTA || '100',
+      10,
+    ),
     maxSnapshotSize: parseInt(process.env.DEFAULT_ORG_QUOTA_MAX_SNAPSHOT_SIZE || '20', 10),
     volumeQuota: parseInt(process.env.DEFAULT_ORG_QUOTA_VOLUME_QUOTA || '100', 10),
   },
@@ -291,7 +294,10 @@ const configuration = {
     maxCpuPerSandbox: parseInt(process.env.ADMIN_MAX_CPU_PER_SANDBOX || '0', 10),
     maxMemoryPerSandbox: parseInt(process.env.ADMIN_MAX_MEMORY_PER_SANDBOX || '0', 10),
     maxDiskPerSandbox: parseInt(process.env.ADMIN_MAX_DISK_PER_SANDBOX || '0', 10),
-    snapshotQuota: parseInt(process.env.ADMIN_SNAPSHOT_QUOTA || '100', 10),
+    activeSnapshotQuota: parseInt(
+      process.env.ADMIN_ACTIVE_SNAPSHOT_QUOTA || process.env.ADMIN_SNAPSHOT_QUOTA || '100',
+      10,
+    ),
     maxSnapshotSize: parseInt(process.env.ADMIN_MAX_SNAPSHOT_SIZE || '100', 10),
     volumeQuota: parseInt(process.env.ADMIN_VOLUME_QUOTA || '0', 10),
   },

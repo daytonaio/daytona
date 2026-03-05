@@ -33,11 +33,12 @@ class CreateOrganizationQuota(BaseModel):
     max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxCpuPerSandbox")
     max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxMemoryPerSandbox")
     max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxDiskPerSandbox")
+    active_snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="activeSnapshotQuota")
     snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="snapshotQuota")
     max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="maxSnapshotSize")
     volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "activeSnapshotQuota", "snapshotQuota", "maxSnapshotSize", "volumeQuota"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -103,6 +104,7 @@ class CreateOrganizationQuota(BaseModel):
             "max_cpu_per_sandbox": obj.get("maxCpuPerSandbox"),
             "max_memory_per_sandbox": obj.get("maxMemoryPerSandbox"),
             "max_disk_per_sandbox": obj.get("maxDiskPerSandbox"),
+            "active_snapshot_quota": obj.get("activeSnapshotQuota"),
             "snapshot_quota": obj.get("snapshotQuota"),
             "max_snapshot_size": obj.get("maxSnapshotSize"),
             "volume_quota": obj.get("volumeQuota")

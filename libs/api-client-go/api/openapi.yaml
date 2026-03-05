@@ -9553,10 +9553,11 @@ components:
       type: object
     OrganizationUsageOverview:
       example:
-        totalSnapshotQuota: 7.061401241503109
-        currentVolumeUsage: 2.027123023002322
-        totalVolumeQuota: 3.616076749251911
-        currentSnapshotUsage: 9.301444243932576
+        totalActiveSnapshotQuota: 7.061401241503109
+        totalSnapshotQuota: 9.301444243932576
+        currentVolumeUsage: 4.145608029883936
+        totalVolumeQuota: 2.027123023002322
+        currentSnapshotUsage: 3.616076749251911
         regionUsage:
         - totalCpuQuota: 0.8008281904610115
           regionId: regionId
@@ -9577,7 +9578,10 @@ components:
           items:
             $ref: '#/components/schemas/RegionUsageOverview'
           type: array
+        totalActiveSnapshotQuota:
+          type: number
         totalSnapshotQuota:
+          deprecated: true
           type: number
         currentSnapshotUsage:
           type: number
@@ -9589,24 +9593,26 @@ components:
       - currentSnapshotUsage
       - currentVolumeUsage
       - regionUsage
+      - totalActiveSnapshotQuota
       - totalSnapshotQuota
       - totalVolumeQuota
       type: object
     UpdateOrganizationQuota:
       example:
-        sandboxCreateRateLimitTtlSeconds: 4.145608029883936
-        sandboxLifecycleRateLimit: 3.616076749251911
-        volumeQuota: 2.3021358869347655
-        maxSnapshotSize: 5.637376656633329
-        authenticatedRateLimit: 7.061401241503109
-        sandboxCreateRateLimit: 9.301444243932576
-        snapshotQuota: 5.962133916683182
-        sandboxLifecycleRateLimitTtlSeconds: 7.386281948385884
+        activeSnapshotQuota: 5.962133916683182
+        sandboxCreateRateLimitTtlSeconds: 7.386281948385884
+        sandboxLifecycleRateLimit: 2.027123023002322
+        volumeQuota: 7.061401241503109
+        maxSnapshotSize: 2.3021358869347655
+        authenticatedRateLimit: 9.301444243932576
+        sandboxCreateRateLimit: 3.616076749251911
+        snapshotQuota: 5.637376656633329
+        sandboxLifecycleRateLimitTtlSeconds: 1.2315135367772556
         maxCpuPerSandbox: 0.8008281904610115
         maxDiskPerSandbox: 1.4658129805029452
-        snapshotDeactivationTimeoutMinutes: 1.2315135367772556
+        snapshotDeactivationTimeoutMinutes: 1.0246457001441578
         maxMemoryPerSandbox: 6.027456183070403
-        authenticatedRateLimitTtlSeconds: 2.027123023002322
+        authenticatedRateLimitTtlSeconds: 4.145608029883936
       properties:
         maxCpuPerSandbox:
           nullable: true
@@ -9617,7 +9623,11 @@ components:
         maxDiskPerSandbox:
           nullable: true
           type: number
+        activeSnapshotQuota:
+          nullable: true
+          type: number
         snapshotQuota:
+          deprecated: true
           nullable: true
           type: number
         maxSnapshotSize:
@@ -9649,6 +9659,7 @@ components:
           nullable: true
           type: number
       required:
+      - activeSnapshotQuota
       - authenticatedRateLimit
       - authenticatedRateLimitTtlSeconds
       - maxCpuPerSandbox
@@ -10236,14 +10247,15 @@ components:
       type: object
     CreateOrganizationQuota:
       example:
-        snapshotQuota: 7.061401241503109
+        snapshotQuota: 9.301444243932576
         totalCpuQuota: 0.8008281904610115
         maxCpuPerSandbox: 5.962133916683182
+        activeSnapshotQuota: 7.061401241503109
         maxDiskPerSandbox: 2.3021358869347655
         maxMemoryPerSandbox: 5.637376656633329
-        volumeQuota: 3.616076749251911
+        volumeQuota: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
-        maxSnapshotSize: 9.301444243932576
+        maxSnapshotSize: 3.616076749251911
         totalDiskQuota: 1.4658129805029452
       properties:
         totalCpuQuota:
@@ -10258,7 +10270,10 @@ components:
           type: number
         maxDiskPerSandbox:
           type: number
+        activeSnapshotQuota:
+          type: number
         snapshotQuota:
+          deprecated: true
           type: number
         maxSnapshotSize:
           type: number
@@ -10273,14 +10288,15 @@ components:
         personalOrganizationDefaultRegionId: personalOrganizationDefaultRegionId
         id: id
         personalOrganizationQuota:
-          snapshotQuota: 7.061401241503109
+          snapshotQuota: 9.301444243932576
           totalCpuQuota: 0.8008281904610115
           maxCpuPerSandbox: 5.962133916683182
+          activeSnapshotQuota: 7.061401241503109
           maxDiskPerSandbox: 2.3021358869347655
           maxMemoryPerSandbox: 5.637376656633329
-          volumeQuota: 3.616076749251911
+          volumeQuota: 2.027123023002322
           totalMemoryQuota: 6.027456183070403
-          maxSnapshotSize: 9.301444243932576
+          maxSnapshotSize: 3.616076749251911
           totalDiskQuota: 1.4658129805029452
         email: email
       properties:

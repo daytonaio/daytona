@@ -35,6 +35,9 @@ export class OrganizationUsageOverviewDto {
 
   // Snapshot usage
   @ApiProperty()
+  totalActiveSnapshotQuota: number
+  /** @deprecated Use totalActiveSnapshotQuota instead */
+  @ApiProperty({ deprecated: true })
   totalSnapshotQuota: number
   @ApiProperty()
   currentSnapshotUsage: number

@@ -179,7 +179,8 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.maxDiskPerSandbox = updateDto.maxDiskPerSandbox ?? organization.maxDiskPerSandbox
     organization.maxSnapshotSize = updateDto.maxSnapshotSize ?? organization.maxSnapshotSize
     organization.volumeQuota = updateDto.volumeQuota ?? organization.volumeQuota
-    organization.snapshotQuota = updateDto.snapshotQuota ?? organization.snapshotQuota
+    organization.activeSnapshotQuota =
+      updateDto.activeSnapshotQuota ?? updateDto.snapshotQuota ?? organization.activeSnapshotQuota
     organization.authenticatedRateLimit = updateDto.authenticatedRateLimit ?? organization.authenticatedRateLimit
     organization.sandboxCreateRateLimit = updateDto.sandboxCreateRateLimit ?? organization.sandboxCreateRateLimit
     organization.sandboxLifecycleRateLimit =
@@ -488,7 +489,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     organization.maxCpuPerSandbox = quota.maxCpuPerSandbox
     organization.maxMemoryPerSandbox = quota.maxMemoryPerSandbox
     organization.maxDiskPerSandbox = quota.maxDiskPerSandbox
-    organization.snapshotQuota = quota.snapshotQuota
+    organization.activeSnapshotQuota = quota.activeSnapshotQuota ?? quota.snapshotQuota
     organization.maxSnapshotSize = quota.maxSnapshotSize
     organization.volumeQuota = quota.volumeQuota
 
