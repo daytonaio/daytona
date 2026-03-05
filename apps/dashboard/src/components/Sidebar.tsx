@@ -24,6 +24,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
+import { useConfig } from '@/hooks/useConfig'
 import { usePylon } from '@/hooks/usePylon'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
@@ -110,6 +111,7 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
 
 export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const posthog = usePostHog()
+  const config = useConfig()
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const { pathname } = useLocation()
@@ -413,23 +415,25 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarContent>
       <SidebarFooter className="pb-4">
         <SidebarMenu>
-          <SidebarMenuItem key="slack">
-            <SidebarMenuButton
-              tooltip="Support"
-              onClick={() => {
-                togglePylon()
-              }}
-            >
-              <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
-              Support
-              {pylonUnreadCount > 0 && (
-                <div className={cn('w-2 h-2 bg-green-500 rounded-full transition-all')}>
-                  <div className={cn('w-full h-full bg-green-500 rounded-full animate-ping')} />
-                </div>
-              )}
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem key="slack">
+          {config.pylonAppId && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Support"
+                onClick={() => {
+                  togglePylon()
+                }}
+              >
+                <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
+                Support
+                {pylonUnreadCount > 0 && (
+                  <div className={cn('w-2 h-2 bg-green-500 rounded-full transition-all')}>
+                    <div className={cn('w-full h-full bg-green-500 rounded-full animate-ping')} />
+                  </div>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Slack">
               <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <Slack size={16} strokeWidth={1.5} />
@@ -437,7 +441,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem key="docs">
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Docs">
               <a href={DAYTONA_DOCS_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <BookOpen size={16} strokeWidth={1.5} />
