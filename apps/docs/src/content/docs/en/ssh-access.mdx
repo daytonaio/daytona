@@ -92,19 +92,17 @@ Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:
 
 SSH access tokens expire automatically for security:
 
-- **Default**: 60 minutes
+- **SDK/API default**: 60 minutes
+- **CLI default**: 1440 minutes (24 hours) via `daytona ssh --expires`
 
 ### Revoking Access
 
-You can revoke SSH access tokens at any time:
+You can revoke SSH access tokens at any time by token:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access()
-
 # Revoke specific SSH access for the sandbox
 sandbox.revoke_ssh_access(token="specific-token")
 ```
@@ -113,9 +111,6 @@ sandbox.revoke_ssh_access(token="specific-token")
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Revoke all SSH access for the sandbox
-await sandbox.revokeSshAccess()
-
 // Revoke specific SSH access for the sandbox
 await sandbox.revokeSshAccess('specific-token')
 ```
@@ -125,9 +120,6 @@ await sandbox.revokeSshAccess('specific-token')
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access
-
 # Revoke specific SSH access for the sandbox
 sandbox.revoke_ssh_access(token: 'specific-token')
 ```

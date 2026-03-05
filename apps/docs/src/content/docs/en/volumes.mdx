@@ -47,11 +47,11 @@ The following snippets demonstrate how to create a volume using the Daytona SDK:
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), and [Ruby SDK](/docs/en/ruby-sdk/) references:
 
-> [**volume.get (Python SDK)**](/docs/python-sdk/sync/volume/#volumeserviceget)
+> [**volume.create (Python SDK)**](/docs/en/python-sdk/sync/volume#volumeservicecreate)
 >
-> [**volume.get (TypeScript SDK)**](/docs/typescript-sdk/volume/#get)
+> [**volume.create (TypeScript SDK)**](/docs/en/typescript-sdk/volume#create)
 >
-> [**volume.get (Ruby SDK)**](/docs/ruby-sdk/volume/#get)
+> [**volume.create (Ruby SDK)**](/docs/en/ruby-sdk/volume#create)
 
 ## Mount Volumes
 
@@ -120,7 +120,7 @@ const sandbox1 = await daytona.create({
 const sandbox2 = await daytona.create({
   language: 'typescript',
   volumes: [
-    { volumeId: volume.id, mountPath: mountDir, subpath: 'users/alice' },
+    { volumeId: volume.id, mountPath: mountDir1, subpath: 'users/alice' },
   ],
 })
 ```

@@ -388,11 +388,13 @@ __Flags__
 
 
 ## daytona snapshot push
-Push local snapshot
+Push local Docker image as a snapshot
 
 ```shell
 daytona snapshot push [SNAPSHOT] [flags]
 ```
+
+`[SNAPSHOT]` is the local Docker image reference to push (for example, `custom-alpine:3.21`).
 
 __Flags__
 | Long | Short | Description |
@@ -482,7 +484,7 @@ daytona volume create [NAME] [flags]
 __Flags__
 | Long | Short | Description |
 | :--- | :---- | :---------- |
-| `--size` | `-s` | Size of the volume in GB |
+| `--size` | `-s` | Reserved flag. The current API creates volumes by name and ignores this value |
 | `--help` |  | help for daytona |
 
 

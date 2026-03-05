@@ -25,7 +25,7 @@ Snapshots can be created using:
 3. Enter the **snapshot name**, **image** (tag or digest), **entrypoint**, and **resources**
 
 - **Snapshot name**: Identifier used to reference the snapshot in the SDK or CLI.
-- **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, only specific tags are supported. Same applies to tags such as `lts` or `stable`, and we recommend avoiding those when defining an image to prevent unexpected behavior.
+- **Image**: Base image for the snapshot. Must include either a tag or a digest (e.g., **`ubuntu:22.04`**). The **`latest`** tag is not allowed. Since images tagged `latest` get frequent updates, use immutable version tags or digests to prevent unexpected behavior.
 - **Entrypoint** (optional): The entrypoint command for the snapshot. Ensure that the entrypoint is a long-running command. If not provided, or if the snapshot does not have an entrypoint, `sleep infinity` will be used as the default.
 - [**Resources**](/docs/en/sandboxes#resources) (optional): The resources you want the underlying Sandboxes to have. By default, Daytona Sandboxes use **1 vCPU**, **1GiB memory**, and **3GiB storage**.
 
@@ -256,10 +256,11 @@ Building image from /Users/user/docs/Dockerfile
 Step 1/5 : FROM alpine:latest
 
 ...
- ⡿  Waiting for the Snapshot to be validated ...
+ ⡿  Waiting for the snapshot to be validated ...
 ...
 
- ✓  Use 'harbor-transient.internal.daytona.app/daytona/trying-daytona:0.0.1' to create a new sandbox using this Snapshot
+ Snapshot my-awesome-snapshot successfully created
+ ✓ Run 'daytona sandbox create --snapshot my-awesome-snapshot' to create a new sandbox using this snapshot
 ```
 
 ### Using images from private registries
