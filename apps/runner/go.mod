@@ -5,6 +5,7 @@ go 1.25.4
 require (
 	github.com/containerd/errdefs v1.0.0
 	github.com/coreos/go-iptables v0.8.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.149.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/gin-gonic/gin v1.10.1
@@ -46,7 +47,7 @@ require (
 	github.com/creack/pty v1.1.23 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/distribution/reference v0.6.0 // indirect
-	github.com/docker/cli v29.0.3+incompatible // indirect
+	github.com/docker/cli v29.2.0+incompatible // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
