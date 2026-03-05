@@ -480,6 +480,17 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
     this.logger.debug(`Found ${recoverableSandboxes.length} recoverable sandboxes on draining runner ${runnerId}`)
 
+    const runner = await this.runnerService.findOneOrFail(runnerId)
+
+    if (runner.apiVersion === '2') {
+      this.logger.debug(
+        `Skipping recovery for sandboxes on draining runner ${runnerId} — not supported for runner API v2`,
+      )
+      return
+    }
+
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
     await Promise.allSettled(
       recoverableSandboxes.map(async (sandbox) => {
         const redisKey = `draining:recover:${sandbox.id}`
@@ -500,9 +511,6 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         }
 
         try {
-          const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
-          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-
           await runnerAdapter.recoverSandbox(sandbox)
 
           const updateData: Partial<Sandbox> = {
@@ -515,7 +523,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
           await this.sandboxRepository.updateWhere(sandbox.id, {
             updateData,
-            whereCondition: { state: In([SandboxState.ERROR, SandboxState.STOPPED]) },
+            whereCondition: { pending: false, state: sandbox.state },
           })
 
           this.logger.log(`Recovered sandbox ${sandbox.id} on draining runner ${runnerId}`)
