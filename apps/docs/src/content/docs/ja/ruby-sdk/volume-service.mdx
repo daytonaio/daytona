@@ -1,0 +1,95 @@
+---
+title: "VolumeService"
+hideTitleOnPage: true
+---
+
+## VolumeService \{#volumeservice\}
+
+Daytona のボリュームを管理するためのサービスです。ボリュームの一覧表示、取得、作成、および削除に使用できます。
+
+### コンストラクタ \{#constructors\}
+
+#### new VolumeService() \{#new-volumeservice\}
+
+```ruby
+def initialize(volumes_api, otel_state:)
+
+```
+
+Daytona のボリュームを管理するためのサービスです。ボリュームの一覧表示、取得、作成、削除に使用できます。
+
+**パラメーター**:
+
+* `volumes_api` *DaytonaApiClient:VolumesApi* -
+* `otel_state` *Daytona:OtelState, nil* -
+
+**戻り値**:
+
+* `VolumeService` - VolumeService の新しいインスタンス
+
+### メソッド \{#methods\}
+
+#### create() \{#create\}
+
+```ruby
+def create(name)
+
+```
+
+新しいボリュームを作成します。
+
+**パラメーター**:
+
+* `name` *String* -
+
+**戻り値**:
+
+* `Daytona:Volume`
+
+#### delete() \{#delete\}
+
+```ruby
+def delete(volume)
+
+```
+
+ボリュームを削除します。
+
+**パラメーター**:
+
+* `volume` *Daytona:Volume* -
+
+**戻り値**:
+
+* `void`
+
+#### get() \{#get\}
+
+```ruby
+def get(name, create:)
+
+```
+
+名前を指定してボリュームを取得します。
+
+**パラメーター**:
+
+* `name` *String* -
+* `create` *Boolean* -
+
+**戻り値**:
+
+* `Daytona:Volume`
+
+#### list() \{#list\}
+
+```ruby
+def list()
+
+```
+
+すべてのボリュームを一覧表示します。
+
+**戻り値**:
+
+* `Array\<Daytona:Volume\>`
