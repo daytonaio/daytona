@@ -1,0 +1,146 @@
+name: daytona-dev
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=user
+      - POSTGRES_DB=daytona
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data_dev:/var/lib/postgresql/18/docker
+    networks:
+      - daytona-dev-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - daytona-dev-network
+    restart: unless-stopped
+
+  registry:
+    image: registry:2.8.2
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_HTTP_ADDR: registry:6000
+    volumes:
+      - registry_dev:/var/lib/registry
+    networks:
+      - daytona-dev-network
+    ports:
+      - "6000:6000"
+    restart: unless-stopped
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Daytona Dev Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://registry:6000
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=1000
+    networks:
+      - daytona-dev-network
+    ports:
+      - "5100:80"
+    restart: unless-stopped
+    profiles:
+      - tools
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_IDENTITY_STS_EXPIRY=24h
+    volumes:
+      - minio_data_dev:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - daytona-dev-network
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    restart: unless-stopped
+
+  runner:
+    image: daytonaio/daytona-runner
+    environment:
+      - ENVIRONMENT=development
+      - API_PORT=3003
+      - DAYTONA_RUNNER_TOKEN=${DEFAULT_RUNNER_API_KEY:-local_runner_key}
+      - LOG_FILE_PATH=/home/daytona/runner/runner.log
+      - RESOURCE_LIMITS_DISABLED=true
+      - AWS_ENDPOINT_URL=http://minio:9000
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+      - AWS_DEFAULT_BUCKET=daytona
+      - DAYTONA_API_URL=${DAYTONA_API_URL:-http://host.docker.internal:3001/api}
+      - RUNNER_DOMAIN=runner
+      - SSH_GATEWAY_ENABLE=false
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - daytona-dev-network
+    ports:
+      - "3003:3003"
+    privileged: true
+    depends_on:
+      - db
+      - redis
+      - registry
+      - minio
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@daytona.io
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    user: root
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./pgadmin4/pgpass:/pgpass
+    depends_on:
+      - db
+    ports:
+      - "5050:80"
+    networks:
+      - daytona-dev-network
+    restart: unless-stopped
+    profiles:
+      - tools
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.67.0
+    networks:
+      - daytona-dev-network
+    ports:
+      - "16686:16686"
+    restart: unless-stopped
+    profiles:
+      - observability
+
+volumes:
+  db_data_dev: {}
+  registry_dev: {}
+  minio_data_dev: {}
+
+networks:
+  daytona-dev-network:
+    driver: bridge
