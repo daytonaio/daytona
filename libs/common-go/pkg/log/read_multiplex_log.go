@@ -52,6 +52,8 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 		return idxErr, streamStderr, len(STDERR_PREFIX)
 	}
 
+	sleepTimer := time.NewTimer(0)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -167,10 +169,11 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 						return
 					}
 					// If following, just continue waiting for more data.
+					sleepTimer.Reset(50 * time.Millisecond)
 					select {
 					case <-ctx.Done():
 						return
-					case <-time.After(50 * time.Millisecond):
+					case <-sleepTimer.C:
 					}
 				} else {
 					// Err already sent to channel above

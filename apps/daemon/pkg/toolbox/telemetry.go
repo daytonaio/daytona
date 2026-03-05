@@ -56,6 +56,13 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 	}
 	s.logger = newLogger
 
+	if s.entrypointLogCancel != nil {
+		s.entrypointLogCancel()
+	}
+
+	entrypointCtx, entrypointCancel := context.WithCancel(s.ctx)
+	s.entrypointLogCancel = entrypointCancel
+
 	go func() {
 		if entrypointLogFilePath == "" {
 			return
@@ -71,10 +78,10 @@ func (s *server) initTelemetry(ctx context.Context, serviceName, entrypointLogFi
 		errChan := make(chan error, 1)
 		stdoutChan := make(chan []byte)
 		stderrChan := make(chan []byte)
-		go log.ReadMultiplexedLog(s.ctx, entrypointLogFile, true, stdoutChan, stderrChan, errChan)
+		go log.ReadMultiplexedLog(entrypointCtx, entrypointLogFile, true, stdoutChan, stderrChan, errChan)
 		for {
 			select {
-			case <-s.ctx.Done():
+			case <-entrypointCtx.Done():
 				return
 			case line := <-stdoutChan:
 				s.logger.InfoContext(telemetryContext, string(line), "daytona-entrypoint", true)

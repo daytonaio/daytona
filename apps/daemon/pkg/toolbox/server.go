@@ -89,6 +89,7 @@ type server struct {
 	configDir                            string
 	recordingService                     *recording.RecordingService
 	entrypointLogFilePath                string
+	entrypointLogCancel                  context.CancelFunc
 	httpServer                           *http.Server
 	ctx                                  context.Context
 	cancel                               context.CancelFunc
