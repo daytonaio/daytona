@@ -33,7 +33,7 @@ export interface ExecuteRequest {
      */
     'cwd'?: string;
     /**
-     * Timeout in seconds, defaults to 10 seconds
+     * Timeout in seconds, defaults to 360 seconds (6 minutes)
      * @type {number}
      * @memberof ExecuteRequest
      */

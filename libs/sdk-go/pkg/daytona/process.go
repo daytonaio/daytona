@@ -111,13 +111,8 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 			return nil, errors.ConvertToolboxError(err, httpResp)
 		}
 
-		exitCode := 0
-		if resp.ExitCode != nil {
-			exitCode = int(*resp.ExitCode)
-		}
-
 		return &types.ExecuteResponse{
-			ExitCode: exitCode,
+			ExitCode: int(resp.GetExitCode()),
 			Result:   resp.Result,
 		}, nil
 	})

@@ -69,6 +69,8 @@ module DaytonaToolboxApiClient
 
       if attributes.key?(:'exit_code')
         self.exit_code = attributes[:'exit_code']
+      else
+        self.exit_code = nil
       end
 
       if attributes.key?(:'result')
@@ -83,6 +85,10 @@ module DaytonaToolboxApiClient
     def list_invalid_properties
       warn '[DEPRECATED] the `list_invalid_properties` method is obsolete'
       invalid_properties = Array.new
+      if @exit_code.nil?
+        invalid_properties.push('invalid value for "exit_code", exit_code cannot be nil.')
+      end
+
       if @result.nil?
         invalid_properties.push('invalid value for "result", result cannot be nil.')
       end
@@ -94,8 +100,19 @@ module DaytonaToolboxApiClient
     # @return true if the model is valid
     def valid?
       warn '[DEPRECATED] the `valid?` method is obsolete'
+      return false if @exit_code.nil?
       return false if @result.nil?
       true
+    end
+
+    # Custom attribute writer method with validation
+    # @param [Object] exit_code Value to be assigned
+    def exit_code=(exit_code)
+      if exit_code.nil?
+        fail ArgumentError, 'exit_code cannot be nil'
+      end
+
+      @exit_code = exit_code
     end
 
     # Custom attribute writer method with validation

@@ -119,7 +119,7 @@ definitions:
         description: Current working directory
         type: string
       timeout:
-        description: Timeout in seconds, defaults to 10 seconds
+        description: Timeout in seconds, defaults to 360 seconds (6 minutes)
         type: integer
     required:
       - command
@@ -131,6 +131,7 @@ definitions:
       result:
         type: string
     required:
+      - exitCode
       - result
     type: object
   FileInfo:

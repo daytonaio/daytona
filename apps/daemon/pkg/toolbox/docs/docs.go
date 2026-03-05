@@ -3039,7 +3039,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "timeout": {
-                    "description": "Timeout in seconds, defaults to 10 seconds",
+                    "description": "Timeout in seconds, defaults to 360 seconds (6 minutes)",
                     "type": "integer"
                 }
             }
@@ -3047,6 +3047,7 @@ const docTemplate = `{
         "ExecuteResponse": {
             "type": "object",
             "required": [
+                "exitCode",
                 "result"
             ],
             "properties": {
