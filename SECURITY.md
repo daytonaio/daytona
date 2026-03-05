@@ -82,4 +82,4 @@ We follow a coordinated disclosure process:
 
 ## Rewards
 
-Daytona evaluates rewards on a case-by-case basis for valid, original findings that demonstrate real security impact. Severity, report quality, and exploitability are all considered. Duplicate reports are credited to the first submission.
+We offer rewards from $100 to $1,000 for valid, original findings that demonstrate real security impact. Severity, exploitability, and report quality are all considered. Duplicate reports are credited to the first submission.
