@@ -34,93 +34,91 @@ export class SandboxArchiveAction extends SandboxAction {
 
   @WithSpan()
   async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+    // Only proceed with archiving if the sandbox is in STOPPED, ARCHIVING or ERROR (runner draining) state.
+    // For all other states, do not proceed with archiving.
+    if (
+      sandbox.state !== SandboxState.STOPPED &&
+      sandbox.state !== SandboxState.ARCHIVING &&
+      sandbox.state !== SandboxState.ERROR
+    ) {
+      return DONT_SYNC_AGAIN
+    }
+
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
     }
 
-    switch (sandbox.state) {
-      case SandboxState.STOPPED:
-      case SandboxState.ARCHIVING:
-      case SandboxState.ERROR: {
-        const isFromErrorState = sandbox.state === SandboxState.ERROR
+    const isFromErrorState = sandbox.state === SandboxState.ERROR
 
-        await this.redisLockProvider.unlock(lockKey)
+    await this.redisLockProvider.unlock(lockKey)
 
-        //  if the backup state is error, we need to retry the backup
-        if (sandbox.backupState === BackupState.ERROR) {
-          const archiveErrorRetryKey = 'archive-error-retry-' + sandbox.id
-          const archiveErrorRetryCountRaw = await this.redis.get(archiveErrorRetryKey)
-          const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
-          //  if the archive error retry count is greater than 3, we need to mark the sandbox as error
-          if (archiveErrorRetryCount > 3) {
-            // Only transition to ERROR if not already in ERROR state
-            if (!isFromErrorState) {
-              await this.updateSandboxState(
-                sandbox,
-                SandboxState.ERROR,
-                lockCode,
-                undefined,
-                'Failed to archive sandbox after 3 retries',
-              )
-            }
-            await this.redis.del(archiveErrorRetryKey)
-            return DONT_SYNC_AGAIN
-          }
-          await this.redis.setex('archive-error-retry-' + sandbox.id, 720, String(archiveErrorRetryCount + 1))
-
-          //  recreate the backup to retry
-          this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
-
-          return DONT_SYNC_AGAIN
+    //  if the backup state is error, we need to retry the backup
+    if (sandbox.backupState === BackupState.ERROR) {
+      const archiveErrorRetryKey = 'archive-error-retry-' + sandbox.id
+      const archiveErrorRetryCountRaw = await this.redis.get(archiveErrorRetryKey)
+      const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
+      //  if the archive error retry count is greater than 3, we need to mark the sandbox as error
+      if (archiveErrorRetryCount > 3) {
+        // Only transition to ERROR if not already in ERROR state
+        if (!isFromErrorState) {
+          await this.updateSandboxState(
+            sandbox,
+            SandboxState.ERROR,
+            lockCode,
+            undefined,
+            'Failed to archive sandbox after 3 retries',
+          )
         }
+        await this.redis.del(archiveErrorRetryKey)
+        return DONT_SYNC_AGAIN
+      }
+      await this.redis.setex('archive-error-retry-' + sandbox.id, 720, String(archiveErrorRetryCount + 1))
 
-        if (sandbox.backupState !== BackupState.COMPLETED) {
-          return DONT_SYNC_AGAIN
-        }
+      // recreate the backup to retry
+      this.eventEmitter.emit(SandboxEvents.BACKUP_CREATED, new SandboxBackupCreatedEvent(sandbox))
 
-        //  when the backup is completed, destroy the sandbox on the runner
-        //  and deassociate the sandbox from the runner
-        const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
-        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+      return DONT_SYNC_AGAIN
+    }
 
-        try {
-          const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-          switch (sandboxInfo.state) {
-            case SandboxState.DESTROYING:
-              //  wait until sandbox is destroyed on runner
-              return SYNC_AGAIN
-            case SandboxState.DESTROYED:
-              if (isFromErrorState) {
-                this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
-              }
-              await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
-              return DONT_SYNC_AGAIN
-            default:
-              await runnerAdapter.destroySandbox(sandbox.id)
-              return SYNC_AGAIN
-          }
-        } catch (error) {
-          //  fail for errors other than sandbox not found or sandbox already destroyed
-          if (
-            !(
-              (error.response?.data?.statusCode === 400 &&
-                error.response?.data?.message.includes('Sandbox already destroyed')) ||
-              error.response?.status === 404
-            )
-          ) {
-            throw error
-          }
-          //  if the sandbox is already destroyed, do nothing
+    if (sandbox.backupState !== BackupState.COMPLETED) {
+      return DONT_SYNC_AGAIN
+    }
+
+    //  when the backup is completed, destroy the sandbox on the runner
+    //  and deassociate the sandbox from the runner
+    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+    try {
+      const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
+      switch (sandboxInfo.state) {
+        case SandboxState.DESTROYING:
+          //  wait until sandbox is destroyed on runner
+          return SYNC_AGAIN
+        case SandboxState.DESTROYED:
           if (isFromErrorState) {
             this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
           }
           await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
           return DONT_SYNC_AGAIN
-        }
+        default:
+          await runnerAdapter.destroySandbox(sandbox.id)
+          return SYNC_AGAIN
+      }
+    } catch (error) {
+      //  fail for errors other than sandbox not found or sandbox already destroyed
+      if (error.response?.status !== 404) {
+        throw error
       }
     }
 
+    //  if the sandbox is already destroyed, do nothing
+    if (isFromErrorState) {
+      this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)
+    }
+
+    await this.updateSandboxState(sandbox, SandboxState.ARCHIVED, lockCode, null)
     return DONT_SYNC_AGAIN
   }
 }

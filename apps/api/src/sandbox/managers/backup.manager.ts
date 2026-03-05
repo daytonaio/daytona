@@ -488,7 +488,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
 
       //  check if backup is already in progress on the runner
       const runnerSandbox = await runnerAdapter.sandboxInfo(sandbox.id)
-      if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
+      if (runnerSandbox.backupState === BackupState.IN_PROGRESS) {
         await this.sandboxService.updateSandboxBackupState(sandbox.id, BackupState.IN_PROGRESS)
         return
       }

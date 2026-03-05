@@ -38,7 +38,7 @@ func (s *SandboxService) GetSandboxInfo(ctx context.Context, sandboxId string) (
 	}
 
 	if sandboxState == enums.SandboxStateDestroyed {
-		s.log.Warn("Sandbox returned sandbox state DESTROYED without an error,sandbox is in DEAD state", "sandbox_id", sandboxId)
+		s.log.Warn("Sandbox returned sandbox state DESTROYED without an error, sandbox is in DEAD state", "sandbox_id", sandboxId)
 
 		err := s.backupInfoCache.Delete(ctx, sandboxId)
 		if err != nil {

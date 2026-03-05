@@ -248,10 +248,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created RECOVER_SANDBOX job for sandbox ${sandbox.id} on runner ${this.runner.id}`)
   }
 
-  async removeDestroyedSandbox(_sandboxId: string): Promise<void> {
-    throw new Error('removeDestroyedSandbox is not supported for V2 runners')
-  }
-
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {
     const payload: CreateBackupDTO = {
       snapshot: backupSnapshotName,
