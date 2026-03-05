@@ -7,8 +7,8 @@
 ```mermaid
 flowchart LR
   subgraph mac[macOS ARM 开发机]
-    api[API Server :3000]
-    dashboard[Dashboard :5173]
+    api[API Server :3001]
+    dashboard[Dashboard :3000]
   end
   subgraph docker[Docker Desktop for Mac]
     db[(PostgreSQL :5432)]
@@ -100,67 +100,51 @@ yarn install
 
 ## 启动开发环境
 
-### 方案 A：仅开发 API / Dashboard（不需要实际创建 Sandbox）
+### 方案 A（推荐）：轻量开发模式
 
-适合前端开发、API 接口开发、认证逻辑调试等场景。
-
-```bash
-# 1. 启动基础设施（数据库、缓存、存储）
-docker-compose -f docker/docker-compose.yaml up -d db redis minio registry
-
-# 2. 配置 API 环境变量
-cp docker/docker-compose.yaml apps/api/.env.reference  # 参考配置
-```
-
-在 `apps/api/.env` 中配置以下关键变量：
+基础设施容器化运行，API 和 Dashboard 本机运行，适合高频迭代。
 
 ```bash
-# apps/api/.env
-DATABASE_URL=postgresql://daytona:daytona@localhost:5432/daytona
-REDIS_URL=redis://localhost:6379
-MINIO_ENDPOINT=localhost
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-ADMIN_PASSWORD=devpassword
-ENCRYPTION_KEY=devencryptionkey32byteslong12345
-ENCRYPTION_SALT=devsalt16bytes12
-SERVER_IP=localhost
-PROXY_API_KEY=dev_proxy_key
+# 1. 启动开发基础设施（db/redis/minio/registry/runner）
+yarn dev:start
+
+# 2. 首次开发时准备 API 配置
+cp apps/api/.env.example apps/api/.env
+
+# 3. 在新终端启动 API（热重载）
+yarn dev:api
+
+# 4. 在新终端启动 Dashboard（Vite）
+yarn dev:dashboard
 ```
+
+访问地址：
+- Dashboard: `http://localhost:3000`
+- API: `http://localhost:3001`
+- Runner: `http://localhost:3003`
+
+可选命令：
 
 ```bash
-# 3. 启动 API 开发服务器（支持热重载）
-cd apps/api
-yarn start:dev
+# 一键启动基础设施 + API + Dashboard
+yarn dev:full
 
-# 4. 在另一个终端启动 Dashboard
-cd apps/dashboard
-yarn dev
+# 环境诊断 / 状态 / 日志
+yarn dev:doctor
+yarn dev:status
+yarn dev:logs
 ```
 
-Dashboard 将在 `http://localhost:5173` 可访问，自动代理 API 请求到 `:3000`。
+### 方案 B：全容器模式（完整集成验证）
 
-### 方案 B：完整功能（含 Sandbox 创建）
-
-适合测试 Sandbox 生命周期、执行代码等完整功能场景。
+适合联调整体部署行为时使用：
 
 ```bash
-# 启动所有基础设施，包含 Runner（Linux/amd64 容器）
-docker-compose -f docker/docker-compose.yaml up -d db redis minio registry runner
-
-# 确认 runner 正常运行
-docker-compose -f docker/docker-compose.yaml logs runner
+docker compose -f docker/docker-compose.yaml up -d
+docker compose -f docker/docker-compose.yaml ps
 ```
 
-Runner 以 Linux 容器形式运行在 Docker Desktop 的虚拟机中，API 本机运行后通过 `localhost:3003` 连接 Runner。
-
-在 `apps/api/.env` 中额外配置 Runner 连接：
-
-```bash
-DEFAULT_RUNNER_API_URL=http://localhost:3003
-DEFAULT_RUNNER_API_KEY=local_runner_key
-```
+该模式会同时运行 API、Proxy、Runner、SSH Gateway、Dashboard 以及全部依赖服务。
 
 ## Runner 在 macOS 的限制
 
@@ -189,7 +173,7 @@ sequenceDiagram
   participant runner as Runner（Docker）
   participant db as PostgreSQL（Docker）
 
-  dev->>api: yarn start:dev（热重载）
+  dev->>api: yarn dev:api（热重载）
   api->>db: 连接数据库
   note over api: 监听文件变化
   dev->>api: 修改代码文件
@@ -202,8 +186,8 @@ sequenceDiagram
 
 ### 热重载说明
 
-- **API**（`yarn start:dev`）：NestJS 使用 `--watch` 模式，文件保存后自动重新编译并重启，通常在 2 秒内完成
-- **Dashboard**（`yarn dev`）：Vite HMR，组件修改即时反映在浏览器，无需刷新
+- **API**（`yarn dev:api`）：NestJS `watch` 模式，文件保存后自动重新编译并重启
+- **Dashboard**（`yarn dev:dashboard`）：Vite HMR，组件修改即时反映在浏览器，无需刷新
 
 ### 常用开发命令
 
@@ -271,17 +255,17 @@ node --version
 
 确认 Docker 容器正在运行：
 ```bash
-docker-compose -f docker/docker-compose.yaml ps
-docker-compose -f docker/docker-compose.yaml logs db
+docker compose -f docker/docker-compose.dev.yml ps
+docker compose -f docker/docker-compose.dev.yml logs db
 ```
 
 **Q: Runner 容器无法启动？**
 
 检查 Docker Desktop 是否已启用特权模式支持，并查看日志：
 ```bash
-docker-compose -f docker/docker-compose.yaml logs runner
+docker compose -f docker/docker-compose.dev.yml logs runner
 ```
 
 **Q: Dashboard 访问 API 报 CORS 错误？**
 
-确认 Vite 代理配置正确（`apps/dashboard/vite.config.ts`），API 应监听在 `localhost:3000`。
+确认 Vite 代理配置正确（`apps/dashboard/vite.config.mts`），API 应监听在 `localhost:3001`。

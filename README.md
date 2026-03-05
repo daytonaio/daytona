@@ -366,18 +366,44 @@ server {
 # 1. 安装依赖
 yarn install
 
-# 2. 启动基础设施（数据库、缓存、存储）
-docker-compose -f docker/docker-compose.yaml up -d db redis minio registry
+# 2. 启动开发基础设施（db/redis/minio/registry/runner）
+yarn dev:start
 
-# 3. 启动 API 开发服务器
-cd apps/api
-cp ../../docker/.env.example .env  # 参考配置
-yarn start:dev
+# 3. 启动 API（热重载）
+yarn dev:api
 
-# 4. 启动 Dashboard 开发服务器
-cd apps/dashboard
-yarn dev
+# 4. 启动 Dashboard（Vite）
+yarn dev:dashboard
 ```
+
+常用开发命令：
+
+```bash
+# 一键启动基础设施 + API + Dashboard
+yarn dev:full
+
+# 查看容器状态/日志
+yarn dev:status
+yarn dev:logs
+
+# 停止开发基础设施
+yarn dev:stop
+
+# 环境诊断
+yarn dev:doctor
+```
+
+`yarn dev:full` 一键模式包含以下自动处理：
+- 自动读取 `apps/api/.env` 并将 `DEFAULT_RUNNER_API_KEY` 注入到开发容器，避免 Runner 与 API token 不一致。
+- 若 `.env` 中配置的数据库不存在（例如 `application_ctx`），会自动在本地 PostgreSQL 容器中创建。
+- 自动将不适合宿主机开发的地址做本地化兜底（如 `db/redis/minio/otel-collector`）。
+- 自动将镜像仓库地址规范到 `host.docker.internal:6000`，保证宿主机 API 与容器内 Runner 都可访问。
+
+首次启动时，Dashboard 可能短暂出现 `/api/config ECONNREFUSED`（API 仍在编译启动），通常会在 API 就绪后自动恢复。
+
+双模式说明：
+- 轻量模式（推荐）：`docker/docker-compose.dev.yml` + 本机 API/Dashboard 热更新
+- 全容器模式：`docker/docker-compose.yaml`（用于完整集成验证）
 
 ### 构建 Docker 镜像
 

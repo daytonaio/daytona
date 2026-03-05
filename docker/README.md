@@ -40,6 +40,19 @@ The Docker Compose configuration includes all the necessary services to run Dayt
    - Registry UI: http://localhost:5100
    - MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
 
+## Local Development (Light Mode)
+
+Use the development compose file when you want Dockerized infra + locally running API/Dashboard:
+
+```bash
+# from repository root
+yarn dev:start
+yarn dev:api
+yarn dev:dashboard
+```
+
+This uses `docker/docker-compose.dev.yml` and keeps the full stack compose (`docker/docker-compose.yaml`) for integration/deployment validation.
+
 ## DNS Setup for Proxy URLs
 
 For local development, you need to resolve `*.proxy.localhost` domains to `127.0.0.1`:
