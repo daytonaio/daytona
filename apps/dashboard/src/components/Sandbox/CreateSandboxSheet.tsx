@@ -221,10 +221,12 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0]
       if (!file) return
+
       const reader = new FileReader()
       reader.onload = () => {
         const parsed = parseEnvFile(reader.result as string)
         if (parsed.length === 0) return
+
         const existing = form.getFieldValue('envVars') ?? []
         const nonEmpty = existing.filter((p) => p.key || p.value)
         form.setFieldValue('envVars', [...nonEmpty, ...parsed])
@@ -260,9 +262,9 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
     }
   }, [open, resetState])
 
-  // if (!createSandboxEnabled) {
-  //   return null
-  // }
+  if (!createSandboxEnabled) {
+    return null
+  }
 
   return (
     <Sheet
@@ -679,9 +681,10 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                       <input
                         ref={envFileInputRef}
                         type="file"
-                        accept=".env,.env.*,.txt"
+                        accept="env"
                         className="hidden"
                         onChange={handleEnvFileImport}
+                        aria-hidden="true"
                       />
                       <label
                         className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer"
