@@ -1085,3 +1085,98 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**MoveFiles (Go SDK)**](/docs/en/go-sdk/daytona/#FileSystemService.MoveFiles)
 >
 > [**move or rename file or directory (API)**](/docs/en/tools/api/#daytona-toolbox/tag/file-system/POST/files/move)
+
+### AI-powered code search with WarpGrep
+
+[WarpGrep](https://docs.morphllm.com/sdk/components/warp-grep/tool) is an AI code search tool by [Morph](https://www.morphllm.com), an external company. It runs as an isolated subagent that searches your codebase and returns only the relevant file spans, keeping your primary agent's context clean.
+
+WarpGrep works with Daytona sandboxes through the `remoteCommands` pattern, which wires its search primitives (grep, read, list directory) to commands executed inside your sandbox.
+
+:::note
+WarpGrep requires a Morph API key. Get one at [morphllm.com/dashboard](https://www.morphllm.com/dashboard).
+:::
+
+<Tabs syncKey="language">
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+import { Daytona } from '@daytonaio/sdk'
+import { createWarpGrepTool } from '@morphllm/morphsdk/tools/warp-grep/anthropic'
+
+const daytona = new Daytona()
+const sandbox = await daytona.create()
+
+const warpGrep = createWarpGrepTool({
+  apiKey: process.env.MORPH_API_KEY,
+  remoteCommands: {
+    grep: async (pattern, path, flags) => {
+      const cmd = `rg --line-number --no-heading --color never ${flags ?? ''} '${pattern}' '${path}'`
+      const res = await sandbox.process.executeCommand(cmd)
+      return res.result
+    },
+    read: async (filePath, startLine, endLine) => {
+      const cmd = `sed -n '${startLine},${endLine}p' '${filePath}'`
+      const res = await sandbox.process.executeCommand(cmd)
+      return res.result
+    },
+    listDir: async (dirPath, maxDepth) => {
+      const cmd = `find '${dirPath}' -maxdepth ${maxDepth} -not -path '*/.git/*' -not -path '*/node_modules/*'`
+      const res = await sandbox.process.executeCommand(cmd)
+      return res.result
+    },
+  },
+})
+
+// Pass warpGrep as a tool to your LLM of choice
+```
+
+</TabItem>
+<TabItem label="Python" icon="seti:python">
+
+WarpGrep can be used from Python via the [direct API protocol](https://docs.morphllm.com/sdk/components/warp-grep/direct). Execute tool calls inside the Daytona sandbox and send results back to the Morph API.
+
+```python
+import os
+import requests
+
+from daytona import Daytona
+
+daytona = Daytona()
+sandbox = daytona.create()
+
+MORPH_API_KEY = os.environ["MORPH_API_KEY"]
+
+# Generate repo structure from sandbox
+tree_result = sandbox.process.exec(
+    "find . -maxdepth 2 -not -path '*/.git/*' -not -path '*/node_modules/*'"
+)
+
+# Send initial query to WarpGrep
+response = requests.post(
+    "https://api.morphllm.com/v1/chat/completions",
+    headers={"Authorization": f"Bearer {MORPH_API_KEY}"},
+    json={
+        "model": "morph-warp-grep-v2",
+        "messages": [
+            {
+                "role": "user",
+                "content": (
+                    f"<repo_structure>{tree_result.result}</repo_structure>\n"
+                    f"<search_string>Find the authentication middleware</search_string>"
+                ),
+            }
+        ],
+        "temperature": 0.0,
+        "max_tokens": 2048,
+    },
+)
+
+# Parse tool calls from response, execute them in the sandbox,
+# and continue the multi-turn loop (max 4 turns) until finish is called.
+# See: https://docs.morphllm.com/sdk/components/warp-grep/direct
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [WarpGrep Tool SDK](https://docs.morphllm.com/sdk/components/warp-grep/tool) and [Direct API](https://docs.morphllm.com/sdk/components/warp-grep/direct) references.
