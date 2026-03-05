@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/containerd/errdefs"
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
@@ -114,22 +115,9 @@ func (d *DockerClient) ContainerDiskResize(ctx context.Context, sandboxId string
 	// Ensure the image is available for container recreation.
 	// ImageInspect works for both tags and IDs, unlike ImageExists which only matches tags.
 	// If the image was removed (e.g., after a backup push), pull it from the registry if provided.
-	imageRef := originalContainer.Config.Image
-	_, err = d.apiClient.ImageInspect(ctx, imageRef)
-	if err != nil {
-		if registry == nil {
-			d.logger.WarnContext(ctx, "Image not found by tag, falling back to image ID",
-				"imageRef", imageRef, "imageID", originalContainer.Image)
-			originalContainer.Config.Image = originalContainer.Image
-		} else {
-			d.logger.WarnContext(ctx, "Image not found locally, pulling from registry before resize",
-				"sandboxId", sandboxId, "imageRef", imageRef)
-			_, pullErr := d.PullImage(ctx, imageRef, registry)
-			if pullErr != nil {
-				_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
-				return fmt.Errorf("image %s not available locally and pull failed: %w", imageRef, pullErr)
-			}
-		}
+	if err = d.resolveContainerImage(ctx, &originalContainer, registry); err != nil {
+		_ = d.apiClient.ContainerRename(ctx, oldName, sandboxId)
+		return err
 	}
 
 	// Create new container with new storage
@@ -237,4 +225,42 @@ func (d *DockerClient) copyContainerOverlayData(ctx context.Context, oldContaine
 	defer cancel()
 
 	return common.RsyncCopy(copyCtx, d.logger, oldContainerOverlayPath, newUpperDir)
+}
+
+// resolveContainerImage ensures the image referenced by the container config is available locally.
+// It tries the tag first, then falls back to the image ID, and finally pulls from the registry.
+// If the image ID is used as a fallback, originalContainer.Config.Image is updated in place.
+func (d *DockerClient) resolveContainerImage(ctx context.Context, originalContainer *container.InspectResponse, registry *dto.RegistryDTO) error {
+	imageRef := originalContainer.Config.Image
+
+	_, err := d.apiClient.ImageInspect(ctx, imageRef)
+	if err == nil {
+		return nil
+	}
+	if !errdefs.IsNotFound(err) {
+		return fmt.Errorf("failed to inspect image %s: %w", imageRef, err)
+	}
+
+	// Tag not found — try the image ID before touching the network.
+	_, idErr := d.apiClient.ImageInspect(ctx, originalContainer.Image)
+	if idErr == nil {
+		d.logger.WarnContext(ctx, "Image not found by tag, falling back to image ID",
+			"imageRef", imageRef, "imageID", originalContainer.Image)
+		originalContainer.Config.Image = originalContainer.Image
+		return nil
+	}
+	if !errdefs.IsNotFound(idErr) {
+		return fmt.Errorf("failed to inspect image by ID %s: %w", originalContainer.Image, idErr)
+	}
+
+	// Both tag and ID not found — pull from registry as last resort.
+	if registry == nil {
+		return fmt.Errorf("image %s not available locally and no registry provided", imageRef)
+	}
+	d.logger.WarnContext(ctx, "Image not found locally, pulling from registry before resize",
+		"containerName", originalContainer.Name, "imageRef", imageRef)
+	if _, pullErr := d.PullImage(ctx, imageRef, registry); pullErr != nil {
+		return fmt.Errorf("image %s not available locally and pull failed: %w", imageRef, pullErr)
+	}
+	return nil
 }

@@ -1417,7 +1417,7 @@ export class SandboxService {
 
     await this.sandboxRepository.updateWhere(sandbox.id, {
       updateData,
-      whereCondition: { recoverable: true },
+      whereCondition: { recoverable: true, pending: false, state: sandbox.state },
     })
 
     if (skipStart) {
