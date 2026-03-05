@@ -150,7 +150,27 @@ export class SandboxActivityService {
   private async bulkUpsertActivity(updates: { sandboxId: string; lastActivityAt: Date }[]): Promise<void> {
     if (updates.length === 0) return
 
-    await this.dataSource.getRepository(SandboxLastActivity).upsert(updates, ['sandboxId'])
+    try {
+      await this.dataSource.getRepository(SandboxLastActivity).upsert(updates, ['sandboxId'])
+    } catch (error) {
+      if (error.code === '23503') {
+        // FK violation: a sandbox was deleted between ZPOPMIN and upsert.
+        // Fall back to individual upserts so only the deleted sandbox is skipped.
+        for (const update of updates) {
+          try {
+            await this.dataSource.getRepository(SandboxLastActivity).upsert(update, ['sandboxId'])
+          } catch (innerError) {
+            if (innerError.code === '23503') {
+              this.logger.warn(`Skipping activity flush for sandbox ${update.sandboxId} (deleted)`)
+            } else {
+              throw innerError
+            }
+          }
+        }
+      } else {
+        throw error
+      }
+    }
   }
 
   @OnEvent(SandboxEvents.CREATED)
