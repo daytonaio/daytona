@@ -1618,6 +1618,9 @@
         "osUser": {
           "type": "string"
         },
+        "registry": {
+          "$ref": "#/definitions/RegistryDTO"
+        },
         "snapshot": {
           "type": "string"
         },
@@ -1729,6 +1732,9 @@
         },
         "daemonVersion": {
           "type": "string"
+        },
+        "recoverable": {
+          "type": "boolean"
         },
         "state": {
           "$ref": "#/definitions/enums.SandboxState"

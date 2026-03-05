@@ -357,6 +357,7 @@ func Info(ctx *gin.Context) {
 		State:         info.SandboxState,
 		BackupState:   info.BackupState,
 		BackupError:   info.BackupErrorReason,
+		Recoverable:   info.BackupErrorReason != nil && common.IsRecoverable(*info.BackupErrorReason),
 		DaemonVersion: daemonVersion,
 	})
 }
@@ -365,6 +366,7 @@ type SandboxInfoResponse struct {
 	State         enums.SandboxState `json:"state"`
 	BackupState   enums.BackupState  `json:"backupState"`
 	BackupError   *string            `json:"backupError,omitempty"`
+	Recoverable   bool               `json:"recoverable"`
 	DaemonVersion *string            `json:"daemonVersion,omitempty"`
 } //	@name	SandboxInfoResponse
 

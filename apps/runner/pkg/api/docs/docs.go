@@ -1740,6 +1740,9 @@ const docTemplate = `{
                 "osUser": {
                     "type": "string"
                 },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
                 "snapshot": {
                     "type": "string"
                 },
@@ -1853,6 +1856,9 @@ const docTemplate = `{
                 },
                 "daemonVersion": {
                     "type": "string"
+                },
+                "recoverable": {
+                    "type": "boolean"
                 },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
