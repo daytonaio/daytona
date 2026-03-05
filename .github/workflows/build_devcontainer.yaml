@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout (GitHub)
         uses: actions/checkout@v4
@@ -28,8 +31,8 @@ jobs:
           # see: https://github.com/devcontainers/ci/issues/191#issuecomment-1603857155
           BUILDX_NO_DEFAULT_ATTESTATIONS: true
         with:
-          imageName: ghcr.io/daytonaio/daytona-devcontainer
-          cacheFrom: ghcr.io/daytonaio/daytona-devcontainer
+          imageName: ghcr.io/${{ github.repository_owner }}/daytona-devcontainer
+          cacheFrom: ghcr.io/${{ github.repository_owner }}/daytona-devcontainer
           platform: linux/amd64,linux/arm64
-          imageTag: main,latest
+          imageTag: latest
           configFile: .devcontainer/devcontainer.build.json

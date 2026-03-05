@@ -28,7 +28,7 @@
     "docs": "nx run-many --target=docs --all",
     "publish": "nx run-many --target=publish --all",
     "prepare-release": "nx run-many --target=prepare-release --all",
-"push-manifest": "nx run-many --target=push-manifest --all --parallel=$(getconf _NPROCESSORS_ONLN)"
+    "push-manifest": "nx run-many --target=push-manifest --all --parallel=$(getconf _NPROCESSORS_ONLN)"
   },
   "dependencies": {
     "@astrojs/mdx": "2.2.4",
@@ -54,6 +54,7 @@
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.8",
     "@nestjs/event-emitter": "^3.0.1",
+    "@nestjs/jwt": "^11.0.1",
     "@nestjs/microservices": "^11.1.8",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.8",

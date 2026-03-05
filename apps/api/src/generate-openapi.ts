@@ -12,7 +12,7 @@ async function generateOpenAPI() {
       logger: ['error'], // Reduce logging noise
     })
 
-    const config = getOpenApiConfig('http://localhost:3000')
+    const config = getOpenApiConfig()
 
     const document = {
       ...SwaggerModule.createDocument(app, config),

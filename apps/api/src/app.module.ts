@@ -178,9 +178,21 @@ import { FeatureFlags } from './common/constants/feature-flags'
         }
       },
       defaultProvider: new InMemoryProvider({
-        [FeatureFlags.ORGANIZATION_INFRASTRUCTURE]: { defaultVariant: 'on', variants: { on: true, off: false } },
-        [FeatureFlags.SANDBOX_RESIZE]: { defaultVariant: 'on', variants: { on: true, off: false } },
-        organization_experiments: { defaultVariant: 'on', variants: { on: true, off: false } },
+        [FeatureFlags.ORGANIZATION_INFRASTRUCTURE]: {
+          defaultVariant: 'on',
+          variants: { on: true, off: false },
+          disabled: false,
+        },
+        [FeatureFlags.SANDBOX_RESIZE]: {
+          defaultVariant: 'on',
+          variants: { on: true, off: false },
+          disabled: false,
+        },
+        organization_experiments: {
+          defaultVariant: 'on',
+          variants: { on: true, off: false },
+          disabled: false,
+        },
       }),
     }),
   ],
