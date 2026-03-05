@@ -17,10 +17,9 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 const REDIS_ACTIVITY_KEY = 'sandbox:activity'
-const ACTIVITY_THROTTLE_TTL = 5
-const FLUSH_BATCH_SIZE = 1000
 
 @Injectable()
 export class SandboxActivityService {
@@ -30,11 +29,12 @@ export class SandboxActivityService {
     @InjectRedis() private readonly redis: Redis,
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly configService: TypedConfigService,
   ) {}
 
   /**
    * Update last-activity for a sandbox.
-   * By default, buffers in Redis (throttled to once per ACTIVITY_THROTTLE_TTL) and relies on the periodic flush to PG.
+   * By default, buffers in Redis (throttled to once per configured throttle TTL) and relies on the periodic flush to PG.
    * When `immediate` is true, writes directly to PG as well, bypassing the throttle.
    * Use immediate for state transitions where stale PG data could cause premature autostop/autoarchive.
    */
@@ -45,7 +45,10 @@ export class SandboxActivityService {
       await this.redis.zrem(REDIS_ACTIVITY_KEY, sandboxId)
     } else {
       const lockKey = `sandbox:update-last-activity:${sandboxId}`
-      const acquired = await this.redisLockProvider.lock(lockKey, ACTIVITY_THROTTLE_TTL)
+      const acquired = await this.redisLockProvider.lock(
+        lockKey,
+        this.configService.getOrThrow('sandboxActivity.throttleTtlSeconds'),
+      )
       if (!acquired) {
         return
       }
@@ -88,7 +91,7 @@ export class SandboxActivityService {
 
   /**
    * Flush buffered activity timestamps from Redis to PG in bulk.
-   * Runs every 60 seconds. Processes entries in batches to avoid oversized transactions.
+   * Processes entries in batches to avoid oversized transactions.
    *
    * Frequency must be < 1min to prevent unintended auto-lifecycle actions.
    */
@@ -106,6 +109,8 @@ export class SandboxActivityService {
       let cursor = 0
       let totalFlushed = 0
 
+      const batchSize = this.configService.getOrThrow('sandboxActivity.flushBatchSize')
+
       // Process in batches using ZPOPMIN to atomically read-and-remove
       // We use ZRANGEBYSCORE + ZREM instead of ZPOPMIN for compatibility
       while (true) {
@@ -117,7 +122,7 @@ export class SandboxActivityService {
           'WITHSCORES',
           'LIMIT',
           cursor,
-          FLUSH_BATCH_SIZE,
+          batchSize,
         )
 
         if (entries.length === 0) {
@@ -138,11 +143,11 @@ export class SandboxActivityService {
           totalFlushed += updates.length
         }
 
-        if (updates.length < FLUSH_BATCH_SIZE) {
+        if (updates.length < batchSize) {
           break
         }
 
-        cursor += FLUSH_BATCH_SIZE
+        cursor += batchSize
       }
 
       if (totalFlushed > 0) {
