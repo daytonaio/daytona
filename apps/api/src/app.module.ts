@@ -20,20 +20,13 @@ import { RedisModule, getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { ScheduleModule } from '@nestjs/schedule'
 import { EventEmitterModule } from '@nestjs/event-emitter'
 import { UsageModule } from './usage/usage.module'
-import { AnalyticsModule } from './analytics/analytics.module'
 import { OrganizationModule } from './organization/organization.module'
-import { EmailModule } from './email/email.module'
 import { TypedConfigService } from './config/typed-config.service'
 import { TypedConfigModule } from './config/typed-config.module'
-import { NotificationModule } from './notification/notification.module'
-import { WebhookModule } from './webhook/webhook.module'
 import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
-import { AuditModule } from './audit/audit.module'
 import { HealthModule } from './health/health.module'
-import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
-import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
 import { LoggerModule } from 'nestjs-pino'
 import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
 import { Redis } from 'ioredis'
@@ -41,8 +34,9 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { RegionModule } from './region/region.module'
 import { BodyParserErrorModule } from './common/modules/body-parser-error.module'
 import { AdminModule } from './admin/admin.module'
-import { ClickHouseModule } from './clickhouse/clickhouse.module'
-import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.module'
+import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
+import { InMemoryProvider } from '@openfeature/server-sdk'
+import { FeatureFlags } from './common/constants/feature-flags'
 
 @Module({
   imports: [
@@ -170,45 +164,23 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
     DockerRegistryModule,
     ScheduleModule.forRoot(),
     UsageModule,
-    AnalyticsModule,
     OrganizationModule,
     RegionModule,
     AdminModule,
-    EmailModule.forRootAsync({
-      inject: [TypedConfigService],
-      useFactory: (configService: TypedConfigService) => {
-        return {
-          host: configService.get('smtp.host'),
-          port: configService.get('smtp.port'),
-          user: configService.get('smtp.user'),
-          password: configService.get('smtp.password'),
-          secure: configService.get('smtp.secure'),
-          from: configService.get('smtp.from'),
-          dashboardUrl: configService.getOrThrow('dashboardUrl'),
-        }
-      },
-    }),
-    NotificationModule,
-    WebhookModule,
     ObjectStorageModule,
-    AuditModule,
     HealthModule,
-    ClickHouseModule,
-    SandboxTelemetryModule,
     OpenFeatureModule.forRoot({
       contextFactory: (request: ExecutionContext) => {
         const req = request.switchToHttp().getRequest()
-
         return {
           targetingKey: req.user?.userId,
           organizationId: req.user?.organizationId,
         }
       },
-      defaultProvider: new OpenFeaturePostHogProvider({
-        clientOptions: {
-          host: process.env.POSTHOG_HOST,
-        },
-        apiKey: process.env.POSTHOG_API_KEY,
+      defaultProvider: new InMemoryProvider({
+        [FeatureFlags.ORGANIZATION_INFRASTRUCTURE]: { defaultVariant: 'on', variants: { on: true, off: false } },
+        [FeatureFlags.SANDBOX_RESIZE]: { defaultVariant: 'on', variants: { on: true, off: false } },
+        organization_experiments: { defaultVariant: 'on', variants: { on: true, off: false } },
       }),
     }),
   ],

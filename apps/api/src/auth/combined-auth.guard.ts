@@ -7,7 +7,7 @@ import { Injectable, ExecutionContext, Logger } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 @Injectable()
-export class CombinedAuthGuard extends AuthGuard(['jwt', 'api-key']) {
+export class CombinedAuthGuard extends AuthGuard(['admin-jwt', 'api-key']) {
   private readonly logger = new Logger(CombinedAuthGuard.name)
 
   constructor() {

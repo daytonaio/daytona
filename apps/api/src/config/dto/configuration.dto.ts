@@ -92,29 +92,6 @@ export class RateLimitConfig {
   sandboxLifecycle?: RateLimitEntry
 }
 
-@ApiSchema({ name: 'OidcConfig' })
-export class OidcConfig {
-  @ApiProperty({
-    description: 'OIDC issuer',
-    example: 'https://auth.example.com',
-  })
-  @IsString()
-  issuer: string
-
-  @ApiProperty({
-    description: 'OIDC client ID',
-    example: 'daytona-client',
-  })
-  @IsString()
-  clientId: string
-
-  @ApiProperty({
-    description: 'OIDC audience',
-    example: 'daytona-api',
-  })
-  @IsString()
-  audience: string
-}
 
 @ApiExtraModels(Announcement)
 @ApiSchema({ name: 'DaytonaConfiguration' })
@@ -133,17 +110,11 @@ export class ConfigurationDto {
   posthog?: PosthogConfig
 
   @ApiProperty({
-    description: 'OIDC configuration',
-    type: OidcConfig,
+    description: 'Authentication mode',
+    example: 'admin-password',
   })
-  oidc: OidcConfig
-
-  @ApiProperty({
-    description: 'Whether linked accounts are enabled',
-    example: true,
-  })
-  @IsBoolean()
-  linkedAccountsEnabled: boolean
+  @IsString()
+  authMode: string
 
   @ApiProperty({
     description: 'System announcements',
@@ -252,12 +223,7 @@ export class ConfigurationDto {
   constructor(configService: TypedConfigService) {
     this.version = configService.getOrThrow('version')
 
-    this.oidc = {
-      issuer: configService.get('oidc.publicIssuer') || configService.getOrThrow('oidc.issuer'),
-      clientId: configService.getOrThrow('oidc.clientId'),
-      audience: configService.getOrThrow('oidc.audience'),
-    }
-    this.linkedAccountsEnabled = configService.get('oidc.managementApi.enabled')
+    this.authMode = 'admin-password'
     this.proxyTemplateUrl = configService.getOrThrow('proxy.templateUrl')
     this.proxyToolboxUrl = configService.getOrThrow('proxy.toolboxUrl')
     this.defaultSnapshot = configService.getOrThrow('defaultSnapshot')

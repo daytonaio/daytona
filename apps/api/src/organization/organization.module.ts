@@ -8,7 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import { OrganizationController } from './controllers/organization.controller'
 import { OrganizationRoleController } from './controllers/organization-role.controller'
 import { OrganizationUserController } from './controllers/organization-user.controller'
-import { OrganizationInvitationController } from './controllers/organization-invitation.controller'
 import { Organization } from './entities/organization.entity'
 import { OrganizationRole } from './entities/organization-role.entity'
 import { OrganizationUser } from './entities/organization-user.entity'
@@ -16,7 +15,6 @@ import { OrganizationInvitation } from './entities/organization-invitation.entit
 import { OrganizationService } from './services/organization.service'
 import { OrganizationRoleService } from './services/organization-role.service'
 import { OrganizationUserService } from './services/organization-user.service'
-import { OrganizationInvitationService } from './services/organization-invitation.service'
 import { UserModule } from '../user/user.module'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
 import { Snapshot } from '../sandbox/entities/snapshot.entity'
@@ -56,14 +54,12 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationController,
     OrganizationRoleController,
     OrganizationUserController,
-    OrganizationInvitationController,
     OrganizationRegionController,
   ],
   providers: [
     OrganizationService,
     OrganizationRoleService,
     OrganizationUserService,
-    OrganizationInvitationService,
     OrganizationUsageService,
     RedisLockProvider,
     SandboxLookupCacheInvalidationService,
@@ -81,7 +77,6 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationService,
     OrganizationRoleService,
     OrganizationUserService,
-    OrganizationInvitationService,
     OrganizationUsageService,
   ],
 })

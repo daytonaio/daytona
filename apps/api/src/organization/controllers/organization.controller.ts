@@ -22,158 +22,41 @@ import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBe
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
 import { OrganizationDto } from '../dto/organization.dto'
-import { OrganizationInvitationDto } from '../dto/organization-invitation.dto'
 import { OrganizationUsageOverviewDto } from '../dto/organization-usage-overview.dto'
-import { UpdateOrganizationQuotaDto } from '../dto/update-organization-quota.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredApiRole, RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { UserService } from '../../user/user.service'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { EmailUtils } from '../../common/utils/email.util'
 import { OrganizationUsageService } from '../services/organization-usage.service'
 import { OrganizationSandboxDefaultLimitedNetworkEgressDto } from '../dto/organization-sandbox-default-limited-network-egress.dto'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
-import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
-import { OrGuard } from '../../auth/or.guard'
-import { OtelCollectorGuard } from '../../auth/otel-collector.guard'
-import { OtelConfigDto } from '../dto/otel-config.dto'
 
 @ApiTags('organizations')
 @Controller('organizations')
-// TODO: Rethink this. Can we allow access to these methods with API keys as well?
-// @UseGuards(AuthGuard('jwt'))
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class OrganizationController {
   constructor(
     private readonly organizationService: OrganizationService,
     private readonly organizationUserService: OrganizationUserService,
-    private readonly organizationInvitationService: OrganizationInvitationService,
     private readonly organizationUsageService: OrganizationUsageService,
     private readonly userService: UserService,
     private readonly configService: TypedConfigService,
   ) {}
-
-  @Get('/invitations')
-  @ApiOperation({
-    summary: 'List organization invitations for authenticated user',
-    operationId: 'listOrganizationInvitationsForAuthenticatedUser',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of organization invitations',
-    type: [OrganizationInvitationDto],
-  })
-  @UseGuards(AuthGuard('jwt'))
-  async findInvitationsByUser(@AuthContext() authContext: IAuthContext): Promise<OrganizationInvitationDto[]> {
-    const invitations = await this.organizationInvitationService.findByUser(authContext.userId)
-    return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
-  }
-
-  @Get('/invitations/count')
-  @ApiOperation({
-    summary: 'Get count of organization invitations for authenticated user',
-    operationId: 'getOrganizationInvitationsCountForAuthenticatedUser',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Count of organization invitations',
-    type: Number,
-  })
-  @UseGuards(AuthGuard('jwt'))
-  async getInvitationsCountByUser(@AuthContext() authContext: IAuthContext): Promise<number> {
-    return this.organizationInvitationService.getCountByUser(authContext.userId)
-  }
-
-  @Post('/invitations/:invitationId/accept')
-  @ApiOperation({
-    summary: 'Accept organization invitation',
-    operationId: 'acceptOrganizationInvitation',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Organization invitation accepted successfully',
-    type: OrganizationInvitationDto,
-  })
-  @ApiParam({
-    name: 'invitationId',
-    description: 'Invitation ID',
-    type: 'string',
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Audit({
-    action: AuditAction.ACCEPT,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-  })
-  async acceptInvitation(
-    @AuthContext() authContext: IAuthContext,
-    @Param('invitationId') invitationId: string,
-  ): Promise<OrganizationInvitationDto> {
-    try {
-      const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
-      if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
-        throw new ForbiddenException('User email does not match invitation email')
-      }
-    } catch (error) {
-      throw new NotFoundException(`Organization invitation with ID ${invitationId} not found`)
-    }
-
-    const acceptedInvitation = await this.organizationInvitationService.accept(invitationId, authContext.userId)
-    return OrganizationInvitationDto.fromOrganizationInvitation(acceptedInvitation)
-  }
-
-  @Post('/invitations/:invitationId/decline')
-  @ApiOperation({
-    summary: 'Decline organization invitation',
-    operationId: 'declineOrganizationInvitation',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Organization invitation declined successfully',
-  })
-  @ApiParam({
-    name: 'invitationId',
-    description: 'Invitation ID',
-    type: 'string',
-  })
-  @UseGuards(AuthGuard('jwt'))
-  @Audit({
-    action: AuditAction.DECLINE,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-  })
-  async declineInvitation(
-    @AuthContext() authContext: IAuthContext,
-    @Param('invitationId') invitationId: string,
-  ): Promise<void> {
-    try {
-      const invitation = await this.organizationInvitationService.findOneOrFail(invitationId)
-      if (!EmailUtils.areEqual(invitation.email, authContext.email)) {
-        throw new ForbiddenException('User email does not match invitation email')
-      }
-    } catch (error) {
-      throw new NotFoundException(`Organization invitation with ID ${invitationId} not found`)
-    }
-
-    return this.organizationInvitationService.decline(invitationId)
-  }
 
   @Post()
   @ApiOperation({
@@ -334,183 +217,6 @@ export class OrganizationController {
     return this.organizationUsageService.getUsageOverview(organizationId)
   }
 
-  @Patch('/:organizationId/quota')
-  @HttpCode(204)
-  @ApiOperation({
-    summary: 'Update organization quota',
-    operationId: 'updateOrganizationQuota',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Organization quota updated successfully',
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
-  @Audit({
-    action: AuditAction.UPDATE_QUOTA,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-    requestMetadata: {
-      body: (req: TypedRequest<UpdateOrganizationQuotaDto>) => ({
-        maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
-        maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
-        maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
-        snapshotQuota: req.body?.snapshotQuota,
-        maxSnapshotSize: req.body?.maxSnapshotSize,
-        volumeQuota: req.body?.volumeQuota,
-      }),
-    },
-  })
-  async updateOrganizationQuota(
-    @Param('organizationId') organizationId: string,
-    @Body() updateDto: UpdateOrganizationQuotaDto,
-  ): Promise<void> {
-    await this.organizationService.updateQuota(organizationId, updateDto)
-  }
-
-  @Patch('/:organizationId/quota/:regionId')
-  @HttpCode(204)
-  @ApiOperation({
-    summary: 'Update organization region quota',
-    operationId: 'updateOrganizationRegionQuota',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Region quota updated successfully',
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @ApiParam({
-    name: 'regionId',
-    description: 'ID of the region where the updated quota will be applied',
-    type: 'string',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
-  @Audit({
-    action: AuditAction.UPDATE_REGION_QUOTA,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-    requestMetadata: {
-      params: (req) => ({
-        regionId: req.params.regionId,
-      }),
-      body: (req: TypedRequest<UpdateOrganizationRegionQuotaDto>) => ({
-        totalCpuQuota: req.body?.totalCpuQuota,
-        totalMemoryQuota: req.body?.totalMemoryQuota,
-        totalDiskQuota: req.body?.totalDiskQuota,
-      }),
-    },
-  })
-  async updateOrganizationRegionQuota(
-    @Param('organizationId') organizationId: string,
-    @Param('regionId') regionId: string,
-    @Body() updateDto: UpdateOrganizationRegionQuotaDto,
-  ): Promise<void> {
-    await this.organizationService.updateRegionQuota(organizationId, regionId, updateDto)
-  }
-
-  @Post('/:organizationId/leave')
-  @ApiOperation({
-    summary: 'Leave organization',
-    operationId: 'leaveOrganization',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Organization left successfully',
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
-  @Audit({
-    action: AuditAction.LEAVE_ORGANIZATION,
-  })
-  async leave(
-    @AuthContext() authContext: IAuthContext,
-    @Param('organizationId') organizationId: string,
-  ): Promise<void> {
-    return this.organizationUserService.delete(organizationId, authContext.userId)
-  }
-
-  @Post('/:organizationId/suspend')
-  @ApiOperation({
-    summary: 'Suspend organization',
-    operationId: 'suspendOrganization',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Organization suspended successfully',
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @ApiBody({
-    type: OrganizationSuspensionDto,
-    required: false,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
-  @Audit({
-    action: AuditAction.SUSPEND,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-    requestMetadata: {
-      body: (req: TypedRequest<OrganizationSuspensionDto>) => ({
-        reason: req.body?.reason,
-        until: req.body?.until,
-      }),
-    },
-  })
-  async suspend(
-    @Param('organizationId') organizationId: string,
-    @Body() organizationSuspensionDto?: OrganizationSuspensionDto,
-  ): Promise<void> {
-    return this.organizationService.suspend(
-      organizationId,
-      organizationSuspensionDto?.reason,
-      organizationSuspensionDto?.until,
-      organizationSuspensionDto?.suspensionCleanupGracePeriodHours,
-    )
-  }
-
-  @Post('/:organizationId/unsuspend')
-  @ApiOperation({
-    summary: 'Unsuspend organization',
-    operationId: 'unsuspendOrganization',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Organization unsuspended successfully',
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
-  @Audit({
-    action: AuditAction.UNSUSPEND,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-  })
-  async unsuspend(@Param('organizationId') organizationId: string): Promise<void> {
-    return this.organizationService.unsuspend(organizationId)
-  }
-
   @Get('/by-sandbox-id/:sandboxId')
   @ApiOperation({
     summary: 'Get organization by sandbox ID',
@@ -561,32 +267,6 @@ export class OrganizationController {
     }
 
     return regionQuota
-  }
-
-  @Get('/otel-config/by-sandbox-auth-token/:authToken')
-  @ApiOperation({
-    summary: 'Get organization OTEL config by sandbox auth token',
-    operationId: 'getOrganizationOtelConfigBySandboxAuthToken',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'OTEL Config',
-    type: OtelConfigDto,
-  })
-  @ApiParam({
-    name: 'authToken',
-    description: 'Sandbox Auth Token',
-    type: 'string',
-  })
-  @RequiredApiRole([SystemRole.ADMIN, 'otel-collector'])
-  @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, OtelCollectorGuard]))
-  async getOtelConfigBySandboxAuthToken(@Param('authToken') authToken: string): Promise<OtelConfigDto> {
-    const otelConfigDto = await this.organizationService.getOtelConfigBySandboxAuthToken(authToken)
-    if (!otelConfigDto) {
-      throw new NotFoundException(`Organization OTEL config with sandbox auth token ${authToken} not found`)
-    }
-
-    return otelConfigDto
   }
 
   @Post('/:organizationId/sandbox-default-limited-network-egress')
@@ -640,14 +320,6 @@ export class OrganizationController {
     required: false,
     schema: {
       additionalProperties: true,
-      example: {
-        otel: {
-          endpoint: 'http://otel-collector:4317',
-          headers: {
-            'api-key': 'XXX',
-          },
-        },
-      },
     },
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)

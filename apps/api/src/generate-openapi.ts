@@ -5,16 +5,6 @@ import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
 import { SwaggerModule } from '@nestjs/swagger'
 import { getOpenApiConfig } from './openapi.config'
-import { addWebhookDocumentation } from './openapi-webhooks'
-import {
-  SandboxCreatedWebhookDto,
-  SandboxStateUpdatedWebhookDto,
-  SnapshotCreatedWebhookDto,
-  SnapshotStateUpdatedWebhookDto,
-  SnapshotRemovedWebhookDto,
-  VolumeCreatedWebhookDto,
-  VolumeStateUpdatedWebhookDto,
-} from './webhook/dto/webhook-event-payloads.dto'
 
 async function generateOpenAPI() {
   try {
@@ -30,27 +20,6 @@ async function generateOpenAPI() {
     const openapiPath = './dist/apps/api/openapi.json'
     fs.mkdirSync(path.dirname(openapiPath), { recursive: true })
     fs.writeFileSync(openapiPath, JSON.stringify(document, null, 2))
-
-    // Generate 3.1.0 version of the OpenAPI specification
-    // Needed for the webhook documentation
-    const document_3_1_0 = {
-      ...SwaggerModule.createDocument(app, config, {
-        extraModels: [
-          SandboxCreatedWebhookDto,
-          SandboxStateUpdatedWebhookDto,
-          SnapshotCreatedWebhookDto,
-          SnapshotStateUpdatedWebhookDto,
-          SnapshotRemovedWebhookDto,
-          VolumeCreatedWebhookDto,
-          VolumeStateUpdatedWebhookDto,
-        ],
-      }),
-      openapi: '3.1.0',
-    }
-    const documentWithWebhooks = addWebhookDocumentation(document_3_1_0)
-    const openapi310Path = './dist/apps/api/openapi.3.1.0.json'
-    fs.mkdirSync(path.dirname(openapi310Path), { recursive: true })
-    fs.writeFileSync(openapi310Path, JSON.stringify(documentWithWebhooks, null, 2))
 
     await app.close()
     console.log('OpenAPI specification generated successfully!')

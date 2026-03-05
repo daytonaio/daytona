@@ -17,7 +17,6 @@ import { TypedConfigService } from './config/typed-config.service'
 import { FailedAuthTrackerService } from './auth/failed-auth-tracker.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
 import { getOpenApiConfig } from './openapi.config'
-import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 import { join } from 'node:path'
 import { ApiKeyService } from './api-key/api-key.service'
 import { DAYTONA_ADMIN_USER_ID } from './app.service'
@@ -57,7 +56,6 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(failedAuthTracker))
   app.useGlobalInterceptors(new LoggerErrorInterceptor())
   app.useGlobalInterceptors(new MetricsInterceptor(configService))
-  app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
@@ -99,19 +97,8 @@ async function bootstrap() {
   const globalPrefix = 'api'
   app.setGlobalPrefix(globalPrefix)
 
-  const documentFactory = () => SwaggerModule.createDocument(app, getOpenApiConfig(configService.get('oidc.issuer')))
-  SwaggerModule.setup('api', app, documentFactory, {
-    swaggerOptions: {
-      initOAuth: {
-        clientId: configService.get('oidc.clientId'),
-        appName: 'Daytona AI',
-        scopes: ['openid', 'profile', 'email'],
-        additionalQueryStringParams: {
-          audience: configService.get('oidc.audience'),
-        },
-      },
-    },
-  })
+  const documentFactory = () => SwaggerModule.createDocument(app, getOpenApiConfig())
+  SwaggerModule.setup('api', app, documentFactory)
 
   // Replace dashboard api url before serving
   if (configService.get('production')) {

@@ -5,7 +5,7 @@
 
 import { DocumentBuilder } from '@nestjs/swagger'
 
-const getOpenApiConfig = (oidcIssuer: string) =>
+const getOpenApiConfig = () =>
   new DocumentBuilder()
     .setTitle('Daytona')
     .addServer('http://localhost:3000')
@@ -16,11 +16,6 @@ const getOpenApiConfig = (oidcIssuer: string) =>
       type: 'http',
       scheme: 'bearer',
       description: 'API Key access',
-    })
-    .addOAuth2({
-      type: 'openIdConnect',
-      flows: undefined,
-      openIdConnectUrl: `${oidcIssuer}/.well-known/openid-configuration`,
     })
     .build()
 
