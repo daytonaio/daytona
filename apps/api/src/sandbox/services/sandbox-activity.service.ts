@@ -40,9 +40,9 @@ export class SandboxActivityService {
    */
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date, immediate = false): Promise<void> {
     if (immediate) {
-      await this.dataSource.getRepository(SandboxLastActivity).upsert({ sandboxId, lastActivityAt }, ['sandboxId'])
       // Prevent stale activity from being flushed to PG
       await this.redis.zrem(REDIS_ACTIVITY_KEY, sandboxId)
+      await this.dataSource.getRepository(SandboxLastActivity).upsert({ sandboxId, lastActivityAt }, ['sandboxId'])
     } else {
       const lockKey = `sandbox:update-last-activity:${sandboxId}`
       const acquired = await this.redisLockProvider.lock(
