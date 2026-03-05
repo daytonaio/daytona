@@ -106,30 +106,17 @@ export class SandboxActivityService {
     }
 
     try {
-      let cursor = 0
       let totalFlushed = 0
 
       const batchSize = this.configService.getOrThrow('sandboxActivity.flushBatchSize')
 
-      // Process in batches using ZPOPMIN to atomically read-and-remove
-      // We use ZRANGEBYSCORE + ZREM instead of ZPOPMIN for compatibility
       while (true) {
-        // Read a batch of entries
-        const entries = await this.redis.zrangebyscore(
-          REDIS_ACTIVITY_KEY,
-          '-inf',
-          '+inf',
-          'WITHSCORES',
-          'LIMIT',
-          cursor,
-          batchSize,
-        )
+        const entries = await this.redis.zpopmin(REDIS_ACTIVITY_KEY, batchSize)
 
         if (entries.length === 0) {
           break
         }
 
-        // Parse entries: [member, score, member, score, ...]
         const updates: { sandboxId: string; lastActivityAt: Date }[] = []
         for (let i = 0; i < entries.length; i += 2) {
           updates.push({
@@ -138,16 +125,12 @@ export class SandboxActivityService {
           })
         }
 
-        if (updates.length > 0) {
-          await this.bulkUpsertActivity(updates)
-          totalFlushed += updates.length
-        }
+        await this.bulkUpsertActivity(updates)
+        totalFlushed += updates.length
 
         if (updates.length < batchSize) {
           break
         }
-
-        cursor += batchSize
       }
 
       if (totalFlushed > 0) {
