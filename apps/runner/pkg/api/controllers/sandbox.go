@@ -4,6 +4,7 @@
 package controllers
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
@@ -105,26 +106,32 @@ func Destroy(ctx *gin.Context) {
 //	@Router			/sandboxes/{sandboxId}/backup [post]
 //
 //	@id				CreateBackup
-func CreateBackup(ctx *gin.Context) {
-	sandboxId := ctx.Param("sandboxId")
+func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		sandboxId := ctx.Param("sandboxId")
 
-	var createBackupDTO dto.CreateBackupDTO
-	err := ctx.ShouldBindJSON(&createBackupDTO)
-	if err != nil {
-		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
-		return
+		var createBackupDTO dto.CreateBackupDTO
+		err := ctx.ShouldBindJSON(&createBackupDTO)
+		if err != nil {
+			ctx.Error(common_errors.NewInvalidBodyRequestError(err))
+			return
+		}
+
+		runner := runner.GetInstance(nil)
+
+		err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
+		if err != nil {
+			setErr := runner.BackupInfoCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
+			if setErr != nil {
+				logger.DebugContext(ctx.Request.Context(), "failed to update backup info", "error", setErr)
+			}
+
+			ctx.Error(err)
+			return
+		}
+
+		ctx.JSON(http.StatusCreated, "Backup started")
 	}
-
-	runner := runner.GetInstance(nil)
-
-	err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
-	if err != nil {
-		runner.BackupInfoCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
-		ctx.Error(err)
-		return
-	}
-
-	ctx.JSON(http.StatusCreated, "Backup started")
 }
 
 // Resize 			godoc
