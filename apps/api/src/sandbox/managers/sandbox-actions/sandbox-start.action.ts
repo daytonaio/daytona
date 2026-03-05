@@ -191,6 +191,7 @@ export class SandboxStartAction extends SandboxAction {
       })
       if (runner) {
         await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode, runner.id)
+        await this.runnerService.updateSnapshotRunnerLastUsedAt(runner.id, snapshotRef)
         return SYNC_AGAIN
       }
     } catch {
@@ -498,6 +499,18 @@ export class SandboxStartAction extends SandboxAction {
 
       const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
 
+      let restartSnapshotRef: string | null = null
+      if (sandbox.buildInfo) {
+        restartSnapshotRef = sandbox.buildInfo.snapshotRef
+      } else if (sandbox.snapshot) {
+        try {
+          const snap = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+          restartSnapshotRef = snap.ref
+        } catch {
+          // non-critical
+        }
+      }
+
       try {
         await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)
       } catch (error) {
@@ -520,6 +533,9 @@ export class SandboxStartAction extends SandboxAction {
       }
 
       await this.updateSandboxState(sandbox, SandboxState.STARTING, lockCode)
+      if (restartSnapshotRef) {
+        await this.runnerService.updateSnapshotRunnerLastUsedAt(sandbox.runnerId, restartSnapshotRef)
+      }
       return SYNC_AGAIN
     }
 
