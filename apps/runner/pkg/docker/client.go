@@ -10,8 +10,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
+	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/client"
 )
 
@@ -58,7 +60,19 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 		config.BackupTimeoutMin = 60
 	}
 
-	info, err := config.ApiClient.Info(context.Background())
+	var info system.Info
+	err := utils.RetryWithExponentialBackoff(
+		context.Background(),
+		"get Docker info",
+		8,
+		1*time.Second,
+		5*time.Second,
+		func() error {
+			var infoErr error
+			info, infoErr = config.ApiClient.Info(context.Background())
+			return infoErr
+		},
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Docker info: %w", err)
 	}
