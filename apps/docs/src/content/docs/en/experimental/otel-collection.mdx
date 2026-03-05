@@ -380,26 +380,23 @@ print(f"NumPy version: {np.__version__}")
         fmt.Printf("Created sandbox: %s\n", sandbox.ID)
 
         // Execute code - this operation will be traced
-        result, err := sandbox.Process.CodeRun(ctx, &types.CodeRunParams{
-            Code: `
-
+        result, err := sandbox.Process.CodeRun(ctx, `
 import numpy as np
 print(f"NumPy version: {np.__version__}")
-            `,
-        })
+        `)
         if err != nil {
           log.Fatal(err)
         }
         fmt.Printf("Execution result: %s\n", result.Result)
 
         // Upload a file - this operation will be traced
-        err = sandbox.Fs.UploadFile(ctx, "local.txt", "/home/daytona/remote.txt")
+        err = sandbox.FileSystem.UploadFile(ctx, "local.txt", "/home/daytona/remote.txt")
         if err != nil {
           log.Fatal(err)
         }
 
         // Delete sandbox - this operation will be traced
-        err = client.Delete(ctx, sandbox, nil)
+        err = sandbox.Delete(ctx)
         if err != nil {
           log.Fatal(err)
         }

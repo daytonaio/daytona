@@ -64,7 +64,7 @@ end
 
 ```go
 // Create from Docker Hub image
-snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+snapshot, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
     Name:  "my-awesome-snapshot",
     Image: "python:3.11-slim",
 })
@@ -79,7 +79,7 @@ for log := range logChan {
 
 // Create with custom image and resources
 image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
-snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+snapshot, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
     Name:  "my-awesome-snapshot",
     Image: image,
     Resources: &types.Resources{CPU: 2, Memory: 4096},
@@ -167,7 +167,7 @@ end
 <TabItem label="Go" icon="seti:go">
 
 ```go
-snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+snapshot, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
     Name:  "my-awesome-snapshot",
     Image: "python:3.11-slim",
 })
@@ -273,7 +273,7 @@ Daytona supports creating snapshots from images from [Docker Hub](#docker-hub), 
 5. Click the **Create Snapshot** button
 6. Enter the **snapshot name** and private **image** (tag or digest). When creating the snapshot, make sure to input the entire private image name, including the registry location and project name (e.g. **`my-private-registry.com/<my-project>/custom-alpine:3.21`**)
 
-Optionally, set the **`CreateSandboxFromSnapshotParams`** field to use the custom snapshot.
+Optionally, set the **`snapshot`** field in your sandbox creation parameters to use the custom snapshot.
 
 #### Docker Hub
 
@@ -421,7 +421,7 @@ daytona.snapshot.create(
 ```go
 // Create a snapshot with custom resources
 image := daytona.Base("python:3.11").PipInstall([]string{"numpy"})
-snapshot, logChan, err := client.Snapshots.Create(ctx, &types.CreateSnapshotParams{
+snapshot, logChan, err := client.Snapshot.Create(ctx, &types.CreateSnapshotParams{
     Name:      "my-awesome-snapshot",
     Image:     image,
     Resources: &types.Resources{CPU: 2, Memory: 4, Disk: 8},
@@ -619,7 +619,7 @@ puts "#{snapshot.name} (#{snapshot.image_name})"
 <TabItem label="Go" icon="seti:go">
 
 ```go
-snapshot, err := client.Snapshots.Get(ctx, "my-awesome-snapshot")
+snapshot, err := client.Snapshot.Get(ctx, "my-awesome-snapshot")
 if err != nil {
     return err
 }
@@ -693,14 +693,14 @@ end
 
 ```go
 // List first page with default limit
-result, err := client.Snapshots.List(ctx, nil, nil)
+result, err := client.Snapshot.List(ctx, nil, nil)
 if err != nil {
     return err
 }
 
 // List with pagination
 page, limit := 2, 10
-result, err := client.Snapshots.List(ctx, &page, &limit)
+result, err := client.Snapshot.List(ctx, &page, &limit)
 fmt.Printf("Page %d of %d, total: %d\n", result.Page, result.TotalPages, result.Total)
 ```
 
@@ -834,11 +834,11 @@ puts 'Snapshot deleted'
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 ```go
-snapshot, err := client.Snapshots.Get(ctx, "my-awesome-snapshot")
+snapshot, err := client.Snapshot.Get(ctx, "my-awesome-snapshot")
 if err != nil {
     return err
 }
-err = client.Snapshots.Delete(ctx, snapshot)
+err = client.Snapshot.Delete(ctx, snapshot)
 if err != nil {
     return err
 }
@@ -1031,21 +1031,28 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
-	"github.com/daytonaio/sdk-go/daytona"
-	"github.com/daytonaio/sdk-go/types"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
 	ctx := context.Background()
 
 	// Initialize the Daytona client
-	client, _ := daytona.NewDaytona(nil)
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a sandbox from a Docker-in-Docker snapshot
-	sandbox, _ := client.Create(ctx, &types.CreateSandboxFromSnapshotParams{
-		Snapshot: daytona.Ptr("docker-dind"),
-	}, nil)
+	sandbox, err := client.Create(ctx, types.SnapshotParams{
+		Snapshot: "docker-dind",
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a docker-compose.yml file
 	composeContent := `
@@ -1055,18 +1062,28 @@ services:
     ports:
       - "8080:80"
 `
-	sandbox.Fs.UploadFile(ctx, []byte(composeContent), "docker-compose.yml")
+	if err := sandbox.FileSystem.UploadFile(ctx, []byte(composeContent), "docker-compose.yml"); err != nil {
+		log.Fatal(err)
+	}
 
 	// Start Docker Compose services
-	result, _ := sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo up -d", nil)
+	result, err := sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo up -d")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(result.Result)
 
 	// Check running services
-	result, _ = sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo ps", nil)
+	result, err = sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo ps")
+	if err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(result.Result)
 
 	// Clean up
-	sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo down", nil)
+	if _, err := sandbox.Process.ExecuteCommand(ctx, "docker compose -p demo down"); err != nil {
+		log.Fatal(err)
+	}
 }
 ```
 

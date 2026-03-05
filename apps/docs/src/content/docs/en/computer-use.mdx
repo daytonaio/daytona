@@ -1359,19 +1359,29 @@ sandbox = daytona.create(
 
 ```go
 import (
-	"github.com/daytonaio/daytona/pkg/client"
-	"github.com/daytonaio/daytona/pkg/types"
+	"context"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
-daytona := client.New()
+ctx := context.Background()
+client, err := daytona.NewClient()
+if err != nil {
+	log.Fatal(err)
+}
+
 envVars := map[string]string{
 	"DAYTONA_RECORDINGS_DIR": "/home/daytona/my-recordings",
 }
 
-sandbox, err := daytona.Create(ctx, &types.CreateSandboxParams{
+sandbox, err := client.Create(ctx, types.SnapshotParams{
 	Snapshot: "daytonaio/sandbox:0.6.0",
-	Name:     "my-sandbox",
-	EnvVars:  envVars,
+	SandboxBaseParams: types.SandboxBaseParams{
+		Name:    "my-sandbox",
+		EnvVars: envVars,
+	},
 })
 if err != nil {
 	log.Fatal(err)

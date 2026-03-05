@@ -16,8 +16,10 @@ Daytona supports multiple methods to configure your environment, in order of pre
 To configure your environment in code, use the `DaytonaConfig` class. The `DaytonaConfig` class accepts the following parameters:
 
 - `api_key`: Your Daytona [API Key](/docs/api-keys)
+- `jwt_token`: JWT token for authentication
+- `organization_id`: Organization ID (required when using `jwt_token`)
 - `api_url`: URL of your [Daytona API](/docs/en/tools/api)
-- `target`: Target region to create the Sandboxes on (`us` / `eu`)
+- `target`: Target region used when creating sandboxes
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -67,16 +69,20 @@ package main
 
 import (
     "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+    "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
-    config := daytona.Config{
+    config := types.DaytonaConfig{
         APIKey: "your-api-key",
-        APIURL: "your-api-url",
+        APIUrl: "your-api-url",
         Target: "us",
     }
 
-    client := daytona.NewClient(&config)
+    client, err := daytona.NewClientWithConfig(&config)
+    if err != nil {
+        panic(err)
+    }
 
     _ = client
 }
@@ -118,11 +124,16 @@ For more information, see the [Python SDK](/docs/en/python-sdk/daytona), [TypeSc
 
 Daytona supports environment variables for configuration. The SDK automatically looks for these environment variables:
 
-| Variable              | Description                                | Required |
-| --------------------- | ------------------------------------------ | -------- |
-| **`DAYTONA_API_KEY`** | Your Daytona API key.                      | Yes      |
-| **`DAYTONA_API_URL`** | URL of your Daytona API.                   | No       |
-| **`DAYTONA_TARGET`**  | Daytona Target to create the sandboxes on. | No       |
+| Variable                      | Description                                           | Required |
+| ----------------------------- | ----------------------------------------------------- | -------- |
+| **`DAYTONA_API_KEY`**         | Your Daytona API key.                                 | No*      |
+| **`DAYTONA_JWT_TOKEN`**       | JWT token for authentication.                         | No*      |
+| **`DAYTONA_ORGANIZATION_ID`** | Organization ID used with JWT authentication.         | No**     |
+| **`DAYTONA_API_URL`**         | URL of your Daytona API.                              | No       |
+| **`DAYTONA_TARGET`**          | Daytona target region used when creating sandboxes.   | No       |
+
+\* Provide either `DAYTONA_API_KEY` or `DAYTONA_JWT_TOKEN`.
+\** Required when `DAYTONA_JWT_TOKEN` is set.
 
 ### Shell
 
