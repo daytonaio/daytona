@@ -71,7 +71,11 @@ func ReadMultiplexedLog(ctx context.Context, logReader io.Reader, follow bool, s
 					atEOF = true
 				} else {
 					// Report non-EOF errors but still try to process any accumulated data.
-					errChan <- err
+					select {
+					case errChan <- err:
+					case <-ctx.Done():
+						return
+					}
 				}
 			}
 
