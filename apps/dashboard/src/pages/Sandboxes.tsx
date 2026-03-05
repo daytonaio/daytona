@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
@@ -51,7 +50,7 @@ import {
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
 import { Check, Copy } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -406,17 +405,7 @@ const Sandboxes: React.FC = () => {
       toast.success(`Starting sandbox with ID: ${id}`)
       await markAllSandboxQueriesAsStale()
     } catch (error) {
-      handleApiError(
-        error,
-        'Failed to start sandbox',
-        error instanceof OrganizationSuspendedError &&
-          config.billingApiUrl &&
-          authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
-          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
-            Go to billing
-          </Button>
-        ) : undefined,
-      )
+      handleApiError(error, 'Failed to start sandbox')
       revertSandboxStateOptimisticUpdate(id, previousState)
     } finally {
       setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))

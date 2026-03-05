@@ -5,7 +5,7 @@
 
 import { ApiContext } from '@/contexts/ApiContext'
 import { useEffect, useRef, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import LoadingFallback from '@/components/LoadingFallback'
 import { ApiClient } from '@/api/apiClient'
 import { useLocation } from 'react-router-dom'

@@ -19,7 +19,7 @@ import {
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytonaio/api-client'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 
 const OrganizationMembers: React.FC = () => {

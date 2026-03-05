@@ -15,7 +15,7 @@ import {
 } from '@daytonaio/sdk'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 
 type CreateSandboxParams = CreateSandboxBaseParams | CreateSandboxFromImageParams | CreateSandboxFromSnapshotParams

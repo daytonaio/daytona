@@ -17,14 +17,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Link } from 'react-router-dom'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { RoutePath } from '@/enums/RoutePath'
 
 interface CreateOrganizationDialogProps {
   open: boolean
-  billingApiUrl?: string
   regions: Region[]
   loadingRegions: boolean
   getRegionName: (regionId: string) => string | undefined
@@ -34,7 +31,6 @@ interface CreateOrganizationDialogProps {
 
 export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> = ({
   open,
-  billingApiUrl,
   regions,
   loadingRegions,
   getRegionName,
@@ -125,23 +121,6 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
 
             <div className="p-3 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
               <p className="font-medium">Your organization is created.</p>
-              <p className="text-sm mt-1">
-                {billingApiUrl ? (
-                  <>
-                    To get started, add a payment method on the{' '}
-                    <Link
-                      to={RoutePath.BILLING_WALLET}
-                      className="text-blue-500 hover:underline"
-                      onClick={(e) => {
-                        onOpenChange(false)
-                      }}
-                    >
-                      wallet page
-                    </Link>
-                    .
-                  </>
-                ) : null}
-              </p>
             </div>
           </div>
         ) : !loadingRegions && regions.length === 0 ? (

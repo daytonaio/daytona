@@ -11,7 +11,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { Organization, OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { usePostHog } from 'posthog-js/react'
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import { suspend } from 'suspend-react'
 

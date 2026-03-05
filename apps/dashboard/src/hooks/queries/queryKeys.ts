@@ -13,13 +13,6 @@ export const queryKeys = {
     all: ['api-keys'] as const,
     list: (organizationId: string) => [...queryKeys.apiKeys.all, organizationId, 'list'] as const,
   },
-  webhooks: {
-    all: ['webhooks'] as const,
-    appPortalAccess: (organizationId: string) =>
-      [...queryKeys.webhooks.all, organizationId, 'app-portal-access'] as const,
-    initializationStatus: (organizationId: string) =>
-      [...queryKeys.webhooks.all, organizationId, 'initialization-status'] as const,
-  },
   organization: {
     all: ['organization'] as const,
 
@@ -32,26 +25,9 @@ export const queryKeys = {
       past: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'usage', 'past'] as const,
     },
 
-    tier: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'tier'] as const,
-    wallet: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'wallet'] as const,
   },
   user: {
     all: ['users'] as const,
-    accountProviders: () => [...queryKeys.user.all, 'account-providers'] as const,
-  },
-  billing: {
-    all: ['billing'] as const,
-    tiers: () => [...queryKeys.billing.all, 'tiers'] as const,
-    emails: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'emails'] as const,
-    portalUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'portal-url'] as const,
-    checkoutUrl: (organizationId: string) => [...queryKeys.billing.all, organizationId, 'checkout-url'] as const,
-    invoices: (organizationId: string, page?: number, perPage?: number) =>
-      [
-        ...queryKeys.billing.all,
-        organizationId,
-        'invoices',
-        ...(page !== undefined && perPage !== undefined ? [{ page, perPage }] : []),
-      ] as const,
   },
   snapshots: {
     all: ['snapshots'] as const,
@@ -85,14 +61,5 @@ export const queryKeys = {
     terminalUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'terminal-url'] as const,
     vncStatus: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-status'] as const,
     vncUrl: (scope: string, id: string) => [...queryKeys.sandbox.all, scope, id, 'vnc-url'] as const,
-  },
-  analytics: {
-    all: ['analytics'] as const,
-    aggregatedUsage: (organizationId: string, params: object) =>
-      [...queryKeys.analytics.all, organizationId, 'aggregated-usage', params] as const,
-    sandboxesUsage: (organizationId: string, params: object) =>
-      [...queryKeys.analytics.all, organizationId, 'sandboxes-usage', params] as const,
-    sandboxUsagePeriods: (organizationId: string, sandboxId: string, params: object) =>
-      [...queryKeys.analytics.all, organizationId, sandboxId, 'usage-periods', params] as const,
   },
 } as const

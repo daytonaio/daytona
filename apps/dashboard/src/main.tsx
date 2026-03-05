@@ -13,6 +13,7 @@ import LoadingFallback from './components/LoadingFallback'
 import { PostHogProviderWrapper } from './components/PostHogProviderWrapper'
 import { ThemeProvider } from './contexts/ThemeContext'
 import './index.css'
+import { AdminAuthProvider } from './providers/AdminAuthProvider'
 import { ConfigProvider } from './providers/ConfigProvider'
 import { QueryProvider } from './providers/QueryProvider'
 
@@ -33,15 +34,17 @@ enableMocking().then(() =>
       <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
         <QueryProvider>
           <ThemeProvider>
-            <Suspense fallback={<LoadingFallback />}>
-              <ConfigProvider>
-                <PostHogProviderWrapper>
-                  <BrowserRouter>
-                    <App />
-                  </BrowserRouter>
-                </PostHogProviderWrapper>
-              </ConfigProvider>
-            </Suspense>
+            <AdminAuthProvider>
+              <Suspense fallback={<LoadingFallback />}>
+                <ConfigProvider>
+                  <PostHogProviderWrapper>
+                    <BrowserRouter>
+                      <App />
+                    </BrowserRouter>
+                  </PostHogProviderWrapper>
+                </ConfigProvider>
+              </Suspense>
+            </AdminAuthProvider>
           </ThemeProvider>
         </QueryProvider>
       </ErrorBoundary>

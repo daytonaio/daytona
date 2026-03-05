@@ -23,21 +23,16 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
-import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
-import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import {
   ArrowRightIcon,
   BookOpen,
   Box,
-  ChartColumn,
   ChevronsUpDown,
   Container,
-  CreditCard,
   FlaskConical,
   HardDrive,
   Joystick,
@@ -45,7 +40,6 @@ import {
   ListChecks,
   LockKeyhole,
   LogOut,
-  Mail,
   MapPinned,
   Moon,
   PackageOpen,
@@ -55,12 +49,11 @@ import {
   Slack,
   SquareUserRound,
   Sun,
-  TextSearch,
   Users,
 } from 'lucide-react'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
 import React, { useMemo } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
 import { Button } from './ui/button'
@@ -70,7 +63,6 @@ import { ScrollArea } from './ui/scroll-area'
 
 interface SidebarProps {
   isBannerVisible: boolean
-  billingEnabled: boolean
   version: string
 }
 
@@ -101,8 +93,7 @@ const useNavCommands = (items: { label: string; path: RoutePath | string; onClic
   useRegisterCommands(navCommands, { groupId: 'navigation', groupLabel: 'Navigation', groupOrder: 1 })
 }
 
-export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
-  const posthog = usePostHog()
+export function Sidebar({ isBannerVisible, version }: SidebarProps) {
   const config = useConfig()
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
@@ -110,13 +101,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const sidebar = useSidebar()
   const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
     useSelectedOrganization()
-  const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
-  const { isInitialized: webhooksInitialized } = useWebhooks()
-  const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
-  const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
-  const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
+  // In Lite version, all feature flags are enabled by default
+  const orgInfraEnabled = true
+  const organizationExperimentsEnabled = true
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
-  const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [
@@ -144,14 +132,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       })
     }
 
-    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_AUDIT_LOGS)) {
-      arr.push({
-        icon: <TextSearch size={16} strokeWidth={1.5} />,
-        label: 'Audit Logs',
-        path: RoutePath.AUDIT_LOGS,
-      })
-    }
-
     return arr
   }, [authenticatedUserHasPermission])
 
@@ -164,26 +144,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       },
       { icon: <KeyRound size={16} strokeWidth={1.5} />, label: 'API Keys', path: RoutePath.KEYS },
     ]
-
-    // Add Webhooks link if webhooks are initialized
-    if (webhooksInitialized) {
-      if (webhooksEnabled) {
-        arr.push({
-          icon: <Mail size={16} strokeWidth={1.5} />,
-          label: 'Webhooks',
-          path: RoutePath.WEBHOOKS,
-        })
-      } else {
-        arr.push({
-          icon: <Mail size={16} strokeWidth={1.5} />,
-          label: 'Webhooks',
-          path: '#webhooks' as any, // This will be handled by onClick
-          onClick: () => {
-            window.open(webhooksAccess.data?.url, '_blank', 'noopener,noreferrer')
-          },
-        })
-      }
-    }
 
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({
@@ -208,9 +168,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   }, [
     authenticatedUserOrganizationMember?.role,
     selectedOrganization?.personal,
-    webhooksInitialized,
-    webhooksAccess.data?.url,
-    webhooksEnabled,
   ])
 
   const experimentalItems = useMemo(() => {
@@ -228,25 +185,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
     }
     return arr
   }, [organizationExperimentsEnabled, authenticatedUserOrganizationMember?.role])
-
-  const billingItems = useMemo(() => {
-    if (!billingEnabled || authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
-      return []
-    }
-
-    return [
-      {
-        icon: <ChartColumn size={16} strokeWidth={1.5} />,
-        label: 'Spending',
-        path: RoutePath.BILLING_SPENDING,
-      },
-      {
-        icon: <CreditCard size={16} strokeWidth={1.5} />,
-        label: 'Wallet',
-        path: RoutePath.BILLING_WALLET,
-      },
-    ]
-  }, [billingEnabled, authenticatedUserOrganizationMember?.role])
 
   const infrastructureItems = useMemo(() => {
     if (!orgInfraEnabled) {
@@ -273,7 +211,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   }, [authenticatedUserHasPermission, orgInfraEnabled])
 
   const handleSignOut = () => {
-    posthog?.reset()
     signoutRedirect()
   }
 
@@ -299,11 +236,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
         items: miscItems,
       },
       { label: 'Settings', items: settingsItems },
-      { label: 'Billing', items: billingItems },
       { label: 'Infrastructure', items: infrastructureItems },
       { label: 'Experimental', items: experimentalItems },
     ].filter((group) => group.items.length > 0)
-  }, [sidebarItems, settingsItems, billingItems, infrastructureItems, experimentalItems, miscItems])
+  }, [sidebarItems, settingsItems, infrastructureItems, experimentalItems, miscItems])
 
   const commandItems = useMemo(() => {
     return sidebarGroups
@@ -313,11 +249,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
           path: RoutePath.ACCOUNT_SETTINGS,
           label: 'Account Settings',
           icon: <Settings size={16} strokeWidth={1.5} />,
-        },
-        {
-          path: RoutePath.USER_INVITATIONS,
-          label: 'Invitations',
-          icon: <Mail size={16} strokeWidth={1.5} />,
         },
         {
           path: RoutePath.ONBOARDING,
@@ -464,19 +395,6 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                     <Link to={RoutePath.ACCOUNT_SETTINGS}>
                       <Settings className="w-4 h-4" />
                       Account Settings
-                    </Link>
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.USER_INVITATIONS}>
-                      <Mail className="w-4 h-4" />
-                      Invitations
-                      {organizationInvitationsCount > 0 && (
-                        <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
-                          {organizationInvitationsCount}
-                        </span>
-                      )}
                     </Link>
                   </Button>
                 </DropdownMenuItem>

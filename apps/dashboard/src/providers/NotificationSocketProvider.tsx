@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { ReactNode, useEffect, useState } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { NotificationSocketContext } from '@/contexts/NotificationSocketContext'

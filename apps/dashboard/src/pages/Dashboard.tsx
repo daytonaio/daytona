@@ -15,15 +15,12 @@ import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
-import { RoutePath } from '@/enums/RoutePath'
-import { useOwnerWalletQuery } from '@/hooks/queries/billingQueries'
 import { useConfig } from '@/hooks/useConfig'
 import { useDocsSearchCommands } from '@/hooks/useDocsSearchCommands'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useSuspensionBanner } from '@/hooks/useSuspensionBanner'
 import { cn } from '@/lib/utils'
 import { BookOpen, BookSearchIcon, SlackIcon, SunMoon } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { PrivacyBanner } from '@/components/PrivacyBanner'
 
 function useDashboardCommands() {
@@ -72,12 +69,8 @@ const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
   const config = useConfig()
-  useOwnerWalletQuery() // prefetch wallet
-
   useDashboardCommands()
   useDocsSearchCommands()
-
-  const navigate = useNavigate()
 
   useSuspensionBanner(selectedOrganization)
 
@@ -89,21 +82,6 @@ const Dashboard: React.FC = () => {
       setShowVerifyEmailDialog(true)
     }
   }, [selectedOrganization])
-
-  useEffect(() => {
-    if (!config.billingApiUrl) {
-      return
-    }
-
-    if (!selectedOrganization) {
-      return
-    }
-
-    if (!selectedOrganization.defaultRegionId) {
-      navigate(RoutePath.SETTINGS)
-      return
-    }
-  }, [config.billingApiUrl, selectedOrganization]) // Do not depend on navigate to avoid infinite loops
 
   const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
     if (!config.announcements || Object.entries(config.announcements).length === 0) {
@@ -141,7 +119,7 @@ const Dashboard: React.FC = () => {
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
-        <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
+        <Sidebar isBannerVisible={isBannerVisible} version={config.version} />
         <SidebarInset className="overflow-y-auto">
           <div className={cn('w-full min-h-screen overscroll-none', isBannerVisible ? 'md:pt-12' : '')}>
             <Outlet />

@@ -5,7 +5,7 @@
 
 import { usePostHog } from 'posthog-js/react'
 import { useCallback, useEffect, useState } from 'react'
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { Button } from './ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
 import { Separator } from './ui/separator'

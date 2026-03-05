@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useAuth } from 'react-oidc-context'
+import { useAuth } from '@/hooks/useAuth'
 import { useCallback } from 'react'
 import { WebhookInitializationStatus } from '@daytonaio/api-client'
 

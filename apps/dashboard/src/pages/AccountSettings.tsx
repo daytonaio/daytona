@@ -8,9 +8,8 @@ import { PrivacyPreferencesDialog, usePrivacyConsent } from '@/components/Privac
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import React, { useState } from 'react'
-import LinkedAccounts from './LinkedAccounts'
 
-const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedAccountsEnabled }) => {
+const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = () => {
   const { preferences, saveConsent } = usePrivacyConsent()
   const [showPrivacyDialog, setShowPrivacyDialog] = useState(false)
 
@@ -22,8 +21,6 @@ const AccountSettings: React.FC<{ linkedAccountsEnabled: boolean }> = ({ linkedA
 
       <PageContent>
         <div className="flex flex-col gap-6">
-          {linkedAccountsEnabled && <LinkedAccounts />}
-
           <Card>
             <CardContent>
               <div className="flex sm:flex-row flex-col justify-between sm:items-center gap-2">
