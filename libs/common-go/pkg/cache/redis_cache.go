@@ -17,6 +17,7 @@ import (
 type RedisConfig struct {
 	Host     *string `envconfig:"HOST" mapstructure:"host"`
 	Port     *int    `envconfig:"PORT" mapstructure:"port"`
+	Username *string `envconfig:"USERNAME" mapstructure:"username"`
 	Password *string `envconfig:"PASSWORD" mapstructure:"password"`
 	TLS      *bool   `envconfig:"TLS" mapstructure:"tls"`
 }
@@ -75,6 +76,11 @@ func NewRedisCache[T any](config *RedisConfig, keyPrefix string) (*RedisCache[T]
 		return nil, errors.New("host and port are required")
 	}
 
+	username := ""
+	if config.Username != nil {
+		username = *config.Username
+	}
+
 	password := ""
 	if config.Password != nil {
 		password = *config.Password
@@ -83,6 +89,7 @@ func NewRedisCache[T any](config *RedisConfig, keyPrefix string) (*RedisCache[T]
 	if client == nil {
 		options := &redis.Options{
 			Addr:     fmt.Sprintf("%s:%d", *config.Host, *config.Port),
+			Username: username,
 			Password: password,
 		}
 		if config.TLS != nil && *config.TLS {
