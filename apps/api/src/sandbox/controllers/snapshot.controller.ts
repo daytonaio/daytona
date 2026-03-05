@@ -41,6 +41,7 @@ import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { SnapshotDto } from '../dto/snapshot.dto'
 import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
+import { SnapshotReadAccessGuard } from '../guards/snapshot-read-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
@@ -178,7 +179,7 @@ export class SnapshotController {
     status: 404,
     description: 'Snapshot not found',
   })
-  @UseGuards(SnapshotAccessGuard)
+  @UseGuards(SnapshotReadAccessGuard)
   async getSnapshot(
     @Param('id') snapshotIdOrName: string,
     @AuthContext() authContext: OrganizationAuthContext,
