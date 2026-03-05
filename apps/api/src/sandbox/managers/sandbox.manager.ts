@@ -342,6 +342,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             // Archive ERROR sandboxes that have completed backups on this draining runner
             await this.archiveErroredSandboxesOnDrainingRunner(runner.id)
 
+            // Recover recoverable ERROR sandboxes in-place (expand disk) so they become STOPPED
+            await this.recoverRecoverableSandboxesOnDrainingRunner(runner.id)
+
             // Retry backups for non-started sandboxes with errored backup state
             await this.retryErroredBackupsOnDrainingRunner(runner.id)
           } catch (e) {
@@ -359,6 +362,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       where: {
         runnerId,
         state: SandboxState.ERROR,
+        recoverable: false,
         desiredState: Not(In([SandboxDesiredState.DESTROYED, SandboxDesiredState.ARCHIVED])),
         backupState: BackupState.COMPLETED,
         backupSnapshot: Not(IsNull()),
@@ -406,6 +410,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   }
 
   private static readonly DRAINING_BACKUP_RETRY_TTL_SECONDS = 12 * 60 * 60 // 12 hours
+  private static readonly DRAINING_RECOVER_TTL_SECONDS = 12 * 60 * 60 // 12 hours
 
   private async retryErroredBackupsOnDrainingRunner(runnerId: string): Promise<void> {
     const erroredSandboxes = await this.sandboxRepository.find({
@@ -413,12 +418,14 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
         {
           runnerId,
           state: SandboxState.STOPPED,
+          recoverable: false,
           desiredState: SandboxDesiredState.STOPPED,
           backupState: BackupState.ERROR,
         },
         {
           runnerId,
           state: SandboxState.ERROR,
+          recoverable: false,
           backupState: In([BackupState.ERROR, BackupState.NONE]),
           desiredState: Not(SandboxDesiredState.DESTROYED),
         },
@@ -451,6 +458,72 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           this.logger.log(`Retried backup for sandbox ${sandbox.id} on draining runner ${runnerId}`)
         } catch (e) {
           this.logger.error(`Failed to retry backup for sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
+        }
+      }),
+    )
+  }
+
+  private async recoverRecoverableSandboxesOnDrainingRunner(runnerId: string): Promise<void> {
+    const recoverableSandboxes = await this.sandboxRepository.find({
+      where: {
+        runnerId,
+        recoverable: true,
+        desiredState: Not(In([SandboxDesiredState.DESTROYED])),
+        backupSnapshot: Not(IsNull()),
+      },
+      take: 100,
+    })
+
+    if (recoverableSandboxes.length === 0) {
+      return
+    }
+
+    this.logger.debug(`Found ${recoverableSandboxes.length} recoverable sandboxes on draining runner ${runnerId}`)
+
+    await Promise.allSettled(
+      recoverableSandboxes.map(async (sandbox) => {
+        const redisKey = `draining:recover:${sandbox.id}`
+
+        // Check if we've already attempted recovery within the last 12 hours
+        const alreadyAttempted = await this.redis.exists(redisKey)
+        if (alreadyAttempted) {
+          this.logger.debug(
+            `Skipping recovery for sandbox ${sandbox.id} on draining runner ${runnerId} — already attempted within 12 hours`,
+          )
+          return
+        }
+
+        const sandboxLockKey = getStateChangeLockKey(sandbox.id)
+        const acquired = await this.redisLockProvider.lock(sandboxLockKey, 60)
+        if (!acquired) {
+          return
+        }
+
+        try {
+          const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+          await runnerAdapter.recoverSandbox(sandbox)
+
+          const updateData: Partial<Sandbox> = {
+            state: SandboxState.STOPPED,
+            desiredState: SandboxDesiredState.STOPPED,
+            errorReason: null,
+            recoverable: false,
+            backupState: BackupState.NONE,
+          }
+
+          await this.sandboxRepository.updateWhere(sandbox.id, {
+            updateData,
+            whereCondition: { state: In([SandboxState.ERROR, SandboxState.STOPPED]) },
+          })
+
+          this.logger.log(`Recovered sandbox ${sandbox.id} on draining runner ${runnerId}`)
+        } catch (e) {
+          await this.redis.set(redisKey, '1', 'EX', SandboxManager.DRAINING_RECOVER_TTL_SECONDS)
+          this.logger.error(`Failed to recover sandbox ${sandbox.id} on draining runner ${runnerId}`, e)
+        } finally {
+          await this.redisLockProvider.unlock(sandboxLockKey)
         }
       }),
     )
