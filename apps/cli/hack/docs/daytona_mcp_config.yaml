@@ -1,9 +1,0 @@
-name: daytona mcp config
-synopsis: Outputs JSON configuration for Daytona MCP Server
-usage: daytona mcp config [AGENT_NAME] [flags]
-inherited_options:
-  - name: help
-    default_value: 'false'
-    usage: help for daytona
-see_also:
-  - daytona mcp - Manage Daytona MCP Server
