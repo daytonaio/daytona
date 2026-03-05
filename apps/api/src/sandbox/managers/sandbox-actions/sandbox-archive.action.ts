@@ -108,7 +108,7 @@ export class SandboxArchiveAction extends SandboxAction {
       }
     } catch (error) {
       //  fail for errors other than sandbox not found or sandbox already destroyed
-      if (error.response?.status !== 404) {
+      if (error.response?.status !== 404 && error.statusCode !== 404) {
         throw error
       }
     }

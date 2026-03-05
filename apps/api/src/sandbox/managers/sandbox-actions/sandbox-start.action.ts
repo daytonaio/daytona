@@ -458,7 +458,7 @@ export class SandboxStartAction extends SandboxAction {
               const runnerAdapter = await this.runnerAdapterFactory.create(runner)
               await runnerAdapter.destroySandbox(sandbox.id)
             } catch (e) {
-              if (e.response?.status !== 404) {
+              if (e.response?.status !== 404 && e.statusCode !== 404) {
                 this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, e)
               }
             }
@@ -865,7 +865,7 @@ export class SandboxStartAction extends SandboxAction {
       await runnerAdapter.destroySandbox(sandbox.id)
       await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
     } catch (error) {
-      if (error.response?.status !== 404) {
+      if (error.response?.status !== 404 && error.statusCode !== 404) {
         this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
         throw error
       }

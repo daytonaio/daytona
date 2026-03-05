@@ -61,9 +61,12 @@ export class SandboxDestroyAction extends SandboxAction {
       }
     } catch (e) {
       //  if the sandbox is not found on runner, it is already destroyed
-      if (e.response?.status !== 404) {
+      if (e.response?.status !== 404 && e.statusCode !== 404) {
         throw e
       }
+
+      await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
+      return DONT_SYNC_AGAIN
     }
   }
 }
