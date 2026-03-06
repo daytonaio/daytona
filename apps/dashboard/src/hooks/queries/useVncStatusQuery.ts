@@ -18,7 +18,7 @@ export const useVncInitialStatusQuery = (sandboxId: string, enabled: boolean) =>
       const { data } = await toolboxApi.getComputerUseStatusDeprecated(sandboxId, selectedOrganization?.id)
       return data.status as string
     },
-    enabled: enabled && !!sandboxId,
+    enabled: enabled && !!sandboxId && !!selectedOrganization?.id,
     retry: false,
     staleTime: 0,
   })
@@ -35,7 +35,7 @@ export const useVncPollStatusQuery = (sandboxId: string, enabled: boolean) => {
       if (data.status !== 'active') throw new Error(`VNC not ready: ${data.status}`)
       return data.status as string
     },
-    enabled: enabled && !!sandboxId,
+    enabled: enabled && !!sandboxId && !!selectedOrganization?.id,
     retry: 10,
     retryDelay: 2000,
   })
