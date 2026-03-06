@@ -9,7 +9,6 @@ import (
 	"log/slog"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
-	"github.com/daytonaio/daytona/cli/util"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
@@ -51,21 +50,21 @@ func (s *SandboxService) GetSandboxInfo(ctx context.Context, sandboxId string) (
 	backupInfo, err := s.backupInfoCache.Get(ctx, sandboxId)
 	if err != nil {
 		return &models.SandboxInfo{
-			SandboxState:      sandboxState,
-			BackupState:       enums.BackupStateNone,
-			BackupErrorReason: util.Pointer(err.Error()),
+			SandboxState: sandboxState,
+			BackupState:  enums.BackupStateNone,
 		}, nil
+	}
+
+	sandboxInfo := &models.SandboxInfo{
+		SandboxState: sandboxState,
+		BackupState:  backupInfo.State,
 	}
 
 	var backupErrReason string
 	if backupInfo.Error != nil {
 		backupErrReason = backupInfo.Error.Error()
-
+		sandboxInfo.BackupErrorReason = &backupErrReason
 	}
 
-	return &models.SandboxInfo{
-		SandboxState:      sandboxState,
-		BackupState:       backupInfo.State,
-		BackupErrorReason: util.Pointer(backupErrReason),
-	}, nil
+	return sandboxInfo, nil
 }

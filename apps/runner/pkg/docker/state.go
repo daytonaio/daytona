@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -19,7 +20,7 @@ func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (e
 		return enums.SandboxStateUnknown, nil
 	}
 
-	container, err := d.ContainerInspect(ctx, sandboxId)
+	ct, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		if common_errors.IsNotFoundError(err) {
 			return enums.SandboxStateDestroyed, nil
@@ -27,33 +28,40 @@ func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (e
 		return enums.SandboxStateError, err
 	}
 
-	switch container.State.Status {
-	case "created":
+	return d.getSandboxState(ctx, ct)
+}
+
+func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.InspectResponse) (enums.SandboxState, error) {
+	if ct == nil {
+		return enums.SandboxStateUnknown, errors.New("invalid sandbox reference")
+	}
+
+	switch ct.State.Status {
+	case container.StateCreated:
 		return enums.SandboxStateCreating, nil
 
-	case "running":
-		if d.isContainerPullingImage(container.ID) {
+	case container.StateRunning:
+		if d.isContainerPullingImage(ctx, ct.ID) {
 			return enums.SandboxStatePullingSnapshot, nil
 		}
 		return enums.SandboxStateStarted, nil
 
-	case "paused":
+	case container.StatePaused:
 		return enums.SandboxStateStopped, nil
 
-	case "restarting":
+	case container.StateRestarting:
 		return enums.SandboxStateStarting, nil
 
-	case "removing":
+	case container.StateRemoving:
 		return enums.SandboxStateDestroying, nil
 
-	case "exited":
-		if container.State.ExitCode == 0 || container.State.ExitCode == 137 || container.State.ExitCode == 143 {
+	case container.StateExited:
+		if ct.State.ExitCode == 0 || ct.State.ExitCode == 137 || ct.State.ExitCode == 143 {
 			return enums.SandboxStateStopped, nil
 		}
+		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", ct.State.ExitCode, ct.State.Error)
 
-		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", container.State.ExitCode, container.State.Error)
-
-	case "dead":
+	case container.StateDead:
 		return enums.SandboxStateDestroyed, nil
 
 	default:
@@ -62,14 +70,14 @@ func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (e
 }
 
 // isContainerPullingImage checks if the container is still in image pulling phase
-func (d *DockerClient) isContainerPullingImage(containerId string) bool {
+func (d *DockerClient) isContainerPullingImage(ctx context.Context, containerId string) bool {
 	options := container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Tail:       "10", // Look at last 10 lines
 	}
 
-	logs, err := d.apiClient.ContainerLogs(context.Background(), containerId, options)
+	logs, err := d.apiClient.ContainerLogs(ctx, containerId, options)
 	if err != nil {
 		return false
 	}

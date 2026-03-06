@@ -863,12 +863,13 @@ export class SandboxStartAction extends SandboxAction {
     try {
       // First try to destroy the sandbox
       await runnerAdapter.destroySandbox(sandbox.id)
-      await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
     } catch (error) {
       if (error.response?.status !== 404 && error.statusCode !== 404) {
         this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
         throw error
       }
     }
+
+    await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
   }
 }
