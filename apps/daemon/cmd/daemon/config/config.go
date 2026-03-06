@@ -4,25 +4,23 @@
 package config
 
 import (
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
-	DaemonLogFilePath                    string  `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
-	EntrypointLogFilePath                string  `envconfig:"DAYTONA_ENTRYPOINT_LOG_FILE_PATH"`
-	EntrypointShutdownTimeoutSec         int     `envconfig:"ENTRYPOINT_SHUTDOWN_TIMEOUT_SEC"`
-	SigtermShutdownTimeoutSec            int     `envconfig:"SIGTERM_SHUTDOWN_TIMEOUT_SEC"`
-	UserHomeAsWorkDir                    bool    `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
-	SandboxId                            string  `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
-	OtelEndpoint                         *string `envconfig:"DAYTONA_OTEL_ENDPOINT"`
-	TerminationGracePeriodSeconds        int     `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD_SECONDS"`        // Period in seconds to wait before forcefully terminating processes
-	TerminationCheckIntervalMilliseconds int     `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL_MILLISECONDS"` // Interval in milliseconds to check for process termination
-	RecordingsDir                        string  `envconfig:"DAYTONA_RECORDINGS_DIR"`
+	DaemonLogFilePath        string        `envconfig:"DAYTONA_DAEMON_LOG_FILE_PATH"`
+	UserHomeAsWorkDir        bool          `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
+	SandboxId                string        `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
+	OtelEndpoint             *string       `envconfig:"DAYTONA_OTEL_ENDPOINT"`
+	TerminationCheckInterval time.Duration `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL" default:"100ms" validate:"min_duration=1ms"`
+	TerminationGracePeriod   time.Duration `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD" default:"5s" validate:"min_duration=1s"`
+	RecordingsDir            string        `envconfig:"DAYTONA_RECORDINGS_DIR"`
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"
-var defaultEntrypointLogFilePath = "/tmp/daytona-entrypoint.log"
 
 var config *Config
 
@@ -39,6 +37,23 @@ func GetConfig() (*Config, error) {
 	}
 
 	var validate = validator.New()
+
+	// Register a custom tag "min_duration" that accepts a duration string like "1ms"
+	err = validate.RegisterValidation("min_duration", func(fl validator.FieldLevel) bool {
+		min, err := time.ParseDuration(fl.Param())
+		if err != nil {
+			return false
+		}
+		d, ok := fl.Field().Interface().(time.Duration)
+		if !ok {
+			return false
+		}
+		return d >= min
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	err = validate.Struct(config)
 	if err != nil {
 		return nil, err
@@ -46,30 +61,6 @@ func GetConfig() (*Config, error) {
 
 	if config.DaemonLogFilePath == "" {
 		config.DaemonLogFilePath = defaultDaemonLogFilePath
-	}
-
-	if config.EntrypointLogFilePath == "" {
-		config.EntrypointLogFilePath = defaultEntrypointLogFilePath
-	}
-
-	if config.EntrypointShutdownTimeoutSec <= 0 {
-		// Default to 10 seconds
-		config.EntrypointShutdownTimeoutSec = 10
-	}
-
-	if config.SigtermShutdownTimeoutSec <= 0 {
-		// Default to 5 seconds
-		config.SigtermShutdownTimeoutSec = 5
-	}
-
-	if config.TerminationGracePeriodSeconds <= 0 {
-		// Default to 5 seconds
-		config.TerminationGracePeriodSeconds = 5
-	}
-
-	if config.TerminationCheckIntervalMilliseconds <= 0 {
-		// Default to 100 milliseconds
-		config.TerminationCheckIntervalMilliseconds = 100
 	}
 
 	return config, nil

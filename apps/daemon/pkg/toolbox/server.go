@@ -22,6 +22,7 @@ import (
 	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
+	session_svc "github.com/daytonaio/daemon/pkg/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse/manager"
 	recordingcontroller "github.com/daytonaio/daemon/pkg/toolbox/computeruse/recording"
@@ -49,44 +50,41 @@ import (
 )
 
 type ServerConfig struct {
-	Logger                               *slog.Logger
-	WorkDir                              string
-	ConfigDir                            string
-	ComputerUse                          computeruse.IComputerUse
-	SandboxId                            string
-	OtelEndpoint                         *string
-	TerminationGracePeriodSeconds        int
-	TerminationCheckIntervalMilliseconds int
-	RecordingService                     *recording.RecordingService
+	Logger           *slog.Logger
+	WorkDir          string
+	ConfigDir        string
+	ComputerUse      computeruse.IComputerUse
+	SandboxId        string
+	OtelEndpoint     *string
+	SessionService   *session_svc.SessionService
+	RecordingService *recording.RecordingService
 }
 
 func NewServer(config ServerConfig) *server {
 	return &server{
-		logger:                               config.Logger.With(slog.String("component", "toolbox_server")),
-		WorkDir:                              config.WorkDir,
-		SandboxId:                            config.SandboxId,
-		otelEndpoint:                         config.OtelEndpoint,
-		telemetry:                            Telemetry{},
-		terminationGracePeriodSeconds:        config.TerminationGracePeriodSeconds,
-		terminationCheckIntervalMilliseconds: config.TerminationCheckIntervalMilliseconds,
-		configDir:                            config.ConfigDir,
-		recordingService:                     config.RecordingService,
+		logger:           config.Logger.With(slog.String("component", "toolbox_server")),
+		WorkDir:          config.WorkDir,
+		SandboxId:        config.SandboxId,
+		otelEndpoint:     config.OtelEndpoint,
+		telemetry:        Telemetry{},
+		sessionService:   config.SessionService,
+		configDir:        config.ConfigDir,
+		recordingService: config.RecordingService,
 	}
 }
 
 type server struct {
-	WorkDir                              string
-	ComputerUse                          computeruse.IComputerUse
-	SandboxId                            string
-	logger                               *slog.Logger
-	otelEndpoint                         *string
-	authToken                            string
-	telemetry                            Telemetry
-	terminationGracePeriodSeconds        int
-	terminationCheckIntervalMilliseconds int
-	configDir                            string
-	recordingService                     *recording.RecordingService
-	httpServer                           *http.Server
+	WorkDir          string
+	ComputerUse      computeruse.IComputerUse
+	SandboxId        string
+	logger           *slog.Logger
+	otelEndpoint     *string
+	authToken        string
+	telemetry        Telemetry
+	sessionService   *session_svc.SessionService
+	configDir        string
+	recordingService *recording.RecordingService
+	httpServer       *http.Server
 }
 
 type Telemetry struct {
@@ -174,7 +172,7 @@ func (s *server) Start() error {
 	{
 		processController.POST("/execute", process.ExecuteCommand(processLogger))
 
-		sessionController := session.NewSessionController(s.logger, s.configDir, s.WorkDir, s.terminationGracePeriodSeconds, s.terminationCheckIntervalMilliseconds)
+		sessionController := session.NewSessionController(s.logger, s.configDir, s.WorkDir, s.sessionService)
 		sessionGroup := processController.Group("/session")
 		{
 			sessionGroup.GET("", sessionController.ListSessions)
@@ -185,6 +183,8 @@ func (s *server) Start() error {
 			sessionGroup.GET("/:sessionId/command/:commandId", sessionController.GetSessionCommand)
 			sessionGroup.POST("/:sessionId/command/:commandId/input", sessionController.SendInput)
 			sessionGroup.GET("/:sessionId/command/:commandId/logs", sessionController.GetSessionCommandLogs)
+			sessionGroup.GET("/entrypoint/logs", sessionController.GetEntrypointLogs)
+			sessionGroup.GET("/entrypoint", sessionController.GetEntrypointSession)
 		}
 
 		// PTY endpoints
