@@ -21,15 +21,13 @@
     "storybook": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "storybook dev -p 6006 -c .storybook",
-        "cwd": "apps/dashboard"
+        "command": "storybook dev -p 6006 -c apps/dashboard/.storybook"
       }
     },
     "build-storybook": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "storybook build -c .storybook -o ../../dist/storybook",
-        "cwd": "apps/dashboard"
+        "command": "storybook build -c apps/dashboard/.storybook -o ../../dist/storybook"
       }
     },
     "format": {
