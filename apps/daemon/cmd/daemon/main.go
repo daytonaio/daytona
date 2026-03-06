@@ -12,6 +12,7 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -104,8 +105,12 @@ func run() int {
 		entrypointLogFilePath := path.Join(configDir, "sessions", util.EntrypointSessionID, util.EntrypointCommandID, "output.log")
 		logBytes, err := os.ReadFile(entrypointLogFilePath)
 		if err != nil {
-			logger.Error("Failed to read entrypoint log file", "error", err)
-			fmt.Printf("failed to read entrypoint log file: %v\n", err)
+			if strings.Contains(err.Error(), "no such file or directory") {
+				logger.Warn("Logs not found, please check if correct entrypoint was provided for sandbox.")
+			} else {
+				logger.Error("Failed to read entrypoint log file", "error", err)
+			}
+
 			return 2
 		}
 
