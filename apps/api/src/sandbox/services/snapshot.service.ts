@@ -410,6 +410,30 @@ export class SnapshotService {
     return snapshot
   }
 
+  async getSnapshotWithRegions(snapshotIdOrName: string, organizationId: string): Promise<Snapshot> {
+    const snapshot = await this.snapshotRepository.findOne({
+      where: [
+        { id: snapshotIdOrName },
+        { name: snapshotIdOrName, organizationId },
+        { name: snapshotIdOrName, general: true },
+      ],
+      relations: ['snapshotRegions'],
+      order: { general: 'ASC' },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotIdOrName} not found`)
+    }
+
+    const availableRegions = await this.organizationService.listAvailableRegions(organizationId)
+    const availableRegionIds = new Set(availableRegions.map((r) => r.id))
+    if (snapshot.snapshotRegions) {
+      snapshot.snapshotRegions = snapshot.snapshotRegions.filter((sr) => availableRegionIds.has(sr.regionId))
+    }
+
+    return snapshot
+  }
+
   async getSnapshotByName(snapshotName: string, organizationId: string): Promise<Snapshot> {
     const snapshot = await this.snapshotRepository.findOne({
       where: { name: snapshotName, organizationId },
