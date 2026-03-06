@@ -69,12 +69,18 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 		req.Rows = util.Pointer(uint16(24))
 	}
 	// Set upper limits to avoid ioctl errors
-	if *req.Cols > 1000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be less than 1000"})
+	if *req.Cols < 1 || *req.Cols > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for cols - must be between 1 and 1000"})
 		return
 	}
-	if *req.Rows > 1000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for rows - must be less than 1000"})
+	if *req.Rows < 1 || *req.Rows > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid value for rows - must be between 1 and 1000"})
+		return
+	}
+
+	// Validate: LazyStart with Command makes no sense
+	if req.LazyStart && req.Command != nil && *req.Command != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "lazyStart cannot be used with a command"})
 		return
 	}
 
@@ -88,6 +94,9 @@ func (p *PTYController) CreatePTYSession(c *gin.Context) {
 			CreatedAt: time.Now(),
 			Active:    false,
 			LazyStart: req.LazyStart,
+			Command:   stringOrEmpty(req.Command),
+			Args:      req.Args,
+			Timeout:   uint32OrZero(req.Timeout),
 		},
 		clients: cmap.New[*wsClient](),
 		logger:  p.logger.With(slog.String("sessionId", req.ID)),
@@ -246,12 +255,12 @@ func (p *PTYController) ResizePTYSession(c *gin.Context) {
 		return
 	}
 
-	if req.Cols > 1000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "cols must be less than 1000"})
+	if req.Cols < 1 || req.Cols > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "cols must be between 1 and 1000"})
 		return
 	}
-	if req.Rows > 1000 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "rows must be less than 1000"})
+	if req.Rows < 1 || req.Rows > 1000 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "rows must be between 1 and 1000"})
 		return
 	}
 
@@ -270,4 +279,18 @@ func (p *PTYController) ResizePTYSession(c *gin.Context) {
 	// Return updated session info
 	updatedInfo := session.Info()
 	c.JSON(http.StatusOK, updatedInfo)
+}
+
+func stringOrEmpty(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func uint32OrZero(v *uint32) uint32 {
+	if v == nil {
+		return 0
+	}
+	return *v
 }
