@@ -24,7 +24,8 @@ import { ArrowLeft, MoreHorizontal, Play, RefreshCw, Square, Wrench } from 'luci
 interface SandboxHeaderProps {
   sandbox: Sandbox | undefined
   isLoading: boolean
-  isOwner: boolean
+  writePermitted: boolean
+  deletePermitted: boolean
   actionsDisabled: boolean
   isFetching: boolean
   onStart: () => void
@@ -43,7 +44,8 @@ interface SandboxHeaderProps {
 export function SandboxHeader({
   sandbox,
   isLoading,
-  isOwner,
+  writePermitted,
+  deletePermitted,
   actionsDisabled,
   isFetching,
   onStart,
@@ -93,7 +95,7 @@ export function SandboxHeader({
           <>
             <SandboxState state={sandbox.state} errorReason={sandbox.errorReason} recoverable={sandbox.recoverable} />
             <div className="flex items-center gap-2">
-              {isOwner && (
+              {writePermitted && (
                 <ButtonGroup>
                   {isStartable(sandbox) && !sandbox.recoverable && (
                     <Button variant="outline" size="sm" onClick={onStart} disabled={actionsDisabled}>
@@ -141,12 +143,16 @@ export function SandboxHeader({
                           </DropdownMenuGroup>
                         </>
                       )}
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem variant="destructive" onClick={onDelete} disabled={actionsDisabled}>
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
+                      {deletePermitted && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuGroup>
+                            <DropdownMenuItem variant="destructive" onClick={onDelete} disabled={actionsDisabled}>
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuGroup>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </ButtonGroup>
