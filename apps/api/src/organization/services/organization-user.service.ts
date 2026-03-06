@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { BadRequestException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 import { OrganizationRoleService } from './organization-role.service'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { OrganizationUserDto } from '../dto/organization-user.dto'
@@ -16,13 +18,16 @@ import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
 import { OrganizationInvitationAcceptedEvent } from '../events/organization-invitation-accepted.event'
 import { OrganizationResourcePermissionsUnassignedEvent } from '../events/organization-resource-permissions-unassigned.event'
+import { OrganizationDeletedEvent } from '../events/organization-deleted.event'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { UserService } from '../../user/user.service'
-import { UserEvents } from '../../user/constants/user-events.constant'
-import { UserDeletedEvent } from '../../user/events/user-deleted.event'
+import { OrganizationAssertDeletableEvent } from '../events/organization-assert-deletable.event'
+import { getOrganizationUserCacheKey } from '../constants/organization-cache-keys.constant'
 
 @Injectable()
 export class OrganizationUserService {
+  private readonly logger = new Logger(OrganizationUserService.name)
+
   constructor(
     @InjectRepository(OrganizationUser)
     private readonly organizationUserRepository: Repository<OrganizationUser>,
@@ -30,6 +35,7 @@ export class OrganizationUserService {
     private readonly userService: UserService,
     private readonly eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
+    @InjectRedis() private readonly redis: Redis,
   ) {}
 
   async findAll(organizationId: string): Promise<OrganizationUserDto[]> {
@@ -51,6 +57,10 @@ export class OrganizationUserService {
     })
 
     return dtos
+  }
+
+  async countByUserId(userId: string): Promise<number> {
+    return this.organizationUserRepository.count({ where: { userId } })
   }
 
   async findOne(organizationId: string, userId: string): Promise<OrganizationUser | null> {
@@ -207,29 +217,56 @@ export class OrganizationUserService {
   }
 
   @OnAsyncEvent({
-    event: UserEvents.DELETED,
+    event: OrganizationEvents.ASSERT_NO_USERS,
   })
-  async handleUserDeletedEvent(payload: UserDeletedEvent): Promise<void> {
-    const memberships = await payload.entityManager.find(OrganizationUser, {
-      where: {
-        userId: payload.userId,
-        organization: {
-          personal: false,
-        },
-      },
-      relations: {
-        organization: true,
-      },
+  async handleAssertNoUsers(event: OrganizationAssertDeletableEvent): Promise<void> {
+    let count = 0
+
+    try {
+      count = await this.organizationUserRepository.count({
+        where: { organizationId: event.organizationId },
+      })
+    } catch (error) {
+      this.logger.error(
+        `Failed to check if the organization ${event.organizationId} has users that must be removed`,
+        error,
+      )
+      throw new Error('Failed to check if the organization has users that must be removed')
+    }
+
+    // not a single-user organization
+    if (count > 1) {
+      throw new Error(`Organization has ${count - 1} user(s) that must be removed from the organization`)
+    }
+  }
+
+  @OnAsyncEvent({
+    event: OrganizationEvents.DELETED,
+  })
+  async handleOrganizationDeletedEvent(payload: OrganizationDeletedEvent): Promise<void> {
+    const { entityManager, organizationId } = payload
+
+    // Get users before deletion to invalidate caches
+    const users = await entityManager.find(OrganizationUser, {
+      where: { organizationId },
+      select: ['userId'],
     })
 
-    /*
-    // TODO
-    // user deletion will fail if the user is the only owner of some non-personal organization
-    // potential improvements:
-    //  - auto-delete the organization if there are no other members
-    //  - auto-promote a new owner if there are other members
-    */
-    await Promise.all(memberships.map((membership) => this.removeWithEntityManager(payload.entityManager, membership)))
+    await entityManager.delete(OrganizationUser, { organizationId })
+
+    // Invalidate caches
+    try {
+      const cacheKeys = users.map((user) => getOrganizationUserCacheKey(organizationId, user.userId))
+      if (cacheKeys.length > 0) {
+        const BATCH_SIZE = 500
+        for (let i = 0; i < cacheKeys.length; i += BATCH_SIZE) {
+          const batch = cacheKeys.slice(i, i + BATCH_SIZE)
+          await this.redis.del(...batch)
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Failed to invalidate caches for organization ${organizationId}:`, error)
+    }
   }
 
   private getAssignedPermissions(
