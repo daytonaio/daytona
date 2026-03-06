@@ -4,26 +4,22 @@ title: Network Limits (Firewall)
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your organization's billing tier or manually configured for specific sandboxes.
+Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your [organization's billing tier](/docs/en/limits/) or manually configured for specific sandboxes.
 
-## Tier-Based Network Restrictions
+## Tier-based network restrictions
 
 Network limits are automatically applied to sandboxes based on your organization's billing tier. This provides secure and controlled internet access for development environments:
 
-- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level
+- **Tier 1 & Tier 2**: Network access is restricted and cannot be overridden at the sandbox level. Organization-level network restrictions take precedence over sandbox-level settings. Even with [`networkAllowList`](#create-sandboxes-with-network-restrictions) specified when creating a sandbox, the organization's network restrictions still apply
 - **Tier 3 & Tier 4**: Full internet access is available by default, with the ability to configure custom network settings
 
-:::note
-**Tier 1 & 2**: Organization-level network restrictions take precedence over sandbox-level settings. Even if you specify `networkAllowList` when creating a sandbox, the organization's network restrictions will still apply.
-:::
+> To learn more about organization tiers and limits, see [limits](/docs/en/limits/).
 
-To learn more about organization tiers and limits, see the [Limits documentation](/docs/limits/).
+[Essential services](#essential-services) are available on all tiers and include services essential for development: package registries, container registries, Git repositories, CDN services, platform services, and system package managers.
 
-## Managing Network Access
+## Create sandboxes with network restrictions
 
-### Creating Sandboxes with Network Restrictions
-
-You can control network access when creating sandboxes using the `networkAllowList` and `networkBlockAll` parameters:
+Daytona provides methods to control network access when [creating sandboxes](/docs/en/sandboxes#create-sandboxes) by using the `networkAllowList` and `networkBlockAll` parameters:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -64,7 +60,6 @@ const sandbox = await daytona.create({
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
@@ -88,6 +83,44 @@ sandbox = daytona.create(
 ```
 
 </TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+)
+
+func main() {
+	client, err := daytona.NewClient()
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+
+	// Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+	allowList := "208.80.154.232/32,199.16.156.103/32,192.168.1.0/24"
+	sandbox, err := client.Create(ctx, types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			NetworkAllowList: &allowList,
+		},
+	})
+
+	// Or block all network access
+	sandbox, err = client.Create(ctx, types.SnapshotParams{
+		SandboxBaseParams: types.SandboxBaseParams{
+			NetworkBlockAll: true,
+		},
+	})
+}
+```
+
+</TabItem>
 </Tabs>
 
 
@@ -95,27 +128,19 @@ sandbox = daytona.create(
 If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
 
+## Network allow list format
 
-### Network Allow List Format
-
-The `networkAllowList` accepts up to 5 CIDR network blocks separated by commas:
+The `networkAllowList` parameter accepts up to 10 CIDR network blocks separated by commas:
 
 - **Single IP**: `208.80.154.232/32` (Wikipedia)
 - **Subnet**: `192.168.1.0/24` (Private network)
 - **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
 
-:::note
-**Essential Services**: Services that are essential for development are accessible on all tiers, including package registries, container registries, Git repositories, CDN services, platform services, system package managers etc.\
-If you experience issues with any essential development services, please contact [support@daytona.io](mailto:support@daytona.io) for assistance as these should be accessible on all tiers.
-
-For a complete list of whitelisted services, see [Essential Services](#essential-services) below.
-:::
-
-## Organization Configuration
+## Organization configuration
 
 The network access policies for your organization are set automatically depending on your organization's limits tier and cannot be modified by organization administrators. These policies determine the default network behavior for all sandboxes in your organization.
 
-## Testing Network Access
+## Test network access
 
 To test network connectivity from your sandbox:
 
@@ -129,7 +154,7 @@ npm ping    # For Node.js
 pip install --dry-run requests  # For Python
 ```
 
-## Security Benefits
+## Security benefits
 
 Network limits provide several security advantages:
 
@@ -145,54 +170,69 @@ Test network connectivity before starting critical development work and consider
 :::
 
 
-## Essential Services
+## Essential services
 
-The following services are whitelisted and accessible on all tiers:
+Daytona provides a list of essential services that are available on all tiers and can be used for development.
 
-### NPM Registry and Package Managers
+:::note
+This list is continuously updated. If you require access to additional essential development services, submit a request in the [sandbox network whitelist](https://github.com/daytonaio/sandbox-network-whitelist) repository or contact [support@daytona.io](mailto:support@daytona.io).
+:::
+
+### NPM registry and package managers
 
 - **NPM Registry**: `registry.npmjs.org`, `registry.npmjs.com`, `nodejs.org`, `nodesource.com`, `npm.pkg.github.com`
-- **Yarn Packages**: `classic.yarnpkg.com`, `registry.yarnpkg.com`, `repo.yarnpkg.com`, `releases.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`, `dl.yarnpkg.com`, `yarnpkg.com`
+- **Yarn Packages**: `yarnpkg.com`, `*.yarnpkg.com`, `yarn.npmjs.org`, `yarnpkg.netlify.com`
+- **Bun**: `bun.sh`, `*.bun.sh`
 
-### Git Hosting and Version Control
+### Git hosting and version control
 
-- **GitHub**: `github.com`, `api.github.com`, `raw.githubusercontent.com`, `github-releases.githubusercontent.com`, `codeload.github.com`, `ghcr.io`, `packages.github.com`
-- **GitLab**: `gitlab.com`, `registry.gitlab.com`
+- **GitHub**: `github.com`, `*.github.com`, `*.githubusercontent.com`, `ghcr.io`
+- **GitLab**: `gitlab.com`, `*.gitlab.com`
 - **Bitbucket**: `bitbucket.org`
+- **Azure DevOps**: `dev.azure.com`, `*.dev.azure.com`, `login.microsoftonline.com`, `visualstudio.com`, `*.visualstudio.com`, `ssh.dev.azure.com`, `vs-ssh.visualstudio.com`
 
-### Python Package Managers
+### Python package managers
 
-- **PyPI**: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`
+- **PyPI**: `pypi.org`, `pypi.python.org`, `files.pythonhosted.org`, `bootstrap.pypa.io`, `astral.sh`
 
-### Ubuntu/Debian Package Repositories
+### Composer packages
 
-- **Ubuntu Repos**: `archive.ubuntu.com`, `security.ubuntu.com`
-- **Debian Repos**: `deb.debian.org`, `security.debian.org`, `cdn-fastly.deb.debian.org`, `ftp.debian.org`
+- **Composer**: `*.packagist.org`, `packagist.com`
 
-### CDN and Content Delivery
+### Ubuntu/Debian package repositories
 
-- **CDN Services**: `fastly.com`, `cloudflare.com`
+- **Ubuntu Repos**: `*.ubuntu.com`
+- **Debian Repos**: `*.debian.org`, `cdn-fastly.deb.debian.org`
+
+### CDN and content delivery
+
+- **CDN Services**: `fastly.com`, `cloudflare.com`, `r2.cloudflarestorage.com`, `*.r2.cloudflarestorage.com`
 - **JavaScript CDNs**: `unpkg.com`, `jsdelivr.net`
 
-### AI/ML Services
+### AI/ML services
 
-- **Anthropic**: `api.anthropic.com`
-- **OpenAI**: `api.openai.com`
+- **Anthropic**: `*.anthropic.com`, `claude.ai`, `platform.claude.com`
+- **OpenAI**: `openai.com`, `*.openai.com`, `chatgpt.com`
+- **Google AI**: `generativelanguage.googleapis.com`, `gemini.google.com`, `aistudio.google.com`, `ai.google.dev`, `models.dev`
 - **Perplexity**: `api.perplexity.ai`
 - **DeepSeek**: `api.deepseek.com`
 - **Groq**: `api.groq.com`
 - **Expo**: `api.expo.dev`
 - **OpenRouter**: `openrouter.ai`
+- **Qwen**: `chat.qwen.ai`, `dashscope.aliyuncs.com`, `dashscope-intl.aliyuncs.com`
+- **Cursor**: `*.cursor.com`
+- **OpenCode**: `opencode.ai`, `*.opencode.ai`
+- **Other AI Services**: `api.letta.com`, `api.fireworks.ai`, `open.bigmodel.cn`, `*.z.ai`, `*.moonshot.ai`, `ai-gateway.vercel.sh`, `api.featherless.ai`
 
-### Docker Registries and Container Services
+### Docker registries and container services
 
-- **Docker Registries**: `download.docker.com`, `registry-1.docker.io`, `registry.docker.io`, `auth.docker.io`, `index.docker.io`, `hub.docker.com`, `docker.io`
+- **Docker Registries**: `docker.io`, `*.docker.io`, `*.docker.com`
 - **Microsoft Container Registry**: `mcr.microsoft.com`
 - **Kubernetes Registry**: `registry.k8s.io`
-- **Google Container Registry**: `gcr.io`, `asia.gcr.io`, `eu.gcr.io`, `us.gcr.io`, `marketplace.gcr.io`, `registry.cloud.google.com`
+- **Google Container Registry**: `gcr.io`, `*.gcr.io`, `registry.cloud.google.com`
 - **Quay**: `quay.io`, `quay-registry.s3.amazonaws.com`
 
-### Maven Repositories
+### Maven repositories
 
 - **Maven Repos**: `repo1.maven.org`, `repo.maven.apache.org`
 
@@ -200,26 +240,50 @@ The following services are whitelisted and accessible on all tiers:
 
 - **Google Fonts**: `fonts.googleapis.com`, `fonts.gstatic.com`
 
-### AWS S3 Endpoints
+### AWS S3 endpoints
 
 - **US East**: `s3.us-east-1.amazonaws.com`, `s3.us-east-2.amazonaws.com`
 - **US West**: `s3.us-west-1.amazonaws.com`, `s3.us-west-2.amazonaws.com`
 - **EU**: `s3.eu-central-1.amazonaws.com`, `s3.eu-west-1.amazonaws.com`, `s3.eu-west-2.amazonaws.com`
 
-### Daytona Platform
+### Google Cloud Storage
+
+- **GCS**: `storage.googleapis.com`
+
+### Daytona
 
 - **Daytona**: `app.daytona.io`
 
-:::note
-This list is continuously updated. If you require access to additional essential development services, you can submit a request via the [sandbox-network-whitelist](https://github.com/daytonaio/sandbox-network-whitelist) repository or contact [support@daytona.io](mailto:support@daytona.io).
-:::
+### Developer tools and services
+
+- **Convex**: `convex.dev`, `*.convex.dev`, `*.convex.cloud`, `*.convex.site`
+- **Heroku**: `herokuapp.com`, `*.herokuapp.com`
+- **Vercel**: `vercel.com`, `*.vercel.com`, `*.vercel.app`
+- **Supabase**: `supabase.com`, `*.supabase.com`, `supabase.co`, `*.supabase.co`
+- **Clerk**: `clerk.com`, `*.clerk.com`, `clerk.dev`, `*.clerk.dev`, `accounts.dev`, `*.accounts.dev`, `clerk.accounts.dev`, `*.clerk.accounts.dev`
+- **WorkOS**: `workos.com`, `*.workos.com`, `authkit.app`, `*.authkit.app`
+- **Inngest**: `inngest.com`, `*.inngest.com`
+- **PostHog**: `posthog.com`, `*.posthog.com`
+- **Sentry**: `sentry.io`, `*.sentry.io`, `sentry-cdn.com`, `*.sentry-cdn.com`
+- **Linear**: `linear.app`, `*.linear.app`
+- **Figma**: `figma.com`, `*.figma.com`, `*.figmafiles.com`
+- **ClickUp**: `clickup.com`, `*.clickup.com`
+- **Playwright**: `playwright.dev`, `cdn.playwright.dev`
+
+### Messaging services
+
+- **Telegram**: `api.telegram.org`
+- **WhatsApp**: `web.whatsapp.com`, `*.whatsapp.net`
+
+### LLM observability
+
+- **Langfuse**: `*.langfuse.com`, `*.cloud.langfuse.com`
 
 
-## Getting Help
+## Troubleshooting
 
-If you encounter network access issues or need unrestricted network access
+If you encounter network access issues or need unrestricted network access:
 
-1. Check your **organization tier** in the [Dashboard](https://app.daytona.io/dashboard/limits)
-2. Upgrade your **organization tier** by completing the required verification steps to unlock higher limits tiers automatically
-3. Verify your **network allow list** configuration
-4. Contact support at [support@daytona.io](mailto:support@daytona.io) for assistance
+1. Verify your [organization tier](/docs/en/limits#tier-upgrade) in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/limits)
+2. Verify your [network allow list](#network-allow-list-format) configuration
+3. Contact [support@daytona.io](mailto:support@daytona.io) for assistance
