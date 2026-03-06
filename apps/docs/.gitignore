@@ -2,6 +2,8 @@
 dist/
 # generated types
 .astro/
+# generated at build time
+public/toolbox-openapi.json
 
 # dependencies
 node_modules/
