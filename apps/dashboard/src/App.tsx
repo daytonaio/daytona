@@ -35,6 +35,7 @@ import Sandboxes from './pages/Sandboxes'
 import Snapshots from './pages/Snapshots'
 import Volumes from './pages/Volumes'
 import { ApiProvider } from './providers/ApiProvider'
+import { NotificationSocketProvider } from './providers/NotificationSocketProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 
 // Simple redirection components for external URLs
@@ -72,11 +73,13 @@ function App() {
               <OrganizationsProvider>
                 <SelectedOrganizationProvider>
                   <RegionsProvider>
-                    <CommandPaletteProvider>
-                      <BannerProvider>
-                        <Dashboard />
-                      </BannerProvider>
-                    </CommandPaletteProvider>
+                    <NotificationSocketProvider>
+                      <CommandPaletteProvider>
+                        <BannerProvider>
+                          <Dashboard />
+                        </BannerProvider>
+                      </CommandPaletteProvider>
+                    </NotificationSocketProvider>
                   </RegionsProvider>
                 </SelectedOrganizationProvider>
               </OrganizationsProvider>
