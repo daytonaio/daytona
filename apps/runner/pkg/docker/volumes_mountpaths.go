@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -55,6 +56,10 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		bindSource := baseMountPath
 		if vol.Subpath != nil && *vol.Subpath != "" {
 			bindSource = filepath.Join(baseMountPath, *vol.Subpath)
+			// Ensure the resolved path stays within baseMountPath to prevent path traversal
+			if !strings.HasPrefix(filepath.Clean(bindSource), filepath.Clean(baseMountPath)) {
+				return nil, fmt.Errorf("invalid subpath %q: resolves outside volume mount", *vol.Subpath)
+			}
 			err := os.MkdirAll(bindSource, 0755)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create subpath directory %s: %s", bindSource, err)
