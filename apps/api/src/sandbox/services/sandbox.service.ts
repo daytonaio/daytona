@@ -337,7 +337,6 @@ export class SandboxService {
     sandbox.pending = true
 
     await this.sandboxRepository.insert(sandbox)
-    await this.sandboxActivityService.initializeActivity(sandbox.id, sandbox.createdAt ?? new Date())
     return sandbox
   }
 

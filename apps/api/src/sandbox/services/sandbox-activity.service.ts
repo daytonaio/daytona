@@ -7,19 +7,20 @@ import { Injectable, Logger } from '@nestjs/common'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { InjectDataSource } from '@nestjs/typeorm'
-import { DataSource } from 'typeorm'
+import { DataSource, IsNull, Raw } from 'typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
-import { OnEvent } from '@nestjs/event-emitter'
-import { SandboxEvents } from '../constants/sandbox-events.constants'
-import { SandboxCreatedEvent } from '../events/sandbox-create.event'
-import { SandboxStateUpdatedEvent } from '../events/sandbox-state-updated.event'
 import { TypedConfigService } from '../../config/typed-config.service'
 
 const REDIS_ACTIVITY_KEY = 'sandbox:activity'
+
+interface SandboxActivityUpdate {
+  sandboxId: string
+  lastActivityAt: Date
+}
 
 @Injectable()
 export class SandboxActivityService {
@@ -33,32 +34,26 @@ export class SandboxActivityService {
   ) {}
 
   /**
-   * Update last-activity for a sandbox.
-   * By default, buffers in Redis (throttled to once per configured throttle TTL) and relies on the periodic flush to PG.
-   * When `immediate` is true, writes directly to PG as well, bypassing the throttle.
-   * Use immediate for state transitions where stale PG data could cause premature autostop/autoarchive.
+   * Buffers a last activity timestamp in Redis (throttled to once per configured throttle TTL).
+   *
+   * Relies on the periodic flush to the database.
    */
-  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date, immediate = false): Promise<void> {
-    if (immediate) {
-      // Prevent stale activity from being flushed to PG
-      await this.redis.zrem(REDIS_ACTIVITY_KEY, sandboxId)
-      await this.dataSource.getRepository(SandboxLastActivity).upsert({ sandboxId, lastActivityAt }, ['sandboxId'])
-    } else {
-      const lockKey = `sandbox:update-last-activity:${sandboxId}`
-      const acquired = await this.redisLockProvider.lock(
-        lockKey,
-        this.configService.getOrThrow('sandboxActivity.throttleTtlSeconds'),
-      )
-      if (!acquired) {
-        return
-      }
-      await this.redis.zadd(REDIS_ACTIVITY_KEY, lastActivityAt.getTime(), sandboxId)
+  async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
+    const lockKey = `sandbox:update-last-activity:${sandboxId}`
+    const acquired = await this.redisLockProvider.lock(
+      lockKey,
+      this.configService.getOrThrow('sandboxActivity.throttleTtlSeconds'),
+    )
+    if (!acquired) {
+      return
     }
+    await this.redis.zadd(REDIS_ACTIVITY_KEY, lastActivityAt.getTime(), sandboxId)
   }
 
   /**
    * Read the last activity timestamp for a sandbox.
-   * Checks Redis buffer first, falls back to PG.
+   *
+   * Checks Redis buffer first, falls back to the database.
    */
   async getLastActivityAt(sandboxId: string): Promise<Date | null> {
     const score = await this.redis.zscore(REDIS_ACTIVITY_KEY, sandboxId)
@@ -72,35 +67,18 @@ export class SandboxActivityService {
   }
 
   /**
-   * Insert a row into sandbox_last_activity for a newly created sandbox.
-   * Called during sandbox creation to seed the initial activity timestamp.
-   */
-  async initializeActivity(sandboxId: string, timestamp: Date): Promise<void> {
-    await this.dataSource
-      .getRepository(SandboxLastActivity)
-      .upsert({ sandboxId, lastActivityAt: timestamp }, ['sandboxId'])
-  }
-
-  /**
-   * Remove activity tracking for a destroyed sandbox.
-   */
-  async removeActivity(sandboxId: string): Promise<void> {
-    await this.redis.zrem(REDIS_ACTIVITY_KEY, sandboxId)
-    // PG row is cascade-deleted when sandbox is deleted
-  }
-
-  /**
-   * Flush buffered activity timestamps from Redis to PG in bulk.
+   * Flush buffered activity timestamps from Redis to the database in bulk.
    * Processes entries in batches to avoid oversized transactions.
    *
    * Frequency must be < 1min to prevent unintended auto-lifecycle actions.
    */
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'flush-activity-to-pg' })
-  @LogExecution('flush-activity-to-pg')
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'flush-activity-to-db' })
+  @LogExecution('flush-activity-to-db')
   @WithInstrumentation()
-  async flushActivityToPg(): Promise<void> {
-    const lockKey = 'flush-activity-to-pg-lock'
-    const acquired = await this.redisLockProvider.lock(lockKey, 55)
+  async flushActivityToDb(): Promise<void> {
+    const lockKey = 'flush-activity-to-db-lock'
+    const lockTtl = 30
+    const acquired = await this.redisLockProvider.lock(lockKey, lockTtl)
     if (!acquired) {
       return
     }
@@ -117,7 +95,7 @@ export class SandboxActivityService {
           break
         }
 
-        const updates: { sandboxId: string; lastActivityAt: Date }[] = []
+        const updates: SandboxActivityUpdate[] = []
         for (let i = 0; i < entries.length; i += 2) {
           updates.push({
             sandboxId: entries[i],
@@ -134,56 +112,68 @@ export class SandboxActivityService {
       }
 
       if (totalFlushed > 0) {
-        this.logger.debug(`Flushed ${totalFlushed} activity timestamps to PG`)
+        this.logger.debug(`Flushed ${totalFlushed} activity timestamps to the database`)
       }
     } catch (error) {
-      this.logger.error('Error flushing activity timestamps to PG:', error)
+      this.logger.error('Error flushing activity timestamps to the database:', error)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
   }
 
   /**
-   * Bulk upsert activity timestamps into PG.
-   * Uses TypeORM's upsert which generates ON CONFLICT internally.
+   * Builds a query to upsert activity timestamps into the database.
+   *
+   * Uses a conditional upsert that only updates when the incoming timestamp is newer, preventing updates to stale buffered values.
    */
-  private async bulkUpsertActivity(updates: { sandboxId: string; lastActivityAt: Date }[]): Promise<void> {
-    if (updates.length === 0) return
+  private buildUpsertQuery(values: SandboxActivityUpdate | SandboxActivityUpdate[]) {
+    return this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(SandboxLastActivity)
+      .values(values)
+      .orUpdate(['lastActivityAt'], ['sandboxId'], {
+        overwriteCondition: {
+          where: [
+            { lastActivityAt: IsNull() },
+            { lastActivityAt: Raw((alias) => `${alias} < EXCLUDED."lastActivityAt"`) },
+          ],
+        },
+      })
+  }
+
+  /**
+   * Bulk upserts activity timestamps into the database.
+   *
+   * In case of FK violations, falls back to individual upserts to skip deleted sandbox(es).
+   */
+  private async bulkUpsertActivity(updates: SandboxActivityUpdate[]): Promise<void> {
+    if (updates.length === 0) {
+      this.logger.debug('No activity updates to flush')
+      return
+    }
 
     try {
-      await this.dataSource.getRepository(SandboxLastActivity).upsert(updates, ['sandboxId'])
-    } catch (error) {
-      if (error.code === '23503') {
-        // FK violation: a sandbox was deleted between ZPOPMIN and upsert.
-        // Fall back to individual upserts so only the deleted sandbox is skipped.
+      await this.buildUpsertQuery(updates).execute()
+    } catch (bulkUpsertError) {
+      if (bulkUpsertError.code === '23503') {
+        this.logger.warn(
+          'Bulk upsert for activity timestamps failed with FK violation, falling back to individual upserts',
+        )
         for (const update of updates) {
           try {
-            await this.dataSource.getRepository(SandboxLastActivity).upsert(update, ['sandboxId'])
-          } catch (innerError) {
-            if (innerError.code === '23503') {
+            await this.buildUpsertQuery(update).execute()
+          } catch (error) {
+            if (error.code === '23503') {
               this.logger.warn(`Skipping activity flush for sandbox ${update.sandboxId} (deleted)`)
             } else {
-              throw innerError
+              throw error
             }
           }
         }
       } else {
-        throw error
+        throw bulkUpsertError
       }
     }
-  }
-
-  @OnEvent(SandboxEvents.CREATED)
-  private async handleSandboxCreatedEvent(event: SandboxCreatedEvent): Promise<void> {
-    this.initializeActivity(event.sandbox.id, event.sandbox.createdAt).catch((error) => {
-      this.logger.error(`Failed to initialize activity for sandbox ${event.sandbox.id}: ${error}`)
-    })
-  }
-
-  @OnEvent(SandboxEvents.STATE_UPDATED)
-  private async handleSandboxStateUpdatedEvent(event: SandboxStateUpdatedEvent): Promise<void> {
-    this.updateLastActivityAt(event.sandbox.id, new Date(), true).catch((error) => {
-      this.logger.error(`Failed to update activity for sandbox ${event.sandbox.id}: ${error}`)
-    })
   }
 }
