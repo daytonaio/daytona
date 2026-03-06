@@ -154,6 +154,7 @@
     "nestjs-pino": "^4.4.1",
     "node-cache": "^5.1.2",
     "nodemailer": "^7.0.11",
+    "nuqs": "^2.8.8",
     "oidc-client-ts": "^3.2.0",
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",

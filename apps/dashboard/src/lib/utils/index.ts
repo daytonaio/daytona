@@ -119,6 +119,19 @@ export function formatAmount(amount: number): string {
   }).format((amount ?? 0) / 100)
 }
 
+export function formatMoney(
+  value: number,
+  options?: { minimumFractionDigits?: number; maximumFractionDigits?: number },
+): string {
+  return Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(value)
+}
+
 export function findLast<T>(arr: T[], predicate: (item: T, index: number, array: T[]) => boolean): T | undefined {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (predicate(arr[i], i, arr)) {

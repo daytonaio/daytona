@@ -55,6 +55,7 @@ import Volumes from './pages/Volumes'
 import Wallet from './pages/Wallet'
 import WebhookEndpointDetails from './pages/WebhookEndpointDetails'
 import Webhooks from './pages/Webhooks'
+import { SandboxDetails } from './components/sandboxes'
 import { ApiProvider } from './providers/ApiProvider'
 import { RegionsProvider } from './providers/RegionsProvider'
 import { SvixProvider } from './providers/SvixProvider'
@@ -162,6 +163,7 @@ function App() {
         <Route index element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />} />
         <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
         <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
+        <Route path={getRouteSubPath(RoutePath.SANDBOX_DETAILS)} element={<SandboxDetails />} />
         <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
         <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
         <Route
