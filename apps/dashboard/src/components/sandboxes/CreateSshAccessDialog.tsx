@@ -3,13 +3,21 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { SshAccessDto } from '@daytonaio/api-client'
+import { useForm } from '@tanstack/react-form'
 import { CheckIcon, CopyIcon, InfoIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { NumericFormat } from 'react-number-format'
+import { z } from 'zod'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
@@ -42,31 +50,52 @@ const iconProps = {
   transition: { duration: 0.1 },
 }
 
+const formSchema = z.object({
+  expiryMinutes: z.number().int('Must be a whole number').min(1, 'Minimum 1 minute').max(1440, 'Maximum 1440 minutes'),
+})
+
+type FormValues = z.infer<typeof formSchema>
+
+const defaultValues: FormValues = {
+  expiryMinutes: 60,
+}
+
 export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateSshAccessDialogProps) {
-  const [expiryMinutes, setExpiryMinutes] = useState(60)
   const [sshAccess, setSshAccess] = useState<SshAccessDto | null>(null)
-  const createMutation = useCreateSshAccessMutation()
+  const { reset: resetMutation, ...createMutation } = useCreateSshAccessMutation()
 
-  const handleOpenChange = (isOpen: boolean) => {
-    onOpenChange(isOpen)
-    if (!isOpen) {
-      setSshAccess(null)
-      setExpiryMinutes(60)
-      createMutation.reset()
-    }
-  }
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const result = await createMutation.mutateAsync({
+          sandboxId,
+          expiresInMinutes: value.expiryMinutes,
+        })
+        setSshAccess(result)
+      } catch (error) {
+        handleApiError(error, 'Failed to create SSH access')
+      }
+    },
+  })
 
-  const handleCreate = async () => {
-    try {
-      const result = await createMutation.mutateAsync({ sandboxId, expiresInMinutes: expiryMinutes })
-      setSshAccess(result)
-    } catch (error) {
-      handleApiError(error, 'Failed to create SSH access')
+  const resetState = useCallback(() => {
+    form.reset(defaultValues)
+    resetMutation()
+    setSshAccess(null)
+  }, [form, resetMutation])
+
+  useEffect(() => {
+    if (open) {
+      resetState()
     }
-  }
+  }, [open, resetState])
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>{sshAccess ? 'SSH Access Created' : 'Create SSH Access'}</DialogTitle>
@@ -77,27 +106,60 @@ export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateS
         {sshAccess ? (
           <SshAccessCreated sshAccess={sshAccess} />
         ) : (
-          <Field>
-            <FieldLabel htmlFor="ssh-expiry">Expiry (minutes)</FieldLabel>
-            <Input
-              id="ssh-expiry"
-              type="number"
-              min={1}
-              max={1440}
-              value={expiryMinutes}
-              onChange={(e) => setExpiryMinutes(Number(e.target.value))}
-            />
-          </Field>
+          <form
+            id="create-ssh-form"
+            onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              form.handleSubmit()
+            }}
+          >
+            <form.Field name="expiryMinutes">
+              {(field) => {
+                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Expiry</FieldLabel>
+                    <InputGroup>
+                      <NumericFormat
+                        customInput={InputGroupInput}
+                        aria-invalid={isInvalid}
+                        id={field.name}
+                        name={field.name}
+                        inputMode="numeric"
+                        allowNegative={false}
+                        decimalScale={0}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onValueChange={({ floatValue }) => field.handleChange(floatValue ?? 0)}
+                      />
+                      <InputGroupAddon align="inline-end">
+                        <InputGroupText>min</InputGroupText>
+                      </InputGroupAddon>
+                    </InputGroup>
+                    {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </Field>
+                )
+              }}
+            </form.Field>
+          </form>
         )}
         <DialogFooter>
           <DialogClose asChild>
             <Button variant="secondary">Close</Button>
           </DialogClose>
           {!sshAccess && (
-            <Button onClick={handleCreate} disabled={createMutation.isPending}>
-              {createMutation.isPending && <Spinner />}
-              Create
-            </Button>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button type="submit" form="create-ssh-form" disabled={!canSubmit || isSubmitting}>
+                  {isSubmitting && <Spinner />}
+                  Create
+                </Button>
+              )}
+            />
           )}
         </DialogFooter>
       </DialogContent>
