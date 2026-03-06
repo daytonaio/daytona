@@ -10,6 +10,10 @@ import (
 )
 
 func GetContainerIpAddress(ctx context.Context, container *container.InspectResponse) string {
+	if container == nil {
+		return ""
+	}
+
 	if container.NetworkSettings == nil {
 		return ""
 	}

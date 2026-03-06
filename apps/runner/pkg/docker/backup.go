@@ -65,43 +65,79 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 	backup_context_map.Set(containerId, backupContext{ctx, cancel})
 
-	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+	cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+	if cacheErr != nil {
+		d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+	}
 
 	err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			if cacheErr != nil {
+				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+			}
+
 			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
+
 		if errors.Is(err, context.DeadlineExceeded) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			if cacheErr != nil {
+				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+			}
+
 			d.logger.ErrorContext(ctx, "Backup timed out during commit", "containerId", containerId)
 			return err
 		}
+
 		d.logger.ErrorContext(ctx, "Error committing container", "containerId", containerId, "error", err)
-		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+
+		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		if cacheErr != nil {
+			d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+		}
+
 		return err
 	}
 
 	err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			if cacheErr != nil {
+				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+			}
+
 			d.logger.InfoContext(ctx, "Backup canceled for container", "containerId", containerId)
 			return err
 		}
+
 		if errors.Is(err, context.DeadlineExceeded) {
-			d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			if cacheErr != nil {
+				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+			}
+
 			d.logger.ErrorContext(ctx, "Backup timed out during push", "containerId", containerId)
 			return err
 		}
+
 		d.logger.ErrorContext(ctx, "Error pushing image", "image", backupDto.Snapshot, "error", err)
-		d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+
+		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		if cacheErr != nil {
+			d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+		}
+
 		return err
 	}
 
-	d.statesCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
+	cacheErr = d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
+	if cacheErr != nil {
+		d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+	}
 
 	d.logger.InfoContext(ctx, "Backup created successfully", "snapshot", backupDto.Snapshot, "containerId", containerId)
 

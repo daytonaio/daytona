@@ -456,9 +456,11 @@ export class SandboxStartAction extends SandboxAction {
             )
             try {
               const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-              await runnerAdapter.removeDestroyedSandbox(sandbox.id)
+              await runnerAdapter.destroySandbox(sandbox.id)
             } catch (e) {
-              this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, e)
+              if (e.response?.status !== 404 && e.statusCode !== 404) {
+                this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, e)
+              }
             }
           }
         }
@@ -596,7 +598,6 @@ export class SandboxStartAction extends SandboxAction {
 
           return DONT_SYNC_AGAIN
         }
-        break
       }
       case SandboxState.STARTING:
         if (await this.checkTimeoutError(sandbox, 5, 'Timeout while starting sandbox')) {
@@ -862,31 +863,13 @@ export class SandboxStartAction extends SandboxAction {
     try {
       // First try to destroy the sandbox
       await runnerAdapter.destroySandbox(sandbox.id)
-
-      // Wait for sandbox to be destroyed before removing
-      let retries = 0
-      while (retries < 10) {
-        try {
-          const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-          if (sandboxInfo.state === SandboxState.DESTROYED) {
-            break
-          }
-        } catch (e) {
-          if (e.response?.status === 404) {
-            break // Sandbox already gone
-          }
-          throw e
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000 * retries))
-        retries++
-      }
-
-      // Finally remove the destroyed sandbox
-      await runnerAdapter.removeDestroyedSandbox(sandbox.id)
-
-      await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
     } catch (error) {
-      this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
+      if (error.response?.status !== 404 && error.statusCode !== 404) {
+        this.logger.error(`Failed to cleanup sandbox ${sandbox.id} on previous runner ${runner.id}:`, error)
+        throw error
+      }
     }
+
+    await this.sandboxRepository.update(sandbox.id, { updateData: { prevRunnerId: null } }, true)
   }
 }
