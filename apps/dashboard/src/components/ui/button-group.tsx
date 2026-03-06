@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import * as Slot from '@radix-ui/react-slot'
+import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
@@ -49,7 +50,7 @@ function ButtonGroupText({
 }: React.ComponentProps<'div'> & {
   asChild?: boolean
 }) {
-  const Comp = asChild ? Slot.Root : 'div'
+  const Comp = asChild ? Slot : 'div'
 
   return (
     <Comp

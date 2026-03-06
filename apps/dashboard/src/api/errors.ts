@@ -6,7 +6,9 @@
 export class DaytonaError extends Error {
   public static fromError(error: Error): DaytonaError {
     if (String(error).includes('Organization is suspended')) {
-      return new OrganizationSuspendedError(error.message)
+      return new OrganizationSuspendedError(error.message, {
+        cause: error.cause,
+      })
     }
 
     return new DaytonaError(error.message, {
