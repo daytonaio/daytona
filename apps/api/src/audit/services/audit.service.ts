@@ -3,12 +3,19 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Inject, Injectable, Logger, NotFoundException, OnApplicationBootstrap, Optional } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  OnApplicationBootstrap,
+  Optional,
+} from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
-import { LessThan, Repository, IsNull, Not } from 'typeorm'
+import { LessThan, Repository, IsNull, Not, QueryFailedError } from 'typeorm'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
-import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
 import { AuditLog } from '../entities/audit-log.entity'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 import { TypedConfigService } from '../../config/typed-config.service'
@@ -77,33 +84,33 @@ export class AuditService implements OnApplicationBootstrap {
     return this.auditLogRepository.save(auditLog, { transaction: false })
   }
 
-  async updateLog(id: string, updateDto: UpdateAuditLogInternalDto): Promise<AuditLog> {
-    const auditLog = await this.auditLogRepository.findOne({ where: { id } })
-    if (!auditLog) {
-      throw new NotFoundException(`Audit log with ID ${id} not found`)
-    }
+  /**
+   * Updates a pending audit log with request handler outcome data.
+   * Once finalized (statusCode is set), the log becomes immutable (enforced by database trigger).
+   *
+   * @param auditLog - The audit log to update.
+   * @param updateData - The data to update the audit log with.
+   * @throws {NotFoundException} - If the audit log is not found.
+   * @throws {ForbiddenException} - If the audit log is already finalized.
+   *
+   */
+  async updateLog(auditLog: AuditLog, updateData: Partial<AuditLog>): Promise<void> {
+    try {
+      const result = await this.auditLogRepository.update(auditLog.id, updateData)
 
-    if (updateDto.statusCode) {
-      auditLog.statusCode = updateDto.statusCode
-    }
-
-    if (updateDto.errorMessage) {
-      auditLog.errorMessage = updateDto.errorMessage
-    }
-
-    if (updateDto.targetId) {
-      auditLog.targetId = updateDto.targetId
-    }
-
-    if (updateDto.organizationId) {
-      auditLog.organizationId = updateDto.organizationId
+      if (result.affected === 0) {
+        throw new NotFoundException(`Audit log with ID ${auditLog.id} not found`)
+      }
+    } catch (error) {
+      if (error instanceof QueryFailedError && error.message.includes('immutable')) {
+        throw new ForbiddenException('Finalized audit logs are immutable.')
+      }
+      throw error
     }
 
     if (this.configService.get('audit.consoleLogEnabled')) {
-      this.logger.log(`AUDIT_ENTRY: ${JSON.stringify(auditLog)}`)
+      this.logger.log(`AUDIT_ENTRY: ${JSON.stringify({ ...auditLog, ...updateData })}`)
     }
-
-    return this.auditLogRepository.save(auditLog)
   }
 
   async getAllLogs(
