@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.app.json",
+  "compilerOptions": {
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["../src/**/*.ts", "../src/**/*.tsx", "./**/*.ts"],
+  "exclude": ["../src/**/*.spec.ts", "../src/**/*.test.ts"]
+}
