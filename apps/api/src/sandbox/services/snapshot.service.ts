@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -405,6 +405,34 @@ export class SnapshotService {
 
     if (!snapshot) {
       throw new NotFoundException(`Snapshot ${snapshotId} not found`)
+    }
+
+    return snapshot
+  }
+
+  async getSnapshotWithRegions(snapshotIdOrName: string, organizationId: string): Promise<Snapshot> {
+    const where: FindOptionsWhere<Snapshot>[] = [
+      { name: snapshotIdOrName, organizationId },
+      { name: snapshotIdOrName, general: true },
+    ]
+    if (isUUID(snapshotIdOrName)) {
+      where.push({ id: snapshotIdOrName })
+    }
+
+    const snapshot = await this.snapshotRepository.findOne({
+      where,
+      relations: ['snapshotRegions'],
+      order: { general: 'ASC' },
+    })
+
+    if (!snapshot) {
+      throw new NotFoundException(`Snapshot ${snapshotIdOrName} not found`)
+    }
+
+    const availableRegions = await this.organizationService.listAvailableRegions(organizationId)
+    const availableRegionIds = new Set(availableRegions.map((r) => r.id))
+    if (snapshot.snapshotRegions) {
+      snapshot.snapshotRegions = snapshot.snapshotRegions.filter((sr) => availableRegionIds.has(sr.regionId))
     }
 
     return snapshot

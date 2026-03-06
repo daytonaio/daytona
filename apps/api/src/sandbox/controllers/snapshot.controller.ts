@@ -184,14 +184,7 @@ export class SnapshotController {
     @Param('id') snapshotIdOrName: string,
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
-    let snapshot: Snapshot
-    try {
-      // Try to get by ID
-      snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
-    } catch {
-      // If not found by ID, try by name
-      snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
-    }
+    const snapshot = await this.snapshotService.getSnapshotWithRegions(snapshotIdOrName, authContext.organizationId)
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
