@@ -4,18 +4,105 @@ title: Web Terminal
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona provides a Web Terminal for interacting with your Sandboxes, allowing for a convenient way to view files, run commands, and debug.
+Daytona provides a browser-based web terminal for interacting with your sandboxes. The web terminal allows you to run commands, view files, and debug directly from your browser without installing any local tools.
 
-You can open it by clicking on the Terminal icon `>_` in the [Sandbox list](https://app.daytona.io/dashboard/sandboxes) under Access for any running Sandbox. It is available by default and is accessible on port `22222`.
+- **Remote command execution**: run shell commands directly in your sandbox
+- **File management**: navigate the file system, view and edit files
+- **Debugging**: inspect logs, monitor processes, and troubleshoot issues
+- **Package management**: install dependencies and configure your environment
 
-```text
+## Access from Dashboard
 
-ID                    State         Region     Created             Access
-──────────────────────────────────────────────────────────────────────────────
-sandbox-963e3f71      STARTED       us         12 minutes ago      >_
+Access the web terminal directly from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/sandboxes).
 
+1. Navigate to [Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Locate the running sandbox you want to access
+3. Click the terminal icon **`>_`**
+
+This opens the web terminal in a new browser tab, providing a full terminal session connected to your sandbox. The web terminal is available only for sandboxes in the `STARTED` state. If your sandbox is stopped, start it before attempting to access the terminal.
+
+## Access via CLI
+
+When you create a sandbox using the Daytona CLI, the web terminal URL is displayed automatically in the output.
+
+```shell
+daytona create
 ```
 
-:::note
-Since Terminal access is a very sensitive procedure, it is accessible only to users in your Organization, even when setting the `public` parameter to `True` in `CreateSandboxFromSnapshotParams` or `CreateSandboxFromImageParams`.
+The CLI output includes the terminal URL:
+
+```text
+Sandbox '<sandboxId>' created successfully
+Connect via SSH:         daytona ssh <sandboxId>
+Open the Web Terminal:   https://22222-<sandboxId>.proxy.daytona.work
+```
+
+## Access via URL
+
+The web terminal runs on port `22222` inside each sandbox. You can obtain the terminal URL programmatically using [Preview URLs](/docs/en/preview).
+
+Pass port `22222` to the preview URL method:
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+terminal_info = sandbox.get_preview_link(22222)
+print(f"Web Terminal URL: {terminal_info.url}")
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+const terminalInfo = await sandbox.getPreviewLink(22222);
+console.log(`Web Terminal URL: ${terminalInfo.url}`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+terminal_info = sandbox.preview_url(22222)
+puts "Web Terminal URL: #{terminal_info.url}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+url, err := sandbox.GetPreviewLink(ctx, 22222)
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona preview-url <sandbox-name> --port 22222
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/22222/preview-url' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
+</Tabs>
+
+## Security
+
+Terminal access is restricted to authenticated members of your [Organization](/docs/en/organizations). Even when a sandbox has its `public` parameter set to `true`, the web terminal remains accessible only to organization members.
+
+:::warning
+The web terminal provides full shell access to your sandbox. Treat terminal URLs with the same care as SSH credentials. Do not share terminal URLs with untrusted parties.
 :::
+
+## Related
+
+- [SSH Access](/docs/en/ssh-access): connect to your sandbox from a local terminal or IDE
+- [Pseudo Terminal (PTY)](/docs/en/pty): programmatic terminal sessions for automated workflows
+- [Process and Code Execution](/docs/en/process-code-execution): execute commands and run code in sandboxes
+- [Preview](/docs/en/preview): generate preview URLs for accessing sandbox services

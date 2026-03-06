@@ -4,14 +4,46 @@ title: SSH Access
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-You can connect to any of your sandboxes via SSH using token-based authentication.
+Daytona provides SSH access to your sandboxes using token-based authentication. This allows you to connect from local terminals, IDEs, and development tools without installing additional software.
 
-## Creating an SSH Access Token
+## Access from Dashboard
 
-To connect to a sandbox, you'll need to create an SSH access token first. This token provides secure, time-limited access to your sandbox.
+Create an SSH access token directly from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/sandboxes).
 
-SSH access can be initialized from the dashboard by opening the sandbox’s options menu and selecting `Create SSH Access`.
-It can also be initialized programmatically using one of the SDKs listed below.
+1. Navigate to [Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Locate the sandbox you want to create an SSH access token for
+3. Click the sandbox options menu (**⋮**)
+4. Select **Create SSH Access**
+5. Set the expiration time (defaults to 60 minutes)
+6. Click **Create**
+
+Daytona generates a token and displays it in the modal. Copy the token and use it to connect to your sandbox.
+
+## Access via CLI
+
+Daytona provides a CLI command to create an SSH access token for a sandbox:
+
+```shell  
+daytona create
+```
+
+When you create a sandbox, Daytona displays the SSH command automatically in the output:
+
+```text
+Sandbox '<sandboxId>' created successfully
+Connect via SSH:         daytona ssh <sandboxId>
+Open the Web Terminal:   https://22222-<sandboxId>.proxy.daytona.work
+```
+
+To SSH into an existing sandbox, use the following command:
+
+```bash
+daytona ssh <sandbox> --expires 60
+```
+
+## Access via token
+
+You can create SSH access tokens programmatically. The token can then be used to connect manually:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -42,7 +74,6 @@ console.log(`SSH Token: ${sshAccess.token}`)
 ```
 
 </TabItem>
-
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
@@ -57,55 +88,57 @@ puts "SSH Token: #{ssh_access.token}"
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ssh-access?expiresInMinutes=60' \
+  --request POST \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
 </Tabs>
 
-## Connection Command
-
-Once you have your token, connect using:
+To connect to your sandbox, use the following command:
 
 ```bash
 ssh <token>@ssh.app.daytona.io
 ```
 
-## Connecting with VSCode
+## Connect with VS Code
 
-Connecting your local VSCode to a sandbox requires a few simple steps:
+You can connect VS Code directly to your sandbox using the Remote SSH extension.
 
-1. Make sure that the [Remote Explorer extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-explorer) is installed in your VSCode.
+1. Install the [Remote Explorer extension ↗](https://marketplace.visualstudio.com/items?itemName=ms-vscode.remote-explorer)
 2. Add a new SSH connection
-3. When prompted for the SSH connection URL, paste your SSH command from above.
+3. When prompted for the SSH connection URL, paste the SSH command from above
 
-Find out more about the extension [here](https://code.visualstudio.com/docs/remote/ssh).
+For more information, see the [VS Code Remote SSH documentation ↗](https://code.visualstudio.com/docs/remote/ssh).
 
-## Connecting with JetBrains IDEs
+## Connect with JetBrains IDEs
 
-Connecting your local JetBrains IDEs to a sandbox requires a few simple steps:
+JetBrains Gateway provides remote development support for connecting to your sandbox.
 
-1. Download the [JetBrains Gateway](https://www.jetbrains.com/remote-development/gateway/) app to your local machine.
-2. Add a new connection.
-3. When prompted for the SSH connection URL, paste your SSH command from above.
-4. Choose an IDE you want installed in your sandbox.
+1. Download [JetBrains Gateway ↗](https://www.jetbrains.com/remote-development/gateway/)
+2. Add a new connection
+3. When prompted for the SSH connection URL, paste the SSH command from above
+4. Select the IDE to install in your sandbox
 
-## Managing SSH Access
+## Token management
 
-### Token Expiration
+### Expiration
 
-SSH access tokens expire automatically for security:
+SSH access tokens expire automatically after 60 minutes. You can specify a custom expiration time when creating the token using the `expires_in_minutes` parameter.
 
-- **Default**: 60 minutes
+### Revoke token
 
-### Revoking Access
-
-You can revoke SSH access tokens at any time:
+Revoke SSH access tokens before expiry:
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access()
-
-# Revoke specific SSH access for the sandbox
+# Revoke specific SSH access token for the sandbox
 sandbox.revoke_ssh_access(token="specific-token")
 ```
 
@@ -113,10 +146,7 @@ sandbox.revoke_ssh_access(token="specific-token")
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-// Revoke all SSH access for the sandbox
-await sandbox.revokeSshAccess()
-
-// Revoke specific SSH access for the sandbox
+// Revoke specific SSH access token for the sandbox
 await sandbox.revokeSshAccess('specific-token')
 ```
 
@@ -125,12 +155,29 @@ await sandbox.revokeSshAccess('specific-token')
 <TabItem label="Ruby" icon="seti:ruby">
 
 ```ruby
-# Revoke all SSH access for the sandbox
-sandbox.revoke_ssh_access
-
-# Revoke specific SSH access for the sandbox
+# Revoke specific SSH access token for the sandbox
 sandbox.revoke_ssh_access(token: 'specific-token')
 ```
 
 </TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Revoke specific SSH access token
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ssh-access?token=specific-token' \
+  --request DELETE \
+  --header 'Authorization: Bearer <API_KEY>'
+
+# Revoke all SSH access for the sandbox
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ssh-access' \
+  --request DELETE \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
 </Tabs>
+
+## Related
+
+- [Web Terminal](/docs/en/web-terminal): browser-based terminal access to sandboxes
+- [Preview](/docs/en/preview): generate preview URLs for accessing sandbox services
