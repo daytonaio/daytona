@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
@@ -411,12 +411,16 @@ export class SnapshotService {
   }
 
   async getSnapshotWithRegions(snapshotIdOrName: string, organizationId: string): Promise<Snapshot> {
+    const where: FindOptionsWhere<Snapshot>[] = [
+      { name: snapshotIdOrName, organizationId },
+      { name: snapshotIdOrName, general: true },
+    ]
+    if (isUUID(snapshotIdOrName)) {
+      where.push({ id: snapshotIdOrName })
+    }
+
     const snapshot = await this.snapshotRepository.findOne({
-      where: [
-        { id: snapshotIdOrName },
-        { name: snapshotIdOrName, organizationId },
-        { name: snapshotIdOrName, general: true },
-      ],
+      where,
       relations: ['snapshotRegions'],
       order: { general: 'ASC' },
     })
