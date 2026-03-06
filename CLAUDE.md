@@ -101,6 +101,28 @@ yarn migration:revert
 yarn generate:api-client
 ```
 
+## GitHub 提交安全规则
+
+- 当前维护仓库是 `origin = https://github.com/shabooboo006/daytona-lite.git`
+- `upstream = https://github.com/daytonaio/daytona.git` 仅用于同步上游参考，**禁止向 upstream push**
+- 该仓库在 GitHub 上是 **fork**，打开 GitHub 的 PR 页面时，base repository 可能默认指向父仓库 `daytonaio/daytona`
+- 发起 PR 前必须确认：
+  - head repository 是 `shabooboo006/daytona-lite`
+  - base repository 也是 `shabooboo006/daytona-lite`
+- 使用命令行提交前先执行：
+
+```bash
+git remote get-url origin
+git remote get-url --push origin
+```
+
+- 只有当输出包含 `shabooboo006/daytona-lite.git` 时，才允许执行 `git push`
+- 如果使用 `gh` 创建或查看 PR，必须显式带上：
+
+```bash
+--repo shabooboo006/daytona-lite
+```
+
 ### 构建 Docker 镜像
 
 ```bash
