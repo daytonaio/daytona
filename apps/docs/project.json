@@ -77,12 +77,16 @@
     "copy-toolbox-openapi": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "inputs": [
+        "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/public/toolbox-openapi.json"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json"
-      }
+      },
+      "dependsOn": ["daemon:openapi"]
     },
     "check-version-env": {},
     "docker": {
