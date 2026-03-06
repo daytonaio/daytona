@@ -6,10 +6,12 @@ require (
 	github.com/charmbracelet/bubbletea v1.1.0
 	github.com/daytonaio/daytona/libs/api-client-go v0.149.0
 	github.com/docker/docker v28.5.2+incompatible
+	github.com/gorilla/websocket v1.5.3
 	github.com/mark3labs/mcp-go v0.32.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.10.1
+	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.34.0
 )
 

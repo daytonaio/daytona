@@ -72,6 +72,9 @@ type PTYSessionInfo struct {
 	CreatedAt time.Time         `json:"createdAt" validate:"required"`
 	Active    bool              `json:"active" validate:"required"`
 	LazyStart bool              `json:"lazyStart" validate:"required"` // Whether this session uses lazy start
+	Command   string            `json:"command,omitempty"`
+	Args      []string          `json:"args,omitempty"`
+	Timeout   uint32            `json:"timeout,omitempty"` // seconds; 0 = no timeout
 } // @name PtySessionInfo
 
 // API Request/Response types
@@ -84,6 +87,10 @@ type PTYCreateRequest struct {
 	Cols      *uint16           `json:"cols" validate:"optional"`
 	Rows      *uint16           `json:"rows" validate:"optional"`
 	LazyStart bool              `json:"lazyStart,omitempty"` // Don't start PTY until first client connects
+	// If Command is set, run it instead of the default interactive shell.
+	Command *string  `json:"command,omitempty"`
+	Args    []string `json:"args,omitempty"`
+	Timeout *uint32  `json:"timeout,omitempty"` // seconds; 0 = no timeout
 } // @name PtyCreateRequest
 
 // PTYCreateResponse represents the response when creating a PTY session
