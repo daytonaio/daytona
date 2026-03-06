@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daemon/pkg/common"
@@ -40,16 +41,32 @@ func (s *PTYSession) start() error {
 		s.inCh = make(chan []byte, 1024)
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	var ctx context.Context
+	var cancel context.CancelFunc
+	if s.info.Timeout > 0 {
+		ctx, cancel = context.WithTimeout(context.Background(), time.Duration(s.info.Timeout)*time.Second)
+	} else {
+		ctx, cancel = context.WithCancel(context.Background())
+	}
 	s.ctx = ctx
 	s.cancel = cancel
 
-	shell := common.GetShell()
-	if shell == "" {
-		return errors.New("no shell resolved")
+	var cmdBin string
+	var cmdArgs []string
+	if s.info.Command != "" {
+		cmdBin = s.info.Command
+		cmdArgs = s.info.Args
+	} else {
+		shell := common.GetShell()
+		if shell == "" {
+			cancel()
+			return errors.New("no shell resolved")
+		}
+		cmdBin = shell
+		cmdArgs = []string{"-i", "-l"}
 	}
 
-	cmd := exec.CommandContext(ctx, shell, "-i", "-l")
+	cmd := exec.CommandContext(ctx, cmdBin, cmdArgs...)
 	cmd.Dir = s.info.Cwd
 
 	// Env

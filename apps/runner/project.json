@@ -24,7 +24,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}",
-        "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
+        "command": "if [ -n \"$SKIP_COMPUTER_USE_BUILD\" ]; then echo 'Skipping computer-use copy'; touch {projectRoot}/pkg/daemon/static/daytona-computer-use; else cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use; fi"
       },
       "cache": true,
       "inputs": [

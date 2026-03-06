@@ -5,6 +5,7 @@ go 1.25.4
 require (
 	github.com/containerd/errdefs v1.0.0
 	github.com/coreos/go-iptables v0.8.0
+	github.com/daytonaio/daytona/libs/api-client-go v0.149.0
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/docker/go-units v0.5.0
 	github.com/gin-gonic/gin v1.10.1
