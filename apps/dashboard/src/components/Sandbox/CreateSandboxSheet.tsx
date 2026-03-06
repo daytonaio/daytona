@@ -31,6 +31,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
 import { getRegionFullDisplayName } from '@/lib/utils'
+import { Sandbox } from '@daytonaio/sdk'
 import { useForm } from '@tanstack/react-form'
 import { Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
@@ -169,9 +170,10 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
         networkBlockAll: value.networkBlockAll || undefined,
       }
 
+      let sandbox: Sandbox | undefined = undefined
       try {
         if (isImage && value.image) {
-          await createSandboxMutation.mutateAsync({
+          sandbox = await createSandboxMutation.mutateAsync({
             ...baseParams,
             image: value.image,
             resources:
@@ -180,18 +182,18 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                 : undefined,
           })
         } else {
-          await createSandboxMutation.mutateAsync({
+          sandbox = await createSandboxMutation.mutateAsync({
             ...baseParams,
             snapshot: value.snapshot || undefined,
           })
         }
 
-        toast.success(`Sandbox${value.name ? ` ${value.name.trim()}` : ''} created`)
+        toast.success(`Sandbox created`)
 
         setOpen(false)
 
-        if (createSandboxMutation.data?.id) {
-          navigate(generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: createSandboxMutation.data?.id ?? '' }))
+        if (sandbox?.id) {
+          navigate(generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id }))
         }
       } catch (error) {
         handleApiError(error, 'Failed to create sandbox')
@@ -219,8 +221,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
     setSource(SOURCE_SNAPSHOT)
     resetCreateSandboxMutation()
   }, [resetCreateSandboxMutation, form])
-
-  const envFileInputRef = useRef<HTMLInputElement>(null)
 
   const handleEnvFileImport = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -579,7 +579,13 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                       <Checkbox
                         id={field.name}
                         checked={field.state.value ?? false}
-                        onCheckedChange={(checked) => field.handleChange(checked === true)}
+                        onCheckedChange={(checked) => {
+                          const isEphemeral = checked === true
+                          field.handleChange(isEphemeral)
+                          if (isEphemeral) {
+                            form.setFieldValue('autoDeleteInterval', 0)
+                          }
+                        }}
                       />
                       <Label htmlFor={field.name} className="text-sm font-normal">
                         Ephemeral — automatically delete the sandbox when it stops
@@ -659,16 +665,16 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                     </div>
                     <FieldDescription>
                       <input
-                        ref={envFileInputRef}
                         type="file"
                         accept="env"
                         className="hidden"
                         onChange={handleEnvFileImport}
                         aria-hidden="true"
+                        id="env-file-input"
                       />
                       <label
                         className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer"
-                        onClick={() => envFileInputRef.current?.click()}
+                        htmlFor="env-file-input"
                       >
                         <Upload className="size-3" />
                         Import .env file
