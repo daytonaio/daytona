@@ -1,0 +1,245 @@
+---
+title: Build a Coding Agent Using Amp Code and Daytona
+description: Step-by-step guide to building an autonomous coding agent using Amp Code CLI and Daytona sandboxes.
+---
+
+import { Image } from 'astro:assets'
+
+import ampSdkCodingAgentDemo from '../../../../../assets/docs/images/amp-sdk-coding-agent.gif'
+
+This guide demonstrates how to run an autonomous coding agent based on [Amp Code](https://ampcode.com/) inside a Daytona sandbox environment. The agent can develop full-stack web apps, write code in any language, install dependencies, and run scripts. It can also start and manage dev servers, and generate preview links for live apps.
+
+---
+
+### 1. Workflow Overview
+
+When you launch the main module, a Daytona sandbox is created and the Amp CLI is installed inside it. The agent uses Amp's [streaming JSON mode](https://ampcode.com/manual#cli-streaming-json) for programmatic control.
+
+You interact with the main program via a command line chat interface. The program sends your prompts to the agent inside the sandbox, which executes them and returns the results:
+
+```
+$ npm run start
+Creating sandbox...
+Installing Amp CLI...
+Starting Amp Code...
+Initializing agent...
+Thinking...
+Got it! I'm ready to help. What would you like to build or work on?
+
+Agent ready. Press Ctrl+C at any time to exit.
+
+User: Create a Kanji flashcard app
+Thinking...
+> I'll create a Kanji flashcard app with flip animations, progress tracking, and multiple study modes. Here's the preview URL:
+
+https://8000-29baaaf7-767a-4dff-8129-1e6ec2100b3e.daytonaproxy01.net
+🔧 create_file /home/daytona/index.html
+Successfully created file /home/daytona/index.html
+🔧 (cd /home/daytona && python3 -m http.server 8000)
+
+User:
+```
+
+The agent can also host web apps and provide you with a preview link using the [Daytona Preview Links](/docs/en/preview-and-authentication/) feature. When your task involves running or previewing a web application, the agent automatically reasons about this need, hosts the app, and generates a preview link for you to inspect the live result:
+
+<Image
+  src={ampSdkCodingAgentDemo}
+  alt="Amp Code agent creating a Kanji flashcard app in a Daytona sandbox"
+  width={600}
+  style="max-width: 100%; height: auto; margin: 1rem 0;"
+/>
+
+You can continue interacting with your agent until you are finished. When you exit the program, the sandbox will be deleted automatically.
+
+### 2. Project Setup
+
+#### Clone the Repository
+
+First, clone the daytona [repository](https://github.com/daytonaio/daytona.git) and navigate to the example directory:
+
+```bash
+git clone https://github.com/daytonaio/daytona.git
+cd daytona/guides/typescript/amp/amp-sdk
+```
+
+#### Configure Environment
+
+Get your API keys:
+
+- **Daytona API key:** [Daytona Dashboard](https://app.daytona.io/dashboard/keys)
+- **Amp API key:** [Amp Settings](https://ampcode.com/settings)
+
+:::caution[Amp Paid Credits Required]
+Amp's execute mode (`-x`) requires paid credits and cannot use the free tier. [Add credits here](https://ampcode.com/pay) before running this example.
+:::
+
+Copy `.env.example` to `.env` and add your keys:
+
+```bash
+DAYTONA_API_KEY=your_daytona_key
+SANDBOX_AMP_API_KEY=your_amp_key
+```
+
+#### Local Usage
+
+:::note[Node.js Version]
+Node.js 18 or newer is required to run this example. Please ensure your environment meets this requirement before proceeding.
+:::
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the agent:
+
+```bash
+npm run start
+```
+
+The agent will start and wait for your prompt.
+
+### 3. Understanding the Script
+
+This example uses Amp's `--stream-json` and `--stream-json-input` modes for programmatic control of the CLI. This allows bidirectional communication via JSON messages over a PTY.
+
+#### Initialization
+
+On startup, the script:
+
+1. Creates a new [Daytona sandbox](/docs/en/sandboxes) with the Amp API key.
+2. Installs the Amp CLI globally in the sandbox.
+3. Creates a PTY for bidirectional communication with Amp.
+4. Starts Amp in streaming JSON mode with `--execute` and `--dangerously-allow-all` for autonomous operation.
+5. Sends a Daytona-aware system prompt as the first user message (preview URL pattern, server commands with `&` as last action).
+6. Enters the readline loop to send prompts and receive streamed responses.
+7. On Ctrl+C, deletes the sandbox and exits.
+
+#### PTY Communication
+
+The agent uses a pseudo-terminal (PTY) for bidirectional communication with Amp:
+
+```ts
+// Create a PTY for bidirectional communication with Amp
+this.ptyHandle = await this.sandbox.process.createPty({
+  id: 'amp-pty',
+  cols: 200,
+  rows: 50,
+  onData: (data: Uint8Array) => this.handleData(data),
+})
+
+// Wait for PTY connection
+await this.ptyHandle.waitForConnection()
+
+// Start Amp CLI: --stream-json requires --execute
+const ampCommand = [
+  'amp',
+  '--dangerously-allow-all',
+  '--execute',
+  '--stream-json',
+  '--stream-json-input',
+  '-m smart',
+].join(' ')
+
+await this.ptyHandle.sendInput(`${ampCommand}\n`)
+```
+
+#### Streaming JSON Messages
+
+Amp outputs JSON lines that can be parsed to track agent activity. Control is returned to the user (response complete) only when:
+
+- **end_turn**: The assistant sends a normal end-of-turn message.
+- **result**: Amp sends a final result message (success or error).
+- **Background command**: The last content block is a tool use whose command ends with `&`, so the script returns control immediately instead of waiting for the tool result.
+
+```ts
+handleParsedMessage(parsed: AmpMessage): string | undefined {
+  if (parsed.type === 'system' && parsed.subtype === 'init') {
+    this.onAgentInitialized?.()
+  } else if (parsed.type === 'assistant') {
+    const msg = parsed as AssistantMessage
+    // Display text and tool_use blocks; check if last block is tool_use with cmd ending in &
+    for (const block of msg.message.content) {
+      if (block.type === 'text') { /* render text */ }
+      else if (block.type === 'tool_use') { /* display tool */ }
+    }
+    if (msg.message?.stop_reason === 'end_turn') this.onResponseComplete?.()
+    else if (lastBlockIsBackgroundCmd) this.onResponseComplete?.()  // last block: cmd ends with &
+  } else if (parsed.type === 'user') {
+    // Tool results: display output (do not complete here)
+  } else if (parsed.type === 'result') {
+    this.onResponseComplete?.()
+  }
+}
+```
+
+Message types from Amp's streaming JSON:
+- **system**: Session initialization with `subtype: 'init'`
+- **assistant**: AI responses with text content and tool usage; may include `stop_reason` (`end_turn` or `tool_use`)
+- **user**: Tool results (output from executed tools); displayed but do not trigger completion
+- **result**: Final execution result (success or error)
+
+#### Sending User Messages
+
+User prompts are sent as JSON lines matching Amp's `--stream-json-input` format. The script waits for the response to complete (end_turn, result, or background `&` command) and uses a timeout so the user is not blocked indefinitely:
+
+```ts
+async processPrompt(prompt: string): Promise<void> {
+  const message = JSON.stringify({
+    type: 'user',
+    message: {
+      role: 'user',
+      content: [{ type: 'text', text: prompt }],
+    },
+  })
+  this.isSendingInput = true
+  await this.ptyHandle.sendInput(message + '\n')
+
+  // Wait for end_turn, result, or & as last action; timeout after 120s
+  await new Promise<string | undefined>((resolve) => {
+    this.onResponseComplete = resolve
+    // ... timeout clears resolve after 120_000 ms
+  })
+}
+```
+
+#### System prompt and main loop
+
+A Daytona-aware system prompt is sent as the first user message (Amp has no system prompt functionality). It instructs the agent to use the preview URL pattern, to always end server commands with `&` and run them as the last action in a turn, and to give the preview URL before starting the server:
+
+```ts
+const defaultSystemPrompt = [
+  'You are running in a Daytona sandbox.',
+  `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
+  'ALWAYS end server commands with & so it runs in the background.',
+  'ALWAYS run server commands as the last action in your turn.',
+  'If you start a server, FIRST give the user the preview URL and THEN run the server command.',
+].join(' ')
+
+const ampSession = new AmpSession(sandbox)
+await ampSession.initialize({ systemPrompt: defaultSystemPrompt })
+```
+
+When Amp is ready, the script runs a readline loop:
+
+```ts
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+
+while (true) {
+  const prompt = await new Promise<string>((resolve) => rl.question('User: ', resolve))
+  if (prompt.trim()) await ampSession.processPrompt(prompt)
+}
+```
+
+The readline loop waits for user input, sends it to the agent, and displays the streamed response.
+
+**Key advantages:**
+
+- Secure, isolated execution in Daytona sandboxes
+- Streaming JSON output for real-time tool activity feedback
+- PTY-based communication for interactive sessions
+- Uses Amp's `smart` mode for state-of-the-art model capabilities
+- All agent code execution happens inside the sandbox
+- Automatic preview link generation for deployed services
+- Automatic cleanup on exit
