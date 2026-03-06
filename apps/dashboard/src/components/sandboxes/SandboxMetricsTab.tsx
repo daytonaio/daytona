@@ -44,21 +44,28 @@ function isByteMetric(metricName: string): boolean {
 
 function buildChartData(series: MetricSeries[], convertToGiB: boolean): Record<string, unknown>[] {
   const timestampSet = new Set<string>()
-  series.forEach((s) => s.dataPoints.forEach((p) => timestampSet.add(p.timestamp)))
+  const indexed = series.map((s) => {
+    const byTimestamp = new Map<string, number | null>()
+    for (const p of s.dataPoints) {
+      timestampSet.add(p.timestamp)
+      byTimestamp.set(p.timestamp, p.value ?? null)
+    }
+    return { metricName: s.metricName, byTimestamp, convertMetric: convertToGiB && isByteMetric(s.metricName) }
+  })
   const timestamps = Array.from(timestampSet).sort()
 
   return timestamps.map((timestamp) => {
     const point: Record<string, unknown> = { timestamp }
-    series.forEach((s) => {
-      const dp = s.dataPoints.find((p) => p.timestamp === timestamp)
-      if (dp?.value == null) {
-        point[s.metricName] = null
-      } else if (convertToGiB && isByteMetric(s.metricName)) {
-        point[s.metricName] = Math.round((dp.value / BYTES_TO_GIB) * 100) / 100
+    for (const { metricName, byTimestamp, convertMetric } of indexed) {
+      const value = byTimestamp.get(timestamp)
+      if (value == null) {
+        point[metricName] = null
+      } else if (convertMetric) {
+        point[metricName] = Math.round((value / BYTES_TO_GIB) * 100) / 100
       } else {
-        point[s.metricName] = dp.value
+        point[metricName] = value
       }
-    })
+    }
     return point
   })
 }

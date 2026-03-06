@@ -3,24 +3,24 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { useQueryStates } from 'nuqs'
-import { useSandboxLogs, LogsQueryParams } from '@/hooks/useSandboxLogs'
-import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
-import { SeverityBadge } from '@/components/telemetry/SeverityBadge'
 import { CopyButton } from '@/components/CopyButton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Input } from '@/components/ui/input'
+import { SeverityBadge } from '@/components/telemetry/SeverityBadge'
+import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { ChevronLeft, ChevronRight, Search, FileText, RefreshCw, ChevronDown } from 'lucide-react'
-import { format, subHours } from 'date-fns'
-import { LogEntry } from '@daytonaio/api-client'
+import { LogsQueryParams, useSandboxLogs } from '@/hooks/useSandboxLogs'
 import { cn } from '@/lib/utils'
+import { LogEntry } from '@daytonaio/api-client'
+import { format, subHours } from 'date-fns'
+import { ChevronDown, ChevronLeft, ChevronRight, FileText, RefreshCw, Search } from 'lucide-react'
+import { useQueryStates } from 'nuqs'
+import React, { useCallback, useMemo, useState } from 'react'
 import { logsSearchParams, SEVERITY_OPTIONS, timeRangeSearchParams } from './SearchParams'
 
 function formatTimestamp(timestamp: string) {
@@ -30,6 +30,8 @@ function formatTimestamp(timestamp: string) {
     return timestamp
   }
 }
+
+const getLogKey = (log: LogEntry, index: number) => `${log.timestamp}-${index}`
 
 function LogsTableSkeleton() {
   return (
@@ -216,7 +218,7 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
             </TableHeader>
             <TableBody>
               {data.items.map((log: LogEntry, index: number) => (
-                <React.Fragment key={index}>
+                <React.Fragment key={getLogKey(log, index)}>
                   <TableRow
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => setExpandedRow(expandedRow === index ? null : index)}

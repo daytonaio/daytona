@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
@@ -38,7 +39,8 @@ import { handleApiError } from '@/lib/error-handling'
 import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { RefreshCw } from 'lucide-react'
+import { isAxiosError } from 'axios'
+import { Container, RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
@@ -80,7 +82,8 @@ export default function SandboxDetails() {
     }
   }, [isDesktop, tab, setTab, experimentsEnabled])
 
-  const { data: sandbox, isLoading, isError, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
+  const { data: sandbox, isLoading, isError, error, refetch, isFetching } = useSandboxQuery(sandboxId ?? '')
+  const isNotFound = isError && isAxiosError(error.cause) && error.cause?.status === 404
 
   useSandboxWsSync({ sandboxId })
 
@@ -170,7 +173,7 @@ export default function SandboxDetails() {
     }
     try {
       const response = await sandboxApi.getSignedPortPreviewUrl(sandbox.id, 33333, selectedOrganization?.id)
-      window.open(response.data.url, '_blank')
+      window.open(response.data.url, '_blank', 'noopener,noreferrer')
       toast.success('Opening Screen Recordings dashboard...')
     } catch (error) {
       handleApiError(error, 'Failed to open Screen Recordings')
@@ -209,108 +212,125 @@ export default function SandboxDetails() {
           }}
         />
 
-        <div className="flex flex-1 min-h-0 overflow-hidden">
-          <aside className="hidden lg:flex w-72 shrink-0 border-r border-border flex-col overflow-hidden">
-            <div className="flex items-center px-5 border-b border-border shrink-0 h-[41px]">
-              <span className="text-sm font-medium">Overview</span>
-            </div>
-            <ScrollArea fade="mask" className="flex-1 min-h-0">
-              {isLoading ? (
-                <InfoPanelSkeleton />
-              ) : isError || !sandbox ? (
-                <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
-                  <p className="text-sm">Failed to load sandbox details.</p>
-                  <Button variant="outline" size="sm" onClick={() => refetch()}>
-                    <RefreshCw className="size-4" />
-                    Retry
-                  </Button>
-                </div>
-              ) : (
-                <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
-              )}
-            </ScrollArea>
-          </aside>
-
-          <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-            {isLoading ? (
-              <div className="flex flex-col h-full">
-                <div className="flex items-center gap-0 border-b border-border h-[41px] px-4 shrink-0">
-                  <Skeleton className="h-4 w-16 lg:hidden" />
-                  <Skeleton className="h-4 w-10 ml-4 lg:ml-0" />
-                  <Skeleton className="h-4 w-12 ml-4" />
-                  <Skeleton className="h-4 w-14 ml-4" />
-                  <Skeleton className="h-4 w-16 ml-4" />
-                  <Skeleton className="h-4 w-10 ml-4" />
-                </div>
-                <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                  <Spinner className="size-5" />
-                </div>
+        {isNotFound ? (
+          <div className="flex flex-1 min-h-0 items-center justify-center">
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  <Container className="size-4" />
+                </EmptyMedia>
+                <EmptyTitle>Sandbox not found</EmptyTitle>
+                <EmptyDescription>Are you sure you're in the right organization?</EmptyDescription>
+              </EmptyHeader>
+              <Button variant="outline" size="sm" onClick={() => navigate(RoutePath.SANDBOXES)}>
+                Back to Sandboxes
+              </Button>
+            </Empty>
+          </div>
+        ) : (
+          <div className="flex flex-1 min-h-0 overflow-hidden">
+            <aside className="hidden lg:flex w-72 shrink-0 border-r border-border flex-col overflow-hidden">
+              <div className="flex items-center px-5 border-b border-border shrink-0 h-[41px]">
+                <span className="text-sm font-medium">Overview</span>
               </div>
-            ) : !sandbox ? null : (
-              <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="flex flex-col h-full gap-0">
-                <TabsList variant="underline" className="h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm">
-                  <TabsTrigger value="overview" className="lg:hidden">
-                    Overview
-                  </TabsTrigger>
+              <ScrollArea fade="mask" className="flex-1 min-h-0">
+                {isLoading ? (
+                  <InfoPanelSkeleton />
+                ) : isError || !sandbox ? (
+                  <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
+                    <p className="text-sm">Failed to load sandbox details.</p>
+                    <Button variant="outline" size="sm" onClick={() => refetch()}>
+                      <RefreshCw className="size-4" />
+                      Retry
+                    </Button>
+                  </div>
+                ) : (
+                  <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
+                )}
+              </ScrollArea>
+            </aside>
+
+            <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
+              {isLoading ? (
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center gap-0 border-b border-border h-[41px] px-4 shrink-0">
+                    <Skeleton className="h-4 w-16 lg:hidden" />
+                    <Skeleton className="h-4 w-10 ml-4 lg:ml-0" />
+                    <Skeleton className="h-4 w-12 ml-4" />
+                    <Skeleton className="h-4 w-14 ml-4" />
+                    <Skeleton className="h-4 w-16 ml-4" />
+                    <Skeleton className="h-4 w-10 ml-4" />
+                  </div>
+                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
+                    <Spinner className="size-5" />
+                  </div>
+                </div>
+              ) : !sandbox ? null : (
+                <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="flex flex-col h-full gap-0">
+                  <TabsList variant="underline" className="h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm">
+                    <TabsTrigger value="overview" className="lg:hidden">
+                      Overview
+                    </TabsTrigger>
+                    {experimentsEnabled && (
+                      <>
+                        <TabsTrigger value="logs">Logs</TabsTrigger>
+                        <TabsTrigger value="traces">Traces</TabsTrigger>
+                        <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                        <TabsTrigger value="spending">Spending</TabsTrigger>
+                      </>
+                    )}
+                    <TabsTrigger value="terminal">Terminal</TabsTrigger>
+                    <TabsTrigger value="vnc">VNC</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
+                    <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
+                  </TabsContent>
                   {experimentsEnabled && (
                     <>
-                      <TabsTrigger value="logs">Logs</TabsTrigger>
-                      <TabsTrigger value="traces">Traces</TabsTrigger>
-                      <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                      <TabsTrigger value="spending">Spending</TabsTrigger>
+                      <TabsContent
+                        value="logs"
+                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                      >
+                        <SandboxLogsTab sandboxId={sandbox.id} />
+                      </TabsContent>
+                      <TabsContent
+                        value="traces"
+                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                      >
+                        <SandboxTracesTab sandboxId={sandbox.id} />
+                      </TabsContent>
+                      <TabsContent
+                        value="metrics"
+                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                      >
+                        <SandboxMetricsTab sandboxId={sandbox.id} />
+                      </TabsContent>
+                      <TabsContent
+                        value="spending"
+                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                      >
+                        <SandboxSpendingTab sandboxId={sandbox.id} />
+                      </TabsContent>
                     </>
                   )}
-                  <TabsTrigger value="terminal">Terminal</TabsTrigger>
-                  <TabsTrigger value="vnc">VNC</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
-                  <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
-                </TabsContent>
-                {experimentsEnabled && (
-                  <>
-                    <TabsContent
-                      value="logs"
-                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                    >
-                      <SandboxLogsTab sandboxId={sandbox.id} />
-                    </TabsContent>
-                    <TabsContent
-                      value="traces"
-                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                    >
-                      <SandboxTracesTab sandboxId={sandbox.id} />
-                    </TabsContent>
-                    <TabsContent
-                      value="metrics"
-                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                    >
-                      <SandboxMetricsTab sandboxId={sandbox.id} />
-                    </TabsContent>
-                    <TabsContent
-                      value="spending"
-                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                    >
-                      <SandboxSpendingTab sandboxId={sandbox.id} />
-                    </TabsContent>
-                  </>
-                )}
-                <TabsContent
-                  value="terminal"
-                  className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                >
-                  <SandboxTerminalTab sandbox={sandbox} />
-                </TabsContent>
-                <TabsContent
-                  value="vnc"
-                  className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                >
-                  <SandboxVncTab sandbox={sandbox} />
-                </TabsContent>
-              </Tabs>
-            )}
+                  <TabsContent
+                    value="terminal"
+                    className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                  >
+                    <SandboxTerminalTab sandbox={sandbox} />
+                  </TabsContent>
+                  <TabsContent
+                    value="vnc"
+                    className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                  >
+                    <SandboxVncTab sandbox={sandbox} />
+                  </TabsContent>
+                </Tabs>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
           <AlertDialogContent>

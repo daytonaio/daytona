@@ -129,6 +129,7 @@ export function SandboxHeader({
                         <DropdownMenuItem onClick={onRevokeSshAccess} disabled={actionsDisabled}>
                           Revoke SSH Access
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={onScreenRecordings} disabled={actionsDisabled}>
                           Screen Recordings
                         </DropdownMenuItem>
