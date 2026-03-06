@@ -560,6 +560,18 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath(
+            '/docs/guides/amp/amp-sdk-coding-agent',
+            locale
+          ),
+          label: t('sidebarconfig.amp'),
+          disablePagination: true,
+          attrs: {
+            icon: 'amp.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/guides/google-adk-code-generator', locale),
           label: t('sidebarconfig.googleAdk'),
           disablePagination: true,
