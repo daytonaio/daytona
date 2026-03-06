@@ -287,13 +287,13 @@ curl 'https://app.daytona.io/api/sandbox' \
 
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona) references:
 
-> [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createSandboxBaseParams)
+> [**CreateSandboxFromSnapshotParams (Python SDK)**](/docs/python-sdk/sync/daytona#createsandboxfromsnapshotparams)
 >
-> [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createSandboxBaseParams)
+> [**CreateSandboxFromSnapshotParams (TypeScript SDK)**](/docs/typescript-sdk/daytona#createsandboxfromsnapshotparams)
 >
-> [**CreateSandboxFromSnapshotParams (Ruby SDK)**](/docs/ruby-sdk/daytona#createsandboxfromsnapshotparams)
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
 >
-> [**CreateSandboxFromSnapshotParams (Go SDK)**](/docs/go-sdk/daytona)
+> [**Create (Go SDK)**](/docs/en/go-sdk/daytona/#Client.Create)
 >
 > [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
@@ -307,9 +307,8 @@ The following snippet demonstrate how to read from and write to a volume:
 <TabItem label="Python" icon="seti:python">
 
 ```python
-# Write to a file in the mounted volume
-with open("/home/daytona/volume/example.txt", "w") as f:
-    f.write("Hello from Daytona volume!")
+# Write to a file in the mounted volume using the Sandbox file system API
+sandbox.fs.upload_file(b"Hello from Daytona volume!", "/home/daytona/volume/example.txt")
 
 # When you're done with the sandbox, you can remove it
 # The volume will persist even after the sandbox is removed
@@ -320,10 +319,8 @@ sandbox.delete()
 <TabItem label="TypeScript" icon="seti:typescript">
 
 ```typescript
-import fs from 'fs/promises'
-
-// Write to a file in the mounted volume
-await fs.writeFile('/home/daytona/volume/example.txt', 'Hello from Daytona volume!')
+// Write to a file in the mounted volume using the Sandbox file system API
+await sandbox1.fs.uploadFile(Buffer.from('Hello from Daytona volume!'), '/home/daytona/volume/example.txt')
 
 // When you're done with the sandbox, you can remove it
 // The volume will persist even after the sandbox is removed
