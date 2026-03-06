@@ -37,7 +37,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
-import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
@@ -61,7 +61,8 @@ export default function SandboxDetails() {
   const navigate = useNavigate()
   const config = useConfig()
   const { sandboxApi } = useApi()
-  const { authenticatedUserOrganizationMember, selectedOrganization } = useSelectedOrganization()
+  const { authenticatedUserOrganizationMember, selectedOrganization, authenticatedUserHasPermission } =
+    useSelectedOrganization()
   const { getRegionName } = useRegions()
 
   const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
@@ -89,7 +90,8 @@ export default function SandboxDetails() {
   const recoverMutation = useRecoverSandboxMutation()
   const deleteMutation = useDeleteSandboxMutation()
 
-  const isOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
+  const writePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)
+  const deletePermitted = authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)
   const transitioning = sandbox ? isTransitioning(sandbox) : false
   const anyMutating =
     startMutation.isPending ||
@@ -185,7 +187,8 @@ export default function SandboxDetails() {
         <SandboxHeader
           sandbox={sandbox}
           isLoading={isLoading}
-          isOwner={isOwner}
+          writePermitted={writePermitted}
+          deletePermitted={deletePermitted}
           actionsDisabled={actionsDisabled}
           isFetching={isFetching}
           onStart={handleStart}
