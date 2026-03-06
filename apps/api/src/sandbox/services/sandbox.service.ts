@@ -1825,6 +1825,24 @@ export class SandboxService {
     }
   }
 
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-stale-build-failed-sandboxes' })
+  @LogExecution('cleanup-stale-build-failed-sandboxes')
+  @WithInstrumentation()
+  async cleanupStaleBuildFailedSandboxes() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const result = await this.sandboxRepository.delete({
+      state: SandboxState.BUILD_FAILED,
+      desiredState: SandboxDesiredState.STARTED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
+    }
+  }
+
   async setAutostopInterval(sandboxIdOrName: string, interval: number, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
