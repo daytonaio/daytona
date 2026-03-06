@@ -121,7 +121,7 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 
 		err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
 		if err != nil {
-			setErr := runner.BackupInfoCache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed, err)
+			setErr := runner.BackupInfoCache.SetBackupState(ctx.Request.Context(), sandboxId, enums.BackupStateFailed, err)
 			if setErr != nil {
 				logger.DebugContext(ctx.Request.Context(), "failed to update backup info", "error", setErr)
 			}

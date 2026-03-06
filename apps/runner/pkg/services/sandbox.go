@@ -32,7 +32,7 @@ func NewSandboxService(logger *slog.Logger, backupInfoCache *cache.BackupInfoCac
 func (s *SandboxService) GetSandboxInfo(ctx context.Context, sandboxId string) (*models.SandboxInfo, error) {
 	sandboxState, err := s.docker.GetSandboxState(ctx, sandboxId)
 	if err != nil {
-		s.log.Warn("Failed to deduce sandbox state", "sandboxId", sandboxId, "error", err)
+		s.log.Warn("Failed to get sandbox state", "sandboxId", sandboxId, "error", err)
 		return nil, err
 	}
 
