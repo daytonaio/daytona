@@ -22,7 +22,7 @@ import (
 //	@Router			/init [post]
 //
 //	@id				Initialize
-func (s *server) Initialize(otelServiceName string) gin.HandlerFunc {
+func (s *server) Initialize(otelServiceName string, organizationId, regionId *string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req InitializeRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -32,7 +32,7 @@ func (s *server) Initialize(otelServiceName string) gin.HandlerFunc {
 
 		s.authToken = req.Token
 
-		err := s.initTelemetry(ctx.Request.Context(), otelServiceName)
+		err := s.initTelemetry(ctx.Request.Context(), otelServiceName, organizationId, regionId)
 		if err != nil {
 			ctx.AbortWithError(http.StatusBadRequest, err)
 			return

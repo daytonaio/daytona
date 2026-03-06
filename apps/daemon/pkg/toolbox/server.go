@@ -58,6 +58,8 @@ type ServerConfig struct {
 	TerminationGracePeriodSeconds        int
 	TerminationCheckIntervalMilliseconds int
 	RecordingService                     *recording.RecordingService
+	OrganizationId                       *string
+	RegionId                             *string
 }
 
 func NewServer(config ServerConfig) *server {
@@ -71,6 +73,8 @@ func NewServer(config ServerConfig) *server {
 		terminationCheckIntervalMilliseconds: config.TerminationCheckIntervalMilliseconds,
 		configDir:                            config.ConfigDir,
 		recordingService:                     config.RecordingService,
+		organizationId:                       config.OrganizationId,
+		regionId:                             config.RegionId,
 	}
 }
 
@@ -87,6 +91,8 @@ type server struct {
 	configDir                            string
 	recordingService                     *recording.RecordingService
 	httpServer                           *http.Server
+	organizationId                       *string
+	regionId                             *string
 }
 
 type Telemetry struct {
@@ -138,7 +144,7 @@ func (s *server) Start() error {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
-	r.POST("/init", s.Initialize(otelServiceName))
+	r.POST("/init", s.Initialize(otelServiceName, s.organizationId, s.regionId))
 
 	r.GET("/version", s.GetVersion)
 
