@@ -191,7 +191,9 @@ export class SandboxStartAction extends SandboxAction {
       })
       if (runner) {
         await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode, runner.id)
-        await this.runnerService.updateSnapshotRunnerLastUsedAt(runner.id, snapshotRef)
+        this.runnerService
+          .updateSnapshotRunnerLastUsedAt(runner.id, snapshotRef)
+          .catch(() => this.logger.warn(`Failed to update snapshot runner lastUsedAt: ${runner.id}/${snapshotRef}`))
         return SYNC_AGAIN
       }
     } catch {

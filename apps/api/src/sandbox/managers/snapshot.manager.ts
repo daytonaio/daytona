@@ -1060,7 +1060,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .select('sr.id')
         .where('sr.state = :state', { state: SnapshotRunnerState.READY })
         .andWhere('EXISTS (SELECT 1 FROM build_info bi WHERE bi."snapshotRef" = sr."snapshotRef")')
-        .andWhere('(sr."lastUsedAt" IS NULL OR sr."lastUsedAt" < :threshold)', { threshold: oneDayAgo })
+        .andWhere('COALESCE(sr."lastUsedAt", sr."updatedAt") < :threshold', { threshold: oneDayAgo })
         .take(10000)
         .getMany()
 
@@ -1075,7 +1075,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
       if (result.affected > 0) {
         this.logger.debug(
-          `Marked ${result.affected} stale declarative build SnapshotRunners for removal (lastUsedAt > 1 day)`,
+          `Marked ${result.affected} stale declarative build SnapshotRunners for removal (lastUsedAt or updatedAt older than 1 day)`,
         )
       }
     } catch (error) {
