@@ -1276,7 +1276,9 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to fork sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Forking creates a duplicate of your sandbox that operates completely independently. Forks are organized in a tree structure: you can fork a fork, building out branches as needed. If the parent sandbox is deleted, all its forks continue to run unaffected.
+Daytona provides methods to fork sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Forking creates a duplicate of your sandbox's filesystem and copies it into a new sandbox. The new sandbox is fully independent: it can be started, stopped, and deleted without affecting the original. However, Daytona tracks the parent-child relationship in a fork tree, so you can always trace a fork's lineage back to the sandbox it was created from. You can fork a fork, building out branches as needed. If the parent sandbox is deleted, all its forks continue to run unaffected.
+
+Forking and [cloning](#clone-sandboxes) both duplicate the sandbox's **filesystem state only**. The in-memory and runtime state (running processes, open connections, environment variables set at runtime) of the original sandbox is not carried over. The new sandbox starts in a stopped state with a fresh runtime. To capture a reusable environment including installed packages and file contents, consider [creating a snapshot](#create-snapshot-from-sandbox) instead.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the three-dot menu (**⋮**) next to the sandbox you want to fork.
@@ -1298,7 +1300,7 @@ The fork tree displays each sandbox in the hierarchy along with its current stat
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to clone sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Cloning creates a one-off duplicate of your sandbox. Unlike [forking](#fork-sandboxes), there is no parent-child relationship or tree structure — the result is a standalone copy.
+Daytona provides methods to clone sandboxes using [Daytona Dashboard ↗](https://app.daytona.io/dashboard/). Cloning creates a one-off duplicate of your sandbox's filesystem. Unlike [forking](#fork-sandboxes), there is no parent-child relationship or tree structure — the result is a completely standalone copy with no tracked connection to the original.
 
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click the three-dot menu (**⋮**) next to the sandbox you want to clone
