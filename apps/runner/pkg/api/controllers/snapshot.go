@@ -181,8 +181,20 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 		}
 
 		go func() {
-			err := runner.Docker.BuildSnapshot(generalCtx, request)
+			cfg, cfgErr := config.GetConfig()
+			if cfgErr != nil {
+				logger.ErrorContext(generalCtx, "Failed to get config for build timeout", "error", cfgErr)
+				return
+			}
+
+			buildCtx, cancel := context.WithTimeout(generalCtx, time.Duration(cfg.BuildTimeoutMin)*time.Minute)
+			defer cancel()
+
+			err := runner.Docker.BuildSnapshot(buildCtx, request)
 			if err != nil {
+				if buildCtx.Err() == context.DeadlineExceeded {
+					err = fmt.Errorf("build timed out after %d minutes: %w", cfg.BuildTimeoutMin, err)
+				}
 				logger.DebugContext(generalCtx, "Build snapshot failed", "cacheKey", request.Snapshot, "error", err)
 				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
 				if err != nil {

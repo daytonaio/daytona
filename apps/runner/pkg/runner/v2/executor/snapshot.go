@@ -7,8 +7,11 @@ package executor
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
+	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 )
 
@@ -19,8 +22,19 @@ func (e *Executor) buildSnapshot(ctx context.Context, job *apiclient.Job) (any, 
 		return nil, err
 	}
 
-	err = e.docker.BuildSnapshot(ctx, request)
+	cfg, err := config.GetConfig()
 	if err != nil {
+		return nil, fmt.Errorf("failed to get config for build timeout: %w", err)
+	}
+
+	buildCtx, cancel := context.WithTimeout(ctx, time.Duration(cfg.BuildTimeoutMin)*time.Minute)
+	defer cancel()
+
+	err = e.docker.BuildSnapshot(buildCtx, request)
+	if err != nil {
+		if buildCtx.Err() == context.DeadlineExceeded {
+			return nil, fmt.Errorf("build timed out after %d minutes: %w", cfg.BuildTimeoutMin, err)
+		}
 		return nil, err
 	}
 
