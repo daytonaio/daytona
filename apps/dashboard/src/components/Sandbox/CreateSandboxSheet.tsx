@@ -22,6 +22,7 @@ import {
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
+import { RoutePath } from '@/enums/RoutePath'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useConfig } from '@/hooks/useConfig'
@@ -35,6 +36,7 @@ import { Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
+import { generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { ScrollArea } from '../ui/scroll-area'
@@ -65,7 +67,6 @@ const formSchema = z.object({
   snapshot: z.string().optional(),
   image: z.string().optional(),
   regionId: z.string().optional(),
-  language: z.string().optional(),
   cpu: z.number().min(1).optional(),
   memory: z.number().min(1).optional(),
   disk: z.number().min(1).optional(),
@@ -89,7 +90,6 @@ const defaultValues: FormValues = {
   snapshot: undefined,
   image: '',
   regionId: undefined,
-  language: undefined,
   cpu: undefined,
   memory: undefined,
   disk: undefined,
@@ -104,6 +104,7 @@ const defaultValues: FormValues = {
 }
 
 export const CreateSandboxSheet = ({ className }: { className?: string }) => {
+  const navigate = useNavigate()
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
   const [source, setSource] = useState(SOURCE_SNAPSHOT)
@@ -157,7 +158,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
 
       const baseParams = {
         name: value.name?.trim() || undefined,
-        language: value.language || undefined,
         target: value.regionId || undefined,
         autoStopInterval: value.autoStopInterval,
         autoArchiveInterval: value.autoArchiveInterval,
@@ -187,7 +187,12 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
         }
 
         toast.success(`Sandbox${value.name ? ` ${value.name.trim()}` : ''} created`)
+
         setOpen(false)
+
+        if (createSandboxMutation.data?.id) {
+          navigate(generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: createSandboxMutation.data?.id ?? '' }))
+        }
       } catch (error) {
         handleApiError(error, 'Failed to create sandbox')
       }
@@ -499,31 +504,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                 </Field>
               )}
             </form.Field>
-
-            <form.Field name="language">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>Language</FieldLabel>
-                  <Select
-                    value={field.state.value || NONE_VALUE}
-                    onValueChange={(val) => field.handleChange(val === NONE_VALUE ? '' : val)}
-                  >
-                    <SelectTrigger className="h-8" id={field.name}>
-                      <SelectValue placeholder="Select a language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={NONE_VALUE}>
-                        Python <Badge variant="secondary">default</Badge>
-                      </SelectItem>
-                      <SelectItem value="typescript">TypeScript</SelectItem>
-                      <SelectItem value="javascript">JavaScript</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>Sets the primary language for the sandbox toolbox.</FieldDescription>
-                </Field>
-              )}
-            </form.Field>
-
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium">Lifecycle</Label>
               <div className="flex flex-col gap-2">
