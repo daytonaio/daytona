@@ -9,7 +9,8 @@ import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/api-client'
-import { Tag } from 'lucide-react'
+import { AlertCircle, Tag } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import React, { useMemo } from 'react'
 
 export function InfoSection({
@@ -58,6 +59,15 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
 
   return (
     <div className="flex flex-col">
+      {sandbox.errorReason && (
+        <div className="px-5 pt-4">
+          <Alert variant={sandbox.recoverable ? 'warning' : 'destructive'}>
+            <AlertCircle />
+            <AlertDescription>{sandbox.errorReason}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
       <InfoSection title="General">
         <InfoRow label="Region" className="-mr-2">
           <div className="flex items-center gap-1">
