@@ -6,6 +6,7 @@
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useQuery } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { queryKeys } from './queryKeys'
 
 export const useSandboxQuery = (sandboxId: string) => {
@@ -20,5 +21,9 @@ export const useSandboxQuery = (sandboxId: string) => {
     },
     enabled: !!sandboxId && !!selectedOrganization?.id,
     staleTime: 1000 * 10,
+    retry: (failureCount, error) => {
+      if (isAxiosError(error.cause) && error.cause?.status === 404) return false
+      return failureCount < 3
+    },
   })
 }
