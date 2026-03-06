@@ -3,29 +3,45 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useMemo } from 'react'
 import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatDuration, getRelativeTimeString } from '@/lib/utils'
+import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/api-client'
 import { Tag } from 'lucide-react'
+import React, { useMemo } from 'react'
 
-export function InfoSection({ title, children }: { title: string; children: React.ReactNode }) {
+export function InfoSection({
+  title,
+  children,
+  className,
+}: {
+  title: string
+  children: React.ReactNode
+  className?: string
+}) {
   return (
-    <div className="px-5 py-4 border-b border-border last:border-b-0">
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">{title}</p>
+    <div className={cn('px-5 py-4 border-b border-border last:border-b-0', className)}>
+      <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">{title}</p>
       {children}
     </div>
   )
 }
 
-export function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
+export function InfoRow({
+  label,
+  children,
+  className,
+}: {
+  label: string
+  children: React.ReactNode
+  className?: string
+}) {
   return (
-    <div className="flex items-start justify-between gap-3 py-1.5">
-      <span className="text-[13px] text-muted-foreground shrink-0 pt-px leading-tight">{label}</span>
-      <div className="min-w-0 text-[13px] font-medium text-right">{children}</div>
+    <div className={cn('flex items-center justify-between gap-3 py-1', className)}>
+      <span className="text-sm text-muted-foreground shrink-0 pt-px leading-tight">{label}</span>
+      <div className="min-w-0 text-sm font-medium text-right">{children}</div>
     </div>
   )
 }
@@ -43,16 +59,16 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
   return (
     <div className="flex flex-col">
       <InfoSection title="General">
-        <InfoRow label="Region">
+        <InfoRow label="Region" className="-mr-2">
           <div className="flex items-center gap-1">
             <span className="truncate">{getRegionName(sandbox.target) ?? sandbox.target}</span>
             <CopyButton value={sandbox.target} tooltipText="Copy" size="icon-xs" />
           </div>
         </InfoRow>
-        <InfoRow label="Snapshot">
+        <InfoRow label="Snapshot" className="-mr-2">
           {sandbox.snapshot ? (
             <div className="flex items-center gap-1 min-w-0">
-              <span className="truncate font-mono text-[13px]">{sandbox.snapshot}</span>
+              <span className="truncate font-mono text-sm">{sandbox.snapshot}</span>
               <CopyButton value={sandbox.snapshot} tooltipText="Copy" size="icon-xs" />
             </div>
           ) : (
@@ -62,7 +78,7 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
       </InfoSection>
 
       <InfoSection title="Resources">
-        <div className="flex flex-wrap gap-1.5 py-1">
+        <div className="flex flex-wrap gap-2 py-1">
           <ResourceChip resource="cpu" value={sandbox.cpu} />
           <ResourceChip resource="memory" value={sandbox.memory} />
           <ResourceChip resource="disk" value={sandbox.disk} />
@@ -100,11 +116,11 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
       <InfoSection title="Labels">
         {labelEntries.length > 0 ? (
           <div className="max-h-[250px] overflow-y-auto scrollbar-sm">
-            <div className="flex flex-wrap gap-1.5 py-1">
+            <div className="flex flex-wrap gap-2 py-1">
               {labelEntries.map(([key, value]) => (
                 <code
                   key={key}
-                  className="flex items-center gap-1 bg-muted border border-border rounded px-2 py-0.5 text-xs font-mono"
+                  className="flex items-center gap-1 bg-muted border border-border rounded px-2 py-1 text-xs font-mono"
                 >
                   <span className="text-muted-foreground">{key}:</span>
                   <span>{value}</span>
@@ -113,9 +129,9 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-1.5 py-5 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center gap-2 py-5 text-muted-foreground">
             <Tag className="size-4" />
-            <span className="text-[13px]">No labels</span>
+            <span className="text-sm">No labels</span>
           </div>
         )}
       </InfoSection>
@@ -154,7 +170,7 @@ export function InfoPanelSkeleton() {
       </div>
       <div className="px-5 py-4 border-b border-border">
         <Skeleton className="h-2.5 w-20 mb-3" />
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           <Skeleton className="h-6 w-16 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
           <Skeleton className="h-6 w-16 rounded-full" />
