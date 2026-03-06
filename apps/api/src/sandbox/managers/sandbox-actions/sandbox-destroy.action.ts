@@ -34,6 +34,8 @@ export class SandboxDestroyAction extends SandboxAction {
 
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
+      // Runner is not ready; treat as if deletion on the runner succeeded
+      await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
       return DONT_SYNC_AGAIN
     }
 
