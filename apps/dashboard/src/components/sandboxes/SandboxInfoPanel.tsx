@@ -6,11 +6,11 @@
 import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/api-client'
 import { AlertCircle, Tag } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import React, { useMemo } from 'react'
 
 export function InfoSection({
@@ -41,8 +41,8 @@ export function InfoRow({
 }) {
   return (
     <div className={cn('flex items-center justify-between gap-3 py-1', className)}>
-      <span className="text-sm text-muted-foreground shrink-0 pt-px leading-tight">{label}</span>
-      <div className="min-w-0 text-sm font-medium text-right">{children}</div>
+      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
+      <div className="min-w-0 text-sm text-right">{children}</div>
     </div>
   )
 }
