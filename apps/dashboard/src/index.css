@@ -194,3 +194,13 @@ body {
 .scrollbar-sm {
   @apply scrollbar-thin scrollbar-thumb-neutral-300 dark:scrollbar-thumb-neutral-700 scrollbar-track-background;
 }
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+::selection {
+  @apply bg-primary text-primary-foreground;
+}
