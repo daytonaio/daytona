@@ -5,7 +5,7 @@ package util
 
 import "strings"
 
-// shellQuoteJoin quotes each argument for safe use in a shell command string.
+// ShellQuoteJoin quotes each argument for safe use in a shell command string.
 // Each arg is wrapped in single quotes, with any internal single quotes escaped.
 func ShellQuoteJoin(args []string) string {
 	quoted := make([]string, len(args))
