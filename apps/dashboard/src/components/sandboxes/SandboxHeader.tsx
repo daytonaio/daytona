@@ -36,6 +36,7 @@ interface SandboxHeaderProps {
   onBack: () => void
   onCreateSshAccess: () => void
   onRevokeSshAccess: () => void
+  onScreenRecordings: () => void
   mutations: { start: boolean; stop: boolean; archive: boolean; recover: boolean }
 }
 
@@ -54,6 +55,7 @@ export function SandboxHeader({
   onBack,
   onCreateSshAccess,
   onRevokeSshAccess,
+  onScreenRecordings,
   mutations,
 }: SandboxHeaderProps) {
   return (
@@ -72,7 +74,7 @@ export function SandboxHeader({
             </div>
             <div className="flex items-center gap-1 min-w-0">
               <span className="text-xs text-muted-foreground shrink-0">UUID</span>
-              <span className="text-[13px] text-muted-foreground font-mono truncate">{sandbox.id}</span>
+              <span className="text-sm text-muted-foreground font-mono truncate">{sandbox.id}</span>
               <CopyButton value={sandbox.id} tooltipText="Copy ID" size="icon-xs" />
             </div>
           </div>
@@ -124,6 +126,9 @@ export function SandboxHeader({
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={onRevokeSshAccess} disabled={actionsDisabled}>
                           Revoke SSH Access
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onScreenRecordings} disabled={actionsDisabled}>
+                          Screen Recordings
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
                       {isArchivable(sandbox) && (
