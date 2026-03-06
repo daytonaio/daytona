@@ -96,7 +96,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       }
       sandbox.updatedAt = new Date()
 
-      if (previousSandbox.state !== sandbox.state) {
+      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
       }
     })
@@ -153,7 +153,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       await entityManager.update(Sandbox, id, { ...updateData, ...invariantChanges })
       sandbox.updatedAt = new Date()
 
-      if (previousSandbox.state !== sandbox.state) {
+      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
         await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
       }
 
