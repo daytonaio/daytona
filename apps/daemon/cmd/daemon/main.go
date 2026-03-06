@@ -113,19 +113,21 @@ func run() int {
 	var entrypointWg sync.WaitGroup
 	if len(args) > 0 {
 		// used for logging in case of errors starting/waiting for the command
-		entrypointLogWriter := os.Stdout
-		entrypointErrLogWriter := os.Stderr
+		var entrypointLogWriter io.Writer = os.Stdout
+		var entrypointErrLogWriter io.Writer = os.Stderr
 
 		if c.EntrypointLogFilePath != "" {
-			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			entrypointLogFile, err := os.OpenFile(c.EntrypointLogFilePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 			if err != nil {
 				logger.Error("Failed to open log file, fallback to STDOUT and STDERR",
 					"path", c.EntrypointLogFilePath,
 					"error", err)
 			} else {
 				defer entrypointLogFile.Close()
-				entrypointLogWriter = entrypointLogFile
-				entrypointErrLogWriter = entrypointLogFile
+				stdoutWriter := log.NewPrefixWriter(log.STDOUT_PREFIX, entrypointLogFile)
+				stderrWriter := log.NewPrefixWriter(log.STDERR_PREFIX, entrypointLogFile)
+				entrypointLogWriter = stdoutWriter
+				entrypointErrLogWriter = stderrWriter
 			}
 		}
 
@@ -176,6 +178,7 @@ func run() int {
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
 		RecordingService:                     recordingService,
+		EntrypointLogFilePath:                c.EntrypointLogFilePath,
 	})
 
 	// Start the toolbox server in a go routine
