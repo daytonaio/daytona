@@ -66,6 +66,7 @@
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.8",
+    "@number-flow/react": "^0.6.0",
     "@openfeature/core": "^1.9.0",
     "@openfeature/nestjs-sdk": "^0.2.5",
     "@openfeature/react-sdk": "^1.0.1",

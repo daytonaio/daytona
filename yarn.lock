@@ -7952,6 +7952,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@number-flow/react@npm:^0.6.0":
+  version: 0.6.0
+  resolution: "@number-flow/react@npm:0.6.0"
+  dependencies:
+    esm-env: "npm:^1.1.4"
+    number-flow: "npm:0.6.0"
+  peerDependencies:
+    react: ^18 || ^19
+    react-dom: ^18 || ^19
+  checksum: 10c0/5d3d348a369bd415d75182304e7f2e7a300f37c6d232d73947112073b6934c8844bff6afdb47c8f70455eb5893e09feeba4b8c1a3af8ed17ad8c73b2bf5b9e28
+  languageName: node
+  linkType: hard
+
 "@nuxt/opencollective@npm:0.4.1":
   version: 0.4.1
   resolution: "@nuxt/opencollective@npm:0.4.1"
@@ -20277,6 +20290,7 @@ __metadata:
     "@nestjs/throttler": "npm:^6.4.0"
     "@nestjs/typeorm": "npm:^11.0.0"
     "@nestjs/websockets": "npm:^11.1.8"
+    "@number-flow/react": "npm:^0.6.0"
     "@nx-go/nx-go": "npm:^3.3.1"
     "@nx-tools/nx-container": "npm:^6.8.2"
     "@nx/eslint": "npm:21.4.1"
@@ -22479,6 +22493,13 @@ __metadata:
   bin:
     eslint: bin/eslint.js
   checksum: 10c0/0e2705a94847813b03f2f3c1367c0708319cbb66458250a09b2d056a088c56e079a1c1d76c44feebf51971d9ce64d010373b2a4f007cd1026fc24f95c89836df
+  languageName: node
+  linkType: hard
+
+"esm-env@npm:^1.1.4":
+  version: 1.2.2
+  resolution: "esm-env@npm:1.2.2"
+  checksum: 10c0/3d25c973f2fd69c25ffff29c964399cea573fe10795ecc1d26f6f957ce0483d3254e1cceddb34bf3296a0d7b0f1d53a28992f064ba509dfe6366751e752c4166
   languageName: node
   linkType: hard
 
@@ -30954,6 +30975,15 @@ __metadata:
   dependencies:
     boolbase: "npm:^1.0.0"
   checksum: 10c0/5fee7ff309727763689cfad844d979aedd2204a817fbaaf0e1603794a7c20db28548d7b024692f953557df6ce4a0ee4ae46cd8ebd9b36cfb300b9226b567c479
+  languageName: node
+  linkType: hard
+
+"number-flow@npm:0.6.0":
+  version: 0.6.0
+  resolution: "number-flow@npm:0.6.0"
+  dependencies:
+    esm-env: "npm:^1.1.4"
+  checksum: 10c0/dc1a86a89d5e8205f2885ee3dacbbaf11e99ab6a603a29beec337b324ff17c0a575e2e6831163ad39b6a4ca54d676028f7e3dd2f51166e521db8cf923a7d1c94
   languageName: node
   linkType: hard
 
