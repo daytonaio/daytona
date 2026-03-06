@@ -1574,9 +1574,6 @@ const docTemplate = `{
                 "osUser": {
                     "type": "string"
                 },
-                "otelEndpoint": {
-                    "type": "string"
-                },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
                 },

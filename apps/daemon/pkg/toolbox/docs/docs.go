@@ -1797,7 +1797,7 @@ const docTemplate = `{
         },
         "/init": {
             "post": {
-                "description": "Set the auth token and initialize telemetry for the toolbox server",
+                "description": "Set the auth token for the toolbox server",
                 "produces": [
                     "application/json"
                 ],

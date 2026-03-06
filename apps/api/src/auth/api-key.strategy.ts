@@ -62,13 +62,6 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       }
     }
 
-    const otelCollectorApiKey = this.configService.get('otelCollector.apiKey')
-    if (otelCollectorApiKey && otelCollectorApiKey === token) {
-      return {
-        role: 'otel-collector',
-      }
-    }
-
     const healthCheckApiKey = this.configService.get('healthCheck.apiKey')
     if (healthCheckApiKey && healthCheckApiKey === token) {
       return {

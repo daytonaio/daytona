@@ -19,7 +19,6 @@ import (
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
-	"github.com/daytonaio/common-go/pkg/telemetry"
 	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/recording"
 	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
@@ -36,10 +35,6 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
 	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
 	sloggin "github.com/samber/slog-gin"
-	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
-	otellog "go.opentelemetry.io/otel/sdk/log"
-	"go.opentelemetry.io/otel/sdk/metric"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	"github.com/daytonaio/daemon/pkg/toolbox/docs"
 	"github.com/gin-gonic/gin"
@@ -54,7 +49,6 @@ type ServerConfig struct {
 	ConfigDir                            string
 	ComputerUse                          computeruse.IComputerUse
 	SandboxId                            string
-	OtelEndpoint                         *string
 	TerminationGracePeriodSeconds        int
 	TerminationCheckIntervalMilliseconds int
 	RecordingService                     *recording.RecordingService
@@ -65,8 +59,6 @@ func NewServer(config ServerConfig) *server {
 		logger:                               config.Logger.With(slog.String("component", "toolbox_server")),
 		WorkDir:                              config.WorkDir,
 		SandboxId:                            config.SandboxId,
-		otelEndpoint:                         config.OtelEndpoint,
-		telemetry:                            Telemetry{},
 		terminationGracePeriodSeconds:        config.TerminationGracePeriodSeconds,
 		terminationCheckIntervalMilliseconds: config.TerminationCheckIntervalMilliseconds,
 		configDir:                            config.ConfigDir,
@@ -79,20 +71,12 @@ type server struct {
 	ComputerUse                          computeruse.IComputerUse
 	SandboxId                            string
 	logger                               *slog.Logger
-	otelEndpoint                         *string
 	authToken                            string
-	telemetry                            Telemetry
 	terminationGracePeriodSeconds        int
 	terminationCheckIntervalMilliseconds int
 	configDir                            string
 	recordingService                     *recording.RecordingService
 	httpServer                           *http.Server
-}
-
-type Telemetry struct {
-	TracerProvider *sdktrace.TracerProvider
-	MeterProvider  *metric.MeterProvider
-	LoggerProvider *otellog.LoggerProvider
 }
 
 func (s *server) Start() error {
@@ -106,20 +90,9 @@ func (s *server) Start() error {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	otelServiceName := fmt.Sprintf("sandbox-%s", s.SandboxId)
-
 	r := gin.New()
 	r.Use(common_errors.Recovery())
 	noTelemetryRouter := r.Group("/")
-	r.Use(func(ctx *gin.Context) {
-		if s.telemetry.TracerProvider == nil {
-			ctx.Next()
-			return
-		}
-
-		otelgin.Middleware(otelServiceName, otelgin.WithTracerProvider(s.telemetry.TracerProvider))(ctx)
-		ctx.Next()
-	})
 	r.Use(sloggin.New(s.logger))
 	errMiddleware := common_errors.NewErrorMiddleware(func(ctx *gin.Context, err error) common_errors.ErrorResponse {
 		return common_errors.ErrorResponse{
@@ -138,7 +111,7 @@ func (s *server) Start() error {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
-	r.POST("/init", s.Initialize(otelServiceName))
+	r.POST("/init", s.Initialize())
 
 	r.GET("/version", s.GetVersion)
 
@@ -369,21 +342,5 @@ func (s *server) Shutdown() {
 		if err != nil {
 			s.logger.Error("Failed to stop computer use", "error", err)
 		}
-	}
-
-	// Flush telemetry
-	if s.telemetry.TracerProvider != nil {
-		s.logger.Info("Shutting down tracer provider")
-		telemetry.ShutdownTracer(s.logger, s.telemetry.TracerProvider)
-	}
-
-	if s.telemetry.MeterProvider != nil {
-		s.logger.Info("Shutting down meter provider")
-		telemetry.ShutdownMeter(s.logger, s.telemetry.MeterProvider)
-	}
-
-	if s.telemetry.LoggerProvider != nil {
-		s.logger.Info("Shutting down logger provider")
-		telemetry.ShutdownLogger(s.logger, s.telemetry.LoggerProvider)
 	}
 }

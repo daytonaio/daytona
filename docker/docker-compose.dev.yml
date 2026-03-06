@@ -104,38 +104,6 @@ services:
       - minio
     restart: unless-stopped
 
-  pgadmin:
-    image: dpage/pgadmin4:9.2.0
-    entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
-    environment:
-      PGADMIN_DEFAULT_EMAIL: dev@daytona.io
-      PGADMIN_DEFAULT_PASSWORD: pgadmin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
-      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
-    user: root
-    volumes:
-      - ./pgadmin4/servers.json:/pgadmin4/servers.json
-      - ./pgadmin4/pgpass:/pgpass
-    depends_on:
-      - db
-    ports:
-      - "5050:80"
-    networks:
-      - daytona-dev-network
-    restart: unless-stopped
-    profiles:
-      - tools
-
-  jaeger:
-    image: jaegertracing/all-in-one:1.67.0
-    networks:
-      - daytona-dev-network
-    ports:
-      - "16686:16686"
-    restart: unless-stopped
-    profiles:
-      - observability
-
 volumes:
   db_data_dev: {}
   registry_dev: {}

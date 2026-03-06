@@ -12,7 +12,6 @@ import { RunnerContext } from './runner-context.interface'
 import { SshGatewayContext } from './ssh-gateway-context.interface'
 import { RegionProxyContext } from './region-proxy.interface'
 import { RegionSSHGatewayContext } from './region-ssh-gateway.interface'
-import { OtelCollectorContext } from './otel-collector-context.interface'
 import { HealthCheckContext } from './health-check-context.interface'
 
 export interface BaseAuthContext {
@@ -26,7 +25,6 @@ export type ApiRole =
   | 'ssh-gateway'
   | 'region-proxy'
   | 'region-ssh-gateway'
-  | 'otel-collector'
   | 'health-check'
 
 export interface AuthContext extends BaseAuthContext {
@@ -59,5 +57,4 @@ export type AuthContextType =
   | SshGatewayContext
   | RegionProxyContext
   | RegionSSHGatewayContext
-  | OtelCollectorContext
   | HealthCheckContext

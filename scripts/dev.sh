@@ -333,9 +333,6 @@ run_api() {
   if [[ "${DEFAULT_RUNNER_PROXY_URL:-}" == *"runner"* ]] || [ -z "${DEFAULT_RUNNER_PROXY_URL:-}" ]; then
     export DEFAULT_RUNNER_PROXY_URL="http://localhost:3003"
   fi
-  if [[ "${OTEL_EXPORTER_OTLP_ENDPOINT:-}" == *"otel-collector"* ]]; then
-    export OTEL_ENABLED="false"
-  fi
   if [ "${DASHBOARD_BASE_API_URL:-}" = "http://localhost:3000" ]; then
     export DASHBOARD_BASE_API_URL="http://localhost:${PORT:-3001}"
   fi

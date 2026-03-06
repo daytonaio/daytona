@@ -2080,7 +2080,7 @@ paths:
         - git
   /init:
     post:
-      description: Set the auth token and initialize telemetry for the toolbox server
+      description: Set the auth token for the toolbox server
       operationId: Initialize
       parameters:
         - description: Initialization request

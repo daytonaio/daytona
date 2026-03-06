@@ -14,7 +14,7 @@ import (
 // Initialize godoc
 //
 //	@Summary		Initialize toolbox server
-//	@Description	Set the auth token and initialize telemetry for the toolbox server
+//	@Description	Set the auth token for the toolbox server
 //	@Tags			server
 //	@Produce		json
 //	@Param			request	body		InitializeRequest	true	"Initialization request"
@@ -22,7 +22,7 @@ import (
 //	@Router			/init [post]
 //
 //	@id				Initialize
-func (s *server) Initialize(otelServiceName string) gin.HandlerFunc {
+func (s *server) Initialize() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req InitializeRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -32,14 +32,8 @@ func (s *server) Initialize(otelServiceName string) gin.HandlerFunc {
 
 		s.authToken = req.Token
 
-		err := s.initTelemetry(ctx.Request.Context(), otelServiceName)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, err)
-			return
-		}
-
 		ctx.JSON(http.StatusOK, gin.H{
-			"message": "Auth token set and telemetry initialized successfully",
+			"message": "Auth token set successfully",
 		})
 	}
 }

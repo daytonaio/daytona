@@ -9,7 +9,7 @@ This folder contains a Docker Compose setup for running Daytona locally.
 
 ## Overview
 
-The Docker Compose configuration includes all the necessary services to run Daytona:
+The Docker Compose configuration includes the core services required to run Daytona Lite:
 
 - **API**: Main Daytona application server
 - **Proxy**: Request proxy service
@@ -17,12 +17,8 @@ The Docker Compose configuration includes all the necessary services to run Dayt
 - **SSH Gateway**: Service that handles sandbox SSH access
 - **Database**: PostgreSQL database for data persistence
 - **Redis**: In-memory data store for caching and sessions
-- **Dex**: OIDC authentication provider
 - **Registry**: Docker image registry with web UI
 - **MinIO**: S3-compatible object storage
-- **MailDev**: Email testing service
-- **Jaeger**: Distributed tracing
-- **PgAdmin**: Database administration interface
 
 ## Quick Start
 
@@ -36,7 +32,6 @@ The Docker Compose configuration includes all the necessary services to run Dayt
    - Daytona Dashboard: http://localhost:3000
      - Access Credentials: dev@daytona.io `password`
      - Make sure that the default snapshot is active at http://localhost:3000/dashboard/snapshots
-   - PgAdmin: http://localhost:5050
    - Registry UI: http://localhost:5100
    - MinIO Console: http://localhost:9001 (minioadmin / minioadmin)
 

@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { otelSdk } from './tracing'
 import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -35,9 +34,6 @@ const httpsOptions: HttpsOptions = {
 }
 
 async function bootstrap() {
-  if (process.env.OTEL_ENABLED === 'true') {
-    await otelSdk.start()
-  }
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
     httpsOptions: httpsEnabled ? httpsOptions : undefined,

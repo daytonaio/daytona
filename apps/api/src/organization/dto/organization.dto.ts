@@ -137,17 +137,6 @@ export class OrganizationDto {
   sandboxLifecycleRateLimitTtlSeconds: number | null
 
   static fromOrganization(organization: Organization): OrganizationDto {
-    const experimentalConfig = organization._experimentalConfig
-    if (experimentalConfig && experimentalConfig.otel && experimentalConfig.otel.headers) {
-      experimentalConfig.otel.headers = Object.entries(experimentalConfig.otel.headers).reduce(
-        (acc, [key]) => {
-          acc[key] = '******'
-          return acc
-        },
-        {} as Record<string, string>,
-      )
-    }
-
     const dto: OrganizationDto = {
       id: organization.id,
       name: organization.name,
@@ -169,7 +158,7 @@ export class OrganizationDto {
       authenticatedRateLimit: organization.authenticatedRateLimit,
       sandboxCreateRateLimit: organization.sandboxCreateRateLimit,
       sandboxLifecycleRateLimit: organization.sandboxLifecycleRateLimit,
-      experimentalConfig,
+      experimentalConfig: organization._experimentalConfig,
       authenticatedRateLimitTtlSeconds: organization.authenticatedRateLimitTtlSeconds,
       sandboxCreateRateLimitTtlSeconds: organization.sandboxCreateRateLimitTtlSeconds,
       sandboxLifecycleRateLimitTtlSeconds: organization.sandboxLifecycleRateLimitTtlSeconds,

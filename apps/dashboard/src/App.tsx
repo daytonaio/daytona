@@ -21,7 +21,6 @@ import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
 import AccountSettings from './pages/AccountSettings'
 import Dashboard from './pages/Dashboard'
-import Experimental from './pages/Experimental'
 import Keys from './pages/Keys'
 import LandingPage from './pages/LandingPage'
 import Limits from './pages/Limits'
@@ -141,14 +140,6 @@ function App() {
           element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
         />
         <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
-        <Route
-          path={getRouteSubPath(RoutePath.EXPERIMENTAL)}
-          element={
-            <OwnerAccessOrganizationPageWrapper>
-              <Experimental />
-            </OwnerAccessOrganizationPageWrapper>
-          }
-        />
         <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
       </Route>
       <Route path="*" element={<NotFound />} />

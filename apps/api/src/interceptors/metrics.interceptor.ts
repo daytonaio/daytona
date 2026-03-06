@@ -882,7 +882,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       'api_organization_experimental_config_update_failed',
       {
         experimental_config_empty: !experimentalConfig,
-        experimental_config_otel_set: !!experimentalConfig?.otel,
+        experimental_config_keys: experimentalConfig ? Object.keys(experimentalConfig).length : 0,
       },
     )
   }

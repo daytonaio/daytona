@@ -138,7 +138,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
-    otelEndpoint?: string,
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined> {
     const payload: CreateSandboxDTO = {
@@ -169,7 +168,6 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       networkAllowList: sandbox.networkAllowList,
       metadata: metadata,
       authToken: sandbox.authToken,
-      otelEndpoint: otelEndpoint,
       skipStart: skipStart,
     }
 

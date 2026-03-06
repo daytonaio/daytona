@@ -21,7 +21,6 @@ type CreateSandboxDTO struct {
 	NetworkAllowList *string           `json:"networkAllowList,omitempty"`
 	Metadata         map[string]string `json:"metadata,omitempty"`
 	AuthToken        *string           `json:"authToken,omitempty"`
-	OtelEndpoint     *string           `json:"otelEndpoint,omitempty"`
 	SkipStart        *bool             `json:"skipStart,omitempty"`
 } //	@name	CreateSandboxDTO
 

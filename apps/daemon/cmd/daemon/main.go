@@ -171,7 +171,6 @@ func run() int {
 		Logger:                               logger,
 		WorkDir:                              workDir,
 		ConfigDir:                            configDir,
-		OtelEndpoint:                         c.OtelEndpoint,
 		SandboxId:                            c.SandboxId,
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,

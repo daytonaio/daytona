@@ -33,7 +33,6 @@ import {
   Box,
   ChevronsUpDown,
   Container,
-  FlaskConical,
   HardDrive,
   Joystick,
   KeyRound,
@@ -103,7 +102,6 @@ export function Sidebar({ isBannerVisible, version }: SidebarProps) {
     useSelectedOrganization()
   // In Lite version, all feature flags are enabled by default
   const orgInfraEnabled = true
-  const organizationExperimentsEnabled = true
   const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
 
   const sidebarItems = useMemo(() => {
@@ -170,22 +168,6 @@ export function Sidebar({ isBannerVisible, version }: SidebarProps) {
     selectedOrganization?.personal,
   ])
 
-  const experimentalItems = useMemo(() => {
-    const arr: SidebarItem[] = []
-
-    if (
-      organizationExperimentsEnabled &&
-      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-    ) {
-      arr.push({
-        icon: <FlaskConical size={16} strokeWidth={1.5} />,
-        label: 'Experimental',
-        path: RoutePath.EXPERIMENTAL,
-      })
-    }
-    return arr
-  }, [organizationExperimentsEnabled, authenticatedUserOrganizationMember?.role])
-
   const infrastructureItems = useMemo(() => {
     if (!orgInfraEnabled) {
       return []
@@ -237,9 +219,8 @@ export function Sidebar({ isBannerVisible, version }: SidebarProps) {
       },
       { label: 'Settings', items: settingsItems },
       { label: 'Infrastructure', items: infrastructureItems },
-      { label: 'Experimental', items: experimentalItems },
     ].filter((group) => group.items.length > 0)
-  }, [sidebarItems, settingsItems, infrastructureItems, experimentalItems, miscItems])
+  }, [sidebarItems, settingsItems, infrastructureItems, miscItems])
 
   const commandItems = useMemo(() => {
     return sidebarGroups
