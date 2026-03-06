@@ -35,7 +35,7 @@ export const useTerminalSessionQuery = (sandboxId: string, enabled: boolean) => 
       ).data.url
       return { url, expiresAt: Date.now() + SESSION_DURATION_SECONDS * 1000 }
     },
-    enabled: enabled && !!sandboxId,
+    enabled: enabled && !!sandboxId && !!selectedOrganization?.id,
     staleTime: Infinity,
   })
 

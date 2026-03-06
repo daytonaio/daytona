@@ -22,9 +22,9 @@ export function useSandboxWsSync({ sandboxId, refetchOnCreate = false }: UseSand
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    if (!notificationSocket) return
+    if (!notificationSocket || !selectedOrganization?.id) return
 
-    const orgId = selectedOrganization?.id ?? ''
+    const orgId = selectedOrganization.id
 
     const updateStateInListCache = (targetId: string, state: SandboxState) => {
       queryClient.setQueriesData<PaginatedSandboxes>({ queryKey: getSandboxesQueryKey(orgId) }, (oldData) => {
