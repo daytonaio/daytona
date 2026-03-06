@@ -39,6 +39,9 @@ type DockerClientConfig struct {
 	VolumeCleanupExclusionPeriod time.Duration
 	BackupTimeoutMin             int
 	SnapshotPullTimeout          time.Duration
+	BuildTimeoutMin              int
+	BuildCPUCores                int64
+	BuildMemoryGB                int64
 	InitializeDaemonTelemetry    bool
 	InterSandboxNetworkEnabled   bool
 }
@@ -62,6 +65,21 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 	if config.BackupTimeoutMin <= 0 {
 		logger.Warn("Invalid backup timeout value. Using default value of 60 minutes")
 		config.BackupTimeoutMin = 60
+	}
+
+	if config.BuildTimeoutMin <= 0 {
+		logger.Warn("Invalid build timeout value. Using default value of 120 minutes")
+		config.BuildTimeoutMin = 120
+	}
+
+	if config.BuildCPUCores <= 0 {
+		logger.Warn("Invalid build CPU cores value. Using default value of 4")
+		config.BuildCPUCores = 4
+	}
+
+	if config.BuildMemoryGB <= 0 {
+		logger.Warn("Invalid build memory value. Using default value of 8 GB")
+		config.BuildMemoryGB = 8
 	}
 
 	var info system.Info
@@ -133,6 +151,9 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 		volumeCleanupExclusionPeriod: config.VolumeCleanupExclusionPeriod,
 		backupTimeoutMin:             config.BackupTimeoutMin,
 		snapshotPullTimeout:          config.SnapshotPullTimeout,
+		buildTimeoutMin:              config.BuildTimeoutMin,
+		buildCPUCores:                config.BuildCPUCores,
+		buildMemoryGB:                config.BuildMemoryGB,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
 		filesystem:                   filesystem,
@@ -141,6 +162,10 @@ func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerCli
 
 func (d *DockerClient) ApiClient() client.APIClient {
 	return d.apiClient
+}
+
+func (d *DockerClient) BuildTimeoutMin() int {
+	return d.buildTimeoutMin
 }
 
 const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
@@ -168,6 +193,9 @@ type DockerClient struct {
 	volumeCleanupExclusionPeriod time.Duration
 	backupTimeoutMin             int
 	snapshotPullTimeout          time.Duration
+	buildTimeoutMin              int
+	buildCPUCores                int64
+	buildMemoryGB                int64
 	volumeCleanupMutex           sync.Mutex
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool
