@@ -2,44 +2,133 @@
 title: Billing
 ---
 
-[Daytona Billing ↗](https://app.daytona.io/dashboard/billing/spending) provides an overview of your organization's billing, wallet, and usage details.
-
-Daytona displays a cost breakdown chart that shows a breakdown of costs per resource. You can choose between area and bar charts and filter by RAM, CPU, and storage. You can also filter by date range (last 12, 6, or 3 months).
+Daytona provides an overview of your organization's [wallet](#wallet) and [spending](#spending). Daytona uses a pay-as-you-go billing model where you are charged based on the resources your sandboxes consume. For information on resource quotas, rate limits, and tier-based access, see [limits](/docs/en/limits).
 
 ## Wallet
 
 [Daytona Wallet ↗](https://app.daytona.io/dashboard/billing/wallet) shows the current balance of the organization's wallet and the amount of credits spent this month.
 
-### Add payment method
+### Overview
 
-Daytona provides a payment method to add to your wallet. You can connect your credit card to your wallet to top up your balance.
+Overview provides a summary of your organization's wallet, including the current balance and the amount of credits spent this month, with options to add a [payment method](#payment-method) and [redeem coupon](#redeem-coupon). The amounts for current balance and credits spent this month are displayed in USD.
+
+#### Payment method
+
+Payment method connects your wallet to your preferred payment method, allowing you to add funds to your balance and receive invoices.
 
 1. Navigate to [Daytona Wallet ↗](https://app.daytona.io/dashboard/billing/wallet)
-2. Click the **Connect** button next to the **Payment method** section
-3. Follow the prompts to connect your credit card to your wallet.
+2. Click the **Connect** button in the **Payment method** section
+3. Follow the prompts to connect your payment method to your wallet
 
-Organizations can set automatic top-up rules for their wallets.
+Organizations can set automatic top-up rules for their wallets
 
-- **Threshold** — When the wallet balance drops to this amount, a top-up is triggered.  
-- **Target** — The wallet balance is topped up to this amount.
+- **Threshold**: when the wallet balance drops to this amount, a top-up is triggered
+- **Target**: the wallet balance is topped up to this amount
 
 Set both **Threshold** and **Target** to `0` to disable automatic top-up.
 
-### Redeem coupon
+#### Redeem coupon
 
-Daytona provides coupon codes to redeem credits on your wallet.
+Redeem coupon allows you to redeem coupon codes to add credits to your wallet.
 
 1. Navigate to [Daytona Wallet ↗](https://app.daytona.io/dashboard/billing/wallet)
 2. Enter the coupon code in the **Redeem coupon** input field
-3. Click the **Redeem** button to redeem the coupon code.
+3. Click the **Redeem** button to redeem the coupon code
 
-### Billing emails
+### One time top-up
 
-Daytona provides billing emails to receive important billing notifications such as invoices and credit depletion notices.
+One time top-up allows you to add credits to your balance with a one time payment.
 
 1. Navigate to [Daytona Wallet ↗](https://app.daytona.io/dashboard/billing/wallet)
-2. Click the **Add Email** button to add a new email address.
-3. Enter the email address and click the **Add Email** button.
+2. Select the top-up amount or enter a custom amount
+3. Click the **Top up** button
+4. Follow the prompts to complete the payment
 
-A verification email will be sent to the email address to verify it. Once verified, the email address will be added to the list of billing emails.
+After completing the payment, the amount will be added to your wallet and the **Current balance** will be updated.
 
+### Invoices
+
+Invoices are automatically generated and sent to your billing emails.
+
+- **Invoice**: the invoice identifier
+- **Date**: the date the invoice was issued
+- **Due date**: the date the invoice is due
+- **Amount**: the amount of the invoice
+- **Status**: the status of the invoice
+- **Type**: the type of the invoice
+
+1. Navigate to [Daytona Wallet ↗](https://app.daytona.io/dashboard/billing/wallet)
+2. Click the three dots button (**:::**) next to the invoice you want to view
+3. Click the **View** button to see the invoice details
+4. Optionally, download the invoice 
+
+## Spending
+
+### Resource usage
+
+Resource usage provides a summary of the organization's resource usage.
+
+- **Total cost**: the total cost of your organization's usage
+- **Sandboxes**: the total number of sandboxes in your organization
+- **CPU**: the total CPU usage of your organization
+- **RAM**: the total RAM usage of your organization
+- **Disk**: the total disk usage of your organization
+
+### Resource breakdown
+
+Resource breakdown displays a breakdown of usage per resource.
+
+- **CPU**: the total CPU usage of your organization
+- **RAM**: the total RAM usage of your organization
+- **Disk**: the total disk usage of your organization
+
+### Per-sandbox usage
+
+Per-sandbox usage displays usage per sandbox.
+
+- **Sandbox ID**: the ID of the sandbox
+- **Total price**: the total price of the sandbox's resources usage
+- **CPU (seconds)**: the total CPU usage of the sandbox
+- **RAM (GB-seconds)**: the total RAM usage of the sandbox
+- **Disk (GB-seconds)**: the total disk usage of the sandbox
+
+### Monthly breakdown
+
+Monthly breakdown displays a chart of cost breakdown by month. The chart is interactive and you can filter by resources, change the chart type (bar or area), and select the time range (last 3 months, last 6 months, last 12 months).
+
+## Cancellation & post-cancellation
+
+:::note
+Refer to [Daytona Terms of Service ↗](https://www.daytona.io/terms-of-service) for more information.
+:::
+
+When you delete your [organization](/docs/en/organizations), cancel your subscription, or disable billing, you remain responsible for any sandbox usage that occurred before your action.
+
+### Charges after cancellation
+
+There is a delay of up to 48 hours between when sandbox resources are consumed and when the corresponding charges appear in the billing system. If you cancel during this window, charges for usage that already occurred may still post to your account. These charges reflect sandbox activity that happened before your cancellation and are not charges for new usage.
+
+No charges will be asserted for usage first reported more than 48 hours after cancellation. In no event will any charge be asserted more than 30 calendar days after cancellation, regardless of the cause of any delay.
+
+### Before cancelling
+
+You are responsible for deleting all sandboxes and verifying that no active resources remain before cancelling.
+
+1. Navigate to your organization's [Daytona Dashboard ↗](https://app.daytona.io/dashboard)
+2. Delete all sandboxes across all projects
+3. Confirm no active resources remain under your organization
+
+Daytona will not charge you for resources that failed to delete due to a platform issue on Daytona's side.
+
+### Final settlement
+
+After cancellation, Daytona sends a final billing summary to the billing email address(es) on file within 5 business days, itemizing any charges posted during the 48-hour settlement window.
+
+### Billing disputes
+
+If you believe a post-cancellation charge is incorrect, you can submit a billing dispute.
+
+1. Email [billing@daytona.io](mailto:billing@daytona.io) within 30 days of receiving your final settlement notice
+2. Include your organization name and/or ID, and the specific charges in question
+
+Daytona will provide detailed usage records supporting the disputed charges upon request and respond within 15 business days.
