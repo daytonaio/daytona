@@ -6,6 +6,7 @@
 import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerState } from '../enums/runner-state.enum'
+import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Entity()
 @Unique(['region', 'name'])
@@ -160,6 +161,13 @@ export class Runner {
     default: false,
   })
   draining: boolean
+
+  @Column({
+    type: 'jsonb',
+    nullable: true,
+    default: null,
+  })
+  serviceHealth: RunnerServiceInfo[] | null
 
   @CreateDateColumn({
     type: 'timestamp with time zone',

@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,11 @@ import (
 //
 //	@id				RunnerInfo
 func RunnerInfo(ctx *gin.Context) {
-	runnerInstance := runner.GetInstance(nil)
+	runnerInstance, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	metrics, err := runnerInstance.MetricsCollector.Collect(ctx.Request.Context())
 	if err != nil {
@@ -30,7 +35,10 @@ func RunnerInfo(ctx *gin.Context) {
 		return
 	}
 
+	servicesInfo := runnerInstance.InspectRunnerServices(ctx.Request.Context())
+
 	response := dto.RunnerInfoResponseDTO{
+		ServiceHealth: mapRunnerServiceInfoToDTO(servicesInfo),
 		Metrics: &dto.RunnerMetrics{
 			CurrentCpuLoadAverage:        float64(metrics.CPULoadAverage),
 			CurrentCpuUsagePercentage:    float64(metrics.CPUUsagePercentage),
@@ -46,4 +54,24 @@ func RunnerInfo(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, response)
+}
+
+func mapRunnerServiceInfoToDTO(servicesInfo []models.RunnerServiceInfo) []*dto.RunnerServiceInfo {
+	runnerServicesInfoDTO := make([]*dto.RunnerServiceInfo, 0)
+
+	for _, serviceInfo := range servicesInfo {
+		serviceInfoDto := &dto.RunnerServiceInfo{
+			ServiceName: serviceInfo.ServiceName,
+			Healthy:     serviceInfo.Healthy,
+		}
+
+		if serviceInfo.Err != nil {
+			errReason := serviceInfo.Err.Error()
+			serviceInfoDto.ErrorReason = &errReason
+		}
+
+		runnerServicesInfoDTO = append(runnerServicesInfoDTO, serviceInfoDto)
+	}
+
+	return runnerServicesInfoDTO
 }

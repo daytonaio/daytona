@@ -124,6 +124,7 @@ export * from './runner';
 export * from './runner-full';
 export * from './runner-health-metrics';
 export * from './runner-healthcheck';
+export * from './runner-service-health';
 export * from './runner-snapshot-dto';
 export * from './runner-state';
 export * from './sandbox';

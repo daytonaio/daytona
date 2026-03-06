@@ -21,6 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.runner_health_metrics import RunnerHealthMetrics
+from daytona_api_client_async.models.runner_service_health import RunnerServiceHealth
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,12 +30,13 @@ class RunnerHealthcheck(BaseModel):
     RunnerHealthcheck
     """ # noqa: E501
     metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
+    service_health: Optional[List[RunnerServiceHealth]] = Field(default=None, description="Health status of individual services on the runner", serialization_alias="serviceHealth")
     domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
     proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", serialization_alias="proxyUrl")
     api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", serialization_alias="apiUrl")
     app_version: StrictStr = Field(description="Runner app version", serialization_alias="appVersion")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "apiUrl", "appVersion"]
+    __properties: ClassVar[List[str]] = ["metrics", "serviceHealth", "domain", "proxyUrl", "apiUrl", "appVersion"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -80,6 +82,13 @@ class RunnerHealthcheck(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of metrics
         if self.metrics:
             _dict['metrics'] = self.metrics.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of each item in service_health (list)
+        _items = []
+        if self.service_health:
+            for _item_service_health in self.service_health:
+                if _item_service_health:
+                    _items.append(_item_service_health.to_dict())
+            _dict['serviceHealth'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -98,6 +107,7 @@ class RunnerHealthcheck(BaseModel):
 
         _obj = cls.model_validate({
             "metrics": RunnerHealthMetrics.from_dict(obj["metrics"]) if obj.get("metrics") is not None else None,
+            "service_health": [RunnerServiceHealth.from_dict(_item) for _item in obj["serviceHealth"]] if obj.get("serviceHealth") is not None else None,
             "domain": obj.get("domain"),
             "proxy_url": obj.get("proxyUrl"),
             "api_url": obj.get("apiUrl"),

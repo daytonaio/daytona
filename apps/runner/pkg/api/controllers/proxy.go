@@ -48,7 +48,11 @@ func ProxyRequest(logger *slog.Logger) gin.HandlerFunc {
 }
 
 func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return nil, nil, err
+	}
 
 	sandboxId := ctx.Param("sandboxId")
 	if sandboxId == "" {

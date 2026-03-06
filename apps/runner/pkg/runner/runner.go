@@ -4,17 +4,22 @@
 package runner
 
 import (
-	"log"
+	"context"
+	"errors"
+	"log/slog"
+	"time"
 
 	"github.com/daytonaio/runner/internal/metrics"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/docker"
+	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/daytonaio/runner/pkg/services"
 	"github.com/daytonaio/runner/pkg/sshgateway"
 )
 
 type RunnerInstanceConfig struct {
+	Logger             *slog.Logger
 	StatesCache        *cache.StatesCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
@@ -25,6 +30,7 @@ type RunnerInstanceConfig struct {
 }
 
 type Runner struct {
+	Logger             *slog.Logger
 	StatesCache        *cache.StatesCache
 	SnapshotErrorCache *cache.SnapshotErrorCache
 	Docker             *docker.DockerClient
@@ -36,17 +42,23 @@ type Runner struct {
 
 var runner *Runner
 
-func GetInstance(config *RunnerInstanceConfig) *Runner {
+func GetInstance(config *RunnerInstanceConfig) (*Runner, error) {
 	if config != nil && runner != nil {
-		log.Fatal("Runner already initialized")
+		return nil, errors.New("runner instance already initialized")
 	}
 
 	if runner == nil {
 		if config == nil {
-			log.Fatal("Runner not initialized")
+			return nil, errors.New("runner instance not initialized and no config provided")
+		}
+
+		logger := slog.Default()
+		if config.Logger != nil {
+			logger = config.Logger
 		}
 
 		runner = &Runner{
+			Logger:             logger.With(slog.String("component", "runner")),
 			StatesCache:        config.StatesCache,
 			SnapshotErrorCache: config.SnapshotErrorCache,
 			Docker:             config.Docker,
@@ -57,5 +69,28 @@ func GetInstance(config *RunnerInstanceConfig) *Runner {
 		}
 	}
 
-	return runner
+	return runner, nil
+}
+
+func (r *Runner) InspectRunnerServices(ctx context.Context) []models.RunnerServiceInfo {
+	runnerServicesInfo := make([]models.RunnerServiceInfo, 0)
+
+	pingCtx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	dockerHealth := models.RunnerServiceInfo{
+		ServiceName: "docker",
+		Healthy:     true,
+	}
+
+	err := r.Docker.Ping(pingCtx)
+	if err != nil {
+		r.Logger.WarnContext(ctx, "Failed to ping Docker daemon", "error", err)
+		dockerHealth.Healthy = false
+		dockerHealth.Err = err
+	}
+
+	runnerServicesInfo = append(runnerServicesInfo, dockerHealth)
+
+	return runnerServicesInfo
 }

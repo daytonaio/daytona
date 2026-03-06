@@ -151,6 +151,7 @@ daytona_api_client_async/models/runner.py
 daytona_api_client_async/models/runner_full.py
 daytona_api_client_async/models/runner_health_metrics.py
 daytona_api_client_async/models/runner_healthcheck.py
+daytona_api_client_async/models/runner_service_health.py
 daytona_api_client_async/models/runner_snapshot_dto.py
 daytona_api_client_async/models/runner_state.py
 daytona_api_client_async/models/sandbox.py

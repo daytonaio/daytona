@@ -14,6 +14,7 @@ export * from './registry-dto';
 export * from './resize-sandbox-dto';
 export * from './runner-info-response-dto';
 export * from './runner-metrics';
+export * from './runner-service-info';
 export * from './sandbox-info-response';
 export * from './snapshot-digest-response';
 export * from './snapshot-exists-response';

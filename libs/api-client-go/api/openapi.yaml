@@ -11575,18 +11575,52 @@ components:
       - diskGiB
       - memoryGiB
       type: object
+    RunnerServiceHealth:
+      example:
+        healthy: false
+        errorReason: Cannot connect to the runner
+        serviceName: runner
+      properties:
+        serviceName:
+          description: Name of the service being checked
+          example: runner
+          type: string
+        healthy:
+          description: Whether the service is healthy
+          example: false
+          type: boolean
+        errorReason:
+          description: Error reason if the service is unhealthy
+          example: Cannot connect to the runner
+          type: string
+      required:
+      - healthy
+      - serviceName
+      type: object
     RunnerHealthcheck:
       example:
         appVersion: v0.0.0-dev
         apiUrl: http://api.daytona.example.com:8080
         proxyUrl: http://proxy.daytona.example.com:8080
         domain: runner-123.daytona.example.com
+        serviceHealth:
+        - healthy: false
+          errorReason: Cannot connect to the runner
+          serviceName: runner
+        - healthy: false
+          errorReason: Cannot connect to the runner
+          serviceName: runner
         metrics: ""
       properties:
         metrics:
           allOf:
           - $ref: '#/components/schemas/RunnerHealthMetrics'
           description: Runner metrics
+        serviceHealth:
+          description: Health status of individual services on the runner
+          items:
+            $ref: '#/components/schemas/RunnerServiceHealth'
+          type: array
         domain:
           description: Runner domain
           example: runner-123.daytona.example.com
