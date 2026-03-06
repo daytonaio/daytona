@@ -82,6 +82,11 @@ func (d *DockerClient) getInUseVolumeMounts(ctx context.Context) (map[string]boo
 			src := normalizePath(m.Source)
 			if strings.HasPrefix(src, prefix) {
 				inUse[src] = true
+				// Also mark the volume root as in-use when a subpath is mounted.
+				// e.g. src="/mnt/daytona-volume-abc/sub" → root="/mnt/daytona-volume-abc"
+				if idx := strings.Index(src[len(prefix):], "/"); idx != -1 {
+					inUse[src[:len(prefix)+idx]] = true
+				}
 			}
 		}
 	}
