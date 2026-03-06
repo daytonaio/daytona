@@ -5,14 +5,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -102,10 +101,10 @@ func run() int {
 	// Check if user wants to read entrypoint logs
 	args := os.Args[1:]
 	if len(args) == 2 && args[0] == "entrypoint" && args[1] == "logs" {
-		entrypointLogFilePath := path.Join(configDir, "sessions", util.EntrypointSessionID, util.EntrypointCommandID, "output.log")
+		entrypointLogFilePath := filepath.Join(configDir, "sessions", util.EntrypointSessionID, util.EntrypointCommandID, "output.log")
 		logBytes, err := os.ReadFile(entrypointLogFilePath)
 		if err != nil {
-			if strings.Contains(err.Error(), "no such file or directory") {
+			if errors.Is(err, os.ErrNotExist) {
 				logger.Warn("Logs not found, please check if correct entrypoint was provided for sandbox.")
 			} else {
 				logger.Error("Failed to read entrypoint log file", "error", err)

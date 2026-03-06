@@ -436,6 +436,8 @@ export class Process {
    * });
    */
   public async getEntrypointLogs(onStdout: (chunk: string) => void, onStderr: (chunk: string) => void): Promise<void>
+
+  @WithInstrumentation()
   public async getEntrypointLogs(
     onStdout?: (chunk: string) => void,
     onStderr?: (chunk: string) => void,

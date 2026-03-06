@@ -498,7 +498,7 @@ func (p *ProcessService) GetSessionCommandLogsStream(ctx context.Context, sessio
 //
 // Returns a map containing the "logs" key with command output.
 func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (map[string]any, error) {
-	return withInstrumentation(ctx, p.otel, "Process", "ProcessService.GetEntrypointLogs", func(ctx context.Context) (map[string]any, error) {
+	return withInstrumentation(ctx, p.otel, "Process", "GetEntrypointLogs", func(ctx context.Context) (map[string]any, error) {
 		logs, httpResp, err := p.toolboxClient.ProcessAPI.GetEntrypointLogs(ctx).Execute()
 		if err != nil {
 			return nil, errors.ConvertToolboxError(err, httpResp)
@@ -558,32 +558,30 @@ func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (map[string]any,
 //
 // Returns an error if the connection fails or stream encounters an error.
 func (p *ProcessService) GetEntrypointLogsStream(ctx context.Context, stdout, stderr chan<- string) error {
-	defer func() {
-		close(stdout)
-		close(stderr)
-	}()
-
-	// Convert HTTP URL to WebSocket URL
-	httpURL := p.toolboxClient.GetConfig().Servers[0].URL
-	wsURL := common.ConvertToWebSocketURL(httpURL)
-
-	// Get authentication headers from the toolbox client configuration
-	headers := make(map[string][]string)
-	cfg := p.toolboxClient.GetConfig()
-	for key, value := range cfg.DefaultHeader {
-		headers[key] = []string{value}
-	}
-
-	// Connect to WebSocket with follow=true to stream logs
-	wsEndpoint := fmt.Sprintf("%s/process/session/entrypoint/logs?follow=true", wsURL)
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsEndpoint, headers)
-	if err != nil {
-		return errors.NewDaytonaError(fmt.Sprintf("Failed to connect to log stream: %v", err), 0, nil)
-	}
-	defer conn.Close()
-
-	// Process the WebSocket stream and demux stdout/stderr
-	return processWebsocketStream(ctx, conn, stdout, stderr)
+	return withInstrumentationVoid(ctx, p.otel, "Process", "GetEntrypointLogsStream", func(ctx context.Context) error {
+		defer func() {
+			close(stdout)
+			close(stderr)
+		}()
+		// Convert HTTP URL to WebSocket URL
+		httpURL := p.toolboxClient.GetConfig().Servers[0].URL
+		wsURL := common.ConvertToWebSocketURL(httpURL)
+		// Get authentication headers from the toolbox client configuration
+		headers := make(map[string][]string)
+		cfg := p.toolboxClient.GetConfig()
+		for key, value := range cfg.DefaultHeader {
+			headers[key] = []string{value}
+		}
+		// Connect to WebSocket with follow=true to stream logs
+		wsEndpoint := fmt.Sprintf("%s/process/session/entrypoint/logs?follow=true", wsURL)
+		conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsEndpoint, headers)
+		if err != nil {
+			return errors.NewDaytonaError(fmt.Sprintf("Failed to connect to log stream: %v", err), 0, nil)
+		}
+		defer conn.Close()
+		// Process the WebSocket stream and demux stdout/stderr
+		return processWebsocketStream(ctx, conn, stdout, stderr)
+	})
 }
 
 // processWebsocketStream demultiplexes a WebSocket stream into separate stdout and stderr channels.

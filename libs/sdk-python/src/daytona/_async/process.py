@@ -465,6 +465,7 @@ class AsyncProcess:
             await std_demux_stream(ws, on_stdout, on_stderr)
 
     @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+    @with_instrumentation()
     async def get_entrypoint_logs(self) -> SessionCommandLogsResponse:
         """Get the logs for the entrypoint session.
 
