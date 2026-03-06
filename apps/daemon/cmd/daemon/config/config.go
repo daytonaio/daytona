@@ -15,8 +15,8 @@ type Config struct {
 	UserHomeAsWorkDir        bool          `envconfig:"DAYTONA_USER_HOME_AS_WORKDIR"`
 	SandboxId                string        `envconfig:"DAYTONA_SANDBOX_ID" validate:"required"`
 	OtelEndpoint             *string       `envconfig:"DAYTONA_OTEL_ENDPOINT"`
-	TerminationCheckInterval time.Duration `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL" default:"100ms" validate:"min=1ms"`
-	TerminationGracePeriod   time.Duration `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD" default:"5s" validate:"min=1s"`
+	TerminationCheckInterval time.Duration `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL" default:"100ms" validate:"min_duration=1ms"`
+	TerminationGracePeriod   time.Duration `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD" default:"5s" validate:"min_duration=1s"`
 	RecordingsDir            string        `envconfig:"DAYTONA_RECORDINGS_DIR"`
 }
 
@@ -37,6 +37,23 @@ func GetConfig() (*Config, error) {
 	}
 
 	var validate = validator.New()
+
+	// Register a custom tag "min_duration" that accepts a duration string like "1ms"
+	err = validate.RegisterValidation("min_duration", func(fl validator.FieldLevel) bool {
+		min, err := time.ParseDuration(fl.Param())
+		if err != nil {
+			return false
+		}
+		d, ok := fl.Field().Interface().(time.Duration)
+		if !ok {
+			return false
+		}
+		return d >= min
+	})
+	if err != nil {
+		return nil, err
+	}
+
 	err = validate.Struct(config)
 	if err != nil {
 		return nil, err

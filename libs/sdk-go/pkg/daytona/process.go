@@ -217,16 +217,19 @@ func (p *ProcessService) GetSession(ctx context.Context, sessionID string) (map[
 //
 // Returns an error if the session doesn't exist.
 func (p *ProcessService) GetEntrypointSession(ctx context.Context) (map[string]any, error) {
-	resp, httpResp, err := p.toolboxClient.ProcessAPI.GetEntrypointSession(ctx).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "GetEntrypointSession", func(ctx context.Context) (map[string]any, error) {
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.GetEntrypointSession(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	return map[string]any{
-		"sessionId": resp.GetSessionId(),
-		"commands":  resp.GetCommands(),
-	}, nil
+		// Convert to map for backward compatibility
+		return map[string]any{
+			"sessionId": resp.GetSessionId(),
+			"commands":  resp.GetCommands(),
+		}, nil
+	})
+
 }
 
 // DeleteSession removes a session and releases its resources.
@@ -495,16 +498,18 @@ func (p *ProcessService) GetSessionCommandLogsStream(ctx context.Context, sessio
 //
 // Returns a map containing the "logs" key with command output.
 func (p *ProcessService) GetEntrypointLogs(ctx context.Context) (map[string]any, error) {
-	logs, httpResp, err := p.toolboxClient.ProcessAPI.GetEntrypointLogs(ctx).Execute()
-	if err != nil {
-		return nil, errors.ConvertToolboxError(err, httpResp)
-	}
+	return withInstrumentation(ctx, p.otel, "Process", "ProcessService.GetEntrypointLogs", func(ctx context.Context) (map[string]any, error) {
+		logs, httpResp, err := p.toolboxClient.ProcessAPI.GetEntrypointLogs(ctx).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
 
-	// Convert to map for backward compatibility
-	// The API returns logs as a plain string, so we return it as "logs"
-	return map[string]any{
-		"logs": logs,
-	}, nil
+		// Convert to map for backward compatibility
+		// The API returns logs as a plain string, so we return it as "logs"
+		return map[string]any{
+			"logs": logs,
+		}, nil
+	})
 }
 
 // GetEntrypointLogsStream streams entrypoint logs as they become available.

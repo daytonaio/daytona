@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"path"
 	"path/filepath"
-	"strings"
 	"syscall"
 	"time"
 
@@ -126,7 +125,7 @@ func run() int {
 		logger.Debug("Created entrypoint session", "session_id", util.EntrypointSessionID)
 
 		// Execute command asynchronously via session
-		command := strings.Join(args, " ")
+		command := util.ShellQuoteJoin(args)
 		_, err := sessionService.Execute(
 			util.EntrypointSessionID,
 			util.EntrypointCommandID,
@@ -207,14 +206,16 @@ func run() int {
 		logger.Info("Received signal, shutting down gracefully...", "signal", sig)
 	}
 
-	// Handle entrypoint command shutdown
-	_, err = sessionService.Get(util.EntrypointSessionID)
-	if err != nil {
-		logger.Error("Failed to get entrypoint session", "error", err)
-	} else {
-		delErr := sessionService.Delete(context.Background(), util.EntrypointSessionID)
-		if delErr != nil {
-			logger.Error("Failed to delete entrypoint session", "error", delErr)
+	if len(args) > 0 {
+		// Handle entrypoint command shutdown
+		_, err = sessionService.Get(util.EntrypointSessionID)
+		if err != nil {
+			logger.Error("Failed to get entrypoint session", "error", err)
+		} else {
+			delErr := sessionService.Delete(context.Background(), util.EntrypointSessionID)
+			if delErr != nil {
+				logger.Error("Failed to delete entrypoint session", "error", delErr)
+			}
 		}
 	}
 
