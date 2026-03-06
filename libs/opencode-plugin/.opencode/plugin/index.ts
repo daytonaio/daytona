@@ -1,11 +1,11 @@
 /**
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
 /**
- * Main entry point for the OpenCode Daytona plugin
- * Re-exports all plugin components from the daytona module
+ * Main entry point for the OpenCode Daytona plugin.
+ * Re-exports the default plugin from daytona.
  */
 
-export * from './daytona/index.js'
+export { default } from './daytona/index.js'

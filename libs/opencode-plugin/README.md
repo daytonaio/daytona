@@ -178,6 +178,25 @@ npx nx run opencode-plugin:build
 
 This compiles the TypeScript source files in `.opencode/` to JavaScript in `dist/.opencode/`.
 
+#### Test the built package
+
+After building, create a test project and add a plugin file to load the built plugin (replace `[ABSOLUTE_PATH_TO_DAYTONA]` with your clone path, e.g. `/Users/you/daytona`):
+
+```bash
+mkdir -p ~/myproject && cd ~/myproject
+mkdir -p .opencode/plugins
+cat > .opencode/plugins/daytona-local.js << 'EOF'
+module.exports = require('[ABSOLUTE_PATH_TO_DAYTONA]/dist/libs/opencode-plugin/.opencode/plugin')
+EOF
+```
+
+Initialize git to enable file syncing, and start OpenCode:
+
+```bash
+git init
+opencode
+```
+
 ### Publishing
 
 Log into npm:

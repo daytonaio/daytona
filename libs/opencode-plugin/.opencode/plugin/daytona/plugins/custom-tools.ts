@@ -1,28 +1,19 @@
 /**
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Plugin, PluginInput } from '@opencode-ai/plugin'
+import type { PluginInput } from '@opencode-ai/plugin'
 import { createDaytonaTools } from '../tools'
 import { logger } from '../core/logger'
 import type { DaytonaSessionManager } from '../core/session-manager'
-import { toast } from '../core/toast'
 
 /**
- * Creates the custom tools plugin for Daytona sandbox integration
- * Provides tools for file operations, command execution, and search within sandboxes
+ * Custom tools for Daytona sandbox: file ops, command execution, search.
  */
-export function createCustomToolsPlugin(sessionManager: DaytonaSessionManager): Plugin {
-  return async (pluginCtx: PluginInput) => {
-    logger.info('OpenCode started with Daytona plugin')
-    toast.initialize(pluginCtx.client?.tui)
-
-    const projectId = pluginCtx.project.id
-    const worktree = pluginCtx.project.worktree
-
-    return {
-      tool: createDaytonaTools(sessionManager, projectId, worktree, pluginCtx),
-    }
-  }
+export async function customTools(ctx: PluginInput, sessionManager: DaytonaSessionManager) {
+  logger.info('OpenCode started with Daytona plugin')
+  const projectId = ctx.project.id
+  const worktree = ctx.project.worktree
+  return createDaytonaTools(sessionManager, projectId, worktree, ctx)
 }

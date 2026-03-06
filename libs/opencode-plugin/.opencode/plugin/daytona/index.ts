@@ -1,5 +1,5 @@
 /**
- * Copyright 2025 Daytona Platforms Inc.
+ * Copyright Daytona Platforms Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -25,22 +25,16 @@
 
 import { join } from 'path'
 import { xdgData } from 'xdg-basedir'
-import type { Plugin } from '@opencode-ai/plugin'
-
-// Import modules
+import type { PluginInput } from '@opencode-ai/plugin'
 import { setLogFilePath } from './core/logger'
 import { DaytonaSessionManager } from './core/session-manager'
-import {
-  createCustomToolsPlugin,
-  createSessionCleanupPlugin,
-  createSystemTransformPlugin,
-  createSessionIdleAutoCommitPlugin,
-} from './plugins'
+import { toast } from './core/toast'
+import { customTools } from './plugins/custom-tools'
+import { eventHandlers } from './plugins/session-events'
+import { systemPromptTransform } from './plugins/system-transform'
 
-// Export types for consumers
 export type { EventSessionDeleted, LogLevel, SandboxInfo, SessionInfo, ProjectSessionData } from './core/types'
 
-// Initialize logger and session manager using xdg-basedir (same as OpenCode)
 const LOG_FILE = join(xdgData, 'opencode', 'log', 'daytona.log')
 const STORAGE_DIR = join(xdgData, 'opencode', 'storage', 'daytona')
 const REPO_PATH = '/home/daytona/project'
@@ -48,8 +42,13 @@ const REPO_PATH = '/home/daytona/project'
 setLogFilePath(LOG_FILE)
 const sessionManager = new DaytonaSessionManager(process.env.DAYTONA_API_KEY || '', STORAGE_DIR, REPO_PATH)
 
-// Export plugin instances
-export const CustomToolsPlugin: Plugin = createCustomToolsPlugin(sessionManager)
-export const DaytonaSessionCleanupPlugin: Plugin = createSessionCleanupPlugin(sessionManager)
-export const SystemTransformPlugin: Plugin = createSystemTransformPlugin(REPO_PATH)
-export const DaytonaSessionIdleAutoCommitPlugin: Plugin = createSessionIdleAutoCommitPlugin(sessionManager, REPO_PATH)
+async function daytonaPlugin(ctx: PluginInput) {
+  toast.initialize(ctx.client?.tui)
+  return {
+    tool: await customTools(ctx, sessionManager),
+    event: await eventHandlers(ctx, sessionManager, REPO_PATH),
+    'experimental.chat.system.transform': await systemPromptTransform(ctx, REPO_PATH),
+  }
+}
+
+export default daytonaPlugin
