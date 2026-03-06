@@ -29,6 +29,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
+import { usePylon, usePylonCommands } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import {
   ArrowRightIcon,
@@ -42,19 +43,20 @@ import {
   HardDrive,
   Joystick,
   KeyRound,
+  LifeBuoyIcon,
   ListChecks,
   LockKeyhole,
   LogOut,
   Mail,
   MapPinned,
-  Moon,
+  MoonIcon,
   PackageOpen,
   SearchIcon,
   Server,
   Settings,
   Slack,
   SquareUserRound,
-  Sun,
+  SunIcon,
   TextSearch,
   Users,
 } from 'lucide-react'
@@ -63,8 +65,13 @@ import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { CommandConfig, useCommandPaletteActions, useRegisterCommands } from './CommandPalette'
-import { Button } from './ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
 
@@ -327,6 +334,9 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
+  const { unreadCount: pylonUnreadCount, toggle: togglePylon, isEnabled: pylonEnabled } = usePylon()
+  usePylonCommands()
+
   const commandPaletteActions = useCommandPaletteActions()
 
   useNavCommands(commandItems)
@@ -403,18 +413,25 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarContent>
       <SidebarFooter className="pb-4">
         <SidebarMenu>
-          <SidebarMenuItem key="theme-toggle">
-            <SidebarMenuButton
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-8 py-0"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              tooltip="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem key="slack">
+          {pylonEnabled && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                tooltip="Support"
+                onClick={() => {
+                  togglePylon()
+                }}
+              >
+                <LifeBuoyIcon className="size-4" strokeWidth={1.5} />
+                Support
+                {pylonUnreadCount > 0 && (
+                  <div className={cn('w-2 h-2 bg-green-500 rounded-full transition-all')}>
+                    <div className={cn('w-full h-full bg-green-500 rounded-full animate-ping')} />
+                  </div>
+                )}
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Slack">
               <a href={DAYTONA_SLACK_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <Slack size={16} strokeWidth={1.5} />
@@ -422,7 +439,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem key="docs">
+          <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Docs">
               <a href={DAYTONA_DOCS_URL} className=" h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <BookOpen size={16} strokeWidth={1.5} />
@@ -459,40 +476,41 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" align="start" className="w-[--radix-popper-anchor-width] min-w-[12rem]">
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.ACCOUNT_SETTINGS}>
-                      <Settings className="w-4 h-4" />
-                      Account Settings
-                    </Link>
-                  </Button>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.ACCOUNT_SETTINGS}>
+                    <Settings className="size-4" />
+                    Account Settings
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.USER_INVITATIONS}>
-                      <Mail className="w-4 h-4" />
-                      Invitations
-                      {organizationInvitationsCount > 0 && (
-                        <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
-                          {organizationInvitationsCount}
-                        </span>
-                      )}
-                    </Link>
-                  </Button>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                >
+                  {theme === 'dark' ? <SunIcon className="size-4" /> : <MoonIcon className="size-4" />}
+                  {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" asChild>
-                    <Link to={RoutePath.ONBOARDING}>
-                      <ListChecks className="w-4 h-4" />
-                      Onboarding
-                    </Link>
-                  </Button>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.USER_INVITATIONS}>
+                    <Mail className="size-4" />
+                    Invitations
+                    {organizationInvitationsCount > 0 && (
+                      <span className="ml-auto px-2 py-0.5 text-xs font-medium bg-secondary rounded-full">
+                        {organizationInvitationsCount}
+                      </span>
+                    )}
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button variant="ghost" className="w-full cursor-pointer justify-start" onClick={handleSignOut}>
-                    <LogOut className="w-4 h-4" />
-                    Sign out
-                  </Button>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link to={RoutePath.ONBOARDING}>
+                    <ListChecks className="size-4" />
+                    Onboarding
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={handleSignOut}>
+                  <LogOut className="size-4" />
+                  Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
