@@ -29,6 +29,7 @@ import { RegionService } from '../../region/services/region.service'
 import { CreateRunnerResponseDto } from '../../sandbox/dto/create-runner-response.dto'
 import { RunnerFullDto } from '../../sandbox/dto/runner-full.dto'
 import { RunnerDto } from '../../sandbox/dto/runner.dto'
+import { RunnersByRegionDto } from '../../sandbox/dto/runners-by-region.dto'
 import { RunnerService } from '../../sandbox/services/runner.service'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
@@ -91,6 +92,27 @@ export class AdminRunnerController {
     })
 
     return CreateRunnerResponseDto.fromRunner(runner, apiKey)
+  }
+
+  @Get('by-region')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runners breakdown by region',
+    operationId: 'adminGetRunnersBreakdownByRegion',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns runner domains grouped by region',
+    schema: {
+      type: 'object',
+      additionalProperties: {
+        type: 'array',
+        items: { type: 'string' },
+      },
+    },
+  })
+  async getRunnersBreakdownByRegion(): Promise<RunnersByRegionDto> {
+    return this.runnerService.getRunnersBreakdownByRegion()
   }
 
   @Get(':id')
