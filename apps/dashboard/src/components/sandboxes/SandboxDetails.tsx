@@ -28,13 +28,14 @@ import { useRecoverSandboxMutation } from '@/hooks/mutations/useRecoverSandboxMu
 import { useStartSandboxMutation } from '@/hooks/mutations/useStartSandboxMutation'
 import { useStopSandboxMutation } from '@/hooks/mutations/useStopSandboxMutation'
 import { useSandboxQuery } from '@/hooks/queries/useSandboxQuery'
+import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useMatchMedia } from '@/hooks/useMatchMedia'
 import { useRegions } from '@/hooks/useRegions'
 import { useSandboxWsSync } from '@/hooks/useSandboxWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
-import { isTransitioning } from '@/lib/utils/sandbox'
+import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { RefreshCw } from 'lucide-react'
@@ -49,20 +50,18 @@ import { SandboxHeader } from './SandboxHeader'
 import { InfoPanelSkeleton, SandboxInfoPanel } from './SandboxInfoPanel'
 import { SandboxLogsTab } from './SandboxLogsTab'
 import { SandboxMetricsTab } from './SandboxMetricsTab'
+import { SandboxSpendingTab } from './SandboxSpendingTab'
 import { SandboxTerminalTab } from './SandboxTerminalTab'
 import { SandboxTracesTab } from './SandboxTracesTab'
 import { SandboxVncTab } from './SandboxVncTab'
 import { tabParser, TabValue } from './SearchParams'
 
-const TAB_TRIGGER =
-  'rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm'
-const TABS_LIST = 'w-full bg-transparent border-b border-border rounded-none h-auto p-0 gap-0 justify-start shrink-0'
-
 export default function SandboxDetails() {
   const { sandboxId } = useParams<{ sandboxId: string }>()
   const navigate = useNavigate()
   const config = useConfig()
-  const { authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { sandboxApi } = useApi()
+  const { authenticatedUserOrganizationMember, selectedOrganization } = useSelectedOrganization()
   const { getRegionName } = useRegions()
 
   const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
@@ -162,6 +161,20 @@ export default function SandboxDetails() {
     }
   }
 
+  const handleScreenRecordings = async () => {
+    if (!sandbox || !isStoppable(sandbox)) {
+      toast.error('Sandbox must be started to access Screen Recordings')
+      return
+    }
+    try {
+      const response = await sandboxApi.getSignedPortPreviewUrl(sandbox.id, 33333, selectedOrganization?.id)
+      window.open(response.data.url, '_blank')
+      toast.success('Opening Screen Recordings dashboard...')
+    } catch (error) {
+      handleApiError(error, 'Failed to open Screen Recordings')
+    }
+  }
+
   return (
     <SandboxSessionProvider>
       <PageLayout className="max-h-screen overflow-hidden">
@@ -184,6 +197,7 @@ export default function SandboxDetails() {
           onBack={() => navigate(RoutePath.SANDBOXES)}
           onCreateSshAccess={() => setCreateSshDialogOpen(true)}
           onRevokeSshAccess={() => setRevokeSshDialogOpen(true)}
+          onScreenRecordings={handleScreenRecordings}
           mutations={{
             start: startMutation.isPending,
             stop: stopMutation.isPending,
@@ -197,7 +211,7 @@ export default function SandboxDetails() {
             <div className="flex items-center px-5 border-b border-border shrink-0 h-[41px]">
               <span className="text-sm font-medium">Overview</span>
             </div>
-            <ScrollArea fade="mask" className="flex-1">
+            <ScrollArea fade="mask" className="flex-1 min-h-0">
               {isLoading ? (
                 <InfoPanelSkeleton />
               ) : isError || !sandbox ? (
@@ -231,65 +245,64 @@ export default function SandboxDetails() {
               </div>
             ) : !sandbox ? null : (
               <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="flex flex-col h-full gap-0">
-                <TabsList className={`${TABS_LIST} h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm`}>
-                  <TabsTrigger value="overview" className={`${TAB_TRIGGER} lg:hidden`}>
+                <TabsList variant="underline" className="h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm">
+                  <TabsTrigger value="overview" className="lg:hidden">
                     Overview
                   </TabsTrigger>
                   {experimentsEnabled && (
                     <>
-                      <TabsTrigger value="logs" className={TAB_TRIGGER}>
-                        Logs
-                      </TabsTrigger>
-                      <TabsTrigger value="traces" className={TAB_TRIGGER}>
-                        Traces
-                      </TabsTrigger>
-                      <TabsTrigger value="metrics" className={TAB_TRIGGER}>
-                        Metrics
-                      </TabsTrigger>
+                      <TabsTrigger value="logs">Logs</TabsTrigger>
+                      <TabsTrigger value="traces">Traces</TabsTrigger>
+                      <TabsTrigger value="metrics">Metrics</TabsTrigger>
+                      <TabsTrigger value="spending">Spending</TabsTrigger>
                     </>
                   )}
-                  <TabsTrigger value="terminal" className={TAB_TRIGGER}>
-                    Terminal
-                  </TabsTrigger>
-                  <TabsTrigger value="vnc" className={TAB_TRIGGER}>
-                    VNC
-                  </TabsTrigger>
+                  <TabsTrigger value="terminal">Terminal</TabsTrigger>
+                  <TabsTrigger value="vnc">VNC</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="overview" className="relative flex-1 min-h-0 m-0 lg:hidden">
-                  <div className="absolute inset-0 overflow-y-auto scrollbar-sm">
-                    <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
-                  </div>
+                <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
+                  <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
                 </TabsContent>
-
                 {experimentsEnabled && (
                   <>
-                    <TabsContent value="logs" className="relative flex-1 min-h-0 m-0">
-                      <div className="absolute inset-0 flex flex-col overflow-hidden">
-                        <SandboxLogsTab sandboxId={sandbox.id} />
-                      </div>
+                    <TabsContent
+                      value="logs"
+                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                    >
+                      <SandboxLogsTab sandboxId={sandbox.id} />
                     </TabsContent>
-                    <TabsContent value="traces" className="relative flex-1 min-h-0 m-0">
-                      <div className="absolute inset-0 flex flex-col overflow-hidden">
-                        <SandboxTracesTab sandboxId={sandbox.id} />
-                      </div>
+                    <TabsContent
+                      value="traces"
+                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                    >
+                      <SandboxTracesTab sandboxId={sandbox.id} />
                     </TabsContent>
-                    <TabsContent value="metrics" className="relative flex-1 min-h-0 m-0">
-                      <div className="absolute inset-0 flex flex-col overflow-hidden">
-                        <SandboxMetricsTab sandboxId={sandbox.id} />
-                      </div>
+                    <TabsContent
+                      value="metrics"
+                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                    >
+                      <SandboxMetricsTab sandboxId={sandbox.id} />
+                    </TabsContent>
+                    <TabsContent
+                      value="spending"
+                      className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                    >
+                      <SandboxSpendingTab sandboxId={sandbox.id} />
                     </TabsContent>
                   </>
                 )}
-                <TabsContent value="terminal" className="relative flex-1 min-h-0 m-0">
-                  <div className="absolute inset-0 flex flex-col overflow-hidden">
-                    <SandboxTerminalTab sandbox={sandbox} />
-                  </div>
+                <TabsContent
+                  value="terminal"
+                  className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                >
+                  <SandboxTerminalTab sandbox={sandbox} />
                 </TabsContent>
-                <TabsContent value="vnc" className="relative flex-1 min-h-0 m-0">
-                  <div className="absolute inset-0 flex flex-col overflow-hidden">
-                    <SandboxVncTab sandbox={sandbox} />
-                  </div>
+                <TabsContent
+                  value="vnc"
+                  className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
+                >
+                  <SandboxVncTab sandbox={sandbox} />
                 </TabsContent>
               </Tabs>
             )}
