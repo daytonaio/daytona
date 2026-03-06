@@ -25,11 +25,11 @@ import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useConfig } from '@/hooks/useConfig'
-import { usePylon } from '@/hooks/usePylon'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { useWebhooks } from '@/hooks/useWebhooks'
 import { cn, getMetaKey } from '@/lib/utils'
+import { usePylon, usePylonCommands } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import {
   ArrowRightIcon,
@@ -74,7 +74,6 @@ import {
 } from './ui/dropdown-menu'
 import { Kbd } from './ui/kbd'
 import { ScrollArea } from './ui/scroll-area'
-import { usePylonCommands } from './usePylonCommands'
 
 interface SidebarProps {
   isBannerVisible: boolean
@@ -335,11 +334,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       )
   }, [sidebarGroups])
 
-  const { unreadCount: pylonUnreadCount, toggle: togglePylon } = usePylon()
+  const { unreadCount: pylonUnreadCount, toggle: togglePylon, isEnabled: pylonEnabled } = usePylon()
+  usePylonCommands()
 
   const commandPaletteActions = useCommandPaletteActions()
-
-  usePylonCommands(togglePylon)
 
   useNavCommands(commandItems)
 
@@ -415,7 +413,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
       </SidebarContent>
       <SidebarFooter className="pb-4">
         <SidebarMenu>
-          {config.pylonAppId && (
+          {pylonEnabled && (
             <SidebarMenuItem>
               <SidebarMenuButton
                 tooltip="Support"

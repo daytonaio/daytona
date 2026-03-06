@@ -35,3 +35,9 @@ export const addPylonWidget = (appId: string) => {
     e.addEventListener('load', r, false)
   }
 }
+
+export const initPylon = (appId: string, options: typeof window.pylon) => {
+  addPylonWidget(appId)
+
+  window.pylon = options
+}

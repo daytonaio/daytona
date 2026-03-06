@@ -5,9 +5,12 @@
 
 import { LifeBuoyIcon } from 'lucide-react'
 import { useMemo } from 'react'
-import { useRegisterCommands } from './CommandPalette'
+import { useRegisterCommands } from '../../components/CommandPalette'
+import { usePylon } from './usePylon'
 
-export function usePylonCommands(toggle: () => void) {
+export function usePylonCommands() {
+  const { toggle, isEnabled } = usePylon()
+
   const commands = useMemo(
     () => [
       {
@@ -21,5 +24,5 @@ export function usePylonCommands(toggle: () => void) {
     [toggle],
   )
 
-  useRegisterCommands(commands, { groupId: 'support', groupLabel: 'Support', groupOrder: 10 })
+  useRegisterCommands(isEnabled ? commands : [], { groupId: 'support', groupLabel: 'Support', groupOrder: 10 })
 }

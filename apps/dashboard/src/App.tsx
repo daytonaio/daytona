@@ -12,6 +12,7 @@ import { NotificationSocketProvider } from '@/providers/NotificationSocketProvid
 import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
+import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
@@ -33,7 +34,6 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import { FeatureFlags } from './enums/FeatureFlags'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
-import { addPylonWidget } from './lib/pylon-widget'
 import AccountSettings from './pages/AccountSettings'
 import AuditLogs from './pages/AuditLogs'
 import Dashboard from './pages/Dashboard'
@@ -91,8 +91,7 @@ function App() {
       })
     }
     if (import.meta.env.PROD && config.pylonAppId && isAuthenticated && user) {
-      addPylonWidget(config.pylonAppId)
-      window.pylon = {
+      initPylon(config.pylonAppId, {
         chat_settings: {
           app_id: config.pylonAppId,
           email: user.profile.email || '',
@@ -100,7 +99,7 @@ function App() {
           avatar_url: user.profile.picture,
           email_hash: user.profile?.email_hash as string | undefined,
         },
-      }
+      })
     }
   }, [isAuthenticated, user, posthog, config.pylonAppId])
 
