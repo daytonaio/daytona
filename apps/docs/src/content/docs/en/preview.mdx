@@ -69,11 +69,12 @@ puts "Preview link token: #{preview_info.token}"
 </TabItem>
 <TabItem label="Go" icon="seti:go">
 ```go
-url, err := sandbox.GetPreviewLink(ctx, 3000)
+preview, err := sandbox.GetPreviewLink(ctx, 3000)
 if err != nil {
     log.Fatal(err)
 }
-fmt.Printf("URL: %s\n", url)
+fmt.Printf("URL: %s\n", preview.URL)
+fmt.Printf("Token: %s\n", preview.Token)
 ```
 
 </TabItem>
