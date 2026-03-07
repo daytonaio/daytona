@@ -5,6 +5,9 @@
 
 import { DaytonaError } from '../errors/DaytonaError'
 import { RUNTIME } from './Runtime'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
 
 const loaderMap = {
   'fast-glob': () => import('fast-glob'),
@@ -12,7 +15,7 @@ const loaderMap = {
   stream: () => import('stream'),
   tar: () => import('tar'),
   'expand-tilde': () => import('expand-tilde'),
-  ObjectStorage: () => import('../ObjectStorage.js'),
+  ObjectStorage: () => import('../ObjectStorage'),
   fs: (): Promise<typeof import('fs')> => import('fs'),
   'form-data': () => import('form-data'),
   util: (): Promise<typeof import('util')> => import('util'),

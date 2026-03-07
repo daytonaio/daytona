@@ -2,8 +2,21 @@
   "name": "@daytonaio/sdk",
   "version": "0.0.0-dev",
   "description": "TypeScript SDK for Daytona",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daytonaio/daytona.git"
@@ -18,7 +31,40 @@
     "docsDir": "../../apps/docs/src/content/docs/en/typescript-sdk"
   },
   "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "prepare": "tsdown",
     "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && typedoc && rm -f $npm_package_config_docsDir/readme.mdx"
   },
-  "keywords": []
+  "keywords": [],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1004.0",
+    "@aws-sdk/lib-storage": "^3.1004.0",
+    "@daytonaio/api-client": "^0.149.0",
+    "@daytonaio/toolbox-api-client": "^0.149.0",
+    "@iarna/toml": "^2.2.5",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.207.0",
+    "@opentelemetry/instrumentation-http": "^0.207.0",
+    "@opentelemetry/otlp-exporter-base": "0.207.0",
+    "@opentelemetry/resources": "2.2.0",
+    "@opentelemetry/sdk-node": "^0.207.0",
+    "@opentelemetry/sdk-trace-base": "^2.2.0",
+    "@opentelemetry/semantic-conventions": "^1.37.0",
+    "axios": "^1.13.5",
+    "busboy": "^1.6.0",
+    "dotenv": "^17.0.1",
+    "expand-tilde": "^2.0.2",
+    "fast-glob": "^3.3.0",
+    "form-data": "^4.0.4",
+    "isomorphic-ws": "^5.0.0",
+    "pathe": "^2.0.3",
+    "shell-quote": "^1.8.2",
+    "tar": "^7.5.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "tsdown": "^0.16.6",
+    "typescript": "5.8.3"
+  }
 }

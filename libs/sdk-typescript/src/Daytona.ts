@@ -14,6 +14,7 @@ import {
   ConfigApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
+import { createRequire } from 'node:module'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
@@ -22,10 +23,10 @@ import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
-import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
 import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
+import { SDK_VERSION } from './version'
 import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
@@ -35,6 +36,8 @@ import { CompressionAlgorithm } from '@opentelemetry/otlp-exporter-base'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { diag, DiagConsoleLogger, DiagLogLevel } from '@opentelemetry/api'
+
+const require = createRequire(import.meta.url)
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -299,7 +302,7 @@ export class Daytona implements AsyncDisposable {
         headers: {
           Authorization: `Bearer ${this.apiKey || this.jwtToken}`,
           'X-Daytona-Source': 'typescript-sdk',
-          'X-Daytona-SDK-Version': packageJson.version,
+          'X-Daytona-SDK-Version': SDK_VERSION,
           ...orgHeader,
         },
       },
@@ -327,7 +330,7 @@ export class Daytona implements AsyncDisposable {
 
     this.otelSdk = new NodeSDK({
       resource: resourceFromAttributes({
-        [ATTR_SERVICE_VERSION]: packageJson.version,
+        [ATTR_SERVICE_VERSION]: SDK_VERSION,
         [ATTR_SERVICE_NAME]: 'daytona-typescript-sdk',
       }),
       instrumentations: [
