@@ -1434,7 +1434,7 @@ fmt.Printf("File path: %s\n", *recording.FilePath)
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/start' \
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/start' \
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
@@ -1455,7 +1455,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**Start (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Start)
 >
-> [**Start Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recording/start)
+> [**Start Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recordings/start)
 
 ### Stop Recording
 
@@ -1509,7 +1509,7 @@ fmt.Printf("Saved to: %s\n", *stoppedRecording.FilePath)
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/stop' \
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/stop' \
   --request POST \
   --header 'Content-Type: application/json' \
   --data '{
@@ -1530,7 +1530,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Stop)
 >
-> [**Stop Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recording/stop)
+> [**Stop Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/POST/computeruse/recordings/stop)
 
 ### List Recordings
 
@@ -1587,7 +1587,7 @@ for _, rec := range recordingsList.Recordings {
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/list'
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings'
 ```
 
 </TabItem>
@@ -1603,7 +1603,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**List (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.List)
 >
-> [**List Recordings (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recording/list)
+> [**List Recordings (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings)
 
 ### Get Recording
 
@@ -1657,7 +1657,7 @@ fmt.Printf("Duration: %.2fs\n", *recordingDetail.DurationSeconds)
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/{recordingId}'
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/{recordingId}'
 ```
 
 </TabItem>
@@ -1673,7 +1673,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**Get (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Get)
 >
-> [**Get Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recording/{recordingId})
+> [**Get Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/GET/computeruse/recordings/{recordingId})
 
 ### Delete Recording
 
@@ -1719,7 +1719,7 @@ fmt.Println("Recording deleted successfully")
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recording/{recordingId}' \
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/computeruse/recordings/{recordingId}' \
   --request DELETE
 ```
 
@@ -1736,7 +1736,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/computer-use
 >
 > [**Delete (Go SDK)**](/docs/en/go-sdk/daytona/#RecordingService.Delete)
 >
-> [**Delete Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/DELETE/computeruse/recording/{recordingId})
+> [**Delete Recording (API)**](/docs/en/tools/api/#daytona-toolbox/tag/computer-use/DELETE/computeruse/recordings/{recordingId})
 
 ### Download Recording
 
