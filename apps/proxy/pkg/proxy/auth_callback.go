@@ -193,6 +193,7 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 		},
 	}
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
+	clientConfig.AddDefaultHeader("X-Daytona-Proxy-Api-Key", p.config.ProxyApiKey)
 
 	apiClient := apiclient.NewAPIClient(clientConfig)
 

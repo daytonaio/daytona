@@ -31,6 +31,11 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
+    const proxyApiKey = this.configService.get('proxy.apiKey')
+    if (proxyApiKey && req.headers['x-daytona-proxy-api-key'] === proxyApiKey) {
+      return next()
+    }
+
     const ip = req.ips.length ? req.ips[0] : req.ip
     const throttlerName = 'failed-auth'
     const tracker = `${throttlerName}:${ip}`
