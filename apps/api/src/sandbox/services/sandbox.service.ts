@@ -2148,4 +2148,44 @@ export class SandboxService {
 
     await this.sandboxRepository.update(sandboxId, { updateData, entity: sandboxToUpdate })
   }
+
+  async markSandboxAsCreationTimedOut(sandboxId: string): Promise<boolean> {
+    try {
+      const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
+      if (!sandbox) {
+        this.logger.warn(`Cannot mark sandbox ${sandboxId} as timed out: not found`)
+        return false
+      }
+
+      if (sandbox.state === SandboxState.STARTED || sandbox.state === SandboxState.DESTROYED) {
+        this.logger.debug(`Skipping timeout marking for sandbox ${sandboxId}: already in state ${sandbox.state}`)
+        return false
+      }
+
+      const timestamp = Date.now()
+      const newName = `${sandbox.name}_system_timeout_${timestamp}`
+
+      await this.sandboxRepository.update(
+        sandboxId,
+        {
+          updateData: {
+            state: SandboxState.ERROR,
+            desiredState: SandboxDesiredState.DESTROYED,
+            name: newName,
+            organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
+            errorReason: 'Creation timed out after 20 seconds',
+            recoverable: false,
+            pending: false,
+          },
+        },
+        true,
+      )
+
+      this.logger.log(`Marked sandbox ${sandboxId} as creation timed out (new name: ${newName})`)
+      return true
+    } catch (error) {
+      this.logger.error(`Failed to mark sandbox ${sandboxId} as creation timed out: ${error}`)
+      return false
+    }
+  }
 }

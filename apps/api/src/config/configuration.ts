@@ -301,6 +301,11 @@ const configuration = {
     userCacheTtlSeconds: parseInt(process.env.API_KEY_USER_CACHE_TTL_SECONDS || '60', 10),
   },
   runnerHealthTimeout: parseInt(process.env.RUNNER_HEALTH_TIMEOUT_SECONDS || '3', 10),
+  creationTimeoutRetry: {
+    totalTimeoutMs: parseInt(process.env.CREATION_TIMEOUT_TOTAL_MS || '30000', 10),
+    retryAfterMs: parseInt(process.env.CREATION_TIMEOUT_RETRY_AFTER_MS || '20000', 10),
+    maxRetries: parseInt(process.env.CREATION_TIMEOUT_RETRY_MAX || '1000', 10),
+  },
   warmPool: {
     candidateLimit: parseInt(process.env.WARM_POOL_CANDIDATE_LIMIT || '300', 10),
   },

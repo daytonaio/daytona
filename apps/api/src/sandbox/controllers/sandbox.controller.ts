@@ -51,6 +51,7 @@ import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Organization } from '../../organization/entities/organization.entity'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -77,6 +78,7 @@ import { UrlDto } from '../../common/dto/url.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
+import { TypedConfigService } from '../../config/typed-config.service'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
 
@@ -87,6 +89,8 @@ import { FeatureFlags } from '../../common/constants/feature-flags'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxController {
+  private static readonly CREATION_TIMEOUT_RETRY_GLOBAL_COUNTER_KEY = 'sandbox:creation-timeout-retry:global-counter'
+
   private readonly logger = new Logger(SandboxController.name)
   private readonly sandboxCallbacks: Map<string, (event: SandboxStateUpdatedEvent) => void> = new Map()
   private readonly redisSubscriber: Redis
@@ -94,6 +98,7 @@ export class SandboxController {
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
     @InjectRedis() private readonly redis: Redis,
+    private readonly configService: TypedConfigService,
   ) {
     this.redisSubscriber = this.redis.duplicate()
     this.redisSubscriber.subscribe(SANDBOX_EVENT_CHANNEL)
@@ -289,12 +294,27 @@ export class SandboxController {
       if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
         throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
       }
+      const creationTimeoutRetry = this.configService.get('creationTimeoutRetry')
+      const totalTimeoutMs = creationTimeoutRetry.totalTimeoutMs
+      const retryAfterMs = creationTimeoutRetry.retryAfterMs
+      const startTime = Date.now()
+
       sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
       if (sandbox.state === SandboxState.STARTED) {
         return sandbox
       }
 
-      await this.waitForSandboxStarted(sandbox, 30)
+      const elapsedAfterCreate = Date.now() - startTime
+      const firstWaitSeconds = Math.max(1, Math.floor((retryAfterMs - elapsedAfterCreate) / 1000))
+      const waitResult = await this.waitForSandboxStarted(sandbox, firstWaitSeconds)
+
+      if (waitResult.state !== SandboxState.STARTED) {
+        const remainingMs = Math.max(0, totalTimeoutMs - (Date.now() - startTime))
+        const retriedSandbox = await this.handleCreationTimeout(sandbox, createSandboxDto, organization, remainingMs)
+        if (retriedSandbox) {
+          return retriedSandbox
+        }
+      }
     }
 
     return sandbox
@@ -1252,6 +1272,58 @@ export class SandboxController {
   async getToolboxProxyUrl(@Param('sandboxId') sandboxId: string): Promise<ToolboxProxyUrlDto> {
     const url = await this.sandboxService.getToolboxProxyUrl(sandboxId)
     return new ToolboxProxyUrlDto(url)
+  }
+
+  private async handleCreationTimeout(
+    timedOutSandbox: SandboxDto,
+    createSandboxDto: CreateSandboxDto,
+    organization: Organization,
+    remainingBudgetMs: number,
+  ): Promise<SandboxDto | null> {
+    const retryStartTime = Date.now()
+    const requestLockKey = `sandbox:creation-timeout-retry:${timedOutSandbox.id}`
+    const globalCounterKey = SandboxController.CREATION_TIMEOUT_RETRY_GLOBAL_COUNTER_KEY
+
+    const lockAcquired = await this.redis.set(requestLockKey, '1', 'EX', 300, 'NX')
+    if (!lockAcquired) {
+      this.logger.warn(`Creation timeout retry already attempted for sandbox ${timedOutSandbox.id}`)
+      return null
+    }
+
+    const maxRetries = this.configService.get('creationTimeoutRetry').maxRetries
+    const currentCount = await this.redis.incr(globalCounterKey)
+    if (currentCount > maxRetries) {
+      await this.redis.decr(globalCounterKey)
+      this.logger.warn(
+        `Global creation timeout retry limit reached (${maxRetries}), skipping retry for sandbox ${timedOutSandbox.id}`,
+      )
+      return null
+    }
+
+    const retryAfterMs = this.configService.get('creationTimeoutRetry').retryAfterMs
+    this.logger.log(
+      `Sandbox ${timedOutSandbox.id} creation timed out after ${retryAfterMs}ms. Marking as timed out and retrying creation (global retry count: ${currentCount})`,
+    )
+
+    try {
+      const marked = await this.sandboxService.markSandboxAsCreationTimedOut(timedOutSandbox.id)
+      if (!marked) {
+        return null
+      }
+
+      const newSandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
+      if (newSandbox.state === SandboxState.STARTED) {
+        return newSandbox
+      }
+
+      const elapsedMs = Date.now() - retryStartTime
+      const remainingSeconds = Math.max(1, Math.floor((remainingBudgetMs - elapsedMs) / 1000))
+
+      return await this.waitForSandboxStarted(newSandbox, remainingSeconds)
+    } catch (error) {
+      this.logger.error(`Failed to retry sandbox creation after timeout for ${timedOutSandbox.id}: ${error}`)
+      return null
+    }
   }
 
   // wait up to `timeoutSeconds` for the sandbox to start; if it doesn’t, return current sandbox
