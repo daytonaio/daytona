@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -38,7 +39,17 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStateStarted || state == enums.SandboxStatePullingSnapshot || state == enums.SandboxStateStarting {
-		daemonVersion, err := d.GetDaemonVersion(ctx, sandboxDto.Id)
+		c, err := d.ContainerInspect(ctx, sandboxDto.Id)
+		if err != nil {
+			return "", "", err
+		}
+
+		containerIP := common.GetContainerIpAddress(ctx, &c)
+		if containerIP == "" {
+			return "", "", errors.New("sandbox IP not found? Is the sandbox started?")
+		}
+
+		daemonVersion, err := d.waitForDaemonRunning(ctx, containerIP, sandboxDto.AuthToken)
 		if err != nil {
 			return "", "", err
 		}
