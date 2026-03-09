@@ -6,13 +6,14 @@
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
+import { CostBreakdown } from '@/components/spending/CostBreakdown'
+import { UsageChartData } from '@/components/spending/ResourceUsageChart'
 import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
-import { UsageChart, UsageChartData } from '@/components/spending/UsageChart'
+import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
 import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
@@ -20,6 +21,7 @@ import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizati
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { subDays } from 'date-fns'
+import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
@@ -28,8 +30,6 @@ const analyticsQuickRanges: QuickRangesConfig = {
   hours: [1, 6, 12, 24],
   days: [7, 14, 30],
 }
-
-const SKELETON_ROWS = 10
 
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -48,15 +48,35 @@ const Spending = () => {
     enabled: analyticsAvailable && !!selectedOrganization,
   }
 
-  const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams)
-  const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams)
+  const {
+    data: aggregatedUsage,
+    isLoading: aggregatedLoading,
+    isError: aggregatedError,
+    refetch: refetchAggregated,
+  } = useAggregatedUsage(analyticsParams)
+  const {
+    data: sandboxesUsage,
+    isLoading: sandboxesLoading,
+    isError: sandboxesError,
+    refetch: refetchSandboxes,
+  } = useSandboxesUsage(analyticsParams)
 
-  const { data: currentOrganizationUsage } = useOrganizationUsageQuery({
+  const {
+    data: currentOrganizationUsage,
+    isLoading: currentUsageLoading,
+    isError: currentUsageError,
+    refetch: refetchCurrentUsage,
+  } = useOrganizationUsageQuery({
     organizationId: selectedOrganization?.id ?? '',
     enabled: !!selectedOrganization,
   })
 
-  const { data: pastOrganizationUsage } = usePastOrganizationUsageQuery({
+  const {
+    data: pastOrganizationUsage,
+    isLoading: pastUsageLoading,
+    isError: pastUsageError,
+    refetch: refetchPastUsage,
+  } = usePastOrganizationUsageQuery({
     organizationId: selectedOrganization?.id ?? '',
     enabled: !!selectedOrganization,
   })
@@ -98,11 +118,44 @@ const Spending = () => {
                 contentAlign="end"
               />
             </CardHeader>
-            <UsageSummary data={aggregatedUsage} isLoading={aggregatedLoading} />
-            <Separator />
-            <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
-            <Separator />
-            <ResourceUsageBreakdown data={aggregatedUsage} />
+            {aggregatedError ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                    <AlertCircle />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-destructive">Failed to load resource usage</EmptyTitle>
+                  <EmptyDescription>Something went wrong while fetching usage data. Please try again.</EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => refetchAggregated()}>
+                    <RefreshCw />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : !aggregatedLoading && !aggregatedUsage?.sandboxCount ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BarChart3 />
+                  </EmptyMedia>
+                  <EmptyTitle>No resource usage data</EmptyTitle>
+                  <EmptyDescription>
+                    Usage data will appear here once your sandboxes start consuming resources in the selected time
+                    range.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <>
+                <UsageSummary data={aggregatedUsage} isLoading={aggregatedLoading} />
+                <Separator />
+                <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
+                <Separator />
+                <ResourceUsageBreakdown data={aggregatedUsage} />
+              </>
+            )}
             <Separator />
             <div className="p-4">
               <p className="text-xl font-semibold leading-none tracking-tight">Per-Sandbox Usage</p>
@@ -110,56 +163,54 @@ const Spending = () => {
                 Resource consumption broken down by individual sandbox.
               </p>
             </div>
-            {sandboxesLoading ? (
-              <SandboxUsageTableSkeleton />
+            {sandboxesError ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                    <AlertCircle />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-destructive">Failed to load sandbox usage</EmptyTitle>
+                  <EmptyDescription>
+                    Something went wrong while fetching per-sandbox data. Please try again.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => refetchSandboxes()}>
+                    <RefreshCw />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : !sandboxesLoading && !sandboxesUsage?.length ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BarChart3 />
+                  </EmptyMedia>
+                  <EmptyTitle>No sandbox usage yet</EmptyTitle>
+                  <EmptyDescription>
+                    Once you create and run a sandbox, its resource consumption will appear here.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
             )}
           </Card>
         )}
 
-        <UsageChart title="Monthly Cost Breakdown" usageData={usageChartData} showTotal />
+        <CostBreakdown
+          usageData={usageChartData}
+          showTotal
+          isLoading={currentUsageLoading || pastUsageLoading}
+          isError={currentUsageError || pastUsageError}
+          onRetry={() => {
+            if (currentUsageError) refetchCurrentUsage()
+            if (pastUsageError) refetchPastUsage()
+          }}
+        />
       </PageContent>
     </PageLayout>
-  )
-}
-
-function SandboxUsageTableSkeleton() {
-  return (
-    <div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Sandbox ID</TableHead>
-            <TableHead className="text-right">Total Price</TableHead>
-            <TableHead className="text-right">CPU (seconds)</TableHead>
-            <TableHead className="text-right">RAM (GB-seconds)</TableHead>
-            <TableHead className="text-right">Disk (GB-seconds)</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: SKELETON_ROWS }).map((_, i) => (
-            <TableRow key={i}>
-              <TableCell>
-                <Skeleton className="h-4 w-[200px]" />
-              </TableCell>
-              <TableCell className="text-right">
-                <Skeleton className="h-4 w-12 ml-auto" />
-              </TableCell>
-              <TableCell className="text-right">
-                <Skeleton className="h-4 w-16 ml-auto" />
-              </TableCell>
-              <TableCell className="text-right">
-                <Skeleton className="h-4 w-16 ml-auto" />
-              </TableCell>
-              <TableCell className="text-right">
-                <Skeleton className="h-4 w-16 ml-auto" />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
   )
 }
 

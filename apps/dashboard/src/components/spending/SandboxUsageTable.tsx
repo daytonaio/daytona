@@ -3,15 +3,18 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useMemo, useState } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
-import { ModelsSandboxUsage } from '@daytonaio/analytics-api-client'
 import { CopyButton } from '@/components/CopyButton'
 import { SortOrderIcon } from '@/components/SortIcon'
+import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
+import { ModelsSandboxUsage } from '@daytonaio/analytics-api-client'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import React, { useMemo, useState } from 'react'
+
+const SKELETON_ROWS = 10
 
 interface SandboxUsageTableProps {
   data: ModelsSandboxUsage[] | undefined
@@ -62,50 +65,64 @@ export const SandboxUsageTable: React.FC<SandboxUsageTableProps> = ({ data, isLo
     setPageIndex(0)
   }
 
-  if (isLoading || !data) {
+  if (!isLoading && (!data || sortedData.length === 0)) {
     return null
   }
 
   return (
     <div className="px-4">
-      {sortedData.length === 0 ? (
-        <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
-          No sandbox usage data
-        </div>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Sandbox ID</TableHead>
-                <SortableTableHead
-                  field="totalPrice"
-                  label="Total Price"
-                  onSort={handleSort}
-                  getSortDirection={getSortDirection}
-                />
-                <SortableTableHead
-                  field="totalCPUSeconds"
-                  label="CPU (seconds)"
-                  onSort={handleSort}
-                  getSortDirection={getSortDirection}
-                />
-                <SortableTableHead
-                  field="totalRAMGBSeconds"
-                  label="RAM (GB-seconds)"
-                  onSort={handleSort}
-                  getSortDirection={getSortDirection}
-                />
-                <SortableTableHead
-                  field="totalDiskGBSeconds"
-                  label="Disk (GB-seconds)"
-                  onSort={handleSort}
-                  getSortDirection={getSortDirection}
-                />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedData.map((sandbox, index) => (
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Sandbox ID</TableHead>
+            <SortableTableHead
+              field="totalPrice"
+              label="Total Price"
+              onSort={handleSort}
+              getSortDirection={getSortDirection}
+            />
+            <SortableTableHead
+              field="totalCPUSeconds"
+              label="CPU (seconds)"
+              onSort={handleSort}
+              getSortDirection={getSortDirection}
+            />
+            <SortableTableHead
+              field="totalRAMGBSeconds"
+              label="RAM (GB-seconds)"
+              onSort={handleSort}
+              getSortDirection={getSortDirection}
+            />
+            <SortableTableHead
+              field="totalDiskGBSeconds"
+              label="Disk (GB-seconds)"
+              onSort={handleSort}
+              getSortDirection={getSortDirection}
+            />
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading
+            ? Array.from({ length: SKELETON_ROWS }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[200px]" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-12 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-16 ml-auto" />
+                  </TableCell>
+                </TableRow>
+              ))
+            : paginatedData.map((sandbox, index) => (
                 <TableRow key={sandbox.sandboxId ?? `row-${index}`}>
                   <TableCell className="font-mono text-sm">
                     <div className="flex items-center gap-2 group/copy-button">
@@ -125,71 +142,69 @@ export const SandboxUsageTable: React.FC<SandboxUsageTableProps> = ({ data, isLo
                   </TableCell>
                 </TableRow>
               ))}
-            </TableBody>
-          </Table>
+        </TableBody>
+      </Table>
 
-          <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full pb-2 pt-4">
-            <div className="flex items-center gap-4">
-              <Select value={`${pageSize}`} onValueChange={handlePageSizeChange}>
-                <SelectTrigger className="h-8 w-[164px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {PAGE_SIZE_OPTIONS.map((size) => (
-                    <SelectItem key={size} value={`${size}`}>
-                      {size} per page
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="text-sm text-muted-foreground">{sortedData.length} total item(s)</div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm font-medium text-muted-foreground">
-                Page {pageIndex + 1} of {pageCount}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => setPageIndex(0)}
-                  disabled={pageIndex === 0}
-                >
-                  <span className="sr-only">Go to first page</span>
-                  <ChevronsLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() => setPageIndex((p) => p - 1)}
-                  disabled={pageIndex === 0}
-                >
-                  <span className="sr-only">Go to previous page</span>
-                  <ChevronLeft />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 p-0"
-                  onClick={() => setPageIndex((p) => p + 1)}
-                  disabled={pageIndex >= pageCount - 1}
-                >
-                  <span className="sr-only">Go to next page</span>
-                  <ChevronRight />
-                </Button>
-                <Button
-                  variant="outline"
-                  className="hidden h-8 w-8 p-0 lg:flex"
-                  onClick={() => setPageIndex(pageCount - 1)}
-                  disabled={pageIndex >= pageCount - 1}
-                >
-                  <span className="sr-only">Go to last page</span>
-                  <ChevronsRight />
-                </Button>
-              </div>
-            </div>
+      <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between w-full pb-2 pt-4">
+        <div className="flex items-center gap-4">
+          <Select value={`${pageSize}`} onValueChange={handlePageSizeChange}>
+            <SelectTrigger className="h-8 w-[164px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent side="top">
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={`${size}`}>
+                  {size} per page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="text-sm text-muted-foreground">{sortedData.length} total item(s)</div>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-medium text-muted-foreground">
+            Page {pageIndex + 1} of {pageCount}
           </div>
-        </>
-      )}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setPageIndex(0)}
+              disabled={pageIndex === 0}
+            >
+              <span className="sr-only">Go to first page</span>
+              <ChevronsLeft />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => setPageIndex((p) => p - 1)}
+              disabled={pageIndex === 0}
+            >
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft />
+            </Button>
+            <Button
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => setPageIndex((p) => p + 1)}
+              disabled={pageIndex >= pageCount - 1}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight />
+            </Button>
+            <Button
+              variant="outline"
+              className="hidden h-8 w-8 p-0 lg:flex"
+              onClick={() => setPageIndex(pageCount - 1)}
+              disabled={pageIndex >= pageCount - 1}
+            >
+              <span className="sr-only">Go to last page</span>
+              <ChevronsRight />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -205,11 +220,18 @@ function SortableTableHead({
   onSort: (field: SortField) => void
   getSortDirection: (field: SortField) => 'asc' | 'desc' | null
 }) {
+  const sortDirection = getSortDirection(field)
+  const ariaSort = sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none'
+
   return (
-    <TableHead className="hover:bg-muted cursor-pointer" onClick={() => onSort(field)}>
-      <button type="button" className="group/sort-header flex items-center gap-2 w-full h-full justify-end">
+    <TableHead className="hover:bg-muted cursor-pointer" aria-sort={ariaSort}>
+      <button
+        type="button"
+        className="group/sort-header flex items-center gap-2 w-full h-full justify-end"
+        onClick={() => onSort(field)}
+      >
         {label}
-        <SortOrderIcon sort={getSortDirection(field)} />
+        <SortOrderIcon sort={sortDirection} />
       </button>
     </TableHead>
   )
