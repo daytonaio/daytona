@@ -12,12 +12,6 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 )
 
-// Stream prefixes for multiplexing stdout/stderr in logs
-var (
-	STDOUT_PREFIX = []byte{0x01, 0x01, 0x01}
-	STDERR_PREFIX = []byte{0x02, 0x02, 0x02}
-)
-
 type session struct {
 	id          string
 	cmd         *exec.Cmd

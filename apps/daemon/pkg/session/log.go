@@ -17,6 +17,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/log"
 )
 
 type FetchLogsOptions struct {
@@ -130,7 +131,7 @@ func (s *SessionService) GetSessionCommandLogs(sessionId, commandId string, requ
 
 	if opts.IsCombinedOutput {
 		// remove prefixes from log bytes
-		logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, STDOUT_PREFIX, []byte{}), STDERR_PREFIX, []byte{})
+		logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
 	}
 
 	return logBytes, nil
@@ -219,7 +220,7 @@ func processLogChunkWithPrefixFiltering(chunk []byte, buffer *[]byte) []byte {
 			// If remaining bytes could be start of STDOUT_PREFIX (0x01, 0x01, 0x01)
 			couldBeStdoutPrefix := true
 			for i, b := range remainingBytes {
-				if b != STDOUT_PREFIX[i] {
+				if b != log.STDOUT_PREFIX[i] {
 					couldBeStdoutPrefix = false
 					break
 				}
@@ -228,7 +229,7 @@ func processLogChunkWithPrefixFiltering(chunk []byte, buffer *[]byte) []byte {
 			// If remaining bytes could be start of STDERR_PREFIX (0x02, 0x02, 0x02)
 			couldBeStderrPrefix := true
 			for i, b := range remainingBytes {
-				if b != STDERR_PREFIX[i] {
+				if b != log.STDERR_PREFIX[i] {
 					couldBeStderrPrefix = false
 					break
 				}
@@ -246,18 +247,18 @@ func processLogChunkWithPrefixFiltering(chunk []byte, buffer *[]byte) []byte {
 		}
 
 		// Check for STDOUT_PREFIX (0x01, 0x01, 0x01)
-		if (*buffer)[processed] == STDOUT_PREFIX[0] &&
-			(*buffer)[processed+1] == STDOUT_PREFIX[1] &&
-			(*buffer)[processed+2] == STDOUT_PREFIX[2] {
+		if (*buffer)[processed] == log.STDOUT_PREFIX[0] &&
+			(*buffer)[processed+1] == log.STDOUT_PREFIX[1] &&
+			(*buffer)[processed+2] == log.STDOUT_PREFIX[2] {
 			// Found STDOUT_PREFIX, skip it
 			processed += 3
 			continue
 		}
 
 		// Check for STDERR_PREFIX (0x02, 0x02, 0x02)
-		if (*buffer)[processed] == STDERR_PREFIX[0] &&
-			(*buffer)[processed+1] == STDERR_PREFIX[1] &&
-			(*buffer)[processed+2] == STDERR_PREFIX[2] {
+		if (*buffer)[processed] == log.STDERR_PREFIX[0] &&
+			(*buffer)[processed+1] == log.STDERR_PREFIX[1] &&
+			(*buffer)[processed+2] == log.STDERR_PREFIX[2] {
 			// Found STDERR_PREFIX, skip it
 			processed += 3
 			continue
