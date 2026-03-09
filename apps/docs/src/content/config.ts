@@ -439,6 +439,16 @@ export const getSidebarConfig = (
         {
           type: 'link',
           href: localizePath(
+            '/docs/guides/opencode/opencode-plugin',
+            locale
+          ),
+          label: t('sidebarconfig.opencode'),
+          disablePagination: true,
+          hideInSidebar: true,
+        },
+        {
+          type: 'link',
+          href: localizePath(
             '/docs/guides/opencode/opencode-sdk-agent',
             locale
           ),
