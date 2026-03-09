@@ -279,7 +279,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className="ml-auto" title="Create Sandbox">
+        <Button variant="default" size="sm" title="Create Sandbox">
           <Plus className="size-4" />
           Create Sandbox
         </Button>
