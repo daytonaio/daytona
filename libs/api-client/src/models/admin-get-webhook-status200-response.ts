@@ -17,13 +17,13 @@
 /**
  * 
  * @export
- * @interface WebhookControllerGetStatus200Response
+ * @interface AdminGetWebhookStatus200Response
  */
-export interface WebhookControllerGetStatus200Response {
+export interface AdminGetWebhookStatus200Response {
     /**
      * 
      * @type {boolean}
-     * @memberof WebhookControllerGetStatus200Response
+     * @memberof AdminGetWebhookStatus200Response
      */
     'enabled'?: boolean;
 }

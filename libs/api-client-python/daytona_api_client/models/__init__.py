@@ -17,6 +17,7 @@
 # import models into model package
 from daytona_api_client.models.account_provider import AccountProvider
 from daytona_api_client.models.admin_create_runner import AdminCreateRunner
+from daytona_api_client.models.admin_get_webhook_status200_response import AdminGetWebhookStatus200Response
 from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
@@ -184,7 +185,6 @@ from daytona_api_client.models.user_public_key import UserPublicKey
 from daytona_api_client.models.volume_dto import VolumeDto
 from daytona_api_client.models.volume_state import VolumeState
 from daytona_api_client.models.webhook_app_portal_access import WebhookAppPortalAccess
-from daytona_api_client.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
 from daytona_api_client.models.webhook_event import WebhookEvent
 from daytona_api_client.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client.models.windows_response import WindowsResponse

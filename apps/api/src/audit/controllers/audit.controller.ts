@@ -9,12 +9,9 @@ import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
 import { AuditService } from '../services/audit.service'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
-import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { ListAuditLogsQueryDto } from '../dto/list-audit-logs-query.dto'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
@@ -25,38 +22,6 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 @ApiBearerAuth()
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
-
-  // TODO: move to admin controller
-  @Get()
-  @ApiOperation({
-    summary: 'Get all audit logs',
-    operationId: 'getAllAuditLogs',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Paginated list of all audit logs',
-    type: PaginatedAuditLogsDto,
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async getAllLogs(@Query() query: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
-    const result = await this.auditService.getAllLogs(
-      query.page,
-      query.limit,
-      {
-        from: query.from,
-        to: query.to,
-      },
-      query.nextToken,
-    )
-    return {
-      items: result.items.map(AuditLogDto.fromAuditLog),
-      total: result.total,
-      page: result.page,
-      totalPages: result.totalPages,
-      nextToken: result.nextToken,
-    }
-  }
 
   @Get('/organizations/:organizationId')
   @ApiOperation({

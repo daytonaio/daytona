@@ -24,17 +24,76 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { AdminCreateRunner } from '../models';
 // @ts-ignore
+import type { AdminGetWebhookStatus200Response } from '../models';
+// @ts-ignore
 import type { CreateRunnerResponse } from '../models';
+// @ts-ignore
+import type { CreateUser } from '../models';
+// @ts-ignore
+import type { DockerRegistry } from '../models';
+// @ts-ignore
+import type { PaginatedAuditLogs } from '../models';
 // @ts-ignore
 import type { RunnerFull } from '../models';
 // @ts-ignore
 import type { Sandbox } from '../models';
+// @ts-ignore
+import type { SendWebhookDto } from '../models';
+// @ts-ignore
+import type { SetSnapshotGeneralStatusDto } from '../models';
+// @ts-ignore
+import type { SnapshotDto } from '../models';
+// @ts-ignore
+import type { User } from '../models';
 /**
  * AdminApi - axios parameter creator
  * @export
  */
 export const AdminApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * 
+         * @summary Check if an image can be cleaned up
+         * @param {string} imageName Image name with tag to check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminCanCleanupImage: async (imageName: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'imageName' is not null or undefined
+            assertParamExists('adminCanCleanupImage', 'imageName', imageName)
+            const localVarPath = `/admin/snapshots/can-cleanup-image`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            if (imageName !== undefined) {
+                localVarQueryParameter['imageName'] = imageName;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * 
          * @summary Create runner
@@ -71,6 +130,48 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(adminCreateRunner, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Create user
+         * @param {CreateUser} createUser 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminCreateUser: async (createUser: CreateUser, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createUser' is not null or undefined
+            assertParamExists('adminCreateUser', 'createUser', createUser)
+            const localVarPath = `/admin/users`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createUser, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -119,6 +220,115 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary Get all audit logs
+         * @param {number} [page] Page number of the results
+         * @param {number} [limit] Number of results per page
+         * @param {Date} [from] From date (ISO 8601 format)
+         * @param {Date} [to] To date (ISO 8601 format)
+         * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetAllAuditLogs: async (page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/admin/audit`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+            if (page !== undefined) {
+                localVarQueryParameter['page'] = page;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (from !== undefined) {
+                localVarQueryParameter['from'] = (from as any instanceof Date) ?
+                    (from as any).toISOString() :
+                    from;
+            }
+
+            if (to !== undefined) {
+                localVarQueryParameter['to'] = (to as any instanceof Date) ?
+                    (to as any).toISOString() :
+                    to;
+            }
+
+            if (nextToken !== undefined) {
+                localVarQueryParameter['nextToken'] = nextToken;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get delivery attempts for a webhook message
+         * @param {string} organizationId 
+         * @param {string} messageId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetMessageAttempts: async (organizationId: string, messageId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('adminGetMessageAttempts', 'organizationId', organizationId)
+            // verify required parameter 'messageId' is not null or undefined
+            assertParamExists('adminGetMessageAttempts', 'messageId', messageId)
+            const localVarPath = `/admin/webhooks/organizations/{organizationId}/messages/{messageId}/attempts`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)))
+                .replace(`{${"messageId"}}`, encodeURIComponent(String(messageId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Get runner by ID
          * @param {string} id Runner ID
          * @param {*} [options] Override http request option.
@@ -137,6 +347,122 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             }
 
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get user by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetUser: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('adminGetUser', 'id', id)
+            const localVarPath = `/admin/users/{id}`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Get webhook service status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetWebhookStatus: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/admin/webhooks/status`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Initialize webhooks for an organization
+         * @param {string} organizationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminInitializeWebhooks: async (organizationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('adminInitializeWebhooks', 'organizationId', organizationId)
+            const localVarPath = `/admin/webhooks/organizations/{organizationId}/initialize`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -200,6 +526,42 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @summary List all users
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminListUsers: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/admin/users`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @summary Recover sandbox from error state as an admin
          * @param {string} sandboxId ID of the sandbox
          * @param {*} [options] Override http request option.
@@ -232,6 +594,178 @@ export const AdminApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Regenerate user key pair
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminRegenerateKeyPair: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('adminRegenerateKeyPair', 'id', id)
+            const localVarPath = `/admin/users/{id}/regenerate-key-pair`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Send a webhook message to an organization
+         * @param {string} organizationId 
+         * @param {SendWebhookDto} sendWebhookDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSendWebhook: async (organizationId: string, sendWebhookDto: SendWebhookDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('adminSendWebhook', 'organizationId', organizationId)
+            // verify required parameter 'sendWebhookDto' is not null or undefined
+            assertParamExists('adminSendWebhook', 'sendWebhookDto', sendWebhookDto)
+            const localVarPath = `/admin/webhooks/organizations/{organizationId}/send`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(sendWebhookDto, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Set default registry
+         * @param {string} id ID of the docker registry
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSetDefaultRegistry: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('adminSetDefaultRegistry', 'id', id)
+            const localVarPath = `/admin/docker-registry/{id}/set-default`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @summary Set snapshot general status
+         * @param {string} id Snapshot ID
+         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSetSnapshotGeneralStatus: async (id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('adminSetSnapshotGeneralStatus', 'id', id)
+            // verify required parameter 'setSnapshotGeneralStatusDto' is not null or undefined
+            assertParamExists('adminSetSnapshotGeneralStatus', 'setSnapshotGeneralStatusDto', setSnapshotGeneralStatusDto)
+            const localVarPath = `/admin/snapshots/{id}/general`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            // authentication oauth2 required
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(setSnapshotGeneralStatusDto, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -290,6 +824,19 @@ export const AdminApiFp = function(configuration?: Configuration) {
     return {
         /**
          * 
+         * @summary Check if an image can be cleaned up
+         * @param {string} imageName Image name with tag to check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminCanCleanupImage(imageName: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminCanCleanupImage(imageName, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminCanCleanupImage']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Create runner
          * @param {AdminCreateRunner} adminCreateRunner 
          * @param {*} [options] Override http request option.
@@ -299,6 +846,19 @@ export const AdminApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.adminCreateRunner(adminCreateRunner, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AdminApi.adminCreateRunner']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Create user
+         * @param {CreateUser} createUser 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminCreateUser(createUser: CreateUser, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminCreateUser(createUser, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminCreateUser']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -316,6 +876,37 @@ export const AdminApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary Get all audit logs
+         * @param {number} [page] Page number of the results
+         * @param {number} [limit] Number of results per page
+         * @param {Date} [from] From date (ISO 8601 format)
+         * @param {Date} [to] To date (ISO 8601 format)
+         * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminGetAllAuditLogs(page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PaginatedAuditLogs>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminGetAllAuditLogs(page, limit, from, to, nextToken, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminGetAllAuditLogs']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get delivery attempts for a webhook message
+         * @param {string} organizationId 
+         * @param {string} messageId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminGetMessageAttempts(organizationId: string, messageId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<object>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminGetMessageAttempts(organizationId, messageId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminGetMessageAttempts']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Get runner by ID
          * @param {string} id Runner ID
          * @param {*} [options] Override http request option.
@@ -325,6 +916,44 @@ export const AdminApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.adminGetRunnerById(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AdminApi.adminGetRunnerById']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get user by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminGetUser(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminGetUser(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminGetUser']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Get webhook service status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminGetWebhookStatus(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AdminGetWebhookStatus200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminGetWebhookStatus(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminGetWebhookStatus']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Initialize webhooks for an organization
+         * @param {string} organizationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminInitializeWebhooks(organizationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminInitializeWebhooks(organizationId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminInitializeWebhooks']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -342,6 +971,18 @@ export const AdminApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @summary List all users
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminListUsers(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminListUsers(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminListUsers']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @summary Recover sandbox from error state as an admin
          * @param {string} sandboxId ID of the sandbox
          * @param {*} [options] Override http request option.
@@ -351,6 +992,60 @@ export const AdminApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.adminRecoverSandbox(sandboxId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AdminApi.adminRecoverSandbox']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Regenerate user key pair
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminRegenerateKeyPair(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminRegenerateKeyPair(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminRegenerateKeyPair']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Send a webhook message to an organization
+         * @param {string} organizationId 
+         * @param {SendWebhookDto} sendWebhookDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminSendWebhook(organizationId: string, sendWebhookDto: SendWebhookDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminSendWebhook(organizationId, sendWebhookDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminSendWebhook']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Set default registry
+         * @param {string} id ID of the docker registry
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminSetDefaultRegistry(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DockerRegistry>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminSetDefaultRegistry(id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminSetDefaultRegistry']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @summary Set snapshot general status
+         * @param {string} id Snapshot ID
+         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminSetSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotDto>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AdminApi.adminSetSnapshotGeneralStatus']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -378,6 +1073,16 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
     return {
         /**
          * 
+         * @summary Check if an image can be cleaned up
+         * @param {string} imageName Image name with tag to check
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminCanCleanupImage(imageName: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+            return localVarFp.adminCanCleanupImage(imageName, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Create runner
          * @param {AdminCreateRunner} adminCreateRunner 
          * @param {*} [options] Override http request option.
@@ -385,6 +1090,16 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
          */
         adminCreateRunner(adminCreateRunner: AdminCreateRunner, options?: RawAxiosRequestConfig): AxiosPromise<CreateRunnerResponse> {
             return localVarFp.adminCreateRunner(adminCreateRunner, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Create user
+         * @param {CreateUser} createUser 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminCreateUser(createUser: CreateUser, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminCreateUser(createUser, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -398,6 +1113,31 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary Get all audit logs
+         * @param {number} [page] Page number of the results
+         * @param {number} [limit] Number of results per page
+         * @param {Date} [from] From date (ISO 8601 format)
+         * @param {Date} [to] To date (ISO 8601 format)
+         * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetAllAuditLogs(page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options?: RawAxiosRequestConfig): AxiosPromise<PaginatedAuditLogs> {
+            return localVarFp.adminGetAllAuditLogs(page, limit, from, to, nextToken, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get delivery attempts for a webhook message
+         * @param {string} organizationId 
+         * @param {string} messageId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetMessageAttempts(organizationId: string, messageId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<object>> {
+            return localVarFp.adminGetMessageAttempts(organizationId, messageId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Get runner by ID
          * @param {string} id Runner ID
          * @param {*} [options] Override http request option.
@@ -405,6 +1145,35 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
          */
         adminGetRunnerById(id: string, options?: RawAxiosRequestConfig): AxiosPromise<RunnerFull> {
             return localVarFp.adminGetRunnerById(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get user by ID
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetUser(id: string, options?: RawAxiosRequestConfig): AxiosPromise<User> {
+            return localVarFp.adminGetUser(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Get webhook service status
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminGetWebhookStatus(options?: RawAxiosRequestConfig): AxiosPromise<AdminGetWebhookStatus200Response> {
+            return localVarFp.adminGetWebhookStatus(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Initialize webhooks for an organization
+         * @param {string} organizationId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminInitializeWebhooks(organizationId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminInitializeWebhooks(organizationId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -418,6 +1187,15 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @summary List all users
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminListUsers(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminListUsers(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @summary Recover sandbox from error state as an admin
          * @param {string} sandboxId ID of the sandbox
          * @param {*} [options] Override http request option.
@@ -425,6 +1203,48 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
          */
         adminRecoverSandbox(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
             return localVarFp.adminRecoverSandbox(sandboxId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Regenerate user key pair
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminRegenerateKeyPair(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminRegenerateKeyPair(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Send a webhook message to an organization
+         * @param {string} organizationId 
+         * @param {SendWebhookDto} sendWebhookDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSendWebhook(organizationId: string, sendWebhookDto: SendWebhookDto, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.adminSendWebhook(organizationId, sendWebhookDto, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set default registry
+         * @param {string} id ID of the docker registry
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSetDefaultRegistry(id: string, options?: RawAxiosRequestConfig): AxiosPromise<DockerRegistry> {
+            return localVarFp.adminSetDefaultRegistry(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @summary Set snapshot general status
+         * @param {string} id Snapshot ID
+         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminSetSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotDto> {
+            return localVarFp.adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -448,6 +1268,18 @@ export const AdminApiFactory = function (configuration?: Configuration, basePath
 export class AdminApi extends BaseAPI {
     /**
      * 
+     * @summary Check if an image can be cleaned up
+     * @param {string} imageName Image name with tag to check
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminCanCleanupImage(imageName: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminCanCleanupImage(imageName, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Create runner
      * @param {AdminCreateRunner} adminCreateRunner 
      * @param {*} [options] Override http request option.
@@ -456,6 +1288,18 @@ export class AdminApi extends BaseAPI {
      */
     public adminCreateRunner(adminCreateRunner: AdminCreateRunner, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminCreateRunner(adminCreateRunner, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Create user
+     * @param {CreateUser} createUser 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminCreateUser(createUser: CreateUser, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminCreateUser(createUser, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -472,6 +1316,35 @@ export class AdminApi extends BaseAPI {
 
     /**
      * 
+     * @summary Get all audit logs
+     * @param {number} [page] Page number of the results
+     * @param {number} [limit] Number of results per page
+     * @param {Date} [from] From date (ISO 8601 format)
+     * @param {Date} [to] To date (ISO 8601 format)
+     * @param {string} [nextToken] Token for cursor-based pagination. When provided, takes precedence over page parameter.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminGetAllAuditLogs(page?: number, limit?: number, from?: Date, to?: Date, nextToken?: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminGetAllAuditLogs(page, limit, from, to, nextToken, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get delivery attempts for a webhook message
+     * @param {string} organizationId 
+     * @param {string} messageId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminGetMessageAttempts(organizationId: string, messageId: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminGetMessageAttempts(organizationId, messageId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Get runner by ID
      * @param {string} id Runner ID
      * @param {*} [options] Override http request option.
@@ -480,6 +1353,41 @@ export class AdminApi extends BaseAPI {
      */
     public adminGetRunnerById(id: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminGetRunnerById(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get user by ID
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminGetUser(id: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminGetUser(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Get webhook service status
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminGetWebhookStatus(options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminGetWebhookStatus(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Initialize webhooks for an organization
+     * @param {string} organizationId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminInitializeWebhooks(organizationId: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminInitializeWebhooks(organizationId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -496,6 +1404,17 @@ export class AdminApi extends BaseAPI {
 
     /**
      * 
+     * @summary List all users
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminListUsers(options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminListUsers(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
      * @summary Recover sandbox from error state as an admin
      * @param {string} sandboxId ID of the sandbox
      * @param {*} [options] Override http request option.
@@ -504,6 +1423,56 @@ export class AdminApi extends BaseAPI {
      */
     public adminRecoverSandbox(sandboxId: string, options?: RawAxiosRequestConfig) {
         return AdminApiFp(this.configuration).adminRecoverSandbox(sandboxId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Regenerate user key pair
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminRegenerateKeyPair(id: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminRegenerateKeyPair(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Send a webhook message to an organization
+     * @param {string} organizationId 
+     * @param {SendWebhookDto} sendWebhookDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminSendWebhook(organizationId: string, sendWebhookDto: SendWebhookDto, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminSendWebhook(organizationId, sendWebhookDto, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Set default registry
+     * @param {string} id ID of the docker registry
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminSetDefaultRegistry(id: string, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminSetDefaultRegistry(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Set snapshot general status
+     * @param {string} id Snapshot ID
+     * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AdminApi
+     */
+    public adminSetSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, options?: RawAxiosRequestConfig) {
+        return AdminApiFp(this.configuration).adminSetSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

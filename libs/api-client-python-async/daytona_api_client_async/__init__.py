@@ -52,6 +52,7 @@ from daytona_api_client_async.exceptions import ApiException
 # import models into sdk package
 from daytona_api_client_async.models.account_provider import AccountProvider
 from daytona_api_client_async.models.admin_create_runner import AdminCreateRunner
+from daytona_api_client_async.models.admin_get_webhook_status200_response import AdminGetWebhookStatus200Response
 from daytona_api_client_async.models.announcement import Announcement
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
@@ -219,7 +220,6 @@ from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
 from daytona_api_client_async.models.webhook_app_portal_access import WebhookAppPortalAccess
-from daytona_api_client_async.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
 from daytona_api_client_async.models.webhook_event import WebhookEvent
 from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
 from daytona_api_client_async.models.windows_response import WindowsResponse
@@ -260,6 +260,7 @@ __all__ = [
     "WorkspaceApi",
     "AccountProvider",
     "AdminCreateRunner",
+    "AdminGetWebhookStatus200Response",
     "Announcement",
     "ApiKeyList",
     "ApiKeyResponse",
@@ -427,7 +428,6 @@ __all__ = [
     "VolumeDto",
     "VolumeState",
     "WebhookAppPortalAccess",
-    "WebhookControllerGetStatus200Response",
     "WebhookEvent",
     "WebhookInitializationStatus",
     "WindowsResponse",

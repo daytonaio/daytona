@@ -17,17 +17,12 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common'
-import { User } from './user.entity'
 import { UserService } from './user.service'
-import { CreateUserDto } from './dto/create-user.dto'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
 import { UserDto } from './dto/user.dto'
-import { SystemActionGuard } from './guards/system-action.guard'
-import { RequiredSystemRole } from './decorators/required-system-role.decorator'
-import { SystemRole } from './enums/system-role.enum'
 import { TypedConfigService } from '../config/typed-config.service'
 import axios from 'axios'
 import { AccountProviderDto } from './dto/account-provider.dto'
@@ -36,7 +31,6 @@ import { AccountProvider } from './enums/account-provider.enum'
 import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
-import { AuditTarget } from '../audit/enums/audit-target.enum'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
 
 @ApiTags('users')
@@ -69,62 +63,6 @@ export class UserController {
     }
 
     return UserDto.fromUser(user)
-  }
-
-  // TODO: move to admin controller
-  @Post()
-  @ApiOperation({
-    summary: 'Create user',
-    operationId: 'createUser',
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.USER,
-    targetIdFromResult: (result: User) => result?.id,
-    requestMetadata: {
-      body: (req: TypedRequest<CreateUserDto>) => ({
-        id: req.body?.id,
-        name: req.body?.name,
-        email: req.body?.email,
-        personalOrganizationQuota: req.body?.personalOrganizationQuota,
-        role: req.body?.role,
-        emailVerified: req.body?.emailVerified,
-      }),
-    },
-  })
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto)
-  }
-
-  // TODO: move to admin controller
-  @Get()
-  @ApiOperation({
-    summary: 'List all users',
-    operationId: 'listUsers',
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async findAll(): Promise<User[]> {
-    return this.userService.findAll()
-  }
-
-  // TODO: move to admin controller
-  @Post('/:id/regenerate-key-pair')
-  @ApiOperation({
-    summary: 'Regenerate user key pair',
-    operationId: 'regenerateKeyPair',
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.REGENERATE_KEY_PAIR,
-    targetType: AuditTarget.USER,
-    targetIdFromRequest: (req) => req.params.id,
-  })
-  async regenerateKeyPair(@Param('id') id: string): Promise<User> {
-    return this.userService.regenerateKeyPair(id)
   }
 
   @Get('/account-providers')
@@ -331,28 +269,6 @@ export class UserController {
       this.logger.error('Failed to enable SMS MFA', error?.message || String(error))
       throw new UnauthorizedException()
     }
-  }
-
-  // TODO: move to admin controller
-  @Get('/:id')
-  @ApiOperation({
-    summary: 'Get user by ID',
-    operationId: 'getUser',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User details',
-    type: UserDto,
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async getUserById(@Param('id') id: string): Promise<UserDto> {
-    const user = await this.userService.findOne(id)
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`)
-    }
-
-    return UserDto.fromUser(user)
   }
 
   private async getManagementApiToken(): Promise<string> {

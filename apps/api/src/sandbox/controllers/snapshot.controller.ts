@@ -9,7 +9,6 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   UseGuards,
@@ -49,10 +48,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
-import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -140,29 +136,6 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
-  // TODO: move to admin controller
-  @Get('can-cleanup-image')
-  @ApiOperation({
-    summary: 'Check if an image can be cleaned up',
-    operationId: 'canCleanupImage',
-  })
-  @ApiQuery({
-    name: 'imageName',
-    required: true,
-    type: String,
-    description: 'Image name with tag to check',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Boolean indicating if image can be cleaned up',
-    type: Boolean,
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async canCleanupImage(@Query('imageName') imageName: string): Promise<boolean> {
-    return this.snapshotService.canCleanupImage(imageName)
-  }
-
   @Get(':id')
   @ApiOperation({
     summary: 'Get snapshot by ID or name',
@@ -244,41 +217,6 @@ export class SnapshotController {
       page: result.page,
       totalPages: result.totalPages,
     }
-  }
-
-  // TODO: move to admin controller
-  @Patch(':id/general')
-  @ApiOperation({
-    summary: 'Set snapshot general status',
-    operationId: 'setSnapshotGeneralStatus',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Snapshot ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Snapshot general status has been set',
-    type: SnapshotDto,
-  })
-  @UseGuards(SystemActionGuard)
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.SET_GENERAL_STATUS,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      body: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => ({
-        general: req.body?.general,
-      }),
-    },
-  })
-  async setSnapshotGeneralStatus(
-    @Param('id') snapshotId: string,
-    @Body() dto: SetSnapshotGeneralStatusDto,
-  ): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.setSnapshotGeneralStatus(snapshotId, dto.general)
-    return SnapshotDto.fromSnapshot(snapshot)
   }
 
   @Get(':id/build-logs')
