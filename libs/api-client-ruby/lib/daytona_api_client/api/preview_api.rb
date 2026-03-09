@@ -147,6 +147,74 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Check if a bearer token has access to the sandbox (proxy-only)
+    # @param sandbox_id [String] ID of the sandbox
+    # @param x_daytona_bearer_token [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Boolean]
+    def has_sandbox_access_by_token(sandbox_id, x_daytona_bearer_token, opts = {})
+      data, _status_code, _headers = has_sandbox_access_by_token_with_http_info(sandbox_id, x_daytona_bearer_token, opts)
+      data
+    end
+
+    # Check if a bearer token has access to the sandbox (proxy-only)
+    # @param sandbox_id [String] ID of the sandbox
+    # @param x_daytona_bearer_token [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Boolean, Integer, Hash)>] Boolean data, response status code and response headers
+    def has_sandbox_access_by_token_with_http_info(sandbox_id, x_daytona_bearer_token, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: PreviewApi.has_sandbox_access_by_token ...'
+      end
+      # verify the required parameter 'sandbox_id' is set
+      if @api_client.config.client_side_validation && sandbox_id.nil?
+        fail ArgumentError, "Missing the required parameter 'sandbox_id' when calling PreviewApi.has_sandbox_access_by_token"
+      end
+      # verify the required parameter 'x_daytona_bearer_token' is set
+      if @api_client.config.client_side_validation && x_daytona_bearer_token.nil?
+        fail ArgumentError, "Missing the required parameter 'x_daytona_bearer_token' when calling PreviewApi.has_sandbox_access_by_token"
+      end
+      # resource path
+      local_var_path = '/preview/{sandboxId}/proxy-access'.sub('{' + 'sandboxId' + '}', CGI.escape(sandbox_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      header_params[:'x-daytona-bearer-token'] = x_daytona_bearer_token
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Boolean'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer']
+
+      new_options = opts.merge(
+        :operation => :"PreviewApi.has_sandbox_access_by_token",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: PreviewApi#has_sandbox_access_by_token\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Check if sandbox is public
     # @param sandbox_id [String] ID of the sandbox
     # @param [Hash] opts the optional parameters

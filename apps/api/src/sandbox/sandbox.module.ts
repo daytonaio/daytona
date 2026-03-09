@@ -61,6 +61,7 @@ import { RegionSandboxAccessGuard } from './guards/region-sandbox-access.guard'
 import { ProxyGuard } from './guards/proxy.guard'
 import { SshGatewayGuard } from './guards/ssh-gateway.guard'
 import { EventEmitter2 } from '@nestjs/event-emitter'
+import { ApiKeyModule } from '../api-key/api-key.module'
 
 @Module({
   imports: [
@@ -68,6 +69,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
     DockerRegistryModule,
     OrganizationModule,
     RegionModule,
+    ApiKeyModule,
     TypeOrmModule.forFeature([
       Sandbox,
       Runner,

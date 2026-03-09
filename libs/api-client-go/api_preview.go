@@ -51,6 +51,19 @@ type PreviewAPI interface {
 	HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (bool, *http.Response, error)
 
 	/*
+	HasSandboxAccessByToken Check if a bearer token has access to the sandbox (proxy-only)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId ID of the sandbox
+	@return PreviewAPIHasSandboxAccessByTokenRequest
+	*/
+	HasSandboxAccessByToken(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessByTokenRequest
+
+	// HasSandboxAccessByTokenExecute executes the request
+	//  @return bool
+	HasSandboxAccessByTokenExecute(r PreviewAPIHasSandboxAccessByTokenRequest) (bool, *http.Response, error)
+
+	/*
 	IsSandboxPublic Check if sandbox is public
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -250,6 +263,117 @@ func (a *PreviewAPIService) HasSandboxAccessExecute(r PreviewAPIHasSandboxAccess
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type PreviewAPIHasSandboxAccessByTokenRequest struct {
+	ctx context.Context
+	ApiService PreviewAPI
+	sandboxId string
+	xDaytonaBearerToken *string
+}
+
+func (r PreviewAPIHasSandboxAccessByTokenRequest) XDaytonaBearerToken(xDaytonaBearerToken string) PreviewAPIHasSandboxAccessByTokenRequest {
+	r.xDaytonaBearerToken = &xDaytonaBearerToken
+	return r
+}
+
+func (r PreviewAPIHasSandboxAccessByTokenRequest) Execute() (bool, *http.Response, error) {
+	return r.ApiService.HasSandboxAccessByTokenExecute(r)
+}
+
+/*
+HasSandboxAccessByToken Check if a bearer token has access to the sandbox (proxy-only)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param sandboxId ID of the sandbox
+ @return PreviewAPIHasSandboxAccessByTokenRequest
+*/
+func (a *PreviewAPIService) HasSandboxAccessByToken(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessByTokenRequest {
+	return PreviewAPIHasSandboxAccessByTokenRequest{
+		ApiService: a,
+		ctx: ctx,
+		sandboxId: sandboxId,
+	}
+}
+
+// Execute executes the request
+//  @return bool
+func (a *PreviewAPIService) HasSandboxAccessByTokenExecute(r PreviewAPIHasSandboxAccessByTokenRequest) (bool, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  bool
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.HasSandboxAccessByToken")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/preview/{sandboxId}/proxy-access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.xDaytonaBearerToken == nil {
+		return localVarReturnValue, nil, reportError("xDaytonaBearerToken is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "x-daytona-bearer-token", r.xDaytonaBearerToken, "simple", "")
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

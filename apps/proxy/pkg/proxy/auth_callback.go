@@ -13,12 +13,11 @@ import (
 	"net/http"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
-
-	common_errors "github.com/daytonaio/common-go/pkg/errors"
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
 
 func (p *Proxy) AuthCallback(ctx *gin.Context) {
@@ -186,17 +185,9 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 }
 
 func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToken string) (bool, error) {
-	clientConfig := apiclient.NewConfiguration()
-	clientConfig.Servers = apiclient.ServerConfigurations{
-		{
-			URL: p.config.DaytonaApiUrl,
-		},
-	}
-	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
-
-	apiClient := apiclient.NewAPIClient(clientConfig)
-
-	_, res, err := apiClient.PreviewAPI.HasSandboxAccess(context.Background(), sandboxId).Execute()
+	_, res, err := p.apiclient.PreviewAPI.HasSandboxAccessByToken(context.Background(), sandboxId).
+		XDaytonaBearerToken(authToken).
+		Execute()
 	if res != nil && res.StatusCode == http.StatusOK {
 		return true, nil
 	}

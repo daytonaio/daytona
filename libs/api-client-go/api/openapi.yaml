@@ -7402,6 +7402,37 @@ paths:
       summary: Check if user has access to the sandbox
       tags:
       - preview
+  /preview/{sandboxId}/proxy-access:
+    get:
+      operationId: hasSandboxAccessByToken
+      parameters:
+      - description: ID of the sandbox
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: header
+        name: x-daytona-bearer-token
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: User access status to the sandbox
+      security:
+      - bearer: []
+      summary: Check if a bearer token has access to the sandbox (proxy-only)
+      tags:
+      - preview
   /preview/{signedPreviewToken}/{port}/sandbox-id:
     get:
       operationId: getSandboxIdFromSignedPreviewUrlToken
