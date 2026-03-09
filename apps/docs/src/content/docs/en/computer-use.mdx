@@ -4,19 +4,19 @@ title: Computer Use
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Computer Use enables programmatic control of desktop environments within Daytona sandboxes. It provides mouse, keyboard, screenshot, and display operations for automating GUI interactions and testing desktop applications.
+Computer Use enables programmatic control of desktop environments within sandboxes. It provides mouse, keyboard, screenshot, screen recording, and display operations for automating GUI interactions and testing desktop applications.
 
-We recommend using this instance type if you need to interact with **Linux**, **Windows**, or **macOS** applications.
+Computer Use and [VNC](/docs/en/vnc-access) work together to enable both manual and automated desktop interactions. VNC provides the visual interface for users to manually interact with the desktop, while Computer Use provides the programmatic API for AI agents to automate operations.
 
-:::caution[Alpha Access Required]
-Computer Use for macOS and Windows is currently in **private alpha**. To request access, please fill out the [Computer Use Windows Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog) or [Computer Use macOS Access Request Form](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944). Once submitted, our team will review your request and reach out with setup instructions and availability details.
+Computer Use is available for **Linux**. **Windows** and **macOS** support is currently in private alpha.
+
+:::caution[Private Alpha]
+Computer Use for macOS and Windows is currently in private alpha and requires access. To request access, fill out the [Windows](https://docs.google.com/forms/d/e/1FAIpQLSfoK-77-VpfsMubw8F4f1opCxIL1AyJUgnM0ONYup5hZ0RTvQ/viewform?usp=dialog) or [macOS](https://docs.google.com/forms/d/e/1FAIpQLSc9xlGZ49OjWNkyzDPC9Ip3InMRR0ZXY3tcoD-PFQj3ck6gzQ/viewform?usp=sharing&ouid=103304973264148733944) access request form. Our team will review your request and reach out with setup instructions.
 :::
 
-## Common use cases
-
-- **GUI Application Testing** - Automate interactions with native macOS applications, click buttons, fill forms, and validate UI behavior
-- **Visual Testing & Screenshots** - Capture screenshots of applications, compare UI states, and perform visual regression testing
-- **Desktop Automation** - Automate repetitive macOS desktop tasks, file management through GUI, and complex workflows
+- **GUI application testing**: automate interactions with native applications, click buttons, fill forms, and validate UI behavior
+- **Visual testing & screenshots**: capture screenshots of applications, compare UI states, and perform visual regression testing
+- **Desktop automation**: automate repetitive desktop tasks, file management through GUI, and complex workflows
 
 ## Start Computer Use
 
