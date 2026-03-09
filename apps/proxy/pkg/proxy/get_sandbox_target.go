@@ -287,7 +287,7 @@ func (p *Proxy) updateLastActivity(ctx context.Context, sandboxId string, should
 	if !cached {
 		_, err := p.apiclient.SandboxAPI.UpdateLastActivity(ctx, sandboxId).Execute()
 		if err != nil {
-			if ctx.Err() != nil && errors.Is(ctx.Err(), context.Canceled) {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				return
 			}
 			log.Errorf("failed to update last activity for sandbox %s: %v", sandboxId, err)
