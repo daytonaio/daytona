@@ -19,7 +19,7 @@ export const addPylonWidget = (appId: string) => {
     // @ts-expect-error ignore
     n.q.push(e)
   }
-  // @ts-expect-error ignore
+
   e.Pylon = n
   var r = function () {
     var e = t.createElement('script')
@@ -34,4 +34,10 @@ export const addPylonWidget = (appId: string) => {
   } else if (e.addEventListener) {
     e.addEventListener('load', r, false)
   }
+}
+
+export const initPylon = (appId: string, options: typeof window.pylon) => {
+  addPylonWidget(appId)
+
+  window.pylon = options
 }
