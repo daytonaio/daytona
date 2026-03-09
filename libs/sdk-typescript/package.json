@@ -61,7 +61,8 @@
     "isomorphic-ws": "^5.0.0",
     "pathe": "^2.0.3",
     "shell-quote": "^1.8.2",
-    "tar": "^7.5.7"
+    "tar": "^7.5.7",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
