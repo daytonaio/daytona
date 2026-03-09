@@ -171,6 +171,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
       authToken: sandbox.authToken,
       otelEndpoint: otelEndpoint,
       skipStart: skipStart,
+      organizationId: sandbox.organizationId,
+      regionId: sandbox.region,
     }
 
     await this.jobService.createJob(

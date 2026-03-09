@@ -1571,10 +1571,17 @@ const docTemplate = `{
                 "networkBlockAll": {
                     "type": "boolean"
                 },
+                "organizationId": {
+                    "description": "Nullable for backward compatibility",
+                    "type": "string"
+                },
                 "osUser": {
                     "type": "string"
                 },
                 "otelEndpoint": {
+                    "type": "string"
+                },
+                "regionId": {
                     "type": "string"
                 },
                 "registry": {

@@ -23,6 +23,10 @@ type CreateSandboxDTO struct {
 	AuthToken        *string           `json:"authToken,omitempty"`
 	OtelEndpoint     *string           `json:"otelEndpoint,omitempty"`
 	SkipStart        *bool             `json:"skipStart,omitempty"`
+
+	// Nullable for backward compatibility
+	OrganizationId *string `json:"organizationId,omitempty"`
+	RegionId       *string `json:"regionId,omitempty"`
 } //	@name	CreateSandboxDTO
 
 type ResizeSandboxDTO struct {

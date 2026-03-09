@@ -93,6 +93,12 @@ export interface CreateSandboxDTO {
      */
     'networkBlockAll'?: boolean;
     /**
+     * Nullable for backward compatibility
+     * @type {string}
+     * @memberof CreateSandboxDTO
+     */
+    'organizationId'?: string;
+    /**
      * 
      * @type {string}
      * @memberof CreateSandboxDTO
@@ -104,6 +110,12 @@ export interface CreateSandboxDTO {
      * @memberof CreateSandboxDTO
      */
     'otelEndpoint'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CreateSandboxDTO
+     */
+    'regionId'?: string;
     /**
      * 
      * @type {RegistryDTO}

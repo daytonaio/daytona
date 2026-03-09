@@ -19,6 +19,8 @@ type Config struct {
 	TerminationGracePeriodSeconds        int     `envconfig:"DAYTONA_TERMINATION_GRACE_PERIOD_SECONDS"`        // Period in seconds to wait before forcefully terminating processes
 	TerminationCheckIntervalMilliseconds int     `envconfig:"DAYTONA_TERMINATION_CHECK_INTERVAL_MILLISECONDS"` // Interval in milliseconds to check for process termination
 	RecordingsDir                        string  `envconfig:"DAYTONA_RECORDINGS_DIR"`
+	OrganizationId                       *string `envconfig:"DAYTONA_ORGANIZATION_ID"`
+	RegionId                             *string `envconfig:"DAYTONA_REGION_ID"`
 }
 
 var defaultDaemonLogFilePath = "/tmp/daytona-daemon.log"

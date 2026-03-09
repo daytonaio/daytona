@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/log"
@@ -17,7 +16,6 @@ import (
 	"go.opentelemetry.io/otel/log/global"
 	otellog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 // InitLogger initializes OpenTelemetry logging with OTLP exporter.
@@ -28,19 +26,9 @@ func InitLogger(ctx context.Context, logger *slog.Logger, config Config) (*slog.
 		return logger, nil, errors.New("logger cannot be nil")
 	}
 
-	hostname, err := os.Hostname()
-	if err != nil || hostname == "" {
-		hostname = "unknown"
-	}
-
 	// Create a new resource with service information
 	res, err := resource.New(ctx,
-		resource.WithAttributes(
-			semconv.ServiceName(config.ServiceName),
-			semconv.ServiceVersion(config.ServiceVersion),
-			semconv.ServiceInstanceID(hostname),
-			semconv.DeploymentEnvironmentName(config.Environment),
-		),
+		resource.WithAttributes(config.Attributes()...),
 		resource.WithTelemetrySDK(),
 	)
 	if err != nil {

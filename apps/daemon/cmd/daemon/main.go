@@ -176,6 +176,8 @@ func run() int {
 		TerminationGracePeriodSeconds:        c.TerminationGracePeriodSeconds,
 		TerminationCheckIntervalMilliseconds: c.TerminationCheckIntervalMilliseconds,
 		RecordingService:                     recordingService,
+		OrganizationId:                       c.OrganizationId,
+		RegionId:                             c.RegionId,
 	})
 
 	// Start the toolbox server in a go routine
