@@ -71,10 +71,13 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 	}, nil
 }
 
-func (p *Proxy) getSnapshot(ctx context.Context, snapshotId string) (*apiclient.SnapshotDto, error) {
+func (p *Proxy) getSnapshot(ctx *gin.Context, snapshotId string) (*apiclient.SnapshotDto, error) {
 	var snapshot *apiclient.SnapshotDto
+	bearerToken := p.getBearerToken(ctx)
+	apiClient := p.getUserApiClient(ctx, bearerToken)
+
 	err := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSnapshot(%s)", snapshotId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
-		s, _, e := p.apiclient.SnapshotsAPI.GetSnapshot(ctx, snapshotId).Execute()
+		s, _, e := apiClient.SnapshotsAPI.GetSnapshot(ctx, snapshotId).Execute()
 		snapshot = s
 		return e
 	})

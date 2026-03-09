@@ -4,7 +4,6 @@
 package proxy
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/url"
@@ -63,10 +62,13 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 	}, nil
 }
 
-func (p *Proxy) getSandbox(ctx context.Context, sandboxId string) (*apiclient.Sandbox, error) {
+func (p *Proxy) getSandbox(ctx *gin.Context, sandboxId string) (*apiclient.Sandbox, error) {
 	var sandbox *apiclient.Sandbox
+	bearerToken := p.getBearerToken(ctx)
+	apiClient := p.getUserApiClient(ctx, bearerToken)
+
 	err := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandbox(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
-		s, _, e := p.apiclient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
+		s, _, e := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
 		sandbox = s
 		return e
 	})

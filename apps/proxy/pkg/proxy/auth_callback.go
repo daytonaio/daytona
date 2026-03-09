@@ -186,18 +186,7 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 }
 
 func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToken string) (bool, error) {
-	clientConfig := apiclient.NewConfiguration()
-	clientConfig.Servers = apiclient.ServerConfigurations{
-		{
-			URL: p.config.DaytonaApiUrl,
-		},
-	}
-	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
-	if ginCtx, ok := ctx.(*gin.Context); ok {
-		clientConfig.AddDefaultHeader("X-Forwarded-For", ginCtx.ClientIP())
-	}
-
-	apiClient := apiclient.NewAPIClient(clientConfig)
+	apiClient := p.getUserApiClient(ctx, authToken)
 
 	_, res, err := apiClient.PreviewAPI.HasSandboxAccess(context.Background(), sandboxId).Execute()
 	if res != nil && res.StatusCode == http.StatusOK {
@@ -212,6 +201,23 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 	}
 
 	return false, nil
+}
+
+func (p *Proxy) getUserApiClient(ctx context.Context, authToken string) *apiclient.APIClient {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
+		{
+			URL: p.config.DaytonaApiUrl,
+		},
+	}
+	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		clientConfig.AddDefaultHeader("X-Forwarded-For", ginCtx.ClientIP())
+	}
+
+	apiClient := apiclient.NewAPIClient(clientConfig)
+
+	return apiClient
 }
 
 func (p *Proxy) getOidcEndpoint(ctx context.Context) (context.Context, *oauth2.Endpoint, error) {
