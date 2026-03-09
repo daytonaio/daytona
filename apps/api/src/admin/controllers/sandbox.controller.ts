@@ -9,8 +9,8 @@ import { Audit } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxService } from '../../sandbox/services/sandbox.service'
@@ -19,7 +19,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 @ApiTags('admin')
 @Controller('admin/sandbox')
 @UseGuards(CombinedAuthGuard, SystemActionGuard)
-@RequiredApiRole([SystemRole.ADMIN])
+@RequiredSystemRole(SystemRole.ADMIN)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AdminSandboxController {

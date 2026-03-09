@@ -49,8 +49,8 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
@@ -67,7 +67,7 @@ import { UrlDto } from '../../common/dto/url.dto'
 @ApiTags('snapshots')
 @Controller('snapshots')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SnapshotController {
@@ -140,6 +140,7 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  // TODO: move to admin controller
   @Get('can-cleanup-image')
   @ApiOperation({
     summary: 'Check if an image can be cleaned up',
@@ -156,6 +157,7 @@ export class SnapshotController {
     description: 'Boolean indicating if image can be cleaned up',
     type: Boolean,
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async canCleanupImage(@Query('imageName') imageName: string): Promise<boolean> {
     return this.snapshotService.canCleanupImage(imageName)
@@ -244,6 +246,7 @@ export class SnapshotController {
     }
   }
 
+  // TODO: move to admin controller
   @Patch(':id/general')
   @ApiOperation({
     summary: 'Set snapshot general status',
@@ -258,6 +261,7 @@ export class SnapshotController {
     description: 'Snapshot general status has been set',
     type: SnapshotDto,
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.SET_GENERAL_STATUS,

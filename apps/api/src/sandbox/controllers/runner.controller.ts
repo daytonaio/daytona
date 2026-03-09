@@ -30,9 +30,6 @@ import {
   ApiParam,
   ApiHeader,
 } from '@nestjs/swagger'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { ProxyGuard } from '../guards/proxy.guard'
 import { RunnerDto } from '../dto/runner.dto'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
@@ -139,6 +136,50 @@ export class RunnerController {
     return this.runnerService.findOneFullOrFail(runnerContext.runnerId)
   }
 
+  // TODO: add similar endpoint to admin controller
+  @Get('/by-sandbox/:sandboxId')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runner by sandbox ID',
+    operationId: 'getRunnerBySandboxId',
+  })
+  @ApiResponse({
+    status: 200,
+    type: RunnerFullDto,
+  })
+  @UseGuards(OrGuard([ProxyGuard, SshGatewayGuard, RegionSandboxAccessGuard]))
+  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
+    const runner = await this.runnerService.findBySandboxId(sandboxId)
+
+    if (!runner) {
+      throw new NotFoundException('Runner not found')
+    }
+
+    return RunnerFullDto.fromRunner(runner)
+  }
+
+  // TODO: add similar endpoint to admin controller
+  @Get('/by-snapshot-ref')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get runners by snapshot ref',
+    operationId: 'getRunnersBySnapshotRef',
+  })
+  @ApiResponse({
+    status: 200,
+    type: [RunnerSnapshotDto],
+  })
+  @ApiQuery({
+    name: 'ref',
+    description: 'Snapshot ref',
+    type: String,
+    required: true,
+  })
+  @UseGuards(OrGuard([ProxyGuard, SshGatewayGuard]))
+  async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
+    return this.runnerService.getRunnersBySnapshotRef(ref)
+  }
+
   @Get(':id')
   @HttpCode(200)
   @ApiOperation({
@@ -162,6 +203,7 @@ export class RunnerController {
     return RunnerDto.fromRunner(runner)
   }
 
+  // TODO: add similar endpoint to admin controller
   @Get(':id/full')
   @HttpCode(200)
   @ApiOperation({
@@ -177,8 +219,7 @@ export class RunnerController {
     description: 'Runner ID',
     type: String,
   })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionRunnerAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN])
+  @UseGuards(OrGuard([ProxyGuard, SshGatewayGuard, RegionRunnerAccessGuard]))
   async getRunnerByIdFull(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerFullDto> {
     const runner = await this.runnerService.findOneOrFail(id)
     return RunnerFullDto.fromRunner(runner)
@@ -301,50 +342,6 @@ export class RunnerController {
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.runnerService.remove(id)
-  }
-
-  @Get('/by-sandbox/:sandboxId')
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get runner by sandbox ID',
-    operationId: 'getRunnerBySandboxId',
-  })
-  @ApiResponse({
-    status: 200,
-    type: RunnerFullDto,
-  })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard, RegionSandboxAccessGuard]))
-  @RequiredApiRole([SystemRole.ADMIN])
-  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerFullDto> {
-    const runner = await this.runnerService.findBySandboxId(sandboxId)
-
-    if (!runner) {
-      throw new NotFoundException('Runner not found')
-    }
-
-    return RunnerFullDto.fromRunner(runner)
-  }
-
-  @Get('/by-snapshot-ref')
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Get runners by snapshot ref',
-    operationId: 'getRunnersBySnapshotRef',
-  })
-  @ApiResponse({
-    status: 200,
-    type: [RunnerSnapshotDto],
-  })
-  @ApiQuery({
-    name: 'ref',
-    description: 'Snapshot ref',
-    type: String,
-    required: true,
-  })
-  @UseGuards(OrGuard([SystemActionGuard, ProxyGuard, SshGatewayGuard]))
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy', 'ssh-gateway'])
-  async getRunnersBySnapshotRef(@Query('ref') ref: string): Promise<RunnerSnapshotDto[]> {
-    return this.runnerService.getRunnersBySnapshotRef(ref)
   }
 
   @Post('healthcheck')

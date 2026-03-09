@@ -9,9 +9,9 @@ import { WebhookService } from '../services/webhook.service'
 import { SendWebhookDto } from '../dto/send-webhook.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { SystemActionGuard } from '../../auth/system-action.guard'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
 import { OrganizationAccessGuard } from '../../organization/guards/organization-access.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -43,12 +43,14 @@ export class WebhookController {
     return this.webhookService.getAppPortalAccess(organizationId)
   }
 
+  // TODO: move to admin controller
   @Post('organizations/:organizationId/send')
   @ApiOperation({ summary: 'Send a webhook message to an organization' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Webhook message sent successfully',
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.SEND_WEBHOOK_MESSAGE,
@@ -74,6 +76,7 @@ export class WebhookController {
     )
   }
 
+  // TODO: move to admin controller
   @Get('organizations/:organizationId/messages/:messageId/attempts')
   @ApiOperation({ summary: 'Get delivery attempts for a webhook message' })
   @ApiResponse({
@@ -81,6 +84,7 @@ export class WebhookController {
     description: 'List of delivery attempts',
     type: [Object],
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async getMessageAttempts(
     @Param('organizationId') organizationId: string,
@@ -89,6 +93,7 @@ export class WebhookController {
     return this.webhookService.getMessageAttempts(organizationId, messageId)
   }
 
+  // TODO: move to admin controller
   @Get('status')
   @ApiOperation({ summary: 'Get webhook service status' })
   @ApiResponse({
@@ -101,6 +106,7 @@ export class WebhookController {
       },
     },
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async getStatus(): Promise<{ enabled: boolean }> {
     return {
@@ -129,6 +135,7 @@ export class WebhookController {
     return WebhookInitializationStatusDto.fromWebhookInitialization(status)
   }
 
+  // TODO: move to admin controller (modify helper for enabling orgs)
   @Post('organizations/:organizationId/initialize')
   @ApiOperation({ summary: 'Initialize webhooks for an organization' })
   @ApiResponse({
@@ -143,6 +150,7 @@ export class WebhookController {
     status: HttpStatus.NOT_FOUND,
     description: 'Organization not found',
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.INITIALIZE_WEBHOOKS,

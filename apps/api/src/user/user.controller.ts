@@ -25,8 +25,8 @@ import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
 import { UserDto } from './dto/user.dto'
-import { SystemActionGuard } from '../auth/system-action.guard'
-import { RequiredSystemRole } from '../common/decorators/required-role.decorator'
+import { SystemActionGuard } from './guards/system-action.guard'
+import { RequiredSystemRole } from './decorators/required-system-role.decorator'
 import { SystemRole } from './enums/system-role.enum'
 import { TypedConfigService } from '../config/typed-config.service'
 import axios from 'axios'
@@ -41,7 +41,7 @@ import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class UserController {
@@ -71,11 +71,13 @@ export class UserController {
     return UserDto.fromUser(user)
   }
 
+  // TODO: move to admin controller
   @Post()
   @ApiOperation({
     summary: 'Create user',
     operationId: 'createUser',
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.CREATE,
@@ -96,21 +98,25 @@ export class UserController {
     return this.userService.create(createUserDto)
   }
 
+  // TODO: move to admin controller
   @Get()
   @ApiOperation({
     summary: 'List all users',
     operationId: 'listUsers',
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async findAll(): Promise<User[]> {
     return this.userService.findAll()
   }
 
+  // TODO: move to admin controller
   @Post('/:id/regenerate-key-pair')
   @ApiOperation({
     summary: 'Regenerate user key pair',
     operationId: 'regenerateKeyPair',
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.REGENERATE_KEY_PAIR,
@@ -327,6 +333,7 @@ export class UserController {
     }
   }
 
+  // TODO: move to admin controller
   @Get('/:id')
   @ApiOperation({
     summary: 'Get user by ID',
@@ -337,6 +344,7 @@ export class UserController {
     description: 'User details',
     type: UserDto,
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async getUserById(@Param('id') id: string): Promise<UserDto> {
     const user = await this.userService.findOne(id)

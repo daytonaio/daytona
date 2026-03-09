@@ -23,8 +23,8 @@ import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { RegionService } from '../../region/services/region.service'
 import { CreateRunnerResponseDto } from '../../sandbox/dto/create-runner-response.dto'
 import { RunnerFullDto } from '../../sandbox/dto/runner-full.dto'
@@ -35,7 +35,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 @ApiTags('admin')
 @Controller('admin/runners')
 @UseGuards(CombinedAuthGuard, SystemActionGuard)
-@RequiredApiRole([SystemRole.ADMIN])
+@RequiredSystemRole(SystemRole.ADMIN)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AdminRunnerController {

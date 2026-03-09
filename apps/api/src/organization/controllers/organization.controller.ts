@@ -32,8 +32,8 @@ import { OrganizationUserService } from '../services/organization-user.service'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole, RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -50,8 +50,8 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
-import { OrGuard } from '../../auth/or.guard'
 import { OtelCollectorGuard } from '../../auth/otel-collector.guard'
+import { ProxyGuard } from '../../sandbox/guards/proxy.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
 
 @ApiTags('organizations')
@@ -511,6 +511,7 @@ export class OrganizationController {
     return this.organizationService.unsuspend(organizationId)
   }
 
+  // TODO: add similar endpoint to admin controller
   @Get('/by-sandbox-id/:sandboxId')
   @ApiOperation({
     summary: 'Get organization by sandbox ID',
@@ -526,8 +527,7 @@ export class OrganizationController {
     description: 'Sandbox ID',
     type: 'string',
   })
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, ProxyGuard)
   async getBySandboxId(@Param('sandboxId') sandboxId: string): Promise<OrganizationDto> {
     const organization = await this.organizationService.findBySandboxId(sandboxId)
     if (!organization) {
@@ -537,6 +537,7 @@ export class OrganizationController {
     return OrganizationDto.fromOrganization(organization)
   }
 
+  // TODO: add similar endpoint to admin controller
   @Get('/region-quota/by-sandbox-id/:sandboxId')
   @ApiOperation({
     summary: 'Get region quota by sandbox ID',
@@ -552,8 +553,7 @@ export class OrganizationController {
     description: 'Sandbox ID',
     type: 'string',
   })
-  @RequiredApiRole([SystemRole.ADMIN, 'proxy'])
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, ProxyGuard)
   async getRegionQuotaBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RegionQuotaDto> {
     const regionQuota = await this.organizationService.getRegionQuotaBySandboxId(sandboxId)
     if (!regionQuota) {
@@ -578,8 +578,7 @@ export class OrganizationController {
     description: 'Sandbox Auth Token',
     type: 'string',
   })
-  @RequiredApiRole([SystemRole.ADMIN, 'otel-collector'])
-  @UseGuards(CombinedAuthGuard, OrGuard([SystemActionGuard, OtelCollectorGuard]))
+  @UseGuards(CombinedAuthGuard, OtelCollectorGuard)
   async getOtelConfigBySandboxAuthToken(@Param('authToken') authToken: string): Promise<OtelConfigDto> {
     const otelConfigDto = await this.organizationService.getOtelConfigBySandboxAuthToken(authToken)
     if (!otelConfigDto) {

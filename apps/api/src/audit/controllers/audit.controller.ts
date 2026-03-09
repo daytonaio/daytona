@@ -9,8 +9,8 @@ import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
 import { AuditService } from '../services/audit.service'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
@@ -20,12 +20,13 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 
 @ApiTags('audit')
 @Controller('audit')
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AuditController {
   constructor(private readonly auditService: AuditService) {}
 
+  // TODO: move to admin controller
   @Get()
   @ApiOperation({
     summary: 'Get all audit logs',
@@ -36,6 +37,7 @@ export class AuditController {
     description: 'Paginated list of all audit logs',
     type: PaginatedAuditLogsDto,
   })
+  @UseGuards(SystemActionGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
   async getAllLogs(@Query() query: ListAuditLogsQueryDto): Promise<PaginatedAuditLogsDto> {
     const result = await this.auditService.getAllLogs(

@@ -41,8 +41,8 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
+import { SystemActionGuard } from '../../user/guards/system-action.guard'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -53,7 +53,7 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 @ApiTags('docker-registry')
 @Controller('docker-registry')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class DockerRegistryController {
@@ -232,6 +232,7 @@ export class DockerRegistryController {
     return this.dockerRegistryService.remove(registryId)
   }
 
+  // TODO: move to admin controller (no need for docker registry access guard)
   @Post(':id/set-default')
   @ApiOperation({
     summary: 'Set default registry',
@@ -247,8 +248,8 @@ export class DockerRegistryController {
     description: 'The docker registry has been set as default.',
     type: DockerRegistryDto,
   })
+  @UseGuards(SystemActionGuard, DockerRegistryAccessGuard)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(DockerRegistryAccessGuard)
   @Audit({
     action: AuditAction.SET_DEFAULT,
     targetType: AuditTarget.DOCKER_REGISTRY,
