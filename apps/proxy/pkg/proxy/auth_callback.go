@@ -193,6 +193,9 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 		},
 	}
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
+	if ginCtx, ok := ctx.(*gin.Context); ok {
+		clientConfig.AddDefaultHeader("X-Forwarded-For", ginCtx.ClientIP())
+	}
 
 	apiClient := apiclient.NewAPIClient(clientConfig)
 
