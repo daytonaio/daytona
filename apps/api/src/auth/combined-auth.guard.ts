@@ -24,7 +24,6 @@ export class CombinedAuthGuard extends AuthGuard(['api-key', 'jwt']) {
       this.logger.debug('Authentication failed', { err, user })
       throw new UnauthorizedException('Invalid credentials')
     }
-
     return user
   }
 }
