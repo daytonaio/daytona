@@ -50,13 +50,7 @@ export function ResourceUsageChart({ data, chartConfig, chartType, showTotal }: 
             tickMargin={4}
             tickCount={4}
             width={45}
-            tickFormatter={(value) => {
-              if (!showTotal) {
-                return value
-              }
-
-              return formatMoney(value)
-            }}
+            tickFormatter={(value) => formatMoney(value)}
           />
           <ChartTooltip
             cursor={false}
@@ -118,6 +112,7 @@ export function ResourceUsageChart({ data, chartConfig, chartType, showTotal }: 
           content={
             <ChartTooltipContent
               indicator="dot"
+              hideLabel={!showTotal}
               labelFormatter={(label, payload) => {
                 return `${getShortDate(label)}: ${formatMoney(payload.reduce((acc, curr) => acc + (curr.value as number), 0))}`
               }}
