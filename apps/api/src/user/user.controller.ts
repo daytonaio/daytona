@@ -19,7 +19,6 @@ import {
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
 import { UserDto } from './dto/user.dto'
@@ -32,10 +31,13 @@ import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('users')
 @Controller('users')
-@UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class UserController {

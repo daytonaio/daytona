@@ -8,8 +8,10 @@ import { HealthCheckService, HealthCheck, TypeOrmHealthIndicator } from '@nestjs
 import { RedisHealthIndicator } from './redis.health'
 import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.guard'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
-import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { HealthCheckGuard } from '../auth/health-check.guard'
+import { Public } from '../auth/decorators/public.decorator'
+import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 
 @Controller('health')
 export class HealthController {
@@ -22,13 +24,15 @@ export class HealthController {
   ) {}
 
   @Get()
+  @Public()
   @UseGuards(AnonymousRateLimitGuard)
   live() {
     return { status: 'ok' }
   }
 
   @Get('ready')
-  @UseGuards(CombinedAuthGuard, HealthCheckGuard, AuthenticatedRateLimitGuard)
+  @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+  @UseGuards(HealthCheckGuard, AuthenticatedRateLimitGuard)
   @HealthCheck()
   async check() {
     try {

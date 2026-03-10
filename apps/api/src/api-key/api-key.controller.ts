@@ -9,7 +9,6 @@ import { CreateApiKeyDto } from './dto/create-api-key.dto'
 import { ApiHeader, ApiOAuth2, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { ApiKeyResponseDto } from './dto/api-key-response.dto'
 import { ApiKeyListDto } from './dto/api-key-list.dto'
-import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
@@ -23,11 +22,14 @@ import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
 import { ApiKey } from './api-key.entity'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('api-keys')
 @Controller('api-keys')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ApiKeyController {

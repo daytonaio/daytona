@@ -26,11 +26,12 @@ import {
   ApiBearerAuth,
   ApiQuery,
 } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { DockerRegistryService } from '../services/docker-registry.service'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { DockerRegistryDto } from '../dto/docker-registry.dto'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import { DockerRegistryAccessGuard } from '../guards/docker-registry-access.guard'
 import { DockerRegistry } from '../decorators/docker-registry.decorator'
@@ -50,8 +51,9 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 
 @ApiTags('docker-registry')
 @Controller('docker-registry')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class DockerRegistryController {

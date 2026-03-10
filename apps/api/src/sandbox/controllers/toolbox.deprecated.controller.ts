@@ -20,7 +20,6 @@ import {
   Res,
   Next,
 } from '@nestjs/common'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -117,6 +116,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { DownloadFilesDto } from '../dto/download-files.dto'
 import { SkipThrottle } from '@nestjs/throttler'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -130,9 +131,10 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 
 @ApiTags('toolbox')
 @Controller('toolbox')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @SkipThrottle({ anonymous: true, authenticated: true })
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
+@UseGuards(OrganizationResourceActionGuard, SandboxAccessGuard)
 @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

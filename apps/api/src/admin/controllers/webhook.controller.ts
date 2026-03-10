@@ -3,10 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Body, Controller, Get, HttpStatus, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, HttpStatus, NotFoundException, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
 import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { WebhookService } from '../../webhook/services/webhook.service'
@@ -15,10 +13,12 @@ import { SendWebhookDto } from '../../webhook/dto/send-webhook.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('admin')
 @Controller('admin/webhooks')
-@UseGuards(CombinedAuthGuard, SystemActionGuard)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @RequiredSystemRole(SystemRole.ADMIN)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

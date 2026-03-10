@@ -17,8 +17,9 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiBearerAuth } from '@nestjs/swagger'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
 import { OrganizationDto } from '../dto/organization.dto'
@@ -32,11 +33,9 @@ import { OrganizationUserService } from '../services/organization-user.service'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
 import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { UserService } from '../../user/user.service'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -80,7 +79,7 @@ export class OrganizationController {
     description: 'List of organization invitations',
     type: [OrganizationInvitationDto],
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   async findInvitationsByUser(@AuthContext() authContext: IAuthContext): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findByUser(authContext.userId)
     return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
@@ -96,7 +95,7 @@ export class OrganizationController {
     description: 'Count of organization invitations',
     type: Number,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   async getInvitationsCountByUser(@AuthContext() authContext: IAuthContext): Promise<number> {
     return this.organizationInvitationService.getCountByUser(authContext.userId)
   }
@@ -116,7 +115,7 @@ export class OrganizationController {
     description: 'Invitation ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   @Audit({
     action: AuditAction.ACCEPT,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
@@ -153,7 +152,7 @@ export class OrganizationController {
     description: 'Invitation ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   @Audit({
     action: AuditAction.DECLINE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
@@ -185,7 +184,7 @@ export class OrganizationController {
     description: 'Organization created successfully',
     type: OrganizationDto,
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.ORGANIZATION,
@@ -229,7 +228,8 @@ export class OrganizationController {
     type: UpdateOrganizationDefaultRegionDto,
     required: true,
   })
-  @UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  @UseGuards(AuthenticatedRateLimitGuard, OrganizationActionGuard)
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
     action: AuditAction.UPDATE,
@@ -258,7 +258,7 @@ export class OrganizationController {
     description: 'List of organizations',
     type: [OrganizationDto],
   })
-  @UseGuards(AuthGuard('jwt'))
+  @AuthStrategy(AuthStrategyType.JWT)
   async findAll(@AuthContext() authContext: IAuthContext): Promise<OrganizationDto[]> {
     const organizations = await this.organizationService.findByUser(authContext.userId)
     return organizations.map(OrganizationDto.fromOrganization)
@@ -279,7 +279,9 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  // TODO: maybe org access guard?
+  @UseGuards(OrganizationActionGuard)
   async findOne(@Param('organizationId') organizationId: string): Promise<OrganizationDto> {
     const organization = await this.organizationService.findOne(organizationId)
     if (!organization) {
@@ -303,7 +305,8 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  @UseGuards(OrganizationActionGuard)
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
     action: AuditAction.DELETE,
@@ -329,7 +332,8 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  @UseGuards(OrganizationActionGuard)
   async getUsageOverview(@Param('organizationId') organizationId: string): Promise<OrganizationUsageOverviewDto> {
     return this.organizationUsageService.getUsageOverview(organizationId)
   }
@@ -349,8 +353,9 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(AuthenticatedRateLimitGuard)
   @Audit({
     action: AuditAction.UPDATE_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
@@ -393,8 +398,9 @@ export class OrganizationController {
     description: 'ID of the region where the updated quota will be applied',
     type: 'string',
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(AuthenticatedRateLimitGuard)
   @Audit({
     action: AuditAction.UPDATE_REGION_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
@@ -432,7 +438,8 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  @UseGuards(OrganizationActionGuard)
   @Audit({
     action: AuditAction.LEAVE_ORGANIZATION,
   })
@@ -461,8 +468,9 @@ export class OrganizationController {
     type: OrganizationSuspensionDto,
     required: false,
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(AuthenticatedRateLimitGuard)
   @Audit({
     action: AuditAction.SUSPEND,
     targetType: AuditTarget.ORGANIZATION,
@@ -500,8 +508,9 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, SystemActionGuard)
+  @UseGuards(AuthenticatedRateLimitGuard)
   @Audit({
     action: AuditAction.UNSUSPEND,
     targetType: AuditTarget.ORGANIZATION,
@@ -527,7 +536,8 @@ export class OrganizationController {
     description: 'Sandbox ID',
     type: 'string',
   })
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, ProxyGuard)
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(AuthenticatedRateLimitGuard, ProxyGuard)
   async getBySandboxId(@Param('sandboxId') sandboxId: string): Promise<OrganizationDto> {
     const organization = await this.organizationService.findBySandboxId(sandboxId)
     if (!organization) {
@@ -553,7 +563,8 @@ export class OrganizationController {
     description: 'Sandbox ID',
     type: 'string',
   })
-  @UseGuards(CombinedAuthGuard, AuthenticatedRateLimitGuard, ProxyGuard)
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(AuthenticatedRateLimitGuard, ProxyGuard)
   async getRegionQuotaBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RegionQuotaDto> {
     const regionQuota = await this.organizationService.getRegionQuotaBySandboxId(sandboxId)
     if (!regionQuota) {
@@ -578,7 +589,8 @@ export class OrganizationController {
     description: 'Sandbox Auth Token',
     type: 'string',
   })
-  @UseGuards(CombinedAuthGuard, OtelCollectorGuard)
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(AuthenticatedRateLimitGuard, OtelCollectorGuard)
   async getOtelConfigBySandboxAuthToken(@Param('authToken') authToken: string): Promise<OtelConfigDto> {
     const otelConfigDto = await this.organizationService.getOtelConfigBySandboxAuthToken(authToken)
     if (!otelConfigDto) {
@@ -602,8 +614,8 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
   @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
   @Audit({
     action: AuditAction.UPDATE_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS,
     targetType: AuditTarget.ORGANIZATION,
@@ -650,7 +662,8 @@ export class OrganizationController {
     },
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @AuthStrategy(AuthStrategyType.JWT)
+  @UseGuards(OrganizationActionGuard)
   @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   async updateExperimentalConfig(
     @Param('organizationId') organizationId: string,

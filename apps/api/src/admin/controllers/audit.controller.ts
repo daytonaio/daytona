@@ -3,20 +3,20 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
 import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { AuditService } from '../../audit/services/audit.service'
 import { AuditLogDto } from '../../audit/dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../../audit/dto/paginated-audit-logs.dto'
 import { ListAuditLogsQueryDto } from '../../audit/dto/list-audit-logs-query.dto'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('admin')
 @Controller('admin/audit')
-@UseGuards(CombinedAuthGuard, SystemActionGuard)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @RequiredSystemRole(SystemRole.ADMIN)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

@@ -25,10 +25,11 @@ import { OrganizationService } from '../services/organization.service'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { CreateRegionDto, CreateRegionResponseDto } from '../../region/dto/create-region.dto'
 import { RegionDto } from '../../region/dto/region.dto'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RegionService } from '../../region/services/region.service'
 import { RegionAccessGuard } from '../../region/guards/region-access.guard'
 import { RegenerateApiKeyResponseDto } from '../../region/dto/regenerate-api-key.dto'
@@ -43,8 +44,9 @@ import { UpdateRegionDto } from '../../region/dto/update-region.dto'
 
 @ApiTags('organizations')
 @Controller('regions')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
+@UseGuards(OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class OrganizationRegionController {

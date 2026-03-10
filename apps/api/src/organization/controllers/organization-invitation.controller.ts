@@ -4,8 +4,9 @@
  */
 
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { CreateOrganizationInvitationDto } from '../dto/create-organization-invitation.dto'
 import { UpdateOrganizationInvitationDto } from '../dto/update-organization-invitation.dto'
@@ -22,7 +23,8 @@ import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-r
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/invitations')
-@UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+@AuthStrategy(AuthStrategyType.JWT)
+@UseGuards(AuthenticatedRateLimitGuard, OrganizationActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class OrganizationInvitationController {

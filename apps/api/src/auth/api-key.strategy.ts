@@ -18,6 +18,8 @@ import { RunnerService } from '../sandbox/services/runner.service'
 import { generateApiKeyHash } from '../common/utils/api-key'
 import { RegionService } from '../region/services/region.service'
 import { JWT_REGEX } from './constants/jwt-regex.constant'
+import { AuthStrategyType } from './enums/auth-strategy-type.enum'
+import { Request } from 'express'
 
 type UserCache = {
   userId: string
@@ -37,7 +39,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     private readonly runnerService: RunnerService,
     private readonly regionService: RegionService,
   ) {
-    super()
+    super({ passReqToCallback: true })
     this.logger.log('ApiKeyStrategy constructor called')
   }
 
@@ -45,7 +47,12 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(token: string): Promise<AuthContextType | null> {
+  async validate(request: Request, token: string): Promise<AuthContextType | null> {
+    request.authStrategyType = AuthStrategyType.API_KEY
+    return this.validateToken(token)
+  }
+
+  async validateToken(token: string): Promise<AuthContextType | null> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 

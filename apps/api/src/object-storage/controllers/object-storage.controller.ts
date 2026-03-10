@@ -5,7 +5,6 @@
 
 import { Controller, Get, UseGuards, HttpCode } from '@nestjs/common'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
 import { ObjectStorageService } from '../services/object-storage.service'
 import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
@@ -13,11 +12,14 @@ import { CustomHeaders } from '../../common/constants/header.constants'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('object-storage')
 @Controller('object-storage')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ObjectStorageController {

@@ -4,20 +4,22 @@
  */
 
 import { Controller, Post, Get, Param, UseGuards, HttpStatus, NotFoundException } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader } from '@nestjs/swagger'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiHeader, ApiOAuth2 } from '@nestjs/swagger'
 import { WebhookService } from '../services/webhook.service'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { SystemActionGuard } from '../../user/guards/system-action.guard'
 import { OrganizationAccessGuard } from '../../organization/guards/organization-access.guard'
 import { WebhookAppPortalAccessDto } from '../dto/webhook-app-portal-access.dto'
 import { WebhookInitializationStatusDto } from '../dto/webhook-initialization-status.dto'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 @ApiTags('webhooks')
 @Controller('webhooks')
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationAccessGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAccessGuard, AuthenticatedRateLimitGuard)
+@ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}

@@ -81,7 +81,7 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
 
       // Try API key authentication
       try {
-        const authContext = await this.apiKeyStrategy.validate(token)
+        const authContext = await this.apiKeyStrategy.validateToken(token)
 
         if (isAuthContext(authContext)) {
           // Join the user room for user scoped notifications
