@@ -38,7 +38,7 @@ The agent will:
 
 1. Create a Daytona sandbox
 2. Install the Amp CLI in the sandbox
-3. Start an interactive prompt loop using streaming JSON mode
+3. Start an interactive prompt loop using CLI-per-turn mode with thread continuity
 
 Example session:
 
@@ -47,7 +47,6 @@ $ npm run start
 Creating sandbox...
 Installing Amp CLI...
 Starting Amp Code...
-Initializing agent...
 Thinking...
 Got it! I'm ready to help. What would you like to build or work on?
 
@@ -64,16 +63,17 @@ User:
 
 - Secure, isolated execution in Daytona sandboxes
 - Amp CLI with streaming JSON output for real-time updates
+- Thread-based session continuity across multiple turns
 - Automatic cleanup on exit
 
 ## How It Works
 
-This example runs a single Amp process in the sandbox with `--execute`, `--stream-json`, and `--stream-json-input` for bidirectional PTY control:
+This example runs the Amp CLI once per user turn, using threads for session continuity:
 
-1. Amp is started with `amp --dangerously-allow-all --execute --stream-json --stream-json-input -m smart` and kept running
-2. User prompts are sent as JSON lines on stdin (Amp's stream-json-input format)
-3. Amp outputs JSON lines for system, assistant, user (tool results), and result messages; tool usage and text are displayed in real time
-4. Control returns when the assistant sends `end_turn`, Amp sends a `result` message, or a command ends with `&`. A 120s timeout prevents indefinite blocking
+1. First prompt: Run `amp --dangerously-allow-all --stream-json -m smart -x "prompt"` and capture the thread ID
+2. Follow-up prompts: Run `amp threads continue <thread-id> --dangerously-allow-all --stream-json -m smart -x "prompt"`
+3. Thread ID is retrieved via `amp threads list --json` after the first turn
+4. Each command streams JSON output for real-time display of assistant messages and tool usage
 
 ## Learn More
 
