@@ -5,20 +5,14 @@
 
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { SnapshotService } from '../services/snapshot.service'
-import {
-  BaseAuthContext,
-  isOrganizationAuthContext,
-  OrganizationAuthContext,
-} from '../../common/interfaces/auth-context.interface'
+import { isBaseAuthContext, isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
 import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isRegionProxyContext, RegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import {
-  isRegionSSHGatewayContext,
-  RegionSSHGatewayContext,
-} from '../../common/interfaces/region-ssh-gateway.interface'
+import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
+import { isRegionSSHGatewayContext } from '../../common/interfaces/region-ssh-gateway.interface'
 
 @Injectable()
 export class SnapshotAccessGuard implements CanActivate {
@@ -30,8 +24,7 @@ export class SnapshotAccessGuard implements CanActivate {
 
     let snapshot: Snapshot
 
-    // TODO: initialize authContext safely
-    const authContext: BaseAuthContext = request.user
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     try {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
@@ -46,26 +39,31 @@ export class SnapshotAccessGuard implements CanActivate {
 
     try {
       switch (true) {
-        case isRegionProxyContext(authContext):
-        case isRegionSSHGatewayContext(authContext): {
-          // For region proxy/ssh gateway authentication, verify that the runner's region ID matches the region ID
-          const regionContext = authContext as RegionProxyContext | RegionSSHGatewayContext
-          const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, regionContext.regionId)
+        case isRegionProxyContext(authContext): {
+          const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
           if (!isAvailable) {
-            throw new NotFoundException(`Snapshot is not available in region ${regionContext.regionId}`)
+            throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
+          }
+          break
+        }
+        case isRegionSSHGatewayContext(authContext): {
+          const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
+          if (!isAvailable) {
+            throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
           }
           break
         }
         case isProxyContext(authContext):
         case isSshGatewayContext(authContext):
           break
-        default: {
-          // For user/organization authentication, check organization access
-          const orgAuthContext = authContext as OrganizationAuthContext
-          if (orgAuthContext.role !== SystemRole.ADMIN && snapshot.organizationId !== orgAuthContext.organizationId) {
+        case isOrganizationAuthContext(authContext): {
+          if (authContext.role !== SystemRole.ADMIN && snapshot.organizationId !== authContext.organizationId) {
             throw new ForbiddenException('Request organization ID does not match resource organization ID')
           }
+          break
         }
+        default:
+          return false
       }
 
       request.snapshot = snapshot

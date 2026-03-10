@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
 import { Request } from 'express'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
-import { IS_PUBLIC_KEY } from './decorators/public.decorator'
+import { isPublic } from './decorators/public.decorator'
 import { AuthStrategy } from './decorators/auth-strategy.decorator'
 
 /**
@@ -28,12 +28,7 @@ export class GlobalAuthGuard extends AuthGuard([AuthStrategyType.API_KEY, AuthSt
    * Endpoints decorated with `@Public()` bypass authentication entirely.
    */
   canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ])
-
-    if (isPublic) {
+    if (isPublic(context, this.reflector)) {
       return true
     }
 

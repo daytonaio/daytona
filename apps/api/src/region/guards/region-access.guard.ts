@@ -12,7 +12,8 @@ import {
   Logger,
 } from '@nestjs/common'
 import { RegionService } from '../services/region.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../enums/region-type.enum'
 
@@ -26,8 +27,7 @@ export class RegionAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const regionId: string = request.params.regionId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     try {
       const region = await this.regionService.findOne(regionId)

@@ -10,7 +10,8 @@ import { RequiredOrganizationMemberRole } from '../decorators/required-organizat
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
 @Injectable()
@@ -30,9 +31,7 @@ export class OrganizationActionGuard extends OrganizationAccessGuard {
       return false
     }
 
-    const request = context.switchToHttp().getRequest()
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     if (authContext.role === SystemRole.ADMIN) {
       return true

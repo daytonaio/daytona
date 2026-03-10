@@ -5,7 +5,8 @@
 
 import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { DockerRegistryService } from '../services/docker-registry.service'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegistryType } from '../enums/registry-type.enum'
 
@@ -17,8 +18,7 @@ export class DockerRegistryAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const dockerRegistryId: string = request.params.dockerRegistryId || request.params.registryId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     try {
       const dockerRegistry = await this.dockerRegistryService.findOneOrFail(dockerRegistryId)

@@ -13,7 +13,8 @@ import {
 } from '@nestjs/common'
 import { RegionService } from '../../region/services/region.service'
 import { RunnerService } from '../services/runner.service'
-import { BaseAuthContext, OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isBaseAuthContext, isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
@@ -34,8 +35,7 @@ export class RunnerAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const runnerId: string = request.params.runnerId || request.params.id
 
-    // TODO: initialize authContext safely
-    const authContext: BaseAuthContext = request.user
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     try {
       const runner = await this.runnerService.findOneOrFail(runnerId)
@@ -49,15 +49,13 @@ export class RunnerAccessGuard implements CanActivate {
         case isProxyContext(authContext):
         case isSshGatewayContext(authContext):
           return true
-        default: {
-          const orgAuthContext = authContext as OrganizationAuthContext
-
-          if (orgAuthContext.role !== SystemRole.ADMIN) {
+        case isOrganizationAuthContext(authContext): {
+          if (authContext.role !== SystemRole.ADMIN) {
             const region = await this.regionService.findOne(runner.region)
             if (!region) {
               throw new NotFoundException('Region not found')
             }
-            if (region.organizationId !== orgAuthContext.organizationId) {
+            if (region.organizationId !== authContext.organizationId) {
               throw new ForbiddenException('Request organization ID does not match resource organization ID')
             }
             if (region.regionType !== RegionType.CUSTOM) {
@@ -66,6 +64,8 @@ export class RunnerAccessGuard implements CanActivate {
           }
           return true
         }
+        default:
+          return false
       }
     } catch (error) {
       if (!(error instanceof NotFoundException)) {

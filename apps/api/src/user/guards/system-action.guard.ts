@@ -7,7 +7,9 @@ import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/commo
 import { Reflector } from '@nestjs/core'
 import { RequiredSystemRole } from '../decorators/required-system-role.decorator'
 import { SystemRole } from '../enums/system-role.enum'
-import { AuthContext } from '../../common/interfaces/auth-context.interface'
+import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
+import { getAuthContext } from '../../auth/get-auth-context'
+import { isPublic } from '../../auth/decorators/public.decorator'
 
 /**
  * Authentication guard that enforces the `RequiredSystemRole` decorator.
@@ -22,9 +24,11 @@ export class SystemActionGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-    // TODO: initialize authContext safely
-    const authContext: AuthContext = request.user
+    if (isPublic(context, this.reflector)) {
+      return true
+    }
+
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     let requiredRole: SystemRole | SystemRole[] =
       this.reflector.get(RequiredSystemRole, context.getHandler()) ||

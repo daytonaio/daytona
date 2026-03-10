@@ -19,6 +19,10 @@ export interface BaseAuthContext {
   role: ApiRole
 }
 
+export function isBaseAuthContext(user: BaseAuthContext): user is BaseAuthContext {
+  return 'role' in user
+}
+
 export type ApiRole =
   | SystemRole
   | 'proxy'
