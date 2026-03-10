@@ -555,61 +555,23 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
 2. Click on a sandbox to open its details page. Alternatively, open the sandbox options menu in the list and select **View** to open the details page.
 
-The sandbox details page header provides actions and a summary of the sandbox:
+The sandbox details page header a summary of the sandbox and actions to perform on the sandbox:
 
 - **Name**: the name of the sandbox
 - **UUID**: the unique identifier of the sandbox
 - **State**: the sandbox state with a visual indicator
-- **Actions**: actions to perform on the sandbox
-
-**General**
-
+- **Actions**: [start](#start-sandboxes), [stop](#stop-sandboxes), [recover](#recover-sandboxes), [archive](#archive-sandboxes), [delete](#delete-sandboxes), refresh, [SSH access](/docs/en/ssh-access), [screen recordings](/docs/en/computer-use#screen-recording)
 - [**Region**](/docs/en/regions): the target region where the sandbox is running
 - [**Snapshot**](/docs/en/snapshots): the snapshot used to create the sandbox
-
-[**Resources**](#resources)
-
-- **CPU**: allocated CPU
-- **Memory**: allocated memory
-- **Disk**: allocated disk
-
-[**Lifecycle**](#sandbox-lifecycle)
-
-- [**Auto-stop**](#auto-stop-interval): auto-stop interval
-- [**Auto-archive**](#auto-archive-interval): auto-archive interval
-- [**Auto-delete**](#auto-delete-interval): auto-delete interval
-
-**Labels**
-
-- **Labels**: key-value pairs assigned to the sandbox
-
-**Timestamps**
-
-- **Created**: when the sandbox was created
-- **Last event**: when the sandbox was last updated
-
-**Terminal**
-
+- [**Resources**](#resources): allocated sandbox CPU, memory, and disk
+- [**Lifecycle**](#sandbox-lifecycle): [auto-stop](#auto-stop-interval), [auto-archive](#auto-archive-interval), and [auto-delete](#auto-delete-interval) intervals
+- [**Labels**](#labels): key-value pairs assigned to the sandbox
+- [**Timestamps**](#timestamps): when the sandbox was created and when the last event occurred
 - [**Web terminal**](/docs/en/web-terminal): an embedded web terminal session directly in the browser
-
-**VNC**
-
 - [**VNC**](/docs/en/vnc-access): a graphical desktop session for sandboxes that have a desktop environment
-
-**Logs**
-
-- [**OpenTelemetry collection**](/docs/en/experimental/otel-collection): a detailed record of user and system activity for the sandbox
-
-**Metrics**
-
+- [**Logs**](/docs/en/experimental/otel-collection): a detailed record of user and system activity for the sandbox
 - **Metrics**: sandbox metrics data displayed as charts
-
-**Traces**
-
 - **Traces**: distributed traces and spans collected from the sandbox
-
-**Spending**
-
 - **Spending**: usage and cost over time
 
 ## Stop Sandboxes
