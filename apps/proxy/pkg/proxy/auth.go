@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -101,7 +102,12 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 }
 
 func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32, cookieDomain string) (string, error) {
-	sandboxId, _, err := p.apiclient.PreviewAPI.GetSandboxIdFromSignedPreviewUrlToken(ctx.Request.Context(), sandboxIdOrSignedToken, port).Execute()
+	var sandboxId string
+	err := utils.RetryWithExponentialBackoff(ctx.Request.Context(), fmt.Sprintf("getSandboxIdFromSignedPreviewUrlToken(%s)", sandboxIdOrSignedToken), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		s, _, e := p.apiclient.PreviewAPI.GetSandboxIdFromSignedPreviewUrlToken(ctx.Request.Context(), sandboxIdOrSignedToken, port).Execute()
+		sandboxId = s
+		return e
+	})
 	if err != nil {
 		return "", fmt.Errorf("failed to get sandbox ID: %w. Is the token expired?", err)
 	}

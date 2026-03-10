@@ -14,6 +14,8 @@ import (
 	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/utils"
+	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
 
 	log "github.com/sirupsen/logrus"
@@ -125,7 +127,12 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 		return runnerInfo, nil
 	}
 
-	runner, _, err := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
+	var runner *apiclient.RunnerFull
+	err = utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandboxRunnerInfo(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		r, _, e := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
+		runner = r
+		return e
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -153,15 +160,30 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 		return isPublicCache, nil
 	}
 
-	isPublic := false
-	_, resp, _ := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
-	if resp != nil && resp.StatusCode == http.StatusOK {
-		isPublic = true
+	var isPublic bool
+	err = utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandboxPublic(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		_, resp, apiErr := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
+		if resp != nil && resp.StatusCode == http.StatusOK {
+			isPublic = true
+			return nil
+		}
+		if apiErr != nil {
+			if resp != nil && resp.StatusCode >= 400 && resp.StatusCode < 500 &&
+				resp.StatusCode != http.StatusRequestTimeout && resp.StatusCode != http.StatusTooManyRequests {
+				isPublic = false
+				return nil
+			}
+			return apiErr
+		}
+		isPublic = false
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	err = p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 1*time.Hour)
-	if err != nil {
-		log.Errorf("Failed to set sandbox public in cache: %v", err)
+	if cacheErr := p.sandboxPublicCache.Set(ctx, sandboxId, isPublic, 1*time.Hour); cacheErr != nil {
+		log.Errorf("Failed to set sandbox public in cache: %v", cacheErr)
 	}
 
 	return &isPublic, nil
@@ -194,9 +216,6 @@ func (p *Proxy) getSandboxBearerTokenValid(ctx context.Context, sandboxId string
 	return p.validateAndCache(ctx, sandboxId, bearerToken, apiValidation)
 }
 
-const authValidationRetries = 2
-const authValidationRetryDelay = 250 * time.Millisecond
-
 func (p *Proxy) validateAndCache(
 	ctx context.Context,
 	sandboxId string,
@@ -210,17 +229,14 @@ func (p *Proxy) validateAndCache(
 	}
 
 	var isValid bool
-	var validationErr error
-	for attempt := range authValidationRetries {
-		isValid, validationErr = apiValidation()
-		if validationErr == nil {
-			break
+	validationErr := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("validateAndCache(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		result, err := apiValidation()
+		if err != nil {
+			return err
 		}
-		if attempt < authValidationRetries-1 {
-			log.Warnf("Auth validation attempt %d/%d failed for sandbox %s: %v, retrying...", attempt+1, authValidationRetries, sandboxId, validationErr)
-			time.Sleep(authValidationRetryDelay)
-		}
-	}
+		isValid = result
+		return nil
+	})
 	if validationErr != nil {
 		return nil, validationErr
 	}

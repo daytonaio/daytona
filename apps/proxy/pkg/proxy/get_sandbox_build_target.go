@@ -11,6 +11,7 @@ import (
 	"regexp"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/gin-gonic/gin"
 )
@@ -63,10 +64,11 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 }
 
 func (p *Proxy) getSandbox(ctx context.Context, sandboxId string) (*apiclient.Sandbox, error) {
-	sandbox, _, err := p.apiclient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
-	if err != nil {
-		return nil, err
-	}
-
-	return sandbox, nil
+	var sandbox *apiclient.Sandbox
+	err := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandbox(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		s, _, e := p.apiclient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
+		sandbox = s
+		return e
+	})
+	return sandbox, err
 }
