@@ -7,6 +7,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { ResourceChip } from '@/components/ResourceChip'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/api-client'
@@ -139,10 +140,14 @@ export function SandboxInfoPanel({ sandbox, getRegionName }: SandboxInfoPanelPro
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center gap-2 py-5 text-muted-foreground">
-            <Tag className="size-4" />
-            <span className="text-sm">No labels</span>
-          </div>
+          <Empty>
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Tag className="size-4" />
+              </EmptyMedia>
+              <EmptyDescription>No labels</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </InfoSection>
 

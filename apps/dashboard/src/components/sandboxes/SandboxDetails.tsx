@@ -18,9 +18,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Spinner } from '@/components/ui/spinner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useArchiveSandboxMutation } from '@/hooks/mutations/useArchiveSandboxMutation'
@@ -40,23 +37,19 @@ import { isStoppable, isTransitioning } from '@/lib/utils/sandbox'
 import { SandboxSessionProvider } from '@/providers/SandboxSessionProvider'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { isAxiosError } from 'axios'
-import { Container, RefreshCw } from 'lucide-react'
+import { Container, GripVertical, RefreshCw } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useEffect, useState } from 'react'
+import { Group, Panel, Separator } from 'react-resizable-panels'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { CreateSshAccessDialog } from './CreateSshAccessDialog'
 import { RevokeSshAccessDialog } from './RevokeSshAccessDialog'
+import { SandboxContentTabs } from './SandboxContentTabs'
 import { SandboxHeader } from './SandboxHeader'
 import { InfoPanelSkeleton, SandboxInfoPanel } from './SandboxInfoPanel'
-import { SandboxLogsTab } from './SandboxLogsTab'
-import { SandboxMetricsTab } from './SandboxMetricsTab'
-import { SandboxSpendingTab } from './SandboxSpendingTab'
-import { SandboxTerminalTab } from './SandboxTerminalTab'
-import { SandboxTracesTab } from './SandboxTracesTab'
-import { SandboxVncTab } from './SandboxVncTab'
-import { tabParser, TabValue } from './SearchParams'
+import { tabParser } from './SearchParams'
 
 export default function SandboxDetails() {
   const { sandboxId } = useParams<{ sandboxId: string }>()
@@ -235,108 +228,48 @@ export default function SandboxDetails() {
             </Empty>
           </div>
         ) : (
-          <div className="flex flex-1 min-h-0 overflow-hidden">
-            <aside className="hidden lg:flex w-72 shrink-0 border-r border-border flex-col overflow-hidden">
-              <div className="flex items-center px-5 border-b border-border shrink-0 h-[41px]">
-                <span className="text-sm font-medium">Overview</span>
-              </div>
-              <ScrollArea fade="mask" className="flex-1 min-h-0">
-                {isLoading ? (
-                  <InfoPanelSkeleton />
-                ) : isError || !sandbox ? (
-                  <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
-                    <p className="text-sm">Failed to load sandbox details.</p>
-                    <Button variant="outline" size="sm" onClick={() => refetch()}>
-                      <RefreshCw className="size-4" />
-                      Retry
-                    </Button>
+          <Group orientation="horizontal" className="flex flex-1 min-h-0 overflow-hidden">
+            {isDesktop && (
+              <>
+                <Panel
+                  id="overview"
+                  minSize={250}
+                  maxSize={550}
+                  defaultSize={320}
+                  className="flex flex-col overflow-hidden"
+                >
+                  <div className="flex items-center px-5 border-b border-border shrink-0 h-[41px]">
+                    <span className="text-sm font-medium">Overview</span>
                   </div>
-                ) : (
-                  <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
-                )}
-              </ScrollArea>
-            </aside>
-
-            <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
-              {isLoading ? (
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center gap-0 border-b border-border h-[41px] px-4 shrink-0">
-                    <Skeleton className="h-4 w-16 lg:hidden" />
-                    <Skeleton className="h-4 w-10 ml-4 lg:ml-0" />
-                    <Skeleton className="h-4 w-12 ml-4" />
-                    <Skeleton className="h-4 w-14 ml-4" />
-                    <Skeleton className="h-4 w-16 ml-4" />
-                    <Skeleton className="h-4 w-10 ml-4" />
-                  </div>
-                  <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                    <Spinner className="size-5" />
-                  </div>
-                </div>
-              ) : !sandbox ? null : (
-                <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="flex flex-col h-full gap-0">
-                  <TabsList variant="underline" className="h-[41px] overflow-x-auto overflow-y-hidden scrollbar-sm">
-                    <TabsTrigger value="overview" className="lg:hidden">
-                      Overview
-                    </TabsTrigger>
-                    {experimentsEnabled && (
-                      <>
-                        <TabsTrigger value="logs">Logs</TabsTrigger>
-                        <TabsTrigger value="traces">Traces</TabsTrigger>
-                        <TabsTrigger value="metrics">Metrics</TabsTrigger>
-                        <TabsTrigger value="spending">Spending</TabsTrigger>
-                      </>
+                  <ScrollArea fade="mask" className="flex-1 min-h-0">
+                    {isLoading ? (
+                      <InfoPanelSkeleton />
+                    ) : isError || !sandbox ? (
+                      <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-muted-foreground">
+                        <p className="text-sm">Failed to load sandbox details.</p>
+                        <Button variant="outline" size="sm" onClick={() => refetch()}>
+                          <RefreshCw className="size-4" />
+                          Retry
+                        </Button>
+                      </div>
+                    ) : (
+                      <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
                     )}
-                    <TabsTrigger value="terminal">Terminal</TabsTrigger>
-                    <TabsTrigger value="vnc">VNC</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="overview" className="flex-1 min-h-0 m-0 overflow-y-auto scrollbar-sm lg:hidden">
-                    <SandboxInfoPanel sandbox={sandbox} getRegionName={getRegionName} />
-                  </TabsContent>
-                  {experimentsEnabled && (
-                    <>
-                      <TabsContent
-                        value="logs"
-                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                      >
-                        <SandboxLogsTab sandboxId={sandbox.id} />
-                      </TabsContent>
-                      <TabsContent
-                        value="traces"
-                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                      >
-                        <SandboxTracesTab sandboxId={sandbox.id} />
-                      </TabsContent>
-                      <TabsContent
-                        value="metrics"
-                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                      >
-                        <SandboxMetricsTab sandboxId={sandbox.id} />
-                      </TabsContent>
-                      <TabsContent
-                        value="spending"
-                        className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                      >
-                        <SandboxSpendingTab sandboxId={sandbox.id} />
-                      </TabsContent>
-                    </>
-                  )}
-                  <TabsContent
-                    value="terminal"
-                    className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                  >
-                    <SandboxTerminalTab sandbox={sandbox} />
-                  </TabsContent>
-                  <TabsContent
-                    value="vnc"
-                    className="flex-1 min-h-0 m-0 data-[state=active]:flex flex-col overflow-hidden"
-                  >
-                    <SandboxVncTab sandbox={sandbox} />
-                  </TabsContent>
-                </Tabs>
-              )}
-            </div>
-          </div>
+                  </ScrollArea>
+                </Panel>
+                <ResizableSeparator />
+              </>
+            )}
+            <Panel id="content" className="flex-1 min-w-0 flex flex-col overflow-hidden">
+              <SandboxContentTabs
+                sandbox={sandbox}
+                isLoading={isLoading}
+                experimentsEnabled={experimentsEnabled}
+                tab={tab}
+                onTabChange={setTab}
+              />
+            </Panel>
+          </Group>
         )}
 
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -372,5 +305,15 @@ export default function SandboxDetails() {
         )}
       </PageLayout>
     </SandboxSessionProvider>
+  )
+}
+
+function ResizableSeparator() {
+  return (
+    <Separator className="group relative flex w-px items-center justify-center bg-transparent text-muted-foreground focus-visible:outline-none after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-border after:transition-colors data-[separator=hover]:text-primary data-[separator=hover]:after:bg-primary data-[separator=active]:text-primary data-[separator=active]:after:bg-primary focus-visible:text-primary">
+      <div className="z-10 flex h-6 w-3.5 items-center justify-center rounded-sm border border-border bg-background transition-colors group-data-[separator=hover]:border-current group-data-[separator=active]:border-current group-focus-visible:border-current">
+        <GripVertical className="size-3 text-current" />
+      </div>
+    </Separator>
   )
 }
