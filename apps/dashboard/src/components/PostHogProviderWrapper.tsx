@@ -4,11 +4,31 @@
  */
 
 import { useConfig } from '@/hooks/useConfig'
+import { usePrivacyConsentStore } from '@/hooks/usePrivacyConsent'
+import { usePostHog } from 'posthog-js/react'
 import { PostHogProvider } from 'posthog-js/react'
-import { FC, ReactNode } from 'react'
+import { FC, ReactNode, useEffect } from 'react'
 
 interface PostHogProviderWrapperProps {
   children: ReactNode
+}
+
+function PostHogConsentSync() {
+  const posthog = usePostHog()
+  const analytics = usePrivacyConsentStore((state) => state.preferences.analytics)
+  const hasConsented = usePrivacyConsentStore((state) => state.hasConsented)
+
+  useEffect(() => {
+    if (!posthog || !hasConsented) return
+
+    if (analytics) {
+      posthog.opt_in_capturing()
+    } else {
+      posthog.opt_out_capturing()
+    }
+  }, [posthog, analytics, hasConsented])
+
+  return null
 }
 
 export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ children }) => {
@@ -37,6 +57,7 @@ export const PostHogProviderWrapper: FC<PostHogProviderWrapperProps> = ({ childr
         capture_pageleave: true,
       }}
     >
+      <PostHogConsentSync />
       {children}
     </PostHogProvider>
   )

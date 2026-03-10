@@ -4,7 +4,8 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { PrivacyPreferencesDialog, usePrivacyConsent } from '@/components/PrivacyPreferencesDialog'
+import { PrivacyPreferencesDialog } from '@/components/PrivacyPreferencesDialog'
+import { usePrivacyConsent } from '@/hooks/usePrivacyConsent'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import React, { useState } from 'react'
