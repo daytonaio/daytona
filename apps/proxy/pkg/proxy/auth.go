@@ -17,9 +17,8 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 	var authErrors []string
 
 	// Try Authorization header with Bearer token
-	authHeader := ctx.Request.Header.Get("Authorization")
-	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
-		bearerToken := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+	bearerToken := p.getBearerToken(ctx)
+	if bearerToken != "" {
 		isValid, err := p.getSandboxBearerTokenValid(ctx, sandboxIdOrSignedToken, bearerToken)
 		if err != nil {
 			authErrors = append(authErrors, fmt.Sprintf("Bearer token validation error: %v", err))
@@ -99,6 +98,14 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 	}
 
 	return sandboxIdOrSignedToken, true, errors.New(errorMsg)
+}
+
+func (p *Proxy) getBearerToken(ctx *gin.Context) string {
+	authHeader := ctx.Request.Header.Get("Authorization")
+	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		return strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+	}
+	return ""
 }
 
 func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32, cookieDomain string) (string, error) {
