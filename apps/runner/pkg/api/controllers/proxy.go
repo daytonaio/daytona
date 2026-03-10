@@ -10,12 +10,13 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
-
-	proxy "github.com/daytonaio/common-go/pkg/proxy"
-	"github.com/daytonaio/runner/pkg/runner"
-	"github.com/gin-gonic/gin"
+	"time"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	proxy "github.com/daytonaio/common-go/pkg/proxy"
+	"github.com/daytonaio/common-go/pkg/utils"
+	"github.com/daytonaio/runner/pkg/runner"
+	"github.com/gin-gonic/gin"
 )
 
 // ProxyRequest handles proxying requests to a sandbox's container
@@ -56,23 +57,35 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 		return nil, nil, errors.New("sandbox ID is required")
 	}
 
-	// Get container details
-	container, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
-	if err != nil {
-		ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err)))
-		return nil, nil, fmt.Errorf("sandbox container not found: %w", err)
-	}
-
+	// Resolve the container IP with retries to handle transient Docker
+	// networking states where the container exists but has no IP yet.
 	var containerIP string
-	for _, network := range container.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
-	}
+	var containerNotFound bool
+	err := utils.RetryWithExponentialBackoff(ctx.Request.Context(), "resolve container IP", 3, 100*time.Millisecond, 500*time.Millisecond, func() error {
+		container, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
+		if err != nil {
+			containerNotFound = true
+			return &utils.NonRetryableError{Err: fmt.Errorf("sandbox container not found: %w", err)}
+		}
 
-	if containerIP == "" {
-		message := "no IP address found. Is the Sandbox started?"
-		ctx.Error(common_errors.NewBadRequestError(errors.New(message)))
-		return nil, nil, errors.New(message)
+		for _, network := range container.NetworkSettings.Networks {
+			containerIP = network.IPAddress
+			break
+		}
+
+		if containerIP == "" {
+			return errors.New("no IP address found")
+		}
+
+		return nil
+	})
+	if err != nil {
+		if containerNotFound {
+			ctx.Error(common_errors.NewNotFoundError(err))
+		} else {
+			ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("%w. Is the Sandbox started?", err)))
+		}
+		return nil, nil, err
 	}
 
 	// Build the target URL
