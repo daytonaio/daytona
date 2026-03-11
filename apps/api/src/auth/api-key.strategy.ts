@@ -17,6 +17,7 @@ import { SystemRole } from '../user/enums/system-role.enum'
 import { RunnerService } from '../sandbox/services/runner.service'
 import { generateApiKeyHash } from '../common/utils/api-key'
 import { RegionService } from '../region/services/region.service'
+import { JWT_REGEX } from './constants/jwt-regex.constant'
 
 type UserCache = {
   userId: string
@@ -44,7 +45,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(token: string): Promise<AuthContextType> {
+  async validate(token: string): Promise<AuthContextType | null> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
@@ -74,6 +75,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       return {
         role: 'health-check',
       }
+    }
+
+    // Tokens matching JWT structure are not API keys — skip DB lookups and delegate to the JWT strategy.
+    if (JWT_REGEX.test(token)) {
+      return null
     }
 
     try {
@@ -170,7 +176,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       this.logger.debug('Error checking region SSH gateway API key:', error)
     }
 
-    throw new UnauthorizedException('Invalid API key')
+    return null
   }
 
   private async getUserCache(userId: string): Promise<UserCache | null> {
