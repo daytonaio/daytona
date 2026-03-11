@@ -64,7 +64,7 @@ export class SandboxStartAction extends SandboxAction {
           // Using the PULLING_SNAPSHOT state for the case where the runner isn't assigned yet as well
           return this.handleUnassignedRunnerSandbox(sandbox, lockCode)
         } else {
-          return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
+          return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox, lockCode)
         }
       }
       case SandboxState.PENDING_BUILD: {
