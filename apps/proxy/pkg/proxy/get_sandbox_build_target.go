@@ -72,7 +72,7 @@ func (p *Proxy) getSandbox(ctx *gin.Context, sandboxId string) (*apiclient.Sandb
 		sandbox = s
 		openapiErr := common_errors.ConvertOpenAPIError(e)
 
-		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
 			return &utils.NonRetryableError{Err: openapiErr}
 		}
 

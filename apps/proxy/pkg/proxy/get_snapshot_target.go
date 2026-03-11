@@ -81,7 +81,7 @@ func (p *Proxy) getSnapshot(ctx *gin.Context, snapshotId string) (*apiclient.Sna
 		snapshot = s
 		openapiErr := common_errors.ConvertOpenAPIError(e)
 
-		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
 			return &utils.NonRetryableError{Err: openapiErr}
 		}
 
@@ -102,7 +102,7 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, runnerId string) (*RunnerInfo
 		runner = r
 		openapiErr := common_errors.ConvertOpenAPIError(e)
 
-		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
 			return &utils.NonRetryableError{Err: openapiErr}
 		}
 

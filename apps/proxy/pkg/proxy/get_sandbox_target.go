@@ -73,7 +73,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 		sandboxId, didRedirect, err = p.Authenticate(ctx, sandboxIdOrSignedToken, float32(portFloat))
 		if err != nil {
 			if !didRedirect {
-				ctx.Error(common_errors.NewUnauthorizedError(err))
+				ctx.Error(err)
 			}
 			return nil, nil, err
 		}
@@ -133,7 +133,7 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 		runner = r
 		openapiErr := common_errors.ConvertOpenAPIError(e)
 
-		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
 			return &utils.NonRetryableError{Err: openapiErr}
 		}
 
@@ -175,7 +175,7 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 		}
 		openapiErr := common_errors.ConvertOpenAPIError(err)
 
-		if err != nil {
+		if openapiErr != nil {
 			if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 &&
 				res.StatusCode != http.StatusRequestTimeout && res.StatusCode != http.StatusTooManyRequests {
 				isPublic = false

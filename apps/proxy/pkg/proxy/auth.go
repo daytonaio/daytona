@@ -117,7 +117,7 @@ func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxI
 		sandboxId = s
 		openapiErr := common_errors.ConvertOpenAPIError(e)
 
-		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+		if openapiErr != nil && !common_errors.IsRetryableOpenAPIError(openapiErr) {
 			return &utils.NonRetryableError{Err: openapiErr}
 		}
 

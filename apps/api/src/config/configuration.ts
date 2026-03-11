@@ -228,10 +228,8 @@ const configuration = {
       limit: process.env.RATE_LIMIT_ANONYMOUS_LIMIT ? parseInt(process.env.RATE_LIMIT_ANONYMOUS_LIMIT, 10) : undefined,
     },
     failedAuth: {
-      ttl: process.env.RATE_LIMIT_FAILED_AUTH_TTL ? parseInt(process.env.RATE_LIMIT_FAILED_AUTH_TTL, 10) : undefined,
-      limit: process.env.RATE_LIMIT_FAILED_AUTH_LIMIT
-        ? parseInt(process.env.RATE_LIMIT_FAILED_AUTH_LIMIT, 10)
-        : undefined,
+      ttl: 10,
+      limit: 1,
     },
     authenticated: {
       ttl: process.env.RATE_LIMIT_AUTHENTICATED_TTL

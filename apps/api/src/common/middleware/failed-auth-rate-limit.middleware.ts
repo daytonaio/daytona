@@ -37,6 +37,7 @@ export class FailedAuthRateLimitMiddleware implements NestMiddleware {
 
     // Get failed-auth config from TypedConfigService
     const failedAuthConfig = this.configService.get('rateLimit.failedAuth')
+    console.log(failedAuthConfig)
 
     if (!failedAuthConfig || !failedAuthConfig.ttl || !failedAuthConfig.limit) {
       // If failed-auth throttler is not configured, skip
