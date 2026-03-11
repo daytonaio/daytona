@@ -109,6 +109,8 @@ export interface RunnerAdapter {
 
   recoverSandbox(sandbox: Sandbox): Promise<void>
 
+  cancelImageProcessing(snapshotRef: string): Promise<void>
+
   resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void>
 }
 

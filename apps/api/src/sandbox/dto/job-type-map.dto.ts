@@ -48,6 +48,9 @@ export interface JobTypeMap {
   [JobType.RECOVER_SANDBOX]: {
     resourceType: [ResourceType.SANDBOX]
   }
+  [JobType.CANCEL_IMAGE_PROCESSING]: {
+    resourceType: [ResourceType.SNAPSHOT]
+  }
 }
 
 /**

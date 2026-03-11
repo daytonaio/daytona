@@ -1111,6 +1111,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/snapshots/image-processing/cancel": {
+            "post": {
+                "description": "Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.",
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Cancel image processing",
+                "operationId": "CancelImageProcessing",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Image processing cancelled successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/snapshots/info": {
             "get": {
                 "description": "Get information about a specified snapshot including size and entrypoint. Returns 422 if the last pull/build operation failed, with the error reason in the message.",

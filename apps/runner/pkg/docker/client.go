@@ -115,6 +115,15 @@ func (d *DockerClient) ApiClient() client.APIClient {
 	return d.apiClient
 }
 
+func (d *DockerClient) CancelImageProcessing(snapshotRef string) bool {
+	if cancelFn, ok := d.imageProcessingCancels.LoadAndDelete(snapshotRef); ok {
+		cancelFn.(context.CancelFunc)()
+		d.logger.Info("Cancelled image processing", "snapshotRef", snapshotRef)
+		return true
+	}
+	return false
+}
+
 type DockerClient struct {
 	apiClient                    client.APIClient
 	statesCache                  *cache.StatesCache
@@ -140,4 +149,5 @@ type DockerClient struct {
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool
 	filesystem                   string
+	imageProcessingCancels       sync.Map // map[string]context.CancelFunc keyed by snapshot ref
 }

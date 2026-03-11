@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, IsNull, Not } from 'typeorm'
+import { Repository, IsNull, Not, In } from 'typeorm'
 import {
   RunnerAdapter,
   RunnerInfo,
@@ -525,6 +525,32 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(
       `Created UPDATE_SANDBOX_NETWORK_SETTINGS job for sandbox ${sandboxId} on runner ${this.runner.id}`,
     )
+  }
+
+  async cancelImageProcessing(snapshotRef: string): Promise<void> {
+    try {
+      const incompleteJob = await this.jobRepository.findOne({
+        where: {
+          runnerId: this.runner.id,
+          resourceType: ResourceType.SNAPSHOT,
+          resourceId: snapshotRef,
+          completedAt: IsNull(),
+          type: In([JobType.BUILD_SNAPSHOT, JobType.PULL_SNAPSHOT]),
+        },
+        order: { createdAt: 'DESC' },
+      })
+
+      if (incompleteJob) {
+        await this.jobService.updateJobStatus(incompleteJob.id, JobStatus.FAILED, 'Image processing cancelled')
+        this.logger.debug(
+          `Cancelled ${incompleteJob.type} job ${incompleteJob.id} for ${snapshotRef} on runner ${this.runner.id}`,
+        )
+      } else {
+        this.logger.debug(`No active image processing job found for ${snapshotRef} on runner ${this.runner.id}`)
+      }
+    } catch (e) {
+      this.logger.warn(`Failed to cancel image processing job for ${snapshotRef}: ${e.message}`)
+    }
   }
 
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {

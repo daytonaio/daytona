@@ -13764,6 +13764,7 @@ components:
       - INSPECT_SNAPSHOT_IN_REGISTRY
       - REMOVE_SNAPSHOT
       - UPDATE_SANDBOX_NETWORK_SETTINGS
+      - CANCEL_IMAGE_PROCESSING
       type: string
     Job:
       example:

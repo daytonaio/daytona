@@ -440,6 +440,14 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     await this.sandboxApiClient.recover(sandbox.id, recoverSandboxDTO)
   }
 
+  async cancelImageProcessing(snapshotRef: string): Promise<void> {
+    try {
+      await this.snapshotApiClient.cancelImageProcessing(snapshotRef)
+    } catch (err) {
+      this.logger.warn(`cancelImageProcessing failed for ${snapshotRef}: ${err.message}`)
+    }
+  }
+
   async resizeSandbox(sandboxId: string, cpu?: number, memory?: number, disk?: number): Promise<void> {
     await this.sandboxApiClient.resize(sandboxId, { cpu, memory, disk })
   }

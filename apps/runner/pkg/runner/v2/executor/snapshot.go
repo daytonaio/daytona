@@ -77,6 +77,18 @@ func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any,
 	return nil, e.docker.RemoveImage(ctx, *job.Payload, true)
 }
 
+func (e *Executor) cancelImageProcessing(ctx context.Context, job *apiclient.Job) (any, error) {
+	if job.Payload == nil || *job.Payload == "" {
+		return nil, errors.New("payload is required")
+	}
+
+	cancelled := e.docker.CancelImageProcessing(*job.Payload)
+	if !cancelled {
+		e.log.WarnContext(ctx, "No active image processing found to cancel", "snapshot", *job.Payload)
+	}
+	return nil, nil
+}
+
 func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
 	var request dto.InspectSnapshotInRegistryRequestDTO
 	err := e.parsePayload(job.Payload, &request)
