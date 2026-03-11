@@ -25,7 +25,7 @@ export interface ErrorResponse {
      * @type {string}
      * @memberof ErrorResponse
      */
-    'code': string;
+    'code'?: string;
     /**
      * 
      * @type {string}
@@ -37,7 +37,7 @@ export interface ErrorResponse {
      * @type {string}
      * @memberof ErrorResponse
      */
-    'method': string;
+    'method'?: string;
     /**
      * 
      * @type {string}

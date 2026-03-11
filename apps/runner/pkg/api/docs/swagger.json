@@ -1506,7 +1506,7 @@
     "ErrorResponse": {
       "description": "Error response",
       "type": "object",
-      "required": ["code", "message", "method", "path", "statusCode", "timestamp"],
+      "required": ["message", "path", "statusCode", "timestamp"],
       "properties": {
         "code": {
           "type": "string",

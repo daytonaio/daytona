@@ -119,9 +119,7 @@ definitions:
         example: '2023-01-01T12:00:00Z'
         type: string
     required:
-      - code
       - message
-      - method
       - path
       - statusCode
       - timestamp
