@@ -15,7 +15,7 @@
     "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --nxBail=true",
     "docker:production": "SKIP_COMPUTER_USE_BUILD=true nx run-many --target=docker --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production --output-style=stream",
     "serve": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
-    "serve-slim": "nx run-many --target=serve --projects=api,runner,dashboard --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
+    "serve-slim": "nx run-many --target=serve --projects=api,runner,proxy,dashboard --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:skip-runner": "nx run-many --target=serve --all --exclude=runner,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:skip-proxy": "nx run-many --target=serve --all --exclude=proxy,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:production": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
