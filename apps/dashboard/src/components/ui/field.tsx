@@ -8,6 +8,8 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { useMemo } from 'react'
 
+import { Slot } from '@radix-ui/react-slot'
+
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
@@ -129,9 +131,10 @@ function FieldTitle({ className, ...props }: React.ComponentProps<'div'>) {
   )
 }
 
-function FieldDescription({ className, ...props }: React.ComponentProps<'p'>) {
+function FieldDescription({ className, asChild = false, ...props }: React.ComponentProps<'p'> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : 'p'
   return (
-    <p
+    <Comp
       data-slot="field-description"
       className={cn(
         'text-muted-foreground text-sm leading-normal font-normal group-has-[[data-orientation=horizontal]]/field:text-balance',

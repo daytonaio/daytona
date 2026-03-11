@@ -30,24 +30,28 @@ import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
+import { imageNameSchema } from '@/lib/schema'
 import { getRegionFullDisplayName } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/sdk'
 import { useForm } from '@tanstack/react-form'
-import { Minus, Plus, Upload } from 'lucide-react'
+import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { Tooltip } from '../Tooltip'
 import { ScrollArea } from '../ui/scroll-area'
 
 const NAME_REGEX = /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/
 
 const NONE_VALUE = '__none__'
 
-const SOURCE_SNAPSHOT = 'snapshot'
-const SOURCE_IMAGE = 'image'
+enum Source {
+  SNAPSHOT = 'snapshot',
+  IMAGE = 'image',
+}
 
 const keyValuePairSchema = z.object({
   key: z.string(),
@@ -60,13 +64,11 @@ const noDuplicateKeys = (pairs: { key: string; value: string }[] | undefined) =>
   return new Set(keys).size === keys.length
 }
 
-const formSchema = z.object({
+const baseFormSchema = z.object({
   name: z
     .string()
     .optional()
     .refine((val) => !val || NAME_REGEX.test(val), 'Only letters, digits, dots, underscores and dashes are allowed'),
-  snapshot: z.string().optional(),
-  image: z.string().optional(),
   regionId: z.string().optional(),
   cpu: z.number().min(1).optional(),
   memory: z.number().min(1).optional(),
@@ -84,10 +86,28 @@ const formSchema = z.object({
   ephemeral: z.boolean().optional(),
 })
 
-type FormValues = z.infer<typeof formSchema>
+const formSchema = z.discriminatedUnion('source', [
+  baseFormSchema.extend({
+    source: z.literal(Source.SNAPSHOT),
+    snapshot: z.string().optional(),
+    image: z.string().optional(),
+  }),
+  baseFormSchema.extend({
+    source: z.literal(Source.IMAGE),
+    snapshot: z.string().optional(),
+    image: imageNameSchema,
+  }),
+])
+
+type FormValues = z.infer<typeof baseFormSchema> & {
+  source: Source
+  snapshot?: string
+  image?: string
+}
 
 const defaultValues: FormValues = {
   name: '',
+  source: Source.SNAPSHOT,
   snapshot: undefined,
   image: '',
   regionId: undefined,
@@ -108,7 +128,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
   const navigate = useNavigate()
   const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
   const [open, setOpen] = useState(false)
-  const [source, setSource] = useState(SOURCE_SNAPSHOT)
 
   const config = useConfig()
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
@@ -155,7 +174,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
         if (key) labels[key] = val
       })
 
-      const isImage = source === SOURCE_IMAGE
+      const isImage = value.source === Source.IMAGE
 
       const baseParams = {
         name: value.name?.trim() || undefined,
@@ -203,8 +222,8 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
 
   const handleSourceChange = useCallback(
     (val: string) => {
-      setSource(val)
-      if (val === SOURCE_SNAPSHOT) {
+      form.setFieldValue('source', val as Source)
+      if (val === Source.SNAPSHOT) {
         form.setFieldValue('image', '')
         form.setFieldValue('cpu', undefined)
         form.setFieldValue('memory', undefined)
@@ -218,7 +237,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
 
   const resetState = useCallback(() => {
     form.reset(defaultValues)
-    setSource(SOURCE_SNAPSHOT)
     resetCreateSandboxMutation()
   }, [resetCreateSandboxMutation, form])
 
@@ -327,159 +345,165 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
               }}
             </form.Field>
 
-            <Tabs value={source} onValueChange={handleSourceChange} className="gap-3">
-              <div className="flex flex-col gap-2">
-                <FieldLabel>Source</FieldLabel>
-                <TabsList className="w-full">
-                  <TabsTrigger value={SOURCE_SNAPSHOT} className="flex-1">
-                    Snapshot
-                  </TabsTrigger>
-                  <TabsTrigger value={SOURCE_IMAGE} className="flex-1">
-                    Image
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-
-              <TabsContent value={SOURCE_SNAPSHOT}>
-                <form.Field name="snapshot">
-                  {(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>Snapshot</FieldLabel>
-                      <Select
-                        value={field.state.value || NONE_VALUE}
-                        onValueChange={(val) => field.handleChange(val === NONE_VALUE ? '' : val)}
-                      >
-                        <SelectTrigger
-                          className="h-8"
-                          id={field.name}
-                          disabled={snapshotsLoading}
-                          loading={snapshotsLoading}
-                        >
-                          <SelectValue placeholder={snapshotsLoading ? 'Loading snapshots...' : 'Select a snapshot'} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value={NONE_VALUE}>
-                            {config.defaultSnapshot} <Badge variant="secondary">default</Badge>
-                          </SelectItem>
-                          {snapshotsData?.items?.map((snapshot) => (
-                            <SelectItem key={snapshot.id} value={snapshot.name}>
-                              {snapshot.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </Field>
-                  )}
-                </form.Field>
-              </TabsContent>
-
-              <TabsContent value={SOURCE_IMAGE} className="flex flex-col gap-4">
-                <form.Field name="image">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Image</FieldLabel>
-                        <Input
-                          aria-invalid={isInvalid}
-                          id={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="ubuntu:22.04"
-                        />
-                        <FieldDescription>
-                          Must include either a tag (e.g., ubuntu:22.04) or a digest. The tag &quot;latest&quot; is not
-                          allowed.
-                        </FieldDescription>
-                        {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
-                          <FieldError errors={field.state.meta.errors} />
-                        )}
-                      </Field>
-                    )
-                  }}
-                </form.Field>
-                <div className="flex flex-col gap-2">
-                  <Label className="text-sm font-medium">Resources</Label>
+            <form.Subscribe selector={(state) => state.values.source}>
+              {(source) => (
+                <Tabs value={source} onValueChange={handleSourceChange} className="gap-3">
                   <div className="flex flex-col gap-2">
-                    <form.Field name="cpu">
-                      {(field) => (
-                        <div className="flex items-center gap-4">
-                          <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                            Compute (vCPU):
-                          </Label>
-                          <NumericFormat
-                            customInput={Input}
-                            id={field.name}
-                            className="w-full"
-                            placeholder="1"
-                            decimalScale={0}
-                            allowNegative={false}
-                            isAllowed={(values) => {
-                              if (values.floatValue === undefined) return true
-                              return !maxCpu || values.floatValue <= maxCpu
-                            }}
-                            value={field.state.value ?? ''}
-                            onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                          />
-                        </div>
-                      )}
-                    </form.Field>
-                    <form.Field name="memory">
-                      {(field) => (
-                        <div className="flex items-center gap-4">
-                          <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                            Memory (GiB):
-                          </Label>
-                          <NumericFormat
-                            customInput={Input}
-                            id={field.name}
-                            className="w-full"
-                            placeholder="1"
-                            decimalScale={0}
-                            allowNegative={false}
-                            isAllowed={(values) => {
-                              if (values.floatValue === undefined) return true
-                              return !maxMemory || values.floatValue <= maxMemory
-                            }}
-                            value={field.state.value ?? ''}
-                            onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                          />
-                        </div>
-                      )}
-                    </form.Field>
-                    <form.Field name="disk">
-                      {(field) => (
-                        <div className="flex items-center gap-4">
-                          <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                            Storage (GiB):
-                          </Label>
-                          <NumericFormat
-                            customInput={Input}
-                            id={field.name}
-                            className="w-full"
-                            placeholder="3"
-                            decimalScale={0}
-                            allowNegative={false}
-                            isAllowed={(values) => {
-                              if (values.floatValue === undefined) return true
-                              return !maxDisk || values.floatValue <= maxDisk
-                            }}
-                            value={field.state.value ?? ''}
-                            onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                          />
-                        </div>
-                      )}
-                    </form.Field>
+                    <FieldLabel>Source</FieldLabel>
+                    <TabsList className="w-full">
+                      <TabsTrigger value={Source.SNAPSHOT} className="flex-1">
+                        Snapshot
+                      </TabsTrigger>
+                      <TabsTrigger value={Source.IMAGE} className="flex-1">
+                        Image
+                      </TabsTrigger>
+                    </TabsList>
                   </div>
-                  <FieldDescription>
-                    {`Defaults: 1 vCPU, 1 GiB memory, 3 GiB storage.`}
-                    <br />
-                    {maxCpu ? ` Limits: ${maxCpu} vCPU, ${maxMemory} GiB memory, ${maxDisk} GiB storage.` : ''}
-                  </FieldDescription>
-                </div>
-              </TabsContent>
-            </Tabs>
+
+                  <TabsContent value={Source.SNAPSHOT}>
+                    <form.Field name="snapshot">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>Snapshot</FieldLabel>
+                          <Select
+                            value={field.state.value || NONE_VALUE}
+                            onValueChange={(val) => field.handleChange(val === NONE_VALUE ? '' : val)}
+                          >
+                            <SelectTrigger
+                              className="h-8"
+                              id={field.name}
+                              disabled={snapshotsLoading}
+                              loading={snapshotsLoading}
+                            >
+                              <SelectValue
+                                placeholder={snapshotsLoading ? 'Loading snapshots...' : 'Select a snapshot'}
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value={NONE_VALUE}>
+                                {config.defaultSnapshot} <Badge variant="secondary">default</Badge>
+                              </SelectItem>
+                              {snapshotsData?.items?.map((snapshot) => (
+                                <SelectItem key={snapshot.id} value={snapshot.name}>
+                                  {snapshot.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      )}
+                    </form.Field>
+                  </TabsContent>
+
+                  <TabsContent value={Source.IMAGE} className="flex flex-col gap-4">
+                    <form.Field name="image">
+                      {(field) => {
+                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor={field.name}>Image</FieldLabel>
+                            <Input
+                              aria-invalid={isInvalid}
+                              id={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              placeholder="ubuntu:22.04"
+                            />
+                            <FieldDescription>
+                              Must include either a tag (e.g., ubuntu:22.04) or a digest. The tag &quot;latest&quot; is
+                              not allowed.
+                            </FieldDescription>
+                            {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                              <FieldError errors={field.state.meta.errors} />
+                            )}
+                          </Field>
+                        )
+                      }}
+                    </form.Field>
+                    <div className="flex flex-col gap-2">
+                      <Label className="text-sm font-medium">Resources</Label>
+                      <div className="flex flex-col gap-2">
+                        <form.Field name="cpu">
+                          {(field) => (
+                            <div className="flex items-center gap-4">
+                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                Compute (vCPU):
+                              </Label>
+                              <NumericFormat
+                                customInput={Input}
+                                id={field.name}
+                                className="w-full"
+                                placeholder="1"
+                                decimalScale={0}
+                                allowNegative={false}
+                                isAllowed={(values) => {
+                                  if (values.floatValue === undefined) return true
+                                  return !maxCpu || values.floatValue <= maxCpu
+                                }}
+                                value={field.state.value ?? ''}
+                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                              />
+                            </div>
+                          )}
+                        </form.Field>
+                        <form.Field name="memory">
+                          {(field) => (
+                            <div className="flex items-center gap-4">
+                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                Memory (GiB):
+                              </Label>
+                              <NumericFormat
+                                customInput={Input}
+                                id={field.name}
+                                className="w-full"
+                                placeholder="1"
+                                decimalScale={0}
+                                allowNegative={false}
+                                isAllowed={(values) => {
+                                  if (values.floatValue === undefined) return true
+                                  return !maxMemory || values.floatValue <= maxMemory
+                                }}
+                                value={field.state.value ?? ''}
+                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                              />
+                            </div>
+                          )}
+                        </form.Field>
+                        <form.Field name="disk">
+                          {(field) => (
+                            <div className="flex items-center gap-4">
+                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                Storage (GiB):
+                              </Label>
+                              <NumericFormat
+                                customInput={Input}
+                                id={field.name}
+                                className="w-full"
+                                placeholder="3"
+                                decimalScale={0}
+                                allowNegative={false}
+                                isAllowed={(values) => {
+                                  if (values.floatValue === undefined) return true
+                                  return !maxDisk || values.floatValue <= maxDisk
+                                }}
+                                value={field.state.value ?? ''}
+                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                              />
+                            </div>
+                          )}
+                        </form.Field>
+                      </div>
+                      <FieldDescription>
+                        {`Defaults: 1 vCPU, 1 GiB memory, 3 GiB storage.`}
+                        <br />
+                        {maxCpu ? ` Limits: ${maxCpu} vCPU, ${maxMemory} GiB memory, ${maxDisk} GiB storage.` : ''}
+                      </FieldDescription>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              )}
+            </form.Subscribe>
 
             <form.Field name="regionId">
               {(field) => (
@@ -510,8 +534,21 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                 <form.Field name="autoStopInterval">
                   {(field) => (
                     <div className="flex items-center gap-4">
-                      <Label htmlFor={field.name} className="w-40 flex-shrink-0">
+                      <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                         Auto-stop (min):
+                        <Tooltip
+                          label={<Info className="size-3 text-muted-foreground" />}
+                          content={
+                            <p>
+                              Minutes of inactivity before stopping. Resets on preview access, SSH, or Toolbox API
+                              calls.
+                              <br />
+                              <span className="text-muted-foreground">0 = disabled</span>
+                            </p>
+                          }
+                          side="right"
+                          contentClassName="max-w-xs"
+                        />
                       </Label>
                       <NumericFormat
                         customInput={Input}
@@ -529,8 +566,20 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                 <form.Field name="autoArchiveInterval">
                   {(field) => (
                     <div className="flex items-center gap-4">
-                      <Label htmlFor={field.name} className="w-40 flex-shrink-0">
+                      <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                         Auto-archive (min):
+                        <Tooltip
+                          label={<Info className="size-3 text-muted-foreground" />}
+                          content={
+                            <p>
+                              Minutes a sandbox must remain continuously stopped before archiving.
+                              <br />
+                              <span className="text-muted-foreground">0 = max (30 days)</span>
+                            </p>
+                          }
+                          side="right"
+                          contentClassName="max-w-xs"
+                        />
                       </Label>
                       <NumericFormat
                         customInput={Input}
@@ -550,8 +599,22 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                     <form.Subscribe selector={(state) => state.values.ephemeral}>
                       {(ephemeral) => (
                         <div className="flex items-center gap-4">
-                          <Label htmlFor={field.name} className="w-40 flex-shrink-0">
+                          <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                             Auto-delete (min):
+                            <Tooltip
+                              label={<Info className="size-3 text-muted-foreground" />}
+                              content={
+                                <p>
+                                  Minutes a sandbox must remain continuously stopped before permanent deletion.
+                                  <br />
+                                  <span className="text-muted-foreground">0 = deleted on stop</span>
+                                  <br />
+                                  <span className="text-muted-foreground">-1 = disabled</span>
+                                </p>
+                              }
+                              side="right"
+                              contentClassName="max-w-xs"
+                            />
                           </Label>
                           <NumericFormat
                             customInput={Input}
@@ -594,19 +657,6 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                   )}
                 </form.Field>
               </div>
-              <ul className="list-disc list-inside space-y-0.5 text-muted-foreground text-xs">
-                <li>
-                  Auto-stop: minutes of inactivity before stopping. Resets on preview access, SSH, or Toolbox API calls.
-                  0 = disabled.
-                </li>
-                <li>
-                  Auto-archive: minutes a sandbox must remain continuously stopped before archiving. 0 = max (30 days).
-                </li>
-                <li>
-                  Auto-delete: minutes a sandbox must remain continuously stopped before permanent deletion. 0 = deleted
-                  on stop. -1 = disabled.
-                </li>
-              </ul>
             </div>
 
             <form.Field name="envVars">
@@ -663,23 +713,25 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                         Add Variable
                       </Button>
                     </div>
-                    <FieldDescription>
-                      <input
-                        type="file"
-                        accept="env"
-                        className="hidden"
-                        onChange={handleEnvFileImport}
-                        aria-hidden="true"
-                        id="env-file-input"
-                      />
-                      <label
-                        className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer"
-                        htmlFor="env-file-input"
-                      >
-                        <Upload className="size-3" />
-                        Import .env file
-                      </label>{' '}
-                      or paste .env contents into any key field.
+                    <FieldDescription asChild>
+                      <div>
+                        <input
+                          type="file"
+                          accept="env"
+                          className="hidden"
+                          onChange={handleEnvFileImport}
+                          aria-hidden="true"
+                          id="env-file-input"
+                        />
+                        <label
+                          className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer"
+                          htmlFor="env-file-input"
+                        >
+                          <Upload className="size-3" />
+                          Import .env file
+                        </label>{' '}
+                        or paste .env contents into any key field.
+                      </div>
                     </FieldDescription>
                     {hasErrors && <FieldError errors={field.state.meta.errors} />}
                   </Field>
