@@ -75,7 +75,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 
 		d.logger.InfoContext(ctx, "mounting S3 volume", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "runnerVolumeMountPath", runnerVolumeMountPath)
 
-		cmd := d.getMountCmd(volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
+		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
 		err = cmd.Run()
 		if err != nil {
 			if !dirExisted {
@@ -174,7 +174,7 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 	return fmt.Errorf("mount did not become ready within timeout")
 }
 
-func (d *DockerClient) getMountCmd(volume string, subpath *string, path string) *exec.Cmd {
+func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
 
 	if subpath != nil && *subpath != "" {
@@ -188,25 +188,25 @@ func (d *DockerClient) getMountCmd(volume string, subpath *string, path string) 
 
 	args = append(args, volume, path)
 
-	// exec.Command (not CommandContext) — mount-s3 daemonizes and must survive runner shutdown.
-	cmd := exec.Command("mount-s3", args...)
-
+	// Run mount-s3 in a transient systemd scope (its own cgroup) so the FUSE daemon
+	// survives runner restarts — systemd kills services by cgroup on stop/restart.
+	sdArgs := []string{"--scope"}
 	if d.awsEndpointUrl != "" {
-		cmd.Env = append(cmd.Env, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)
+		sdArgs = append(sdArgs, "--setenv=AWS_ENDPOINT_URL="+d.awsEndpointUrl)
 	}
-
 	if d.awsAccessKeyId != "" {
-		cmd.Env = append(cmd.Env, "AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
+		sdArgs = append(sdArgs, "--setenv=AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
 	}
-
 	if d.awsSecretAccessKey != "" {
-		cmd.Env = append(cmd.Env, "AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
+		sdArgs = append(sdArgs, "--setenv=AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
 	}
-
 	if d.awsRegion != "" {
-		cmd.Env = append(cmd.Env, "AWS_REGION="+d.awsRegion)
+		sdArgs = append(sdArgs, "--setenv=AWS_REGION="+d.awsRegion)
 	}
+	sdArgs = append(sdArgs, "--", "mount-s3")
+	sdArgs = append(sdArgs, args...)
 
+	cmd := exec.CommandContext(ctx, "systemd-run", sdArgs...)
 	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
 	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
 
