@@ -27,7 +27,7 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 
 	sandbox, err := p.getSandbox(ctx, sandboxId)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get sandbox: %w", err)))
+		ctx.Error(err)
 		return nil, nil, fmt.Errorf("failed to get sandbox: %w", err)
 	}
 
@@ -38,7 +38,7 @@ func (p *Proxy) getSandboxBuildTarget(ctx *gin.Context) (*url.URL, map[string]st
 
 	runnerInfo, err := p.getRunnerInfo(ctx, *sandbox.RunnerId)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
+		ctx.Error(err)
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
 
@@ -67,10 +67,16 @@ func (p *Proxy) getSandbox(ctx *gin.Context, sandboxId string) (*apiclient.Sandb
 	bearerToken := p.getBearerToken(ctx)
 	apiClient := p.getUserApiClient(ctx, bearerToken)
 
-	err := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandbox(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	err := utils.RetryWithExponentialBackoff(ctx, "getSandbox", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		s, _, e := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
 		sandbox = s
-		return e
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return openapiErr
 	})
 	return sandbox, err
 }

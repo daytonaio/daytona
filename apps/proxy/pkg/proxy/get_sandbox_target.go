@@ -21,10 +21,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*url.URL, map[string]string, error) {
+func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, error) {
 	var targetPort, targetPath, sandboxIdOrSignedToken string
 
-	if toolboxSubpathRequest {
+	if ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
 		// Expected format: /toolbox/<sandboxID>/<targetPath>
 		var err error
 		targetPort, sandboxIdOrSignedToken, targetPath, err = p.parseToolboxSubpath(ctx.Param("path"))
@@ -97,7 +97,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context, toolboxSubpathRequest bool) (*u
 
 	// Build the target URL
 	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxId, targetPort)
-	if toolboxSubpathRequest {
+	if ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
 		targetURL = fmt.Sprintf("%s/sandboxes/%s/toolbox", runnerInfo.ApiUrl, sandboxId)
 	}
 
@@ -128,10 +128,16 @@ func (p *Proxy) getSandboxRunnerInfo(ctx context.Context, sandboxId string) (*Ru
 	}
 
 	var runner *apiclient.RunnerFull
-	err = utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandboxRunnerInfo(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	err = utils.RetryWithExponentialBackoff(ctx, "getSandboxRunnerInfo", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		r, _, e := p.apiclient.RunnersAPI.GetRunnerBySandboxId(context.Background(), sandboxId).Execute()
 		runner = r
-		return e
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return openapiErr
 	})
 	if err != nil {
 		return nil, err
@@ -161,19 +167,24 @@ func (p *Proxy) getSandboxPublic(ctx context.Context, sandboxId string) (*bool, 
 	}
 
 	var isPublic bool
-	err = utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSandboxPublic(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
-		_, resp, apiErr := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
-		if resp != nil && resp.StatusCode == http.StatusOK {
+	err = utils.RetryWithExponentialBackoff(ctx, "getSandboxPublic", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+		_, res, err := p.apiclient.PreviewAPI.IsSandboxPublic(context.Background(), sandboxId).Execute()
+		if res != nil && res.StatusCode == http.StatusOK {
 			isPublic = true
 			return nil
 		}
-		if apiErr != nil {
-			if resp != nil && resp.StatusCode >= 400 && resp.StatusCode < 500 &&
-				resp.StatusCode != http.StatusRequestTimeout && resp.StatusCode != http.StatusTooManyRequests {
+		openapiErr := common_errors.ConvertOpenAPIError(err)
+
+		if err != nil {
+			if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 &&
+				res.StatusCode != http.StatusRequestTimeout && res.StatusCode != http.StatusTooManyRequests {
 				isPublic = false
 				return nil
 			}
-			return apiErr
+			if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+				return &utils.NonRetryableError{Err: openapiErr}
+			}
+			return openapiErr
 		}
 		isPublic = false
 		return nil
@@ -195,12 +206,17 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 		if resp != nil && resp.StatusCode == http.StatusOK {
 			return true, nil
 		}
-		if err != nil {
+		openapiErr := common_errors.ConvertOpenAPIError(err)
+
+		if openapiErr != nil {
 			if resp != nil && resp.StatusCode >= 400 && resp.StatusCode < 500 &&
 				resp.StatusCode != http.StatusRequestTimeout && resp.StatusCode != http.StatusTooManyRequests {
 				return false, nil
 			}
-			return false, fmt.Errorf("failed to validate auth token: %w", err)
+			if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+				return false, &utils.NonRetryableError{Err: openapiErr}
+			}
+			return false, openapiErr
 		}
 		return false, nil
 	}
@@ -229,7 +245,7 @@ func (p *Proxy) validateAndCache(
 	}
 
 	var isValid bool
-	validationErr := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("validateAndCache(%s)", sandboxId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	validationErr := utils.RetryWithExponentialBackoff(ctx, "validateAndCache", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		result, err := apiValidation()
 		if err != nil {
 			return err

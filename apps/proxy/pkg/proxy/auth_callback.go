@@ -18,6 +18,7 @@ import (
 	"golang.org/x/oauth2"
 
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
+	"github.com/daytonaio/common-go/pkg/utils"
 	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 )
 
@@ -192,12 +193,18 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 	if res != nil && res.StatusCode == http.StatusOK {
 		return true, nil
 	}
-	if err != nil {
+	openapiErr := common_errors.ConvertOpenAPIError(err)
+
+	if openapiErr != nil {
 		if res != nil && res.StatusCode >= 400 && res.StatusCode < 500 &&
 			res.StatusCode != http.StatusRequestTimeout && res.StatusCode != http.StatusTooManyRequests {
 			return false, nil
 		}
-		return false, err
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return false, &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return false, openapiErr
 	}
 
 	return false, nil

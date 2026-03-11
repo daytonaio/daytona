@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -72,32 +73,33 @@ func (p *Proxy) Authenticate(ctx *gin.Context, sandboxIdOrSignedToken string, po
 		}
 	}
 
-	cookieDomain := p.getCookieDomain(ctx.Request.Host)
+	if !ctx.GetBool(IS_TOOLBOX_REQUEST_KEY) {
+		cookieDomain := p.getCookieDomain(ctx.Request.Host)
+		sandboxId, err = p.getSandboxIdFromSignedPreviewUrlToken(ctx, sandboxIdOrSignedToken, port, cookieDomain)
+		if err == nil {
+			return sandboxId, false, nil
+		} else {
+			authErrors = append(authErrors, err.Error())
+		}
 
-	sandboxId, err = p.getSandboxIdFromSignedPreviewUrlToken(ctx, sandboxIdOrSignedToken, port, cookieDomain)
-	if err == nil {
-		return sandboxId, false, nil
-	} else {
-		authErrors = append(authErrors, err.Error())
+		// All authentication methods failed, redirect to auth URL
+		authUrl, err := p.getAuthUrl(ctx, sandboxIdOrSignedToken)
+		if err != nil {
+			return sandboxIdOrSignedToken, false, fmt.Errorf("failed to get auth URL: %w", err)
+		}
+
+		ctx.Redirect(http.StatusTemporaryRedirect, authUrl)
 	}
-
-	// All authentication methods failed, redirect to auth URL
-	authUrl, err := p.getAuthUrl(ctx, sandboxIdOrSignedToken)
-	if err != nil {
-		return sandboxIdOrSignedToken, false, fmt.Errorf("failed to get auth URL: %w", err)
-	}
-
-	ctx.Redirect(http.StatusTemporaryRedirect, authUrl)
 
 	// Return error with details about what failed
 	var errorMsg string
 	if len(authErrors) > 0 {
-		errorMsg = fmt.Sprintf("authentication failed:\n%s", strings.Join(authErrors, "\n;\n"))
+		errorMsg = fmt.Sprintf("authentication failed: %s", strings.Join(authErrors, ","))
 	} else {
 		errorMsg = "missing authentication: provide a preview access token (via header, query parameter, or cookie) or use an API key or JWT"
 	}
 
-	return sandboxIdOrSignedToken, true, errors.New(errorMsg)
+	return sandboxIdOrSignedToken, !ctx.GetBool(IS_TOOLBOX_REQUEST_KEY), common_errors.NewUnauthorizedError(errors.New(errorMsg))
 }
 
 func (p *Proxy) getBearerToken(ctx *gin.Context) string {
@@ -110,13 +112,19 @@ func (p *Proxy) getBearerToken(ctx *gin.Context) string {
 
 func (p *Proxy) getSandboxIdFromSignedPreviewUrlToken(ctx *gin.Context, sandboxIdOrSignedToken string, port float32, cookieDomain string) (string, error) {
 	var sandboxId string
-	err := utils.RetryWithExponentialBackoff(ctx.Request.Context(), fmt.Sprintf("getSandboxIdFromSignedPreviewUrlToken(%s)", sandboxIdOrSignedToken), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	err := utils.RetryWithExponentialBackoff(ctx.Request.Context(), "getSandboxIdFromSignedPreviewUrlToken", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		s, _, e := p.apiclient.PreviewAPI.GetSandboxIdFromSignedPreviewUrlToken(ctx.Request.Context(), sandboxIdOrSignedToken, port).Execute()
 		sandboxId = s
-		return e
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return openapiErr
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to get sandbox ID: %w. Is the token expired?", err)
+		return "", err
 	}
 
 	encoded, err := p.secureCookie.Encode(SANDBOX_AUTH_COOKIE_NAME+sandboxIdOrSignedToken, sandboxId)

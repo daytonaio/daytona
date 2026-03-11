@@ -31,7 +31,7 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 
 	snapshot, err := p.getSnapshot(ctx, snapshotId)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get snapshot: %w", err)))
+		ctx.Error(err)
 		return nil, nil, fmt.Errorf("failed to get snapshot: %w", err)
 	}
 
@@ -47,7 +47,7 @@ func (p *Proxy) getSnapshotTarget(ctx *gin.Context) (*url.URL, map[string]string
 
 	runnerInfo, err := p.getRunnerInfo(ctx, *snapshot.InitialRunnerId)
 	if err != nil {
-		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to get runner info: %w", err)))
+		ctx.Error(err)
 		return nil, nil, fmt.Errorf("failed to get runner info: %w", err)
 	}
 
@@ -76,10 +76,16 @@ func (p *Proxy) getSnapshot(ctx *gin.Context, snapshotId string) (*apiclient.Sna
 	bearerToken := p.getBearerToken(ctx)
 	apiClient := p.getUserApiClient(ctx, bearerToken)
 
-	err := utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getSnapshot(%s)", snapshotId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	err := utils.RetryWithExponentialBackoff(ctx, "getSnapshot", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		s, _, e := apiClient.SnapshotsAPI.GetSnapshot(ctx, snapshotId).Execute()
 		snapshot = s
-		return e
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return openapiErr
 	})
 	return snapshot, err
 }
@@ -91,10 +97,16 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, runnerId string) (*RunnerInfo
 	}
 
 	var runner *apiclient.RunnerFull
-	err = utils.RetryWithExponentialBackoff(ctx, fmt.Sprintf("getRunnerInfo(%s)", runnerId), proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
+	err = utils.RetryWithExponentialBackoff(ctx, "getRunnerInfo", proxyMaxRetries, proxyBaseDelay, proxyMaxDelay, func() error {
 		r, _, e := p.apiclient.RunnersAPI.GetRunnerFullById(context.Background(), runnerId).Execute()
 		runner = r
-		return e
+		openapiErr := common_errors.ConvertOpenAPIError(e)
+
+		if !common_errors.IsRetryableOpenAPIError(openapiErr) {
+			return &utils.NonRetryableError{Err: openapiErr}
+		}
+
+		return openapiErr
 	})
 	if err != nil {
 		return nil, err

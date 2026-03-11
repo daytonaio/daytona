@@ -10,7 +10,6 @@ import (
 	"maps"
 	"net"
 	"net/http"
-	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -44,6 +43,7 @@ const ACTIVITY_POLL_STOP_KEY = "daytona-activity-poll-stop"
 const TERMINAL_PORT = "22222"
 const TOOLBOX_PORT = "2280"
 const RECORDING_DASHBOARD_PORT = "33333"
+const IS_TOOLBOX_REQUEST_KEY = "is-toolbox-request"
 
 // stopActivityPoll retrieves and calls the activity poll stop function from the gin context.
 // This ensures the polling goroutine is stopped when the request (including WebSocket) finishes.
@@ -200,6 +200,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			}
 
 			if strings.HasPrefix(ctx.Request.URL.Path, "/toolbox/") {
+				ctx.Set(IS_TOOLBOX_REQUEST_KEY, true)
 				_, sandboxID, _, err := proxy.parseToolboxSubpath(ctx.Request.URL.Path)
 				if err != nil {
 					ctx.Error(common_errors.NewNotFoundError(errors.New("not found")))
@@ -207,10 +208,6 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 				}
 
 				prefix := fmt.Sprintf("/toolbox/%s", sandboxID)
-
-				getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
-					return proxy.GetProxyTarget(ctx, true)
-				}
 
 				modifyResponse := func(res *http.Response) error {
 					if res.StatusCode >= 300 && res.StatusCode < 400 {
@@ -221,7 +218,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 					return nil
 				}
 
-				common_proxy.NewProxyRequestHandler(getProxyTarget, modifyResponse)(ctx)
+				common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, modifyResponse)(ctx)
 				return
 			}
 
@@ -235,11 +232,7 @@ func StartProxy(ctx context.Context, config *config.Config) error {
 			return
 		}
 
-		getProxyTarget := func(ctx *gin.Context) (*url.URL, map[string]string, error) {
-			return proxy.GetProxyTarget(ctx, false)
-		}
-
-		common_proxy.NewProxyRequestHandler(getProxyTarget, nil)(ctx)
+		common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget, nil)(ctx)
 	})
 
 	httpServer := &http.Server{
