@@ -7,6 +7,7 @@ import { Inject, Injectable, Logger, NotFoundException, OnApplicationBootstrap, 
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
 import { LessThan, Repository, IsNull, Not } from 'typeorm'
+import { v4 } from 'uuid'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
 import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
 import { AuditLog } from '../entities/audit-log.entity'
@@ -61,6 +62,7 @@ export class AuditService implements OnApplicationBootstrap {
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
     const auditLog = new AuditLog()
+    auditLog.id = v4()
     auditLog.actorId = createDto.actorId
     auditLog.actorEmail = createDto.actorEmail
     auditLog.organizationId = createDto.organizationId
@@ -73,8 +75,10 @@ export class AuditService implements OnApplicationBootstrap {
     auditLog.userAgent = createDto.userAgent
     auditLog.source = createDto.source
     auditLog.metadata = createDto.metadata
+    auditLog.createdAt = new Date()
 
-    return this.auditLogRepository.save(auditLog, { transaction: false })
+    await this.auditLogRepository.insert(auditLog)
+    return auditLog
   }
 
   async updateLog(id: string, updateDto: UpdateAuditLogInternalDto): Promise<AuditLog> {
