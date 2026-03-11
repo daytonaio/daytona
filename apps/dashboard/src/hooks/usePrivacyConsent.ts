@@ -5,14 +5,19 @@
 
 import { useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
+import { z } from 'zod'
+import { toast } from 'sonner'
 import { create } from 'zustand'
+import { getLocalStorageItem } from '@/lib/local-storage'
 
-export type ConsentPreferences = {
-  necessary: boolean
-  analytics: boolean
-  preferences: boolean
-  marketing: boolean
-}
+const ConsentPreferencesSchema = z.object({
+  necessary: z.boolean(),
+  analytics: z.boolean(),
+  preferences: z.boolean(),
+  marketing: z.boolean(),
+})
+
+export type ConsentPreferences = z.infer<typeof ConsentPreferencesSchema>
 
 const CONSENT_KEY_PREFIX = 'privacy_consent_'
 
@@ -42,9 +47,9 @@ const usePrivacyConsentStore = create<PrivacyConsentState>()((set, get) => ({
 
     const consentKey = `${CONSENT_KEY_PREFIX}${userSub}`
     try {
-      const saved = localStorage.getItem(consentKey)
+      const saved = getLocalStorageItem(consentKey)
       if (saved) {
-        const parsedConsent: ConsentPreferences = JSON.parse(saved)
+        const parsedConsent = ConsentPreferencesSchema.parse(JSON.parse(saved))
         set({ preferences: parsedConsent, hasConsented: true })
       } else {
         set({ preferences: DEFAULT_PREFERENCES, hasConsented: false })
@@ -60,8 +65,12 @@ const usePrivacyConsentStore = create<PrivacyConsentState>()((set, get) => ({
     if (!currentUserSub) return
 
     const consentKey = `${CONSENT_KEY_PREFIX}${currentUserSub}`
-    localStorage.setItem(consentKey, JSON.stringify(newPreferences))
-    set({ preferences: newPreferences, hasConsented: true })
+    try {
+      localStorage.setItem(consentKey, JSON.stringify(newPreferences))
+      set({ preferences: newPreferences, hasConsented: true })
+    } catch {
+      toast.error('Failed to save privacy preferences. Please try again.')
+    }
   },
 }))
 
