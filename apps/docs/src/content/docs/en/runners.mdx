@@ -112,7 +112,14 @@ If needed, these credentials can always be regenerated, but you will need to red
 
 ### List custom regions
 
-Daytona provides an API to list all available regions for your organization.
+Daytona provides methods to list all available regions for your organization using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. The list of regions is displayed in the **Regions** table with the following columns:
+
+- **Name**: the name of the region
+- **ID**: the ID of the region
+- **Created**: the date and time the region was created
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -131,7 +138,16 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations
 
 ### Get a custom region
 
-Daytona provides an API to get the details of a specific region.
+Daytona provides methods to get the details of a specific region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/GET/regions/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to get the details of
+3. The region details are displayed in the **Region Details** panel with the following information:
+
+- **Name**: the name of the region
+- **ID**: the ID of the region
+- **Created**: the date and time the region was created
+- **URLs**: the URLs of the region's proxy, SSH gateway, and snapshot manager services
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -150,7 +166,17 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations
 
 ### Update a custom region
 
-Daytona provides an API to update the configuration of an existing custom region.
+Daytona provides methods to update the configuration of an existing custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/PATCH/regions/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to update the configuration of
+3. Click the three dots menu (**⋮**) next to the region and select the **Edit** icon
+4. Enter the new **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
+5. Click **Update** to update the region configuration
+
+- **Proxy URL** (optional): the new URL of the custom proxy for this region
+- **SSH gateway URL** (optional): the new URL of the custom SSH gateway for this region
+- **Snapshot manager URL** (optional): the new URL of the custom snapshot manager for this region
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -176,7 +202,12 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/organizations
 
 ### Delete a custom region
 
-Daytona provides an API to delete a custom region.
+Daytona provides methods to delete a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/DELETE/regions/{id}). Regions that have runners assigned to them cannot be deleted.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the region you want to delete
+3. Click the three dots menu (**⋮**) next to the region and select **Delete**
+4. Confirm the deletion
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -320,7 +351,16 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) refe
 
 ### List custom runners
 
-Daytona provides an API to list all runners in your organization.
+Daytona provides methods to list all runners in your organization using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners) or programmatically using the [API](/docs/en/tools/api#daytona/tag/runners/GET/runners).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners)
+2. The list of runners is displayed in the **Runners** table with the following columns:
+
+- **ID**: the ID of the runner
+- **Name**: the name of the runner
+- **Region**: the region this runner is assigned to
+- **State**: the state of the runner
+- **Schedulable**: checkbox to mark the runner as unschedulable
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -339,7 +379,24 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) refe
 
 ### Get a custom runner
 
-Daytona provides an API to get the details of a specific runner.
+Daytona provides methods to get the details of a specific runner using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners) or programmatically using the [API](/docs/en/tools/api#daytona/tag/runners/GET/runners/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners)
+2. Click the runner you want to get the details of
+3. The runner details are displayed in the **Runner Details** panel with the following information:
+
+- **Name**: the name of the runner
+- **UUID**: the UUID of the runner
+- **State**: the state of the runner
+- **Schedulable**: whether the runner is schedulable
+- **Region**: the region this runner is assigned to
+- **Version**: the version of the runner
+- **Health metrics**: the health metrics of the runner (availability score, CPU, memory, disk usage)
+- **Active sandboxes**: the number of active sandboxes running on the runner
+- **Snapshots**: the number of snapshots stored on the runner
+- **Total resources**: the total resources allocated to the runner (CPU, memory, disk)
+- **Created at**: the date and time the runner was created
+- **Updated at**: the date and time the runner was last updated
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -358,7 +415,10 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) refe
 
 ### Update runner scheduling
 
-Daytona provides an API to update the scheduling status of a runner. This allows you to mark a runner as unschedulable, preventing new sandboxes from being assigned to it.
+Daytona provides methods to update the scheduling status of a runner using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners) or programmatically using the [API](/docs/en/tools/api#daytona/tag/runners/PATCH/runners/{id}/scheduling). This allows you to mark a runner as unschedulable, preventing new sandboxes from being assigned to it.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners)
+2. Use the checkbox to mark the runner as unschedulable or schedulable
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -378,7 +438,11 @@ For more information, see the [API](/docs/en/tools/api#daytona/tag/runners) refe
 
 ### Delete a custom runner
 
-Daytona provides an API to delete a custom runner.
+Daytona provides methods to delete a custom runner using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners) or programmatically using the [API](/docs/en/tools/api#daytona/tag/runners/DELETE/runners/{id}).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners)
+2. Click the three dots menu (**⋮**) next to the runner you want to delete and select **Delete**
+3. Confirm the deletion
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
