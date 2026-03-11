@@ -86,6 +86,7 @@ const configuration = {
     accountId: process.env.S3_ACCOUNT_ID,
     roleName: process.env.S3_ROLE_NAME,
   },
+  notificationGatewayDisabled: process.env.NOTIFICATION_GATEWAY_DISABLED === 'true',
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
   maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
   maintananceMode: process.env.MAINTENANCE_MODE === 'true',

@@ -25,12 +25,13 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { RunnerDto } from '../../sandbox/dto/runner.dto'
 import { RunnerState } from '../../sandbox/enums/runner-state.enum'
 import { RunnerEvents } from '../../sandbox/constants/runner-events'
+import { NotificationEmitterInterface } from '../interfaces/notification-emitter.interface'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
   transports: ['websocket'],
 })
-export class NotificationGateway implements OnGatewayInit, OnModuleInit {
+export class NotificationGateway extends NotificationEmitterInterface implements OnGatewayInit, OnModuleInit {
   private readonly logger = new Logger(NotificationGateway.name)
 
   @WebSocketServer()
@@ -40,7 +41,9 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
     private readonly jwtStrategy: JwtStrategy,
     private readonly apiKeyStrategy: ApiKeyStrategy,
     @InjectRedis() private readonly redis: Redis,
-  ) {}
+  ) {
+    super()
+  }
 
   onModuleInit() {
     const pubClient = this.redis.duplicate()
