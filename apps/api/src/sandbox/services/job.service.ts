@@ -16,6 +16,8 @@ import { JobStateHandlerService } from './job-state-handler.service'
 import { propagation, context as otelContext } from '@opentelemetry/api'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
+const REDIS_BLOCKING_COMMAND_TIMEOUT_BUFFER_MS = 3_000
+
 @Injectable()
 export class JobService {
   private readonly logger = new Logger(JobService.name)
@@ -133,7 +135,11 @@ export class JobService {
     try {
       this.logger.debug(`No existing jobs, runner ${runnerId} starting BRPOP with timeout ${maxTimeout}s`)
 
-      blockingClient = this.redis.duplicate()
+      blockingClient = this.redis.duplicate({
+        commandTimeout: maxTimeout * 1000 + REDIS_BLOCKING_COMMAND_TIMEOUT_BUFFER_MS,
+        enableOfflineQueue: false,
+        retryStrategy: () => null,
+      })
 
       // Wrap BRPOP in a promise that can be aborted
       const brpopPromise = blockingClient.brpop(queueKey, maxTimeout)
@@ -194,9 +200,9 @@ export class JobService {
       // Always close the blocking client to prevent connection leaks
       if (blockingClient) {
         try {
-          await blockingClient.quit()
+          blockingClient.disconnect()
         } catch (error) {
-          this.logger.warn(`Failed to close blocking Redis client: ${error.message}`)
+          this.logger.warn(`Failed to disconnect blocking Redis client for runner ${runnerId}: ${error.message}`)
         }
       }
     }
