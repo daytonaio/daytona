@@ -50,7 +50,18 @@ Additionally, custom regions have no limits applied for concurrent resource usag
 
 ### Create a custom region
 
-Daytona provides an API to programmatically create a custom region.
+Daytona provides methods to create a custom region using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions) or programmatically using the [API](/docs/en/tools/api#daytona/tag/organizations/POST/regions).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/regions)
+2. Click the **Create Region** button
+3. Enter the **region name**, **proxy URL**, **SSH gateway URL**, and **snapshot manager URL**
+
+- **Region name**: the name of the region; must contain only letters, numbers, underscores, periods, and hyphens.
+- **Proxy URL** (optional): the URL of the custom proxy for this region
+- **SSH gateway URL** (optional): the URL of the custom SSH gateway for this region
+- **Snapshot manager URL** (optional): the URL of the custom snapshot manager for this region
+
+4. Click **Create** to create the region
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -263,7 +274,15 @@ Custom runners are created and managed by your organization, allowing you to use
 
 ### Create a custom runner
 
-Daytona provides an API to create a custom runner.
+Daytona provides methods to create a custom runner using the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners) or programmatically using the [API](/docs/en/tools/api#daytona/tag/runners/POST/runners).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/runners)
+2. Click the **Create Runner** button
+3. Select a **region** and enter its **name**
+4. Click **Create** to create the runner
+
+- **Region**: the region this runner is assigned to
+- **Name**: the name of the runner
 
 <Tabs>
 <TabItem label="API" icon="seti:json">
@@ -282,7 +301,7 @@ curl https://app.daytona.io/api/runners \
 </TabItem>
 </Tabs>
 
-The response includes the runner ID and an API key token:
+Upon creating a runner, you will be presented with a secure token that you can use to authenticate the runner with the Daytona control plane. The response includes the runner ID and the API key token:
 
 ```json
 {
