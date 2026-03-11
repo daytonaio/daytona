@@ -4,7 +4,7 @@ title: API Keys
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona API keys are used to authenticate requests to the [Daytona API](/docs/en/tools/api).
+Daytona API keys authenticate requests to the [Daytona API](/docs/en/tools/api). They are used by the Daytona [SDKs](/docs/en/getting-started#sdks) and [CLI](/docs/en/getting-started#cli) to access and manage resources in your organization.
 
 ## Create an API key
 
@@ -17,6 +17,8 @@ Daytona provides options to create API keys in [Daytona Dashboard ↗](https://a
 5. Copy the API key to your clipboard
 
 To use the API key in your application, set the `DAYTONA_API_KEY` environment variable. Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
+
+API keys support optional expiration and can be revoked at any time. After creation, you can only retrieve a masked key value when listing keys.
 
 <Tabs syncKey="language">
 <TabItem label="API" icon="seti:json">
@@ -119,7 +121,11 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) re
 
 ## Delete API key
 
-Daytona provides options to delete an API key by name. The key is revoked immediately and cannot be recovered.
+Daytona provides options to delete an API key in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or programmatically using the API. The key is revoked immediately and cannot be recovered.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys)
+2. Click **Revoke** next to the API key you want to delete
+3. Confirm the revocation
 
 <Tabs syncKey="language">
 <TabItem label="API" icon="seti:json">
