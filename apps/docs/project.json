@@ -34,7 +34,7 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["api:openapi", "copy-toolbox-openapi"],
+      "dependsOn": ["api:openapi", "copy-openapi", "copy-toolbox-openapi"],
       "configurations": {
         "production": {
           "commands": [
@@ -77,12 +77,30 @@
     "copy-toolbox-openapi": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": ["{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json"],
+      "inputs": [
+        "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
       "outputs": ["{projectRoot}/public/toolbox-openapi.json"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "cp ../../apps/daemon/pkg/toolbox/docs/swagger.json ./public/toolbox-openapi.json"
-      }
+      },
+      "dependsOn": ["daemon:openapi"]
+    },
+    "copy-openapi": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{workspaceRoot}/dist/apps/api/openapi.3.1.0.json",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{projectRoot}/public/openapi.json"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "cp ../../dist/apps/api/openapi.3.1.0.json ./public/openapi.json"
+      },
+      "dependsOn": ["api:openapi"]
     },
     "check-version-env": {},
     "docker": {
