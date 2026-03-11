@@ -87,29 +87,29 @@ export class SandboxActivityService {
       let totalFlushed = 0
 
       const batchSize = this.configService.getOrThrow('sandboxActivity.flushBatchSize')
+      const maxScore = Date.now()
 
-      while (true) {
-        const entries = await this.redis.zpopmin(REDIS_ACTIVITY_KEY, batchSize)
+      const entries = await this.redis.zrangebyscore(REDIS_ACTIVITY_KEY, '-inf', maxScore, 'WITHSCORES')
 
-        if (entries.length === 0) {
-          break
-        }
-
-        const updates: SandboxActivityUpdate[] = []
-        for (let i = 0; i < entries.length; i += 2) {
-          updates.push({
-            sandboxId: entries[i],
-            lastActivityAt: new Date(Number(entries[i + 1])),
-          })
-        }
-
-        await this.bulkUpsertActivity(updates)
-        totalFlushed += updates.length
-
-        if (updates.length < batchSize) {
-          break
-        }
+      if (entries.length === 0) {
+        return
       }
+
+      const updates: SandboxActivityUpdate[] = []
+      for (let i = 0; i < entries.length; i += 2) {
+        updates.push({
+          sandboxId: entries[i],
+          lastActivityAt: new Date(Number(entries[i + 1])),
+        })
+      }
+
+      for (let offset = 0; offset < updates.length; offset += batchSize) {
+        const batch = updates.slice(offset, offset + batchSize)
+        await this.bulkUpsertActivity(batch)
+        totalFlushed += batch.length
+      }
+
+      await this.redis.zremrangebyscore(REDIS_ACTIVITY_KEY, '-inf', maxScore)
 
       if (totalFlushed > 0) {
         this.logger.debug(`Flushed ${totalFlushed} activity timestamps to the database`)
