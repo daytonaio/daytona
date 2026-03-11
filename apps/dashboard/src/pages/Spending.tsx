@@ -5,19 +5,26 @@
 
 import { BillableMetricCode, OrganizationUsage } from '@/billing-api/types/OrganizationUsage'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { UsageChart, UsageChartData } from '@/components/UsageChart'
-import { AggregatedUsageChart } from '@/components/spending/AggregatedUsageChart'
+import { AggregatedUsageChart, ResourceUsageBreakdown, UsageSummary } from '@/components/spending/AggregatedUsageChart'
+import { CostBreakdown } from '@/components/spending/CostBreakdown'
+import { UsageChartData } from '@/components/spending/ResourceUsageChart'
 import { SandboxUsageTable } from '@/components/spending/SandboxUsageTable'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useConfig } from '@/hooks/useConfig'
-import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { FeatureFlags } from '@/enums/FeatureFlags'
-import { useCallback, useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
-import { DateRange } from 'react-day-picker'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Separator } from '@/components/ui/separator'
+import { FeatureFlags } from '@/enums/FeatureFlags'
+import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
+import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
+import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizationUsageQuery'
+import { useConfig } from '@/hooks/useConfig'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { subDays } from 'date-fns'
+import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
+import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 
 const analyticsQuickRanges: QuickRangesConfig = {
   hours: [1, 6, 12, 24],
@@ -26,14 +33,9 @@ const analyticsQuickRanges: QuickRangesConfig = {
 
 const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
-  const { billingApi } = useApi()
   const config = useConfig()
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
   const analyticsAvailable = spendingEnabled && !!config.analyticsApiUrl
-  const [currentOrganizationUsage, setCurrentOrganizationUsage] = useState<OrganizationUsage | null>(null)
-  const [currentOrganizationUsageLoading, setCurrentOrganizationUsageLoading] = useState(true)
-  const [pastOrganizationUsage, setPastOrganizationUsage] = useState<OrganizationUsage[]>([])
-  const [pastOrganizationUsageLoading, setPastOrganizationUsageLoading] = useState(true)
 
   const [analyticsDateRange, setAnalyticsDateRange] = useState<DateRange>(() => {
     const now = new Date()
@@ -46,46 +48,51 @@ const Spending = () => {
     enabled: analyticsAvailable && !!selectedOrganization,
   }
 
-  const { data: aggregatedUsage, isLoading: aggregatedLoading } = useAggregatedUsage(analyticsParams)
-  const { data: sandboxesUsage, isLoading: sandboxesLoading } = useSandboxesUsage(analyticsParams)
+  const {
+    data: aggregatedUsage,
+    isLoading: aggregatedLoading,
+    isError: aggregatedError,
+    refetch: refetchAggregated,
+  } = useAggregatedUsage(analyticsParams)
+  const {
+    data: sandboxesUsage,
+    isLoading: sandboxesLoading,
+    isError: sandboxesError,
+    refetch: refetchSandboxes,
+  } = useSandboxesUsage(analyticsParams)
 
-  const fetchOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setCurrentOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getOrganizationUsage(selectedOrganization.id)
-      setCurrentOrganizationUsage(data)
-    } catch (error) {
-      console.error('Failed to fetch organization usage data:', error)
-    } finally {
-      setCurrentOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
+  const {
+    data: currentOrganizationUsage,
+    isLoading: currentUsageLoading,
+    isError: currentUsageError,
+    refetch: refetchCurrentUsage,
+  } = useOrganizationUsageQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: !!selectedOrganization,
+  })
 
-  const fetchPastOrganizationUsage = useCallback(async () => {
-    if (!selectedOrganization) {
-      return
-    }
-    setPastOrganizationUsageLoading(true)
-    try {
-      const data = await billingApi.getPastOrganizationUsage(selectedOrganization.id)
-      setPastOrganizationUsage(data.sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()))
-    } catch (error) {
-      console.error('Failed to fetch past organization usage data:', error)
-    } finally {
-      setPastOrganizationUsageLoading(false)
-    }
-  }, [billingApi, selectedOrganization])
+  const {
+    data: pastOrganizationUsage,
+    isLoading: pastUsageLoading,
+    isError: pastUsageError,
+    refetch: refetchPastUsage,
+  } = usePastOrganizationUsageQuery({
+    organizationId: selectedOrganization?.id ?? '',
+    enabled: !!selectedOrganization,
+  })
 
-  useEffect(() => {
-    if (!selectedOrganization) {
-      return
-    }
-    fetchOrganizationUsage()
-    fetchPastOrganizationUsage()
-  }, [fetchOrganizationUsage, fetchPastOrganizationUsage, selectedOrganization])
+  const sortedPastUsage = useMemo(
+    () => [...(pastOrganizationUsage ?? [])].sort((a, b) => new Date(a.from).getTime() - new Date(b.from).getTime()),
+    [pastOrganizationUsage],
+  )
+
+  const usageChartData = useMemo(
+    () =>
+      [...sortedPastUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
+        convertUsageToChartData,
+      ),
+    [sortedPastUsage, currentOrganizationUsage],
+  )
 
   return (
     <PageLayout>
@@ -93,11 +100,13 @@ const Spending = () => {
         <PageTitle>Spending</PageTitle>
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent>
         {analyticsAvailable && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-lg font-semibold shrink-0">Resource Usage</h2>
+          <Card>
+            <CardHeader className="flex flex-row items-center gap-2 space-y-0 border-b p-4">
+              <div className="flex-1">
+                <CardTitle>Resource Usage</CardTitle>
+              </div>
               <DateRangePicker
                 value={analyticsDateRange}
                 onChange={setAnalyticsDateRange}
@@ -106,20 +115,99 @@ const Spending = () => {
                 timeSelection
                 defaultSelectedQuickRange="Last 30 days"
                 className="w-auto"
+                contentAlign="end"
               />
+            </CardHeader>
+            {aggregatedError ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                    <AlertCircle />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-destructive">Failed to load resource usage</EmptyTitle>
+                  <EmptyDescription>Something went wrong while fetching usage data. Please try again.</EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => refetchAggregated()}>
+                    <RefreshCw />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : !aggregatedLoading && !aggregatedUsage?.sandboxCount ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BarChart3 />
+                  </EmptyMedia>
+                  <EmptyTitle>No resource usage data</EmptyTitle>
+                  <EmptyDescription>
+                    Usage data will appear here once your sandboxes start consuming resources in the selected time
+                    range.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <>
+                <UsageSummary data={aggregatedUsage} isLoading={aggregatedLoading} />
+                <Separator />
+                <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
+                <Separator />
+                <ResourceUsageBreakdown data={aggregatedUsage} />
+              </>
+            )}
+            <Separator />
+            <div className="p-4">
+              <p className="text-xl font-semibold leading-none tracking-tight">Per-Sandbox Usage</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Resource consumption broken down by individual sandbox.
+              </p>
             </div>
-
-            <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
-            <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
-          </div>
+            {sandboxesError ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                    <AlertCircle />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-destructive">Failed to load sandbox usage</EmptyTitle>
+                  <EmptyDescription>
+                    Something went wrong while fetching per-sandbox data. Please try again.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => refetchSandboxes()}>
+                    <RefreshCw />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : !sandboxesLoading && !sandboxesUsage?.length ? (
+              <Empty className="py-12">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <BarChart3 />
+                  </EmptyMedia>
+                  <EmptyTitle>No sandbox usage yet</EmptyTitle>
+                  <EmptyDescription>
+                    Once you create and run a sandbox, its resource consumption will appear here.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              <SandboxUsageTable data={sandboxesUsage} isLoading={sandboxesLoading} />
+            )}
+          </Card>
         )}
 
-        <UsageChart
-          title="Monthly Breakdown"
-          usageData={[...pastOrganizationUsage, ...(currentOrganizationUsage ? [currentOrganizationUsage] : [])].map(
-            convertUsageToChartData,
-          )}
+        <CostBreakdown
+          usageData={usageChartData}
           showTotal
+          isLoading={currentUsageLoading || pastUsageLoading}
+          isError={currentUsageError || pastUsageError}
+          onRetry={() => {
+            if (currentUsageError) refetchCurrentUsage()
+            if (pastUsageError) refetchPastUsage()
+          }}
         />
       </PageContent>
     </PageLayout>

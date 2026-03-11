@@ -29,6 +29,7 @@ export const queryKeys = {
     usage: {
       overview: (organizationId: string) =>
         [...queryKeys.organization.all, organizationId, 'usage', 'overview'] as const,
+      current: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'usage', 'current'] as const,
       past: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'usage', 'past'] as const,
     },
 
