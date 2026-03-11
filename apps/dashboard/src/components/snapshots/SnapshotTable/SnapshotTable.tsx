@@ -4,6 +4,7 @@
  */
 
 import { useCommandPaletteActions } from '@/components/CommandPalette'
+import { trackCommandPaletteOpened } from '@/hooks/useCommandPaletteAnalytics'
 import { SelectionToast } from '@/components/SelectionToast'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SnapshotSorting } from '@/hooks/queries/useSnapshotsQuery'
@@ -195,6 +196,7 @@ export function SnapshotTable({
 
   const { setIsOpen } = useCommandPaletteActions()
   const handleOpenCommandPalette = () => {
+    trackCommandPaletteOpened('snapshot_selection_toast')
     setIsOpen(true)
   }
 
