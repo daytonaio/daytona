@@ -75,7 +75,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 
 		d.logger.InfoContext(ctx, "mounting S3 volume", "volumeId", volumeIdPrefixed, "subpath", subpathStr, "runnerVolumeMountPath", runnerVolumeMountPath)
 
-		cmd := d.getMountCmd(ctx, volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
+		cmd := d.getMountCmd(volumeIdPrefixed, vol.Subpath, runnerVolumeMountPath)
 		err = cmd.Run()
 		if err != nil {
 			if !dirExisted {
@@ -174,7 +174,7 @@ func (d *DockerClient) waitForMountReady(ctx context.Context, path string) error
 	return fmt.Errorf("mount did not become ready within timeout")
 }
 
-func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *string, path string) *exec.Cmd {
+func (d *DockerClient) getMountCmd(volume string, subpath *string, path string) *exec.Cmd {
 	args := []string{"--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777"}
 
 	if subpath != nil && *subpath != "" {
@@ -188,7 +188,8 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *
 
 	args = append(args, volume, path)
 
-	cmd := exec.CommandContext(ctx, "mount-s3", args...)
+	// exec.Command (not CommandContext) — mount-s3 daemonizes and must survive runner shutdown.
+	cmd := exec.Command("mount-s3", args...)
 
 	if d.awsEndpointUrl != "" {
 		cmd.Env = append(cmd.Env, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)

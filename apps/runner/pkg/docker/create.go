@@ -5,8 +5,10 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 	"time"
 
@@ -58,7 +60,15 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
-		_, daemonVersion, err := d.Start(ctx, sandboxDto.Id, sandboxDto.AuthToken, sandboxDto.Metadata)
+		metadata := maps.Clone(sandboxDto.Metadata)
+		if len(sandboxDto.Volumes) > 0 {
+			if metadata == nil {
+				metadata = make(map[string]string)
+			}
+			volumesJSON, _ := json.Marshal(sandboxDto.Volumes)
+			metadata["volumes"] = string(volumesJSON)
+		}
+		_, daemonVersion, err := d.Start(ctx, sandboxDto.Id, sandboxDto.AuthToken, metadata)
 		if err != nil {
 			return "", "", err
 		}

@@ -496,7 +496,12 @@ export class SandboxStartAction extends SandboxAction {
 
       const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-      const metadata: { [key: string]: string } | undefined = organization?.sandboxMetadata
+      const metadata: { [key: string]: string } = { ...organization?.sandboxMetadata }
+      if (sandbox.volumes?.length) {
+        metadata['volumes'] = JSON.stringify(
+          sandbox.volumes.map((v) => ({ volumeId: v.volumeId, mountPath: v.mountPath, subpath: v.subpath })),
+        )
+      }
 
       try {
         await runnerAdapter.startSandbox(sandbox.id, sandbox.authToken, metadata)
