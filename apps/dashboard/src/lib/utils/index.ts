@@ -119,12 +119,16 @@ export function formatAmount(amount: number): string {
   }).format((amount ?? 0) / 100)
 }
 
-export function formatMoney(value: number): string {
+export function formatMoney(
+  value: number,
+  options?: { minimumFractionDigits?: number; maximumFractionDigits?: number },
+): string {
   return Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+    ...options,
   }).format(value)
 }
 

@@ -4,29 +4,29 @@
  */
 
 import { BillingApiClient } from '@/billing-api/billingApiClient'
+import { DashboardConfig } from '@/types/DashboardConfig'
+import {
+  Configuration as AnalyticsConfiguration,
+  TelemetryApi as AnalyticsTelemetryApi,
+  UsageApi as AnalyticsUsageApi,
+} from '@daytonaio/analytics-api-client'
 import {
   ApiKeysApi,
+  AuditApi,
   Configuration,
   DockerRegistryApi,
-  SnapshotsApi,
   OrganizationsApi,
-  UsersApi,
-  VolumesApi,
-  SandboxApi,
-  ToolboxApi,
-  AuditApi,
   RegionsApi,
   RunnersApi,
+  SandboxApi,
+  SnapshotsApi,
+  ToolboxApi,
+  UsersApi,
+  VolumesApi,
   WebhooksApi,
 } from '@daytonaio/api-client'
-import {
-  UsageApi as AnalyticsUsageApi,
-  TelemetryApi as AnalyticsTelemetryApi,
-  Configuration as AnalyticsConfiguration,
-} from '@daytonaio/analytics-api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
-import { DashboardConfig } from '@/types/DashboardConfig'
 
 export class ApiClient {
   private config: Configuration
@@ -66,7 +66,7 @@ export class ApiClient {
           errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
         }
 
-        throw DaytonaError.fromString(String(errorMessage))
+        throw DaytonaError.fromString(String(errorMessage), { cause: error instanceof Error ? error : undefined })
       },
     )
 

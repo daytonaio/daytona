@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { NuqsAdapter } from 'nuqs/adapters/react-router/v6'
 import React, { Suspense } from 'react'
 import ReactDOM from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -35,11 +36,13 @@ enableMocking().then(() =>
           <ThemeProvider>
             <Suspense fallback={<LoadingFallback />}>
               <ConfigProvider>
-                <PostHogProviderWrapper>
-                  <BrowserRouter>
-                    <App />
-                  </BrowserRouter>
-                </PostHogProviderWrapper>
+                <BrowserRouter>
+                  <PostHogProviderWrapper>
+                    <NuqsAdapter>
+                      <App />
+                    </NuqsAdapter>
+                  </PostHogProviderWrapper>
+                </BrowserRouter>
               </ConfigProvider>
             </Suspense>
           </ThemeProvider>
