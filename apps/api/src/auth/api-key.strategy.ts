@@ -9,7 +9,6 @@ import { Strategy } from 'passport-http-bearer'
 import { ApiKeyService } from '../api-key/api-key.service'
 import { ApiKey } from '../api-key/api-key.entity'
 import { UserService } from '../user/user.service'
-import { AuthContextType } from '../common/interfaces/auth-context.interface'
 import { TypedConfigService } from '../config/typed-config.service'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
@@ -20,6 +19,24 @@ import { RegionService } from '../region/services/region.service'
 import { JWT_REGEX } from './constants/jwt-regex.constant'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
 import { Request } from 'express'
+import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
+import { ProxyAuthContext } from '../common/interfaces/proxy-auth-context.interface'
+import { RunnerAuthContext } from '../common/interfaces/runner-auth-context.interface'
+import { SshGatewayAuthContext } from '../common/interfaces/ssh-gateway-auth-context.interface'
+import { RegionProxyAuthContext } from '../common/interfaces/region-proxy-auth-context.interface'
+import { RegionSSHGatewayAuthContext } from '../common/interfaces/region-ssh-gateway-auth-context.interface'
+import { OtelCollectorAuthContext } from '../common/interfaces/otel-collector-auth-context.interface'
+import { HealthCheckAuthContext } from '../common/interfaces/health-check-auth-context.interface'
+
+type ApiKeyAuthContext =
+  | UserAuthContext
+  | ProxyAuthContext
+  | RunnerAuthContext
+  | SshGatewayAuthContext
+  | RegionProxyAuthContext
+  | RegionSSHGatewayAuthContext
+  | OtelCollectorAuthContext
+  | HealthCheckAuthContext
 
 type UserCache = {
   userId: string
@@ -28,7 +45,7 @@ type UserCache = {
 }
 
 @Injectable()
-export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implements OnModuleInit {
+export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.API_KEY) implements OnModuleInit {
   private readonly logger = new Logger(ApiKeyStrategy.name)
 
   constructor(
@@ -47,12 +64,12 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(request: Request, token: string): Promise<AuthContextType | null> {
+  async validate(request: Request, token: string): Promise<ApiKeyAuthContext | null> {
     request.authStrategyType = AuthStrategyType.API_KEY
     return this.validateToken(token)
   }
 
-  async validateToken(token: string): Promise<AuthContextType | null> {
+  async validateToken(token: string): Promise<ApiKeyAuthContext | null> {
     this.logger.debug('Validate method called')
     this.logger.debug(`Validating API key: ${token.substring(0, 8)}...`)
 
