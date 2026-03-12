@@ -5,7 +5,6 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { VolumeService } from '../services/volume.service'
 
 @Injectable()
@@ -27,7 +26,7 @@ export class VolumeAccessGuard implements CanActivate {
       const params = volumeId ? { id: volumeId } : { name: volumeName, organizationId: authContext.organizationId }
       const volumeOrganizationId = await this.volumeService.getOrganizationId(params)
 
-      if (authContext.role !== SystemRole.ADMIN && volumeOrganizationId !== authContext.organizationId) {
+      if (volumeOrganizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
     } catch {

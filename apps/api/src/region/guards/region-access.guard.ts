@@ -14,7 +14,6 @@ import {
 import { RegionService } from '../services/region.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../enums/region-type.enum'
 
 @Injectable()
@@ -34,10 +33,10 @@ export class RegionAccessGuard implements CanActivate {
       if (!region) {
         throw new NotFoundException('Region not found')
       }
-      if (authContext.role !== SystemRole.ADMIN && region.organizationId !== authContext.organizationId) {
+      if (region.organizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      if (authContext.role !== SystemRole.ADMIN && region.regionType !== RegionType.CUSTOM) {
+      if (region.regionType !== RegionType.CUSTOM) {
         throw new ForbiddenException('Region is not a custom region')
       }
       return true

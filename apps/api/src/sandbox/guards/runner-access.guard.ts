@@ -16,7 +16,6 @@ import { RunnerService } from '../services/runner.service'
 import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { isRegionProxyAuthContext } from '../../common/interfaces/region-proxy-auth-context.interface'
 import { isRegionSSHGatewayAuthContext } from '../../common/interfaces/region-ssh-gateway-auth-context.interface'
@@ -51,17 +50,15 @@ export class RunnerAccessGuard implements CanActivate {
         case isSshGatewayAuthContext(authContext):
           return true
         case isOrganizationAuthContext(authContext): {
-          if (authContext.role !== SystemRole.ADMIN) {
-            const region = await this.regionService.findOne(runner.region)
-            if (!region) {
-              throw new NotFoundException('Region not found')
-            }
-            if (region.organizationId !== authContext.organizationId) {
-              throw new ForbiddenException('Request organization ID does not match resource organization ID')
-            }
-            if (region.regionType !== RegionType.CUSTOM) {
-              throw new ForbiddenException('Runner is not in a custom region')
-            }
+          const region = await this.regionService.findOne(runner.region)
+          if (!region) {
+            throw new NotFoundException('Region not found')
+          }
+          if (region.organizationId !== authContext.organizationId) {
+            throw new ForbiddenException('Request organization ID does not match resource organization ID')
+          }
+          if (region.regionType !== RegionType.CUSTOM) {
+            throw new ForbiddenException('Runner is not in a custom region')
           }
           return true
         }

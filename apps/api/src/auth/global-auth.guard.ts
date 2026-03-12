@@ -6,8 +6,8 @@
 import { ExecutionContext, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
-import { Request } from 'express'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
+import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata.interface'
 import { isPublic } from './decorators/public.decorator'
 import { AuthStrategy } from './decorators/auth-strategy.decorator'
 
@@ -46,7 +46,7 @@ export class GlobalAuthGuard extends AuthGuard([AuthStrategyType.API_KEY, AuthSt
       throw new UnauthorizedException('Invalid credentials')
     }
 
-    const request = context.switchToHttp().getRequest<Request>()
+    const request = context.switchToHttp().getRequest<RequestWithAuthMetadata>()
 
     // Should never happen - defensive check.
     if (!request.authStrategyType) {

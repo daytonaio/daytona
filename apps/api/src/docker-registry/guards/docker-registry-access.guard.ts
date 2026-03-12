@@ -7,7 +7,6 @@ import { Injectable, CanActivate, ExecutionContext, NotFoundException, Forbidden
 import { DockerRegistryService } from '../services/docker-registry.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegistryType } from '../enums/registry-type.enum'
 
 @Injectable()
@@ -22,10 +21,10 @@ export class DockerRegistryAccessGuard implements CanActivate {
 
     try {
       const dockerRegistry = await this.dockerRegistryService.findOneOrFail(dockerRegistryId)
-      if (authContext.role !== SystemRole.ADMIN && dockerRegistry.organizationId !== authContext.organizationId) {
+      if (dockerRegistry.organizationId !== authContext.organizationId) {
         throw new ForbiddenException('Request organization ID does not match resource organization ID')
       }
-      if (authContext.role !== SystemRole.ADMIN && dockerRegistry.registryType !== RegistryType.ORGANIZATION) {
+      if (dockerRegistry.registryType !== RegistryType.ORGANIZATION) {
         // only allow access to registries manually created by the organization
         throw new ForbiddenException(`Requested registry is not type "${RegistryType.ORGANIZATION}"`)
       }

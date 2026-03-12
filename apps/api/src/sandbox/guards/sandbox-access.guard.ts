@@ -9,7 +9,6 @@ import { isBaseAuthContext } from '../../common/interfaces/auth-context.interfac
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 import { isRegionProxyAuthContext } from '../../common/interfaces/region-proxy-auth-context.interface'
@@ -50,7 +49,7 @@ export class SandboxAccessGuard implements CanActivate {
             sandboxIdOrName,
             authContext.organizationId,
           )
-          if (authContext.role !== SystemRole.ADMIN && sandboxOrganizationId !== authContext.organizationId) {
+          if (sandboxOrganizationId !== authContext.organizationId) {
             throw new ForbiddenException('Request organization ID does not match resource organization ID')
           }
           break

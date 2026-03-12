@@ -1547,12 +1547,6 @@ paths:
                   $ref: '#/components/schemas/Region'
                 type: array
           description: List of all shared regions
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
       summary: List all shared regions
       tags:
       - regions
@@ -8350,6 +8344,10 @@ paths:
           description: App Portal access generated successfully
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Get Svix Consumer App Portal access for an organization
       tags:
       - webhooks
@@ -8383,6 +8381,10 @@ paths:
           description: Webhook initialization status not found
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Get webhook initialization status for an organization
       tags:
       - webhooks
@@ -12929,7 +12931,6 @@ components:
       type: object
     CreateSnapshot:
       example:
-        general: true
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -12954,9 +12955,6 @@ components:
           items:
             type: string
           type: array
-        general:
-          description: Whether the snapshot is general
-          type: boolean
         cpu:
           description: CPU cores allocated to the resulting sandbox
           example: 1
@@ -13814,9 +13812,7 @@ components:
       type: object
     CreateDockerRegistry:
       example:
-        registryType: organization
         password: password
-        isDefault: true
         name: name
         project: project
         url: url
@@ -13837,22 +13833,9 @@ components:
         project:
           description: Registry project
           type: string
-        registryType:
-          default: organization
-          description: Registry type
-          enum:
-          - internal
-          - organization
-          - transient
-          - backup
-          type: string
-        isDefault:
-          description: Set as default registry
-          type: boolean
       required:
       - name
       - password
-      - registryType
       - url
       - username
       type: object

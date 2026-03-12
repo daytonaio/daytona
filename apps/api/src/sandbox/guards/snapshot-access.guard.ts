@@ -8,7 +8,6 @@ import { SnapshotService } from '../services/snapshot.service'
 import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
@@ -58,7 +57,7 @@ export class SnapshotAccessGuard implements CanActivate {
         case isSshGatewayAuthContext(authContext):
           break
         case isOrganizationAuthContext(authContext): {
-          if (authContext.role !== SystemRole.ADMIN && snapshot.organizationId !== authContext.organizationId) {
+          if (snapshot.organizationId !== authContext.organizationId) {
             throw new ForbiddenException('Request organization ID does not match resource organization ID')
           }
           break

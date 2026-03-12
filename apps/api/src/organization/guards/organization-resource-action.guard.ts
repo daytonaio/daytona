@@ -12,7 +12,6 @@ import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 
 @Injectable()
 export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
@@ -29,10 +28,6 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
     const canActivate = await super.canActivate(context)
 
     const authContext = getAuthContext(context, isOrganizationAuthContext)
-
-    if (authContext.role === SystemRole.ADMIN) {
-      return true
-    }
 
     if (!canActivate) {
       return false

@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { Request } from 'express'
 import { AuthStrategyType } from '../enums/auth-strategy-type.enum'
 
-declare global {
-  namespace Express {
-    interface Request {
-      authStrategyType?: AuthStrategyType
-    }
-  }
+export interface RequestWithAuthMetadata extends Request {
+  authStrategyType?: AuthStrategyType
 }

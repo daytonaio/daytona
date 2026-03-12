@@ -9,7 +9,6 @@ import { OrganizationUserService } from '../services/organization-user.service'
 import { isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { Organization } from '../entities/organization.entity'
@@ -49,7 +48,6 @@ export class OrganizationAccessGuard implements CanActivate {
       organizationIdParam &&
       authContext.apiKey &&
       authContext.apiKey.organizationId !== organizationIdParam &&
-      authContext.role !== SystemRole.ADMIN &&
       authContext.role !== 'ssh-gateway'
     ) {
       this.logger.warn(
@@ -73,10 +71,6 @@ export class OrganizationAccessGuard implements CanActivate {
       organization,
     }
     request.user = organizationAuthContext
-
-    if (authContext.role === SystemRole.ADMIN) {
-      return true
-    }
 
     const organizationUser = await this.getCachedOrganizationUser(organizationId, authContext.userId)
 

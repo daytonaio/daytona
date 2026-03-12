@@ -24,9 +24,6 @@ module DaytonaApiClient
     # The entrypoint command for the snapshot
     attr_accessor :entrypoint
 
-    # Whether the snapshot is general
-    attr_accessor :general
-
     # CPU cores allocated to the resulting sandbox
     attr_accessor :cpu
 
@@ -51,7 +48,6 @@ module DaytonaApiClient
         :'name' => :'name',
         :'image_name' => :'imageName',
         :'entrypoint' => :'entrypoint',
-        :'general' => :'general',
         :'cpu' => :'cpu',
         :'gpu' => :'gpu',
         :'memory' => :'memory',
@@ -77,7 +73,6 @@ module DaytonaApiClient
         :'name' => :'String',
         :'image_name' => :'String',
         :'entrypoint' => :'Array<String>',
-        :'general' => :'Boolean',
         :'cpu' => :'Integer',
         :'gpu' => :'Integer',
         :'memory' => :'Integer',
@@ -123,10 +118,6 @@ module DaytonaApiClient
         if (value = attributes[:'entrypoint']).is_a?(Array)
           self.entrypoint = value
         end
-      end
-
-      if attributes.key?(:'general')
-        self.general = attributes[:'general']
       end
 
       if attributes.key?(:'cpu')
@@ -192,7 +183,6 @@ module DaytonaApiClient
           name == o.name &&
           image_name == o.image_name &&
           entrypoint == o.entrypoint &&
-          general == o.general &&
           cpu == o.cpu &&
           gpu == o.gpu &&
           memory == o.memory &&
@@ -210,7 +200,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [name, image_name, entrypoint, general, cpu, gpu, memory, disk, build_info, region_id].hash
+      [name, image_name, entrypoint, cpu, gpu, memory, disk, build_info, region_id].hash
     end
 
     # Builds the object from hash

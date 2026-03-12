@@ -11,7 +11,7 @@ import { createRemoteJWKSet, JWTPayload, jwtVerify } from 'jose'
 import { UserService } from '../user/user.service'
 import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
-import { Request } from 'express'
+import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata.interface'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { TypedConfigService } from '../config/typed-config.service'
 
@@ -48,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     this.logger.debug('JwtStrategy initialized')
   }
 
-  async validate(request: Request, payload: any): Promise<UserAuthContext> {
+  async validate(request: RequestWithAuthMetadata, payload: any): Promise<UserAuthContext> {
     request.authStrategyType = AuthStrategyType.JWT
 
     // OKTA does not return the userId in access_token sub claim

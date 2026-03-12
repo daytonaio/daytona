@@ -15,7 +15,6 @@ import { OrganizationAuthContext } from '../common/interfaces/organization-auth-
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
-import { SystemRole } from '../user/enums/system-role.enum'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
@@ -87,8 +86,7 @@ export class ApiKeyController {
   async getApiKeys(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
     let apiKeys: ApiKey[] = []
 
-    // TODO: remove admin check
-    if (authContext.role === SystemRole.ADMIN || authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
+    if (authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId)
     } else {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
@@ -172,11 +170,7 @@ export class ApiKeyController {
     @Param('userId') userId: string,
     @Param('name') name: string,
   ) {
-    if (
-      userId !== authContext.userId &&
-      authContext.role !== SystemRole.ADMIN &&
-      authContext.organizationUser?.role !== OrganizationMemberRole.OWNER
-    ) {
+    if (userId !== authContext.userId && authContext.organizationUser?.role !== OrganizationMemberRole.OWNER) {
       throw new ForbiddenException('Incorrect user ID provided')
     }
 
@@ -187,10 +181,6 @@ export class ApiKeyController {
     authContext: OrganizationAuthContext,
     requestedPermissions: OrganizationResourcePermission[],
   ): void {
-    if (authContext.role === SystemRole.ADMIN) {
-      return
-    }
-
     if (!authContext.organizationUser) {
       throw new ForbiddenException(`Insufficient permissions for assigning: ${requestedPermissions.join(', ')}`)
     }

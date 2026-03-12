@@ -13,7 +13,6 @@ import {
   Query,
   UseGuards,
   HttpCode,
-  ForbiddenException,
   Logger,
   NotFoundException,
   Res,
@@ -47,7 +46,6 @@ import { OrganizationAuthContext } from '../../common/interfaces/organization-au
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -101,7 +99,6 @@ export class SnapshotController {
         name: req.body?.name,
         imageName: req.body?.imageName,
         entrypoint: req.body?.entrypoint,
-        general: req.body?.general,
         cpu: req.body?.cpu,
         memory: req.body?.memory,
         disk: req.body?.disk,
@@ -114,10 +111,6 @@ export class SnapshotController {
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createSnapshotDto: CreateSnapshotDto,
   ): Promise<SnapshotDto> {
-    if (createSnapshotDto.general && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException('Insufficient permissions for creating general snapshots')
-    }
-
     if (createSnapshotDto.buildInfo) {
       if (createSnapshotDto.imageName) {
         throw new BadRequestError('Cannot specify an image name when using a build info entry')

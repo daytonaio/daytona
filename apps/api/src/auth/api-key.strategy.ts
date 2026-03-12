@@ -18,7 +18,7 @@ import { generateApiKeyHash } from '../common/utils/api-key'
 import { RegionService } from '../region/services/region.service'
 import { JWT_REGEX } from './constants/jwt-regex.constant'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
-import { Request } from 'express'
+import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata.interface'
 import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
 import { ProxyAuthContext } from '../common/interfaces/proxy-auth-context.interface'
 import { RunnerAuthContext } from '../common/interfaces/runner-auth-context.interface'
@@ -64,7 +64,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
     this.logger.log('ApiKeyStrategy initialized')
   }
 
-  async validate(request: Request, token: string): Promise<ApiKeyAuthContext | null> {
+  async validate(request: RequestWithAuthMetadata, token: string): Promise<ApiKeyAuthContext | null> {
     request.authStrategyType = AuthStrategyType.API_KEY
     return this.validateToken(token)
   }

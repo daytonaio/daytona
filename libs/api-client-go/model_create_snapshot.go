@@ -27,8 +27,6 @@ type CreateSnapshot struct {
 	ImageName *string `json:"imageName,omitempty"`
 	// The entrypoint command for the snapshot
 	Entrypoint []string `json:"entrypoint,omitempty"`
-	// Whether the snapshot is general
-	General *bool `json:"general,omitempty"`
 	// CPU cores allocated to the resulting sandbox
 	Cpu *int32 `json:"cpu,omitempty"`
 	// GPU units allocated to the resulting sandbox
@@ -150,38 +148,6 @@ func (o *CreateSnapshot) HasEntrypoint() bool {
 // SetEntrypoint gets a reference to the given []string and assigns it to the Entrypoint field.
 func (o *CreateSnapshot) SetEntrypoint(v []string) {
 	o.Entrypoint = v
-}
-
-// GetGeneral returns the General field value if set, zero value otherwise.
-func (o *CreateSnapshot) GetGeneral() bool {
-	if o == nil || IsNil(o.General) {
-		var ret bool
-		return ret
-	}
-	return *o.General
-}
-
-// GetGeneralOk returns a tuple with the General field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateSnapshot) GetGeneralOk() (*bool, bool) {
-	if o == nil || IsNil(o.General) {
-		return nil, false
-	}
-	return o.General, true
-}
-
-// HasGeneral returns a boolean if a field has been set.
-func (o *CreateSnapshot) HasGeneral() bool {
-	if o != nil && !IsNil(o.General) {
-		return true
-	}
-
-	return false
-}
-
-// SetGeneral gets a reference to the given bool and assigns it to the General field.
-func (o *CreateSnapshot) SetGeneral(v bool) {
-	o.General = &v
 }
 
 // GetCpu returns the Cpu field value if set, zero value otherwise.
@@ -393,9 +359,6 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Entrypoint) {
 		toSerialize["entrypoint"] = o.Entrypoint
 	}
-	if !IsNil(o.General) {
-		toSerialize["general"] = o.General
-	}
 	if !IsNil(o.Cpu) {
 		toSerialize["cpu"] = o.Cpu
 	}
@@ -460,7 +423,6 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 		delete(additionalProperties, "name")
 		delete(additionalProperties, "imageName")
 		delete(additionalProperties, "entrypoint")
-		delete(additionalProperties, "general")
 		delete(additionalProperties, "cpu")
 		delete(additionalProperties, "gpu")
 		delete(additionalProperties, "memory")

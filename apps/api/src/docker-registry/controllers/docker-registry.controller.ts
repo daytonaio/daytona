@@ -3,19 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  HttpCode,
-  ForbiddenException,
-  Query,
-} from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, Query } from '@nestjs/common'
 import {
   ApiTags,
   ApiOperation,
@@ -42,7 +30,6 @@ import { OrganizationAuthContext } from '../../common/interfaces/organization-au
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { SystemRole } from '../../user/enums/system-role.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -81,8 +68,6 @@ export class DockerRegistryController {
         password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
         url: req.body?.url,
         project: req.body?.project,
-        registryType: req.body?.registryType,
-        isDefault: req.body?.isDefault,
       }),
     },
   })
@@ -90,17 +75,13 @@ export class DockerRegistryController {
     @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
-    if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException(
-        `Insufficient permissions for creating ${createDockerRegistryDto.registryType} registries`,
-      )
-    }
-
-    if (createDockerRegistryDto.isDefault && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException('Insufficient permissions for setting a default registry')
-    }
-
-    const dockerRegistry = await this.dockerRegistryService.create(createDockerRegistryDto, authContext.organizationId)
+    const dockerRegistry = await this.dockerRegistryService.create(
+      {
+        ...createDockerRegistryDto,
+        registryType: RegistryType.ORGANIZATION,
+      },
+      authContext.organizationId,
+    )
     return DockerRegistryDto.fromDockerRegistry(dockerRegistry)
   }
 

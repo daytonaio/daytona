@@ -64,7 +64,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'WebhookAppPortalAccess'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer']
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
         :operation => :"WebhooksApi.webhook_controller_get_app_portal_access",
@@ -128,7 +128,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'WebhookInitializationStatus'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer']
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
         :operation => :"WebhooksApi.webhook_controller_get_initialization_status",
