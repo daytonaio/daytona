@@ -772,13 +772,12 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                         <input
                           type="file"
                           accept="env"
-                          className="hidden"
+                          className="sr-only peer"
                           onChange={handleEnvFileImport}
-                          aria-hidden="true"
                           id="env-file-input"
                         />
                         <label
-                          className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer"
+                          className="inline-flex items-center gap-1 underline hover:text-foreground cursor-pointer peer-focus-visible:text-primary"
                           htmlFor="env-file-input"
                         >
                           <Upload className="size-3" />
