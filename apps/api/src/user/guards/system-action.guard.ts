@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core'
 import { RequiredSystemRole } from '../decorators/required-system-role.decorator'
 import { SystemRole } from '../enums/system-role.enum'
 import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { isPublic } from '../../auth/decorators/public.decorator'
 
 /**

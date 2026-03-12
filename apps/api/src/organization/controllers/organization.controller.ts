@@ -31,8 +31,8 @@ import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsUserAuthContext } from '../../common/decorators/auth-context.decorator'
+import { UserAuthContext } from '../../common/interfaces/user-auth-context.interface'
 import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
@@ -49,7 +49,7 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
-import { OtelCollectorGuard } from '../../auth/otel-collector.guard'
+import { OtelCollectorGuard } from '../guards/otel-collector.guard'
 import { ProxyGuard } from '../../sandbox/guards/proxy.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
 
@@ -80,7 +80,7 @@ export class OrganizationController {
     type: [OrganizationInvitationDto],
   })
   @AuthStrategy(AuthStrategyType.JWT)
-  async findInvitationsByUser(@AuthContext() authContext: IAuthContext): Promise<OrganizationInvitationDto[]> {
+  async findInvitationsByUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<OrganizationInvitationDto[]> {
     const invitations = await this.organizationInvitationService.findByUser(authContext.userId)
     return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
   }
@@ -96,7 +96,7 @@ export class OrganizationController {
     type: Number,
   })
   @AuthStrategy(AuthStrategyType.JWT)
-  async getInvitationsCountByUser(@AuthContext() authContext: IAuthContext): Promise<number> {
+  async getInvitationsCountByUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<number> {
     return this.organizationInvitationService.getCountByUser(authContext.userId)
   }
 
@@ -122,7 +122,7 @@ export class OrganizationController {
     targetIdFromRequest: (req) => req.params.invitationId,
   })
   async acceptInvitation(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
   ): Promise<OrganizationInvitationDto> {
     try {
@@ -159,7 +159,7 @@ export class OrganizationController {
     targetIdFromRequest: (req) => req.params.invitationId,
   })
   async declineInvitation(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Param('invitationId') invitationId: string,
   ): Promise<void> {
     try {
@@ -197,7 +197,7 @@ export class OrganizationController {
     },
   })
   async create(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Body() createOrganizationDto: CreateOrganizationDto,
   ): Promise<OrganizationDto> {
     const user = await this.userService.findOne(authContext.userId)
@@ -259,7 +259,7 @@ export class OrganizationController {
     type: [OrganizationDto],
   })
   @AuthStrategy(AuthStrategyType.JWT)
-  async findAll(@AuthContext() authContext: IAuthContext): Promise<OrganizationDto[]> {
+  async findAll(@IsUserAuthContext() authContext: UserAuthContext): Promise<OrganizationDto[]> {
     const organizations = await this.organizationService.findByUser(authContext.userId)
     return organizations.map(OrganizationDto.fromOrganization)
   }
@@ -444,7 +444,7 @@ export class OrganizationController {
     action: AuditAction.LEAVE_ORGANIZATION,
   })
   async leave(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Param('organizationId') organizationId: string,
   ): Promise<void> {
     return this.organizationUserService.delete(organizationId, authContext.userId)

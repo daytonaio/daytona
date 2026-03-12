@@ -38,15 +38,14 @@ import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { SshGatewayGuard } from '../guards/ssh-gateway.guard'
 import { OrGuard } from '../../auth/or.guard'
-import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
-import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { RunnerAuthGuard } from '../guards/runner-auth.guard'
+import { RunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { RunnerAccessGuard } from '../guards/runner-access.guard'
 import { RegionRunnerAccessGuard } from '../guards/region-runner-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext, IsRunnerAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -100,7 +99,7 @@ export class RunnerController {
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async create(
     @Body() createRunnerDto: CreateRunnerDto,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<CreateRunnerResponseDto> {
     // validate that the runner region is a custom region owned by the organization
     const region = await this.regionService.findOne(createRunnerDto.regionId)
@@ -134,7 +133,7 @@ export class RunnerController {
     description: 'Runner info',
     type: RunnerFullDto,
   })
-  async getInfoForAuthenticatedRunner(@RunnerContextDecorator() runnerContext: RunnerContext): Promise<RunnerFullDto> {
+  async getInfoForAuthenticatedRunner(@IsRunnerAuthContext() runnerContext: RunnerAuthContext): Promise<RunnerFullDto> {
     return this.runnerService.findOneFullOrFail(runnerContext.runnerId)
   }
 
@@ -241,7 +240,7 @@ export class RunnerController {
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
-  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
+  async findAll(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
     return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
 
@@ -358,7 +357,7 @@ export class RunnerController {
     description: 'Healthcheck received',
   })
   async runnerHealthcheck(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Body() healthcheck: RunnerHealthcheckDto,
   ): Promise<void> {
     await this.runnerService.updateRunnerHealth(

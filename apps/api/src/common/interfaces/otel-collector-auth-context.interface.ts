@@ -5,10 +5,10 @@
 
 import { BaseAuthContext } from './auth-context.interface'
 
-export interface OtelCollectorContext extends BaseAuthContext {
+export interface OtelCollectorAuthContext extends BaseAuthContext {
   role: 'otel-collector'
 }
 
-export function isOtelCollectorContext(user: BaseAuthContext): user is OtelCollectorContext {
+export function isOtelCollectorAuthContext(user: BaseAuthContext): user is OtelCollectorAuthContext {
   return 'role' in user && user.role === 'otel-collector'
 }

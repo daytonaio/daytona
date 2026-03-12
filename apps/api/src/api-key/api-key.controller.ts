@@ -10,9 +10,8 @@ import { ApiHeader, ApiOAuth2, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth
 import { ApiKeyResponseDto } from './dto/api-key-response.dto'
 import { ApiKeyListDto } from './dto/api-key-list.dto'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
-import { OrganizationAuthContext } from '../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../common/interfaces/organization-auth-context.interface'
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
@@ -58,7 +57,7 @@ export class ApiKeyController {
     },
   })
   async createApiKey(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createApiKeyDto: CreateApiKeyDto,
   ): Promise<ApiKeyResponseDto> {
     this.validateRequestedApiKeyPermissions(authContext, createApiKeyDto.permissions)
@@ -85,9 +84,10 @@ export class ApiKeyController {
     type: [ApiKeyListDto],
   })
   @ApiResponse({ status: 500, description: 'Error fetching API keys.' })
-  async getApiKeys(@AuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
+  async getApiKeys(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
     let apiKeys: ApiKey[] = []
 
+    // TODO: remove admin check
     if (authContext.role === SystemRole.ADMIN || authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId)
     } else {
@@ -107,7 +107,8 @@ export class ApiKeyController {
     description: 'API key retrieved successfully.',
     type: ApiKeyListDto,
   })
-  async getCurrentApiKey(@AuthContext() authContext: IAuthContext): Promise<ApiKeyListDto> {
+  async getCurrentApiKey(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto> {
+    // TODO: obsolete if we use AuthStrategy('api-key')
     if (!authContext.apiKey) {
       throw new ForbiddenException('Authenticate with an API key to use this endpoint')
     }
@@ -126,7 +127,7 @@ export class ApiKeyController {
     type: ApiKeyListDto,
   })
   async getApiKey(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('name') name: string,
   ): Promise<ApiKeyListDto> {
     const apiKey = await this.apiKeyService.getApiKeyByName(authContext.organizationId, authContext.userId, name)
@@ -145,7 +146,7 @@ export class ApiKeyController {
     targetType: AuditTarget.API_KEY,
     targetIdFromRequest: (req) => req.params.name,
   })
-  async deleteApiKey(@AuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
+  async deleteApiKey(@IsOrganizationAuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, authContext.userId, name)
   }
 
@@ -167,7 +168,7 @@ export class ApiKeyController {
     },
   })
   async deleteApiKeyForUser(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('userId') userId: string,
     @Param('name') name: string,
   ) {

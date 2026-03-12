@@ -4,7 +4,7 @@
  */
 
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common'
-import { BaseAuthContext } from '../common/interfaces/auth-context.interface'
+import { BaseAuthContext } from '../interfaces/auth-context.interface'
 
 /**
  * Retrieves the authentication context from the request.

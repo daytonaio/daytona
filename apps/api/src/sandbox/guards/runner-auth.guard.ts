@@ -4,8 +4,8 @@
  */
 
 import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common'
-import { isRunnerContext } from '../common/interfaces/runner-context.interface'
-import { getAuthContext } from './get-auth-context'
+import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 
 @Injectable()
 export class RunnerAuthGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class RunnerAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not runner context
-    getAuthContext(context, isRunnerContext)
+    getAuthContext(context, isRunnerAuthContext)
     return true
   }
 }

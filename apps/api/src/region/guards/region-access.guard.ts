@@ -12,8 +12,8 @@ import {
   Logger,
 } from '@nestjs/common'
 import { RegionService } from '../services/region.service'
-import { isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../enums/region-type.enum'
 

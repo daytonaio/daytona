@@ -6,12 +6,12 @@
 import { BaseAuthContext } from './auth-context.interface'
 import { Runner } from '../../sandbox/entities/runner.entity'
 
-export interface RunnerContext extends BaseAuthContext {
+export interface RunnerAuthContext extends BaseAuthContext {
   role: 'runner'
   runnerId: string
   runner: Runner
 }
 
-export function isRunnerContext(user: BaseAuthContext): user is RunnerContext {
+export function isRunnerAuthContext(user: BaseAuthContext): user is RunnerAuthContext {
   return 'role' in user && user.role === 'runner'
 }

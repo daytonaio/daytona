@@ -6,8 +6,9 @@
 import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { isAuthContext, OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
@@ -26,7 +27,7 @@ export class OrganizationAccessGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
-    const authContext = getAuthContext(context, isAuthContext)
+    const authContext = getAuthContext(context, isUserAuthContext)
 
     // note: semantic parameter names must be used (avoid :id)
     const organizationIdParam = request.params.organizationId || request.params.orgId

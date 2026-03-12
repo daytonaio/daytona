@@ -5,10 +5,10 @@
 
 import { BaseAuthContext } from './auth-context.interface'
 
-export interface ProxyContext extends BaseAuthContext {
+export interface ProxyAuthContext extends BaseAuthContext {
   role: 'proxy'
 }
 
-export function isProxyContext(user: BaseAuthContext): user is ProxyContext {
+export function isProxyAuthContext(user: BaseAuthContext): user is ProxyAuthContext {
   return 'role' in user && user.role === 'proxy'
 }

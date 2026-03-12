@@ -37,8 +37,8 @@ import { RegionType } from '../../region/enums/region-type.enum'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { FeatureFlags } from '../../common/constants/feature-flags'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { SnapshotManagerCredentialsDto } from '../../region/dto/snapshot-manager-credentials.dto'
 import { UpdateRegionDto } from '../../region/dto/update-region.dto'
 
@@ -68,7 +68,7 @@ export class OrganizationRegionController {
     description: 'List of all available regions',
     type: [RegionDto],
   })
-  async listAvailableRegions(@AuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
+  async listAvailableRegions(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<RegionDto[]> {
     return this.organizationService.listAvailableRegions(authContext.organizationId)
   }
 
@@ -97,7 +97,7 @@ export class OrganizationRegionController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGIONS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async createRegion(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createRegionDto: CreateRegionDto,
   ): Promise<CreateRegionResponseDto> {
     return await this.regionService.create(

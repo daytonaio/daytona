@@ -12,8 +12,8 @@ import {
   Logger,
 } from '@nestjs/common'
 import { JobService } from '../services/job.service'
-import { isRunnerContext } from '../../common/interfaces/runner-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 
 @Injectable()
 export class JobAccessGuard implements CanActivate {
@@ -25,7 +25,7 @@ export class JobAccessGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const jobId: string = request.params.jobId || request.params.id
 
-    const authContext = getAuthContext(context, isRunnerContext)
+    const authContext = getAuthContext(context, isRunnerAuthContext)
 
     try {
       const job = await this.jobService.findOne(jobId)

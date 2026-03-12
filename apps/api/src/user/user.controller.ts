@@ -19,8 +19,8 @@ import {
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
-import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
+import { IsUserAuthContext } from '../common/decorators/auth-context.decorator'
+import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
 import { UserDto } from './dto/user.dto'
 import { TypedConfigService } from '../config/typed-config.service'
 import axios from 'axios'
@@ -58,7 +58,7 @@ export class UserController {
     description: 'User details',
     type: UserDto,
   })
-  async getAuthenticatedUser(@AuthContext() authContext: IAuthContext): Promise<UserDto> {
+  async getAuthenticatedUser(@IsUserAuthContext() authContext: UserAuthContext): Promise<UserDto> {
     const user = await this.userService.findOne(authContext.userId)
     if (!user) {
       throw new NotFoundException(`User with ID ${authContext.userId} not found`)
@@ -130,7 +130,7 @@ export class UserController {
     },
   })
   async linkAccount(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Body() createLinkedAccountDto: CreateLinkedAccountDto,
   ): Promise<void> {
     if (!this.configService.get('oidc.managementApi.enabled')) {
@@ -209,7 +209,7 @@ export class UserController {
     },
   })
   async unlinkAccount(
-    @AuthContext() authContext: IAuthContext,
+    @IsUserAuthContext() authContext: UserAuthContext,
     @Param('provider') provider: string,
     @Param('providerUserId') providerUserId: string,
   ): Promise<void> {
@@ -245,7 +245,7 @@ export class UserController {
     description: 'SMS MFA enrollment URL',
     type: String,
   })
-  async enrollInSmsMfa(@AuthContext() authContext: IAuthContext): Promise<string> {
+  async enrollInSmsMfa(@IsUserAuthContext() authContext: UserAuthContext): Promise<string> {
     if (!this.configService.get('oidc.managementApi.enabled')) {
       this.logger.warn('OIDC Management API is not enabled')
       throw new NotFoundException()

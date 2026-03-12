@@ -4,8 +4,8 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
-import { getAuthContext } from '../../auth/get-auth-context'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
 
 @Injectable()
 export class ProxyGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class ProxyGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not proxy context
-    getAuthContext(context, isProxyContext)
+    getAuthContext(context, isProxyAuthContext)
     return true
   }
 }

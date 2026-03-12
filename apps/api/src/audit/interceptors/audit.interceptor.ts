@@ -21,12 +21,12 @@ import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditService } from '../services/audit.service'
-import { AuthContext } from '../../common/interfaces/auth-context.interface'
+import { UserAuthContext } from '../../common/interfaces/user-auth-context.interface'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { TypedConfigService } from '../../config/typed-config.service'
 
 type RequestWithUser = Request & {
-  user?: AuthContext
+  user?: UserAuthContext
 }
 
 @Injectable()
@@ -40,6 +40,7 @@ export class AuditInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // TODO: this unsafe type inference should be fixed
     const request = context.switchToHttp().getRequest<RequestWithUser>()
     const response = context.switchToHttp().getResponse<Response>()
 

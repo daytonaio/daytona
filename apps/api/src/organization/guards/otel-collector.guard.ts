@@ -4,8 +4,8 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
-import { getAuthContext } from './get-auth-context'
-import { isOtelCollectorContext } from '../common/interfaces/otel-collector-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
+import { isOtelCollectorAuthContext } from '../../common/interfaces/otel-collector-auth-context.interface'
 
 @Injectable()
 export class OtelCollectorGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class OtelCollectorGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not otel collector context
-    getAuthContext(context, isOtelCollectorContext)
+    getAuthContext(context, isOtelCollectorAuthContext)
     return true
   }
 }

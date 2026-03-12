@@ -5,12 +5,12 @@
 
 import { Controller, Get, UseGuards, HttpCode } from '@nestjs/common'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { ObjectStorageService } from '../services/object-storage.service'
 import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
@@ -36,7 +36,7 @@ export class ObjectStorageController {
     description: 'Temporary storage access has been generated',
     type: StorageAccessDto,
   })
-  async getPushAccess(@AuthContext() authContext: OrganizationAuthContext): Promise<StorageAccessDto> {
+  async getPushAccess(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<StorageAccessDto> {
     return this.objectStorageService.getPushAccess(authContext.organizationId)
   }
 }

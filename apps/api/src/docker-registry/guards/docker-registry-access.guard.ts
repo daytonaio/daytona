@@ -5,8 +5,8 @@
 
 import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { DockerRegistryService } from '../services/docker-registry.service'
-import { isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegistryType } from '../enums/registry-type.enum'
 

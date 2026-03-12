@@ -8,7 +8,7 @@ import { HealthCheckService, HealthCheck, TypeOrmHealthIndicator } from '@nestjs
 import { RedisHealthIndicator } from './redis.health'
 import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.guard'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
-import { HealthCheckGuard } from '../auth/health-check.guard'
+import { HealthCheckGuard } from './guards/health-check.guard'
 import { Public } from '../auth/decorators/public.decorator'
 import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
 import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'

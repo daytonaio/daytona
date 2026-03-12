@@ -30,8 +30,8 @@ import { VolumeService } from '../services/volume.service'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -74,7 +74,7 @@ export class VolumeController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   async listVolumes(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('includeDeleted') includeDeleted = false,
   ): Promise<VolumeDto[]> {
     const volumes = await this.volumeService.findAll(authContext.organizationId, includeDeleted)
@@ -105,7 +105,7 @@ export class VolumeController {
     },
   })
   async createVolume(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.create(authContext.organization, createVolumeDto)
@@ -181,7 +181,7 @@ export class VolumeController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   @UseGuards(VolumeAccessGuard)
   async getVolumeByName(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('name') name: string,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.findByName(authContext.organizationId, name)

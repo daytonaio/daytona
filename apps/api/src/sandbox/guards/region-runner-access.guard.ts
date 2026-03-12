@@ -12,12 +12,8 @@ import {
   Logger,
 } from '@nestjs/common'
 import { RunnerService } from '../services/runner.service'
-import { BaseAuthContext } from '../../common/interfaces/auth-context.interface'
-import { isRegionProxyContext, RegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import {
-  isRegionSSHGatewayContext,
-  RegionSSHGatewayContext,
-} from '../../common/interfaces/region-ssh-gateway.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
+import { isRegionAuthContext } from '../../common/interfaces/region-auth-context.interface'
 
 @Injectable()
 export class RegionRunnerAccessGuard implements CanActivate {
@@ -28,17 +24,11 @@ export class RegionRunnerAccessGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest()
     const runnerId: string = request.params.runnerId || request.params.id
-
-    const authContext: BaseAuthContext = request.user
-
-    if (!isRegionProxyContext(authContext) && !isRegionSSHGatewayContext(authContext)) {
-      return false
-    }
+    const authContext = getAuthContext(context, isRegionAuthContext)
 
     try {
-      const regionContext = authContext as RegionProxyContext | RegionSSHGatewayContext
       const runner = await this.runnerService.findOneOrFail(runnerId)
-      if (regionContext.regionId !== runner.region) {
+      if (authContext.regionId !== runner.region) {
         throw new ForbiddenException('Region ID does not match runner region ID')
       }
       return true

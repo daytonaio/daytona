@@ -3,17 +3,16 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiKey } from '../../api-key/api-key.entity'
-import { OrganizationUser } from '../../organization/entities/organization-user.entity'
-import { Organization } from '../../organization/entities/organization.entity'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { ProxyContext } from './proxy-context.interface'
-import { RunnerContext } from './runner-context.interface'
-import { SshGatewayContext } from './ssh-gateway-context.interface'
-import { RegionProxyContext } from './region-proxy.interface'
-import { RegionSSHGatewayContext } from './region-ssh-gateway.interface'
-import { OtelCollectorContext } from './otel-collector-context.interface'
-import { HealthCheckContext } from './health-check-context.interface'
+import { ProxyAuthContext } from './proxy-auth-context.interface'
+import { RunnerAuthContext } from './runner-auth-context.interface'
+import { SshGatewayAuthContext } from './ssh-gateway-auth-context.interface'
+import { RegionProxyAuthContext } from './region-proxy-auth-context.interface'
+import { RegionSSHGatewayAuthContext } from './region-ssh-gateway-auth-context.interface'
+import { OtelCollectorAuthContext } from './otel-collector-auth-context.interface'
+import { HealthCheckAuthContext } from './health-check-auth-context.interface'
+import { UserAuthContext } from './user-auth-context.interface'
+import { OrganizationAuthContext } from './organization-auth-context.interface'
 
 export interface BaseAuthContext {
   role: ApiRole
@@ -33,35 +32,13 @@ export type ApiRole =
   | 'otel-collector'
   | 'health-check'
 
-export interface AuthContext extends BaseAuthContext {
-  userId: string
-  email: string
-  apiKey?: ApiKey
-  organizationId?: string
-  runnerId?: string
-}
-
-export function isAuthContext(user: BaseAuthContext): user is AuthContext {
-  return 'userId' in user
-}
-
-export interface OrganizationAuthContext extends AuthContext {
-  organizationId: string
-  organization: Organization
-  organizationUser?: OrganizationUser
-}
-
-export function isOrganizationAuthContext(user: BaseAuthContext): user is OrganizationAuthContext {
-  return 'organizationId' in user
-}
-
 export type AuthContextType =
-  | AuthContext
+  | UserAuthContext
   | OrganizationAuthContext
-  | ProxyContext
-  | RunnerContext
-  | SshGatewayContext
-  | RegionProxyContext
-  | RegionSSHGatewayContext
-  | OtelCollectorContext
-  | HealthCheckContext
+  | ProxyAuthContext
+  | RunnerAuthContext
+  | SshGatewayAuthContext
+  | RegionProxyAuthContext
+  | RegionSSHGatewayAuthContext
+  | OtelCollectorAuthContext
+  | HealthCheckAuthContext

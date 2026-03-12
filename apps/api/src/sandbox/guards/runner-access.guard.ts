@@ -13,14 +13,15 @@ import {
 } from '@nestjs/common'
 import { RegionService } from '../../region/services/region.service'
 import { RunnerService } from '../services/runner.service'
-import { isBaseAuthContext, isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { RegionType } from '../../region/enums/region-type.enum'
-import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import { isRegionSSHGatewayContext } from '../../common/interfaces/region-ssh-gateway.interface'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
+import { isRegionProxyAuthContext } from '../../common/interfaces/region-proxy-auth-context.interface'
+import { isRegionSSHGatewayAuthContext } from '../../common/interfaces/region-ssh-gateway-auth-context.interface'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 
 @Injectable()
 export class RunnerAccessGuard implements CanActivate {
@@ -41,13 +42,13 @@ export class RunnerAccessGuard implements CanActivate {
       const runner = await this.runnerService.findOneOrFail(runnerId)
 
       switch (true) {
-        case isRegionProxyContext(authContext):
-        case isRegionSSHGatewayContext(authContext): {
+        case isRegionProxyAuthContext(authContext):
+        case isRegionSSHGatewayAuthContext(authContext): {
           // Use RunnerRegionAccessGuard to check access instead
           return false
         }
-        case isProxyContext(authContext):
-        case isSshGatewayContext(authContext):
+        case isProxyAuthContext(authContext):
+        case isSshGatewayAuthContext(authContext):
           return true
         case isOrganizationAuthContext(authContext): {
           if (authContext.role !== SystemRole.ADMIN) {

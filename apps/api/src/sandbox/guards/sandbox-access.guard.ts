@@ -5,14 +5,15 @@
 
 import { Injectable, CanActivate, ExecutionContext, NotFoundException, ForbiddenException } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
-import { isBaseAuthContext, isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { isRunnerContext } from '../../common/interfaces/runner-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { isRunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
-import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import { isRegionSSHGatewayContext } from '../../common/interfaces/region-ssh-gateway.interface'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
+import { isRegionProxyAuthContext } from '../../common/interfaces/region-proxy-auth-context.interface'
+import { isRegionSSHGatewayAuthContext } from '../../common/interfaces/region-ssh-gateway-auth-context.interface'
 
 @Injectable()
 export class SandboxAccessGuard implements CanActivate {
@@ -28,7 +29,7 @@ export class SandboxAccessGuard implements CanActivate {
 
     try {
       switch (true) {
-        case isRunnerContext(authContext): {
+        case isRunnerAuthContext(authContext): {
           // For runner authentication, verify that the runner ID matches the sandbox's runner ID
           const sandboxRunnerId = await this.sandboxService.getRunnerId(sandboxIdOrName)
           if (sandboxRunnerId !== authContext.runnerId) {
@@ -36,13 +37,13 @@ export class SandboxAccessGuard implements CanActivate {
           }
           break
         }
-        case isRegionProxyContext(authContext):
-        case isRegionSSHGatewayContext(authContext): {
+        case isRegionProxyAuthContext(authContext):
+        case isRegionSSHGatewayAuthContext(authContext): {
           // Use RegionSandboxAccessGuard to check access instead
           return false
         }
-        case isProxyContext(authContext):
-        case isSshGatewayContext(authContext):
+        case isProxyAuthContext(authContext):
+        case isSshGatewayAuthContext(authContext):
           return true
         case isOrganizationAuthContext(authContext): {
           const sandboxOrganizationId = await this.sandboxService.getOrganizationId(

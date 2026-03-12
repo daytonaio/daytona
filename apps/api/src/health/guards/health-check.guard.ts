@@ -4,8 +4,8 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
-import { getAuthContext } from './get-auth-context'
-import { isHealthCheckContext } from '../common/interfaces/health-check-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
+import { isHealthCheckAuthContext } from '../../common/interfaces/health-check-auth-context.interface'
 
 @Injectable()
 export class HealthCheckGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class HealthCheckGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not health check context
-    getAuthContext(context, isHealthCheckContext)
+    getAuthContext(context, isHealthCheckAuthContext)
     return true
   }
 }

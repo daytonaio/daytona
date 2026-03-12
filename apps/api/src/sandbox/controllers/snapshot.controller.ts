@@ -42,8 +42,8 @@ import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
 import { SnapshotReadAccessGuard } from '../guards/snapshot-read-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -111,7 +111,7 @@ export class SnapshotController {
     },
   })
   async createSnapshot(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createSnapshotDto: CreateSnapshotDto,
   ): Promise<SnapshotDto> {
     if (createSnapshotDto.general && authContext.role !== SystemRole.ADMIN) {
@@ -159,7 +159,7 @@ export class SnapshotController {
   @UseGuards(SnapshotReadAccessGuard)
   async getSnapshot(
     @Param('id') snapshotIdOrName: string,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.getSnapshotWithRegions(snapshotIdOrName, authContext.organizationId)
     return SnapshotDto.fromSnapshot(snapshot)
@@ -200,7 +200,7 @@ export class SnapshotController {
     type: PaginatedSnapshotsDto,
   })
   async getAllSnapshots(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query() queryParams: ListSnapshotsQueryDto,
   ): Promise<PaginatedSnapshotsDto> {
     const { page, limit, name, sort, order } = queryParams
@@ -360,7 +360,7 @@ export class SnapshotController {
   })
   async activateSnapshot(
     @Param('id') snapshotId: string,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId, authContext.organization)
     return SnapshotDto.fromSnapshot(snapshot)

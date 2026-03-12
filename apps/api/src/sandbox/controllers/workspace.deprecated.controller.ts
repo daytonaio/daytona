@@ -44,8 +44,8 @@ import { ContentTypeInterceptor } from '../../common/interceptors/content-type.i
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { SandboxAccessGuard as WorkspaceAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -105,7 +105,7 @@ export class WorkspaceController {
     description: 'JSON encoded labels to filter by',
   })
   async listWorkspacees(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('verbose') verbose?: boolean,
     @Query('labels') labelsQuery?: string,
   ): Promise<WorkspaceDto[]> {
@@ -159,7 +159,7 @@ export class WorkspaceController {
     },
   })
   async createWorkspace(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
     if (createWorkspaceDto.buildInfo) {
@@ -277,7 +277,7 @@ export class WorkspaceController {
     targetIdFromRequest: (req) => req.params.workspaceId,
   })
   async startWorkspace(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('workspaceId') workspaceId: string,
   ): Promise<void> {
     await this.workspaceService.start(workspaceId, authContext.organization)

@@ -5,10 +5,10 @@
 
 import { BaseAuthContext } from './auth-context.interface'
 
-export interface HealthCheckContext extends BaseAuthContext {
+export interface HealthCheckAuthContext extends BaseAuthContext {
   role: 'health-check'
 }
 
-export function isHealthCheckContext(user: BaseAuthContext): user is HealthCheckContext {
+export function isHealthCheckAuthContext(user: BaseAuthContext): user is HealthCheckAuthContext {
   return 'role' in user && user.role === 'health-check'
 }

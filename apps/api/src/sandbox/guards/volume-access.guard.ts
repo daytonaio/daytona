@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { VolumeService } from '../services/volume.service'
+
 @Injectable()
 export class VolumeAccessGuard implements CanActivate {
   constructor(private readonly volumeService: VolumeService) {}
@@ -19,7 +21,7 @@ export class VolumeAccessGuard implements CanActivate {
       throw new NotFoundException(`Volume not found`)
     }
 
-    const authContext: OrganizationAuthContext = request.user
+    const authContext = getAuthContext(context, isOrganizationAuthContext)
 
     try {
       const params = volumeId ? { id: volumeId } : { name: volumeName, organizationId: authContext.organizationId }

@@ -4,8 +4,8 @@
  */
 
 import { Injectable, ExecutionContext, Logger, CanActivate } from '@nestjs/common'
-import { getAuthContext } from '../../auth/get-auth-context'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
 
 @Injectable()
 export class SshGatewayGuard implements CanActivate {
@@ -13,7 +13,7 @@ export class SshGatewayGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // Throws if not ssh gateway context
-    getAuthContext(context, isSshGatewayContext)
+    getAuthContext(context, isSshGatewayAuthContext)
     return true
   }
 }

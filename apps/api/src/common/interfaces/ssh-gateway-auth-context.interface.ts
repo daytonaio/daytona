@@ -5,10 +5,10 @@
 
 import { BaseAuthContext } from './auth-context.interface'
 
-export interface SshGatewayContext extends BaseAuthContext {
+export interface SshGatewayAuthContext extends BaseAuthContext {
   role: 'ssh-gateway'
 }
 
-export function isSshGatewayContext(user: BaseAuthContext): user is SshGatewayContext {
+export function isSshGatewayAuthContext(user: BaseAuthContext): user is SshGatewayAuthContext {
   return 'role' in user && user.role === 'ssh-gateway'
 }

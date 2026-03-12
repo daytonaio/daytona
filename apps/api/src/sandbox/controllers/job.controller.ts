@@ -6,9 +6,9 @@
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Logger, Req, NotFoundException } from '@nestjs/common'
 import { Request } from 'express'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger'
-import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
-import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { RunnerAuthGuard } from '../guards/runner-auth.guard'
+import { RunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { IsRunnerAuthContext } from '../../common/decorators/auth-context.decorator'
 import {
   JobDto,
   JobStatus,
@@ -65,7 +65,7 @@ export class JobController {
     type: PaginatedJobsDto,
   })
   async listJobs(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Query() query: ListJobsQueryDto,
   ): Promise<PaginatedJobsDto> {
     return await this.jobService.findJobsForRunner(runnerContext.runnerId, query.status, query.page, query.limit)
@@ -97,7 +97,7 @@ export class JobController {
   })
   async pollJobs(
     @Req() req: Request,
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Query('timeout') timeout?: number,
     @Query('limit') limit?: number,
   ): Promise<PollJobsResponseDto> {
@@ -151,7 +151,10 @@ export class JobController {
     type: JobDto,
   })
   @UseGuards(JobAccessGuard)
-  async getJob(@RunnerContextDecorator() runnerContext: RunnerContext, @Param('jobId') jobId: string): Promise<JobDto> {
+  async getJob(
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
+    @Param('jobId') jobId: string,
+  ): Promise<JobDto> {
     this.logger.log(`Runner ${runnerContext.runnerId} fetching job ${jobId}`)
 
     const job = await this.jobService.findOne(jobId)
@@ -179,7 +182,7 @@ export class JobController {
   })
   @UseGuards(JobAccessGuard)
   async updateJobStatus(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Param('jobId') jobId: string,
     @Body() updateJobStatusDto: UpdateJobStatusDto,
   ): Promise<JobDto> {

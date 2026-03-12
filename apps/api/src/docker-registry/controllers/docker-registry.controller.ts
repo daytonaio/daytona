@@ -37,8 +37,8 @@ import { DockerRegistryAccessGuard } from '../guards/docker-registry-access.guar
 import { DockerRegistry } from '../decorators/docker-registry.decorator'
 import { DockerRegistry as DockerRegistryEntity } from '../entities/docker-registry.entity'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
@@ -87,7 +87,7 @@ export class DockerRegistryController {
     },
   })
   async create(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
   ): Promise<DockerRegistryDto> {
     if (createDockerRegistryDto.registryType !== RegistryType.ORGANIZATION && authContext.role !== SystemRole.ADMIN) {
@@ -114,7 +114,7 @@ export class DockerRegistryController {
     description: 'List of all docker registries',
     type: [DockerRegistryDto],
   })
-  async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
+  async findAll(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<DockerRegistryDto[]> {
     const dockerRegistries = await this.dockerRegistryService.findAll(
       authContext.organizationId,
       // only include registries manually created by the organization
@@ -141,7 +141,7 @@ export class DockerRegistryController {
     type: RegistryPushAccessDto,
   })
   async getTransientPushAccess(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('regionId') regionId?: string,
   ): Promise<RegistryPushAccessDto> {
     return this.dockerRegistryService.getRegistryPushAccess(authContext.organizationId, authContext.userId, regionId)

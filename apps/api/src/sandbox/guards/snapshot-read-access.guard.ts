@@ -5,14 +5,15 @@
 
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { SnapshotService } from '../services/snapshot.service'
-import { isBaseAuthContext, isOrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
-import { getAuthContext } from '../../auth/get-auth-context'
+import { isBaseAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { Snapshot } from '../entities/snapshot.entity'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isRegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import { isRegionSSHGatewayContext } from '../../common/interfaces/region-ssh-gateway.interface'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
+import { isRegionProxyAuthContext } from '../../common/interfaces/region-proxy-auth-context.interface'
+import { isRegionSSHGatewayAuthContext } from '../../common/interfaces/region-ssh-gateway-auth-context.interface'
 
 @Injectable()
 export class SnapshotReadAccessGuard implements CanActivate {
@@ -38,22 +39,22 @@ export class SnapshotReadAccessGuard implements CanActivate {
 
     try {
       switch (true) {
-        case isRegionProxyContext(authContext): {
+        case isRegionProxyAuthContext(authContext): {
           const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
           if (!isAvailable) {
             throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
           }
           break
         }
-        case isRegionSSHGatewayContext(authContext): {
+        case isRegionSSHGatewayAuthContext(authContext): {
           const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
           if (!isAvailable) {
             throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
           }
           break
         }
-        case isProxyContext(authContext):
-        case isSshGatewayContext(authContext):
+        case isProxyAuthContext(authContext):
+        case isSshGatewayAuthContext(authContext):
           break
         case isOrganizationAuthContext(authContext): {
           if (
