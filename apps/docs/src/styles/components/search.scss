@@ -23,9 +23,11 @@ nav.mobile-navigation {
 .searchbox-wrapper {
   position: fixed;
   margin-top: 32px;
+  margin-bottom: 0px;
   top: 32px;
   left: 0;
   right: 0;
+  width: 100%;
   max-width: 1248px;
   background: var(--bg-color);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -39,13 +41,52 @@ nav.mobile-navigation {
   position: sticky;
   top: 0;
   background: var(--bg-color);
-  padding: 20px 20px 0 20px;
+  padding: 12px 12px 12px 12px;
+  border: none;
+  margin-bottom: 0px;
   z-index: 1;
 }
 
 .search-content {
   padding: 0 20px;
   flex-grow: 1;
+}
+
+.search-index-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.search-index-filter-chip {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color, #e0e0e0);
+  background: var(--bg-color);
+  color: var(--primary-text-color);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: var(--secondary-text-color);
+  }
+
+  &.active {
+    border-color: var(--primary-text-color);
+    background: var(--block-bg-color);
+    color: var(--primary-text-color);
+  }
+
+  html[data-theme='light'] &.active {
+    border-color: var(--secondary-text-color);
+    background: var(--block-bg-color);
+    color: var(--primary-text-color);
+  }
 }
 
 .searchbox-wrapper::-webkit-scrollbar {
@@ -56,6 +97,8 @@ nav.mobile-navigation {
   max-width: 1248px;
   margin: 0 auto;
   display: block;
+  height: 72px;
+  border: none;
 }
 
 .ais-SearchBox-input {
@@ -67,6 +110,7 @@ nav.mobile-navigation {
   text-align: left;
   box-sizing: border-box;
   margin-bottom: 40px;
+  background: var(--bg-color);
 }
 
 .ais-SearchBox-input:focus {
@@ -86,7 +130,7 @@ nav.mobile-navigation {
   width: 100%;
   max-width: 1248px;
   margin: 0 auto;
-  padding-bottom: 40px;
+  padding-bottom: 16px;
 }
 
 .ais-Pagination {
