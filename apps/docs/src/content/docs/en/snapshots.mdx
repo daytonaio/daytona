@@ -364,7 +364,7 @@ Daytona supports creating snapshots from images from Amazon Elastic Container Re
 6. Enter the **snapshot name** and **image** (tag or digest). When creating the snapshot, make sure to input the entire image name, including the registry location and repository name (e.g. **`123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo/custom-alpine:3.21`**)
 
 :::caution
-Amazon ECR authorization tokens expire after **12 hours**. Update the registry password in Daytona each time the token expires.
+Amazon ECR authorization tokens expire after **12 hours**. Update the registry password in Daytona each time the token expires. Support for automatic renewal is coming soon.
 :::
 
 ### Using the declarative builder
