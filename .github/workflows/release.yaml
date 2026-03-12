@@ -188,7 +188,7 @@ jobs:
 
       - name: Upload runner .deb to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/runner-deb/daytona-runner_${{ inputs.version }}_amd64.deb#daytona-runner-${{ inputs.version }}_amd64.deb --clobber
+          gh release upload ${{ inputs.version }} dist/apps/runner-deb/daytona-runner_${{ inputs.version }}_amd64.deb#daytona-runner-${{ inputs.version }}-amd64.deb --clobber
 
       - name: Upload daemon to release assets
         run: |
