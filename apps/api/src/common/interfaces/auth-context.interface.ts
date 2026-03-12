@@ -15,22 +15,20 @@ import { UserAuthContext } from './user-auth-context.interface'
 import { OrganizationAuthContext } from './organization-auth-context.interface'
 
 export interface BaseAuthContext {
-  role: ApiRole
+  role:
+    | SystemRole
+    | 'proxy'
+    | 'runner'
+    | 'ssh-gateway'
+    | 'region-proxy'
+    | 'region-ssh-gateway'
+    | 'otel-collector'
+    | 'health-check'
 }
 
 export function isBaseAuthContext(user: BaseAuthContext): user is BaseAuthContext {
   return 'role' in user
 }
-
-export type ApiRole =
-  | SystemRole
-  | 'proxy'
-  | 'runner'
-  | 'ssh-gateway'
-  | 'region-proxy'
-  | 'region-ssh-gateway'
-  | 'otel-collector'
-  | 'health-check'
 
 export type AuthContextType =
   | UserAuthContext
