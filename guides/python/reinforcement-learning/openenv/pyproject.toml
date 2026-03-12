@@ -1,0 +1,26 @@
+[project]
+name = "daytona-openenv-finqa"
+version = "0.1.0"
+description = "FinQA evaluation and training on Daytona sandboxes using OpenEnv"
+authors = [{name = "Daytona Team", email = "support@daytona.io"}]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "daytona",
+    "python-dotenv>=1.2.0",
+    "openenv-core @ git+https://github.com/meta-pytorch/OpenEnv.git",
+    "openenv-finqa-env @ git+https://github.com/meta-pytorch/OpenEnv.git#subdirectory=envs/finqa_env",
+]
+
+[project.optional-dependencies]
+train = [
+    "torch>=2.1.0",
+    "transformers>=4.40.0",
+    "vllm>=0.4.0",
+    "numpy>=1.24.0",
+    "peft>=0.13.0",
+    "requests>=2.31.0",
+]
+
+[tool.setuptools]
+py-modules = []
