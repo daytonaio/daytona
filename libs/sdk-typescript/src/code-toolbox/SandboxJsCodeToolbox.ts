@@ -12,6 +12,9 @@ export class SandboxJsCodeToolbox implements SandboxCodeToolbox {
     const base64Code = Buffer.from(code).toString('base64')
     const argv = params?.argv ? params.argv.join(' ') : ''
 
-    return `sh -c 'echo ${base64Code} | base64 --decode | node -e "$(cat)" ${argv} 2>&1 | grep -vE "npm notice"'`
+    // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+    // Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
+    // Capture the exit code before filtering to preserve node's exit status
+    return `_dtn_out=$(echo '${base64Code}' | base64 -d | node /dev/stdin ${argv} 2>&1); _dtn_ec=$?; printf '%s\\n' "$_dtn_out" | grep -v 'npm notice'; exit $_dtn_ec`
   }
 }
