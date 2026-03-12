@@ -142,8 +142,10 @@ export class VolumeService {
       throw new NotFoundException(`Volume with ID ${volumeId} not found`)
     }
 
-    if (volume.state !== VolumeState.READY) {
-      throw new BadRequestError(`Volume must be in '${VolumeState.READY}' state in order to be deleted`)
+    if (volume.state !== VolumeState.READY && volume.state !== VolumeState.ERROR) {
+      throw new BadRequestError(
+        `Volume must be in '${VolumeState.READY}' or '${VolumeState.ERROR}' state in order to be deleted`,
+      )
     }
 
     // Check if any non-destroyed sandboxes are using this volume
