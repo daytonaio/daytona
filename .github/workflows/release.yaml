@@ -169,7 +169,7 @@ jobs:
           yarn nx build-amd64 runner --configuration=production --nxBail=true
 
       - name: Build runner .deb package
-        run: yarn nx package-deb runner
+        run: VERSION="${VERSION#v}" yarn nx package-deb runner
 
       - name: Build CLI
         run: |
@@ -188,7 +188,8 @@ jobs:
 
       - name: Upload runner .deb to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/runner-deb/daytona-runner_${{ inputs.version }}_amd64.deb#daytona-runner-${{ inputs.version }}-amd64.deb --clobber
+          DEB_VERSION="${VERSION#v}"
+          gh release upload ${{ inputs.version }} "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
 
       - name: Upload daemon to release assets
         run: |
