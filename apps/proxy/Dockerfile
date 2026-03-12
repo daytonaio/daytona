@@ -10,14 +10,25 @@ RUN apk add --no-cache git
 
 WORKDIR /daytona
 
-COPY . .
+# Yarn caching layer
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+
+# Nx config
+COPY nx.json ./
+
+# Go source
+COPY go.work go.work.sum ./
+COPY apps/proxy/ apps/proxy/
+COPY libs/common-go/ libs/common-go/
+COPY libs/api-client-go/ libs/api-client-go/
+RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/proxy\n\t./libs/common-go\n\t./libs/api-client-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
+ENV NX_DAEMON=false
 
 ENV GONOSUMDB=github.com/daytonaio/daytona
-
-RUN yarn
 
 RUN yarn nx build proxy --configuration=production --nxBail=true
 

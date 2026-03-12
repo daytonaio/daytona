@@ -4,7 +4,20 @@ RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
 
-COPY . .
+# Yarn caching layer
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+
+# Nx + TS config
+COPY nx.json tsconfig.base.json ./
+
+# App source (docs + api for openapi generation)
+COPY apps/docs/ apps/docs/
+COPY apps/api/ apps/api/
+COPY apps/daemon/pkg/toolbox/docs/swagger.json apps/daemon/pkg/toolbox/docs/swagger.json
+
+# Lib dependencies (api imports runner-api-client)
+COPY libs/runner-api-client/ libs/runner-api-client/
 
 # Docs build arguments
 ENV PUBLIC_WEB_URL=https://daytona.io
@@ -23,8 +36,7 @@ ENV PUBLIC_ALGOLIA_SDK_INDEX_NAME=${PUBLIC_ALGOLIA_SDK_INDEX_NAME}
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
-
-RUN yarn
+ENV NX_DAEMON=false
 
 RUN yarn nx build docs --configuration=production --nxBail=true
 

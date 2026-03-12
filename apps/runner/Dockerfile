@@ -10,14 +10,30 @@ RUN apk add --no-cache git
 
 WORKDIR /daytona
 
-COPY . .
+# Yarn caching layer
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+
+# Nx config
+COPY nx.json ./
+
+# Go source
+COPY go.work go.work.sum ./
+COPY apps/runner/ apps/runner/
+COPY apps/daemon/ apps/daemon/
+COPY libs/common-go/ libs/common-go/
+COPY libs/api-client-go/ libs/api-client-go/
+COPY libs/computer-use/ libs/computer-use/
+RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/runner\n\t./apps/daemon\n\t./libs/common-go\n\t./libs/api-client-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
+
+# Pre-built computer-use binary and build script
+COPY dist/libs/computer-use-amd64 dist/libs/computer-use-amd64
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
+ENV NX_DAEMON=false
 
 ENV GONOSUMDB=github.com/daytonaio/daytona
-
-RUN yarn
 
 RUN SKIP_COMPUTER_USE_BUILD=true yarn nx build runner --configuration=production --nxBail=true
 
