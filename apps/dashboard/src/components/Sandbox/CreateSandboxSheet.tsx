@@ -36,7 +36,7 @@ import { Sandbox } from '@daytonaio/sdk'
 import { useForm } from '@tanstack/react-form'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -64,42 +64,55 @@ const noDuplicateKeys = (pairs: { key: string; value: string }[] | undefined) =>
   return new Set(keys).size === keys.length
 }
 
-const baseFormSchema = z.object({
-  name: z
-    .string()
-    .optional()
-    .refine((val) => !val || NAME_REGEX.test(val), 'Only letters, digits, dots, underscores and dashes are allowed'),
-  regionId: z.string().optional(),
-  cpu: z.number().min(1).optional(),
-  memory: z.number().min(1).optional(),
-  disk: z.number().min(1).optional(),
-  autoStopInterval: z.number().min(0).optional(),
-  autoArchiveInterval: z.number().min(0).optional(),
-  autoDeleteInterval: z
+const resourceSchema = (name: string, max: number | undefined) =>
+  z
     .number()
-    .refine((val) => val === -1 || val >= 0, 'Must be -1 (disabled) or a non-negative number')
-    .optional(),
-  envVars: z.array(keyValuePairSchema).optional().refine(noDuplicateKeys, 'Duplicate keys are not allowed'),
-  labels: z.array(keyValuePairSchema).optional().refine(noDuplicateKeys, 'Duplicate keys are not allowed'),
-  public: z.boolean().optional(),
-  networkBlockAll: z.boolean().optional(),
-  ephemeral: z.boolean().optional(),
-})
+    .optional()
+    .refine(
+      (val) => val === undefined || (val >= 1 && (!max || val <= max)),
+      max ? `${name} must be between 1 and ${max}` : `${name} must be at least 1`,
+    )
 
-const formSchema = z.discriminatedUnion('source', [
-  baseFormSchema.extend({
-    source: z.literal(Source.SNAPSHOT),
-    snapshot: z.string().optional(),
-    image: z.string().optional(),
-  }),
-  baseFormSchema.extend({
-    source: z.literal(Source.IMAGE),
-    snapshot: z.string().optional(),
-    image: imageNameSchema,
-  }),
-])
+const buildBaseFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) =>
+  z.object({
+    name: z
+      .string()
+      .optional()
+      .refine((val) => !val || NAME_REGEX.test(val), 'Only letters, digits, dots, underscores and dashes are allowed'),
+    regionId: z.string().optional(),
+    cpu: resourceSchema('CPU', maxCpu),
+    memory: resourceSchema('Memory', maxMemory),
+    disk: resourceSchema('Storage', maxDisk),
+    autoStopInterval: z.number().min(0).optional(),
+    autoArchiveInterval: z.number().min(0).optional(),
+    autoDeleteInterval: z
+      .number()
+      .refine((val) => val === -1 || val >= 0, 'Must be -1 (disabled) or a non-negative number')
+      .optional(),
+    envVars: z.array(keyValuePairSchema).optional().refine(noDuplicateKeys, 'Duplicate keys are not allowed'),
+    labels: z.array(keyValuePairSchema).optional().refine(noDuplicateKeys, 'Duplicate keys are not allowed'),
+    public: z.boolean().optional(),
+    networkBlockAll: z.boolean().optional(),
+    ephemeral: z.boolean().optional(),
+  })
 
-type FormValues = z.infer<typeof baseFormSchema> & {
+const buildFormSchema = (maxCpu?: number, maxMemory?: number, maxDisk?: number) => {
+  const base = buildBaseFormSchema(maxCpu, maxMemory, maxDisk)
+  return z.discriminatedUnion('source', [
+    base.extend({
+      source: z.literal(Source.SNAPSHOT),
+      snapshot: z.string().optional(),
+      image: z.string().optional(),
+    }),
+    base.extend({
+      source: z.literal(Source.IMAGE),
+      snapshot: z.string().optional(),
+      image: imageNameSchema,
+    }),
+  ])
+}
+
+type FormValues = z.input<ReturnType<typeof buildBaseFormSchema>> & {
   source: Source
   snapshot?: string
   image?: string
@@ -138,6 +151,8 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
   const maxCpu = selectedOrganization?.maxCpuPerSandbox
   const maxMemory = selectedOrganization?.maxMemoryPerSandbox
   const maxDisk = selectedOrganization?.maxDiskPerSandbox
+
+  const formSchema = useMemo(() => buildFormSchema(maxCpu, maxMemory, maxDisk), [maxCpu, maxMemory, maxDisk])
 
   const { data: snapshotsData, isLoading: snapshotsLoading } = useSnapshotsQuery({
     page: 1,
@@ -430,73 +445,103 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                       <Label className="text-sm font-medium">Resources</Label>
                       <div className="flex flex-col gap-2">
                         <form.Field name="cpu">
-                          {(field) => (
-                            <div className="flex items-center gap-4">
-                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                                Compute (vCPU):
-                              </Label>
-                              <NumericFormat
-                                customInput={Input}
-                                id={field.name}
-                                className="w-full"
-                                placeholder="1"
-                                decimalScale={0}
-                                allowNegative={false}
-                                isAllowed={(values) => {
-                                  if (values.floatValue === undefined) return true
-                                  return !maxCpu || values.floatValue <= maxCpu
-                                }}
-                                value={field.state.value ?? ''}
-                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                              />
-                            </div>
-                          )}
+                          {(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-4">
+                                  <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                    Compute (vCPU):
+                                  </Label>
+                                  <NumericFormat
+                                    customInput={Input}
+                                    aria-invalid={isInvalid}
+                                    id={field.name}
+                                    className="w-full"
+                                    placeholder="1"
+                                    decimalScale={0}
+                                    allowNegative={false}
+                                    isAllowed={(values) => {
+                                      if (values.floatValue === undefined) return true
+                                      return !maxCpu || values.floatValue <= maxCpu
+                                    }}
+                                    value={field.state.value ?? ''}
+                                    onBlur={field.handleBlur}
+                                    onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                                  />
+                                </div>
+                                {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </div>
+                            )
+                          }}
                         </form.Field>
                         <form.Field name="memory">
-                          {(field) => (
-                            <div className="flex items-center gap-4">
-                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                                Memory (GiB):
-                              </Label>
-                              <NumericFormat
-                                customInput={Input}
-                                id={field.name}
-                                className="w-full"
-                                placeholder="1"
-                                decimalScale={0}
-                                allowNegative={false}
-                                isAllowed={(values) => {
-                                  if (values.floatValue === undefined) return true
-                                  return !maxMemory || values.floatValue <= maxMemory
-                                }}
-                                value={field.state.value ?? ''}
-                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                              />
-                            </div>
-                          )}
+                          {(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-4">
+                                  <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                    Memory (GiB):
+                                  </Label>
+                                  <NumericFormat
+                                    customInput={Input}
+                                    aria-invalid={isInvalid}
+                                    id={field.name}
+                                    className="w-full"
+                                    placeholder="1"
+                                    decimalScale={0}
+                                    allowNegative={false}
+                                    isAllowed={(values) => {
+                                      if (values.floatValue === undefined) return true
+                                      return !maxMemory || values.floatValue <= maxMemory
+                                    }}
+                                    value={field.state.value ?? ''}
+                                    onBlur={field.handleBlur}
+                                    onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                                  />
+                                </div>
+                                {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </div>
+                            )
+                          }}
                         </form.Field>
                         <form.Field name="disk">
-                          {(field) => (
-                            <div className="flex items-center gap-4">
-                              <Label htmlFor={field.name} className="w-32 flex-shrink-0">
-                                Storage (GiB):
-                              </Label>
-                              <NumericFormat
-                                customInput={Input}
-                                id={field.name}
-                                className="w-full"
-                                placeholder="3"
-                                decimalScale={0}
-                                allowNegative={false}
-                                isAllowed={(values) => {
-                                  if (values.floatValue === undefined) return true
-                                  return !maxDisk || values.floatValue <= maxDisk
-                                }}
-                                value={field.state.value ?? ''}
-                                onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
-                              />
-                            </div>
-                          )}
+                          {(field) => {
+                            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                            return (
+                              <div className="flex flex-col gap-1">
+                                <div className="flex items-center gap-4">
+                                  <Label htmlFor={field.name} className="w-32 flex-shrink-0">
+                                    Storage (GiB):
+                                  </Label>
+                                  <NumericFormat
+                                    customInput={Input}
+                                    aria-invalid={isInvalid}
+                                    id={field.name}
+                                    className="w-full"
+                                    placeholder="3"
+                                    decimalScale={0}
+                                    allowNegative={false}
+                                    isAllowed={(values) => {
+                                      if (values.floatValue === undefined) return true
+                                      return !maxDisk || values.floatValue <= maxDisk
+                                    }}
+                                    value={field.state.value ?? ''}
+                                    onBlur={field.handleBlur}
+                                    onValueChange={(values) => field.handleChange(values.floatValue ?? undefined)}
+                                  />
+                                </div>
+                                {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                                  <FieldError errors={field.state.meta.errors} />
+                                )}
+                              </div>
+                            )
+                          }}
                         </form.Field>
                       </div>
                       <FieldDescription>
