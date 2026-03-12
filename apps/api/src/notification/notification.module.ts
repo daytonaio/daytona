@@ -7,7 +7,7 @@ import { Module } from '@nestjs/common'
 import { NotificationService } from './services/notification.service'
 import { NotificationGateway } from './gateways/notification.gateway'
 import { NotificationRedisEmitter } from './emitters/notification-redis.emitter'
-import { NotificationEmitterInterface } from './interfaces/notification-emitter.interface'
+import { NotificationEmitter } from './gateways/notification-emitter.abstract'
 import { OrganizationModule } from '../organization/organization.module'
 import { SandboxModule } from '../sandbox/sandbox.module'
 import { RedisModule } from '@nestjs-modules/ioredis'
@@ -22,8 +22,8 @@ const gatewayEnabled = isApiEnabled() && process.env.NOTIFICATION_GATEWAY_DISABL
   providers: [
     NotificationService,
     ...(gatewayEnabled
-      ? [NotificationGateway, { provide: NotificationEmitterInterface, useExisting: NotificationGateway }]
-      : [{ provide: NotificationEmitterInterface, useClass: NotificationRedisEmitter }]),
+      ? [NotificationGateway, { provide: NotificationEmitter, useExisting: NotificationGateway }]
+      : [{ provide: NotificationEmitter, useClass: NotificationRedisEmitter }]),
   ],
   exports: [NotificationService],
 })

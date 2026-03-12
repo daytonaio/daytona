@@ -5,7 +5,7 @@
 
 import { Injectable } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { NotificationEmitterInterface } from '../interfaces/notification-emitter.interface'
+import { NotificationEmitter } from '../gateways/notification-emitter.abstract'
 import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
@@ -34,7 +34,7 @@ import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 @Injectable()
 export class NotificationService {
   constructor(
-    private readonly notificationEmitter: NotificationEmitterInterface,
+    private readonly notificationEmitter: NotificationEmitter,
     private readonly regionService: RegionService,
     private readonly sandboxService: SandboxService,
     @InjectRedis() private readonly redis: Redis,

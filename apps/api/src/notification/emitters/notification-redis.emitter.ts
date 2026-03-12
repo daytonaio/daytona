@@ -7,7 +7,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { Emitter } from '@socket.io/redis-emitter'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
-import { NotificationEmitterInterface } from '../interfaces/notification-emitter.interface'
+import { NotificationEmitter } from '../gateways/notification-emitter.abstract'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
@@ -23,7 +23,7 @@ import { RunnerState } from '../../sandbox/enums/runner-state.enum'
 import { RunnerEvents } from '../../sandbox/constants/runner-events'
 
 @Injectable()
-export class NotificationRedisEmitter extends NotificationEmitterInterface implements OnModuleInit {
+export class NotificationRedisEmitter extends NotificationEmitter implements OnModuleInit {
   private readonly logger = new Logger(NotificationRedisEmitter.name)
   private emitter: Emitter
 

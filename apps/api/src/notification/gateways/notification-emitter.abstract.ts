@@ -13,7 +13,7 @@ import { VolumeState } from '../../sandbox/enums/volume-state.enum'
 import { RunnerDto } from '../../sandbox/dto/runner.dto'
 import { RunnerState } from '../../sandbox/enums/runner-state.enum'
 
-export abstract class NotificationEmitterInterface {
+export abstract class NotificationEmitter {
   abstract emitSandboxCreated(sandbox: SandboxDto): void
   abstract emitSandboxStateUpdated(sandbox: SandboxDto, oldState: SandboxState, newState: SandboxState): void
   abstract emitSandboxDesiredStateUpdated(

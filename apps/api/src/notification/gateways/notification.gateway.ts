@@ -25,13 +25,13 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { RunnerDto } from '../../sandbox/dto/runner.dto'
 import { RunnerState } from '../../sandbox/enums/runner-state.enum'
 import { RunnerEvents } from '../../sandbox/constants/runner-events'
-import { NotificationEmitterInterface } from '../interfaces/notification-emitter.interface'
+import { NotificationEmitter } from './notification-emitter.abstract'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
   transports: ['websocket'],
 })
-export class NotificationGateway extends NotificationEmitterInterface implements OnGatewayInit, OnModuleInit {
+export class NotificationGateway extends NotificationEmitter implements OnGatewayInit, OnModuleInit {
   private readonly logger = new Logger(NotificationGateway.name)
 
   @WebSocketServer()
