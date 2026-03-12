@@ -359,6 +359,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
+          href: localizePath('/docs/custom-preview-proxy', locale),
+          label: t('sidebarconfig.customPreviewProxy'),
+          description: t('sidebarconfig.customPreviewProxyDescription'),
+          attrs: {
+            icon: 'proxy-link.svg',
+          },
+        },
+        {
+          type: 'link',
           href: localizePath('/docs/playground', locale),
           label: t('sidebarconfig.playground'),
           description: t('sidebarconfig.playgroundDescription'),
