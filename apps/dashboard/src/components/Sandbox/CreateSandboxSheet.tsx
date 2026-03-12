@@ -38,7 +38,7 @@ import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
-import { generatePath, useNavigate } from 'react-router-dom'
+import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Tooltip } from '../Tooltip'
@@ -212,7 +212,12 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
         setOpen(false)
 
         if (sandbox?.id) {
-          navigate(generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id }))
+          navigate({
+            pathname: generatePath(RoutePath.SANDBOX_DETAILS, { sandboxId: sandbox.id }),
+            search: `${createSearchParams({
+              tab: 'terminal',
+            })}`,
+          })
         }
       } catch (error) {
         handleApiError(error, 'Failed to create sandbox')
@@ -638,8 +643,9 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                 </form.Field>
                 <form.Field name="ephemeral">
                   {(field) => (
-                    <div className="flex items-start gap-2 mt-1">
+                    <div className="flex items-start gap-2">
                       <Checkbox
+                        className="mt-0.5"
                         id={field.name}
                         checked={field.state.value ?? false}
                         onCheckedChange={(checked) => {
@@ -650,9 +656,12 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                           }
                         }}
                       />
-                      <Label htmlFor={field.name} className="text-sm font-normal">
-                        Ephemeral — automatically delete the sandbox when it stops
-                      </Label>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor={field.name} className="text-sm font-normal">
+                          Ephemeral
+                        </Label>
+                        <FieldDescription>Automatically delete the sandbox when it stops.</FieldDescription>
+                      </div>
                     </div>
                   )}
                 </form.Field>
