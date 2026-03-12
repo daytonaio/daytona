@@ -31,12 +31,12 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { parseEnvFile } from '@/lib/env'
 import { handleApiError } from '@/lib/error-handling'
 import { imageNameSchema } from '@/lib/schema'
-import { getRegionFullDisplayName } from '@/lib/utils'
+import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/sdk'
 import { useForm } from '@tanstack/react-form'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -135,6 +135,14 @@ const defaultValues: FormValues = {
   public: false,
   networkBlockAll: false,
   ephemeral: false,
+}
+
+const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) => {
+  return (
+    <button className={cn('rounded-full', className)} {...props}>
+      <Info className="size-3 text-muted-foreground" />
+    </button>
+  )
 }
 
 export const CreateSandboxSheet = ({ className }: { className?: string }) => {
@@ -587,7 +595,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                       <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                         Auto-stop (min):
                         <Tooltip
-                          label={<Info className="size-3 text-muted-foreground" />}
+                          label={<InfoTooltipButton aria-label="Auto-stop information" />}
                           content={
                             <p>
                               Minutes of inactivity before stopping. Resets on preview access, SSH, or Toolbox API
@@ -619,7 +627,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                       <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                         Auto-archive (min):
                         <Tooltip
-                          label={<Info className="size-3 text-muted-foreground" />}
+                          label={<InfoTooltipButton aria-label="Auto-archive information" />}
                           content={
                             <p>
                               Minutes a sandbox must remain continuously stopped before archiving.
@@ -652,7 +660,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
                           <Label htmlFor={field.name} className="w-40 flex-shrink-0 flex items-center gap-1">
                             Auto-delete (min):
                             <Tooltip
-                              label={<Info className="size-3 text-muted-foreground" />}
+                              label={<InfoTooltipButton aria-label="Auto-delete information" />}
                               content={
                                 <p>
                                   Minutes a sandbox must remain continuously stopped before permanent deletion.
