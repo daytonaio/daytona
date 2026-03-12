@@ -275,13 +275,16 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 		Managed:         true,
 	})
 
+	success := false
+	defer func() {
+		if !success {
+			client.Kill()
+		}
+	}()
+
 	logger.Info("Computer use registered", "pluginName", pluginName)
 	rpcClient, err := client.Client()
 	if err != nil {
-		// Clean up the client before returning to avoid goroutine leaks and WaitGroup panics
-		client.Kill()
-
-		// Try to get detailed error information
 		pluginErr := detectPluginError(logger, path)
 		if pluginErr != nil {
 			return nil, fmt.Errorf("failed to get RPC client for computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
@@ -291,25 +294,20 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 
 	raw, err := rpcClient.Dispense(pluginName)
 	if err != nil {
-		// Clean up the client before returning
-		client.Kill()
 		return nil, fmt.Errorf("failed to dispense computer-use plugin: %w", err)
 	}
 
 	impl, ok := raw.(computeruse.IComputerUse)
 	if !ok {
-		// Clean up the client before returning
-		client.Kill()
 		return nil, fmt.Errorf("unexpected type from computer-use plugin")
 	}
 
 	_, err = impl.Initialize()
 	if err != nil {
-		// Clean up the client before returning
-		client.Kill()
 		return nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
 	}
 
+	success = true
 	logger.Info("Computer-use plugin initialized successfully")
 	computerUse.client = client
 	computerUse.impl = impl
