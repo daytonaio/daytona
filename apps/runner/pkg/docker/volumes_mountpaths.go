@@ -188,25 +188,36 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume string, subpath *
 
 	args = append(args, volume, path)
 
-	// Run mount-s3 in a transient systemd scope (its own cgroup) so the FUSE daemon
-	// survives runner restarts — systemd kills services by cgroup on stop/restart.
-	sdArgs := []string{"--scope"}
+	var envVars []string
 	if d.awsEndpointUrl != "" {
-		sdArgs = append(sdArgs, "--setenv=AWS_ENDPOINT_URL="+d.awsEndpointUrl)
+		envVars = append(envVars, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)
 	}
 	if d.awsAccessKeyId != "" {
-		sdArgs = append(sdArgs, "--setenv=AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
+		envVars = append(envVars, "AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
 	}
 	if d.awsSecretAccessKey != "" {
-		sdArgs = append(sdArgs, "--setenv=AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
+		envVars = append(envVars, "AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
 	}
 	if d.awsRegion != "" {
-		sdArgs = append(sdArgs, "--setenv=AWS_REGION="+d.awsRegion)
+		envVars = append(envVars, "AWS_REGION="+d.awsRegion)
 	}
-	sdArgs = append(sdArgs, "--", "mount-s3")
-	sdArgs = append(sdArgs, args...)
 
-	cmd := exec.CommandContext(ctx, "systemd-run", sdArgs...)
+	// No systemd (containerized) — daemon orphan survives runner restarts naturally.
+	cmd := exec.Command("mount-s3", args...)
+	cmd.Env = envVars
+
+	_, err := os.Stat("/run/systemd/system")
+	if err == nil {
+		// Isolate mount-s3 in its own cgroup so the FUSE daemon survives runner restarts.
+		sdArgs := []string{"--scope"}
+		for _, env := range envVars {
+			sdArgs = append(sdArgs, "--setenv="+env)
+		}
+		sdArgs = append(sdArgs, "--", "mount-s3")
+		sdArgs = append(sdArgs, args...)
+		cmd = exec.CommandContext(ctx, "systemd-run", sdArgs...)
+	}
+
 	cmd.Stderr = io.Writer(&log.ErrorLogWriter{})
 	cmd.Stdout = io.Writer(&log.InfoLogWriter{})
 
