@@ -16,6 +16,7 @@ import {
 } from '@tanstack/react-table'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
+import { Skeleton } from './ui/skeleton'
 import { Switch } from './ui/switch'
 import { useState } from 'react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
@@ -148,11 +149,19 @@ export function RunnerTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(5)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) =>
+                      column.id === 'options' ? null : (
+                        <TableCell key={column.id} className="px-2">
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

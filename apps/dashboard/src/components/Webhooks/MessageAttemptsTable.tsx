@@ -4,6 +4,7 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -185,7 +186,11 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
     return (
       <div>
         {header}
-        <div className="text-sm text-muted-foreground">No delivery attempts yet.</div>
+        <Empty className="border-none py-8">
+          <EmptyHeader>
+            <EmptyTitle>No delivery attempts yet.</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </div>
     )
   }

@@ -4,7 +4,8 @@
  */
 
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, MailPlus, X } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   ColumnDef,
   flexRender,
@@ -97,11 +98,19 @@ export function UserOrganizationInvitationTable({
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from(new Array(5)).map((_, i) => (
+                    <TableRow key={i}>
+                      {table.getVisibleLeafColumns().map((column) =>
+                        column.id === 'actions' ? null : (
+                          <TableCell key={column.id} className="px-2">
+                            <Skeleton className="h-4 w-10/12" />
+                          </TableCell>
+                        ),
+                      )}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -115,7 +124,12 @@ export function UserOrganizationInvitationTable({
                   </TableRow>
                 ))
               ) : (
-                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
+                <TableEmptyState
+                  colSpan={columns.length}
+                  message="No Invitations found."
+                  icon={<MailPlus className="h-5 w-5" />}
+                  description="You have no pending organization invitations."
+                />
               )}
             </TableBody>
           </Table>

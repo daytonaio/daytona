@@ -17,6 +17,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Copy, MapPinned, MoreHorizontal } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { DebouncedInput } from './DebouncedInput'
@@ -125,11 +126,19 @@ export function RegionTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(5)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) =>
+                      column.id === 'options' ? null : (
+                        <TableCell key={column.id} className="px-2">
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const isCustom = row.original.regionType === RegionType.CUSTOM

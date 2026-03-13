@@ -6,6 +6,7 @@
 import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { AuditLog } from '@daytonaio/api-client'
@@ -73,11 +74,17 @@ export function AuditLogTable({ data, loading, pagination, pageCount, onPaginati
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(25)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) => (
+                      <TableCell key={column.id} className="px-2">
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>

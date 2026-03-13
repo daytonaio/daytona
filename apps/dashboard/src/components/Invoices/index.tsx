@@ -8,6 +8,7 @@ import { flexRender } from '@tanstack/react-table'
 import { FileText } from 'lucide-react'
 import { Pagination } from '../Pagination'
 import { TableEmptyState } from '../TableEmptyState'
+import { Skeleton } from '../ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { InvoicesTableHeader } from './InvoicesTableHeader'
 import { InvoicesTableProps } from './types'
@@ -65,11 +66,19 @@ export function InvoicesTable({
         </TableHeader>
         <TableBody>
           {loading ? (
-            <TableRow>
-              <TableCell colSpan={table.getAllColumns().length} className="h-10 text-center">
-                Loading...
-              </TableCell>
-            </TableRow>
+            <>
+              {Array.from(new Array(5)).map((_, i) => (
+                <TableRow key={i}>
+                  {table.getVisibleLeafColumns().map((column) =>
+                    column.id === 'actions' ? null : (
+                      <TableCell key={column.id} className="px-2">
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ),
+                  )}
+                </TableRow>
+              ))}
+            </>
           ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow

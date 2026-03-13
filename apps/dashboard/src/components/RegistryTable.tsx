@@ -17,6 +17,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '.
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
 import { MoreHorizontal, Package } from 'lucide-react'
+import { Skeleton } from './ui/skeleton'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,11 +89,19 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(5)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) =>
+                      column.id === 'actions' ? null : (
+                        <TableCell key={column.id} className="px-2">
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>

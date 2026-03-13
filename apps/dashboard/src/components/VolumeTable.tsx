@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
@@ -112,11 +113,19 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from(new Array(5)).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column) =>
+                      column.id === 'actions' ? null : (
+                        <TableCell key={column.id} className="px-2">
+                          <Skeleton className="h-4 w-10/12" />
+                        </TableCell>
+                      ),
+                    )}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow

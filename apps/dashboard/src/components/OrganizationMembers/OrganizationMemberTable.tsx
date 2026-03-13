@@ -4,7 +4,8 @@
  */
 
 import { useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { MoreHorizontal, Users } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   ColumnDef,
   flexRender,
@@ -129,11 +130,19 @@ export function OrganizationMemberTable({
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from(new Array(5)).map((_, i) => (
+                    <TableRow key={i}>
+                      {table.getVisibleLeafColumns().map((column) =>
+                        column.id === 'actions' ? null : (
+                          <TableCell key={column.id} className="px-2">
+                            <Skeleton className="h-4 w-10/12" />
+                          </TableCell>
+                        ),
+                      )}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -147,7 +156,12 @@ export function OrganizationMemberTable({
                   </TableRow>
                 ))
               ) : (
-                <TableEmptyState colSpan={columns.length} message="No Members found." />
+                <TableEmptyState
+                  colSpan={columns.length}
+                  message="No Members found."
+                  icon={<Users className="h-5 w-5" />}
+                  description="Invite people to collaborate in your organization."
+                />
               )}
             </TableBody>
           </Table>
