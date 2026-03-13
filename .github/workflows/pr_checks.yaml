@@ -93,6 +93,26 @@ jobs:
           working-directory: libs/computer-use
           args: --timeout=5m ./...
 
+  lint-rust:
+    name: Rust lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - name: Check Rust code formatting
+        run: |
+          cd libs/sdk-rust
+          cargo fmt -- --check
+      - name: Run Cargo clippy
+        run: |
+          cd libs/sdk-rust
+          cargo clippy --all-targets -- -D warnings
+      - name: Run Cargo tests
+        run: |
+          cd libs/sdk-rust
+          cargo test
   lint-python:
     name: Python lint
     runs-on: ubuntu-latest
@@ -191,6 +211,10 @@ jobs:
           yarn
           VERSION=0.0.0-dev yarn build --nxBail=true
 
+      - name: Build Rust SDK
+        run: |
+          cd libs/sdk-rust
+          cargo build --release
   license-check:
     runs-on: ubuntu-latest
     steps:
@@ -209,3 +233,10 @@ jobs:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
           mode: 'check'
+
+      - name: Check Rust License Headers
+        run: |
+          cd libs/sdk-rust
+          grep -q "// Copyright 2019-2025 Daytona Labs Inc." src/lib.rs && \
+          grep -q "// SPDX-License-Identifier: Apache-2.0" src/lib.rs || \
+          (echo "License header check failed" && exit 1)
