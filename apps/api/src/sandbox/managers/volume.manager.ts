@@ -254,7 +254,17 @@ export class VolumeManager
       await this.redis.setex(lockKey, 30, '1')
 
       // Delete bucket from Minio/S3
-      await deleteS3Bucket(this.s3Client, volume.getBucketName())
+      try {
+        await deleteS3Bucket(this.s3Client, volume.getBucketName())
+      } catch (error) {
+        if (error.name === 'NoSuchBucket') {
+          this.logger.warn(`Bucket for volume ${volume.id} does not exist, treating as already deleted`)
+        } else if (error.name === 'BucketNotEmpty') {
+          throw new Error('Volume deletion failed because the bucket is not empty. You may retry deletion.')
+        } else {
+          throw error
+        }
+      }
 
       // Refresh lock before final state update
       await this.redis.setex(lockKey, 30, '1')
