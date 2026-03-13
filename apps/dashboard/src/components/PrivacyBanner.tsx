@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { usePrivacyConsent } from '@/hooks/usePrivacyConsent'
 import { Cookie, Settings } from 'lucide-react'
 import { useState } from 'react'
-import { PrivacyPreferencesDialog, usePrivacyConsent } from './PrivacyPreferencesDialog'
+import { PrivacyPreferencesDialog } from './PrivacyPreferencesDialog'
 import { Button } from './ui/button'
 
 export function PrivacyBanner() {
