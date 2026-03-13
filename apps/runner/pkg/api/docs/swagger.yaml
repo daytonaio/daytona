@@ -1130,6 +1130,41 @@ paths:
       summary: Check if a snapshot exists
       tags:
         - snapshots
+  /snapshots/image-processing/cancel:
+    post:
+      description: Cancel an in-progress image build or pull. Returns 200 if the operation
+        was found and cancelled, 404 if no active operation was found.
+      operationId: CancelImageProcessing
+      parameters:
+        - description: Snapshot name and tag
+          in: query
+          name: snapshot
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Image processing cancelled successfully
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Cancel image processing
+      tags:
+        - snapshots
   /snapshots/info:
     get:
       description: Get information about a specified snapshot including size and entrypoint.

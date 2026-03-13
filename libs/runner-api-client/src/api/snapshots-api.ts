@@ -83,6 +83,46 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.
+         * @summary Cancel image processing
+         * @param {string} snapshot Snapshot name and tag
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelImageProcessing: async (snapshot: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'snapshot' is not null or undefined
+            assertParamExists('cancelImageProcessing', 'snapshot', snapshot)
+            const localVarPath = `/snapshots/image-processing/cancel`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            if (snapshot !== undefined) {
+                localVarQueryParameter['snapshot'] = snapshot;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Stream build logs
          * @summary Get build logs
          * @param {string} snapshotRef Snapshot ref
@@ -389,6 +429,19 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.
+         * @summary Cancel image processing
+         * @param {string} snapshot Snapshot name and tag
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async cancelImageProcessing(snapshot: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.cancelImageProcessing(snapshot, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.cancelImageProcessing']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Stream build logs
          * @summary Get build logs
          * @param {string} snapshotRef Snapshot ref
@@ -502,6 +555,16 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
             return localVarFp.buildSnapshot(request, options).then((request) => request(axios, basePath));
         },
         /**
+         * Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.
+         * @summary Cancel image processing
+         * @param {string} snapshot Snapshot name and tag
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        cancelImageProcessing(snapshot: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+            return localVarFp.cancelImageProcessing(snapshot, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Stream build logs
          * @summary Get build logs
          * @param {string} snapshotRef Snapshot ref
@@ -593,6 +656,18 @@ export class SnapshotsApi extends BaseAPI {
      */
     public buildSnapshot(request: BuildSnapshotRequestDTO, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).buildSnapshot(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.
+     * @summary Cancel image processing
+     * @param {string} snapshot Snapshot name and tag
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SnapshotsApi
+     */
+    public cancelImageProcessing(snapshot: string, options?: RawAxiosRequestConfig) {
+        return SnapshotsApiFp(this.configuration).cancelImageProcessing(snapshot, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

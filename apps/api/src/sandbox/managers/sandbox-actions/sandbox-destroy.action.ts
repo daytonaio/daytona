@@ -32,6 +32,32 @@ export class SandboxDestroyAction extends SandboxAction {
       return DONT_SYNC_AGAIN
     }
 
+    if (sandbox.state === SandboxState.BUILDING_SNAPSHOT || sandbox.state === SandboxState.PULLING_SNAPSHOT) {
+      if (sandbox.runnerId) {
+        try {
+          const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
+          const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+
+          let snapshotRef = sandbox.snapshot
+          if (!snapshotRef) {
+            const fullSandbox = await this.sandboxRepository.findOne({
+              where: { id: sandbox.id },
+              relations: ['buildInfo'],
+            })
+            snapshotRef = fullSandbox?.buildInfo?.snapshotRef
+          }
+
+          if (snapshotRef) {
+            await runnerAdapter.cancelImageProcessing(snapshotRef)
+          }
+        } catch (e) {
+          this.logger.warn(`Failed to cancel build for sandbox ${sandbox.id}: ${e.message}`)
+        }
+      }
+      await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
+      return DONT_SYNC_AGAIN
+    }
+
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN

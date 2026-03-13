@@ -264,6 +264,42 @@ func RemoveSnapshot(logger *slog.Logger) gin.HandlerFunc {
 	}
 }
 
+// CancelImageProcessing godoc
+//
+//	@Tags			snapshots
+//	@Summary		Cancel image processing
+//	@Description	Cancel an in-progress image build or pull. Returns 200 if the operation was found and cancelled, 404 if no active operation was found.
+//	@Param			snapshot	query		string	true	"Snapshot name and tag"	example:"myimage:1.0"
+//	@Success		200			{string}	string	"Image processing cancelled successfully"
+//	@Failure		400			{object}	common_errors.ErrorResponse
+//	@Failure		401			{object}	common_errors.ErrorResponse
+//	@Failure		404			{object}	common_errors.ErrorResponse
+//	@Failure		500			{object}	common_errors.ErrorResponse
+//
+//	@Router			/snapshots/image-processing/cancel [post]
+//
+//	@id				CancelImageProcessing
+func CancelImageProcessing(logger *slog.Logger) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		snapshot := ctx.Query("snapshot")
+		if snapshot == "" {
+			ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot parameter is required")))
+			return
+		}
+
+		runner := runner.GetInstance(nil)
+
+		cancelled := runner.Docker.CancelImageProcessing(snapshot)
+		if !cancelled {
+			ctx.Error(common_errors.NewNotFoundError(fmt.Errorf("no active image processing found for snapshot: %s", snapshot)))
+			return
+		}
+
+		logger.Info("Cancelled image processing", "snapshot", snapshot)
+		ctx.JSON(http.StatusOK, "Image processing cancelled successfully")
+	}
+}
+
 type SnapshotExistsResponse struct {
 	Exists bool `json:"exists" example:"true"`
 } //	@name	SnapshotExistsResponse

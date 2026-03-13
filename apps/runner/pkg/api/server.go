@@ -152,6 +152,7 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	{
 		snapshotController.POST("/pull", controllers.PullSnapshot(ctx, snapshotControllerLogger))
 		snapshotController.POST("/build", controllers.BuildSnapshot(ctx, snapshotControllerLogger))
+		snapshotController.POST("/image-processing/cancel", controllers.CancelImageProcessing(snapshotControllerLogger))
 		snapshotController.POST("/tag", controllers.TagImage)
 		snapshotController.GET("/exists", controllers.SnapshotExists)
 		snapshotController.GET("/info", controllers.GetSnapshotInfo)
