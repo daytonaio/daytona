@@ -9,4 +9,5 @@ export enum FeatureFlags {
   DASHBOARD_PLAYGROUND = 'dashboard_playground',
   DASHBOARD_WEBHOOKS = 'dashboard_webhooks',
   SANDBOX_SPENDING = 'sandbox_spending',
+  DASHBOARD_CREATE_SANDBOX = 'dashboard_create-sandbox',
 }

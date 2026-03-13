@@ -5,6 +5,7 @@
 
 import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
 import {
@@ -920,18 +921,21 @@ const Sandboxes: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
-        {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
-          <div className="flex items-center gap-2 ml-auto">
-            <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-              Onboarding guide
-            </Button>
-            <Button variant="link" className="text-primary" asChild size="sm">
-              <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                Docs
-              </a>
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 ml-auto">
+          {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
+            <>
+              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
+                Onboarding guide
+              </Button>
+              <Button variant="link" className="text-primary" asChild size="sm">
+                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
+                  Docs
+                </a>
+              </Button>
+            </>
+          )}
+          <CreateSandboxSheet />
+        </div>
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
         <SandboxTable

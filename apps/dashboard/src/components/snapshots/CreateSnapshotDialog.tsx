@@ -28,26 +28,16 @@ import { useForm } from '@tanstack/react-form'
 import { Plus } from 'lucide-react'
 import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { imageNameSchema } from '@/lib/schema'
 import { z } from 'zod'
 import { ScrollArea } from '../ui/scroll-area'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
-const IMAGE_TAG_OR_DIGEST_REGEX = /^[^@]+@sha256:[a-f0-9]{64}$|^(?!.*@sha256:).*:.+$/
 
 const snapshotNameSchema = z
   .string()
   .min(1, 'Snapshot name is required')
   .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
-
-const imageNameSchema = z
-  .string()
-  .min(1, 'Image name is required')
-  .refine((name) => IMAGE_NAME_REGEX.test(name), 'Only letters, digits, dots, colons, slashes and dashes are allowed')
-  .refine(
-    (name) => IMAGE_TAG_OR_DIGEST_REGEX.test(name),
-    'Image must include a tag (e.g., ubuntu:22.04) or digest (@sha256:...)',
-  )
-  .refine((name) => !name.endsWith(':latest'), 'Images with tag ":latest" are not allowed')
 
 const formSchema = z.object({
   name: snapshotNameSchema,
