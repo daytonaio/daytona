@@ -11,29 +11,20 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
-import { useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
 import { useRegions } from '@/hooks/useRegions'
 import { formatMoney } from '@/lib/utils'
+import { ModelsUsageChartPoint } from '@daytonaio/analytics-api-client'
 import type { RegionUsageOverview } from '@daytonaio/api-client'
-import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
-import { useCallback, useMemo, useState } from 'react'
-import { DateRange } from 'react-day-picker'
+import { useMemo, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 
-const MAX_RANGE_DAYS = 3
-
-const timelineQuickRanges: QuickRangesConfig = {
-  hours: [1, 6, 12, 24],
-  days: [2, 3],
-}
-
 type UsageTimelineChartProps = {
-  analyticsEnabled: boolean
+  data: ModelsUsageChartPoint[] | undefined
+  isLoading: boolean
   regionUsage: RegionUsageOverview[] | undefined
 }
 
@@ -46,9 +37,9 @@ const LIMIT_COLORS = {
 }
 
 const resourceChartConfig: ChartConfig = {
-  cpu: { label: 'CPU (cores)', color: 'hsl(var(--chart-1))' },
-  ramGB: { label: 'RAM (GB)', color: 'hsl(var(--chart-2))' },
-  diskGB: { label: 'Disk (GB)', color: 'hsl(var(--chart-3))' },
+  cpu: { label: 'CPU (vCPU)', color: 'hsl(var(--chart-1))' },
+  ramGB: { label: 'RAM (GiB)', color: 'hsl(var(--chart-2))' },
+  diskGB: { label: 'Disk (GiB)', color: 'hsl(var(--chart-3))' },
 }
 
 const costChartConfig: ChartConfig = {
@@ -85,33 +76,11 @@ function formatDateTime(value: string) {
 
 const ALL_REGIONS_VALUE = '__all__'
 
-export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimelineChartProps) {
-  const { availableRegions: regions, loadingAvailableRegions: regionsLoading, getRegionName } = useRegions()
+export function UsageTimelineChart({ data, isLoading, regionUsage }: UsageTimelineChartProps) {
+  const { getRegionName } = useRegions()
 
   const [mode, setMode] = useState<ChartMode>('resources')
   const [selectedRegion, setSelectedRegion] = useState<string | undefined>(undefined)
-  const [dateRange, setDateRange] = useState<DateRange>(() => {
-    const now = new Date()
-    return { from: subDays(now, 1), to: now }
-  })
-
-  const handleDateRangeChange = useCallback((range: DateRange) => {
-    if (range.from && range.to) {
-      const days = differenceInCalendarDays(range.to, range.from)
-      if (days > MAX_RANGE_DAYS) {
-        setDateRange({ from: range.from, to: addDays(range.from, MAX_RANGE_DAYS) })
-        return
-      }
-    }
-    setDateRange(range)
-  }, [])
-
-  const { data, isLoading } = useUsageChart({
-    from: dateRange.from ?? subDays(new Date(), 1),
-    to: dateRange.to ?? new Date(),
-    region: selectedRegion,
-    enabled: analyticsEnabled,
-  })
 
   const chartData = useMemo(() => {
     if (!data?.length) return []
@@ -148,29 +117,19 @@ export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimel
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xl font-semibold leading-none tracking-tight">Usage Timeline</p>
         <div className="flex items-center gap-3 flex-wrap">
-          <DateRangePicker
-            value={dateRange}
-            onChange={handleDateRangeChange}
-            quickRangesEnabled
-            quickRanges={timelineQuickRanges}
-            timeSelection
-            defaultSelectedQuickRange="Last 24 hour"
-            className="w-auto"
-            contentAlign="end"
-          />
           <Select
             value={selectedRegion ?? ALL_REGIONS_VALUE}
             onValueChange={(value) => setSelectedRegion(value === ALL_REGIONS_VALUE ? undefined : value)}
-            disabled={regionsLoading}
+            disabled={!regionUsage?.length}
           >
             <SelectTrigger size="sm" className="w-[160px] rounded-lg" aria-label="Select region">
               <SelectValue placeholder="All Regions" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value={ALL_REGIONS_VALUE}>All Regions</SelectItem>
-              {regions.map((region) => (
-                <SelectItem key={region.id} value={region.id}>
-                  {getRegionName(region.id) ?? region.id}
+              {regionUsage?.map((usage) => (
+                <SelectItem key={usage.regionId} value={usage.regionId}>
+                  {getRegionName(usage.regionId) ?? usage.regionId}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -254,7 +213,7 @@ export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimel
                   strokeDasharray="6 3"
                   strokeWidth={1.5}
                   label={{
-                    value: `CPU limit (${limits.cpu})`,
+                    value: `CPU limit (${limits.cpu} vCPU)`,
                     position: 'insideTopRight',
                     fontSize: 11,
                     fill: LIMIT_COLORS.cpu,
@@ -266,7 +225,7 @@ export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimel
                   strokeDasharray="6 3"
                   strokeWidth={1.5}
                   label={{
-                    value: `RAM limit (${limits.ram} GB)`,
+                    value: `RAM limit (${limits.ram} GiB)`,
                     position: 'insideTopRight',
                     fontSize: 11,
                     fill: LIMIT_COLORS.ram,
@@ -278,7 +237,7 @@ export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimel
                   strokeDasharray="6 3"
                   strokeWidth={1.5}
                   label={{
-                    value: `Disk limit (${limits.disk} GB)`,
+                    value: `Disk limit (${limits.disk} GiB)`,
                     position: 'insideTopRight',
                     fontSize: 11,
                     fill: LIMIT_COLORS.disk,

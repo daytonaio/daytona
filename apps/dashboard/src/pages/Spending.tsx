@@ -16,16 +16,16 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Separator } from '@/components/ui/separator'
 import { FeatureFlags } from '@/enums/FeatureFlags'
 import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
-import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
+import { useAggregatedUsage, useSandboxesUsage, useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
 import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
 import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizationUsageQuery'
 import { useConfig } from '@/hooks/useConfig'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { subDays } from 'date-fns'
+import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
 const analyticsQuickRanges: QuickRangesConfig = {
@@ -43,6 +43,17 @@ const Spending = () => {
     const now = new Date()
     return { from: subDays(now, 30), to: now }
   })
+
+  const handleAnalyticsDateRangeChange = useCallback((range: DateRange) => {
+    if (range.from && range.to) {
+      const days = differenceInCalendarDays(range.to, range.from)
+      if (days > 30) {
+        setAnalyticsDateRange({ from: range.from, to: addDays(range.from, 30) })
+        return
+      }
+    }
+    setAnalyticsDateRange(range)
+  }, [])
 
   const analyticsParams = {
     from: analyticsDateRange.from ?? subDays(new Date(), 30),
@@ -62,6 +73,7 @@ const Spending = () => {
     isError: sandboxesError,
     refetch: refetchSandboxes,
   } = useSandboxesUsage(analyticsParams)
+  const { data: usageChartPoints, isLoading: chartLoading } = useUsageChart(analyticsParams)
 
   const { data: usageOverview } = useOrganizationUsageOverviewQuery({
     organizationId: selectedOrganization?.id ?? '',
@@ -115,7 +127,7 @@ const Spending = () => {
               </div>
               <DateRangePicker
                 value={analyticsDateRange}
-                onChange={setAnalyticsDateRange}
+                onChange={handleAnalyticsDateRangeChange}
                 quickRangesEnabled
                 quickRanges={analyticsQuickRanges}
                 timeSelection
@@ -162,7 +174,8 @@ const Spending = () => {
                 <ResourceUsageBreakdown data={aggregatedUsage} />
                 <Separator />
                 <UsageTimelineChart
-                  analyticsEnabled={analyticsAvailable && !!selectedOrganization}
+                  data={usageChartPoints}
+                  isLoading={chartLoading}
                   regionUsage={usageOverview?.regionUsage}
                 />
               </>
