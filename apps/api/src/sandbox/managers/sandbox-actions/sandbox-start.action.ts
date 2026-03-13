@@ -206,13 +206,20 @@ export class SandboxStartAction extends SandboxAction {
     for (const snapshotRunner of snapshotRunners) {
       // Consider removing the runner usage rate check or improving it
       const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
+
+      if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+        await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
+        return DONT_SYNC_AGAIN
+      }
+
+      if (runner.unschedulable || runner.draining || runner.state !== RunnerState.READY) {
+        continue
+      }
+
       if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
         if (snapshotRunner.state === targetState) {
           await this.updateSandboxState(sandbox, targetSandboxState, lockCode, runner.id)
           return SYNC_AGAIN
-        } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
-          return DONT_SYNC_AGAIN
         }
       }
     }
