@@ -140,7 +140,7 @@ jobs:
 
       - name: System dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev gettext
           corepack enable
           python3 -m pip install --upgrade pip
           python3 -m pip install "poetry==2.1.3"
@@ -168,6 +168,9 @@ jobs:
           yarn build:production
           yarn nx build-amd64 runner --configuration=production --nxBail=true
 
+      - name: Build runner .deb package
+        run: VERSION="${VERSION#v}" yarn nx package-deb runner
+
       - name: Build CLI
         run: |
           cd ./apps/cli
@@ -182,6 +185,11 @@ jobs:
       - name: Upload runner to release assets
         run: |
           gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
+
+      - name: Upload runner .deb to release assets
+        run: |
+          DEB_VERSION="${VERSION#v}"
+          gh release upload ${{ inputs.version }} "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
 
       - name: Upload daemon to release assets
         run: |
