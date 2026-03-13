@@ -7,14 +7,10 @@ import { Injectable, ExecutionContext, Logger, CanActivate, Type, mixin } from '
 import { ModuleRef } from '@nestjs/core'
 
 /**
- * Creates an OrGuard that allows access if at least one of the provided guards allows access.
- * It tries each guard in sequence and returns true on the first successful guard.
- * If all guards fail, it returns false.
+ * Utility guard that allows access if at least one of the provided guards succeeds.
  *
- * Usage:
- * ```typescript
- * @UseGuards(OrGuard([GuardA, GuardB]))
- * ```
+ * Using guards that are not registered as providers in the module will result in a runtime error.
+ *
  */
 export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
   @Injectable()
@@ -25,8 +21,8 @@ export function OrGuard(guards: Type<CanActivate>[]): Type<CanActivate> {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
       for (const GuardClass of guards) {
+        const guard = this.moduleRef.get(GuardClass)
         try {
-          const guard = this.moduleRef.get(GuardClass, { strict: false })
           const result = await guard.canActivate(context)
 
           if (result) {
