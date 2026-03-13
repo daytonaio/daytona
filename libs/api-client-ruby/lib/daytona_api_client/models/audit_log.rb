@@ -41,6 +41,9 @@ module DaytonaApiClient
 
     attr_accessor :metadata
 
+    # Duration of the request in milliseconds
+    attr_accessor :duration
+
     attr_accessor :created_at
 
     # Attribute mapping from ruby-style variable name to JSON key.
@@ -59,6 +62,7 @@ module DaytonaApiClient
         :'user_agent' => :'userAgent',
         :'source' => :'source',
         :'metadata' => :'metadata',
+        :'duration' => :'duration',
         :'created_at' => :'createdAt'
       }
     end
@@ -89,6 +93,7 @@ module DaytonaApiClient
         :'user_agent' => :'String',
         :'source' => :'String',
         :'metadata' => :'Hash<String, Object>',
+        :'duration' => :'Float',
         :'created_at' => :'Time'
       }
     end
@@ -175,6 +180,10 @@ module DaytonaApiClient
         if (value = attributes[:'metadata']).is_a?(Hash)
           self.metadata = value
         end
+      end
+
+      if attributes.key?(:'duration')
+        self.duration = attributes[:'duration']
       end
 
       if attributes.key?(:'created_at')
@@ -292,6 +301,7 @@ module DaytonaApiClient
           user_agent == o.user_agent &&
           source == o.source &&
           metadata == o.metadata &&
+          duration == o.duration &&
           created_at == o.created_at
     end
 
@@ -304,7 +314,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, actor_id, actor_email, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, created_at].hash
+      [id, actor_id, actor_email, organization_id, action, target_type, target_id, status_code, error_message, ip_address, user_agent, source, metadata, duration, created_at].hash
     end
 
     # Builds the object from hash
