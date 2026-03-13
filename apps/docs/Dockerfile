@@ -1,5 +1,7 @@
 FROM node:22-alpine AS build
 
+ENV CI=true
+
 RUN npm install -g corepack && corepack enable
 
 WORKDIR /daytona
