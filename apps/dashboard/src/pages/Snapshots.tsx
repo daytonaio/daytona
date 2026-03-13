@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { SearchInput } from '@/components/SearchInput'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SNAPSHOT_SORTING,
@@ -45,6 +46,7 @@ const Snapshots: React.FC = () => {
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -60,8 +62,9 @@ const Snapshots: React.FC = () => {
       page: paginationParams.pageIndex + 1,
       pageSize: paginationParams.pageSize,
       sorting,
+      filters: searchQuery.trim() ? { name: searchQuery.trim() } : undefined,
     }),
-    [paginationParams, sorting],
+    [paginationParams, sorting, searchQuery],
   )
 
   const baseQueryKey = useMemo(() => queryKeys.snapshots.all, [])
@@ -82,6 +85,21 @@ const Snapshots: React.FC = () => {
       handleApiError(snapshotsDataError, 'Failed to fetch snapshots')
     }
   }, [snapshotsDataError])
+
+  const prevSearchQueryRef = useRef<string>(searchQuery)
+
+  // Reset to first page when search query changes
+  useEffect(() => {
+    if (searchQuery !== prevSearchQueryRef.current) {
+      prevSearchQueryRef.current = searchQuery
+      setPaginationParams((prev) => {
+        if (prev.pageIndex > 0) {
+          return { ...prev, pageIndex: 0 }
+        }
+        return prev
+      })
+    }
+  }, [searchQuery])
 
   const updateSnapshotInCache = useCallback(
     (snapshotId: string, updates: Partial<SnapshotDto>) => {
@@ -335,6 +353,15 @@ const Snapshots: React.FC = () => {
       </PageHeader>
 
       <PageContent size="full">
+        <SearchInput
+          placeholder="Search snapshots..."
+          value={searchQuery}
+          onChange={setSearchQuery}
+          resultCount={snapshotsData?.total ?? 0}
+          entityName="snapshot"
+          data-testid="snapshots-search"
+        />
+
         <SnapshotTable
           data={snapshotsData?.items ?? []}
           loading={snapshotsDataIsLoading}
