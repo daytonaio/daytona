@@ -177,22 +177,22 @@ export class AuditOpenSearchStorageAdapter implements AuditLogStorageAdapter, On
   }
 
   private mapSourceToAuditLog(source: any): AuditLog {
-    const auditLog = new AuditLog()
-    auditLog.id = source.id
-    auditLog.actorId = source.actorId
-    auditLog.actorEmail = source.actorEmail
-    auditLog.organizationId = source.organizationId
-    auditLog.action = source.action
-    auditLog.targetType = source.targetType
-    auditLog.targetId = source.targetId
-    auditLog.statusCode = source.statusCode
-    auditLog.errorMessage = source.errorMessage
-    auditLog.ipAddress = source.ipAddress
-    auditLog.userAgent = source.userAgent
-    auditLog.source = source.source
-    auditLog.metadata = source.metadata
-    auditLog.createdAt = new Date(source.createdAt)
-    return auditLog
+    return new AuditLog({
+      id: source.id,
+      actorId: source.actorId,
+      actorEmail: source.actorEmail,
+      organizationId: source.organizationId,
+      action: source.action,
+      targetType: source.targetType,
+      targetId: source.targetId,
+      statusCode: source.statusCode,
+      errorMessage: source.errorMessage,
+      ipAddress: source.ipAddress,
+      userAgent: source.userAgent,
+      source: source.source,
+      metadata: source.metadata,
+      createdAt: new Date(source.createdAt),
+    })
   }
 
   private async setupISM(): Promise<void> {

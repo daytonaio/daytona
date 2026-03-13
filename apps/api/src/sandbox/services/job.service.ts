@@ -50,31 +50,28 @@ export class JobService {
     const encodedPayload = typeof payload === 'string' ? payload : payload ? JSON.stringify(payload) : undefined
 
     try {
-      const savedJob = await repo.save(
-        new Job({
-          type,
-          runnerId,
-          resourceType,
-          resourceId,
-          status: JobStatus.PENDING,
-          payload: encodedPayload,
-          traceContext,
-        }),
-        {
-          transaction: false,
-        },
-      )
+      const job = new Job({
+        type,
+        runnerId,
+        resourceType,
+        resourceId,
+        status: JobStatus.PENDING,
+        payload: encodedPayload,
+        traceContext,
+      })
+
+      await repo.insert(job)
 
       // Log with context-specific info
       const contextInfo = resourceId ? `${resourceType} ${resourceId}` : 'N/A'
 
-      this.logger.debug(`Created job ${savedJob.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
+      this.logger.debug(`Created job ${job.id} of type ${type} for ${contextInfo} on runner ${runnerId}`)
 
       // Notify runner via Redis - happens outside transaction
       // If transaction rolls back, notification is harmless (runner will poll and find nothing)
-      await this.notifyRunner(runnerId, savedJob.id)
+      await this.notifyRunner(runnerId, job.id)
 
-      return savedJob
+      return job
     } catch (error) {
       if (error.code === '23505') {
         if (error.constraint === 'IDX_UNIQUE_INCOMPLETE_JOB') {

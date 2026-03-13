@@ -122,6 +122,7 @@ export class Job {
     completedAt?: Date | null
   }) {
     this.id = params.id || v4()
+    this.version = 1
     this.type = params.type
     this.status = params.status || JobStatus.PENDING
     this.runnerId = params.runnerId

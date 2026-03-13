@@ -60,21 +60,10 @@ export class AuditService implements OnApplicationBootstrap {
   }
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
-    const auditLog = new AuditLog()
-    auditLog.actorId = createDto.actorId
-    auditLog.actorEmail = createDto.actorEmail
-    auditLog.organizationId = createDto.organizationId
-    auditLog.action = createDto.action
-    auditLog.targetType = createDto.targetType
-    auditLog.targetId = createDto.targetId
-    auditLog.statusCode = createDto.statusCode
-    auditLog.errorMessage = createDto.errorMessage
-    auditLog.ipAddress = createDto.ipAddress
-    auditLog.userAgent = createDto.userAgent
-    auditLog.source = createDto.source
-    auditLog.metadata = createDto.metadata
+    const auditLog = new AuditLog(createDto)
 
-    return this.auditLogRepository.save(auditLog, { transaction: false })
+    await this.auditLogRepository.insert(auditLog)
+    return auditLog
   }
 
   async updateLog(id: string, updateDto: UpdateAuditLogInternalDto): Promise<AuditLog> {
