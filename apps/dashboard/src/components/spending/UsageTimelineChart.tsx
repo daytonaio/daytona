@@ -11,24 +11,29 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
+import { useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
+import { useRegions } from '@/hooks/useRegions'
 import { formatMoney } from '@/lib/utils'
-import { ModelsUsageChartPoint } from '@daytonaio/analytics-api-client'
-import type { Region, RegionUsageOverview } from '@daytonaio/api-client'
-import { useMemo, useState } from 'react'
+import type { RegionUsageOverview } from '@daytonaio/api-client'
+import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
+import { useCallback, useMemo, useState } from 'react'
+import { DateRange } from 'react-day-picker'
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 
+const MAX_RANGE_DAYS = 3
+
+const timelineQuickRanges: QuickRangesConfig = {
+  hours: [1, 6, 12, 24],
+  days: [2, 3],
+}
+
 type UsageTimelineChartProps = {
-  data: ModelsUsageChartPoint[] | undefined
-  isLoading: boolean
-  regions: Region[]
-  regionsLoading: boolean
-  selectedRegion: string | undefined
-  onRegionChange: (regionId: string | undefined) => void
-  getRegionName: (regionId: string) => string | undefined
+  analyticsEnabled: boolean
   regionUsage: RegionUsageOverview[] | undefined
 }
 
@@ -80,17 +85,33 @@ function formatDateTime(value: string) {
 
 const ALL_REGIONS_VALUE = '__all__'
 
-export function UsageTimelineChart({
-  data,
-  isLoading,
-  regions,
-  regionsLoading,
-  selectedRegion,
-  onRegionChange,
-  getRegionName,
-  regionUsage,
-}: UsageTimelineChartProps) {
+export function UsageTimelineChart({ analyticsEnabled, regionUsage }: UsageTimelineChartProps) {
+  const { availableRegions: regions, loadingAvailableRegions: regionsLoading, getRegionName } = useRegions()
+
   const [mode, setMode] = useState<ChartMode>('resources')
+  const [selectedRegion, setSelectedRegion] = useState<string | undefined>(undefined)
+  const [dateRange, setDateRange] = useState<DateRange>(() => {
+    const now = new Date()
+    return { from: subDays(now, 1), to: now }
+  })
+
+  const handleDateRangeChange = useCallback((range: DateRange) => {
+    if (range.from && range.to) {
+      const days = differenceInCalendarDays(range.to, range.from)
+      if (days > MAX_RANGE_DAYS) {
+        setDateRange({ from: range.from, to: addDays(range.from, MAX_RANGE_DAYS) })
+        return
+      }
+    }
+    setDateRange(range)
+  }, [])
+
+  const { data, isLoading } = useUsageChart({
+    from: dateRange.from ?? subDays(new Date(), 1),
+    to: dateRange.to ?? new Date(),
+    region: selectedRegion,
+    enabled: analyticsEnabled,
+  })
 
   const chartData = useMemo(() => {
     if (!data?.length) return []
@@ -126,10 +147,20 @@ export function UsageTimelineChart({
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <p className="text-xl font-semibold leading-none tracking-tight">Usage Timeline</p>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <DateRangePicker
+            value={dateRange}
+            onChange={handleDateRangeChange}
+            quickRangesEnabled
+            quickRanges={timelineQuickRanges}
+            timeSelection
+            defaultSelectedQuickRange="Last 24 hour"
+            className="w-auto"
+            contentAlign="end"
+          />
           <Select
             value={selectedRegion ?? ALL_REGIONS_VALUE}
-            onValueChange={(value) => onRegionChange(value === ALL_REGIONS_VALUE ? undefined : value)}
+            onValueChange={(value) => setSelectedRegion(value === ALL_REGIONS_VALUE ? undefined : value)}
             disabled={regionsLoading}
           >
             <SelectTrigger size="sm" className="w-[160px] rounded-lg" aria-label="Select region">
