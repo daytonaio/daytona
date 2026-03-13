@@ -25,7 +25,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
 const analyticsQuickRanges: QuickRangesConfig = {
@@ -55,6 +55,8 @@ const Spending = () => {
     setAnalyticsDateRange(range)
   }, [])
 
+  const [selectedChartRegion, setSelectedChartRegion] = useState<string | undefined>(undefined)
+
   const analyticsParams = {
     from: analyticsDateRange.from ?? subDays(new Date(), 30),
     to: analyticsDateRange.to ?? new Date(),
@@ -73,11 +75,27 @@ const Spending = () => {
     isError: sandboxesError,
     refetch: refetchSandboxes,
   } = useSandboxesUsage(analyticsParams)
-  const { data: usageChartPoints, isLoading: chartLoading } = useUsageChart(analyticsParams)
+  const { data: usageChartPoints, isLoading: chartLoading } = useUsageChart({
+    ...analyticsParams,
+    region: selectedChartRegion,
+  })
 
   const { data: usageOverview } = useOrganizationUsageOverviewQuery({
     organizationId: selectedOrganization?.id ?? '',
   })
+
+  // Default chart region to the organization's default region
+  useEffect(() => {
+    if (selectedChartRegion) return
+    const regionUsage = usageOverview?.regionUsage
+    if (!regionUsage?.length) return
+    const defaultRegionId = selectedOrganization?.defaultRegionId
+    if (defaultRegionId && regionUsage.some((r) => r.regionId === defaultRegionId)) {
+      setSelectedChartRegion(defaultRegionId)
+    } else {
+      setSelectedChartRegion(regionUsage[0].regionId)
+    }
+  }, [usageOverview?.regionUsage, selectedOrganization?.defaultRegionId, selectedChartRegion])
 
   const {
     data: currentOrganizationUsage,
@@ -177,6 +195,8 @@ const Spending = () => {
                   data={usageChartPoints}
                   isLoading={chartLoading}
                   regionUsage={usageOverview?.regionUsage}
+                  selectedRegion={selectedChartRegion}
+                  onRegionChange={setSelectedChartRegion}
                 />
               </>
             )}
