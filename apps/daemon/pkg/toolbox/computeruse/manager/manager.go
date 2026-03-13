@@ -284,10 +284,16 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 		Managed:         true,
 	})
 
+	success := false
+	defer func() {
+		if !success {
+			client.Kill()
+		}
+	}()
+
 	logger.Info("Computer use registered", "pluginName", pluginName)
 	rpcClient, err := client.Client()
 	if err != nil {
-		// Try to get detailed error information
 		pluginErr := detectPluginError(logger, path)
 		if pluginErr != nil {
 			return nil, fmt.Errorf("failed to get RPC client for computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
@@ -310,6 +316,7 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 		return nil, fmt.Errorf("failed to initialize computer-use plugin: %w", err)
 	}
 
+	success = true
 	logger.Info("Computer-use plugin initialized successfully")
 	computerUse.client = client
 	computerUse.impl = impl
