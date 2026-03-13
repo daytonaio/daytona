@@ -4,7 +4,7 @@ ENV CI=true
 
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.23.5-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
