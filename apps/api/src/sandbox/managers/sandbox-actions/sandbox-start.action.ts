@@ -164,100 +164,134 @@ export class SandboxStartAction extends SandboxAction {
     lockCode: LockCode,
     isBuild = false,
   ): Promise<SyncState> {
-    // Get snapshot reference based on whether it's a pull or build operation
-    let snapshotRef: string
+    const pendingKey = isBuild ? `org-build-pending:${sandbox.organizationId}` : undefined
+    let buildSlotReserved = false
 
-    if (isBuild) {
-      snapshotRef = sandbox.buildInfo.snapshotRef
-    } else {
-      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      snapshotRef = snapshot.ref
-    }
-
-    const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
-
-    // Try to assign an available runner with the snapshot already available
     try {
-      const runner = await this.runnerService.getRandomAvailableRunner({
-        regions: [sandbox.region],
-        sandboxClass: sandbox.class,
-        snapshotRef: snapshotRef,
-        ...(isBuild &&
-          declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
-      })
-      if (runner) {
-        await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode, runner.id)
-        return SYNC_AGAIN
-      }
-    } catch {
-      // Continue to next assignment method
-    }
+      if (pendingKey) {
+        const pendingCount = await this.redis.incr(pendingKey)
+        await this.redis.expire(pendingKey, 7200)
+        buildSlotReserved = true
 
-    // Try to assign an available runner that is currently processing the snapshot
-    const snapshotRunners = await this.runnerService.getSnapshotRunners(snapshotRef)
-    const targetState = isBuild ? SnapshotRunnerState.BUILDING_SNAPSHOT : SnapshotRunnerState.PULLING_SNAPSHOT
-    const targetSandboxState = isBuild ? SandboxState.BUILDING_SNAPSHOT : SandboxState.PULLING_SNAPSHOT
-    const errorSandboxState = isBuild ? SandboxState.BUILD_FAILED : SandboxState.ERROR
-
-    for (const snapshotRunner of snapshotRunners) {
-      // Consider removing the runner usage rate check or improving it
-      const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
-
-      if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-        await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
-        return DONT_SYNC_AGAIN
-      }
-
-      if (runner.unschedulable || runner.draining || runner.state !== RunnerState.READY) {
-        continue
-      }
-
-      if (declarativeBuildScoreThreshold === undefined || runner.availabilityScore >= declarativeBuildScoreThreshold) {
-        if (snapshotRunner.state === targetState) {
-          await this.updateSandboxState(sandbox, targetSandboxState, lockCode, runner.id)
-          return SYNC_AGAIN
+        const org = await this.organizationService.findOne(sandbox.organizationId)
+        const maxBuilds = org?.maxConcurrentBuilds ?? 100
+        const activeBuilds = await this.runnerService.getOrgActiveBuildCount(sandbox.organizationId)
+        if (activeBuilds + pendingCount > maxBuilds) {
+          this.logger.debug(
+            `Org ${sandbox.organizationId} has ${activeBuilds} active + ${pendingCount} pending / ${maxBuilds} max concurrent builds, deferring sandbox ${sandbox.id}`,
+          )
+          return DONT_SYNC_AGAIN
         }
       }
-    }
 
-    // Get excluded runner IDs based on operation type
-    const excludedRunnerIds = await (isBuild
-      ? this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-      : this.runnerService.getRunnersWithMultipleSnapshotsPulling())
+      // Get snapshot reference based on whether it's a pull or build operation
+      let snapshotRef: string
 
-    // Try to assign an available runner to start processing the snapshot
-    let runner: Runner
+      if (isBuild) {
+        snapshotRef = sandbox.buildInfo.snapshotRef
+      } else {
+        const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        snapshotRef = snapshot.ref
+      }
 
-    try {
-      runner = await this.runnerService.getRandomAvailableRunner({
-        regions: [sandbox.region],
-        sandboxClass: sandbox.class,
-        excludedRunnerIds: excludedRunnerIds,
-        ...(isBuild &&
-          declarativeBuildScoreThreshold !== undefined && {
-            availabilityScoreThreshold: declarativeBuildScoreThreshold,
-          }),
-      })
-    } catch {
-      // TODO: reconsider the timeout here
-      // No runners available, wait for 3 seconds and retry
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      const declarativeBuildScoreThreshold = this.configService.get('runnerScore.thresholds.declarativeBuild')
+
+      // Try to assign an available runner with the snapshot already available
+      try {
+        const runner = await this.runnerService.getRandomAvailableRunner({
+          regions: [sandbox.region],
+          sandboxClass: sandbox.class,
+          snapshotRef: snapshotRef,
+          ...(isBuild &&
+            declarativeBuildScoreThreshold !== undefined && {
+              availabilityScoreThreshold: declarativeBuildScoreThreshold,
+            }),
+        })
+        if (runner) {
+          await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode, runner.id)
+          return SYNC_AGAIN
+        }
+      } catch {
+        // Continue to next assignment method
+      }
+
+      // Try to assign an available runner that is currently processing the snapshot
+      const snapshotRunners = await this.runnerService.getSnapshotRunners(snapshotRef)
+      const targetState = isBuild ? SnapshotRunnerState.BUILDING_SNAPSHOT : SnapshotRunnerState.PULLING_SNAPSHOT
+      const targetSandboxState = isBuild ? SandboxState.BUILDING_SNAPSHOT : SandboxState.PULLING_SNAPSHOT
+      const errorSandboxState = isBuild ? SandboxState.BUILD_FAILED : SandboxState.ERROR
+
+      for (const snapshotRunner of snapshotRunners) {
+        // Consider removing the runner usage rate check or improving it
+        const runner = await this.runnerService.findOneOrFail(snapshotRunner.runnerId)
+
+        if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+          await this.updateSandboxState(sandbox, errorSandboxState, lockCode, runner.id, snapshotRunner.errorReason)
+          return DONT_SYNC_AGAIN
+        }
+
+        if (runner.unschedulable || runner.draining || runner.state !== RunnerState.READY) {
+          continue
+        }
+
+        if (
+          declarativeBuildScoreThreshold === undefined ||
+          runner.availabilityScore >= declarativeBuildScoreThreshold
+        ) {
+          if (snapshotRunner.state === targetState) {
+            await this.updateSandboxState(sandbox, targetSandboxState, lockCode, runner.id)
+            return SYNC_AGAIN
+          }
+        }
+      }
+
+      // Get excluded runner IDs based on operation type
+      const excludedRunnerIds = await (isBuild
+        ? this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+        : this.runnerService.getRunnersWithMultipleSnapshotsPulling())
+
+      // Try to assign an available runner to start processing the snapshot
+      let runner: Runner
+
+      try {
+        runner = await this.runnerService.getRandomAvailableRunner({
+          regions: [sandbox.region],
+          sandboxClass: sandbox.class,
+          excludedRunnerIds: excludedRunnerIds,
+          ...(isBuild &&
+            declarativeBuildScoreThreshold !== undefined && {
+              availabilityScoreThreshold: declarativeBuildScoreThreshold,
+            }),
+        })
+      } catch {
+        // TODO: reconsider the timeout here
+        // No runners available, wait for 3 seconds and retry
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        return SYNC_AGAIN
+      }
+
+      if (isBuild) {
+        this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
+        await this.updateSandboxState(sandbox, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
+        buildSlotReserved = false
+        await this.redis.decr(pendingKey)
+      } else {
+        const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
+        await this.runnerService.createSnapshotRunnerEntry(
+          runner.id,
+          snapshot.ref,
+          SnapshotRunnerState.PULLING_SNAPSHOT,
+        )
+        this.pullSnapshotToRunner(snapshot, runner)
+        await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
+      }
+
       return SYNC_AGAIN
+    } finally {
+      if (buildSlotReserved && pendingKey) {
+        await this.redis.decr(pendingKey)
+      }
     }
-
-    if (isBuild) {
-      this.buildOnRunner(sandbox.buildInfo, runner, sandbox.organizationId)
-      await this.updateSandboxState(sandbox, SandboxState.BUILDING_SNAPSHOT, lockCode, runner.id)
-    } else {
-      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      await this.runnerService.createSnapshotRunnerEntry(runner.id, snapshot.ref, SnapshotRunnerState.PULLING_SNAPSHOT)
-      this.pullSnapshotToRunner(snapshot, runner)
-      await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode, runner.id)
-    }
-
-    return SYNC_AGAIN
   }
 
   async pullSnapshotToRunner(snapshot: Snapshot, runner: Runner) {
