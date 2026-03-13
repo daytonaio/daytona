@@ -11,9 +11,9 @@ import { UserAuthContext } from './user-auth-context.interface'
 export interface OrganizationAuthContext extends UserAuthContext {
   organizationId: string
   organization: Organization
-  organizationUser?: OrganizationUser
+  organizationUser: OrganizationUser
 }
 
 export function isOrganizationAuthContext(user: BaseAuthContext): user is OrganizationAuthContext {
-  return 'organizationId' in user
+  return 'organization' in user && 'organizationUser' in user
 }

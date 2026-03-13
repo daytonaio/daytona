@@ -32,10 +32,6 @@ export class OrganizationActionGuard extends OrganizationAccessGuard {
 
     const authContext = getAuthContext(context, isOrganizationAuthContext)
 
-    if (!authContext.organizationUser) {
-      return false
-    }
-
     const requiredRole = this.reflector.get(RequiredOrganizationMemberRole, context.getHandler())
     if (!requiredRole) {
       return true

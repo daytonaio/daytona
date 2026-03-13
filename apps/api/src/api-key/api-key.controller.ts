@@ -86,7 +86,7 @@ export class ApiKeyController {
   async getApiKeys(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
     let apiKeys: ApiKey[] = []
 
-    if (authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
+    if (authContext.organizationUser.role === OrganizationMemberRole.OWNER) {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId)
     } else {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
@@ -170,7 +170,7 @@ export class ApiKeyController {
     @Param('userId') userId: string,
     @Param('name') name: string,
   ) {
-    if (userId !== authContext.userId && authContext.organizationUser?.role !== OrganizationMemberRole.OWNER) {
+    if (userId !== authContext.userId && authContext.organizationUser.role !== OrganizationMemberRole.OWNER) {
       throw new ForbiddenException('Incorrect user ID provided')
     }
 
@@ -181,10 +181,6 @@ export class ApiKeyController {
     authContext: OrganizationAuthContext,
     requestedPermissions: OrganizationResourcePermission[],
   ): void {
-    if (!authContext.organizationUser) {
-      throw new ForbiddenException(`Insufficient permissions for assigning: ${requestedPermissions.join(', ')}`)
-    }
-
     if (authContext.organizationUser.role === OrganizationMemberRole.OWNER) {
       return
     }

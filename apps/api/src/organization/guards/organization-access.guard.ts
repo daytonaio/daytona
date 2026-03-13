@@ -65,13 +65,6 @@ export class OrganizationAccessGuard implements CanActivate {
       return false
     }
 
-    const organizationAuthContext: OrganizationAuthContext = {
-      ...authContext,
-      organizationId,
-      organization,
-    }
-    request.user = organizationAuthContext
-
     const organizationUser = await this.getCachedOrganizationUser(organizationId, authContext.userId)
 
     if (!organizationUser) {
@@ -81,7 +74,12 @@ export class OrganizationAccessGuard implements CanActivate {
       return false
     }
 
-    organizationAuthContext.organizationUser = organizationUser
+    const organizationAuthContext: OrganizationAuthContext = {
+      ...authContext,
+      organizationId,
+      organization,
+      organizationUser,
+    }
     request.user = organizationAuthContext
 
     return true

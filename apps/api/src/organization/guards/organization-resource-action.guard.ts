@@ -33,10 +33,6 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
       return false
     }
 
-    if (!authContext.organizationUser) {
-      return false
-    }
-
     if (authContext.organizationUser.role === OrganizationMemberRole.OWNER && !authContext.apiKey) {
       return true
     }
