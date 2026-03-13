@@ -27,7 +27,7 @@ type UsageTimelineChartProps = {
   isLoading: boolean
   regionUsage: RegionUsageOverview[] | undefined
   selectedRegion: string | undefined
-  onRegionChange: (region: string | undefined) => void
+  onRegionChange: (region: string) => void
   dateRange: { from: Date; to: Date }
 }
 
@@ -105,8 +105,6 @@ function formatTooltipLabel(value: string) {
     hour12: false,
   })
 }
-
-const ALL_REGIONS_VALUE = '__all__'
 
 export function UsageTimelineChart({
   data,
@@ -217,15 +215,14 @@ export function UsageTimelineChart({
         <p className="text-xl font-semibold leading-none tracking-tight">Usage Timeline</p>
         <div className="flex items-center gap-3 flex-wrap">
           <Select
-            value={selectedRegion ?? ALL_REGIONS_VALUE}
-            onValueChange={(value) => onRegionChange(value === ALL_REGIONS_VALUE ? undefined : value)}
+            value={selectedRegion ?? ''}
+            onValueChange={(value) => onRegionChange(value)}
             disabled={!regionUsage?.length}
           >
             <SelectTrigger size="sm" className="w-[160px] rounded-lg" aria-label="Select region">
-              <SelectValue placeholder="All Regions" />
+              <SelectValue placeholder="Select region" />
             </SelectTrigger>
             <SelectContent className="rounded-xl">
-              <SelectItem value={ALL_REGIONS_VALUE}>All Regions</SelectItem>
               {regionUsage?.map((usage) => (
                 <SelectItem key={usage.regionId} value={usage.regionId}>
                   {getRegionName(usage.regionId) ?? usage.regionId}
