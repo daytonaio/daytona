@@ -27,12 +27,12 @@ class WebhookInitializationStatus(BaseModel):
     """
     WebhookInitializationStatus
     """ # noqa: E501
-    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
-    svix_application_id: Optional[StrictStr] = Field(description="The ID of the Svix application", serialization_alias="svixApplicationId")
-    last_error: Optional[StrictStr] = Field(description="The error reason for the last initialization attempt", serialization_alias="lastError")
-    retry_count: Union[StrictFloat, StrictInt] = Field(description="The number of times the initialization has been attempted", serialization_alias="retryCount")
-    created_at: StrictStr = Field(description="When the webhook initialization was created", serialization_alias="createdAt")
-    updated_at: StrictStr = Field(description="When the webhook initialization was last updated", serialization_alias="updatedAt")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    svix_application_id: Optional[StrictStr] = Field(description="The ID of the Svix application", alias="svixApplicationId")
+    last_error: Optional[StrictStr] = Field(description="The error reason for the last initialization attempt", alias="lastError")
+    retry_count: Union[StrictFloat, StrictInt] = Field(description="The number of times the initialization has been attempted", alias="retryCount")
+    created_at: StrictStr = Field(description="When the webhook initialization was created", alias="createdAt")
+    updated_at: StrictStr = Field(description="When the webhook initialization was last updated", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["organizationId", "svixApplicationId", "lastError", "retryCount", "createdAt", "updatedAt"]
 

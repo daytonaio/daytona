@@ -28,8 +28,8 @@ class SessionExecuteRequest(BaseModel):
     SessionExecuteRequest
     """ # noqa: E501
     command: StrictStr = Field(description="The command to execute")
-    run_async: Optional[StrictBool] = Field(default=None, description="Whether to execute the command asynchronously", serialization_alias="runAsync")
-    var_async: Optional[StrictBool] = Field(default=None, description="Deprecated: Use runAsync instead. Whether to execute the command asynchronously", serialization_alias="async")
+    run_async: Optional[StrictBool] = Field(default=None, description="Whether to execute the command asynchronously", alias="runAsync")
+    var_async: Optional[StrictBool] = Field(default=None, description="Deprecated: Use runAsync instead. Whether to execute the command asynchronously", alias="async")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["command", "runAsync", "async"]
 

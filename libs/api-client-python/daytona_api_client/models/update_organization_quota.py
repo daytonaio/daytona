@@ -27,19 +27,19 @@ class UpdateOrganizationQuota(BaseModel):
     """
     UpdateOrganizationQuota
     """ # noqa: E501
-    max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxCpuPerSandbox")
-    max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxMemoryPerSandbox")
-    max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxDiskPerSandbox")
-    snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="snapshotQuota")
-    max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="maxSnapshotSize")
-    volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="volumeQuota")
-    authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="authenticatedRateLimit")
-    sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxCreateRateLimit")
-    sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimit")
-    authenticated_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="authenticatedRateLimitTtlSeconds")
-    sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxCreateRateLimitTtlSeconds")
-    sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="sandboxLifecycleRateLimitTtlSeconds")
-    snapshot_deactivation_timeout_minutes: Optional[Union[StrictFloat, StrictInt]] = Field(description="Time in minutes before an unused snapshot is deactivated", serialization_alias="snapshotDeactivationTimeoutMinutes")
+    max_cpu_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxCpuPerSandbox")
+    max_memory_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxMemoryPerSandbox")
+    max_disk_per_sandbox: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxDiskPerSandbox")
+    snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="snapshotQuota")
+    max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxSnapshotSize")
+    volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="volumeQuota")
+    authenticated_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(alias="authenticatedRateLimit")
+    sandbox_create_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxCreateRateLimit")
+    sandbox_lifecycle_rate_limit: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxLifecycleRateLimit")
+    authenticated_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(alias="authenticatedRateLimitTtlSeconds")
+    sandbox_create_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxCreateRateLimitTtlSeconds")
+    sandbox_lifecycle_rate_limit_ttl_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(alias="sandboxLifecycleRateLimitTtlSeconds")
+    snapshot_deactivation_timeout_minutes: Optional[Union[StrictFloat, StrictInt]] = Field(description="Time in minutes before an unused snapshot is deactivated", alias="snapshotDeactivationTimeoutMinutes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["maxCpuPerSandbox", "maxMemoryPerSandbox", "maxDiskPerSandbox", "snapshotQuota", "maxSnapshotSize", "volumeQuota", "authenticatedRateLimit", "sandboxCreateRateLimit", "sandboxLifecycleRateLimit", "authenticatedRateLimitTtlSeconds", "sandboxCreateRateLimitTtlSeconds", "sandboxLifecycleRateLimitTtlSeconds", "snapshotDeactivationTimeoutMinutes"]
 

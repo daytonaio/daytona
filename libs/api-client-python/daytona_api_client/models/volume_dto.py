@@ -30,12 +30,12 @@ class VolumeDto(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Volume ID")
     name: StrictStr = Field(description="Volume name")
-    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
     state: VolumeState = Field(description="Volume state")
-    created_at: StrictStr = Field(description="Creation timestamp", serialization_alias="createdAt")
-    updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
-    last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", serialization_alias="lastUsedAt")
-    error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", serialization_alias="errorReason")
+    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
+    last_used_at: Optional[StrictStr] = Field(default=None, description="Last used timestamp", alias="lastUsedAt")
+    error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", alias="errorReason")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
 

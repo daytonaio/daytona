@@ -32,13 +32,13 @@ class Job(BaseModel):
     id: StrictStr = Field(description="The ID of the job")
     type: JobType = Field(description="The type of the job")
     status: JobStatus = Field(description="The status of the job")
-    resource_type: StrictStr = Field(description="The type of resource this job operates on", serialization_alias="resourceType")
-    resource_id: StrictStr = Field(description="The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)", serialization_alias="resourceId")
+    resource_type: StrictStr = Field(description="The type of resource this job operates on", alias="resourceType")
+    resource_id: StrictStr = Field(description="The ID of the resource this job operates on (sandboxId, snapshotRef, etc.)", alias="resourceId")
     payload: Optional[StrictStr] = Field(default=None, description="Job-specific JSON-encoded payload data (operational metadata)")
-    trace_context: Optional[Dict[str, Any]] = Field(default=None, description="OpenTelemetry trace context for distributed tracing (W3C Trace Context format)", serialization_alias="traceContext")
-    error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", serialization_alias="errorMessage")
-    created_at: StrictStr = Field(description="The creation timestamp of the job", serialization_alias="createdAt")
-    updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the job", serialization_alias="updatedAt")
+    trace_context: Optional[Dict[str, Any]] = Field(default=None, description="OpenTelemetry trace context for distributed tracing (W3C Trace Context format)", alias="traceContext")
+    error_message: Optional[StrictStr] = Field(default=None, description="Error message if the job failed", alias="errorMessage")
+    created_at: StrictStr = Field(description="The creation timestamp of the job", alias="createdAt")
+    updated_at: Optional[StrictStr] = Field(default=None, description="The last update timestamp of the job", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "type", "status", "resourceType", "resourceId", "payload", "traceContext", "errorMessage", "createdAt", "updatedAt"]
 

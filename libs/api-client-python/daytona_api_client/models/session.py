@@ -28,7 +28,7 @@ class Session(BaseModel):
     """
     Session
     """ # noqa: E501
-    session_id: StrictStr = Field(description="The ID of the session", serialization_alias="sessionId")
+    session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
     commands: Optional[List[Command]] = Field(description="The list of commands executed in this session")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId", "commands"]

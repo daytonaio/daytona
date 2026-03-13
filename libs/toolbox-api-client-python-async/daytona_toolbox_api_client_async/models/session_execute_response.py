@@ -26,8 +26,8 @@ class SessionExecuteResponse(BaseModel):
     """
     SessionExecuteResponse
     """ # noqa: E501
-    cmd_id: StrictStr = Field(serialization_alias="cmdId")
-    exit_code: Optional[StrictInt] = Field(default=None, serialization_alias="exitCode")
+    cmd_id: StrictStr = Field(alias="cmdId")
+    exit_code: Optional[StrictInt] = Field(default=None, alias="exitCode")
     output: Optional[StrictStr] = None
     stderr: Optional[StrictStr] = None
     stdout: Optional[StrictStr] = None

@@ -27,7 +27,7 @@ class InterpreterContext(BaseModel):
     InterpreterContext
     """ # noqa: E501
     active: StrictBool
-    created_at: StrictStr = Field(serialization_alias="createdAt")
+    created_at: StrictStr = Field(alias="createdAt")
     cwd: StrictStr
     id: StrictStr
     language: StrictStr

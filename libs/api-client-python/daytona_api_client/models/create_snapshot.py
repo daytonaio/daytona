@@ -29,15 +29,15 @@ class CreateSnapshot(BaseModel):
     CreateSnapshot
     """ # noqa: E501
     name: StrictStr = Field(description="The name of the snapshot")
-    image_name: Optional[StrictStr] = Field(default=None, description="The image name of the snapshot", serialization_alias="imageName")
+    image_name: Optional[StrictStr] = Field(default=None, description="The image name of the snapshot", alias="imageName")
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     general: Optional[StrictBool] = Field(default=None, description="Whether the snapshot is general")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
-    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
-    region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", serialization_alias="regionId")
+    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
+    region_id: Optional[StrictStr] = Field(default=None, description="ID of the region where the snapshot will be available. Defaults to organization default region if not specified.", alias="regionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk", "buildInfo", "regionId"]
 

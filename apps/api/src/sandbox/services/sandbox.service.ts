@@ -1323,7 +1323,7 @@ export class SandboxService {
     }
   }
 
-  async stop(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
+  async stop(sandboxIdOrName: string, organizationId?: string, force?: boolean): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
     this.assertSandboxNotErrored(sandbox)
@@ -1353,7 +1353,7 @@ export class SandboxService {
     if (sandbox.autoDeleteInterval === 0) {
       this.eventEmitter.emit(SandboxEvents.DESTROYED, new SandboxDestroyedEvent(updatedSandbox))
     } else {
-      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(updatedSandbox))
+      this.eventEmitter.emit(SandboxEvents.STOPPED, new SandboxStoppedEvent(updatedSandbox, force))
     }
 
     return updatedSandbox

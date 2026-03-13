@@ -28,8 +28,8 @@ class MetricSeries(BaseModel):
     """
     MetricSeries
     """ # noqa: E501
-    metric_name: StrictStr = Field(description="Name of the metric", serialization_alias="metricName")
-    data_points: List[MetricDataPoint] = Field(description="Data points for this metric", serialization_alias="dataPoints")
+    metric_name: StrictStr = Field(description="Name of the metric", alias="metricName")
+    data_points: List[MetricDataPoint] = Field(description="Data points for this metric", alias="dataPoints")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["metricName", "dataPoints"]
 

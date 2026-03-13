@@ -26,7 +26,7 @@ class ProcessStatus(BaseModel):
     """
     ProcessStatus
     """ # noqa: E501
-    auto_restart: Optional[StrictBool] = Field(default=None, serialization_alias="autoRestart")
+    auto_restart: Optional[StrictBool] = Field(default=None, alias="autoRestart")
     pid: Optional[StrictInt] = None
     priority: Optional[StrictInt] = None
     running: Optional[StrictBool] = None

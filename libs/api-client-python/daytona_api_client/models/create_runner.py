@@ -27,7 +27,7 @@ class CreateRunner(BaseModel):
     """
     CreateRunner
     """ # noqa: E501
-    region_id: StrictStr = Field(serialization_alias="regionId")
+    region_id: StrictStr = Field(alias="regionId")
     name: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["regionId", "name"]

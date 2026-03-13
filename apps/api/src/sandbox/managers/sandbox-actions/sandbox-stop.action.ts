@@ -27,7 +27,7 @@ export class SandboxStopAction extends SandboxAction {
   }
 
   @WithSpan()
-  async run(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+  async run(sandbox: Sandbox, lockCode: LockCode, force?: boolean): Promise<SyncState> {
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       return DONT_SYNC_AGAIN
@@ -38,7 +38,7 @@ export class SandboxStopAction extends SandboxAction {
     switch (sandbox.state) {
       case SandboxState.STARTED: {
         // stop sandbox
-        await runnerAdapter.stopSandbox(sandbox.id)
+        await runnerAdapter.stopSandbox(sandbox.id, force)
         await this.updateSandboxState(sandbox, SandboxState.STOPPING, lockCode)
         //  sync states again immediately for sandbox
         return SYNC_AGAIN

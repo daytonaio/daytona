@@ -28,9 +28,9 @@ class SendWebhookDto(BaseModel):
     """
     SendWebhookDto
     """ # noqa: E501
-    event_type: WebhookEvent = Field(description="The type of event being sent", serialization_alias="eventType")
+    event_type: WebhookEvent = Field(description="The type of event being sent", alias="eventType")
     payload: Dict[str, Any] = Field(description="The payload data to send")
-    event_id: Optional[StrictStr] = Field(default=None, description="Optional event ID for idempotency", serialization_alias="eventId")
+    event_id: Optional[StrictStr] = Field(default=None, description="Optional event ID for idempotency", alias="eventId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["eventType", "payload", "eventId"]
 

@@ -29,9 +29,9 @@ class GitStatus(BaseModel):
     """ # noqa: E501
     ahead: Optional[StrictInt] = None
     behind: Optional[StrictInt] = None
-    branch_published: Optional[StrictBool] = Field(default=None, serialization_alias="branchPublished")
-    current_branch: StrictStr = Field(serialization_alias="currentBranch")
-    file_status: List[FileStatus] = Field(serialization_alias="fileStatus")
+    branch_published: Optional[StrictBool] = Field(default=None, alias="branchPublished")
+    current_branch: StrictStr = Field(alias="currentBranch")
+    file_status: List[FileStatus] = Field(alias="fileStatus")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["ahead", "behind", "branchPublished", "currentBranch", "fileStatus"]
 

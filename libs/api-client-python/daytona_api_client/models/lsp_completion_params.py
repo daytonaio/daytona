@@ -29,8 +29,8 @@ class LspCompletionParams(BaseModel):
     """
     LspCompletionParams
     """ # noqa: E501
-    language_id: StrictStr = Field(description="Language identifier", serialization_alias="languageId")
-    path_to_project: StrictStr = Field(description="Path to the project", serialization_alias="pathToProject")
+    language_id: StrictStr = Field(description="Language identifier", alias="languageId")
+    path_to_project: StrictStr = Field(description="Path to the project", alias="pathToProject")
     uri: StrictStr = Field(description="Document URI")
     position: Position
     context: Optional[CompletionContext] = None

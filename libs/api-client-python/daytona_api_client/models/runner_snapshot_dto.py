@@ -27,9 +27,9 @@ class RunnerSnapshotDto(BaseModel):
     """
     RunnerSnapshotDto
     """ # noqa: E501
-    runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", serialization_alias="runnerSnapshotId")
-    runner_id: StrictStr = Field(description="Runner ID", serialization_alias="runnerId")
-    runner_domain: Optional[StrictStr] = Field(default=None, description="Runner domain", serialization_alias="runnerDomain")
+    runner_snapshot_id: StrictStr = Field(description="Runner snapshot ID", alias="runnerSnapshotId")
+    runner_id: StrictStr = Field(description="Runner ID", alias="runnerId")
+    runner_domain: Optional[StrictStr] = Field(default=None, description="Runner domain", alias="runnerDomain")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["runnerSnapshotId", "runnerId", "runnerDomain"]
 

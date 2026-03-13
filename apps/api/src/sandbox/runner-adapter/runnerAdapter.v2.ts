@@ -206,8 +206,8 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     return undefined
   }
 
-  async stopSandbox(sandboxId: string): Promise<void> {
-    await this.jobService.createJob(null, JobType.STOP_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId)
+  async stopSandbox(sandboxId: string, force?: boolean): Promise<void> {
+    await this.jobService.createJob(null, JobType.STOP_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId, { force })
 
     this.logger.debug(`Created STOP_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }

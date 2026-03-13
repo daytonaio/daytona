@@ -27,7 +27,7 @@ class ExecuteResponse(BaseModel):
     """
     ExecuteResponse
     """ # noqa: E501
-    exit_code: Union[StrictFloat, StrictInt] = Field(description="Exit code", serialization_alias="exitCode")
+    exit_code: Union[StrictFloat, StrictInt] = Field(description="Exit code", alias="exitCode")
     result: StrictStr = Field(description="Command output")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["exitCode", "result"]

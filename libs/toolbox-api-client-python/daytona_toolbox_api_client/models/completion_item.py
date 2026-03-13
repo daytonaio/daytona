@@ -28,11 +28,11 @@ class CompletionItem(BaseModel):
     """ # noqa: E501
     detail: Optional[StrictStr] = None
     documentation: Optional[Dict[str, Any]] = None
-    filter_text: Optional[StrictStr] = Field(default=None, serialization_alias="filterText")
-    insert_text: Optional[StrictStr] = Field(default=None, serialization_alias="insertText")
+    filter_text: Optional[StrictStr] = Field(default=None, alias="filterText")
+    insert_text: Optional[StrictStr] = Field(default=None, alias="insertText")
     kind: Optional[StrictInt] = None
     label: StrictStr
-    sort_text: Optional[StrictStr] = Field(default=None, serialization_alias="sortText")
+    sort_text: Optional[StrictStr] = Field(default=None, alias="sortText")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["detail", "documentation", "filterText", "insertText", "kind", "label", "sortText"]
 

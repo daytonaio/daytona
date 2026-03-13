@@ -27,7 +27,7 @@ class ProcessStatusResponse(BaseModel):
     """
     ProcessStatusResponse
     """ # noqa: E501
-    process_name: StrictStr = Field(description="The name of the VNC process being checked", serialization_alias="processName")
+    process_name: StrictStr = Field(description="The name of the VNC process being checked", alias="processName")
     running: StrictBool = Field(description="Whether the specified VNC process is currently running")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "running"]

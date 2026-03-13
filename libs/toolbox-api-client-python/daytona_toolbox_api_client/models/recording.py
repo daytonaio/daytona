@@ -26,13 +26,13 @@ class Recording(BaseModel):
     """
     Recording
     """ # noqa: E501
-    duration_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="durationSeconds")
-    end_time: Optional[StrictStr] = Field(default=None, serialization_alias="endTime")
-    file_name: StrictStr = Field(serialization_alias="fileName")
-    file_path: StrictStr = Field(serialization_alias="filePath")
+    duration_seconds: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="durationSeconds")
+    end_time: Optional[StrictStr] = Field(default=None, alias="endTime")
+    file_name: StrictStr = Field(alias="fileName")
+    file_path: StrictStr = Field(alias="filePath")
     id: StrictStr
-    size_bytes: Optional[StrictInt] = Field(default=None, serialization_alias="sizeBytes")
-    start_time: StrictStr = Field(serialization_alias="startTime")
+    size_bytes: Optional[StrictInt] = Field(default=None, alias="sizeBytes")
+    start_time: StrictStr = Field(alias="startTime")
     status: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["durationSeconds", "endTime", "fileName", "filePath", "id", "sizeBytes", "startTime", "status"]

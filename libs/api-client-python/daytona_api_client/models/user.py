@@ -32,8 +32,8 @@ class User(BaseModel):
     id: StrictStr = Field(description="User ID")
     name: StrictStr = Field(description="User name")
     email: StrictStr = Field(description="User email")
-    public_keys: List[UserPublicKey] = Field(description="User public keys", serialization_alias="publicKeys")
-    created_at: datetime = Field(description="Creation timestamp", serialization_alias="createdAt")
+    public_keys: List[UserPublicKey] = Field(description="User public keys", alias="publicKeys")
+    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "email", "publicKeys", "createdAt"]
 

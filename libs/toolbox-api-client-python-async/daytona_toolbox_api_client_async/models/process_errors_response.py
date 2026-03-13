@@ -27,7 +27,7 @@ class ProcessErrorsResponse(BaseModel):
     ProcessErrorsResponse
     """ # noqa: E501
     errors: Optional[StrictStr] = None
-    process_name: Optional[StrictStr] = Field(default=None, serialization_alias="processName")
+    process_name: Optional[StrictStr] = Field(default=None, alias="processName")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["errors", "processName"]
 

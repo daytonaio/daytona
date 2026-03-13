@@ -28,7 +28,7 @@ class UpdateSandboxStateDto(BaseModel):
     UpdateSandboxStateDto
     """ # noqa: E501
     state: StrictStr = Field(description="The new state for the sandbox")
-    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", serialization_alias="errorReason")
+    error_reason: Optional[StrictStr] = Field(default=None, description="Optional error message when reporting an error state", alias="errorReason")
     recoverable: Optional[StrictBool] = Field(default=None, description="Whether the sandbox is recoverable")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["state", "errorReason", "recoverable"]

@@ -28,7 +28,7 @@ class CreateOrganization(BaseModel):
     CreateOrganization
     """ # noqa: E501
     name: StrictStr = Field(description="The name of organization")
-    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", serialization_alias="defaultRegionId")
+    default_region_id: StrictStr = Field(description="The ID of the default region for the organization", alias="defaultRegionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "defaultRegionId"]
 

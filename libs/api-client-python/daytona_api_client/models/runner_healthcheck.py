@@ -30,9 +30,9 @@ class RunnerHealthcheck(BaseModel):
     """ # noqa: E501
     metrics: Optional[RunnerHealthMetrics] = Field(default=None, description="Runner metrics")
     domain: Optional[StrictStr] = Field(default=None, description="Runner domain")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", serialization_alias="proxyUrl")
-    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", serialization_alias="apiUrl")
-    app_version: StrictStr = Field(description="Runner app version", serialization_alias="appVersion")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Runner proxy URL", alias="proxyUrl")
+    api_url: Optional[StrictStr] = Field(default=None, description="Runner API URL", alias="apiUrl")
+    app_version: StrictStr = Field(description="Runner app version", alias="appVersion")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["metrics", "domain", "proxyUrl", "apiUrl", "appVersion"]
 

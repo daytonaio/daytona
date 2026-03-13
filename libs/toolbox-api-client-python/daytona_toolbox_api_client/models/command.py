@@ -27,7 +27,7 @@ class Command(BaseModel):
     Command
     """ # noqa: E501
     command: StrictStr
-    exit_code: Optional[StrictInt] = Field(default=None, serialization_alias="exitCode")
+    exit_code: Optional[StrictInt] = Field(default=None, alias="exitCode")
     id: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["command", "exitCode", "id"]

@@ -27,13 +27,13 @@ class RegionUsageOverview(BaseModel):
     """
     RegionUsageOverview
     """ # noqa: E501
-    region_id: StrictStr = Field(serialization_alias="regionId")
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
-    current_cpu_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentCpuUsage")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
-    current_memory_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentMemoryUsage")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
-    current_disk_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentDiskUsage")
+    region_id: StrictStr = Field(alias="regionId")
+    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
+    current_cpu_usage: Union[StrictFloat, StrictInt] = Field(alias="currentCpuUsage")
+    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
+    current_memory_usage: Union[StrictFloat, StrictInt] = Field(alias="currentMemoryUsage")
+    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
+    current_disk_usage: Union[StrictFloat, StrictInt] = Field(alias="currentDiskUsage")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["regionId", "totalCpuQuota", "currentCpuUsage", "totalMemoryQuota", "currentMemoryUsage", "totalDiskQuota", "currentDiskUsage"]
 

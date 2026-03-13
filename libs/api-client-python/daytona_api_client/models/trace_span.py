@@ -27,15 +27,15 @@ class TraceSpan(BaseModel):
     """
     TraceSpan
     """ # noqa: E501
-    trace_id: StrictStr = Field(description="Trace identifier", serialization_alias="traceId")
-    span_id: StrictStr = Field(description="Span identifier", serialization_alias="spanId")
-    parent_span_id: Optional[StrictStr] = Field(default=None, description="Parent span identifier", serialization_alias="parentSpanId")
-    span_name: StrictStr = Field(description="Span name", serialization_alias="spanName")
+    trace_id: StrictStr = Field(description="Trace identifier", alias="traceId")
+    span_id: StrictStr = Field(description="Span identifier", alias="spanId")
+    parent_span_id: Optional[StrictStr] = Field(default=None, description="Parent span identifier", alias="parentSpanId")
+    span_name: StrictStr = Field(description="Span name", alias="spanName")
     timestamp: StrictStr = Field(description="Span start timestamp")
-    duration_ns: Union[StrictFloat, StrictInt] = Field(description="Span duration in nanoseconds", serialization_alias="durationNs")
-    span_attributes: Dict[str, StrictStr] = Field(description="Span attributes", serialization_alias="spanAttributes")
-    status_code: Optional[StrictStr] = Field(default=None, description="Status code of the span", serialization_alias="statusCode")
-    status_message: Optional[StrictStr] = Field(default=None, description="Status message", serialization_alias="statusMessage")
+    duration_ns: Union[StrictFloat, StrictInt] = Field(description="Span duration in nanoseconds", alias="durationNs")
+    span_attributes: Dict[str, StrictStr] = Field(description="Span attributes", alias="spanAttributes")
+    status_code: Optional[StrictStr] = Field(default=None, description="Status code of the span", alias="statusCode")
+    status_message: Optional[StrictStr] = Field(default=None, description="Status message", alias="statusMessage")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["traceId", "spanId", "parentSpanId", "spanName", "timestamp", "durationNs", "spanAttributes", "statusCode", "statusMessage"]
 

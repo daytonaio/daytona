@@ -29,14 +29,14 @@ class OrganizationUser(BaseModel):
     """
     OrganizationUser
     """ # noqa: E501
-    user_id: StrictStr = Field(description="User ID", serialization_alias="userId")
-    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
+    user_id: StrictStr = Field(description="User ID", alias="userId")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
     name: StrictStr = Field(description="User name")
     email: StrictStr = Field(description="User email")
     role: StrictStr = Field(description="Member role")
-    assigned_roles: List[OrganizationRole] = Field(description="Roles assigned to the user", serialization_alias="assignedRoles")
-    created_at: datetime = Field(description="Creation timestamp", serialization_alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", serialization_alias="updatedAt")
+    assigned_roles: List[OrganizationRole] = Field(description="Roles assigned to the user", alias="assignedRoles")
+    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["userId", "organizationId", "name", "email", "role", "assignedRoles", "createdAt", "updatedAt"]
 

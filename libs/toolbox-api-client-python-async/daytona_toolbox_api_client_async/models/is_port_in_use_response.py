@@ -26,7 +26,7 @@ class IsPortInUseResponse(BaseModel):
     """
     IsPortInUseResponse
     """ # noqa: E501
-    is_in_use: Optional[StrictBool] = Field(default=None, serialization_alias="isInUse")
+    is_in_use: Optional[StrictBool] = Field(default=None, alias="isInUse")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["isInUse"]
 

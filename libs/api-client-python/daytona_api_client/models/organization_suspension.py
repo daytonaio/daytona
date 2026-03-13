@@ -31,7 +31,7 @@ class OrganizationSuspension(BaseModel):
     """ # noqa: E501
     reason: StrictStr = Field(description="Suspension reason")
     until: datetime = Field(description="Suspension until")
-    suspension_cleanup_grace_period_hours: Optional[Union[Annotated[float, Field(strict=True, ge=0)], Annotated[int, Field(strict=True, ge=0)]]] = Field(default=None, description="Suspension cleanup grace period hours", serialization_alias="suspensionCleanupGracePeriodHours")
+    suspension_cleanup_grace_period_hours: Optional[Union[Annotated[float, Field(strict=True, ge=0)], Annotated[int, Field(strict=True, ge=0)]]] = Field(default=None, description="Suspension cleanup grace period hours", alias="suspensionCleanupGracePeriodHours")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["reason", "until", "suspensionCleanupGracePeriodHours"]
 

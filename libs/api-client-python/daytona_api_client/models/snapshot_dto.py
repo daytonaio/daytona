@@ -31,10 +31,10 @@ class SnapshotDto(BaseModel):
     SnapshotDto
     """ # noqa: E501
     id: StrictStr
-    organization_id: Optional[StrictStr] = Field(default=None, serialization_alias="organizationId")
+    organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     general: StrictBool
     name: StrictStr
-    image_name: Optional[StrictStr] = Field(default=None, serialization_alias="imageName")
+    image_name: Optional[StrictStr] = Field(default=None, alias="imageName")
     state: SnapshotState
     size: Optional[Union[StrictFloat, StrictInt]]
     entrypoint: Optional[List[StrictStr]]
@@ -42,13 +42,13 @@ class SnapshotDto(BaseModel):
     gpu: Union[StrictFloat, StrictInt]
     mem: Union[StrictFloat, StrictInt]
     disk: Union[StrictFloat, StrictInt]
-    error_reason: Optional[StrictStr] = Field(serialization_alias="errorReason")
-    created_at: datetime = Field(serialization_alias="createdAt")
-    updated_at: datetime = Field(serialization_alias="updatedAt")
-    last_used_at: Optional[datetime] = Field(serialization_alias="lastUsedAt")
-    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", serialization_alias="buildInfo")
-    region_ids: Optional[List[StrictStr]] = Field(default=None, description="IDs of regions where the snapshot is available", serialization_alias="regionIds")
-    initial_runner_id: Optional[StrictStr] = Field(default=None, description="The initial runner ID of the snapshot", serialization_alias="initialRunnerId")
+    error_reason: Optional[StrictStr] = Field(alias="errorReason")
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+    last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the snapshot", alias="buildInfo")
+    region_ids: Optional[List[StrictStr]] = Field(default=None, description="IDs of regions where the snapshot is available", alias="regionIds")
+    initial_runner_id: Optional[StrictStr] = Field(default=None, description="The initial runner ID of the snapshot", alias="initialRunnerId")
     ref: Optional[StrictStr] = Field(default=None, description="The snapshot reference")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "imageName", "state", "size", "entrypoint", "cpu", "gpu", "mem", "disk", "errorReason", "createdAt", "updatedAt", "lastUsedAt", "buildInfo", "regionIds", "initialRunnerId", "ref"]

@@ -28,7 +28,7 @@ class DisplayInfo(BaseModel):
     """ # noqa: E501
     height: Optional[StrictInt] = None
     id: Optional[StrictInt] = None
-    is_active: Optional[StrictBool] = Field(default=None, serialization_alias="isActive")
+    is_active: Optional[StrictBool] = Field(default=None, alias="isActive")
     width: Optional[StrictInt] = None
     x: Optional[StrictInt] = None
     y: Optional[StrictInt] = None

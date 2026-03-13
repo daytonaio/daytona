@@ -27,7 +27,7 @@ class ProcessErrorsResponse(BaseModel):
     """
     ProcessErrorsResponse
     """ # noqa: E501
-    process_name: StrictStr = Field(description="The name of the VNC process whose error logs were retrieved", serialization_alias="processName")
+    process_name: StrictStr = Field(description="The name of the VNC process whose error logs were retrieved", alias="processName")
     errors: StrictStr = Field(description="The error log output from the specified VNC process")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "errors"]

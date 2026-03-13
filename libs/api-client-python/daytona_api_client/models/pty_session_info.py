@@ -32,9 +32,9 @@ class PtySessionInfo(BaseModel):
     envs: Dict[str, Any] = Field(description="Environment variables for the PTY session")
     cols: Union[StrictFloat, StrictInt] = Field(description="Number of terminal columns")
     rows: Union[StrictFloat, StrictInt] = Field(description="Number of terminal rows")
-    created_at: StrictStr = Field(description="When the PTY session was created", serialization_alias="createdAt")
+    created_at: StrictStr = Field(description="When the PTY session was created", alias="createdAt")
     active: StrictBool = Field(description="Whether the PTY session is currently active")
-    lazy_start: StrictBool = Field(description="Whether the PTY session uses lazy start (only start when first client connects)", serialization_alias="lazyStart")
+    lazy_start: StrictBool = Field(description="Whether the PTY session uses lazy start (only start when first client connects)", alias="lazyStart")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "cwd", "envs", "cols", "rows", "createdAt", "active", "lazyStart"]
 

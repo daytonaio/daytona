@@ -27,7 +27,7 @@ class SignedPortPreviewUrl(BaseModel):
     """
     SignedPortPreviewUrl
     """ # noqa: E501
-    sandbox_id: StrictStr = Field(description="ID of the sandbox", serialization_alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
     port: StrictInt = Field(description="Port number of the signed preview URL")
     token: StrictStr = Field(description="Token of the signed preview URL")
     url: StrictStr = Field(description="Signed preview url")

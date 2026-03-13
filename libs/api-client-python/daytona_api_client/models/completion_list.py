@@ -28,7 +28,7 @@ class CompletionList(BaseModel):
     """
     CompletionList
     """ # noqa: E501
-    is_incomplete: StrictBool = Field(serialization_alias="isIncomplete")
+    is_incomplete: StrictBool = Field(alias="isIncomplete")
     items: List[CompletionItem]
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["isIncomplete", "items"]

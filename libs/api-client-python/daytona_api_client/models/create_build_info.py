@@ -27,8 +27,8 @@ class CreateBuildInfo(BaseModel):
     """
     CreateBuildInfo
     """ # noqa: E501
-    dockerfile_content: StrictStr = Field(description="The Dockerfile content used for the build", serialization_alias="dockerfileContent")
-    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", serialization_alias="contextHashes")
+    dockerfile_content: StrictStr = Field(description="The Dockerfile content used for the build", alias="dockerfileContent")
+    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", alias="contextHashes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["dockerfileContent", "contextHashes"]
 

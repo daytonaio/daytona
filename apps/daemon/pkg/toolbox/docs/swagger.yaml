@@ -1414,6 +1414,7 @@ paths:
           name: quality
           type: integer
         - description: Scale factor (0.1-1.0)
+          format: float64
           in: query
           name: scale
           type: number
@@ -1504,6 +1505,7 @@ paths:
           name: quality
           type: integer
         - description: Scale factor (0.1-1.0)
+          format: float64
           in: query
           name: scale
           type: number

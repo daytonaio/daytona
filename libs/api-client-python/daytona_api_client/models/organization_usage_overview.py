@@ -28,11 +28,11 @@ class OrganizationUsageOverview(BaseModel):
     """
     OrganizationUsageOverview
     """ # noqa: E501
-    region_usage: List[RegionUsageOverview] = Field(serialization_alias="regionUsage")
-    total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalSnapshotQuota")
-    current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentSnapshotUsage")
-    total_volume_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalVolumeQuota")
-    current_volume_usage: Union[StrictFloat, StrictInt] = Field(serialization_alias="currentVolumeUsage")
+    region_usage: List[RegionUsageOverview] = Field(alias="regionUsage")
+    total_snapshot_quota: Union[StrictFloat, StrictInt] = Field(alias="totalSnapshotQuota")
+    current_snapshot_usage: Union[StrictFloat, StrictInt] = Field(alias="currentSnapshotUsage")
+    total_volume_quota: Union[StrictFloat, StrictInt] = Field(alias="totalVolumeQuota")
+    current_volume_usage: Union[StrictFloat, StrictInt] = Field(alias="currentVolumeUsage")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["regionUsage", "totalSnapshotQuota", "currentSnapshotUsage", "totalVolumeQuota", "currentVolumeUsage"]
 

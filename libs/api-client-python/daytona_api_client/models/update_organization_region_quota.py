@@ -27,9 +27,9 @@ class UpdateOrganizationRegionQuota(BaseModel):
     """
     UpdateOrganizationRegionQuota
     """ # noqa: E501
-    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalCpuQuota")
-    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalMemoryQuota")
-    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(serialization_alias="totalDiskQuota")
+    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalCpuQuota")
+    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalMemoryQuota")
+    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalDiskQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"]
 

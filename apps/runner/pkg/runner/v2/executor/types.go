@@ -9,3 +9,7 @@ type StartSandboxPayload struct {
 	AuthToken *string           `json:"authToken,omitempty"`
 	Metadata  map[string]string `json:"metadata,omitempty"`
 }
+
+type StopSandboxPayload struct {
+	Force bool `json:"force,omitempty"`
+}

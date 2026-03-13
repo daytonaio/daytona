@@ -27,7 +27,7 @@ class ReplaceRequest(BaseModel):
     ReplaceRequest
     """ # noqa: E501
     files: List[StrictStr]
-    new_value: StrictStr = Field(serialization_alias="newValue")
+    new_value: StrictStr = Field(alias="newValue")
     pattern: StrictStr
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["files", "newValue", "pattern"]

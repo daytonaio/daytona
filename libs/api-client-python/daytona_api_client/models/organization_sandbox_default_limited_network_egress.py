@@ -27,7 +27,7 @@ class OrganizationSandboxDefaultLimitedNetworkEgress(BaseModel):
     """
     OrganizationSandboxDefaultLimitedNetworkEgress
     """ # noqa: E501
-    sandbox_default_limited_network_egress: StrictBool = Field(description="Sandbox default limited network egress", serialization_alias="sandboxDefaultLimitedNetworkEgress")
+    sandbox_default_limited_network_egress: StrictBool = Field(description="Sandbox default limited network egress", alias="sandboxDefaultLimitedNetworkEgress")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sandboxDefaultLimitedNetworkEgress"]
 

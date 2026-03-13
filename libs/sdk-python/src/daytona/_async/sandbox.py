@@ -309,11 +309,12 @@ class AsyncSandbox(SandboxDto):
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
     @with_timeout()
     @with_instrumentation()
-    async def stop(self, timeout: float | None = 60):
+    async def stop(self, timeout: float | None = 60, force: bool = False):
         """Stops the Sandbox and waits for it to be fully stopped.
 
         Args:
             timeout (float | None): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+            force (bool): If True, uses SIGKILL instead of SIGTERM to stop the sandbox. Default is False.
 
         Raises:
             DaytonaError: If timeout is negative; If sandbox fails to stop or times out
@@ -321,11 +322,11 @@ class AsyncSandbox(SandboxDto):
         Example:
             ```python
             sandbox = daytona.get("my-sandbox-id")
-            sandbox.stop()
+            await sandbox.stop()
             print("Sandbox stopped successfully")
             ```
         """
-        _ = await self._sandbox_api.stop_sandbox(self.id, _request_timeout=http_timeout(timeout))
+        _ = await self._sandbox_api.stop_sandbox(self.id, force=force, _request_timeout=http_timeout(timeout))
         await self.__refresh_data_safe()
         # This method already handles a timeout, so we don't need to pass one to internal methods
         await self.wait_for_sandbox_stop(timeout=0)

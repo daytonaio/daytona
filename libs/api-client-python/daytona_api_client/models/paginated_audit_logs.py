@@ -31,8 +31,8 @@ class PaginatedAuditLogs(BaseModel):
     items: List[AuditLog]
     total: Union[StrictFloat, StrictInt]
     page: Union[StrictFloat, StrictInt]
-    total_pages: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalPages")
-    next_token: Optional[StrictStr] = Field(default=None, description="Token for next page in cursor-based pagination", serialization_alias="nextToken")
+    total_pages: Union[StrictFloat, StrictInt] = Field(alias="totalPages")
+    next_token: Optional[StrictStr] = Field(default=None, description="Token for next page in cursor-based pagination", alias="nextToken")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages", "nextToken"]
 

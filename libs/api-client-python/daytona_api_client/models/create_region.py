@@ -28,9 +28,9 @@ class CreateRegion(BaseModel):
     CreateRegion
     """ # noqa: E501
     name: StrictStr = Field(description="Region name")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", serialization_alias="proxyUrl")
-    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", serialization_alias="sshGatewayUrl")
-    snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", serialization_alias="snapshotManagerUrl")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", alias="proxyUrl")
+    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", alias="sshGatewayUrl")
+    snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", alias="snapshotManagerUrl")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"]
 

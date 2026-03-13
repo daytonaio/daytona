@@ -34,16 +34,16 @@ class CreateWorkspace(BaseModel):
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the workspace")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the workspace")
     public: Optional[StrictBool] = Field(default=None, description="Whether the workspace http preview is publicly accessible")
-    var_class: Optional[StrictStr] = Field(default=None, description="The workspace class type", serialization_alias="class")
+    var_class: Optional[StrictStr] = Field(default=None, description="The workspace class type", alias="class")
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the workspace will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the workspace")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the workspace")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the workspace in GB")
-    auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", serialization_alias="autoStopInterval")
-    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", serialization_alias="autoArchiveInterval")
+    auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
+    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", alias="autoArchiveInterval")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
-    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", serialization_alias="buildInfo")
+    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 

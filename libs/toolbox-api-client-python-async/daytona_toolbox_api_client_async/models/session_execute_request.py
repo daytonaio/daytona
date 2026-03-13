@@ -26,10 +26,10 @@ class SessionExecuteRequest(BaseModel):
     """
     SessionExecuteRequest
     """ # noqa: E501
-    var_async: Optional[StrictBool] = Field(default=None, serialization_alias="async")
+    var_async: Optional[StrictBool] = Field(default=None, alias="async")
     command: StrictStr
-    run_async: Optional[StrictBool] = Field(default=None, serialization_alias="runAsync")
-    suppress_input_echo: Optional[StrictBool] = Field(default=None, serialization_alias="suppressInputEcho")
+    run_async: Optional[StrictBool] = Field(default=None, alias="runAsync")
+    suppress_input_echo: Optional[StrictBool] = Field(default=None, alias="suppressInputEcho")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["async", "command", "runAsync", "suppressInputEcho"]
 

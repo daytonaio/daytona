@@ -28,9 +28,9 @@ class FileInfo(BaseModel):
     FileInfo
     """ # noqa: E501
     name: StrictStr
-    is_dir: StrictBool = Field(serialization_alias="isDir")
+    is_dir: StrictBool = Field(alias="isDir")
     size: Union[StrictFloat, StrictInt]
-    mod_time: StrictStr = Field(serialization_alias="modTime")
+    mod_time: StrictStr = Field(alias="modTime")
     mode: StrictStr
     permissions: StrictStr
     owner: StrictStr

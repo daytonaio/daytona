@@ -27,8 +27,8 @@ class FileInfo(BaseModel):
     FileInfo
     """ # noqa: E501
     group: StrictStr
-    is_dir: StrictBool = Field(serialization_alias="isDir")
-    mod_time: StrictStr = Field(serialization_alias="modTime")
+    is_dir: StrictBool = Field(alias="isDir")
+    mod_time: StrictStr = Field(alias="modTime")
     mode: StrictStr
     name: StrictStr
     owner: StrictStr

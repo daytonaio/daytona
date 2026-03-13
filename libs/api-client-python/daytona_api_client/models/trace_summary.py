@@ -27,13 +27,13 @@ class TraceSummary(BaseModel):
     """
     TraceSummary
     """ # noqa: E501
-    trace_id: StrictStr = Field(description="Unique trace identifier", serialization_alias="traceId")
-    root_span_name: StrictStr = Field(description="Name of the root span", serialization_alias="rootSpanName")
-    start_time: StrictStr = Field(description="Trace start time", serialization_alias="startTime")
-    end_time: StrictStr = Field(description="Trace end time", serialization_alias="endTime")
-    duration_ms: Union[StrictFloat, StrictInt] = Field(description="Total duration in milliseconds", serialization_alias="durationMs")
-    span_count: Union[StrictFloat, StrictInt] = Field(description="Number of spans in this trace", serialization_alias="spanCount")
-    status_code: Optional[StrictStr] = Field(default=None, description="Status code of the trace", serialization_alias="statusCode")
+    trace_id: StrictStr = Field(description="Unique trace identifier", alias="traceId")
+    root_span_name: StrictStr = Field(description="Name of the root span", alias="rootSpanName")
+    start_time: StrictStr = Field(description="Trace start time", alias="startTime")
+    end_time: StrictStr = Field(description="Trace end time", alias="endTime")
+    duration_ms: Union[StrictFloat, StrictInt] = Field(description="Total duration in milliseconds", alias="durationMs")
+    span_count: Union[StrictFloat, StrictInt] = Field(description="Number of spans in this trace", alias="spanCount")
+    status_code: Optional[StrictStr] = Field(default=None, description="Status code of the trace", alias="statusCode")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["traceId", "rootSpanName", "startTime", "endTime", "durationMs", "spanCount", "statusCode"]
 

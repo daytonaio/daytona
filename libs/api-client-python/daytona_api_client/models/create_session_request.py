@@ -27,7 +27,7 @@ class CreateSessionRequest(BaseModel):
     """
     CreateSessionRequest
     """ # noqa: E501
-    session_id: StrictStr = Field(description="The ID of the session", serialization_alias="sessionId")
+    session_id: StrictStr = Field(description="The ID of the session", alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId"]
 

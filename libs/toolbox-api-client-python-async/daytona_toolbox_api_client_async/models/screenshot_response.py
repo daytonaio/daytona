@@ -27,9 +27,9 @@ class ScreenshotResponse(BaseModel):
     """
     ScreenshotResponse
     """ # noqa: E501
-    cursor_position: Optional[Position] = Field(default=None, serialization_alias="cursorPosition")
+    cursor_position: Optional[Position] = Field(default=None, alias="cursorPosition")
     screenshot: Optional[StrictStr] = None
-    size_bytes: Optional[StrictInt] = Field(default=None, serialization_alias="sizeBytes")
+    size_bytes: Optional[StrictInt] = Field(default=None, alias="sizeBytes")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["cursorPosition", "screenshot", "sizeBytes"]
 

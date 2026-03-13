@@ -27,7 +27,7 @@ class PtyCreateResponse(BaseModel):
     """
     PtyCreateResponse
     """ # noqa: E501
-    session_id: StrictStr = Field(description="The unique identifier for the created PTY session", serialization_alias="sessionId")
+    session_id: StrictStr = Field(description="The unique identifier for the created PTY session", alias="sessionId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["sessionId"]
 

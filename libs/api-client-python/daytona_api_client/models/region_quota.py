@@ -27,11 +27,11 @@ class RegionQuota(BaseModel):
     """
     RegionQuota
     """ # noqa: E501
-    organization_id: StrictStr = Field(serialization_alias="organizationId")
-    region_id: StrictStr = Field(serialization_alias="regionId")
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalCpuQuota")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalMemoryQuota")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalDiskQuota")
+    organization_id: StrictStr = Field(alias="organizationId")
+    region_id: StrictStr = Field(alias="regionId")
+    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
+    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
+    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["organizationId", "regionId", "totalCpuQuota", "totalMemoryQuota", "totalDiskQuota"]
 

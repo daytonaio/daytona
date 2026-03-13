@@ -32,8 +32,8 @@ class CreateDockerRegistry(BaseModel):
     username: StrictStr = Field(description="Registry username")
     password: StrictStr = Field(description="Registry password")
     project: Optional[StrictStr] = Field(default=None, description="Registry project")
-    registry_type: StrictStr = Field(description="Registry type", serialization_alias="registryType")
-    is_default: Optional[StrictBool] = Field(default=None, description="Set as default registry", serialization_alias="isDefault")
+    registry_type: StrictStr = Field(description="Registry type", alias="registryType")
+    is_default: Optional[StrictBool] = Field(default=None, description="Set as default registry", alias="isDefault")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "url", "username", "password", "project", "registryType", "isDefault"]
 

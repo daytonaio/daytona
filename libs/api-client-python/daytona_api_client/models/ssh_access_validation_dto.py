@@ -28,7 +28,7 @@ class SshAccessValidationDto(BaseModel):
     SshAccessValidationDto
     """ # noqa: E501
     valid: StrictBool = Field(description="Whether the SSH access token is valid")
-    sandbox_id: StrictStr = Field(description="ID of the sandbox this SSH access is for", serialization_alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox this SSH access is for", alias="sandboxId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["valid", "sandboxId"]
 

@@ -27,10 +27,10 @@ class MouseDragRequest(BaseModel):
     MouseDragRequest
     """ # noqa: E501
     button: Optional[StrictStr] = None
-    end_x: Optional[StrictInt] = Field(default=None, serialization_alias="endX")
-    end_y: Optional[StrictInt] = Field(default=None, serialization_alias="endY")
-    start_x: Optional[StrictInt] = Field(default=None, serialization_alias="startX")
-    start_y: Optional[StrictInt] = Field(default=None, serialization_alias="startY")
+    end_x: Optional[StrictInt] = Field(default=None, alias="endX")
+    end_y: Optional[StrictInt] = Field(default=None, alias="endY")
+    start_x: Optional[StrictInt] = Field(default=None, alias="startX")
+    start_y: Optional[StrictInt] = Field(default=None, alias="startY")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["button", "endX", "endY", "startX", "startY"]
 

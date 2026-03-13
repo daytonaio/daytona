@@ -26,8 +26,8 @@ class CompletionContext(BaseModel):
     """
     CompletionContext
     """ # noqa: E501
-    trigger_character: Optional[StrictStr] = Field(default=None, serialization_alias="triggerCharacter")
-    trigger_kind: StrictInt = Field(serialization_alias="triggerKind")
+    trigger_character: Optional[StrictStr] = Field(default=None, alias="triggerCharacter")
+    trigger_kind: StrictInt = Field(alias="triggerKind")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["triggerCharacter", "triggerKind"]
 

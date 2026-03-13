@@ -31,7 +31,7 @@ class PaginatedLogs(BaseModel):
     items: List[LogEntry] = Field(description="List of log entries")
     total: Union[StrictFloat, StrictInt] = Field(description="Total number of log entries matching the query")
     page: Union[StrictFloat, StrictInt] = Field(description="Current page number")
-    total_pages: Union[StrictFloat, StrictInt] = Field(description="Total number of pages", serialization_alias="totalPages")
+    total_pages: Union[StrictFloat, StrictInt] = Field(description="Total number of pages", alias="totalPages")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
 

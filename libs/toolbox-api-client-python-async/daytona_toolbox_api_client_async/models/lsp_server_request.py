@@ -26,8 +26,8 @@ class LspServerRequest(BaseModel):
     """
     LspServerRequest
     """ # noqa: E501
-    language_id: StrictStr = Field(serialization_alias="languageId")
-    path_to_project: StrictStr = Field(serialization_alias="pathToProject")
+    language_id: StrictStr = Field(alias="languageId")
+    path_to_project: StrictStr = Field(alias="pathToProject")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["languageId", "pathToProject"]
 

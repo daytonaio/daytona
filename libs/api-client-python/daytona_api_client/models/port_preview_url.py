@@ -27,7 +27,7 @@ class PortPreviewUrl(BaseModel):
     """
     PortPreviewUrl
     """ # noqa: E501
-    sandbox_id: StrictStr = Field(description="ID of the sandbox", serialization_alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox", alias="sandboxId")
     url: StrictStr = Field(description="Preview url")
     token: StrictStr = Field(description="Access token")
     additional_properties: Dict[str, Any] = {}

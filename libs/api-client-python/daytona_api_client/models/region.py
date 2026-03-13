@@ -30,13 +30,13 @@ class Region(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Region ID")
     name: StrictStr = Field(description="Region name")
-    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", serialization_alias="organizationId")
-    region_type: RegionType = Field(description="The type of the region", serialization_alias="regionType")
-    created_at: StrictStr = Field(description="Creation timestamp", serialization_alias="createdAt")
-    updated_at: StrictStr = Field(description="Last update timestamp", serialization_alias="updatedAt")
-    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", serialization_alias="proxyUrl")
-    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", serialization_alias="sshGatewayUrl")
-    snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", serialization_alias="snapshotManagerUrl")
+    organization_id: Optional[StrictStr] = Field(default=None, description="Organization ID", alias="organizationId")
+    region_type: RegionType = Field(description="The type of the region", alias="regionType")
+    created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
+    proxy_url: Optional[StrictStr] = Field(default=None, description="Proxy URL for the region", alias="proxyUrl")
+    ssh_gateway_url: Optional[StrictStr] = Field(default=None, description="SSH Gateway URL for the region", alias="sshGatewayUrl")
+    snapshot_manager_url: Optional[StrictStr] = Field(default=None, description="Snapshot Manager URL for the region", alias="snapshotManagerUrl")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "regionType", "createdAt", "updatedAt", "proxyUrl", "sshGatewayUrl", "snapshotManagerUrl"]
 

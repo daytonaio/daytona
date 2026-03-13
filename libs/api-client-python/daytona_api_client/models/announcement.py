@@ -28,7 +28,7 @@ class Announcement(BaseModel):
     Announcement
     """ # noqa: E501
     text: StrictStr = Field(description="The announcement text")
-    learn_more_url: Optional[StrictStr] = Field(default=None, description="URL to learn more about the announcement", serialization_alias="learnMoreUrl")
+    learn_more_url: Optional[StrictStr] = Field(default=None, description="URL to learn more about the announcement", alias="learnMoreUrl")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["text", "learnMoreUrl"]
 

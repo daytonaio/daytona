@@ -28,7 +28,7 @@ class UpdateOrganizationMemberAccess(BaseModel):
     UpdateOrganizationMemberAccess
     """ # noqa: E501
     role: StrictStr = Field(description="Organization member role")
-    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs", serialization_alias="assignedRoleIds")
+    assigned_role_ids: List[StrictStr] = Field(description="Array of assigned role IDs", alias="assignedRoleIds")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["role", "assignedRoleIds"]
 

@@ -29,12 +29,12 @@ class SshAccessDto(BaseModel):
     SshAccessDto
     """ # noqa: E501
     id: StrictStr = Field(description="Unique identifier for the SSH access")
-    sandbox_id: StrictStr = Field(description="ID of the sandbox this SSH access is for", serialization_alias="sandboxId")
+    sandbox_id: StrictStr = Field(description="ID of the sandbox this SSH access is for", alias="sandboxId")
     token: StrictStr = Field(description="SSH access token")
-    expires_at: datetime = Field(description="When the SSH access expires", serialization_alias="expiresAt")
-    created_at: datetime = Field(description="When the SSH access was created", serialization_alias="createdAt")
-    updated_at: datetime = Field(description="When the SSH access was last updated", serialization_alias="updatedAt")
-    ssh_command: StrictStr = Field(description="SSH command to connect to the sandbox", serialization_alias="sshCommand")
+    expires_at: datetime = Field(description="When the SSH access expires", alias="expiresAt")
+    created_at: datetime = Field(description="When the SSH access was created", alias="createdAt")
+    updated_at: datetime = Field(description="When the SSH access was last updated", alias="updatedAt")
+    ssh_command: StrictStr = Field(description="SSH command to connect to the sandbox", alias="sshCommand")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "sandboxId", "token", "expiresAt", "createdAt", "updatedAt", "sshCommand"]
 

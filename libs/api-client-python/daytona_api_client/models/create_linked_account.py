@@ -28,7 +28,7 @@ class CreateLinkedAccount(BaseModel):
     CreateLinkedAccount
     """ # noqa: E501
     provider: StrictStr = Field(description="The authentication provider of the secondary account")
-    user_id: StrictStr = Field(description="The user ID of the secondary account", serialization_alias="userId")
+    user_id: StrictStr = Field(description="The user ID of the secondary account", alias="userId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["provider", "userId"]
 

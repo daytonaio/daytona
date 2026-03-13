@@ -28,10 +28,10 @@ class CreateRegionResponse(BaseModel):
     CreateRegionResponse
     """ # noqa: E501
     id: StrictStr = Field(description="ID of the created region")
-    proxy_api_key: Optional[StrictStr] = Field(default=None, description="Proxy API key for the region", serialization_alias="proxyApiKey")
-    ssh_gateway_api_key: Optional[StrictStr] = Field(default=None, description="SSH Gateway API key for the region", serialization_alias="sshGatewayApiKey")
-    snapshot_manager_username: Optional[StrictStr] = Field(default=None, description="Snapshot Manager username for the region", serialization_alias="snapshotManagerUsername")
-    snapshot_manager_password: Optional[StrictStr] = Field(default=None, description="Snapshot Manager password for the region", serialization_alias="snapshotManagerPassword")
+    proxy_api_key: Optional[StrictStr] = Field(default=None, description="Proxy API key for the region", alias="proxyApiKey")
+    ssh_gateway_api_key: Optional[StrictStr] = Field(default=None, description="SSH Gateway API key for the region", alias="sshGatewayApiKey")
+    snapshot_manager_username: Optional[StrictStr] = Field(default=None, description="Snapshot Manager username for the region", alias="snapshotManagerUsername")
+    snapshot_manager_password: Optional[StrictStr] = Field(default=None, description="Snapshot Manager password for the region", alias="snapshotManagerPassword")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "proxyApiKey", "sshGatewayApiKey", "snapshotManagerUsername", "snapshotManagerPassword"]
 

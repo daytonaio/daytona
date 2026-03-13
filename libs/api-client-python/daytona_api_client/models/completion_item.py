@@ -31,9 +31,9 @@ class CompletionItem(BaseModel):
     kind: Optional[Union[StrictFloat, StrictInt]] = None
     detail: Optional[StrictStr] = None
     documentation: Optional[Dict[str, Any]] = None
-    sort_text: Optional[StrictStr] = Field(default=None, serialization_alias="sortText")
-    filter_text: Optional[StrictStr] = Field(default=None, serialization_alias="filterText")
-    insert_text: Optional[StrictStr] = Field(default=None, serialization_alias="insertText")
+    sort_text: Optional[StrictStr] = Field(default=None, alias="sortText")
+    filter_text: Optional[StrictStr] = Field(default=None, alias="filterText")
+    insert_text: Optional[StrictStr] = Field(default=None, alias="insertText")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["label", "kind", "detail", "documentation", "sortText", "filterText", "insertText"]
 

@@ -27,8 +27,8 @@ class SandboxVolume(BaseModel):
     """
     SandboxVolume
     """ # noqa: E501
-    volume_id: StrictStr = Field(description="The ID of the volume", serialization_alias="volumeId")
-    mount_path: StrictStr = Field(description="The mount path for the volume", serialization_alias="mountPath")
+    volume_id: StrictStr = Field(description="The ID of the volume", alias="volumeId")
+    mount_path: StrictStr = Field(description="The mount path for the volume", alias="mountPath")
     subpath: Optional[StrictStr] = Field(default=None, description="Optional subpath within the volume to mount. When specified, only this S3 prefix will be accessible. When omitted, the entire volume is mounted.")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["volumeId", "mountPath", "subpath"]

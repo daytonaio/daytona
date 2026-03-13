@@ -29,19 +29,19 @@ class AuditLog(BaseModel):
     AuditLog
     """ # noqa: E501
     id: StrictStr
-    actor_id: StrictStr = Field(serialization_alias="actorId")
-    actor_email: StrictStr = Field(serialization_alias="actorEmail")
-    organization_id: Optional[StrictStr] = Field(default=None, serialization_alias="organizationId")
+    actor_id: StrictStr = Field(alias="actorId")
+    actor_email: StrictStr = Field(alias="actorEmail")
+    organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     action: StrictStr
-    target_type: Optional[StrictStr] = Field(default=None, serialization_alias="targetType")
-    target_id: Optional[StrictStr] = Field(default=None, serialization_alias="targetId")
-    status_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, serialization_alias="statusCode")
-    error_message: Optional[StrictStr] = Field(default=None, serialization_alias="errorMessage")
-    ip_address: Optional[StrictStr] = Field(default=None, serialization_alias="ipAddress")
-    user_agent: Optional[StrictStr] = Field(default=None, serialization_alias="userAgent")
+    target_type: Optional[StrictStr] = Field(default=None, alias="targetType")
+    target_id: Optional[StrictStr] = Field(default=None, alias="targetId")
+    status_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="statusCode")
+    error_message: Optional[StrictStr] = Field(default=None, alias="errorMessage")
+    ip_address: Optional[StrictStr] = Field(default=None, alias="ipAddress")
+    user_agent: Optional[StrictStr] = Field(default=None, alias="userAgent")
     source: Optional[StrictStr] = None
     metadata: Optional[Dict[str, Any]] = None
-    created_at: datetime = Field(serialization_alias="createdAt")
+    created_at: datetime = Field(alias="createdAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "actorId", "actorEmail", "organizationId", "action", "targetType", "targetId", "statusCode", "errorMessage", "ipAddress", "userAgent", "source", "metadata", "createdAt"]
 

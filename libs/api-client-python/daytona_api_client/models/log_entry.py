@@ -29,13 +29,13 @@ class LogEntry(BaseModel):
     """ # noqa: E501
     timestamp: StrictStr = Field(description="Timestamp of the log entry")
     body: StrictStr = Field(description="Log message body")
-    severity_text: StrictStr = Field(description="Severity level text (e.g., INFO, WARN, ERROR)", serialization_alias="severityText")
-    severity_number: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Severity level number", serialization_alias="severityNumber")
-    service_name: StrictStr = Field(description="Service name that generated the log", serialization_alias="serviceName")
-    resource_attributes: Dict[str, StrictStr] = Field(description="Resource attributes from OTEL", serialization_alias="resourceAttributes")
-    log_attributes: Dict[str, StrictStr] = Field(description="Log-specific attributes", serialization_alias="logAttributes")
-    trace_id: Optional[StrictStr] = Field(default=None, description="Associated trace ID if available", serialization_alias="traceId")
-    span_id: Optional[StrictStr] = Field(default=None, description="Associated span ID if available", serialization_alias="spanId")
+    severity_text: StrictStr = Field(description="Severity level text (e.g., INFO, WARN, ERROR)", alias="severityText")
+    severity_number: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Severity level number", alias="severityNumber")
+    service_name: StrictStr = Field(description="Service name that generated the log", alias="serviceName")
+    resource_attributes: Dict[str, StrictStr] = Field(description="Resource attributes from OTEL", alias="resourceAttributes")
+    log_attributes: Dict[str, StrictStr] = Field(description="Log-specific attributes", alias="logAttributes")
+    trace_id: Optional[StrictStr] = Field(default=None, description="Associated trace ID if available", alias="traceId")
+    span_id: Optional[StrictStr] = Field(default=None, description="Associated span ID if available", alias="spanId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["timestamp", "body", "severityText", "severityNumber", "serviceName", "resourceAttributes", "logAttributes", "traceId", "spanId"]
 

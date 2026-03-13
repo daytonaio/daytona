@@ -31,7 +31,7 @@ class PaginatedTraces(BaseModel):
     items: List[TraceSummary] = Field(description="List of trace summaries")
     total: Union[StrictFloat, StrictInt] = Field(description="Total number of traces matching the query")
     page: Union[StrictFloat, StrictInt] = Field(description="Current page number")
-    total_pages: Union[StrictFloat, StrictInt] = Field(description="Total number of pages", serialization_alias="totalPages")
+    total_pages: Union[StrictFloat, StrictInt] = Field(description="Total number of pages", alias="totalPages")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
 

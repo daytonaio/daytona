@@ -26,7 +26,7 @@ class ProcessStatusResponse(BaseModel):
     """
     ProcessStatusResponse
     """ # noqa: E501
-    process_name: Optional[StrictStr] = Field(default=None, serialization_alias="processName")
+    process_name: Optional[StrictStr] = Field(default=None, alias="processName")
     running: Optional[StrictBool] = None
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["processName", "running"]

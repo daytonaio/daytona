@@ -28,11 +28,11 @@ class PtySessionInfo(BaseModel):
     """ # noqa: E501
     active: StrictBool
     cols: StrictInt
-    created_at: StrictStr = Field(serialization_alias="createdAt")
+    created_at: StrictStr = Field(alias="createdAt")
     cwd: StrictStr
     envs: Dict[str, StrictStr]
     id: StrictStr
-    lazy_start: StrictBool = Field(description="Whether this session uses lazy start", serialization_alias="lazyStart")
+    lazy_start: StrictBool = Field(description="Whether this session uses lazy start", alias="lazyStart")
     rows: StrictInt
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["active", "cols", "createdAt", "cwd", "envs", "id", "lazyStart", "rows"]

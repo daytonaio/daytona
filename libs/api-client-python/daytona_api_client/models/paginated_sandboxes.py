@@ -31,7 +31,7 @@ class PaginatedSandboxes(BaseModel):
     items: List[Sandbox]
     total: Union[StrictFloat, StrictInt]
     page: Union[StrictFloat, StrictInt]
-    total_pages: Union[StrictFloat, StrictInt] = Field(serialization_alias="totalPages")
+    total_pages: Union[StrictFloat, StrictInt] = Field(alias="totalPages")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["items", "total", "page", "totalPages"]
 

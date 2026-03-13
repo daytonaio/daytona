@@ -29,8 +29,8 @@ class UpdateOrganizationInvitation(BaseModel):
     UpdateOrganizationInvitation
     """ # noqa: E501
     role: StrictStr = Field(description="Organization member role")
-    assigned_role_ids: List[StrictStr] = Field(description="Array of role IDs", serialization_alias="assignedRoleIds")
-    expires_at: Optional[datetime] = Field(default=None, description="Expiration date of the invitation", serialization_alias="expiresAt")
+    assigned_role_ids: List[StrictStr] = Field(description="Array of role IDs", alias="assignedRoleIds")
+    expires_at: Optional[datetime] = Field(default=None, description="Expiration date of the invitation", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["role", "assignedRoleIds", "expiresAt"]
 

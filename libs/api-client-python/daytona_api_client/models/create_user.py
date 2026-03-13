@@ -31,10 +31,10 @@ class CreateUser(BaseModel):
     id: StrictStr
     name: StrictStr
     email: Optional[StrictStr] = None
-    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, serialization_alias="personalOrganizationQuota")
-    personal_organization_default_region_id: Optional[StrictStr] = Field(default=None, serialization_alias="personalOrganizationDefaultRegionId")
+    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, alias="personalOrganizationQuota")
+    personal_organization_default_region_id: Optional[StrictStr] = Field(default=None, alias="personalOrganizationDefaultRegionId")
     role: Optional[StrictStr] = None
-    email_verified: Optional[StrictBool] = Field(default=None, serialization_alias="emailVerified")
+    email_verified: Optional[StrictBool] = Field(default=None, alias="emailVerified")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "email", "personalOrganizationQuota", "personalOrganizationDefaultRegionId", "role", "emailVerified"]
 

@@ -29,7 +29,7 @@ class SandboxInfo(BaseModel):
     """ # noqa: E501
     created: StrictStr = Field(description="The creation timestamp of the project")
     name: StrictStr = Field(description="Deprecated: The name of the sandbox")
-    provider_metadata: Optional[StrictStr] = Field(default=None, description="Additional metadata provided by the provider", serialization_alias="providerMetadata")
+    provider_metadata: Optional[StrictStr] = Field(default=None, description="Additional metadata provided by the provider", alias="providerMetadata")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["created", "name", "providerMetadata"]
 

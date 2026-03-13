@@ -30,11 +30,11 @@ class ApiKeyList(BaseModel):
     """ # noqa: E501
     name: StrictStr = Field(description="The name of the API key")
     value: StrictStr = Field(description="The masked API key value")
-    created_at: datetime = Field(description="When the API key was created", serialization_alias="createdAt")
+    created_at: datetime = Field(description="When the API key was created", alias="createdAt")
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
-    last_used_at: Optional[datetime] = Field(description="When the API key was last used", serialization_alias="lastUsedAt")
-    expires_at: Optional[datetime] = Field(description="When the API key expires", serialization_alias="expiresAt")
-    user_id: StrictStr = Field(description="The user ID of the user who created the API key", serialization_alias="userId")
+    last_used_at: Optional[datetime] = Field(description="When the API key was last used", alias="lastUsedAt")
+    expires_at: Optional[datetime] = Field(description="When the API key expires", alias="expiresAt")
+    user_id: StrictStr = Field(description="The user ID of the user who created the API key", alias="userId")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt", "expiresAt", "userId"]
 

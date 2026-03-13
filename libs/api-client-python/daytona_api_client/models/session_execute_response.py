@@ -27,9 +27,9 @@ class SessionExecuteResponse(BaseModel):
     """
     SessionExecuteResponse
     """ # noqa: E501
-    cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", serialization_alias="cmdId")
+    cmd_id: Optional[StrictStr] = Field(default=None, description="The ID of the executed command", alias="cmdId")
     output: Optional[StrictStr] = Field(default=None, description="The output of the executed command marked with stdout and stderr prefixes")
-    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", serialization_alias="exitCode")
+    exit_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The exit code of the executed command", alias="exitCode")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["cmdId", "output", "exitCode"]
 

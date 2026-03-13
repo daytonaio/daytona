@@ -28,10 +28,10 @@ class RateLimitConfig(BaseModel):
     """
     RateLimitConfig
     """ # noqa: E501
-    failed_auth: Optional[RateLimitEntry] = Field(default=None, description="Failed authentication rate limit", serialization_alias="failedAuth")
+    failed_auth: Optional[RateLimitEntry] = Field(default=None, description="Failed authentication rate limit", alias="failedAuth")
     authenticated: Optional[RateLimitEntry] = Field(default=None, description="Authenticated rate limit")
-    sandbox_create: Optional[RateLimitEntry] = Field(default=None, description="Sandbox create rate limit", serialization_alias="sandboxCreate")
-    sandbox_lifecycle: Optional[RateLimitEntry] = Field(default=None, description="Sandbox lifecycle rate limit", serialization_alias="sandboxLifecycle")
+    sandbox_create: Optional[RateLimitEntry] = Field(default=None, description="Sandbox create rate limit", alias="sandboxCreate")
+    sandbox_lifecycle: Optional[RateLimitEntry] = Field(default=None, description="Sandbox lifecycle rate limit", alias="sandboxLifecycle")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["failedAuth", "authenticated", "sandboxCreate", "sandboxLifecycle"]
 

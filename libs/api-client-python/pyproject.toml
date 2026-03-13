@@ -3,7 +3,7 @@ name = "daytona_api_client"
 version = "0.0.0-dev"
 description = "Daytona"
 authors = ["Daytona Platforms Inc. <support@daytona.com>"]
-license = "Apache-2.0"
+license = "NoLicense"
 readme = "README.md"
 repository = "https://github.com/daytonaio/daytona"
 keywords = ["OpenAPI", "OpenAPI-Generator", "Daytona"]
@@ -12,7 +12,7 @@ include = ["daytona_api_client/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.8"
 
-urllib3 = ">= 2.1.0, < 3.0.0"
+urllib3 = ">= 1.25.3, < 3.0.0"
 python-dateutil = ">= 2.8.2"
 pydantic = ">= 2"
 typing-extensions = ">= 4.7.1"

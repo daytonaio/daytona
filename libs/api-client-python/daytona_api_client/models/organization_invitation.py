@@ -31,15 +31,15 @@ class OrganizationInvitation(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Invitation ID")
     email: StrictStr = Field(description="Email address of the invitee")
-    invited_by: StrictStr = Field(description="Email address of the inviter", serialization_alias="invitedBy")
-    organization_id: StrictStr = Field(description="Organization ID", serialization_alias="organizationId")
-    organization_name: StrictStr = Field(description="Organization name", serialization_alias="organizationName")
-    expires_at: datetime = Field(description="Expiration date of the invitation", serialization_alias="expiresAt")
+    invited_by: StrictStr = Field(description="Email address of the inviter", alias="invitedBy")
+    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
+    organization_name: StrictStr = Field(description="Organization name", alias="organizationName")
+    expires_at: datetime = Field(description="Expiration date of the invitation", alias="expiresAt")
     status: StrictStr = Field(description="Invitation status")
     role: StrictStr = Field(description="Member role")
-    assigned_roles: List[OrganizationRole] = Field(description="Assigned roles", serialization_alias="assignedRoles")
-    created_at: datetime = Field(description="Creation timestamp", serialization_alias="createdAt")
-    updated_at: datetime = Field(description="Last update timestamp", serialization_alias="updatedAt")
+    assigned_roles: List[OrganizationRole] = Field(description="Assigned roles", alias="assignedRoles")
+    created_at: datetime = Field(description="Creation timestamp", alias="createdAt")
+    updated_at: datetime = Field(description="Last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "email", "invitedBy", "organizationId", "organizationName", "expiresAt", "status", "role", "assignedRoles", "createdAt", "updatedAt"]
 

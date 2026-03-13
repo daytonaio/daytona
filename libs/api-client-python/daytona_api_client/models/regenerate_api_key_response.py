@@ -27,7 +27,7 @@ class RegenerateApiKeyResponse(BaseModel):
     """
     RegenerateApiKeyResponse
     """ # noqa: E501
-    api_key: StrictStr = Field(description="The newly generated API key", serialization_alias="apiKey")
+    api_key: StrictStr = Field(description="The newly generated API key", alias="apiKey")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["apiKey"]
 

@@ -27,7 +27,7 @@ class PosthogConfig(BaseModel):
     """
     PosthogConfig
     """ # noqa: E501
-    api_key: StrictStr = Field(description="PostHog API key", serialization_alias="apiKey")
+    api_key: StrictStr = Field(description="PostHog API key", alias="apiKey")
     host: StrictStr = Field(description="PostHog host URL")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["apiKey", "host"]
