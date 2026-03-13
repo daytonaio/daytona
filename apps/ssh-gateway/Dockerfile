@@ -1,8 +1,10 @@
 FROM node:22-alpine AS build
 
+ENV CI=true
+
 RUN npm install -g corepack && corepack enable
 
-COPY --from=golang:1.23.5-alpine /usr/local/go/ /usr/local/go/
+COPY --from=golang:1.25.4-alpine /usr/local/go/ /usr/local/go/
 
 ENV PATH="/usr/local/go/bin:${PATH}"
 
@@ -10,14 +12,24 @@ RUN apk add --no-cache git
 
 WORKDIR /daytona
 
-COPY . .
+# Yarn caching layer
+COPY package.json yarn.lock .yarnrc.yml ./
+RUN yarn install --immutable
+
+# Nx config
+COPY nx.json ./
+
+# Go source
+COPY go.work go.work.sum ./
+COPY apps/ssh-gateway/ apps/ssh-gateway/
+COPY libs/api-client-go/ libs/api-client-go/
+RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/ssh-gateway\n\t./libs/api-client-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
 
 ARG VERSION=0.0.1
 ENV VERSION=${VERSION}
+ENV NX_DAEMON=false
 
 ENV GONOSUMDB=github.com/daytonaio/daytona
-
-RUN yarn
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 
