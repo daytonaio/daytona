@@ -77,6 +77,9 @@ export default function DocSearchSidepanel() {
         .DocSearch-Sidepanel-Screen--introduction {color: var(--secondary-text-color);}
         .DocSearch-Sidepanel-Screen--title {color: var(--primary-text-color);}
         .DocSearch-AskAiScreen-MessageContent-Tool, .Tool--Result, .DocSearch-AskAiScreen-MessageContent-Tool-Query {color: var(--secondary-text-color);}
+        .DocSearch-Sidepanel-SuggestedQuestion {color: var(--secondary-text-color);}
+        .DocSearch-Sidepanel-SuggestedQuestion:hover {color: var(--primary-text-color); border: 1px solid var(--primary-text-color);}
+        .DocSearch-Markdown-Content > h3, .DocSearch-Markdown-Content > h2 {color: var(--primary-text-color);}
       `}</style>
       <Sidepanel {...(sidepanelProps as any)} />
     </>
