@@ -188,13 +188,17 @@ export function UsageTimelineChart({
   const yAxisDomain = useMemo<[number, number] | undefined>(() => {
     if (!isResourceMode) return undefined
     if (resourceFilter === 'all') {
-      // Percentage mode — cap at 110% so the 100% limit line is visible
-      return [0, 110]
+      return [0, 120]
     }
     if (!limits) return undefined
     const limitValue = resourceFilter === 'cpu' ? limits.cpu : resourceFilter === 'ram' ? limits.ram : limits.disk
     if (limitValue <= 0) return undefined
-    return [0, Math.ceil(limitValue * 1.1)]
+    // Round up to a nice number so ticks are evenly spaced
+    const raw = limitValue * 1.2
+    const tickCount = 4
+    const interval = Math.ceil(raw / tickCount)
+    const niceMax = interval * tickCount
+    return [0, niceMax]
   }, [isResourceMode, resourceFilter, limits])
 
   const yAxisFormatter = useMemo(() => {
@@ -328,42 +332,42 @@ export function UsageTimelineChart({
             {isResourceMode && resourceFilter === 'cpu' && limits && limits.cpu > 0 && (
               <ReferenceLine
                 y={limits.cpu}
-                stroke={RESOURCE_COLORS.cpu}
+                stroke={LIMIT_COLOR}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `CPU limit (${limits.cpu} vCPU)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: RESOURCE_COLORS.cpu,
+                  fill: LIMIT_COLOR,
                 }}
               />
             )}
             {isResourceMode && resourceFilter === 'ram' && limits && limits.ram > 0 && (
               <ReferenceLine
                 y={limits.ram}
-                stroke={RESOURCE_COLORS.ram}
+                stroke={LIMIT_COLOR}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `RAM limit (${limits.ram} GiB)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: RESOURCE_COLORS.ram,
+                  fill: LIMIT_COLOR,
                 }}
               />
             )}
             {isResourceMode && resourceFilter === 'disk' && limits && limits.disk > 0 && (
               <ReferenceLine
                 y={limits.disk}
-                stroke={RESOURCE_COLORS.disk}
+                stroke={LIMIT_COLOR}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `Disk limit (${limits.disk} GiB)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: RESOURCE_COLORS.disk,
+                  fill: LIMIT_COLOR,
                 }}
               />
             )}
