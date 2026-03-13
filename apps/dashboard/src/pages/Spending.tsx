@@ -25,7 +25,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { addDays, differenceInCalendarDays, subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 
 const analyticsQuickRanges: QuickRangesConfig = {
@@ -56,6 +56,7 @@ const Spending = () => {
   }, [])
 
   const [selectedChartRegion, setSelectedChartRegion] = useState<string | undefined>(undefined)
+  const hasDefaultedRegion = useRef(false)
 
   const analyticsParams = {
     from: analyticsDateRange.from ?? subDays(new Date(), 30),
@@ -84,18 +85,19 @@ const Spending = () => {
     organizationId: selectedOrganization?.id ?? '',
   })
 
-  // Default chart region to the organization's default region
+  // Default chart region to the organization's default region (only once)
   useEffect(() => {
-    if (selectedChartRegion) return
+    if (hasDefaultedRegion.current) return
     const regionUsage = usageOverview?.regionUsage
     if (!regionUsage?.length) return
+    hasDefaultedRegion.current = true
     const defaultRegionId = selectedOrganization?.defaultRegionId
     if (defaultRegionId && regionUsage.some((r) => r.regionId === defaultRegionId)) {
       setSelectedChartRegion(defaultRegionId)
     } else {
       setSelectedChartRegion(regionUsage[0].regionId)
     }
-  }, [usageOverview?.regionUsage, selectedOrganization?.defaultRegionId, selectedChartRegion])
+  }, [usageOverview?.regionUsage, selectedOrganization?.defaultRegionId])
 
   const {
     data: currentOrganizationUsage,
