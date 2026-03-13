@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { DataSource, FindOptionsWhere } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
+import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
@@ -36,14 +37,14 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     if (!sandbox.updatedAt) {
       sandbox.updatedAt = now
     }
-    if (!sandbox.lastActivityAt) {
-      sandbox.lastActivityAt = now
-    }
 
     sandbox.assertValid()
     sandbox.enforceInvariants()
 
-    await this.repository.insert(sandbox)
+    await this.dataSource.transaction(async (entityManager) => {
+      await entityManager.insert(Sandbox, sandbox)
+      await this.upsertLastActivity(entityManager, sandbox.id, sandbox.createdAt)
+    })
 
     this.invalidateLookupCacheOnInsert(sandbox)
 
@@ -72,10 +73,6 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   ): Promise<Sandbox | void> {
     const { updateData, entity } = params
 
-    if (updateData.state && !updateData.lastActivityAt) {
-      updateData.lastActivityAt = new Date()
-    }
-
     if (raw) {
       await this.repository.update(id, updateData)
       return
@@ -92,11 +89,17 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     sandbox.assertValid()
     const invariantChanges = sandbox.enforceInvariants()
 
-    const result = await this.repository.update(id, { ...updateData, ...invariantChanges })
-    if (!result.affected) {
-      throw new NotFoundException('Sandbox not found after update')
-    }
-    sandbox.updatedAt = new Date()
+    await this.dataSource.transaction(async (entityManager) => {
+      const result = await entityManager.update(Sandbox, id, { ...updateData, ...invariantChanges })
+      if (!result.affected) {
+        throw new NotFoundException('Sandbox not found after update')
+      }
+      sandbox.updatedAt = new Date()
+
+      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
+        await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
+      }
+    })
 
     this.emitUpdateEvents(sandbox, previousSandbox)
     this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
@@ -124,10 +127,6 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
   ): Promise<Sandbox> {
     const { updateData, whereCondition } = params
 
-    if (updateData.state && !updateData.lastActivityAt) {
-      updateData.lastActivityAt = new Date()
-    }
-
     return this.manager.transaction(async (entityManager) => {
       const whereClause = {
         ...whereCondition,
@@ -154,11 +153,26 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       await entityManager.update(Sandbox, id, { ...updateData, ...invariantChanges })
       sandbox.updatedAt = new Date()
 
+      if (previousSandbox.state !== sandbox.state || previousSandbox.organizationId !== sandbox.organizationId) {
+        await this.upsertLastActivity(entityManager, id, sandbox.updatedAt)
+      }
+
       this.emitUpdateEvents(sandbox, previousSandbox)
       this.invalidateLookupCacheOnUpdate(sandbox, previousSandbox)
 
       return sandbox
     })
+  }
+
+  /**
+   * Upserts the last activity for a sandbox.
+   */
+  private async upsertLastActivity(
+    entityManager: EntityManager,
+    sandboxId: string,
+    lastActivityAt: Date,
+  ): Promise<void> {
+    await entityManager.upsert(SandboxLastActivity, { sandboxId, lastActivityAt }, ['sandboxId'])
   }
 
   /**

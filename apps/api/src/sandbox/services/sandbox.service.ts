@@ -87,6 +87,7 @@ import {
 } from '../utils/sandbox-lookup-cache.util'
 import { SandboxLookupCacheInvalidationService } from './sandbox-lookup-cache-invalidation.service'
 import { Region } from '../../region/entities/region.entity'
+import { SandboxActivityService } from './sandbox-activity.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -120,6 +121,7 @@ export class SandboxService {
     private readonly regionService: RegionService,
     private readonly snapshotService: SnapshotService,
     private readonly sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
+    private readonly sandboxActivityService: SandboxActivityService,
   ) {}
 
   protected getLockKey(id: string): string {
@@ -546,7 +548,6 @@ export class SandboxService {
       labels: createSandboxDto.labels || {},
       organizationId: organization.id,
       createdAt: now,
-      lastActivityAt: now,
     }
 
     if (createSandboxDto.name) {
@@ -861,7 +862,7 @@ export class SandboxService {
     baseFindOptions.cpu = createRangeFilter(minCpu, maxCpu)
     baseFindOptions.mem = createRangeFilter(minMemoryGiB, maxMemoryGiB)
     baseFindOptions.disk = createRangeFilter(minDiskGiB, maxDiskGiB)
-    baseFindOptions.lastActivityAt = createRangeFilter(lastEventAfter, lastEventBefore)
+    baseFindOptions.updatedAt = createRangeFilter(lastEventAfter, lastEventBefore)
 
     const statesToInclude = (states || Object.values(SandboxState)).filter((state) => state !== SandboxState.DESTROYED)
     const errorStates = [SandboxState.ERROR, SandboxState.BUILD_FAILED]
@@ -1621,14 +1622,7 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    // Prevent spamming updates
-    const lockKey = `sandbox:update-last-activity:${sandboxId}`
-    const acquired = await this.redisLockProvider.lock(lockKey, 45)
-    if (!acquired) {
-      return
-    }
-
-    await this.sandboxRepository.update(sandboxId, { updateData: { lastActivityAt } }, true)
+    await this.sandboxActivityService.updateLastActivityAt(sandboxId, lastActivityAt)
   }
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {

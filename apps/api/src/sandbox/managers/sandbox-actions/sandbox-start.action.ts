@@ -29,6 +29,7 @@ import { LockCode, RedisLockProvider } from '../../common/redis-lock.provider'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { WithSpan } from '../../../common/decorators/otel.decorator'
+import { SandboxActivityService } from '../../services/sandbox-activity.service'
 
 @Injectable()
 export class SandboxStartAction extends SandboxAction {
@@ -43,6 +44,7 @@ export class SandboxStartAction extends SandboxAction {
     protected readonly configService: TypedConfigService,
     protected readonly redisLockProvider: RedisLockProvider,
     @InjectRedis() private readonly redis: Redis,
+    private readonly sandboxActivityService: SandboxActivityService,
   ) {
     super(runnerService, runnerAdapterFactory, sandboxRepository, redisLockProvider)
   }
@@ -657,10 +659,8 @@ export class SandboxStartAction extends SandboxAction {
   }
 
   private async checkTimeoutError(sandbox: Sandbox, timeoutMinutes: number, errorReason: string): Promise<boolean> {
-    if (
-      sandbox.lastActivityAt &&
-      new Date(sandbox.lastActivityAt).getTime() < Date.now() - 1000 * 60 * timeoutMinutes
-    ) {
+    const lastActivityAt = await this.sandboxActivityService.getLastActivityAt(sandbox.id)
+    if (lastActivityAt && lastActivityAt.getTime() < Date.now() - 1000 * 60 * timeoutMinutes) {
       const updateData: Partial<Sandbox> = {
         state: SandboxState.ERROR,
         errorReason,
