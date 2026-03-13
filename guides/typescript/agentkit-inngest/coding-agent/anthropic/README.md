@@ -97,7 +97,7 @@ When the agent finishes, you should see terminal output like:
 
 You can view the app on the given preview link above. The image below shows the result generated in this run:
 
-![Notes App Demo](../../../../../apps/docs/src/assets/docs/images/ingest-agentkit-notes-app.gif)
+![Notes App Demo](../../../../../apps/docs/src/assets/docs/images/inngest-agentkit-notes-app.gif)
 
 ## License
 
