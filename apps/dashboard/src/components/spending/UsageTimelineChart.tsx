@@ -16,10 +16,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
 import { useRegions } from '@/hooks/useRegions'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { formatMoney } from '@/lib/utils'
 import { ModelsUsageChartPoint } from '@daytonaio/analytics-api-client'
 import type { RegionUsageOverview } from '@daytonaio/api-client'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 
 type UsageTimelineChartProps = {
@@ -78,9 +79,22 @@ const ALL_REGIONS_VALUE = '__all__'
 
 export function UsageTimelineChart({ data, isLoading, regionUsage }: UsageTimelineChartProps) {
   const { getRegionName } = useRegions()
+  const { selectedOrganization } = useSelectedOrganization()
 
   const [mode, setMode] = useState<ChartMode>('resources')
   const [selectedRegion, setSelectedRegion] = useState<string | undefined>(undefined)
+
+  // Default to the organization's default region once regionUsage is available
+  useEffect(() => {
+    if (selectedRegion) return
+    if (!regionUsage?.length) return
+    const defaultRegionId = selectedOrganization?.defaultRegionId
+    if (defaultRegionId && regionUsage.some((r) => r.regionId === defaultRegionId)) {
+      setSelectedRegion(defaultRegionId)
+    } else {
+      setSelectedRegion(regionUsage[0].regionId)
+    }
+  }, [regionUsage, selectedOrganization?.defaultRegionId, selectedRegion])
 
   const chartData = useMemo(() => {
     if (!data?.length) return []
@@ -111,6 +125,14 @@ export function UsageTimelineChart({ data, isLoading, regionUsage }: UsageTimeli
   const dataKeys = isResourceMode
     ? (['cpu', 'ramGB', 'diskGB'] as const)
     : (['cpuPrice', 'ramPrice', 'diskPrice'] as const)
+
+  // Expand the Y axis domain to include reference line values
+  const yAxisDomain = useMemo<[number, number] | undefined>(() => {
+    if (!isResourceMode || !limits) return undefined
+    const maxLimit = Math.max(limits.cpu, limits.ram, limits.disk)
+    // Add 10% padding above the highest limit
+    return [0, Math.ceil(maxLimit * 1.1)]
+  }, [isResourceMode, limits])
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -181,6 +203,7 @@ export function UsageTimelineChart({ data, isLoading, regionUsage }: UsageTimeli
               tickMargin={4}
               tickCount={5}
               width={50}
+              domain={yAxisDomain}
               tickFormatter={(value) => (isResourceMode ? value.toLocaleString() : formatMoney(value))}
             />
             <ChartTooltip
