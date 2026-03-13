@@ -142,6 +142,12 @@ export class VolumeController {
     description: 'ID of the volume',
     type: 'string',
   })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: Boolean,
+    description: 'Force deletion of volume even if it contains data or is in ERROR state',
+  })
   @ApiResponse({
     status: 200,
     description: 'Volume has been marked for deletion',
@@ -157,8 +163,11 @@ export class VolumeController {
     targetIdFromRequest: (req) => req.params.volumeId,
   })
   @UseGuards(VolumeAccessGuard)
-  async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
-    return this.volumeService.delete(volumeId)
+  async deleteVolume(
+    @Param('volumeId') volumeId: string,
+    @Query('force') force = false,
+  ): Promise<void> {
+    return this.volumeService.delete(volumeId, force)
   }
 
   @Get('by-name/:name')
