@@ -15,6 +15,18 @@ function isStreamTerminationError(err: unknown): boolean {
   if (typeof e.message === 'string' && /terminated/i.test(e.message)) return true
   if (e.code === 'UND_ERR_SOCKET') return true
 
+  // Connection reset/closed errors (e.g. sandbox auto-deleted while streaming)
+  if (e.code === 'ECONNRESET') return true
+  if (e.code === 'ECONNREFUSED') return true
+  if (e.code === 'EPIPE') return true
+  if (e.code === 'ERR_STREAM_DESTROYED') return true
+  if (typeof e.message === 'string' && /ECONNRESET/i.test(e.message)) return true
+  if (typeof e.message === 'string' && /socket hang up/i.test(e.message)) return true
+  if (typeof e.message === 'string' && /aborted/i.test(e.message)) return true
+
+  // WebSocket close events that are not clean closures
+  if (typeof e.message === 'string' && /WebSocket was closed/i.test(e.message)) return true
+
   // Look into nested causes, Undici often nests errors
   if (e.cause) return isStreamTerminationError(e.cause)
 
@@ -24,11 +36,11 @@ function isStreamTerminationError(err: unknown): boolean {
 /**
  * Process a streaming response from fetch(), where getStream() returns a Fetch Response.
  *
- * @param getStream – zero-arg function that does `await fetch(...)` and returns the Response
- * @param onChunk – called with each decoded UTF-8 chunk
- * @param shouldTerminate – pollable; if true for two consecutive timeouts (or once if requireConsecutiveTermination=false), the loop breaks
- * @param chunkTimeout – milliseconds to wait for a new chunk before calling shouldTerminate()
- * @param requireConsecutiveTermination – whether you need two time-outs in a row to break
+ * @param getStream - zero-arg function that does `await fetch(...)` and returns the Response
+ * @param onChunk - called with each decoded UTF-8 chunk
+ * @param shouldTerminate - pollable; if true for two consecutive timeouts (or once if requireConsecutiveTermination=false), the loop breaks
+ * @param chunkTimeout - milliseconds to wait for a new chunk before calling shouldTerminate()
+ * @param requireConsecutiveTermination - whether you need two time-outs in a row to break
  */
 export async function processStreamingResponse(
   getStream: () => Promise<Response>,
@@ -75,7 +87,7 @@ export async function processStreamingResponse(
         } else {
           exitCheckStreak = 0
         }
-        // loop again—but do NOT overwrite readPromise!
+        // loop again--but do NOT overwrite readPromise!
       } else {
         // readPromise has resolved
         readPromise = null
@@ -294,25 +306,10 @@ export function stdDemuxStream(
       }
     }
 
-    // Event handler for errors
-    const handleError = (error: any) => {
-      // Convert Event or plain error to Error instance for consistency
-      const err = error && error instanceof Event ? new Error('WebSocket error') : error
-      cleanup()
-      try {
-        ws.close()
-      } catch {
-        /* ignore if already closed */
-      }
-      reject(err)
-    }
-
-    // Event handler for socket closure
-    const handleClose = () => {
-      // Flush any remaining buffered payload on clean close
+    // Helper to flush remaining buffered data from decoders
+    const flushBuffered = () => {
       if (buf.length > 0 && currentDataType) {
         const remainingBytes = new Uint8Array(buf)
-        // Use {stream: false} or omit to flush any buffered incomplete UTF-8 sequences
         if (currentDataType === 'stdout') {
           const text = stdoutDecoder.decode(remainingBytes, { stream: false })
           onStdout(text)
@@ -327,6 +324,41 @@ export function stdDemuxStream(
         if (stdoutFlushed) onStdout(stdoutFlushed)
         if (stderrFlushed) onStderr(stderrFlushed)
       }
+    }
+
+    // Event handler for errors
+    const handleError = (error: any) => {
+      // Check if the error is a connection-level termination (e.g. sandbox auto-deleted
+      // while streaming). In that case, treat it like a clean close instead of propagating
+      // the error — this prevents ECONNRESET crashes when sandboxes with autoDeleteInterval
+      // are deleted while log streams are still open.
+      if (isStreamTerminationError(error)) {
+        flushBuffered()
+        cleanup()
+        try {
+          ws.close()
+        } catch {
+          /* ignore if already closed */
+        }
+        resolve()
+        return
+      }
+
+      // Convert Event or plain error to Error instance for consistency
+      const err = error && error instanceof Event ? new Error('WebSocket error') : error
+      cleanup()
+      try {
+        ws.close()
+      } catch {
+        /* ignore if already closed */
+      }
+      reject(err)
+    }
+
+    // Event handler for socket closure
+    const handleClose = () => {
+      // Flush any remaining buffered payload on clean close
+      flushBuffered()
       cleanup()
       resolve()
     }
