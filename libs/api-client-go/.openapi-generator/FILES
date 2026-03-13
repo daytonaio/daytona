@@ -149,6 +149,7 @@ model_runner.go
 model_runner_full.go
 model_runner_health_metrics.go
 model_runner_healthcheck.go
+model_runner_service_health.go
 model_runner_snapshot_dto.go
 model_runner_state.go
 model_sandbox.go

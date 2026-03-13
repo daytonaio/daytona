@@ -15,7 +15,14 @@ type RunnerMetrics struct {
 	CurrentStartedSandboxes      int64   `json:"currentStartedSandboxes"`
 } //	@name	RunnerMetrics
 
+type RunnerServiceInfo struct {
+	ServiceName string  `json:"serviceName" validate:"required"`
+	Healthy     bool    `json:"healthy" validate:"required"`
+	ErrorReason *string `json:"errorReason,omitempty"`
+} // @name RunnerServiceInfo
+
 type RunnerInfoResponseDTO struct {
-	Metrics    *RunnerMetrics `json:"metrics,omitempty"`
-	AppVersion string         `json:"appVersion"`
+	ServiceHealth []*RunnerServiceInfo `json:"serviceHealth,omitempty"`
+	Metrics       *RunnerMetrics       `json:"metrics,omitempty"`
+	AppVersion    string               `json:"appVersion"`
 } //	@name	RunnerInfoResponseDTO
