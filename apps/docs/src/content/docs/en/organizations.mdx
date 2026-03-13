@@ -411,7 +411,7 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**List organization invitations (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/invitations)
 
-### Get count
+### Get invitations count
 
 Daytona provides a method to get the number of invitations in an organization.
 
@@ -502,7 +502,7 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**List pending organization invitations (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/invitations)
 
-### Update
+### Update invitation
 
 Daytona provides options to update an invitation for an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
 
@@ -534,7 +534,7 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Update organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/PUT/organizations/{organizationId}/invitations/{invitationId})
 
-### Cancel
+### Cancel invitation
 
 Daytona provides options to cancel an invitation for an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
 
@@ -596,7 +596,7 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Set default region for organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/default-region)
 
-### Region quota by sandbox ID
+### Get region quota by sandbox ID
 
 Daytona provides a method to get the region quota for a sandbox by ID.
 
@@ -614,39 +614,6 @@ curl 'https://app.daytona.io/api/organizations/region-quota/by-sandbox-id/SANDBO
 For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
 
 > [**Get region quota by sandbox ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/region-quota/by-sandbox-id/{sandboxId})
-
-### Update quota
-
-Daytona provides a method to update the quota for an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota' \
-  --request PATCH \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "maxCpuPerSandbox": 8,
-  "maxMemoryPerSandbox": 32,
-  "maxDiskPerSandbox": 100,
-  "snapshotQuota": 1000,
-  "maxSnapshotSize": 100,
-  "volumeQuota": 1000,
-  "authenticatedRateLimit": 1000,
-  "sandboxCreateRateLimit": 100,
-  "sandboxLifecycleRateLimit": 100,
-  "authenticatedRateLimitTtlSeconds": 60
-}'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Update organization quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota)
 
 ### Update region quota
 
@@ -746,6 +713,39 @@ curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/usage' \
 For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
 
 > [**Get organization current usage overview (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/usage)
+
+### Update quota
+
+Daytona provides a method to update the quota for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota' \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "maxCpuPerSandbox": 8,
+  "maxMemoryPerSandbox": 32,
+  "maxDiskPerSandbox": 100,
+  "snapshotQuota": 1000,
+  "maxSnapshotSize": 100,
+  "volumeQuota": 1000,
+  "authenticatedRateLimit": 1000,
+  "sandboxCreateRateLimit": 100,
+  "sandboxLifecycleRateLimit": 100,
+  "authenticatedRateLimitTtlSeconds": 60
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update organization quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota)
 
 ### Update sandbox default limited network egress
 
