@@ -1,6 +1,6 @@
 import { liteClient as algoliasearch } from 'algoliasearch/lite'
 import { GTProvider, useGT } from 'gt-react'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Configure,
   Highlight,
@@ -47,6 +47,13 @@ function getSortedIndexes() {
   return [DOCS_INDEX_NAME, CLI_INDEX_NAME, SDK_INDEX_NAME, API_INDEX_NAME]
 }
 
+const INDEX_LABELS = {
+  [DOCS_INDEX_NAME]: 'Documentation',
+  [CLI_INDEX_NAME]: 'CLI',
+  [SDK_INDEX_NAME]: 'SDK',
+  [API_INDEX_NAME]: 'API',
+}
+
 function SearchContent() {
   const [isSearchVisible, setIsSearchVisible] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -54,6 +61,8 @@ function SearchContent() {
   const [displayHits, setDisplayHits] = useState(false)
   const [totalHits, setTotalHits] = useState(0)
   const [sortedIndexes, setSortedIndexes] = useState(getSortedIndexes())
+  const [selectedIndexFilter, setSelectedIndexFilter] = useState(null)
+  const [indexesWithHits, setIndexesWithHits] = useState([])
   const debounceTimeoutRef = useRef(null)
   const searchWrapperRef = useRef(null)
   const t = useGT()
@@ -75,6 +84,8 @@ function SearchContent() {
           setDebounceQuery('')
           setDisplayHits(false)
           setTotalHits(0)
+          setSelectedIndexFilter(null)
+          setIndexesWithHits([])
         }
         return !prev
       })
@@ -90,6 +101,8 @@ function SearchContent() {
         setDebounceQuery('')
         setDisplayHits(false)
         setTotalHits(0)
+        setSelectedIndexFilter(null)
+        setIndexesWithHits([])
       }
     }
 
@@ -112,6 +125,8 @@ function SearchContent() {
         setDebounceQuery('')
         setDisplayHits(false)
         setTotalHits(0)
+        setSelectedIndexFilter(null)
+        setIndexesWithHits([])
       }
     }
 
@@ -142,6 +157,7 @@ function SearchContent() {
     debounceTimeoutRef.current = setTimeout(() => {
       setTotalHits(0)
       setDebounceQuery(searchQuery)
+      setSelectedIndexFilter(null)
     }, 400)
 
     return () => {
@@ -150,6 +166,16 @@ function SearchContent() {
       }
     }
   }, [searchQuery])
+
+  const handleIndexHitsChange = useCallback((indexName, nbHits) => {
+    setIndexesWithHits(prev =>
+      nbHits > 0
+        ? prev.includes(indexName)
+          ? prev
+          : [...prev, indexName]
+        : prev.filter(i => i !== indexName)
+    )
+  }, [])
 
   return (
     isSearchVisible && (
@@ -162,7 +188,7 @@ function SearchContent() {
           <div className="search-bar-container">
             <SearchBox
               translations={{
-                placeholder: t('Search daytona.io', {
+                placeholder: t('Search documentation', {
                   $context: 'As in a search bar on a website',
                 }),
               }}
@@ -174,17 +200,45 @@ function SearchContent() {
           <div className="search-content">
             {debounceQuery && (
               <>
+                <div className="search-index-filters">
+                  <button
+                    type="button"
+                    className={`search-index-filter-chip ${selectedIndexFilter === null ? 'active' : ''}`}
+                    onClick={() => setSelectedIndexFilter(null)}
+                  >
+                    All
+                  </button>
+                  {sortedIndexes
+                    .filter(indexName => indexesWithHits.includes(indexName))
+                    .map(indexName => (
+                      <button
+                        key={indexName}
+                        type="button"
+                        className={`search-index-filter-chip ${selectedIndexFilter === indexName ? 'active' : ''}`}
+                        onClick={() => setSelectedIndexFilter(indexName)}
+                      >
+                        {INDEX_LABELS[indexName] ?? indexName}
+                      </button>
+                    ))}
+                </div>
                 {sortedIndexes.map(indexName => (
-                  <SearchIndex
-                    key={indexName}
-                    indexName={indexName}
-                    setDisplayHits={setDisplayHits}
-                    setIsSearchVisible={setIsSearchVisible}
-                    setTotalHits={setTotalHits}
-                    debounceQuery={debounceQuery}
-                  />
+                  <div
+                    key={`${indexName}-${debounceQuery}`}
+                    className="search-index-panel"
+                    hidden={selectedIndexFilter !== null && selectedIndexFilter !== indexName}
+                  >
+                    <SearchIndex
+                      indexName={indexName}
+                      setDisplayHits={setDisplayHits}
+                      setIsSearchVisible={setIsSearchVisible}
+                      setTotalHits={setTotalHits}
+                      onIndexHitsChange={handleIndexHitsChange}
+                      debounceQuery={debounceQuery}
+                    />
+                  </div>
                 ))}
-                {totalHits === 0 && (
+                {(totalHits === 0 ||
+                  (selectedIndexFilter !== null && !indexesWithHits.includes(selectedIndexFilter))) && (
                   <div style={{
                     textAlign: 'center',
                     padding: '20px',
@@ -204,7 +258,7 @@ function SearchContent() {
   )
 }
 
-function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHits, debounceQuery }) {
+function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHits, onIndexHitsChange, debounceQuery }) {
   return (
     <Index indexName={indexName}>
       <ConditionalSearchIndex
@@ -212,17 +266,24 @@ function SearchIndex({ indexName, setDisplayHits, setIsSearchVisible, setTotalHi
         setDisplayHits={setDisplayHits}
         setIsSearchVisible={setIsSearchVisible}
         setTotalHits={setTotalHits}
+        onIndexHitsChange={onIndexHitsChange}
         debounceQuery={debounceQuery}
       />
     </Index>
   )
 }
 
-const ConditionalSearchIndexComponent = ({ indexName, setDisplayHits, setIsSearchVisible, nbHits, setTotalHits, debounceQuery }) => {
+const ConditionalSearchIndexComponent = ({ indexName, setDisplayHits, setIsSearchVisible, nbHits, setTotalHits, onIndexHitsChange, debounceQuery }) => {
   useEffect(() => {
     setDisplayHits(nbHits > 0)
     setTotalHits(prev => prev + nbHits)
   }, [nbHits, setDisplayHits, setTotalHits, debounceQuery])
+
+  useEffect(() => {
+    if (onIndexHitsChange && typeof nbHits === 'number') {
+      onIndexHitsChange(indexName, nbHits)
+    }
+  }, [indexName, nbHits, onIndexHitsChange])
 
   if (nbHits === 0) {
     return null
