@@ -55,9 +55,9 @@ func (s *SandboxSyncService) GetLocalContainerStates(ctx context.Context) (map[s
 		}
 
 		// Get the current state of this container
-		state, err := s.docker.DeduceSandboxState(ctx, sandboxId)
+		state, err := s.docker.GetSandboxState(ctx, sandboxId)
 		if err != nil {
-			s.log.DebugContext(ctx, "Failed to deduce state for sandbox", "sandboxId", sandboxId, "error", err)
+			s.log.DebugContext(ctx, "Failed to get state for sandbox", "sandboxId", sandboxId, "error", err)
 			continue
 		}
 

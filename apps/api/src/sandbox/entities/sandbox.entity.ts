@@ -385,8 +385,11 @@ export class Sandbox {
       changes.pending = false
     }
 
-    if (this.state === SandboxState.DESTROYED) {
+    if (this.state === SandboxState.DESTROYED || this.state === SandboxState.ARCHIVED) {
       changes.runnerId = null
+    }
+
+    if (this.state === SandboxState.DESTROYED) {
       changes.backupState = BackupState.NONE
     }
 

@@ -7,8 +7,7 @@ import (
 	"github.com/daytonaio/runner/pkg/models/enums"
 )
 
-type CachedStates struct {
-	SandboxState      enums.SandboxState
-	BackupState       enums.BackupState
-	BackupErrorReason *string
+type BackupInfo struct {
+	State enums.BackupState
+	Error error
 }

@@ -135,11 +135,10 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		sandboxController.POST("/:sandboxId/destroy", controllers.Destroy)
 		sandboxController.POST("/:sandboxId/start", controllers.Start)
 		sandboxController.POST("/:sandboxId/stop", controllers.Stop)
-		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup)
+		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup(sandboxControllerLogger))
 		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
 		sandboxController.POST("/:sandboxId/recover", controllers.Recover)
 		sandboxController.POST("/:sandboxId/is-recoverable", controllers.IsRecoverable)
-		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 		sandboxController.POST("/:sandboxId/network-settings", controllers.UpdateNetworkSettings)
 
 		// Add proxy endpoint within the sandbox controller for toolbox
