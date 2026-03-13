@@ -550,11 +550,51 @@ export class SandboxStartAction extends SandboxAction {
       )
     } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
       await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode)
+    } else if (sandboxInfo.state === SandboxState.STARTED) {
+      return this.transitionToStarted(sandbox, lockCode, sandboxInfo.daemonVersion)
+    } else if (sandboxInfo.state === SandboxState.CREATING) {
+      // Still in creation phase on the runner — no state change needed, just check timeout
+      if (await this.checkTimeoutError(sandbox, 15, 'Timeout while creating sandbox')) {
+        return DONT_SYNC_AGAIN
+      }
+    } else if (sandboxInfo.state === SandboxState.RESTORING) {
+      // Still in restoration phase on the runner — no state change needed, just check timeout
+      if (await this.checkTimeoutError(sandbox, 30, 'Timeout while restoring sandbox')) {
+        return DONT_SYNC_AGAIN
+      }
     } else {
       await this.updateSandboxState(sandbox, SandboxState.STARTING, lockCode)
     }
 
     return SYNC_AGAIN
+  }
+
+  private async transitionToStarted(
+    sandbox: Sandbox,
+    lockCode: LockCode,
+    daemonVersion?: string,
+  ): Promise<typeof DONT_SYNC_AGAIN> {
+    //  if previous backup state is error or completed, set backup state to none
+    if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+      await this.updateSandboxState(
+        sandbox,
+        SandboxState.STARTED,
+        lockCode,
+        undefined,
+        undefined,
+        daemonVersion,
+        BackupState.NONE,
+      )
+    } else {
+      await this.updateSandboxState(sandbox, SandboxState.STARTED, lockCode, undefined, undefined, daemonVersion)
+
+      //  if sandbox was transferred to a new runner, remove it from the old runner
+      if (sandbox.prevRunnerId) {
+        await this.removeSandboxFromPreviousRunner(sandbox)
+      }
+    }
+
+    return DONT_SYNC_AGAIN
   }
 
   //  used to check if sandbox is started on runner and update sandbox state accordingly
@@ -567,36 +607,7 @@ export class SandboxStartAction extends SandboxAction {
 
     switch (sandboxInfo.state) {
       case SandboxState.STARTED: {
-        //  if previous backup state is error or completed, set backup state to none
-        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
-          await this.updateSandboxState(
-            sandbox,
-            SandboxState.STARTED,
-            lockCode,
-            undefined,
-            undefined,
-            sandboxInfo.daemonVersion,
-            BackupState.NONE,
-          )
-          return DONT_SYNC_AGAIN
-        } else {
-          await this.updateSandboxState(
-            sandbox,
-            SandboxState.STARTED,
-            lockCode,
-            undefined,
-            undefined,
-            sandboxInfo.daemonVersion,
-          )
-
-          //  if sandbox was transferred to a new runner, remove it from the old runner
-          if (sandbox.prevRunnerId) {
-            await this.removeSandboxFromPreviousRunner(sandbox)
-          }
-
-          return DONT_SYNC_AGAIN
-        }
-        break
+        return this.transitionToStarted(sandbox, lockCode, sandboxInfo.daemonVersion)
       }
       case SandboxState.STARTING:
         if (await this.checkTimeoutError(sandbox, 5, 'Timeout while starting sandbox')) {
