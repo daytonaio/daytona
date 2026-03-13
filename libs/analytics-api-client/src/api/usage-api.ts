@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Daytona Analytics API
- * Daytona Analytics API - Read-only telemetry and usage data
+ * Daytona Analytics API - Read-only telemetry and usage data. Authenticated via Daytona API keys or JWT tokens.
  *
  * The version of the OpenAPI document: v0.0.0-dev
  * 
@@ -25,6 +25,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 import type { ModelsAggregatedUsage } from '../models';
 // @ts-ignore
 import type { ModelsSandboxUsage } from '../models';
+// @ts-ignore
+import type { ModelsUsageChartPoint } from '../models';
 // @ts-ignore
 import type { ModelsUsagePeriod } from '../models';
 /**
@@ -140,6 +142,62 @@ export const UsageApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
+         * Returns per-minute resource usage data points for a given time period
+         * @summary Get usage chart data
+         * @param {string} organizationId Organization ID
+         * @param {string} from Start time (RFC3339)
+         * @param {string} to End time (RFC3339)
+         * @param {string} [region] Region filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        organizationOrganizationIdUsageChartGet: async (organizationId: string, from: string, to: string, region?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'organizationId' is not null or undefined
+            assertParamExists('organizationOrganizationIdUsageChartGet', 'organizationId', organizationId)
+            // verify required parameter 'from' is not null or undefined
+            assertParamExists('organizationOrganizationIdUsageChartGet', 'from', from)
+            // verify required parameter 'to' is not null or undefined
+            assertParamExists('organizationOrganizationIdUsageChartGet', 'to', to)
+            const localVarPath = `/organization/{organizationId}/usage/chart`
+                .replace(`{${"organizationId"}}`, encodeURIComponent(String(organizationId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+            if (from !== undefined) {
+                localVarQueryParameter['from'] = from;
+            }
+
+            if (to !== undefined) {
+                localVarQueryParameter['to'] = to;
+            }
+
+            if (region !== undefined) {
+                localVarQueryParameter['region'] = region;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns resource usage aggregated per sandbox for a given time period
          * @summary Get per-sandbox usage
          * @param {string} organizationId Organization ID
@@ -232,6 +290,22 @@ export const UsageApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Returns per-minute resource usage data points for a given time period
+         * @summary Get usage chart data
+         * @param {string} organizationId Organization ID
+         * @param {string} from Start time (RFC3339)
+         * @param {string} to End time (RFC3339)
+         * @param {string} [region] Region filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async organizationOrganizationIdUsageChartGet(organizationId: string, from: string, to: string, region?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ModelsUsageChartPoint>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.organizationOrganizationIdUsageChartGet(organizationId, from, to, region, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['UsageApi.organizationOrganizationIdUsageChartGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Returns resource usage aggregated per sandbox for a given time period
          * @summary Get per-sandbox usage
          * @param {string} organizationId Organization ID
@@ -282,6 +356,19 @@ export const UsageApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.organizationOrganizationIdUsageAggregatedGet(organizationId, from, to, options).then((request) => request(axios, basePath));
         },
         /**
+         * Returns per-minute resource usage data points for a given time period
+         * @summary Get usage chart data
+         * @param {string} organizationId Organization ID
+         * @param {string} from Start time (RFC3339)
+         * @param {string} to End time (RFC3339)
+         * @param {string} [region] Region filter
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        organizationOrganizationIdUsageChartGet(organizationId: string, from: string, to: string, region?: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<ModelsUsageChartPoint>> {
+            return localVarFp.organizationOrganizationIdUsageChartGet(organizationId, from, to, region, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns resource usage aggregated per sandbox for a given time period
          * @summary Get per-sandbox usage
          * @param {string} organizationId Organization ID
@@ -330,6 +417,21 @@ export class UsageApi extends BaseAPI {
      */
     public organizationOrganizationIdUsageAggregatedGet(organizationId: string, from: string, to: string, options?: RawAxiosRequestConfig) {
         return UsageApiFp(this.configuration).organizationOrganizationIdUsageAggregatedGet(organizationId, from, to, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns per-minute resource usage data points for a given time period
+     * @summary Get usage chart data
+     * @param {string} organizationId Organization ID
+     * @param {string} from Start time (RFC3339)
+     * @param {string} to End time (RFC3339)
+     * @param {string} [region] Region filter
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof UsageApi
+     */
+    public organizationOrganizationIdUsageChartGet(organizationId: string, from: string, to: string, region?: string, options?: RawAxiosRequestConfig) {
+        return UsageApiFp(this.configuration).organizationOrganizationIdUsageChartGet(organizationId, from, to, region, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -17,50 +17,50 @@
 /**
  * 
  * @export
- * @interface ModelsUsagePeriod
+ * @interface ModelsUsageChartPoint
  */
-export interface ModelsUsagePeriod {
+export interface ModelsUsageChartPoint {
     /**
      * 
      * @type {number}
-     * @memberof ModelsUsagePeriod
+     * @memberof ModelsUsageChartPoint
      */
     'cpu'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ModelsUsagePeriod
+     * @memberof ModelsUsageChartPoint
+     */
+    'cpuPrice'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof ModelsUsageChartPoint
      */
     'diskGB'?: number;
     /**
      * 
-     * @type {string}
-     * @memberof ModelsUsagePeriod
+     * @type {number}
+     * @memberof ModelsUsageChartPoint
      */
-    'endAt'?: string;
+    'diskPrice'?: number;
     /**
      * 
      * @type {number}
-     * @memberof ModelsUsagePeriod
-     */
-    'gpu'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ModelsUsagePeriod
-     */
-    'price'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof ModelsUsagePeriod
+     * @memberof ModelsUsageChartPoint
      */
     'ramGB'?: number;
     /**
      * 
-     * @type {string}
-     * @memberof ModelsUsagePeriod
+     * @type {number}
+     * @memberof ModelsUsageChartPoint
      */
-    'startAt'?: string;
+    'ramPrice'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ModelsUsageChartPoint
+     */
+    'time'?: string;
 }
 

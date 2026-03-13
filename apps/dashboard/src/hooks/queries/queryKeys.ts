@@ -100,6 +100,8 @@ export const queryKeys = {
     all: ['analytics'] as const,
     aggregatedUsage: (organizationId: string, params: object) =>
       [...queryKeys.analytics.all, organizationId, 'aggregated-usage', params] as const,
+    usageChart: (organizationId: string, params: object) =>
+      [...queryKeys.analytics.all, organizationId, 'usage-chart', params] as const,
     sandboxesUsage: (organizationId: string, params: object) =>
       [...queryKeys.analytics.all, organizationId, 'sandboxes-usage', params] as const,
     sandboxUsagePeriods: (organizationId: string, sandboxId: string, params: object) =>

@@ -16,4 +16,5 @@ models/models-metric-point.ts
 models/models-sandbox-usage.ts
 models/models-span.ts
 models/models-trace-summary.ts
+models/models-usage-chart-point.ts
 models/models-usage-period.ts
