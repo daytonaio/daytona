@@ -257,6 +257,15 @@ func GetComputerUse(logger *slog.Logger, path string) (computeruse.IComputerUse,
 		pluginName = strings.TrimSuffix(pluginName, ".exe")
 	}
 
+	// Pre-flight check: detect critical issues (missing shared libraries, wrong
+	// architecture, permission errors) before starting the go-plugin client.
+	// When the plugin binary exits immediately, go-plugin panics due to a
+	// WaitGroup race condition in its goroutine, crashing the entire daemon.
+	pluginErr := detectPluginError(logger, path)
+	if pluginErr != nil && pluginErr.Type != "plugin" {
+		return nil, fmt.Errorf("failed to start computer-use plugin - detailed error\n[type]: %s - [error]: %s - [details]: %s", pluginErr.Type, pluginErr.Message, pluginErr.Details)
+	}
+
 	hclogger := hclog.New(&hclog.LoggerOptions{
 		Name: pluginName,
 		// Output: log.New().WriterLevel(log.DebugLevel),
