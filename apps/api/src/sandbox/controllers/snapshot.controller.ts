@@ -45,7 +45,7 @@ import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -63,7 +63,7 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 @Controller('snapshots')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SnapshotController {

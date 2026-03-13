@@ -48,7 +48,7 @@ import { IsOrganizationAuthContext, IsRunnerAuthContext } from '../../common/dec
 import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { CreateRunnerResponseDto } from '../dto/create-runner-response.dto'
 import { RegionSandboxAccessGuard } from '../guards/region-sandbox-access.guard'
 import { RunnerFullDto } from '../dto/runner-full.dto'
@@ -94,7 +94,7 @@ export class RunnerController {
     },
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard)
+  @UseGuards(OrganizationActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async create(
@@ -197,7 +197,7 @@ export class RunnerController {
     type: String,
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @UseGuards(OrganizationActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
   async getRunnerById(@Param('id', ParseUUIDPipe) id: string): Promise<RunnerDto> {
     const runner = await this.runnerService.findOneOrFail(id)
@@ -237,7 +237,7 @@ export class RunnerController {
     type: [RunnerDto],
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard)
+  @UseGuards(OrganizationActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async findAll(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
@@ -270,7 +270,7 @@ export class RunnerController {
     },
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @UseGuards(OrganizationActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateSchedulingStatus(
@@ -307,7 +307,7 @@ export class RunnerController {
     },
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @UseGuards(OrganizationActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async updateDrainingStatus(
@@ -338,7 +338,7 @@ export class RunnerController {
     targetIdFromRequest: (req) => req.params.id,
   })
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-  @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
+  @UseGuards(OrganizationActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
   @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

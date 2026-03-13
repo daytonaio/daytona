@@ -3,44 +3,185 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, ExecutionContext, Logger } from '@nestjs/common'
+import { CanActivate, ExecutionContext, Injectable, Logger } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { OrganizationAccessGuard } from './organization-access.guard'
-import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
-import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
 import { OrganizationService } from '../services/organization.service'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
+import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
+import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
+import { UserAuthContext, isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { getAuthContext } from '../../common/utils/get-auth-context'
+import { Organization } from '../entities/organization.entity'
+import { OrganizationUser } from '../entities/organization-user.entity'
 
+/**
+ * Guard that validates access to an organization, enforces role/permission requirements, and enriches the auth context with organization data.
+ *
+ * Enforces the `@RequiredOrganizationMemberRole` and `@RequiredOrganizationResourcePermissions` decorators.
+ */
 @Injectable()
-export class OrganizationActionGuard extends OrganizationAccessGuard {
-  protected readonly logger = new Logger(OrganizationActionGuard.name)
+export class OrganizationActionGuard implements CanActivate {
+  private readonly logger = new Logger(OrganizationActionGuard.name)
 
   constructor(
-    organizationService: OrganizationService,
-    organizationUserService: OrganizationUserService,
+    @InjectRedis() private readonly redis: Redis,
+    private readonly organizationService: OrganizationService,
+    private readonly organizationUserService: OrganizationUserService,
     private readonly reflector: Reflector,
-  ) {
-    super(organizationService, organizationUserService)
-  }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!(await super.canActivate(context))) {
+    const request = context.switchToHttp().getRequest()
+    const authContext = getAuthContext(context, isUserAuthContext)
+
+    const organizationId = this.resolveOrganizationId(request, authContext)
+    if (!organizationId) {
       return false
     }
 
-    const authContext = getAuthContext(context, isOrganizationAuthContext)
+    const organization = await this.getOrganization(organizationId)
+    if (!organization) {
+      return false
+    }
 
-    const requiredRole = this.reflector.get(RequiredOrganizationMemberRole, context.getHandler())
-    if (!requiredRole) {
+    const organizationUser = await this.getOrganizationUser(organizationId, authContext.userId)
+    if (!organizationUser) {
+      return false
+    }
+
+    if (!this.isAuthorized(context, authContext, organizationUser)) {
+      return false
+    }
+
+    request.user = {
+      ...authContext,
+      organizationId,
+      organization,
+      organizationUser,
+    } satisfies OrganizationAuthContext
+
+    return true
+  }
+
+  /**
+   * Resolves the organization ID from the request params or current auth context.
+   *
+   * Additionally, validates that the API key's organization matches the requested organization.
+   */
+  private resolveOrganizationId(request: any, authContext: UserAuthContext): string | null {
+    const organizationIdParam = request.params.organizationId || request.params.orgId
+
+    if (!organizationIdParam && !authContext.organizationId) {
+      this.logger.warn('Organization ID missing from the request context.')
+      return null
+    }
+
+    if (organizationIdParam && authContext.apiKey && authContext.apiKey.organizationId !== organizationIdParam) {
+      this.logger.warn(
+        `Organization ID mismatch in the request context. Expected: ${organizationIdParam}, Actual: ${authContext.apiKey.organizationId}`,
+      )
+      return null
+    }
+
+    return organizationIdParam || authContext.organizationId
+  }
+
+  /**
+   * Fetches an organization by ID, using a Redis cache to reduce DB lookups.
+   */
+  private async getOrganization(organizationId: string): Promise<Organization | null> {
+    try {
+      const cachedOrganization = await this.redis.get(`organization:${organizationId}`)
+      if (cachedOrganization) {
+        return JSON.parse(cachedOrganization)
+      }
+
+      // cache miss - fetch from DB
+      const organization = await this.organizationService.findOne(organizationId)
+      if (organization) {
+        await this.redis.set(`organization:${organizationId}`, JSON.stringify(organization), 'EX', 10)
+        return organization
+      }
+
+      // not found
+      return null
+    } catch (error) {
+      this.logger.error('Error getting organization:', error)
+      return null
+    }
+  }
+
+  /**
+   * Fetches an organization user by org and user ID, using a Redis cache to reduce DB lookups.
+   */
+  private async getOrganizationUser(organizationId: string, userId: string): Promise<OrganizationUser | null> {
+    try {
+      const cachedOrganizationUser = await this.redis.get(`organization-user:${organizationId}:${userId}`)
+      if (cachedOrganizationUser) {
+        return JSON.parse(cachedOrganizationUser)
+      }
+
+      // cache miss - fetch from DB
+      const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
+      if (organizationUser) {
+        await this.redis.set(
+          `organization-user:${organizationId}:${userId}`,
+          JSON.stringify(organizationUser),
+          'EX',
+          10,
+        )
+        return organizationUser
+      }
+
+      // not found
+      return null
+    } catch (ex) {
+      this.logger.error('Error getting organization user:', ex)
+      return null
+    }
+  }
+
+  /**
+   * Checks if the organization user has authorization for the required role and(or) permissions.
+   *
+   * Enforces the `RequiredOrganizationMemberRole` and `RequiredOrganizationResourcePermissions` decorators.
+   */
+  private isAuthorized(
+    context: ExecutionContext,
+    authContext: UserAuthContext,
+    organizationUser: OrganizationUser,
+  ): boolean {
+    const requiredRole = this.reflector.getAllAndOverride(RequiredOrganizationMemberRole, [
+      context.getHandler(),
+      context.getClass(),
+    ])
+
+    if (requiredRole && requiredRole !== organizationUser.role) {
+      return false
+    }
+
+    // Owner has full access unless a scoped API key is used.
+    if (organizationUser.role === OrganizationMemberRole.OWNER && !authContext.apiKey) {
       return true
     }
 
-    if (requiredRole === OrganizationMemberRole.OWNER) {
-      return authContext.organizationUser.role === OrganizationMemberRole.OWNER
+    const requiredPermissions = this.reflector.getAllAndOverride(RequiredOrganizationResourcePermissions, [
+      context.getHandler(),
+      context.getClass(),
+    ])
+
+    if (!requiredPermissions) {
+      return true
     }
 
-    return true
+    const assignedPermissions = authContext.apiKey
+      ? new Set(authContext.apiKey.permissions)
+      : new Set(organizationUser.assignedRoles.flatMap((role) => role.permissions))
+
+    return requiredPermissions.every((permission) => assignedPermissions.has(permission))
   }
 }

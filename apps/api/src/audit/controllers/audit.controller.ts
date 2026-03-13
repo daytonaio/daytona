@@ -8,7 +8,7 @@ import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags 
 import { AuditLogDto } from '../dto/audit-log.dto'
 import { PaginatedAuditLogsDto } from '../dto/paginated-audit-logs.dto'
 import { AuditService } from '../services/audit.service'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { ListAuditLogsQueryDto } from '../dto/list-audit-logs-query.dto'
@@ -19,7 +19,7 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 @ApiTags('audit')
 @Controller('audit')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
-@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class AuditController {

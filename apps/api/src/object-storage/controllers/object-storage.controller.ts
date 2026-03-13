@@ -9,7 +9,7 @@ import { OrganizationAuthContext } from '../../common/interfaces/organization-au
 import { ObjectStorageService } from '../services/object-storage.service'
 import { StorageAccessDto } from '../../sandbox/dto/storage-access-dto'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
@@ -19,7 +19,7 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 @Controller('object-storage')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ObjectStorageController {

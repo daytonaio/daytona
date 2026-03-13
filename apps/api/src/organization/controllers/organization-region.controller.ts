@@ -20,7 +20,7 @@ import {
 import { ApiOAuth2, ApiResponse, ApiOperation, ApiTags, ApiBearerAuth, ApiParam, ApiHeader } from '@nestjs/swagger'
 import { RequiredOrganizationResourcePermissions } from '../decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationService } from '../services/organization.service'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
@@ -46,7 +46,7 @@ import { UpdateRegionDto } from '../../region/dto/update-region.dto'
 @Controller('regions')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(OrganizationResourceActionGuard)
+@UseGuards(OrganizationActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class OrganizationRegionController {

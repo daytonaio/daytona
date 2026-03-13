@@ -104,7 +104,7 @@ import { NextFunction } from 'express'
 import { ServerResponse } from 'http'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
@@ -134,7 +134,7 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @SkipThrottle({ anonymous: true, authenticated: true })
-@UseGuards(OrganizationResourceActionGuard, SandboxAccessGuard)
+@UseGuards(OrganizationActionGuard, SandboxAccessGuard)
 @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()

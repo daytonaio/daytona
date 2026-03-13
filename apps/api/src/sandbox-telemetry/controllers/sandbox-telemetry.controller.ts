@@ -5,7 +5,7 @@
 
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiOAuth2, ApiResponse, ApiOperation, ApiParam, ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../../organization/guards/organization-action.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SandboxAccessGuard } from '../../sandbox/guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -24,7 +24,7 @@ import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 @Controller('sandbox')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard, AnalyticsApiDisabledGuard)
+@UseGuards(OrganizationActionGuard, AuthenticatedRateLimitGuard, AnalyticsApiDisabledGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class SandboxTelemetryController {

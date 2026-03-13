@@ -14,7 +14,7 @@ import { IsOrganizationAuthContext } from '../common/decorators/auth-context.dec
 import { OrganizationAuthContext } from '../common/interfaces/organization-auth-context.interface'
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
+import { OrganizationActionGuard } from '../organization/guards/organization-action.guard'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
@@ -27,7 +27,7 @@ import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 @Controller('api-keys')
 @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationActionGuard, AuthenticatedRateLimitGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ApiKeyController {
