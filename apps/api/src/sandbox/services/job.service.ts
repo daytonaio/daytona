@@ -134,7 +134,6 @@ export class JobService {
 
       blockingClient = this.redis.duplicate({
         commandTimeout: maxTimeout * 1000 + REDIS_BLOCKING_COMMAND_TIMEOUT_BUFFER_MS,
-        enableOfflineQueue: false,
         retryStrategy: () => null,
       })
 
