@@ -23,7 +23,7 @@ func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (e
 	ct, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		if common_errors.IsNotFoundError(err) {
-			return enums.SandboxStateDestroyed, err
+			return enums.SandboxStateDestroyed, nil
 		}
 		return enums.SandboxStateError, err
 	}
@@ -62,7 +62,7 @@ func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.Inspec
 		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", ct.State.ExitCode, ct.State.Error)
 
 	case container.StateDead:
-		return enums.SandboxStateDestroyed, common_errors.NewNotFoundError(errors.New("sandbox is in dead state on runner"))
+		return enums.SandboxStateDestroyed, nil
 
 	default:
 		return enums.SandboxStateUnknown, nil
