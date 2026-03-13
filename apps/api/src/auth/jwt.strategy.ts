@@ -48,8 +48,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     this.logger.debug('JwtStrategy initialized')
   }
 
-  async validate(request: RequestWithAuthMetadata, payload: any): Promise<UserAuthContext> {
-    request.authStrategyType = AuthStrategyType.JWT
+  async validate(request: RequestWithAuthMetadata, payload: any): Promise<UserAuthContext | null> {
+    if (!request.authMetadata?.isStrategyAllowed(AuthStrategyType.JWT)) {
+      return null
+    }
 
     // OKTA does not return the userId in access_token sub claim
     // real userId is in the uid claim and email is in the sub claim

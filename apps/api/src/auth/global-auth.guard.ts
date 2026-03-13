@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ExecutionContext, ForbiddenException, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { AuthGuard } from '@nestjs/passport'
 import { AuthStrategyType } from './enums/auth-strategy-type.enum'
@@ -32,6 +32,12 @@ export class GlobalAuthGuard extends AuthGuard([AuthStrategyType.API_KEY, AuthSt
       return true
     }
 
+    const request = context.switchToHttp().getRequest<RequestWithAuthMetadata>()
+    const allowedStrategies = this.getAllowedStrategies(context)
+    request.authMetadata = {
+      isStrategyAllowed: (type) => allowedStrategies.includes(type),
+    }
+
     return super.canActivate(context)
   }
 
@@ -40,21 +46,10 @@ export class GlobalAuthGuard extends AuthGuard([AuthStrategyType.API_KEY, AuthSt
    *
    * It returns the authenticated user object or throws a generic `UnauthorizedException`.
    */
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
       this.logger.debug('Authentication failed', { err, user })
       throw new UnauthorizedException('Invalid credentials')
-    }
-
-    const request = context.switchToHttp().getRequest<RequestWithAuthMetadata>()
-
-    // Should never happen - defensive check.
-    if (!request.authStrategyType) {
-      throw new UnauthorizedException('Authentication method not recognized')
-    }
-
-    if (!this.getAllowedStrategies(context).includes(request.authStrategyType)) {
-      throw new ForbiddenException('Authentication method not allowed')
     }
 
     return user

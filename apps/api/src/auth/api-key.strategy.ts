@@ -65,7 +65,10 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, AuthStrategyType.
   }
 
   async validate(request: RequestWithAuthMetadata, token: string): Promise<ApiKeyAuthContext | null> {
-    request.authStrategyType = AuthStrategyType.API_KEY
+    if (!request.authMetadata?.isStrategyAllowed(AuthStrategyType.API_KEY)) {
+      return null
+    }
+
     return this.validateToken(token)
   }
 
