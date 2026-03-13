@@ -155,7 +155,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		}
 	}
 
-	resp, err := d.apiClient.ImageBuild(ctx, buildContext, build.ImageBuildOptions{
+	buildOpts := build.ImageBuildOptions{
 		Tags:        []string{buildImageDto.Snapshot},
 		Dockerfile:  "Dockerfile",
 		Remove:      true,
@@ -163,7 +163,20 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 		PullParent:  true,
 		Platform:    "linux/amd64", // Force AMD64 architecture
 		AuthConfigs: authConfigs,
-	})
+	}
+
+	cfg, err := config.GetConfig()
+	if err != nil {
+		return fmt.Errorf("failed to get config for build resource limits: %w", err)
+	}
+	if !d.resourceLimitsDisabled {
+		buildOpts.CPUPeriod = 100000
+		buildOpts.CPUQuota = cfg.BuildCPUCores * 100000
+		buildOpts.Memory = cfg.BuildMemoryGB * 1024 * 1024 * 1024
+		buildOpts.MemorySwap = buildOpts.Memory
+	}
+
+	resp, err := d.apiClient.ImageBuild(ctx, buildContext, buildOpts)
 	if err != nil {
 		return fmt.Errorf("failed to build image: %w", err)
 	}
