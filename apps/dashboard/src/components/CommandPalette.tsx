@@ -5,6 +5,7 @@
 
 'use client'
 
+import { trackCommandPaletteOpened, useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { cn, pluralize } from '@/lib/utils'
 import { useCommandState } from 'cmdk'
@@ -294,6 +295,9 @@ export function CommandPaletteProvider({
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         const state = storeRef.current?.getState()
+        if (state && !state.isOpen) {
+          trackCommandPaletteOpened('keyboard')
+        }
         state?.actions.setIsOpen(!state.isOpen)
       }
     }
@@ -423,6 +427,8 @@ export function CommandPalette({ className, overlay }: CommandPaletteProps) {
             <CommandEmpty search={search} />
           </CommandList>
 
+          <SearchAnalyticsTracker search={search} pageId={activePageId} />
+
           <CommandFooter hideResultsCount={!shouldFilter} className="mt-1">
             {pageStack.length > 1 ? (
               <button
@@ -481,17 +487,22 @@ function CommandGroupRenderer({ group }: { group: CommandGroup }) {
   return (
     <CommandGroupPrimitive heading={group.label} className="px-2">
       {sortedCommands.map((cmd) => (
-        <CommandItem key={cmd.id} config={cmd} />
+        <CommandItem key={cmd.id} config={cmd} groupId={group.id} />
       ))}
     </CommandGroupPrimitive>
   )
 }
 
-function CommandItem({ config }: { config: CommandConfig }) {
+function CommandItem({ config, groupId }: { config: CommandConfig; groupId: string }) {
+  const activePageId = useCommandPalette((state) => state.activePageId)
   const { pushPage, setIsOpen } = useCommandPaletteActions()
+  const analytics = useCommandPaletteAnalytics()
 
   const handleSelect = useCallback(() => {
+    analytics.trackCommandExecuted({ commandId: config.id, groupId, pageId: activePageId })
+
     if (config.page) {
+      analytics.trackPageNavigated({ fromPage: activePageId, toPage: config.page, commandId: config.id, groupId })
       pushPage(config.page)
     } else {
       config.onSelect?.()
@@ -499,7 +510,7 @@ function CommandItem({ config }: { config: CommandConfig }) {
         setIsOpen(false)
       }
     }
-  }, [config, pushPage, setIsOpen])
+  }, [config, pushPage, setIsOpen, analytics, activePageId, groupId])
 
   const value = config.value ?? (typeof config.label === 'string' ? config.label : config.id)
 
@@ -558,6 +569,34 @@ function CommandEmpty({ search }: { search: string }) {
       No results found for <span className="text-foreground">"{search}"</span>.
     </CommandEmptyPrimitive>
   )
+}
+
+function SearchAnalyticsTracker({ search, pageId }: { search: string; pageId: string }) {
+  const resultCount = useCommandState((state) => state.filtered.count)
+  const analytics = useCommandPaletteAnalytics()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const resultCountRef = useRef(resultCount)
+  resultCountRef.current = resultCount
+
+  useEffect(() => {
+    if (!search) return
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current)
+    }
+
+    debounceRef.current = setTimeout(() => {
+      analytics.trackSearched({ pageId, queryLength: search.length, resultCount: resultCountRef.current })
+    }, 1000)
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current)
+      }
+    }
+  }, [search, pageId, analytics])
+
+  return null
 }
 
 function PulseBar({ mode, isVisible, className }: { mode: 'flash' | 'pulse'; isVisible: boolean; className?: string }) {
