@@ -34,7 +34,7 @@
         ],
         "parallel": false
       },
-      "dependsOn": ["api:openapi", "copy-openapi", "copy-toolbox-openapi"],
+      "dependsOn": ["copy-openapi", "copy-toolbox-openapi"],
       "configurations": {
         "production": {
           "commands": [
