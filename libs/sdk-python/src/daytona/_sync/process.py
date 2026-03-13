@@ -108,7 +108,7 @@ class Process:
                 specified, uses the sandbox working directory.
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
-                to complete. 0 means wait indefinitely.
+                to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -156,9 +156,7 @@ class Process:
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
         return ExecuteResponse.model_construct(
-            exit_code=(
-                response.exit_code if response.exit_code is not None else response.additional_properties.get("code")
-            ),
+            exit_code=response.exit_code,
             result=artifacts.stdout,
             artifacts=artifacts,
             additional_properties=response.additional_properties,
@@ -177,7 +175,7 @@ class Process:
             code (str): Code to execute.
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely.
+                to complete. 0 means wait indefinitely. Defaults to 6 minutes.
 
         Returns:
             ExecuteResponse: Code execution result containing:

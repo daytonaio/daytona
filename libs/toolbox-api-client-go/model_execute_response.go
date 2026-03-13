@@ -21,7 +21,7 @@ var _ MappedNullable = &ExecuteResponse{}
 
 // ExecuteResponse struct for ExecuteResponse
 type ExecuteResponse struct {
-	ExitCode *int32 `json:"exitCode,omitempty"`
+	ExitCode int32 `json:"exitCode"`
 	Result string `json:"result"`
 }
 
@@ -31,8 +31,9 @@ type _ExecuteResponse ExecuteResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewExecuteResponse(result string) *ExecuteResponse {
+func NewExecuteResponse(exitCode int32, result string) *ExecuteResponse {
 	this := ExecuteResponse{}
+	this.ExitCode = exitCode
 	this.Result = result
 	return &this
 }
@@ -45,36 +46,28 @@ func NewExecuteResponseWithDefaults() *ExecuteResponse {
 	return &this
 }
 
-// GetExitCode returns the ExitCode field value if set, zero value otherwise.
+// GetExitCode returns the ExitCode field value
 func (o *ExecuteResponse) GetExitCode() int32 {
-	if o == nil || IsNil(o.ExitCode) {
+	if o == nil {
 		var ret int32
 		return ret
 	}
-	return *o.ExitCode
+
+	return o.ExitCode
 }
 
-// GetExitCodeOk returns a tuple with the ExitCode field value if set, nil otherwise
+// GetExitCodeOk returns a tuple with the ExitCode field value
 // and a boolean to check if the value has been set.
 func (o *ExecuteResponse) GetExitCodeOk() (*int32, bool) {
-	if o == nil || IsNil(o.ExitCode) {
+	if o == nil {
 		return nil, false
 	}
-	return o.ExitCode, true
+	return &o.ExitCode, true
 }
 
-// HasExitCode returns a boolean if a field has been set.
-func (o *ExecuteResponse) HasExitCode() bool {
-	if o != nil && !IsNil(o.ExitCode) {
-		return true
-	}
-
-	return false
-}
-
-// SetExitCode gets a reference to the given int32 and assigns it to the ExitCode field.
+// SetExitCode sets field value
 func (o *ExecuteResponse) SetExitCode(v int32) {
-	o.ExitCode = &v
+	o.ExitCode = v
 }
 
 // GetResult returns the Result field value
@@ -111,9 +104,7 @@ func (o ExecuteResponse) MarshalJSON() ([]byte, error) {
 
 func (o ExecuteResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ExitCode) {
-		toSerialize["exitCode"] = o.ExitCode
-	}
+	toSerialize["exitCode"] = o.ExitCode
 	toSerialize["result"] = o.Result
 	return toSerialize, nil
 }
@@ -123,6 +114,7 @@ func (o *ExecuteResponse) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"exitCode",
 		"result",
 	}
 
