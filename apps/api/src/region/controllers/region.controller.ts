@@ -30,6 +30,6 @@ export class RegionController {
     type: [RegionDto],
   })
   async listRegions(): Promise<RegionDto[]> {
-    return this.regionService.findAllByRegionType(RegionType.SHARED)
+    return this.regionService.findAllByRegionTypes([RegionType.SHARED])
   }
 }

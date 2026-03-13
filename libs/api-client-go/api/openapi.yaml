@@ -8066,6 +8066,30 @@ paths:
       summary: Create runner
       tags:
       - admin
+  /admin/runners/by-region:
+    get:
+      operationId: adminGetRunnersBreakdownByRegion
+      parameters: []
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  items:
+                    type: string
+                  type: array
+                type: object
+          description: Returns runner domains grouped by region
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get runners breakdown by region
+      tags:
+      - admin
   /admin/runners/{id}:
     delete:
       operationId: adminDeleteRunner
