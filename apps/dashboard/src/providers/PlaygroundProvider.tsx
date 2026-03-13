@@ -81,9 +81,9 @@ export const PlaygroundProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       disk: DEFAULT_DISK_RESOURCES,
     },
     createSandboxBaseParams: {
-      autoStopInterval: 15,
-      autoArchiveInterval: 7,
-      autoDeleteInterval: -1,
+      autoStopInterval: 5,
+      autoArchiveInterval: 5,
+      autoDeleteInterval: 0,
     },
     listFilesParams: {
       directoryPath: 'workspace/new-dir',
