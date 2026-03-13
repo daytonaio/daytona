@@ -3,33 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-declare global {
-  /**
-   * In Deno this global exists and has a `version.deno` string;
-   * in all other runtimes it will be `undefined`.
-   */
-  var Deno:
-    | {
-        version: { deno: string }
-        env: {
-          get(name: string): string | undefined
-          toObject(): Record<string, string>
-        }
-      }
-    | undefined
-
-  /**
-   * In Bun this global exists and has a `version.bun` string;
-   * in all other runtimes it will be `undefined`.
-   */
-  var Bun:
-    | {
-        version: { bun: string }
-        file: (path: string) => File
-      }
-    | undefined
-}
-
 export enum Runtime {
   NODE = 'node',
   DENO = 'deno',
@@ -39,10 +12,20 @@ export enum Runtime {
   UNKNOWN = 'unknown',
 }
 
+const denoGlobal = (
+  globalThis as {
+    Deno?: {
+      version?: { deno?: string }
+      env?: { get(name: string): string | undefined; toObject(): Record<string, string> }
+    }
+  }
+).Deno
+const bunGlobal = (globalThis as { Bun?: { version?: { bun?: string }; file?: (path: string) => File } }).Bun
+
 export const RUNTIME =
-  typeof Deno !== 'undefined'
+  typeof denoGlobal !== 'undefined' && !!denoGlobal?.version?.deno
     ? Runtime.DENO
-    : typeof Bun !== 'undefined' && !!Bun.version
+    : typeof bunGlobal !== 'undefined' && !!bunGlobal?.version?.bun
       ? Runtime.BUN
       : isServerlessRuntime()
         ? Runtime.SERVERLESS
@@ -57,7 +40,7 @@ export function getEnvVar(name: string): string | undefined {
     return process.env[name]
   }
   if (RUNTIME === Runtime.DENO) {
-    return Deno.env.get(name)
+    return denoGlobal?.env?.get(name)
   }
 
   return undefined
