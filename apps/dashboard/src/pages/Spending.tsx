@@ -199,6 +199,7 @@ const Spending = () => {
                   regionUsage={usageOverview?.regionUsage}
                   selectedRegion={selectedChartRegion}
                   onRegionChange={setSelectedChartRegion}
+                  dateRange={{ from: analyticsParams.from, to: analyticsParams.to }}
                 />
               </>
             )}

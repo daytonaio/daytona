@@ -11,14 +11,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
-import { Switch } from '@/components/ui/switch'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useRegions } from '@/hooks/useRegions'
 import { formatMoney } from '@/lib/utils'
 import { ModelsUsageChartPoint } from '@daytonaio/analytics-api-client'
 import type { RegionUsageOverview } from '@daytonaio/api-client'
+import { differenceInCalendarDays } from 'date-fns'
 import { useMemo, useState } from 'react'
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from 'recharts'
 
@@ -28,26 +28,42 @@ type UsageTimelineChartProps = {
   regionUsage: RegionUsageOverview[] | undefined
   selectedRegion: string | undefined
   onRegionChange: (region: string | undefined) => void
+  dateRange: { from: Date; to: Date }
 }
 
 type ChartMode = 'resources' | 'cost'
+type ResourceFilter = 'all' | 'cpu' | 'ram' | 'disk'
 
-const LIMIT_COLORS = {
-  cpu: '#3b82f6',
-  ram: '#22c55e',
-  disk: '#a855f7',
+const RESOURCE_COLORS = {
+  cpu: 'hsl(var(--chart-1))',
+  ram: 'hsl(var(--chart-2))',
+  disk: 'hsl(var(--chart-3))',
 }
 
-const resourceChartConfig: ChartConfig = {
-  cpu: { label: 'CPU (vCPU)', color: 'hsl(var(--chart-1))' },
-  ramGB: { label: 'RAM (GiB)', color: 'hsl(var(--chart-2))' },
-  diskGB: { label: 'Disk (GiB)', color: 'hsl(var(--chart-3))' },
+const LIMIT_COLOR = '#ef4444'
+
+const allResourceChartConfig: ChartConfig = {
+  cpuPercent: { label: 'Compute', color: RESOURCE_COLORS.cpu },
+  ramPercent: { label: 'Memory', color: RESOURCE_COLORS.ram },
+  diskPercent: { label: 'Storage', color: RESOURCE_COLORS.disk },
+}
+
+const cpuChartConfig: ChartConfig = {
+  cpu: { label: 'CPU (vCPU)', color: RESOURCE_COLORS.cpu },
+}
+
+const ramChartConfig: ChartConfig = {
+  ramGB: { label: 'RAM (GiB)', color: RESOURCE_COLORS.ram },
+}
+
+const diskChartConfig: ChartConfig = {
+  diskGB: { label: 'Disk (GiB)', color: RESOURCE_COLORS.disk },
 }
 
 const costChartConfig: ChartConfig = {
-  cpuPrice: { label: 'CPU', color: 'hsl(var(--chart-1))' },
-  ramPrice: { label: 'RAM', color: 'hsl(var(--chart-2))' },
-  diskPrice: { label: 'Disk', color: 'hsl(var(--chart-3))' },
+  cpuPrice: { label: 'CPU', color: RESOURCE_COLORS.cpu },
+  ramPrice: { label: 'RAM', color: RESOURCE_COLORS.ram },
+  diskPrice: { label: 'Disk', color: RESOURCE_COLORS.disk },
 }
 
 function formatTime(value: string) {
@@ -62,7 +78,21 @@ function formatTime(value: string) {
   })
 }
 
-function formatDateTime(value: string) {
+function formatDateAndTime(value: string) {
+  const date = new Date(value)
+  if (isNaN(date.getTime())) {
+    return ''
+  }
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+}
+
+function formatTooltipLabel(value: string) {
   const date = new Date(value)
   if (isNaN(date.getTime())) {
     return ''
@@ -84,23 +114,17 @@ export function UsageTimelineChart({
   regionUsage,
   selectedRegion,
   onRegionChange,
+  dateRange,
 }: UsageTimelineChartProps) {
   const { getRegionName } = useRegions()
 
   const [mode, setMode] = useState<ChartMode>('resources')
+  const [resourceFilter, setResourceFilter] = useState<ResourceFilter>('all')
 
-  const chartData = useMemo(() => {
-    if (!data?.length) return []
-    return data.map((point) => ({
-      time: point.time ?? '',
-      cpu: point.cpu ?? 0,
-      ramGB: point.ramGB ?? 0,
-      diskGB: point.diskGB ?? 0,
-      cpuPrice: point.cpuPrice ?? 0,
-      ramPrice: point.ramPrice ?? 0,
-      diskPrice: point.diskPrice ?? 0,
-    }))
-  }, [data])
+  const isMultiDay = useMemo(
+    () => differenceInCalendarDays(dateRange.to, dateRange.from) >= 1,
+    [dateRange.from, dateRange.to],
+  )
 
   const limits = useMemo(() => {
     if (!selectedRegion || !regionUsage) return null
@@ -113,19 +137,79 @@ export function UsageTimelineChart({
     }
   }, [selectedRegion, regionUsage])
 
-  const isResourceMode = mode === 'resources'
-  const chartConfig = isResourceMode ? resourceChartConfig : costChartConfig
-  const dataKeys = isResourceMode
-    ? (['cpu', 'ramGB', 'diskGB'] as const)
-    : (['cpuPrice', 'ramPrice', 'diskPrice'] as const)
+  const chartData = useMemo(() => {
+    if (!data?.length) return []
+    return data.map((point) => {
+      const cpu = point.cpu ?? 0
+      const ramGB = point.ramGB ?? 0
+      const diskGB = point.diskGB ?? 0
 
-  // Expand the Y axis domain to include reference line values
+      const cpuPercent = limits?.cpu ? (cpu / limits.cpu) * 100 : 0
+      const ramPercent = limits?.ram ? (ramGB / limits.ram) * 100 : 0
+      const diskPercent = limits?.disk ? (diskGB / limits.disk) * 100 : 0
+
+      return {
+        time: point.time ?? '',
+        cpu,
+        ramGB,
+        diskGB,
+        cpuPrice: point.cpuPrice ?? 0,
+        ramPrice: point.ramPrice ?? 0,
+        diskPrice: point.diskPrice ?? 0,
+        cpuPercent,
+        ramPercent,
+        diskPercent,
+      }
+    })
+  }, [data, limits])
+
+  const isResourceMode = mode === 'resources'
+
+  const { chartConfig, dataKeys } = useMemo(() => {
+    if (!isResourceMode) {
+      return {
+        chartConfig: costChartConfig,
+        dataKeys: ['cpuPrice', 'ramPrice', 'diskPrice'] as string[],
+      }
+    }
+    switch (resourceFilter) {
+      case 'all':
+        return {
+          chartConfig: allResourceChartConfig,
+          dataKeys: ['cpuPercent', 'ramPercent', 'diskPercent'] as string[],
+        }
+      case 'cpu':
+        return { chartConfig: cpuChartConfig, dataKeys: ['cpu'] as string[] }
+      case 'ram':
+        return { chartConfig: ramChartConfig, dataKeys: ['ramGB'] as string[] }
+      case 'disk':
+        return { chartConfig: diskChartConfig, dataKeys: ['diskGB'] as string[] }
+    }
+  }, [isResourceMode, resourceFilter])
+
   const yAxisDomain = useMemo<[number, number] | undefined>(() => {
-    if (!isResourceMode || !limits) return undefined
-    const maxLimit = Math.max(limits.cpu, limits.ram, limits.disk)
-    // Add 10% padding above the highest limit
-    return [0, Math.ceil(maxLimit * 1.1)]
-  }, [isResourceMode, limits])
+    if (!isResourceMode) return undefined
+    if (resourceFilter === 'all') {
+      // Percentage mode — cap at 110% so the 100% limit line is visible
+      return [0, 110]
+    }
+    if (!limits) return undefined
+    const limitValue = resourceFilter === 'cpu' ? limits.cpu : resourceFilter === 'ram' ? limits.ram : limits.disk
+    if (limitValue <= 0) return undefined
+    return [0, Math.ceil(limitValue * 1.1)]
+  }, [isResourceMode, resourceFilter, limits])
+
+  const yAxisFormatter = useMemo(() => {
+    if (!isResourceMode) return (value: number) => formatMoney(value)
+    if (resourceFilter === 'all') return (value: number) => `${value}%`
+    return (value: number) => value.toLocaleString()
+  }, [isResourceMode, resourceFilter])
+
+  const tooltipValueFormatter = useMemo(() => {
+    if (!isResourceMode) return (value: number) => formatMoney(value)
+    if (resourceFilter === 'all') return (value: number) => `${value.toFixed(1)}%`
+    return (value: number) => value.toLocaleString()
+  }, [isResourceMode, resourceFilter])
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -149,20 +233,31 @@ export function UsageTimelineChart({
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="usage-mode-switch" className="text-sm text-muted-foreground">
-              Resources
-            </Label>
-            <Switch
-              id="usage-mode-switch"
-              size="sm"
-              checked={mode === 'cost'}
-              onCheckedChange={(checked) => setMode(checked ? 'cost' : 'resources')}
-            />
-            <Label htmlFor="usage-mode-switch" className="text-sm text-muted-foreground">
-              Cost
-            </Label>
-          </div>
+          {isResourceMode && (
+            <Select value={resourceFilter} onValueChange={(value) => setResourceFilter(value as ResourceFilter)}>
+              <SelectTrigger size="sm" className="w-[150px] rounded-lg" aria-label="Select resource">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl">
+                <SelectItem value="all">All Resources</SelectItem>
+                <SelectItem value="cpu">Compute</SelectItem>
+                <SelectItem value="ram">Memory</SelectItem>
+                <SelectItem value="disk">Storage</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <ToggleGroup
+            type="single"
+            value={mode}
+            onValueChange={(value) => {
+              if (value) setMode(value as ChartMode)
+            }}
+            variant="outline"
+            size="sm"
+          >
+            <ToggleGroupItem value="resources">Resources</ToggleGroupItem>
+            <ToggleGroupItem value="cost">Cost</ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </div>
       <div className="relative">
@@ -188,7 +283,7 @@ export function UsageTimelineChart({
               axisLine={false}
               tickMargin={8}
               minTickGap={48}
-              tickFormatter={formatTime}
+              tickFormatter={isMultiDay ? formatDateAndTime : formatTime}
             />
             <YAxis
               tickLine={false}
@@ -197,17 +292,15 @@ export function UsageTimelineChart({
               tickCount={5}
               width={50}
               domain={yAxisDomain}
-              tickFormatter={(value) => (isResourceMode ? value.toLocaleString() : formatMoney(value))}
+              tickFormatter={yAxisFormatter}
             />
             <ChartTooltip
               cursor={false}
               content={
                 <ChartTooltipContent
                   indicator="dot"
-                  labelFormatter={(label) => formatDateTime(label)}
-                  valueFormatter={(value) =>
-                    isResourceMode ? Number(value).toLocaleString() : formatMoney(Number(value))
-                  }
+                  labelFormatter={(label) => formatTooltipLabel(label)}
+                  valueFormatter={(value) => tooltipValueFormatter(Number(value))}
                 />
               }
             />
@@ -218,48 +311,62 @@ export function UsageTimelineChart({
                 type="monotoneX"
                 fill={`url(#fill-${key})`}
                 stroke={`var(--color-${key})`}
-                stackId="a"
+                stackId={resourceFilter === 'all' && isResourceMode ? 'a' : undefined}
               />
             ))}
-            {isResourceMode && limits && limits.cpu > 0 && (
+            {isResourceMode && resourceFilter === 'all' && (
+              <ReferenceLine
+                y={100}
+                stroke={LIMIT_COLOR}
+                strokeDasharray="6 3"
+                strokeWidth={1.5}
+                label={{
+                  value: 'Limit (100%)',
+                  position: 'insideTopRight',
+                  fontSize: 11,
+                  fill: LIMIT_COLOR,
+                }}
+              />
+            )}
+            {isResourceMode && resourceFilter === 'cpu' && limits && limits.cpu > 0 && (
               <ReferenceLine
                 y={limits.cpu}
-                stroke={LIMIT_COLORS.cpu}
+                stroke={RESOURCE_COLORS.cpu}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `CPU limit (${limits.cpu} vCPU)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: LIMIT_COLORS.cpu,
+                  fill: RESOURCE_COLORS.cpu,
                 }}
               />
             )}
-            {isResourceMode && limits && limits.ram > 0 && (
+            {isResourceMode && resourceFilter === 'ram' && limits && limits.ram > 0 && (
               <ReferenceLine
                 y={limits.ram}
-                stroke={LIMIT_COLORS.ram}
+                stroke={RESOURCE_COLORS.ram}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `RAM limit (${limits.ram} GiB)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: LIMIT_COLORS.ram,
+                  fill: RESOURCE_COLORS.ram,
                 }}
               />
             )}
-            {isResourceMode && limits && limits.disk > 0 && (
+            {isResourceMode && resourceFilter === 'disk' && limits && limits.disk > 0 && (
               <ReferenceLine
                 y={limits.disk}
-                stroke={LIMIT_COLORS.disk}
+                stroke={RESOURCE_COLORS.disk}
                 strokeDasharray="6 3"
                 strokeWidth={1.5}
                 label={{
                   value: `Disk limit (${limits.disk} GiB)`,
                   position: 'insideTopRight',
                   fontSize: 11,
-                  fill: LIMIT_COLORS.disk,
+                  fill: RESOURCE_COLORS.disk,
                 }}
               />
             )}
