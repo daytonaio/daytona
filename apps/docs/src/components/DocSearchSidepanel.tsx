@@ -19,6 +19,7 @@ export default function DocSearchSidepanel() {
     indexName: DOCSEARCH_INDEX_NAME,
     assistantId: DOCSEARCH_ASSISTANT_ID || undefined,
     suggestedQuestions: true,
+    expandedWidth: '50vw',
   }
 
   return (
@@ -62,6 +63,10 @@ export default function DocSearchSidepanel() {
         .DocSearch-Sidepanel-RecentConversation { background-color: var(--bg-color); }
         .DocSearch-Sidepanel-Prompt--submit {background-color: var(--border-color) !important;}
         .DocSearch-SidepanelButton.floating svg { width: 24px; height: 24px; }
+        @media screen and (max-width: 768px) {
+          .DocSearch-Sidepanel-Action-expand { display: none !important; }
+          .DocSearch-Action[title="Conversation history"] { display: none !important; }
+        }
         .DocSearch-Back-Icon, .DocSearch-Action:hover {color: var(--primary-text-color);}
         .DocSearch-Menu-item, .DocSearch-Menu-item:hover, .DocSearch-Menu-content open {background-color: var(--bg-color);}
         .DocSearch-Markdown-Content li {color: var(--secondary-text-color);}
