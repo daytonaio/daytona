@@ -411,13 +411,47 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Get organization invitations count (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/invitations/count)
 
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+### Accept invitation
 
-> [**List organization invitations for authenticated user (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/invitations)  
-> [**Accept organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/accept)  
-> [**Decline organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/decline)
+Daytona provides a method to accept a pending organization invitation.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations/INVITATION_ID/accept' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
 
 Once a user accepts an invitation to join an organization, they get access to resource quotas assigned to that organization and they may proceed by issuing a new [API key](/docs/en/api-keys) and creating sandboxes.
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Accept organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/accept)
+
+### Decline invitation
+
+Daytona provides a method to decline a pending organization invitation.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations/INVITATION_ID/decline' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Decline organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/decline)
 
 ### List pending
 
@@ -484,30 +518,26 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Cancel organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/invitations/{invitationId}/cancel)
 
-## Organization settings
+## Regions
 
-The settings page in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/settings) allows you to view the organization ID and name, and optionally delete the organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal organizations are there by default and cannot be deleted.
+Each organization has a default [region](/docs/en/regions) that determines where sandboxes are created when no specific target is provided. Regions represent geographic or logical groupings of compute infrastructure. Organizations can update their default region, manage per-region resource quotas, and query region quota information for individual sandboxes.
 
-## Advanced operations
+For more information on available region types, see the [Regions](/docs/en/regions) guide.
 
-Daytona provides methods to perform advanced operations on an organization.
+### Set default region
 
-### Suspend organization
-
-Daytona provides a method to suspend an organization.
+Daytona provides a method to set the default region for an organization.
 
 <Tabs syncKey="language">
 <TabItem label="API" icon="seti:json">
 
 ```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/suspend' \
-  --request POST \
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/default-region' \
+  --request PATCH \
   --header 'Content-Type: application/json' \
   --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
-  "reason": "Violation of terms",
-  "until": "2030-01-01T00:00:00.000Z",
-  "suspensionCleanupGracePeriodHours": 24
+  "defaultRegionId": "us"
 }'
 ```
 
@@ -516,46 +546,7 @@ curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/suspend' \
 
 For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
 
-> [**Suspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/suspend)
-
-### Unsuspend organization
-
-Daytona provides a method to unsuspend an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/unsuspend' \
-  --request POST \
-  --header 'Authorization: Bearer YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Unsuspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/unsuspend)
-
-### Usage overview
-
-Daytona provides a method to get the usage overview for an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/usage' \
-  --header 'Authorization: BearER YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Get organization current usage overview (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/usage)
+> [**Set default region for organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/default-region)
 
 ### Region quota by sandbox ID
 
@@ -634,6 +625,79 @@ curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota/REGION_ID' 
 For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
 
 > [**Update organization region quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota/{regionId})
+
+## Organization settings
+
+The settings page in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/settings) allows you to view the organization ID and name, and optionally delete the organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal organizations are there by default and cannot be deleted.
+
+## Advanced operations
+
+Daytona provides methods to perform advanced operations on an organization.
+
+### Suspend organization
+
+Daytona provides a method to suspend an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/suspend' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "reason": "Violation of terms",
+  "until": "2030-01-01T00:00:00.000Z",
+  "suspensionCleanupGracePeriodHours": 24
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Suspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/suspend)
+
+### Unsuspend organization
+
+Daytona provides a method to unsuspend an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/unsuspend' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Unsuspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/unsuspend)
+
+### Usage overview
+
+Daytona provides a method to get the usage overview for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/usage' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization current usage overview (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/usage)
 
 ### Update sandbox default limited network egress
 
