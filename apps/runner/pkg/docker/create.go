@@ -65,8 +65,10 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			if metadata == nil {
 				metadata = make(map[string]string)
 			}
-			volumesJSON, _ := json.Marshal(sandboxDto.Volumes)
-			metadata["volumes"] = string(volumesJSON)
+			volumesJSON, err := json.Marshal(sandboxDto.Volumes)
+			if err == nil {
+				metadata["volumes"] = string(volumesJSON)
+			}
 		}
 		_, daemonVersion, err := d.Start(ctx, sandboxDto.Id, sandboxDto.AuthToken, metadata)
 		if err != nil {
