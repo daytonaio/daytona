@@ -46,6 +46,12 @@ export interface SandboxInfoResponse {
     'daemonVersion'?: string;
     /**
      * 
+     * @type {boolean}
+     * @memberof SandboxInfoResponse
+     */
+    'recoverable'?: boolean;
+    /**
+     * 
      * @type {EnumsSandboxState}
      * @memberof SandboxInfoResponse
      */
