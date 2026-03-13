@@ -576,6 +576,58 @@ func TestCreateValidation(t *testing.T) {
 			},
 			expectedError: false,
 		},
+		{
+			name: "sandbox base params - invalid auto stop interval",
+			params: types.SandboxBaseParams{
+				AutoStopInterval: intPtr(-1),
+			},
+			expectedError: true,
+			errorContains: "autoStopInterval must be a non-negative integer",
+		},
+		{
+			name: "sandbox base params - passes validation with valid params",
+			params: types.SandboxBaseParams{
+				Name:             "my-sandbox",
+				AutoStopInterval: intPtr(60),
+			},
+			expectedError: false,
+		},
+		{
+			name: "pointer to sandbox base params - passes validation",
+			params: &types.SandboxBaseParams{
+				Name:             "my-sandbox",
+				AutoStopInterval: intPtr(60),
+			},
+			expectedError: false,
+		},
+		{
+			name: "pointer to sandbox base params - invalid auto stop interval",
+			params: &types.SandboxBaseParams{
+				AutoStopInterval: intPtr(-1),
+			},
+			expectedError: true,
+			errorContains: "autoStopInterval must be a non-negative integer",
+		},
+		{
+			name: "pointer to snapshot params - passes validation",
+			params: &types.SnapshotParams{
+				SandboxBaseParams: types.SandboxBaseParams{
+					AutoStopInterval: intPtr(60),
+				},
+				Snapshot: "my-snapshot",
+			},
+			expectedError: false,
+		},
+		{
+			name: "pointer to image params - passes validation",
+			params: &types.ImageParams{
+				SandboxBaseParams: types.SandboxBaseParams{
+					AutoStopInterval: intPtr(60),
+				},
+				Image: "debian:12",
+			},
+			expectedError: false,
+		},
 	}
 
 	for _, tt := range tests {

@@ -355,6 +355,12 @@ func (c *Client) createToolboxClient(proxyURL string, sandboxID string) (*toolbo
 //	    },
 //	})
 //
+//	// Create with custom base parameters only
+//	sandbox, err := client.Create(ctx, types.SandboxBaseParams{
+//	    Name:   "my-sandbox",
+//	    Labels: map[string]string{"team": "infra"},
+//	})
+//
 // By default, Create waits for the sandbox to reach the started state before returning.
 // Use [options.WithWaitForStart](false) to return immediately after creation.
 //
@@ -399,10 +405,27 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 	case types.SnapshotParams:
 		baseParams = p.SandboxBaseParams
 		snapshot = p.Snapshot
+	case *types.SnapshotParams:
+		if p != nil {
+			baseParams = p.SandboxBaseParams
+			snapshot = p.Snapshot
+		}
 	case types.ImageParams:
 		baseParams = p.SandboxBaseParams
 		image = p.Image
 		resources = p.Resources
+	case *types.ImageParams:
+		if p != nil {
+			baseParams = p.SandboxBaseParams
+			image = p.Image
+			resources = p.Resources
+		}
+	case types.SandboxBaseParams:
+		baseParams = p
+	case *types.SandboxBaseParams:
+		if p != nil {
+			baseParams = *p
+		}
 	default:
 		// Default params
 		baseParams = types.SandboxBaseParams{
