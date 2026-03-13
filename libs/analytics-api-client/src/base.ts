@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * Daytona Analytics API
- * Daytona Analytics API - Read-only telemetry and usage data
+ * Daytona Analytics API - Read-only telemetry and usage data. Authenticated via Daytona API keys or JWT tokens.
  *
  * The version of the OpenAPI document: v0.0.0-dev
  * 

@@ -15,10 +15,13 @@ import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-p
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Separator } from '@/components/ui/separator'
 import { FeatureFlags } from '@/enums/FeatureFlags'
-import { useAggregatedUsage, useSandboxesUsage } from '@/hooks/queries/useAnalyticsUsage'
+import { UsageTimelineChart } from '@/components/spending/UsageTimelineChart'
+import { useAggregatedUsage, useSandboxesUsage, useUsageChart } from '@/hooks/queries/useAnalyticsUsage'
+import { useOrganizationUsageOverviewQuery } from '@/hooks/queries/useOrganizationUsageOverviewQuery'
 import { useOrganizationUsageQuery } from '@/hooks/queries/useOrganizationUsageQuery'
 import { usePastOrganizationUsageQuery } from '@/hooks/queries/usePastOrganizationUsageQuery'
 import { useConfig } from '@/hooks/useConfig'
+import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { subDays } from 'date-fns'
 import { AlertCircle, BarChart3, RefreshCw } from 'lucide-react'
@@ -35,8 +38,10 @@ const Spending = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const config = useConfig()
   const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
+  const { availableRegions: regionsData, loadingAvailableRegions: regionsDataIsLoading, getRegionName } = useRegions()
   const analyticsAvailable = spendingEnabled && !!config.analyticsApiUrl
 
+  const [selectedChartRegion, setSelectedChartRegion] = useState<string | undefined>(undefined)
   const [analyticsDateRange, setAnalyticsDateRange] = useState<DateRange>(() => {
     const now = new Date()
     return { from: subDays(now, 30), to: now }
@@ -60,6 +65,16 @@ const Spending = () => {
     isError: sandboxesError,
     refetch: refetchSandboxes,
   } = useSandboxesUsage(analyticsParams)
+  const {
+    data: usageChartPoints,
+    isLoading: chartLoading,
+    isError: chartError,
+    refetch: refetchChart,
+  } = useUsageChart({ ...analyticsParams, region: selectedChartRegion })
+
+  const { data: usageOverview } = useOrganizationUsageOverviewQuery({
+    organizationId: selectedOrganization?.id ?? '',
+  })
 
   const {
     data: currentOrganizationUsage,
@@ -154,6 +169,30 @@ const Spending = () => {
                 <AggregatedUsageChart data={aggregatedUsage} isLoading={aggregatedLoading} />
                 <Separator />
                 <ResourceUsageBreakdown data={aggregatedUsage} />
+                <Separator />
+                {chartError ? (
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xl font-semibold leading-none tracking-tight">Usage Timeline</p>
+                      <Button variant="secondary" size="sm" onClick={() => refetchChart()}>
+                        <RefreshCw />
+                        Retry
+                      </Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2">Failed to load chart data.</p>
+                  </div>
+                ) : (
+                  <UsageTimelineChart
+                    data={usageChartPoints}
+                    isLoading={chartLoading}
+                    regions={regionsData}
+                    regionsLoading={regionsDataIsLoading}
+                    selectedRegion={selectedChartRegion}
+                    onRegionChange={setSelectedChartRegion}
+                    getRegionName={getRegionName}
+                    regionUsage={usageOverview?.regionUsage}
+                  />
+                )}
               </>
             )}
             <Separator />
