@@ -25,6 +25,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
+import { SnapshotState } from '../enums/snapshot-state.enum'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
 import { RunnerAdapterFactory, RunnerInfo } from '../runner-adapter/runnerAdapter'
 import { RedisLockProvider } from '../common/redis-lock.provider'
@@ -802,6 +803,27 @@ export class RunnerService {
       .getRawMany()
 
     return runners.map((item) => item.runnerId)
+  }
+
+  async getOrgActiveBuildCount(organizationId: string): Promise<number> {
+    const [sandboxResult, snapshotResult] = await Promise.all([
+      this.sandboxRepository
+        .createQueryBuilder('sandbox')
+        .select('COUNT(DISTINCT sandbox.buildInfoSnapshotRef)', 'count')
+        .where('sandbox.state = :state', { state: SandboxState.BUILDING_SNAPSHOT })
+        .andWhere('sandbox.organizationId = :organizationId', { organizationId })
+        .andWhere('sandbox.buildInfoSnapshotRef IS NOT NULL')
+        .getRawOne(),
+      this.snapshotRepository
+        .createQueryBuilder('snapshot')
+        .select('COUNT(DISTINCT snapshot.buildInfoSnapshotRef)', 'count')
+        .where('snapshot.state = :state', { state: SnapshotState.BUILDING })
+        .andWhere('snapshot.organizationId = :organizationId', { organizationId })
+        .andWhere('snapshot.buildInfoSnapshotRef IS NOT NULL')
+        .getRawOne(),
+    ])
+
+    return parseInt(sandboxResult?.count ?? '0', 10) + parseInt(snapshotResult?.count ?? '0', 10)
   }
 
   async getRunnersWithMultipleSnapshotsPulling(maxSnapshotCount = 6): Promise<string[]> {

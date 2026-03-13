@@ -77,6 +77,13 @@ export class Organization {
 
   @Column({
     type: 'int',
+    default: 100,
+    name: 'max_concurrent_builds',
+  })
+  maxConcurrentBuilds: number
+
+  @Column({
+    type: 'int',
     nullable: true,
     name: 'authenticated_rate_limit',
   })
