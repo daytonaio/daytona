@@ -32,9 +32,9 @@ type UsageTimelineChartProps = {
 type ChartMode = 'resources' | 'cost'
 
 const LIMIT_COLORS = {
-  cpu: 'hsl(var(--chart-1))',
-  ram: 'hsl(var(--chart-2))',
-  disk: 'hsl(var(--chart-3))',
+  cpu: '#3b82f6',
+  ram: '#22c55e',
+  disk: '#a855f7',
 }
 
 const resourceChartConfig: ChartConfig = {
@@ -228,45 +228,47 @@ export function UsageTimelineChart({ data, isLoading, regionUsage }: UsageTimeli
                 stackId="a"
               />
             ))}
-            {isResourceMode && limits && (
-              <>
-                <ReferenceLine
-                  y={limits.cpu}
-                  stroke={LIMIT_COLORS.cpu}
-                  strokeDasharray="6 3"
-                  strokeWidth={1.5}
-                  label={{
-                    value: `CPU limit (${limits.cpu} vCPU)`,
-                    position: 'insideTopRight',
-                    fontSize: 11,
-                    fill: LIMIT_COLORS.cpu,
-                  }}
-                />
-                <ReferenceLine
-                  y={limits.ram}
-                  stroke={LIMIT_COLORS.ram}
-                  strokeDasharray="6 3"
-                  strokeWidth={1.5}
-                  label={{
-                    value: `RAM limit (${limits.ram} GiB)`,
-                    position: 'insideTopRight',
-                    fontSize: 11,
-                    fill: LIMIT_COLORS.ram,
-                  }}
-                />
-                <ReferenceLine
-                  y={limits.disk}
-                  stroke={LIMIT_COLORS.disk}
-                  strokeDasharray="6 3"
-                  strokeWidth={1.5}
-                  label={{
-                    value: `Disk limit (${limits.disk} GiB)`,
-                    position: 'insideTopRight',
-                    fontSize: 11,
-                    fill: LIMIT_COLORS.disk,
-                  }}
-                />
-              </>
+            {isResourceMode && limits && limits.cpu > 0 && (
+              <ReferenceLine
+                y={limits.cpu}
+                stroke={LIMIT_COLORS.cpu}
+                strokeDasharray="6 3"
+                strokeWidth={1.5}
+                label={{
+                  value: `CPU limit (${limits.cpu} vCPU)`,
+                  position: 'insideTopRight',
+                  fontSize: 11,
+                  fill: LIMIT_COLORS.cpu,
+                }}
+              />
+            )}
+            {isResourceMode && limits && limits.ram > 0 && (
+              <ReferenceLine
+                y={limits.ram}
+                stroke={LIMIT_COLORS.ram}
+                strokeDasharray="6 3"
+                strokeWidth={1.5}
+                label={{
+                  value: `RAM limit (${limits.ram} GiB)`,
+                  position: 'insideTopRight',
+                  fontSize: 11,
+                  fill: LIMIT_COLORS.ram,
+                }}
+              />
+            )}
+            {isResourceMode && limits && limits.disk > 0 && (
+              <ReferenceLine
+                y={limits.disk}
+                stroke={LIMIT_COLORS.disk}
+                strokeDasharray="6 3"
+                strokeWidth={1.5}
+                label={{
+                  value: `Disk limit (${limits.disk} GiB)`,
+                  position: 'insideTopRight',
+                  fontSize: 11,
+                  fill: LIMIT_COLORS.disk,
+                }}
+              />
             )}
             <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
