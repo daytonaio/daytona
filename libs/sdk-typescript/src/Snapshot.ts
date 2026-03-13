@@ -72,6 +72,20 @@ export type CreateSnapshotParams = {
 }
 
 /**
+ * Parses date string fields from the API response into Date objects.
+ * Axios does not automatically deserialize JSON date strings into Date instances,
+ * so the SnapshotDto date fields (typed as Date) arrive as strings at runtime.
+ */
+function parseSnapshotDates<T extends SnapshotDto>(snapshot: T): T {
+  return {
+    ...snapshot,
+    createdAt: new Date(snapshot.createdAt as unknown as string),
+    updatedAt: new Date(snapshot.updatedAt as unknown as string),
+    lastUsedAt: snapshot.lastUsedAt != null ? new Date(snapshot.lastUsedAt as unknown as string) : null,
+  }
+}
+
+/**
  * Service for managing Daytona Snapshots. Can be used to list, get, create and delete Snapshots.
  *
  * @class
@@ -101,7 +115,7 @@ export class SnapshotService {
   async list(page?: number, limit?: number): Promise<PaginatedSnapshots> {
     const response = await this.snapshotsApi.getAllSnapshots(undefined, page, limit)
     return {
-      items: response.data.items.map((snapshot) => snapshot as Snapshot),
+      items: response.data.items.map((snapshot) => parseSnapshotDates(snapshot) as Snapshot),
       total: response.data.total,
       page: response.data.page,
       totalPages: response.data.totalPages,
@@ -123,7 +137,7 @@ export class SnapshotService {
   @WithInstrumentation()
   async get(name: string): Promise<Snapshot> {
     const response = await this.snapshotsApi.getSnapshot(name)
-    return response.data as Snapshot
+    return parseSnapshotDates(response.data) as Snapshot
   }
 
   /**
@@ -188,11 +202,13 @@ export class SnapshotService {
 
     createSnapshotReq.regionId = params.regionId || this.defaultRegionId
 
-    let createdSnapshot = (
-      await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
-        timeout: (options.timeout || 0) * 1000,
-      })
-    ).data
+    let createdSnapshot = parseSnapshotDates(
+      (
+        await this.snapshotsApi.createSnapshot(createSnapshotReq, undefined, {
+          timeout: (options.timeout || 0) * 1000,
+        })
+      ).data,
+    )
 
     if (!createdSnapshot) {
       throw new DaytonaError("Failed to create snapshot. Didn't receive a snapshot from the server API.")
@@ -267,7 +283,7 @@ export class SnapshotService {
    */
   @WithInstrumentation()
   async activate(snapshot: Snapshot): Promise<Snapshot> {
-    return (await this.snapshotsApi.activateSnapshot(snapshot.id)).data as Snapshot
+    return parseSnapshotDates((await this.snapshotsApi.activateSnapshot(snapshot.id)).data) as Snapshot
   }
 
   /**
