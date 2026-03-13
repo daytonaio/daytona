@@ -713,4 +713,13 @@ class FileSystem:
                 response = client.post(
                     url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
                 )
-                _ = response.raise_for_status()
+                if response.is_error:
+                    try:
+                        detail = ", ".join(response.json()["errors"])
+                    except Exception:
+                        detail = response.text
+                    raise DaytonaError(
+                        f"Failed to upload files: {response.status_code}: {detail}",
+                        status_code=response.status_code,
+                    )
+
