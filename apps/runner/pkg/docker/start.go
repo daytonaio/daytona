@@ -5,11 +5,13 @@ package docker
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"slices"
 	"time"
 
 	"github.com/daytonaio/common-go/pkg/timer"
+	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -44,6 +46,17 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 
 		d.statesCache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 		return &c, daemonVersion, nil
+	}
+
+	// Re-establish FUSE mounts that may have died since the container was last running.
+	if volumesJSON, ok := metadata["volumes"]; ok {
+		var volumes []dto.VolumeDTO
+		if err := json.Unmarshal([]byte(volumesJSON), &volumes); err == nil && len(volumes) > 0 {
+			_, err = d.getVolumesMountPathBinds(ctx, volumes)
+			if err != nil {
+				d.logger.ErrorContext(ctx, "Failed to ensure volume FUSE mounts", "error", err)
+			}
+		}
 	}
 
 	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
