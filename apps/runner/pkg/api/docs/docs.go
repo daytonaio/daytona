@@ -1612,9 +1612,7 @@ const docTemplate = `{
             "description": "Error response",
             "type": "object",
             "required": [
-                "code",
                 "message",
-                "method",
                 "path",
                 "statusCode",
                 "timestamp"

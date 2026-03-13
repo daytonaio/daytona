@@ -49,7 +49,10 @@
       "mode": "debug",
       "program": "${workspaceFolder}/apps/proxy/cmd/proxy",
       "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/apps/proxy/.env",
+      "envFile": [
+        "${workspaceFolder}/apps/proxy/.env",
+        "${workspaceFolder}/apps/proxy/.env.local"
+      ],
       "output": "${workspaceFolder}/dist/apps/proxy"
     }
   ]
