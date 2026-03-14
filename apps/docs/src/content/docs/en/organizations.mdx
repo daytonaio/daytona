@@ -6,9 +6,9 @@ import { TabItem, Tabs } from '@astrojs/starlight/components'
 
 Daytona provides organizations as a way to group resources and enable collaboration. Users can work individually in their personal organization or together in a collaborative organization.
 
-Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard) to manage your organizations.
+Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard) to manage your organizations, or use the [API](/docs/en/tools/api/#daytona/tag/organizations) to manage them programmatically.
 
-## Personal vs Collaborative organizations
+## Personal vs Collaborative
 
 Every Daytona user starts with a personal organization, ideal for solo use and experimentation. Collaborative organizations are created manually and designed for company-wide collaboration with shared access and controls.
 
@@ -24,28 +24,159 @@ Every Daytona user starts with a personal organization, ideal for solo use and e
 
 Users can switch between their personal and collaborative organizations by using the dropdown in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard) sidebar. Each organization has its own sandboxes, API keys, and resource quotas.
 
-## Organization roles
+## Create organization
+
+Daytona provides options to create organizations in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/organizations) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Expand the dropdown at the top-left corner of the sidebar to view your organizations.
+3. Click the **Create Organization** button
+4. Enter the organization name
+5. Select a [region](/docs/en/regions)
+6. Click **Create** to create the organization
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "My Organization",
+  "defaultRegionId": "us"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Create organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations)
+
+## List organizations
+
+Daytona provides methods to list all organizations the authenticated user belongs to.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**List organizations (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations)
+
+### Get by ID
+
+Daytona provides a method to get an organization by ID.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization by ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId})
+
+### Get by sandbox ID
+
+Daytona provides a method to get the organization by sandbox ID.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/by-sandbox-id/SANDBOX_ID' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization by sandbox ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/by-sandbox-id/{sandboxId})
+
+## Leave organization
+
+Daytona provides options to leave an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Expand the dropdown at the top-left corner of the sidebar to view your organizations
+3. Select the organization you want to leave
+4. Click **Settings** in the sidebar
+5. Click **Leave Organization**
+6. Confirm by clicking the **Leave** button
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/leave' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Leave organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/leave)
+
+## Delete organization
+
+Daytona provides options to delete an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Expand the dropdown at the top-left corner of the sidebar to view your organizations
+3. Select the organization you want to delete
+4. Click **Settings** in the sidebar
+5. Click **Delete Organization**
+6. Confirm the deletion by typing the organization name and clicking the **Delete** button
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID' \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Delete organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/DELETE/organizations/{organizationId})
+
+## Roles
 
 Users within an organization can have one of two different roles:
 
 1. **Owners** have full administrative access to the organization and its resources. Organization owners can perform administrative actions.
-2. **Members** have no administrative access to the organization, while their access to organization resources is based on [**Assignments**](#available-assignments).
+2. **Members** have no administrative access to the organization, while their access to organization resources is based on [**Assignments**](#role-assignments).
 
-## Administrative actions
+### Role assignments
 
-Organization owners can perform administrative actions such as:
-
-- [Invite new users to the organization](#inviting-new-users)
-- [Manage pending invitations](#managing-invitations)
-- [Change role](#organization-roles) of a user in the Organization
-- [Update assignments](#available-assignments) for organization members
-- Remove user from the organization
-- Inspect audit logs
-- [Delete organization](#organization-settings)
-
-## Available assignments
-
-The list of available assignments includes:
+The list of available role assignments includes:
 
 | Assignment                    | Description                                                         |
 | ----------------------------- | ------------------------------------------------------------------- |
@@ -59,31 +190,631 @@ The list of available assignments includes:
 | **`Auditor`**                 | Grants access to audit logs in the organization                     |
 | **`Infrastructure Admin`**    | Grants admin access to infrastructure in the organization           |
 
-## Manage members
+### Create role
 
-### Invite new users
+Daytona provides a method to create a new role in an organization.
 
-As an organization **Owner**, to invite a new user to your organization:
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
 
-1. Navigate to [Members ↗](https://app.daytona.io/dashboard/members)
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/roles' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "Maintainer",
+  "description": "Can manage all resources",
+  "permissions": ["write:sandboxes", "delete:sandboxes"]
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Create organization role (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/roles)
+
+### List roles
+
+Daytona provides a method to list all roles in an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/roles' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**List organization roles (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/roles)
+
+### Update role
+
+Daytona provides a method to update a role in an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/roles/ROLE_ID' \
+  --request PUT \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "Maintainer",
+  "description": "Can manage all resources",
+  "permissions": ["write:sandboxes", "delete:sandboxes"]
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update organization role (API)**](/docs/en/tools/api/#daytona/tag/organizations/PUT/organizations/{organizationId}/roles/{roleId})
+
+### Delete role
+
+Daytona provides a method to delete a role in an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/roles/ROLE_ID' \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Delete organization role (API)**](/docs/en/tools/api/#daytona/tag/organizations/DELETE/organizations/{organizationId}/roles/{roleId})
+
+## Members
+
+Daytona provides methods to manage members in an organization.
+
+### List members
+
+Daytona provides a method to list all members in an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/users' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**List organization members (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/users)
+
+### Invite members
+
+Daytona provides a method to invite a new user to an organization.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members)
 2. Click the **Invite Member** button
 3. Enter the email address of the user you want to invite
-4. [Select a role](#organization-roles) for the new user. If you select the **`Member`** role, define their [assignments](#available-assignments)
+4. [Select a role](#roles) for the new user. If you select the **`Member`** role, define their [assignments](#role-assignments)
 
-### Remove users
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
 
-As an organization **Owner**, to remove a user from your organization:
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/invitations' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "email": "mail@example.com",
+  "role": "member",
+  "assignedRoleIds": ["00000000-0000-0000-0000-000000000001"]
+}'
+```
 
-1. Navigate to [Members ↗](https://app.daytona.io/dashboard/members)
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Create organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/invitations)
+
+### Remove members
+
+Daytona provides a method to remove a user from an organization.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members)
 2. Click the **Remove** button next to the user you want to remove
 3. Confirm the removal by clicking the **Remove** button
 
-## Manage invitations
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
 
-To view pending invitations to join other organizations, navigate to [Invitations ↗](https://app.daytona.io/dashboard/invitations) page by expanding the dropdown at the bottom of the sidebar. 
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/users/USER_ID' \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Delete organization member (API)**](/docs/en/tools/api/#daytona/tag/organizations/DELETE/organizations/{organizationId}/users/{userId})
+
+### Update access
+
+Daytona provides options to update the access of a member in an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members)
+2. Click the three-dot menu on the member row
+3. Click **Change Role** or **Manage Assignments**
+4. Update the role or assignments and click **Save**
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/users/USER_ID/access' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "role": "member",
+  "assignedRoleIds": ["00000000-0000-0000-0000-000000000001"]
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update access for organization member (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/users/{userId}/access)
+
+## Invitations
+
+Daytona provides methods to manage invitations in an organization.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/invitations)
+2. Expand the dropdown at the bottom of the sidebar to view pending invitations to join other organizations.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**List organization invitations (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/invitations)
+
+### Get invitations count
+
+Daytona provides a method to get the number of invitations in an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations/count' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization invitations count (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/invitations/count)
+
+### Accept invitation
+
+Daytona provides options to accept a pending organization invitation in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/user/invitations) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Click your profile at the bottom-left of the sidebar
+3. Click **Invitations**
+4. Click the checkmark button on the invitation row
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations/INVITATION_ID/accept' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
 
 Once a user accepts an invitation to join an organization, they get access to resource quotas assigned to that organization and they may proceed by issuing a new [API key](/docs/en/api-keys) and creating sandboxes.
 
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Accept organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/accept)
+
+### Decline invitation
+
+Daytona provides options to decline a pending organization invitation in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/user/invitations) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Click your profile at the bottom-left of the sidebar
+3. Click **Invitations**
+4. Click the X button on the invitation row
+5. Confirm by clicking the **Decline** button
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/invitations/INVITATION_ID/decline' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Decline organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/invitations/{invitationId}/decline)
+
+### List pending
+
+Daytona provides a method to list pending invitations for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/invitations' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**List pending organization invitations (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/invitations)
+
+### Update invitation
+
+Daytona provides options to update an invitation for an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members)
+2. Scroll to the **Invitations** table
+3. Click the three-dot menu on the invitation row
+4. Click **Edit**
+5. Update the role or assignments and click **Update**
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/invitations/INVITATION_ID' \
+  --request PUT \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "role": "member",
+  "assignedRoleIds": ["00000000-0000-0000-0000-000000000001"],
+  "expiresAt": "2030-01-01T00:00:00.000Z"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/PUT/organizations/{organizationId}/invitations/{invitationId})
+
+### Cancel invitation
+
+Daytona provides options to cancel an invitation for an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/members)
+2. Scroll to the **Invitations** table
+3. Click the three-dot menu on the invitation row
+4. Click **Cancel**
+5. Confirm by clicking the **Confirm** button
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/invitations/INVITATION_ID/cancel' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Cancel organization invitation (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/invitations/{invitationId}/cancel)
+
+## Regions
+
+Each organization has a default [region](/docs/en/regions) that determines where sandboxes are created when no specific target is provided. Regions represent geographic or logical groupings of compute infrastructure. Organizations can update their default region, manage per-region resource quotas, and query region quota information for individual sandboxes.
+
+For more information on available region types, see the [Regions](/docs/en/regions) guide.
+
+### Set default region
+
+Daytona provides options to set the default region for an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/settings) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/)
+2. Click **Settings** in the sidebar
+3. In the **Organization Details** card, locate the **Default Region** row
+4. Click the **Set Region** button
+5. Select a region and click **Save**
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/default-region' \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "defaultRegionId": "us"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Set default region for organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/default-region)
+
+### Get region quota by sandbox ID
+
+Daytona provides a method to get the region quota for a sandbox by ID.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/region-quota/by-sandbox-id/SANDBOX_ID' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get region quota by sandbox ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/region-quota/by-sandbox-id/{sandboxId})
+
+### Update region quota
+
+Daytona provides a method to update the region quota for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota/REGION_ID' \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "totalCpuQuota": 32,
+  "totalMemoryQuota": 128,
+  "totalDiskQuota": 1000
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update organization region quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota/{regionId})
+
 ## Organization settings
 
-The [Settings](https://app.daytona.io/dashboard/settings) subpage in the Dashboard allows you to view the Organization ID and Name and to delete the Organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal Organizations are there by default and cannot be deleted.
+The settings page in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/settings) allows you to view the organization ID and name, and optionally delete the organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal organizations are there by default and cannot be deleted.
+
+## Advanced operations
+
+Daytona provides methods to perform advanced operations on an organization.
+
+### Suspend organization
+
+Daytona provides a method to suspend an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/suspend' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "reason": "Violation of terms",
+  "until": "2030-01-01T00:00:00.000Z",
+  "suspensionCleanupGracePeriodHours": 24
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Suspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/suspend)
+
+### Unsuspend organization
+
+Daytona provides a method to unsuspend an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/unsuspend' \
+  --request POST \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Unsuspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/unsuspend)
+
+### Usage overview
+
+Daytona provides a method to get the usage overview for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/usage' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization current usage overview (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/usage)
+
+### Update quota
+
+Daytona provides a method to update the quota for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota' \
+  --request PATCH \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "maxCpuPerSandbox": 8,
+  "maxMemoryPerSandbox": 32,
+  "maxDiskPerSandbox": 100,
+  "snapshotQuota": 1000,
+  "maxSnapshotSize": 100,
+  "volumeQuota": 1000,
+  "authenticatedRateLimit": 1000,
+  "sandboxCreateRateLimit": 100,
+  "sandboxLifecycleRateLimit": 100,
+  "authenticatedRateLimitTtlSeconds": 60
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update organization quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota)
+
+### Update sandbox default limited network egress
+
+Daytona provides a method to update the sandbox default limited network egress for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/sandbox-default-limited-network-egress' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "sandboxDefaultLimitedNetworkEgress": true
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update sandbox default limited network egress (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/sandbox-default-limited-network-egress)
+
+### Update experimental configuration
+
+Daytona provides a method to update the experimental configuration for an organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/experimental-config' \
+  --request PUT \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "otel": {
+    "endpoint": "http://otel-collector:4317",
+    "headers": {
+      "api-key": "XXX"
+    }
+  }
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Update experimental configuration (API)**](/docs/en/tools/api/#daytona/tag/organizations/PUT/organizations/{organizationId}/experimental-config)
+
+### Get OTEL config by sandbox auth token
+
+Daytona provides a method to get the OTEL configuration by sandbox authentication token.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/organizations/otel-config/by-sandbox-auth-token/AUTH_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
+
+> [**Get organization OTEL config by sandbox auth token (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/otel-config/by-sandbox-auth-token/{authToken})
