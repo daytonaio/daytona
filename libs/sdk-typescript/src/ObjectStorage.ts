@@ -50,6 +50,9 @@ export class ObjectStorage {
         sessionToken: config.sessionToken,
       },
       forcePathStyle: true,
+      // s3proxy does not implement AWS SDK v3 checksum headers — suppress unless required by protocol.
+      requestChecksumCalculation: 'WHEN_REQUIRED',
+      responseChecksumValidation: 'WHEN_REQUIRED',
     })
   }
 
