@@ -1,0 +1,25 @@
+[dotenv@17.3.1] injecting env (6) from .env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ≡ƒ¢í∩╕Å auth for agents: https://vestauth.com
+Deploying contracts with the account: 0xC2269D17cd8afd44EB8ca0effa4716E454c7deF4
+Using treasury address: 0xC2269D17cd8afd44EB8ca0effa4716E454c7deF4
+MockHLUSD deployed to: 0xbd7f774E9DEc325C869F636A31B9d91060382FA6
+AgentVault deployed to: 0x4bca2Fc95bf216fC11cf72Cb41860551CC66c2a0
+AgentRegistry deployed to: 0x80Fd8D4B47A69BA6C0a66B17fAB6990E04E7cA16
+Vault linked to Registry
+TaskLedger deployed to: 0xaBd8A2908FE127eD2265C8214b32D6BeF2410102
+ReputationEngine deployed to: 0xf58dd3830D11a11f16975E44CB40423Fc7C37450
+ArenaEngine deployed to: 0x92c88199BDd30a1bd6FAd799025DfEbB11e46969
+DisputeResolver deployed to: 0xEc28a345F0e4C477064e360744930E11827fc646
+Authorizing contracts cross-communication...
+
+--- Deployment Complete ---
+
+VITE_CONTRACT_HLUSD=0xbd7f774E9DEc325C869F636A31B9d91060382FA6
+VITE_CONTRACT_VAULT=0x4bca2Fc95bf216fC11cf72Cb41860551CC66c2a0
+VITE_CONTRACT_REGISTRY=0x80Fd8D4B47A69BA6C0a66B17fAB6990E04E7cA16
+VITE_CONTRACT_TASK_LEDGER=0xaBd8A2908FE127eD2265C8214b32D6BeF2410102
+VITE_CONTRACT_REPUTATION=0xf58dd3830D11a11f16975E44CB40423Fc7C37450
+VITE_CONTRACT_ARENA=0x92c88199BDd30a1bd6FAd799025DfEbB11e46969
+VITE_CONTRACT_DISPUTE=0xEc28a345F0e4C477064e360744930E11827fc646
+Addresses saved to .env
+Addresses saved to src/contracts/addresses.js

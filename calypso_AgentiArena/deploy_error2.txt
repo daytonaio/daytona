@@ -1,0 +1,15 @@
+[dotenv@17.3.1] injecting env (13) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ≡ƒ¢á∩╕Å  run anywhere with `dotenvx run -- yourcommand`
+Deploying contracts with the account: 0xC2269D17cd8afd44EB8ca0effa4716E454c7deF4
+Using treasury address: 0xC2269D17cd8afd44EB8ca0effa4716E454c7deF4
+MockHLUSD deployed to: 0x28AdC0D51da6524C82833a6155A66f57A7B50442
+AgentVault deployed to: 0x9ac1b75ca629043d6A7132a3c82b4C37B8F31962
+AgentRegistry deployed to: 0xFA36798a9Ed4d9A236d823208f74673f58dd32bc
+Vault linked to Registry
+ConnectTimeoutError: Connect Timeout Error
+    at onConnectTimeout (D:\hackjklu\node_modules\undici\lib\core\connect.js:186:24)
+    at D:\hackjklu\node_modules\undici\lib\core\connect.js:133:46
+    at Immediate._onImmediate (D:\hackjklu\node_modules\undici\lib\core\connect.js:172:33)
+    at processImmediate (node:internal/timers:504:21) {
+  code: 'UND_ERR_CONNECT_TIMEOUT'
+}

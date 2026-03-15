@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas | Sub-Agent Runtime</title>
+    <style>
+        :root {
+            --bg-color: #050510;
+            --text-color: #00FF94;
+            --border-color: #00D4FF;
+            --accent-glow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: linear-gradient(rgba(0, 255, 148, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 148, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--accent-glow);
+            background: rgba(5, 5, 16, 0.9);
+            border-radius: 4px;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 1.5rem;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            text-shadow: 0 0 5px var(--text-color);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.8rem;
+            font-family: 'Courier New', Courier, monospace;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--border-color);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+        }
+
+        button {
+            width: 100%;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--text-color);
+        }
+
+        .console {
+            background: #000;
+            border: 1px solid #333;
+            padding: 1rem;
+            height: 300px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            color: #eee;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .console pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+        }
+        .log-info { color: #888; }
+        .log-success { color: var(--text-color); }
+        .log-trade { color: #FFB800; }
+        .log-alert { color: #ff4444; }
+
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h1>> Atlas_Runtime // Rebalancer</h1>
+    
+    <div class="grid">
+        <div class="controls">
+            <div class="input-group">
+                <label>ETH Balance (Target: 40%)</label>
+                <input type="number" id="eth_bal" value="2.5" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>BTC Balance (Target: 40%)</label>
+                <input type="number" id="btc_bal" value="0.5" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>USDC Balance (Target: 20%)</label>
+                <input type="number" id="usdc_bal" value="10000" step="100">
+            </div>
+            <button id="runBtn" onclick="runAtlas()">Initialize Sequence</button>
+        </div>
+
+        <div>
+            <label>Sub-Agent Terminal Output</label>
+            <div class="console" id="consoleOutput">
+                <pre class="log-info">System initialized.</pre>
+                <pre class="log-info">Waiting for telemetry data...</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function log(msg, type='info') {
+        const consoleEl = document.getElementById('consoleOutput');
+        const span = document.createElement('pre');
+        span.className = `log-line log-${type}`;
+        span.textContent = `> ${msg}`;
+        consoleEl.appendChild(span);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    async function runAtlas() {
+        const eth = parseFloat(document.getElementById('eth_bal').value);
+        const btc = parseFloat(document.getElementById('btc_bal').value);
+        const usdc = parseFloat(document.getElementById('usdc_bal').value);
+
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+        
+        document.getElementById('consoleOutput').innerHTML = '';
+        log('Connecting to Atlas LangGraph instance...', 'info');
+
+        try {
+            const res = await fetch('/api/v1/rebalance', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev-atlas-key-unsafe'
+                },
+                body: JSON.stringify({ ETH: eth, BTC: btc, USDC: usdc })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail?.message || 'API Error');
+            }
+
+            const resp = await res.json();
+            const data = resp.data; // AgentResponse wrapper
+            
+            data.messages.forEach(m => log(m, 'info'));
+
+            const driftPct = (data.drift_percentage * 100).toFixed(2);
+            if (data.drift_percentage > 0.05) {
+                log(`ALERT: Drift threshold exceeded! (${driftPct}%)`, 'alert');
+            }
+
+            if (data.required_trades && data.required_trades.length > 0) {
+                log('--- Executing Tactical Rebalance ---', 'trade');
+                data.required_trades.forEach(t => {
+                    log(`SWAP ${t.amountFrom} ${t.fromToken} -> ${t.toToken} (~$${t.amountUSD})`, 'trade');
+                    log(`Route: ${t.route} | Slippage: ${t.estimatedSlippage}`, 'info');
+                });
+                log('Rebalance sequence complete.', 'success');
+            } else {
+                log(`Portfolio in harmonic balance. Drift: ${driftPct}%`, 'success');
+            }
+
+        } catch (e) {
+            log(`Error: ${e.message}`, 'alert');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Initialize Sequence";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alpha Trend Spotter | Sentiment & Narratives</title>
+    <style>
+        :root {
+            --bg: #0b0710;
+            --primary: #8b5cf6;
+            --primary-dim: rgba(139, 92, 246, 0.5);
+            --card: rgba(139, 92, 246, 0.05);
+            --border: rgba(139, 92, 246, 0.3);
+            --text: #e2d8f0;
+            --green: #10b981;
+            --red: #ff3366;
+            --font: 'Courier New', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-dim); }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image:
+                linear-gradient(var(--card) 1px, transparent 1px),
+                linear-gradient(90deg, var(--card) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            border: 2px solid var(--primary);
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px var(--primary-dim);
+            background: rgba(0,0,0,0.5);
+        }
+        header h1 { font-size: 1.8rem; letter-spacing: 4px; text-transform: uppercase; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        header p { color: #887; font-size: 0.8rem; letter-spacing: 2px; margin-top: 5px; }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            position: relative;
+        }
+        .panel h3 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--primary);
+            border-bottom: 1px dashed var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Input Controls */
+        .control-group { margin-bottom: 1.2rem; }
+        .control-group label { display: block; font-size: 0.7rem; color: #887; margin-bottom: 0.4rem; text-transform: uppercase; }
+        .control-group input, .control-group select {
+            width: 100%;
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 0.6rem;
+            font-family: var(--font);
+            font-size: 0.85rem;
+        }
+        .control-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 10px var(--primary-dim); }
+
+        button {
+            width: 100%;
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            padding: 0.8rem;
+            font-family: var(--font);
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 1rem;
+        }
+        button:hover:not(:disabled) {
+            background: var(--primary);
+            color: #000;
+            box-shadow: 0 0 15px var(--primary);
+        }
+        button:disabled { border-color: #444; color: #444; cursor: not-allowed; }
+
+        /* Console */
+        .terminal {
+            background: #050308;
+            border: 1px solid #221a30;
+            padding: 1rem;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: #776;
+            margin-top: 1.5rem;
+        }
+        .terminal pre { margin: 0 0 4px; white-space: pre-wrap; line-height: 1.4; }
+        .terminal pre.highlight { color: var(--primary); }
+
+        /* Output View */
+        .output-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Gauge */
+        .score-box {
+            text-align: center;
+            border: 1px solid #221a30;
+            padding: 1.5rem;
+            background: #050308;
+        }
+        .score-num {
+            font-size: 3.5rem;
+            font-weight: bold;
+            line-height: 1;
+            margin: 0.5rem 0;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        .score-label { font-size: 0.7rem; letter-spacing: 2px; color: #887; text-transform: uppercase; }
+
+        /* Narratives */
+        .narrative-box {
+            border: 1px solid #221a30;
+            padding: 1rem;
+            background: #050308;
+        }
+        .narrative-item {
+            margin-bottom: 0.8rem;
+            padding-left: 1rem;
+            border-left: 2px solid var(--primary);
+            font-size: 0.8rem;
+            line-height: 1.4;
+            color: #ccc;
+        }
+
+        /* Overview Text */
+        .overview-box {
+            border: 1px solid #221a30;
+            padding: 1.5rem;
+            background: #050308;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #bba;
+            white-space: pre-wrap;
+        }
+
+        /* Raw Coins */
+        .trending-ticker {
+            display: inline-block;
+            background: rgba(139,92,246,0.15);
+            border: 1px solid var(--primary-dim);
+            padding: 0.2rem 0.5rem;
+            margin: 0 0.4rem 0.4rem 0;
+            font-size: 0.7rem;
+            border-radius: 2px;
+        }
+
+        .placeholder { color: #332a40; text-align: center; padding: 2rem; font-size: 0.8rem; }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>> Alpha Trend Spotter</h1>
+        <p>REAL-TIME SEARCH TRENDS & AI NARRATIVE SYNTHESIS</p>
+    </header>
+
+    <div class="dashboard">
+        <!-- Sidebar Controls -->
+        <div class="panel">
+            <h3>Agent Config</h3>
+            
+            <div class="control-group">
+                <label>Focus / Query</label>
+                <input type="text" id="query" value="Crypto Market Macro" placeholder="e.g. AI Coins, L1s">
+            </div>
+
+            <div class="control-group">
+                <label>Data Sources</label>
+                <input type="text" value="CoinGecko Global Top 5" disabled style="opacity:0.6;">
+            </div>
+
+            <button id="runBtn" onclick="runAgent()">> Scan Trends</button>
+
+            <div class="terminal" id="term">
+                <pre>> Agent sleeping. Awaiting command...</pre>
+            </div>
+        </div>
+
+        <!-- Main Display -->
+        <div class="panel">
+            <h3>Intelligence Output</h3>
+
+            <div class="output-grid">
+                <div class="score-box">
+                    <div class="score-label">Market Bullishness Score</div>
+                    <div class="score-num" id="scoreNum" style="color:#555;">--</div>
+                    <div class="score-label" id="scoreDesc">Awaiting scan...</div>
+                </div>
+
+                <div class="narrative-box">
+                    <div class="score-label" style="margin-bottom:1rem;">Detected Narratives</div>
+                    <div id="narrativesList">
+                        <div class="placeholder">No narratives detected yet.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 1rem;">Market Overview Report</h3>
+            <div class="overview-box" id="overviewText">
+                <div class="placeholder">Awaiting Gemini AI synthesis...</div>
+            </div>
+
+            <h3 style="margin-top: 1.5rem;">Raw Trending Tokens</h3>
+            <div id="rawTokens">
+                <div class="placeholder">Connect to CoinGecko...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function log(msg, highlight=false) {
+        const term = document.getElementById('term');
+        const pre = document.createElement('pre');
+        if (highlight) pre.className = 'highlight';
+        pre.textContent = `> ${msg}`;
+        term.appendChild(pre);
+        term.scrollTop = term.scrollHeight;
+    }
+
+    function updateScore(score) {
+        const el = document.getElementById('scoreNum');
+        const desc = document.getElementById('scoreDesc');
+        el.textContent = score;
+        if (score >= 75) { el.style.color = 'var(--green)'; desc.textContent = 'Extreme Greed'; }
+        else if (score >= 55) { el.style.color = '#a3e635'; desc.textContent = 'Greed'; }
+        else if (score >= 45) { el.style.color = '#eab308'; desc.textContent = 'Neutral'; }
+        else if (score >= 25) { el.style.color = '#f97316'; desc.textContent = 'Fear'; }
+        else { el.style.color = 'var(--red)'; desc.textContent = 'Extreme Fear'; }
+    }
+
+    async function runAgent() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.textContent = '> Scanning...';
+        document.getElementById('term').innerHTML = '';
+        
+        log('Initializing Alpha Trend Agent...', true);
+
+        const payload = {
+            query: document.getElementById('query').value.trim() || 'Crypto Market',
+            timeframe: '24h',
+            sources: 'CoinGecko'
+        };
+
+        try {
+            const res = await fetch('/api/v1/spot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': 'dev-trend-key-unsafe' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+            
+            const resp = await res.json();
+            const data = resp.data;
+
+            // Stream logs
+            for (let msg of data.logs) {
+                await new Promise(r => setTimeout(r, 200));
+                log(msg, msg.includes('Gemini') || msg.includes('Successfully'));
+            }
+
+            // Update UI
+            updateScore(data.score);
+            document.getElementById('overviewText').textContent = data.analysis || 'No report generated.';
+            
+            const narrHtml = data.narratives.length > 0 
+                ? data.narratives.map(n => `<div class="narrative-item">${n}</div>`).join('') 
+                : '<div class="narrative-item">No strong narratives detected.</div>';
+            document.getElementById('narrativesList').innerHTML = narrHtml;
+
+            const tokensHtml = data.top_coins.length > 0
+                ? data.top_coins.map(c => `<div class="trending-ticker">🔥 ${c.name} (${c.symbol})</div>`).join('')
+                : '<div class="placeholder">No coin data.</div>';
+            document.getElementById('rawTokens').innerHTML = tokensHtml;
+
+        } catch (e) {
+            log(`Error: ${e.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '> Scan Trends';
+        }
+    }
+</script>
+
+</body>
+</html>

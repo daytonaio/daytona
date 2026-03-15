@@ -1,0 +1,142 @@
+version: "3.9"
+
+services:
+  bid-engine:
+    build:
+      context: ./bid-engine
+    image: agentarena/bid-engine:latest
+    container_name: arena_bid_engine
+    ports:
+      - "8012:8012"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  atlas-agent:
+    build:
+      context: ./atlas-agent
+    image: agentarena/atlas:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - ATLAS_API_KEY=${ATLAS_API_KEY:-dev-atlas-key}
+    restart: unless-stopped
+
+  sniper-agent:
+    build:
+      context: ./sniper-agent
+    image: agentarena/sniper:latest
+    ports:
+      - "8001:8001"
+    environment:
+      - SNIPER_API_KEY=${SNIPER_API_KEY:-dev-sniper-key}
+    restart: unless-stopped
+
+  harvester-agent:
+    build:
+      context: ./harvester-agent
+    image: agentarena/harvester:latest
+    ports:
+      - "8002:8002"
+    environment:
+      - HARVESTER_API_KEY=${HARVESTER_API_KEY:-dev-harvester-key}
+    restart: unless-stopped
+
+  chrono-agent:
+    build:
+      context: ./chrono-agent
+    image: agentarena/chrono:latest
+    ports:
+      - "8003:8003"
+    environment:
+      - CHRONO_API_KEY=${CHRONO_API_KEY:-dev-chrono-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  scribe-agent:
+    build:
+      context: ./scribe-agent
+    image: agentarena/scribe:latest
+    ports:
+      - "8004:8004"
+    environment:
+      - SCRIBE_API_KEY=${SCRIBE_API_KEY:-dev-scribe-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  consigliere-agent:
+    build:
+      context: ./consigliere-agent
+    image: agentarena/consigliere:latest
+    ports:
+      - "8005:8005"
+    environment:
+      - CONSIGLIERE_API_KEY=${CONSIGLIERE_API_KEY:-dev-consigliere-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  trend-agent:
+    build:
+      context: ./trend-agent
+    image: agentarena/trend:latest
+    ports:
+      - "8006:8006"
+    environment:
+      - TREND_API_KEY=${TREND_API_KEY:-dev-trend-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  guardian-agent:
+    build:
+      context: ./guardian-agent
+    image: agentarena/guardian:latest
+    ports:
+      - "8007:8007"
+    environment:
+      - GUARDIAN_API_KEY=${GUARDIAN_API_KEY:-dev-guardian-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  whale-agent:
+    build:
+      context: ./whale-agent
+    image: agentarena/whale:latest
+    ports:
+      - "8008:8008"
+    environment:
+      - WHALE_API_KEY=${WHALE_API_KEY:-dev-whale-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  tax-agent:
+    build:
+      context: ./tax-agent
+    image: agentarena/tax:latest
+    ports:
+      - "8009:8009"
+    environment:
+      - TAX_API_KEY=${TAX_API_KEY:-dev-tax-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  airdrop-agent:
+    build:
+      context: ./airdrop-agent
+    image: agentarena/airdrop:latest
+    ports:
+      - "8010:8010"
+    environment:
+      - AIRDROP_API_KEY=${AIRDROP_API_KEY:-dev-airdrop-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped
+
+  summary-agent:
+    build:
+      context: ./summary-agent
+    image: agentarena/summary:latest
+    ports:
+      - "8011:8011"
+    environment:
+      - SUMMARY_API_KEY=${SUMMARY_API_KEY:-dev-summary-key}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    restart: unless-stopped

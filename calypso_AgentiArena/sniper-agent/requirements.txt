@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+langgraph
+pydantic
+web3

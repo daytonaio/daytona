@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrono | Smart Scheduler Agent</title>
+    <style>
+        :root {
+            --bg: #050810;
+            --blue: #00d4ff;
+            --purple: #9b59b6;
+            --green: #00ff94;
+            --gold: #ffb800;
+            --red: #ff3366;
+            --card: rgba(0, 212, 255, 0.04);
+            --border: rgba(0, 212, 255, 0.3);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--blue);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(0, 212, 255, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.04) 1px, transparent 1px);
+            background-size: 30px 30px;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        header {
+            border: 2px solid var(--blue);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(0,212,255,0.15), inset 0 0 30px rgba(0,212,255,0.03);
+        }
+        header h1 {
+            font-size: 1.8rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--blue);
+        }
+        header p { color: #555; font-size: 0.75rem; letter-spacing: 2px; margin-top: 5px; }
+
+        .layout { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; }
+
+        .panel {
+            border: 1px solid rgba(0,212,255,0.2);
+            background: var(--card);
+            padding: 1.5rem;
+        }
+        .panel h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #444;
+            border-bottom: 1px solid #111;
+            padding-bottom: 0.7rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .field { margin-bottom: 1rem; }
+        .field label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #555;
+            margin-bottom: 0.4rem;
+        }
+        .field input, .field select {
+            width: 100%;
+            background: rgba(0,212,255,0.05);
+            border: 1px solid #2a2a2a;
+            color: #fff;
+            padding: 0.65rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .field input:focus, .field select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 10px rgba(0,212,255,0.2);
+        }
+        .field select option { background: #080c18; }
+
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+        button#scheduleBtn {
+            width: 100%;
+            background: transparent;
+            color: var(--blue);
+            border: 2px solid var(--blue);
+            padding: 0.9rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 0.8rem;
+        }
+        button#scheduleBtn:hover:not(:disabled) {
+            background: var(--blue);
+            color: var(--bg);
+            box-shadow: 0 0 20px var(--blue);
+        }
+        button#scheduleBtn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+
+        /* Console */
+        .console {
+            background: #020508;
+            border: 1px solid #1a2030;
+            border-left: 3px solid var(--blue);
+            padding: 1rem;
+            height: 220px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+        }
+        .console pre { margin: 0 0 6px; white-space: pre-wrap; line-height: 1.5; }
+        .log-info { color: #555; }
+        .log-live { color: var(--blue); }
+        .log-ok { color: var(--green); }
+        .log-warn { color: var(--gold); }
+        .log-queued { color: var(--purple); font-weight: bold; }
+        .log-err { color: var(--red); }
+
+        /* Task queue */
+        .queue-container { grid-column: 1 / -1; }
+        .queue-empty { color: #333; font-size: 0.8rem; text-align: center; padding: 1.5rem 0; }
+
+        .task-card {
+            border: 1px solid #222;
+            padding: 0.9rem 1rem;
+            margin-bottom: 0.6rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1rem;
+            align-items: center;
+        }
+        .task-card.queued { border-left: 3px solid var(--green); }
+        .task-card.pending { border-left: 3px solid var(--gold); }
+
+        .task-badge {
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+        }
+        .badge-queued { background: var(--green); color: #000; }
+        .badge-pending { background: var(--gold); color: #000; }
+
+        .task-info .name { color: #fff; font-size: 0.9rem; }
+        .task-info .detail { color: #555; font-size: 0.75rem; margin-top: 3px; }
+        .task-meta { text-align: right; font-size: 0.75rem; color: #555; }
+        .task-meta .amount { color: var(--blue); font-size: 1rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>> Chrono_Runtime // Smart Scheduler</h1>
+        <p>AUTONOMOUS ON-CHAIN ACTION SCHEDULER // POWERED BY LANGGRAPH + COINGECKO + ETHERSCAN</p>
+    </header>
+
+    <div class="layout">
+        <!-- Input Panel -->
+        <div class="panel">
+            <h3>Schedule New Action</h3>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Action Type</label>
+                    <select id="action_type">
+                        <option value="DCA">DCA (Buy Periodically)</option>
+                        <option value="SALARY">Salary / Payment</option>
+                        <option value="DAO_VOTE">DAO Vote</option>
+                        <option value="REBALANCE">Rebalance</option>
+                        <option value="CUSTOM">Custom</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Token (CoinGecko ID)</label>
+                    <input type="text" id="token" value="bitcoin" placeholder="bitcoin, ethereum...">
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Amount per Execution (USD)</label>
+                    <input type="number" id="amount" value="50" step="10">
+                </div>
+                <div class="field">
+                    <label>Frequency</label>
+                    <select id="frequency">
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly" selected>Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Max Gas (Gwei)</label>
+                    <input type="number" id="gas" value="30" step="5">
+                </div>
+                <div class="field">
+                    <label>Price Trigger (USD) — Optional</label>
+                    <input type="number" id="price_trigger" placeholder="e.g. 60000 for BTC DCA">
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Recipient Address</label>
+                <input type="text" id="recipient" value="0xYourWalletAddress">
+            </div>
+
+            <div class="field">
+                <label>Description</label>
+                <input type="text" id="desc" value="Buy $50 of BTC every week if gas is cheap">
+            </div>
+
+            <button id="scheduleBtn" onclick="runChrono()">> Schedule Action</button>
+        </div>
+
+        <!-- Console Panel -->
+        <div class="panel">
+            <h3>Agent Terminal Output</h3>
+            <div class="console" id="console">
+                <pre class="log-info">Chrono online. Awaiting schedule command...</pre>
+            </div>
+        </div>
+
+        <!-- Task Queue -->
+        <div class="panel queue-container">
+            <h3>Active Task Queue (<span id="queueCount">0</span> tasks)</h3>
+            <div id="queueList">
+                <div class="queue-empty">No tasks scheduled yet. Deploy Chrono to get started.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function log(msg, type = 'info') {
+        const c = document.getElementById('console');
+        const now = new Date();
+        const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        const pre = document.createElement('pre');
+        pre.className = `log-${type}`;
+        pre.textContent = `[${ts}] ${msg}`;
+        c.appendChild(pre);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function addTaskCard(task) {
+        const list = document.getElementById('queueList');
+        list.querySelector('.queue-empty')?.remove();
+
+        const isQueued = task.status === 'QUEUED';
+        const div = document.createElement('div');
+        div.className = `task-card ${isQueued ? 'queued' : 'pending'}`;
+        div.innerHTML = `
+            <span class="task-badge ${isQueued ? 'badge-queued' : 'badge-pending'}">${task.status}</span>
+            <div class="task-info">
+                <div class="name">${task.action_type} — ${task.token} | ${task.frequency_label}</div>
+                <div class="detail">
+                    ID: ${task.task_id} | Gas: ${task.live_snapshot?.gas_gwei} Gwei | 
+                    ${task.token} @ $${(task.live_snapshot?.price_usd || 0).toLocaleString()}
+                    ${task.price_trigger_usd ? ' | Trigger: $' + task.price_trigger_usd.toLocaleString() : ''}
+                </div>
+            </div>
+            <div class="task-meta">
+                <div class="amount">$${task.amount_usd}/exec</div>
+                <div>~$${task.estimated_annual_cost_usd?.toLocaleString()}/yr</div>
+            </div>
+        `;
+        list.appendChild(div);
+        document.getElementById('queueCount').textContent = list.querySelectorAll('.task-card').length;
+    }
+
+    async function runChrono() {
+        const btn = document.getElementById('scheduleBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        document.getElementById('console').innerHTML = '';
+
+        const payload = {
+            action_type: document.getElementById('action_type').value,
+            token: document.getElementById('token').value,
+            amount_usd: parseFloat(document.getElementById('amount').value),
+            recipient_address: document.getElementById('recipient').value,
+            frequency: document.getElementById('frequency').value,
+            max_gas_gwei: parseFloat(document.getElementById('gas').value),
+            description: document.getElementById('desc').value
+        };
+        const trigger = document.getElementById('price_trigger').value;
+        if (trigger) payload.price_trigger_usd = parseFloat(trigger);
+
+        log(`Initializing Chrono for ${payload.action_type} on ${payload.token.toUpperCase()}...`, 'live');
+
+        try {
+            const res = await fetch('/api/v1/schedule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev-chrono-key-unsafe'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail?.message || 'API Error');
+            }
+
+            const resp = await res.json();
+            const data = resp.data;
+
+            for (let i = 0; i < data.messages.length; i++) {
+                await new Promise(r => setTimeout(r, 400));
+                const msg = data.messages[i];
+                let type = 'info';
+                if (msg.includes('Live') || msg.includes('Fetching')) type = 'live';
+                else if (msg.startsWith('✓')) type = 'ok';
+                else if (msg.startsWith('✗') || msg.includes('defer') || msg.includes('PENDING')) type = 'warn';
+                else if (msg.startsWith('✅') || msg.includes('QUEUED')) type = 'queued';
+                log(msg, type);
+            }
+
+            if (data.queued_task) addTaskCard(data.queued_task);
+
+        } catch (e) {
+            log(`Error: ${e.message}`, 'err');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '> Schedule Action';
+        }
+    }
+</script>
+</body>
+</html>

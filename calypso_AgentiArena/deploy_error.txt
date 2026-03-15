@@ -1,0 +1,4 @@
+[dotenv@17.3.1] injecting env (13) from .env -- tip: ≡ƒñû agentic secret storage: https://dotenvx.com/as2
+
+Error HH601: Script scripts/deploy.js doesn't exist.
+For more info go to https://v2.hardhat.org/HH601 or run Hardhat with --show-stack-traces

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scribe | Content Generator Agent</title>
+    <style>
+        :root {
+            --bg: #080510;
+            --purple: #b347ea;
+            --blue: #00d4ff;
+            --green: #00ff94;
+            --gold: #ffb800;
+            --red: #ff3366;
+            --card: rgba(179, 71, 234, 0.04);
+            --border: rgba(179, 71, 234, 0.3);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--purple);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(179,71,234,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(179,71,234,0.04) 1px, transparent 1px);
+            background-size: 25px 25px;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            border: 2px solid var(--purple);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 30px rgba(179,71,234,0.15);
+        }
+        header h1 { font-size: 1.8rem; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 10px var(--purple); }
+        header p { color: #444; font-size: 0.75rem; letter-spacing: 2px; margin-top: 5px; }
+
+        .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--card);
+            padding: 1.5rem;
+        }
+        .panel h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #444;
+            border-bottom: 1px solid #151020;
+            padding-bottom: 0.7rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .field { margin-bottom: 1rem; }
+        .field label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #555; margin-bottom: 0.4rem; }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            background: rgba(179,71,234,0.05);
+            border: 1px solid #2a1a3a;
+            color: #ddd;
+            padding: 0.65rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            resize: vertical;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 10px rgba(179,71,234,0.25);
+        }
+        .field select option { background: #0d0818; }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+        button#runBtn {
+            width: 100%;
+            background: transparent;
+            color: var(--purple);
+            border: 2px solid var(--purple);
+            padding: 0.9rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 0.8rem;
+        }
+        button#runBtn:hover:not(:disabled) {
+            background: var(--purple);
+            color: var(--bg);
+            box-shadow: 0 0 25px var(--purple);
+        }
+        button#runBtn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+
+        /* Output blocks */
+        .output-area {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+        }
+
+        .tweet-list { list-style: none; }
+        .tweet-item {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid #2a1a3a;
+            border-left: 3px solid var(--blue);
+            padding: 0.7rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+        .tweet-item .num { color: var(--blue); font-weight: bold; display: block; margin-bottom: 4px; font-size: 0.7rem; }
+
+        .blog-content {
+            font-size: 0.8rem;
+            color: #aaa;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .bullet-list { list-style: none; }
+        .bullet-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #151015;
+            font-size: 0.8rem;
+            color: #ddd;
+            line-height: 1.5;
+        }
+        .bullet-item::before { content: "▸ "; color: var(--green); }
+
+        .placeholder { color: #333; font-size: 0.8rem; text-align: center; padding: 2rem 0; }
+
+        .status-bar {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #555;
+            border: 1px solid #1a1020;
+            padding: 0.5rem 1rem;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
+        .status-dot.active { background: var(--purple); box-shadow: 0 0 6px var(--purple); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>> Scribe_Runtime // Content Generator</h1>
+        <p>AUTONOMOUS AI CONTENT AGENT // POWERED BY LANGGRAPH + GEMINI 1.5 FLASH</p>
+    </header>
+
+    <div class="layout">
+        <!-- Input Panel -->
+        <div class="panel">
+            <h3>Content Input</h3>
+
+            <div class="field">
+                <label>Topic / Headline</label>
+                <input type="text" id="topic" value="Why AI agents will replace traditional DeFi bots in 2025" placeholder="Enter topic or leave blank if using URL/text">
+            </div>
+
+            <div class="field">
+                <label>Source URL (optional — Scribe will scrape it)</label>
+                <input type="url" id="url" placeholder="https://example.com/article">
+            </div>
+
+            <div class="field">
+                <label>Raw Text / Whitepaper Excerpt (optional)</label>
+                <textarea id="rawtext" rows="4" placeholder="Paste raw text, whitepaper sections, or notes here..."></textarea>
+            </div>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Tone</label>
+                    <select id="tone">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual</option>
+                        <option value="hype" selected>Hype</option>
+                        <option value="academic">Academic</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Audience</label>
+                    <input type="text" id="audience" value="Web3 crypto Twitter">
+                </div>
+            </div>
+
+            <button id="runBtn" onclick="runScribe()">> Generate Content</button>
+        </div>
+
+        <!-- Status Panel -->
+        <div class="panel">
+            <h3>Agent Log</h3>
+            <div id="statusBar" class="status-bar" style="margin-bottom: 1rem;">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Idle — awaiting input</span>
+            </div>
+            <div id="logList" style="font-size:0.8rem; color:#555;">
+                <div class="placeholder">Logs appear here during execution...</div>
+            </div>
+        </div>
+
+        <!-- Output Area -->
+        <div class="output-area">
+
+            <div class="panel">
+                <h3>Twitter / X Thread (<span id="tweetCount">0</span> tweets)</h3>
+                <ul class="tweet-list" id="tweetList">
+                    <div class="placeholder">Thread appears here after generation...</div>
+                </ul>
+            </div>
+
+            <div class="panel">
+                <h3>Blog Post Draft</h3>
+                <div class="blog-content" id="blogContent">
+                    <span class="placeholder">Blog post appears here after generation...</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Key Bullet Points</h3>
+                <ul class="bullet-list" id="bulletList">
+                    <div class="placeholder">Bullet points appear here after generation...</div>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function setStatus(text, active = false) {
+        document.getElementById('statusText').textContent = text;
+        document.getElementById('statusDot').className = 'status-dot' + (active ? ' active' : '');
+    }
+
+    function addLog(msg) {
+        const list = document.getElementById('logList');
+        list.querySelector('.placeholder')?.remove();
+        const div = document.createElement('div');
+        div.style.cssText = 'font-size:0.75rem;color:#666;margin-bottom:5px;line-height:1.4;';
+        const now = new Date();
+        const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        div.textContent = `[${ts}] ${msg}`;
+        list.appendChild(div);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function renderThread(tweets) {
+        const list = document.getElementById('tweetList');
+        list.innerHTML = '';
+        tweets.forEach((tweet, i) => {
+            const li = document.createElement('li');
+            li.className = 'tweet-item';
+            li.innerHTML = `<span class="num">TWEET ${i + 1} • ${tweet.length || 0} CHARS</span>${tweet}`;
+            list.appendChild(li);
+        });
+        document.getElementById('tweetCount').textContent = tweets.length;
+    }
+
+    function renderBlog(text) {
+        document.getElementById('blogContent').textContent = text || 'No blog post generated.';
+    }
+
+    function renderBullets(bullets) {
+        const list = document.getElementById('bulletList');
+        list.innerHTML = '';
+        bullets.forEach(b => {
+            const li = document.createElement('li');
+            li.className = 'bullet-item';
+            li.textContent = b;
+            list.appendChild(li);
+        });
+    }
+
+    async function runScribe() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        document.getElementById('logList').innerHTML = '';
+        setStatus('Initializing Gemini AI pipeline...', true);
+
+        const payload = {
+            tone: document.getElementById('tone').value,
+            audience: document.getElementById('audience').value
+        };
+        const topic = document.getElementById('topic').value.trim();
+        const url = document.getElementById('url').value.trim();
+        const rawtext = document.getElementById('rawtext').value.trim();
+        if (topic) payload.topic = topic;
+        if (url) payload.source_url = url;
+        if (rawtext) payload.raw_text = rawtext;
+
+        try {
+            setStatus('Calling Scribe agent — this may take 5-10s...', true);
+            const res = await fetch('/api/v1/write', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev-scribe-key-unsafe'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail?.message || 'API Error');
+            }
+
+            const resp = await res.json();
+            const data = resp.data;
+
+            data.messages.forEach(m => addLog(m));
+            renderThread(data.twitter_thread || []);
+            renderBlog(data.blog_post || '');
+            renderBullets(data.key_bullets || []);
+            setStatus(`Done — ${data.twitter_thread?.length || 0} tweets + blog post + ${data.key_bullets?.length || 0} bullets generated.`);
+
+        } catch (e) {
+            addLog(`ERROR: ${e.message}`);
+            setStatus(`Failed: ${e.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '> Generate Content';
+        }
+    }
+</script>
+</body>
+</html>

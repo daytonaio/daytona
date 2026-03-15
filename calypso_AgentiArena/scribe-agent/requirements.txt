@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langgraph
+pydantic
+requests
+google-generativeai
+beautifulsoup4

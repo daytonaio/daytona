@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harvester | Yield Optimizer Agent</title>
+    <style>
+        :root {
+            --bg: #040c08;
+            --green: #00ff94;
+            --blue: #00d4ff;
+            --gold: #ffb800;
+            --red: #ff3366;
+            --card: rgba(0, 255, 148, 0.04);
+            --border: rgba(0, 255, 148, 0.25);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background: var(--bg);
+            color: var(--green);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(0,255,148,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,148,0.04) 1px, transparent 1px);
+            background-size: 25px 25px;
+            padding: 2rem;
+        }
+
+        .container { max-width: 960px; margin: 0 auto; }
+
+        header {
+            border: 2px solid var(--green);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 20px rgba(0,255,148,0.2);
+            background: var(--card);
+        }
+        header h1 {
+            font-size: 2rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--green);
+        }
+        header p { color: #666; font-size: 0.85rem; margin-top: 0.4rem; letter-spacing: 1px; }
+
+        .controls-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: end;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #555;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .field input, .field select {
+            width: 100%;
+            background: rgba(0,255,148,0.06);
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.75rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .field input:focus, .field select:focus {
+            outline: none;
+            border-color: var(--green);
+            box-shadow: 0 0 10px rgba(0,255,148,0.25);
+        }
+        .field select option { background: #0a1a0f; }
+
+        button#runBtn {
+            background: transparent;
+            color: var(--green);
+            border: 2px solid var(--green);
+            padding: 0.75rem 2rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        button#runBtn:hover:not(:disabled) {
+            background: var(--green);
+            color: var(--bg);
+            box-shadow: 0 0 25px var(--green);
+        }
+        button#runBtn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--card);
+            padding: 1.5rem;
+        }
+        .panel h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #555;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #1a1a1a;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Pool Cards */
+        .pool-card {
+            border: 1px solid #222;
+            padding: 0.8rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.3s;
+        }
+        .pool-card.best {
+            border-color: var(--green);
+            box-shadow: 0 0 10px rgba(0,255,148,0.15);
+        }
+        .pool-card .left .name { font-size: 0.9rem; color: #fff; font-weight: bold; }
+        .pool-card .left .pool { font-size: 0.75rem; color: #555; margin-top: 2px; }
+        .pool-card .left .risk { font-size: 0.7rem; margin-top: 4px; }
+        .pool-card .right { text-align: right; }
+        .pool-card .right .apy { font-size: 1.3rem; font-weight: bold; color: var(--green); text-shadow: 0 0 8px var(--green); }
+        .pool-card .right .net { font-size: 0.7rem; color: #555; }
+        .risk-low { color: var(--green); }
+        .risk-medium { color: var(--gold); }
+        .risk-high { color: var(--red); }
+        .badge-best { font-size: 0.6rem; background: var(--green); color: #000; padding: 2px 6px; border-radius: 2px; font-weight: bold; margin-left: 6px; }
+
+        /* Projections */
+        .proj-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #111;
+        }
+        .proj-row:last-child { border-bottom: none; }
+        .proj-row .period { color: #555; font-size: 0.85rem; }
+        .proj-row .value { color: #fff; font-weight: bold; }
+        .proj-row .gain { color: var(--green); font-size: 0.8rem; }
+
+        .console {
+            grid-column: 1 / -1;
+            background: #020805;
+            border: 1px solid #1a2a1a;
+            padding: 1rem;
+            height: 180px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            border-left: 3px solid var(--green);
+        }
+        .console pre { margin: 0 0 5px; white-space: pre-wrap; line-height: 1.4; }
+        .log-info { color: #555; }
+        .log-scan { color: var(--blue); }
+        .log-win { color: var(--green); font-weight: bold; text-shadow: 0 0 5px var(--green); }
+        .log-proj { color: var(--gold); }
+        .log-err { color: var(--red); }
+
+        .placeholder { color: #333; font-size: 0.8rem; text-align: center; padding: 2rem 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>> Harvester_Runtime // Yield Optimizer</h1>
+        <p>AUTONOMOUS YIELD FARMING AGENT // POWERED BY LANGGRAPH</p>
+    </header>
+
+    <div class="controls-row">
+        <div class="field">
+            <label>Deposit Token</label>
+            <select id="token">
+                <option value="USDC">USDC (Stablecoin)</option>
+                <option value="ETH">ETH</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Deposit Amount (USD)</label>
+            <input type="number" id="amount" value="5000" step="500" min="100">
+        </div>
+        <button id="runBtn" onclick="runHarvester()">Deploy Harvester</button>
+    </div>
+
+    <div class="grid">
+        <div class="panel" id="poolPanel">
+            <h3>Ranked Protocol Pools</h3>
+            <div class="placeholder" id="poolPlaceholder">Run the agent to see protocol rankings...</div>
+        </div>
+
+        <div class="panel" id="projPanel">
+            <h3>Compounding Projections</h3>
+            <div class="placeholder" id="projPlaceholder">Run the agent to see your growth forecast...</div>
+        </div>
+
+        <div class="console" id="console">
+            <pre class="log-info">System initialized. Awaiting harvest command...</pre>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function log(msg, type = 'info') {
+        const c = document.getElementById('console');
+        const now = new Date();
+        const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        const pre = document.createElement('pre');
+        pre.className = `log-${type}`;
+        pre.textContent = `[${ts}] > ${msg}`;
+        c.appendChild(pre);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function renderPools(ranked) {
+        const panel = document.getElementById('poolPanel');
+        const placeholder = document.getElementById('poolPlaceholder');
+        if (placeholder) placeholder.remove();
+
+        // Clear previous
+        panel.querySelectorAll('.pool-card').forEach(el => el.remove());
+
+        ranked.forEach((pool, i) => {
+            const card = document.createElement('div');
+            card.className = 'pool-card' + (i === 0 ? ' best' : '');
+            const riskClass = pool.risk === 'Low' ? 'risk-low' : pool.risk === 'Medium' ? 'risk-medium' : 'risk-high';
+            card.innerHTML = `
+                <div class="left">
+                    <div class="name">${pool.protocol}${i === 0 ? '<span class="badge-best">BEST</span>' : ''}</div>
+                    <div class="pool">${pool.pool}</div>
+                    <div class="risk ${riskClass}">${pool.risk} Risk</div>
+                </div>
+                <div class="right">
+                    <div class="apy">${pool.apy}%</div>
+                    <div class="net">net ${pool.net_apy}% APY</div>
+                </div>
+            `;
+            panel.appendChild(card);
+        });
+    }
+
+    function renderProjections(plan) {
+        const panel = document.getElementById('projPanel');
+        const placeholder = document.getElementById('projPlaceholder');
+        if (placeholder) placeholder.remove();
+
+        panel.querySelectorAll('.proj-row').forEach(el => el.remove());
+
+        const proj = plan.projections;
+        const rows = [
+            { period: '1 Week', data: proj.week_1 },
+            { period: '1 Month', data: proj.month_1 },
+            { period: '1 Year', data: proj.year_1 },
+        ];
+
+        rows.forEach(r => {
+            const div = document.createElement('div');
+            div.className = 'proj-row';
+            div.innerHTML = `
+                <span class="period">${r.period}</span>
+                <div style="text-align:right">
+                    <span class="value">$${r.data.value.toLocaleString('en-US', {minimumFractionDigits:2})}</span><br>
+                    <span class="gain">+$${r.data.gain.toLocaleString('en-US', {minimumFractionDigits:2})} profit</span>
+                </div>
+            `;
+            panel.appendChild(div);
+        });
+    }
+
+    async function runHarvester() {
+        const token = document.getElementById('token').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const btn = document.getElementById('runBtn');
+
+        btn.disabled = true;
+        btn.textContent = 'Scanning...';
+        document.getElementById('console').innerHTML = '';
+        log(`Initiating harvest scan for ${token} @ $${amount.toLocaleString()}...`, 'scan');
+
+        try {
+            const res = await fetch('/api/v1/harvest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev-harvester-key-unsafe'
+                },
+                body: JSON.stringify({ deposit_token: token, deposit_amount_usd: amount })
+            });
+
+            if (!res.ok) throw new Error('API Error');
+            const data = await res.json();
+            const result = data.data;
+
+            for (let i = 0; i < result.messages.length; i++) {
+                await new Promise(r => setTimeout(r, 350));
+                const msg = result.messages[i];
+                let type = 'info';
+                if (msg.includes('WINNER')) type = 'win';
+                else if (msg.includes('Scanned') || msg.includes('Ranked')) type = 'scan';
+                else if (msg.includes('Week') || msg.includes('Month') || msg.includes('Year')) type = 'proj';
+                log(msg, type);
+            }
+
+            if (result.ranked_pools?.length) renderPools(result.ranked_pools);
+            if (result.compounding_plan?.projections) renderProjections(result.compounding_plan);
+
+        } catch (e) {
+            log('Critical error communicating with Harvester backend.', 'err');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Deploy Harvester';
+        }
+    }
+</script>
+</body>
+</html>

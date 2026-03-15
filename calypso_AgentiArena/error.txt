@@ -1,0 +1,7 @@
+[dotenv@17.3.1] injecting env (0) from .env -- tip: ΓÜí∩╕Å secrets for agents: https://dotenvx.com/as2
+CompilerError: Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables. When compiling inline assembly: Variable value1 is 2 slot(s) too deep inside the stack. Stack too deep. Try compiling with `--via-ir` (cli) or the equivalent `viaIR: true` (standard JSON) while enabling the optimizer. Otherwise, try removing local variables.
+
+
+
+Error HH600: Compilation failed
+For more info go to https://v2.hardhat.org/HH600 or run Hardhat with --show-stack-traces

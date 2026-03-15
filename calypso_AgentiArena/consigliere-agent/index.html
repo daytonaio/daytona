@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consigliere | Business Intelligence Agent</title>
+    <style>
+        :root {
+            --bg: #08060a;
+            --gold: #d4a017;
+            --gold-dim: rgba(212,160,23,0.6);
+            --blue: #00d4ff;
+            --green: #00ff94;
+            --red: #ff3366;
+            --card: rgba(212,160,23,0.03);
+            --border: rgba(212,160,23,0.25);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--gold);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            background-image:
+                linear-gradient(rgba(212,160,23,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212,160,23,0.03) 1px, transparent 1px);
+            background-size: 28px 28px;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        header {
+            border: 2px solid var(--gold);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 0 30px rgba(212,160,23,0.12);
+        }
+        header h1 { font-size: 1.7rem; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 0 10px var(--gold-dim); }
+        header p { color: #444; font-size: 0.72rem; letter-spacing: 2px; margin-top: 5px; }
+
+        .top-row { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+
+        .panel {
+            border: 1px solid var(--border);
+            background: var(--card);
+            padding: 1.5rem;
+        }
+        .panel h3 {
+            font-size: 0.68rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #3a3020;
+            border-bottom: 1px solid #1a1410;
+            padding-bottom: 0.7rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .field { margin-bottom: 1rem; }
+        .field label { display: block; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 1px; color: #554a30; margin-bottom: 0.4rem; }
+        .field input, .field textarea {
+            width: 100%;
+            background: rgba(212,160,23,0.04);
+            border: 1px solid #2a2010;
+            color: #ddc;
+            padding: 0.65rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+            resize: vertical;
+        }
+        .field input:focus, .field textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 10px rgba(212,160,23,0.2);
+        }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+
+        button#runBtn {
+            width: 100%;
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: 0.9rem;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.25s;
+            margin-top: 0.8rem;
+        }
+        button#runBtn:hover:not(:disabled) {
+            background: var(--gold);
+            color: var(--bg);
+            box-shadow: 0 0 25px var(--gold);
+        }
+        button#runBtn:disabled { border-color: #333; color: #333; cursor: not-allowed; }
+
+        /* Financials ticker strip */
+        .fin-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .fin-stat {
+            border: 1px solid #1a1410;
+            padding: 0.6rem;
+            text-align: center;
+        }
+        .fin-stat .label { font-size: 0.6rem; color: #444; text-transform: uppercase; letter-spacing: 1px; }
+        .fin-stat .value { font-size: 1rem; color: #fff; font-weight: bold; margin-top: 2px; }
+        .fin-stat .rec { font-size: 0.65rem; margin-top: 2px; }
+        .rec-buy { color: var(--green); }
+        .rec-hold { color: var(--gold); }
+        .rec-sell { color: var(--red); }
+
+        /* Agent log */
+        .console {
+            background: #040302;
+            border: 1px solid #1a1410;
+            border-left: 3px solid var(--gold);
+            padding: 1rem;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 0.78rem;
+        }
+        .console pre { margin: 0 0 5px; white-space: pre-wrap; line-height: 1.5; color: #554830; }
+        .console pre.active { color: var(--gold); }
+
+        /* Bottom section */
+        .bottom-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+
+        /* Briefing */
+        .briefing-text {
+            font-size: 0.8rem;
+            color: #aa9870;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        /* SWOT */
+        .swot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .swot-cell { border: 1px solid #1a1410; padding: 0.7rem; }
+        .swot-cell h4 { font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 0.5rem; text-transform: uppercase; }
+        .swot-cell.s h4 { color: var(--green); }
+        .swot-cell.w h4 { color: var(--red); }
+        .swot-cell.o h4 { color: var(--blue); }
+        .swot-cell.t h4 { color: #ff8800; }
+        .swot-list { list-style: none; }
+        .swot-list li { font-size: 0.75rem; color: #888; padding: 2px 0; line-height: 1.4; }
+        .swot-list li::before { content: "▸ "; color: #444; }
+
+        /* Recs & Risks */
+        .rec-item {
+            border: 1px solid #1a1410;
+            border-left: 3px solid var(--gold);
+            padding: 0.7rem;
+            margin-bottom: 0.5rem;
+        }
+        .rec-item .num { font-size: 0.65rem; color: #444; display: block; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
+        .rec-item p { font-size: 0.8rem; color: #ccc; line-height: 1.5; }
+
+        .risk-item {
+            border: 1px solid #1a1410;
+            border-left: 3px solid var(--red);
+            padding: 0.6rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.78rem;
+            color: #ff6666;
+        }
+
+        .placeholder { color: #2a2010; font-size: 0.8rem; text-align: center; padding: 1.5rem 0; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>> Consigliere_Runtime // Business Intelligence</h1>
+        <p>AUTONOMOUS STRATEGY ADVISOR // YAHOO FINANCE + GEMINI 1.5 FLASH // LIVE MARKET DATA</p>
+    </header>
+
+    <div class="top-row">
+        <!-- Input -->
+        <div class="panel">
+            <h3>Intelligence Brief</h3>
+
+            <div class="field-row">
+                <div class="field">
+                    <label>Stock / Crypto Ticker</label>
+                    <input type="text" id="ticker" value="AAPL" placeholder="AAPL, TSLA, BTC-USD...">
+                </div>
+                <div class="field">
+                    <label>Industry (optional)</label>
+                    <input type="text" id="industry" value="Consumer Electronics" placeholder="SaaS, DeFi, EV...">
+                </div>
+            </div>
+
+            <div class="field">
+                <label>Business Question (optional)</label>
+                <input type="text" id="question" value="Should we build competing products in this market?" placeholder="e.g. Is this a good acquisition target?">
+            </div>
+
+            <div class="field">
+                <label>Company Name (if no ticker)</label>
+                <input type="text" id="company" placeholder="Useful for private companies or startups">
+            </div>
+
+            <button id="runBtn" onclick="runConsigliere()">> Get Intelligence Briefing</button>
+        </div>
+
+        <!-- Agent Log -->
+        <div class="panel">
+            <h3>Agent Log</h3>
+            <div id="finStrip" class="fin-strip" style="display:none;"></div>
+            <div class="console" id="console">
+                <pre>Consigliere online. Awaiting briefing request...</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div class="bottom-row">
+        <div class="panel">
+            <h3>Executive Briefing</h3>
+            <div class="briefing-text" id="briefing">
+                <span class="placeholder">Briefing appears here after analysis...</span>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>SWOT Analysis</h3>
+            <div id="swot">
+                <div class="placeholder">SWOT appears here after analysis...</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Strategic Recommendations + Risks</h3>
+            <div id="recs">
+                <div class="placeholder">Recommendations appear here...</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function log(msg, active = false) {
+        const c = document.getElementById('console');
+        const now = new Date();
+        const ts = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+        const pre = document.createElement('pre');
+        if (active) pre.className = 'active';
+        pre.textContent = `[${ts}] ${msg}`;
+        c.appendChild(pre);
+        c.scrollTop = c.scrollHeight;
+    }
+
+    function fmtNum(n, prefix='$', suffix='') {
+        if (!n || n === 'N/A') return 'N/A';
+        if (n >= 1e12) return prefix + (n/1e12).toFixed(1) + 'T' + suffix;
+        if (n >= 1e9)  return prefix + (n/1e9).toFixed(1) + 'B' + suffix;
+        if (n >= 1e6)  return prefix + (n/1e6).toFixed(1) + 'M' + suffix;
+        return prefix + n.toFixed(2) + suffix;
+    }
+
+    function renderFinStrip(fd) {
+        const strip = document.getElementById('finStrip');
+        strip.style.display = 'grid';
+        const rec = (fd.recommendation || 'n/a').toLowerCase();
+        const recClass = rec.includes('buy') || rec.includes('strong') ? 'rec-buy' : rec.includes('sell') ? 'rec-sell' : 'rec-hold';
+        strip.innerHTML = `
+            <div class="fin-stat">
+                <div class="label">Market Cap</div>
+                <div class="value">${fmtNum(fd.market_cap_usd)}</div>
+            </div>
+            <div class="fin-stat">
+                <div class="label">Revenue (TTM)</div>
+                <div class="value">${fmtNum(fd.revenue_ttm)}</div>
+            </div>
+            <div class="fin-stat">
+                <div class="label">Net Margin</div>
+                <div class="value">${fd.profit_margin ? (fd.profit_margin*100).toFixed(1)+'%' : 'N/A'}</div>
+            </div>
+            <div class="fin-stat">
+                <div class="label">Analyst</div>
+                <div class="value" style="font-size:0.75rem;">${fd.current_price !== 'N/A' ? '$'+fd.current_price : ''}</div>
+                <div class="rec ${recClass}">${(fd.recommendation || 'N/A').toUpperCase()}</div>
+            </div>
+        `;
+    }
+
+    function renderSwot(swot) {
+        const el = document.getElementById('swot');
+        el.innerHTML = `<div class="swot-grid">
+            <div class="swot-cell s">
+                <h4>Strengths</h4>
+                <ul class="swot-list">${(swot.strengths||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
+            </div>
+            <div class="swot-cell w">
+                <h4>Weaknesses</h4>
+                <ul class="swot-list">${(swot.weaknesses||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
+            </div>
+            <div class="swot-cell o">
+                <h4>Opportunities</h4>
+                <ul class="swot-list">${(swot.opportunities||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
+            </div>
+            <div class="swot-cell t">
+                <h4>Threats</h4>
+                <ul class="swot-list">${(swot.threats||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
+            </div>
+        </div>`;
+    }
+
+    function renderRecs(recs, risks) {
+        const el = document.getElementById('recs');
+        let html = '';
+        (recs||[]).forEach((r, i) => {
+            html += `<div class="rec-item"><span class="num">Recommendation ${i+1}</span><p>${r}</p></div>`;
+        });
+        if ((risks||[]).length) {
+            html += `<div style="font-size:0.65rem;color:#554;text-transform:uppercase;letter-spacing:2px;margin:0.8rem 0 0.4rem;">Risk Flags</div>`;
+            (risks||[]).forEach(r => {
+                html += `<div class="risk-item">⚠ ${r}</div>`;
+            });
+        }
+        el.innerHTML = html || '<div class="placeholder">No recommendations generated.</div>';
+    }
+
+    async function runConsigliere() {
+        const btn = document.getElementById('runBtn');
+        btn.disabled = true;
+        btn.textContent = 'Analyzing...';
+        document.getElementById('console').innerHTML = '';
+        document.getElementById('finStrip').style.display = 'none';
+
+        const payload = {};
+        const ticker  = document.getElementById('ticker').value.trim();
+        const company = document.getElementById('company').value.trim();
+        const question = document.getElementById('question').value.trim();
+        const industry = document.getElementById('industry').value.trim();
+        if (ticker)   payload.ticker = ticker;
+        if (company)  payload.company_name = company;
+        if (question) payload.business_question = question;
+        if (industry) payload.industry = industry;
+
+        log(`Initializing Consigliere for ${ticker || company || 'general analysis'}...`, true);
+
+        try {
+            const res = await fetch('/api/v1/advise', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev-consigliere-key-unsafe'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.detail?.message || 'API Error');
+            }
+
+            const resp = await res.json();
+            const data = resp.data;
+
+            for (let i = 0; i < data.messages.length; i++) {
+                await new Promise(r => setTimeout(r, 350));
+                log(data.messages[i], data.messages[i].includes('Gemini') || data.messages[i].includes('Generating'));
+            }
+
+            if (data.financial_data && data.financial_data.market_cap_usd) renderFinStrip(data.financial_data);
+            document.getElementById('briefing').textContent = data.executive_briefing || 'No briefing generated.';
+            if (data.swot_analysis) renderSwot(data.swot_analysis);
+            renderRecs(data.strategic_recommendations, data.risk_flags);
+
+        } catch (e) {
+            log(`ERROR: ${e.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = '> Get Intelligence Briefing';
+        }
+    }
+</script>
+</body>
+</html>

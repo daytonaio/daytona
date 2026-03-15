@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+langgraph
+pydantic
+requests
+google-generativeai
+yfinance
+beautifulsoup4

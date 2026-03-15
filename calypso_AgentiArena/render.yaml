@@ -1,0 +1,108 @@
+services:
+  - type: web
+    name: bid-engine
+    env: docker
+    rootDir: bid-engine
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+  
+  - type: web
+    name: atlas-agent
+    env: docker
+    rootDir: atlas-agent
+    plan: free
+  
+  - type: web
+    name: sniper-agent
+    env: docker
+    rootDir: sniper-agent
+    plan: free
+
+  - type: web
+    name: harvester-agent
+    env: docker
+    rootDir: harvester-agent
+    plan: free
+
+  - type: web
+    name: chrono-agent
+    env: docker
+    rootDir: chrono-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: scribe-agent
+    env: docker
+    rootDir: scribe-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: consigliere-agent
+    env: docker
+    rootDir: consigliere-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: trend-agent
+    env: docker
+    rootDir: trend-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: guardian-agent
+    env: docker
+    rootDir: guardian-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: whale-agent
+    env: docker
+    rootDir: whale-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: tax-agent
+    env: docker
+    rootDir: tax-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: airdrop-agent
+    env: docker
+    rootDir: airdrop-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+
+  - type: web
+    name: summary-agent
+    env: docker
+    rootDir: summary-agent
+    plan: free
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false

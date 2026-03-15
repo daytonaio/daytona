@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+langgraph
+pydantic
+web3
+requests
+apscheduler
