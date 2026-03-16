@@ -102,7 +102,7 @@ The agent will start and wait for your prompt.
 
 ### 3. Understanding the Script
 
-This example uses Amp's `--stream-json` and `--stream-json-input` modes for programmatic control of the CLI. This allows bidirectional communication via JSON messages over a PTY.
+This example uses Amp's `--stream-json` mode for streaming output and the `-x` (execute) flag for autonomous operation. Commands are sent via a PTY (pseudo-terminal) for real-time streaming.
 
 #### Initialization
 
@@ -110,103 +110,109 @@ On startup, the script:
 
 1. Creates a new [Daytona sandbox](/docs/en/sandboxes) with the Amp API key.
 2. Installs the Amp CLI globally in the sandbox.
-3. Creates a PTY for bidirectional communication with Amp.
-4. Starts Amp in streaming JSON mode with `--execute` and `--dangerously-allow-all` for autonomous operation.
-5. Sends a Daytona-aware system prompt as the first user message (preview URL pattern, server commands with `&` as last action).
-6. Enters the readline loop to send prompts and receive streamed responses.
-7. On Ctrl+C, deletes the sandbox and exits.
+3. Creates a PTY for streaming output from Amp.
+4. Sends a Daytona-aware system prompt as the first user message (preview URL pattern, server commands with `&` as last action).
+5. Enters the readline loop to send prompts and receive streamed responses.
+6. On Ctrl+C, kills the PTY session, deletes the sandbox, and exits.
 
 #### PTY Communication
 
-The agent uses a pseudo-terminal (PTY) for bidirectional communication with Amp:
+The agent uses a pseudo-terminal (PTY) for streaming output from Amp:
 
 ```ts
-// Create a PTY for bidirectional communication with Amp
+// Create a PTY for streaming output from Amp
 this.ptyHandle = await this.sandbox.process.createPty({
-  id: 'amp-pty',
-  cols: 200,
-  rows: 50,
+  id: `amp-pty-${Date.now()}`,
+  cols: 120,
+  rows: 30,
   onData: (data: Uint8Array) => this.handleData(data),
 })
 
 // Wait for PTY connection
 await this.ptyHandle.waitForConnection()
+```
 
-// Start Amp CLI: --stream-json requires --execute
-const ampCommand = [
-  'amp',
-  '--dangerously-allow-all',
-  '--execute',
-  '--stream-json',
-  '--stream-json-input',
-  '-m smart',
-].join(' ')
+#### Running Amp Commands
 
-await this.ptyHandle.sendInput(`${ampCommand}\n`)
+Each prompt is sent as an `amp` command with the `-x` (execute) flag for autonomous operation. The agent uses Amp's thread system to maintain conversation context:
+
+```ts
+// Run an amp command via PTY and wait for completion
+private async runAmpCommand(args: string[]): Promise<void> {
+  const command = ['amp', '--dangerously-allow-all', '--stream-json', '-m smart', ...args].join(' ')
+
+  // Send command to the PTY
+  await this.ptyHandle.sendInput(`cd /home/daytona && ${command}\n`)
+
+  // Wait for the response to complete (signaled by result message)
+  await new Promise<void>((resolve) => {
+    this.onResponseComplete = resolve
+  })
+}
+
+// Process a user prompt
+async processPrompt(prompt: string): Promise<void> {
+  if (this.threadId) {
+    // Continue existing thread
+    await this.runAmpCommand(['-x', JSON.stringify(prompt), 'threads', 'continue', this.threadId])
+  } else {
+    // Start new thread
+    await this.runAmpCommand(['-x', JSON.stringify(prompt)])
+  }
+}
 ```
 
 #### Streaming JSON Messages
 
-Amp outputs JSON lines that can be parsed to track agent activity. Control is returned to the user (response complete) only when:
-
-- **end_turn**: The assistant sends a normal end-of-turn message.
-- **result**: Amp sends a final result message (success or error).
-- **Background command**: The last content block is a tool use whose command ends with `&`, so the script returns control immediately instead of waiting for the tool result.
+Amp outputs JSON lines that can be parsed to track agent activity. The `handleData` method buffers incoming data and processes complete lines:
 
 ```ts
-handleParsedMessage(parsed: AmpMessage): string | undefined {
-  if (parsed.type === 'system' && parsed.subtype === 'init') {
-    this.onAgentInitialized?.()
-  } else if (parsed.type === 'assistant') {
-    const msg = parsed as AssistantMessage
-    // Display text and tool_use blocks; check if last block is tool_use with cmd ending in &
-    for (const block of msg.message.content) {
-      if (block.type === 'text') { /* render text */ }
-      else if (block.type === 'tool_use') { /* display tool */ }
-    }
-    if (msg.message?.stop_reason === 'end_turn') this.onResponseComplete?.()
-    else if (lastBlockIsBackgroundCmd) this.onResponseComplete?.()  // last block: cmd ends with &
-  } else if (parsed.type === 'user') {
-    // Tool results: display output (do not complete here)
-  } else if (parsed.type === 'result') {
-    this.onResponseComplete?.()
+// Handle streamed data from PTY
+private handleData(data: Uint8Array): void {
+  // Append new data to the buffer
+  this.buffer += new TextDecoder().decode(data)
+  // Split the buffer into complete lines
+  const lines = this.buffer.split('\n')
+  // Keep any incomplete line in the buffer for next time
+  this.buffer = lines.pop() || ''
+  // Process each complete line
+  for (const line of lines.filter((l) => l.trim())) {
+    this.handleJsonLine(line)
   }
 }
 ```
 
 Message types from Amp's streaming JSON:
-- **system**: Session initialization with `subtype: 'init'`
-- **assistant**: AI responses with text content and tool usage; may include `stop_reason` (`end_turn` or `tool_use`)
-- **user**: Tool results (output from executed tools); displayed but do not trigger completion
-- **result**: Final execution result (success or error)
-
-#### Sending User Messages
-
-User prompts are sent as JSON lines matching Amp's `--stream-json-input` format. The script waits for the response to complete (end_turn, result, or background `&` command) and uses a timeout so the user is not blocked indefinitely:
+- **system**: Session initialization with `subtype: 'init'` and `session_id` for thread tracking
+- **assistant**: AI responses with text content and tool usage blocks
+- **user**: Tool results (output from executed tools)
+- **result**: Final execution result (success or error) - signals response completion
 
 ```ts
-async processPrompt(prompt: string): Promise<void> {
-  const message = JSON.stringify({
-    type: 'user',
-    message: {
-      role: 'user',
-      content: [{ type: 'text', text: prompt }],
-    },
-  })
-  this.isSendingInput = true
-  await this.ptyHandle.sendInput(message + '\n')
+private handleJsonLine(line: string): void {
+  const parsed = JSON.parse(line) as AmpMessage
 
-  // Wait for end_turn, result, or & as last action; timeout after 120s
-  await new Promise<string | undefined>((resolve) => {
-    this.onResponseComplete = resolve
-    // ... timeout clears resolve after 120_000 ms
-  })
+  if (parsed.type === 'system' && parsed.subtype === 'init') {
+    // Capture thread ID for conversation continuation
+    this.threadId = parsed.session_id
+  } else if (parsed.type === 'assistant') {
+    // Display text and tool_use blocks
+    for (const block of msg.message.content) {
+      if (block.type === 'text') { /* render text */ }
+      else if (block.type === 'tool_use') { /* display tool */ }
+    }
+  } else if (parsed.type === 'user') {
+    // Tool results: display output
+  } else if (parsed.type === 'result') {
+    // Signal response completion
+    this.onResponseComplete?.()
+  }
 }
 ```
 
-#### System prompt and main loop
+#### System Prompt and Main Loop
 
-A Daytona-aware system prompt is sent as the first user message (Amp has no system prompt functionality). It instructs the agent to use the preview URL pattern, to always end server commands with `&` and run them as the last action in a turn, and to give the preview URL before starting the server:
+A Daytona-aware system prompt is sent as the first user message. It instructs the agent to use the preview URL pattern, to always end server commands with `&` and run them as the last action in a turn, and to give the preview URL before starting the server:
 
 ```ts
 const defaultSystemPrompt = [
@@ -238,7 +244,8 @@ The readline loop waits for user input, sends it to the agent, and displays the 
 
 - Secure, isolated execution in Daytona sandboxes
 - Streaming JSON output for real-time tool activity feedback
-- PTY-based communication for interactive sessions
+- PTY-based communication for streaming output
+- Thread-based conversation continuity across prompts
 - Uses Amp's `smart` mode for state-of-the-art model capabilities
 - All agent code execution happens inside the sandbox
 - Automatic preview link generation for deployed services
