@@ -19,17 +19,20 @@ RUN yarn install --immutable
 # Nx config
 COPY nx.json ./
 
-# Go source
+# Go dependency layer (cached unless go.mod/go.sum change)
 COPY go.work go.work.sum ./
-COPY apps/ssh-gateway/ apps/ssh-gateway/
-COPY libs/api-client-go/ libs/api-client-go/
+COPY apps/ssh-gateway/go.mod apps/ssh-gateway/go.sum apps/ssh-gateway/
+COPY libs/api-client-go/go.mod libs/api-client-go/go.sum libs/api-client-go/
 RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/ssh-gateway\n\t./libs/api-client-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
 
-ARG VERSION=0.0.1
-ENV VERSION=${VERSION}
 ENV NX_DAEMON=false
-
 ENV GONOSUMDB=github.com/daytonaio/daytona
+
+RUN go mod download
+
+# Go source
+COPY apps/ssh-gateway/ apps/ssh-gateway/
+COPY libs/api-client-go/ libs/api-client-go/
 
 RUN yarn nx build ssh-gateway --configuration=production --nxBail=true
 

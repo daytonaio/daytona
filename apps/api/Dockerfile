@@ -27,13 +27,14 @@ COPY libs/analytics-api-client/ libs/analytics-api-client/
 COPY libs/toolbox-api-client/ libs/toolbox-api-client/
 COPY libs/sdk-typescript/ libs/sdk-typescript/
 
-ARG VERSION=0.0.1
-ENV VERSION=${VERSION}
 ENV NX_DAEMON=false
 
 RUN yarn nx build api --configuration=production --nxBail=true
 
 RUN VITE_BASE_API_URL=%DAYTONA_BASE_API_URL% yarn nx build dashboard --configuration=production --nxBail=true --output-style=stream
+
+ARG VERSION=0.0.1
+ENV VERSION=${VERSION}
 
 HEALTHCHECK CMD [ "curl", "-f", "http://localhost:3000/api/config" ]
 

@@ -58,6 +58,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           tags: ${{ env.REGISTRY_IMAGE }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=daytonaio/sandbox:buildcache-${{ env.PLATFORM_PAIR }}
+          cache-to: type=registry,ref=daytonaio/sandbox:buildcache-${{ env.PLATFORM_PAIR }},mode=max
 
       - name: Export sandbox digest
         run: |
@@ -74,6 +76,8 @@ jobs:
           platforms: ${{ matrix.platform }}
           tags: ${{ env.REGISTRY_IMAGE }}
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=registry,ref=daytonaio/sandbox:buildcache-slim-${{ env.PLATFORM_PAIR }}
+          cache-to: type=registry,ref=daytonaio/sandbox:buildcache-slim-${{ env.PLATFORM_PAIR }},mode=max
 
       - name: Export sandbox-slim digest
         run: |

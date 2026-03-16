@@ -19,19 +19,23 @@ RUN yarn install --immutable
 # Nx config
 COPY nx.json ./
 
-# Go source
+# Go dependency layer (cached unless go.mod/go.sum change)
 COPY go.work go.work.sum ./
+COPY apps/otel-collector/exporter/go.mod apps/otel-collector/exporter/go.sum apps/otel-collector/exporter/
+COPY libs/api-client-go/go.mod libs/api-client-go/go.sum libs/api-client-go/
+COPY libs/common-go/go.mod libs/common-go/go.sum libs/common-go/
+RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/otel-collector/exporter\n\t./libs/api-client-go\n\t./libs/common-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
+
+ENV NX_DAEMON=false
+ENV GONOSUMDB=github.com/daytonaio/daytona
+
+RUN go mod download
+
+# Go source
 COPY apps/otel-collector/ apps/otel-collector/
 COPY libs/api-client-go/ libs/api-client-go/
 COPY libs/common-go/ libs/common-go/
-RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/otel-collector/exporter\n\t./libs/api-client-go\n\t./libs/common-go\n)\n' >> go.work.tmp && mv go.work.tmp go.work
 RUN mkdir -p dist/apps/otel-collector
-
-ARG VERSION=0.0.1
-ENV VERSION=${VERSION}
-ENV NX_DAEMON=false
-
-ENV GONOSUMDB=github.com/daytonaio/daytona
 
 RUN yarn nx build otel-collector --configuration=production --nxBail=true
 
