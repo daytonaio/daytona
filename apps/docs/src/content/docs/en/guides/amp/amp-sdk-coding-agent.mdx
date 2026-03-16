@@ -193,9 +193,11 @@ private handleJsonLine(line: string): void {
 
   if (parsed.type === 'system' && parsed.subtype === 'init') {
     // Capture thread ID for conversation continuation
-    this.threadId = parsed.session_id
+    const sysMsg = parsed as { session_id?: string }
+    if (sysMsg.session_id) this.threadId = sysMsg.session_id
   } else if (parsed.type === 'assistant') {
     // Display text and tool_use blocks
+    const msg = parsed as AssistantMessage
     for (const block of msg.message.content) {
       if (block.type === 'text') { /* render text */ }
       else if (block.type === 'tool_use') { /* display tool */ }
@@ -217,7 +219,7 @@ A Daytona-aware system prompt is sent as the first user message. It instructs th
 const defaultSystemPrompt = [
   'You are running in a Daytona sandbox.',
   `When running services on localhost, they will be accessible as: ${previewUrlPattern}`,
-  'ALWAYS end server commands with & so it runs in the background.',
+  'ALWAYS end server commands with & so it runs in the background. For example, "(npm start) &" or "(python3 -m http.server 8000) &".',
   'ALWAYS run server commands as the last action in your turn.',
   'If you start a server, FIRST give the user the preview URL and THEN run the server command.',
 ].join(' ')
