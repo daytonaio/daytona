@@ -36,7 +36,8 @@ type PTYManager struct {
 type wsClient struct {
 	id        string
 	conn      *websocket.Conn
-	send      chan []byte // outbound queue for this client (PTY -> WS)
+	send      chan []byte   // outbound queue for this client (PTY -> WS)
+	done      chan struct{} // closed when the client is shutting down
 	closeOnce sync.Once
 }
 

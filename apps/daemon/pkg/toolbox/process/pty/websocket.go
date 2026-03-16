@@ -18,6 +18,7 @@ func (s *PTYSession) attachWebSocket(ws *websocket.Conn) {
 		id:   uuid.NewString(),
 		conn: ws,
 		send: make(chan []byte, 256), // if full, drop slow client
+		done: make(chan struct{}),
 	}
 
 	// Register client FIRST so it can receive PTY output via broadcast
@@ -55,10 +56,9 @@ func (s *PTYSession) clientWriter(cl *wsClient) {
 		select {
 		case <-s.ctx.Done():
 			return
-		case b, ok := <-cl.send:
-			if !ok {
-				return
-			}
+		case <-cl.done:
+			return
+		case b := <-cl.send:
 			_ = cl.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := cl.conn.WriteMessage(websocket.BinaryMessage, b); err != nil {
 				return
@@ -98,6 +98,8 @@ func (s *PTYSession) broadcast(b []byte) {
 	for id, cl := range s.clients.Items() {
 		select {
 		case cl.send <- b:
+		case <-cl.done:
+			// client is shutting down, skip
 		default:
 			// client's outbound queue is full -> drop the client
 			go func(id string, cl *wsClient) {
