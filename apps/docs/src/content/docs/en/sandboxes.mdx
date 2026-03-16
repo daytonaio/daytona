@@ -473,7 +473,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 
 ## List Sandboxes
 
-Daytona provides options to view information about sandboxes (ID, root directory, and status) and manage their lifecycle.
+Daytona provides options to view information about sandboxes in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) via the [sandbox details page](#sandbox-details-page) or programmatically using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references.
 
 <Tabs syncKey="language">
 <TabItem label="Python" icon="seti:python">
@@ -566,6 +566,32 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**list (CLI)**](/docs/en/tools/cli/#daytona-list)
 >
 > [**list (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox)
+
+### Sandbox details page
+
+[Daytona Dashboard ↗](https://app.daytona.io/dashboard/) provides a sandbox details page to view detailed information about a sandbox and interact with it directly.
+
+1. Navigate to [Daytona Sandboxes ↗](https://app.daytona.io/dashboard/sandboxes)
+2. Click on a sandbox to open its details page
+
+The sandbox details page provides a summary of the sandbox information and actions to perform on the sandbox:
+
+- **Name**: the name of the sandbox
+- **UUID**: the unique identifier of the sandbox
+- **State**: the sandbox state with a visual indicator
+- **Actions**: [start](#start-sandboxes), [stop](#stop-sandboxes), [recover](#recover-sandboxes), [archive](#archive-sandboxes), [delete](#delete-sandboxes), refresh, [SSH access](/docs/en/ssh-access), [screen recordings](/docs/en/computer-use#screen-recording)
+- [**Region**](/docs/en/regions): the target region where the sandbox is running
+- [**Snapshot**](/docs/en/snapshots): the snapshot used to create the sandbox
+- [**Resources**](#resources): allocated sandbox CPU, memory, and disk
+- [**Lifecycle**](#sandbox-lifecycle): [auto-stop](#auto-stop-interval), [auto-archive](#auto-archive-interval), and [auto-delete](#auto-delete-interval) intervals
+- **Labels**: key-value pairs assigned to the sandbox
+- **Timestamps**: when the sandbox was created and when the last event occurred
+- [**Web terminal**](/docs/en/web-terminal): an embedded web terminal session directly in the browser
+- [**VNC**](/docs/en/vnc-access): a graphical desktop session for sandboxes that have a desktop environment
+- [**Logs**](/docs/en/experimental/otel-collection): a detailed record of user and system activity for the sandbox
+- **Metrics**: sandbox metrics data displayed as charts
+- **Traces**: distributed traces and spans collected from the sandbox
+- **Spending**: usage and cost over time
 
 ## Stop Sandboxes
 
