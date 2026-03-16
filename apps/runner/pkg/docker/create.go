@@ -39,7 +39,11 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
-	if state == enums.SandboxStateStarted || state == enums.SandboxStatePullingSnapshot || state == enums.SandboxStateStarting {
+	if state == enums.SandboxStatePullingSnapshot {
+		return "", "", common_errors.NewConflictError(fmt.Errorf("sandbox %s is currently pulling snapshot", sandboxDto.Id))
+	}
+
+	if state == enums.SandboxStateStarted || state == enums.SandboxStateStarting {
 		c, err := d.ContainerInspect(ctx, sandboxDto.Id)
 		if err != nil {
 			return "", "", err
@@ -77,10 +81,13 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, daemonVersion, nil
 	}
 
+	d.pullTracker.Add(sandboxDto.Id)
 	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
 	if err != nil {
+		d.pullTracker.Remove(sandboxDto.Id)
 		return "", "", err
 	}
+	d.pullTracker.Remove(sandboxDto.Id)
 
 	err = d.validateImageArchitecture(image)
 	if err != nil {

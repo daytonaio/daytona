@@ -12,6 +12,7 @@ import (
 
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/cache"
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/client"
@@ -89,6 +90,7 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 	return &DockerClient{
 		apiClient:                    config.ApiClient,
 		backupInfoCache:              config.BackupInfoCache,
+		pullTracker:                  &common.Tracker[string]{},
 		logger:                       logger,
 		awsRegion:                    config.AWSRegion,
 		awsEndpointUrl:               config.AWSEndpointUrl,
@@ -118,6 +120,7 @@ func (d *DockerClient) ApiClient() client.APIClient {
 type DockerClient struct {
 	apiClient                    client.APIClient
 	backupInfoCache              *cache.BackupInfoCache
+	pullTracker                  *common.Tracker[string]
 	logger                       *slog.Logger
 	awsRegion                    string
 	awsEndpointUrl               string

@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
@@ -18,6 +17,10 @@ import (
 func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (enums.SandboxState, error) {
 	if sandboxId == "" {
 		return enums.SandboxStateUnknown, nil
+	}
+
+	if d.pullTracker.Contains(sandboxId) {
+		return enums.SandboxStatePullingSnapshot, nil
 	}
 
 	ct, err := d.ContainerInspect(ctx, sandboxId)
@@ -41,9 +44,6 @@ func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.Inspec
 		return enums.SandboxStateCreating, nil
 
 	case container.StateRunning:
-		if d.isContainerPullingImage(ctx, ct.ID) {
-			return enums.SandboxStatePullingSnapshot, nil
-		}
 		return enums.SandboxStateStarted, nil
 
 	case container.StatePaused:
@@ -67,28 +67,4 @@ func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.Inspec
 	default:
 		return enums.SandboxStateUnknown, nil
 	}
-}
-
-// isContainerPullingImage checks if the container is still in image pulling phase
-func (d *DockerClient) isContainerPullingImage(ctx context.Context, containerId string) bool {
-	options := container.LogsOptions{
-		ShowStdout: true,
-		ShowStderr: true,
-		Tail:       "10", // Look at last 10 lines
-	}
-
-	logs, err := d.apiClient.ContainerLogs(ctx, containerId, options)
-	if err != nil {
-		return false
-	}
-	defer logs.Close()
-
-	// Read logs and check for pull messages
-	buf := make([]byte, 1024)
-	n, _ := logs.Read(buf)
-	logContent := string(buf[:n])
-
-	return strings.Contains(logContent, "Pulling from") ||
-		strings.Contains(logContent, "Downloading") ||
-		strings.Contains(logContent, "Extracting")
 }
