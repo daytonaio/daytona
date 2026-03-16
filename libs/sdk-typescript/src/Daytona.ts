@@ -265,11 +265,6 @@ export class Daytona implements AsyncDisposable {
           !(this.jwtToken && this.organizationId && apiUrl && this.target))) &&
       RUNTIME !== Runtime.BROWSER
     ) {
-      if (RUNTIME === Runtime.NODE && typeof require !== 'undefined') {
-        const dotenv = require('dotenv')
-        dotenv.config({ quiet: true })
-        dotenv.config({ path: '.env.local', override: true, quiet: true })
-      }
       this.apiKey = this.apiKey || (this.jwtToken ? undefined : getEnvVar('DAYTONA_API_KEY'))
       this.jwtToken = this.jwtToken || getEnvVar('DAYTONA_JWT_TOKEN')
       this.organizationId = this.organizationId || getEnvVar('DAYTONA_ORGANIZATION_ID')
