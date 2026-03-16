@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Sandbox } from '@daytonaio/sdk'
+import { Sandbox, PtyHandle } from '@daytonaio/sdk'
 import { AmpMessage, AssistantMessage, ResultMessage, UserMessage } from './types.js'
 import { renderMarkdown } from './utils.js'
 
@@ -30,11 +30,12 @@ function formatToolUse(block: { name: string; input?: Record<string, unknown> })
 export class AmpSession {
   private threadId: string | null = null
   private systemPrompt: string | null = null
-  private sessionId: string
+  private ptyHandle: PtyHandle | null = null
+  private buffer = ''
+  private onResponseComplete?: () => void
 
   constructor(private sandbox: Sandbox) {
-    this.sessionId = `amp-session-${Date.now()}`
-    debug('AmpSession constructed. Initial threadId:', this.threadId, 'sessionId:', this.sessionId)
+    debug('AmpSession constructed. Initial threadId:', this.threadId)
   }
 
   // Handle a single JSON line from Amp's --stream-json output
@@ -99,6 +100,8 @@ export class AmpSession {
           }
           process.stdout.write(`\n❌ Error: ${msg.error}`)
         }
+        // Signal that the response is complete
+        this.onResponseComplete?.()
       }
     } catch {
       // Not valid JSON, ignore
@@ -106,47 +109,43 @@ export class AmpSession {
     }
   }
 
-  // Run an amp command using Daytona session commands and stream output
+  // Handle streamed data from PTY
+  private handleData(data: Uint8Array): void {
+    // Append new data to the buffer
+    this.buffer += new TextDecoder().decode(data)
+    // Split the buffer into complete lines
+    const lines = this.buffer.split('\n')
+    // Keep any incomplete line in the buffer for next time
+    this.buffer = lines.pop() || ''
+    // Process each complete line
+    for (const line of lines.filter((l) => l.trim())) {
+      this.handleJsonLine(line)
+    }
+  }
+
+  // Run an amp command via PTY and wait for completion
   private async runAmpCommand(args: string[]): Promise<void> {
     const command = ['amp', '--dangerously-allow-all', '--stream-json', '-m smart', ...args].join(' ')
     debug('running:', command)
 
-    // Execute the command in the Daytona session asynchronously
-    const result = await this.sandbox.process.executeSessionCommand(this.sessionId, {
-      command: `cd /home/daytona && ${command}`,
-      runAsync: true,
+    // Send command to the PTY
+    await this.ptyHandle!.sendInput(`cd /home/daytona && ${command}\n`)
+
+    // Wait for the response to complete (signaled by result message)
+    await new Promise<void>((resolve) => {
+      this.onResponseComplete = resolve
     })
-
-    if (!result.cmdId) {
-      throw new Error('Failed to start amp command in sandbox session')
-    }
-
-    // Stream the command output using session command logs
-    await this.sandbox.process.getSessionCommandLogs(
-      this.sessionId,
-      result.cmdId,
-      (stdout: string) => {
-        for (const line of stdout.split('\n').filter(Boolean)) {
-          this.handleJsonLine(line)
-        }
-      },
-      (stderr: string) => {
-        debug('stderr:', stderr)
-      },
-    )
   }
 
   // Fallback: get most recent thread ID by parsing `amp threads list` text output
   private async getThreadIdFromList(): Promise<string | null> {
-    const result = await this.sandbox.process.executeSessionCommand(this.sessionId, {
-      command: 'cd /home/daytona && amp threads list',
-    })
-    if (result.exitCode !== 0 || !result.output) {
-      debug('failed to list threads via text output:', result.output)
+    const result = await this.sandbox.process.executeCommand('amp threads list', '/home/daytona')
+    if (result.exitCode !== 0 || !result.result) {
+      debug('failed to list threads via text output:', result.result)
       return null
     }
 
-    const lines = result.output.split('\n').map((l) => l.trim()).filter(Boolean)
+    const lines = result.result.split('\n').map((l) => l.trim()).filter(Boolean)
     if (lines.length <= 2) {
       return null
     }
@@ -192,9 +191,17 @@ export class AmpSession {
   async initialize(options?: { systemPrompt?: string }): Promise<void> {
     console.log('Starting Amp Code...')
 
-    // Create the Daytona session for executing commands
-    await this.sandbox.process.createSession(this.sessionId)
-    debug('created Daytona session:', this.sessionId)
+    // Create a PTY (pseudo-terminal) for streaming output from Amp
+    this.ptyHandle = await this.sandbox.process.createPty({
+      id: `amp-pty-${Date.now()}`,
+      cols: 120,
+      rows: 30,
+      onData: (data: Uint8Array) => this.handleData(data),
+    })
+    debug('created PTY session')
+
+    // Wait for PTY connection
+    await this.ptyHandle.waitForConnection()
 
     if (options?.systemPrompt?.trim()) {
       this.systemPrompt = options.systemPrompt.trim()
@@ -207,13 +214,15 @@ export class AmpSession {
     console.log('Agent ready. Press Ctrl+C at any time to exit.\n')
   }
 
-  // Cleanup the Daytona session
+  // Cleanup the PTY session
   async cleanup(): Promise<void> {
     try {
-      await this.sandbox.process.deleteSession(this.sessionId)
-      debug('deleted Daytona session:', this.sessionId)
+      if (this.ptyHandle) {
+        await this.ptyHandle.kill()
+        debug('killed PTY session')
+      }
     } catch (e) {
-      debug('error deleting session:', e)
+      debug('error killing PTY session:', e)
     }
   }
 }

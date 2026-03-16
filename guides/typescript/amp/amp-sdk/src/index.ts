@@ -83,7 +83,7 @@ async function main() {
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 
-    // Enhanced cleanup handler to also cleanup the Daytona session
+    // Enhanced cleanup handler to also cleanup the PTY session
     const cleanupWithSession = async () => {
       try {
         console.log('\nCleaning up...')
@@ -96,7 +96,7 @@ async function main() {
       }
     }
 
-    // Re-register cleanup handler with session cleanup
+    // Re-register cleanup handler with PTY cleanup
     process.removeAllListeners('SIGINT')
     process.once('SIGINT', cleanupWithSession)
     rl.once('SIGINT', cleanupWithSession)
