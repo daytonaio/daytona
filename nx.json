@@ -179,8 +179,8 @@
             "registry:5000/daytonaio/test-daytona-{projectName}:$VERSION",
             "registry:5000/daytonaio/test-daytona-{projectName}:latest"
           ],
-          "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache"],
-          "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache,mode=max"]
+          "cache-from": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache,mode=max"]
         }
       },
       "dependsOn": ["check-version-env"]
