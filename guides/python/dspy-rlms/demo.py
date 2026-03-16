@@ -59,7 +59,7 @@ def fetch_chapters() -> list[str]:
 
 # ── Configure DSPy ───────────────────────────────────────────────────────────
 
-lm = dspy.LM("openrouter/google/gemini-3-flash-preview")
+lm = dspy.LM("openrouter/anthropic/claude-sonnet-4.6")
 dspy.configure(lm=lm)
 
 # ── Run RLM analysis ────────────────────────────────────────────────────────
