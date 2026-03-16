@@ -642,6 +642,9 @@ export class SandboxStartAction extends SandboxAction {
         break
       }
       case SandboxState.PULLING_SNAPSHOT: {
+        if (await this.checkTimeoutError(sandbox, 30, 'Timeout while pulling snapshot')) {
+          return DONT_SYNC_AGAIN
+        }
         await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode)
         break
       }
