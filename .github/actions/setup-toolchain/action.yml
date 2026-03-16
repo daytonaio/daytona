@@ -68,7 +68,13 @@ runs:
       if: inputs.install-ruby == 'true'
       with:
         ruby-version: '3.4.5'
-        bundler-cache: true
+        bundler-cache: false
+
+    - name: Bundle install
+      if: inputs.install-ruby == 'true'
+      shell: bash
+      run: |
+        bundle install
 
     - uses: actions/setup-node@v4
       if: inputs.install-node == 'true'
