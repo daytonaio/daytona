@@ -94,25 +94,6 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Get organization by ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId})
 
-### Get by sandbox ID
-
-Daytona provides a method to get the organization by sandbox ID.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/by-sandbox-id/SANDBOX_ID' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Get organization by sandbox ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/by-sandbox-id/{sandboxId})
-
 ## Leave organization
 
 Daytona provides options to leave an organization in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/organizations).
@@ -596,51 +577,6 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Set default region for organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/default-region)
 
-### Get region quota by sandbox ID
-
-Daytona provides a method to get the region quota for a sandbox by ID.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/region-quota/by-sandbox-id/SANDBOX_ID' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Get region quota by sandbox ID (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/region-quota/by-sandbox-id/{sandboxId})
-
-### Update region quota
-
-Daytona provides a method to update the region quota for an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota/REGION_ID' \
-  --request PATCH \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "totalCpuQuota": 32,
-  "totalMemoryQuota": 128,
-  "totalDiskQuota": 1000
-}'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Update organization region quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota/{regionId})
-
 ## Organization settings
 
 The settings page in the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/settings) allows you to view the organization ID and name, and optionally delete the organization if you don't need it anymore. This action is irreversible, so please proceed with caution. Personal organizations are there by default and cannot be deleted.
@@ -648,52 +584,6 @@ The settings page in the [Daytona Dashboard ↗](https://app.daytona.io/dashboar
 ## Advanced operations
 
 Daytona provides methods to perform advanced operations on an organization.
-
-### Suspend organization
-
-Daytona provides a method to suspend an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/suspend' \
-  --request POST \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "reason": "Violation of terms",
-  "until": "2030-01-01T00:00:00.000Z",
-  "suspensionCleanupGracePeriodHours": 24
-}'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Suspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/suspend)
-
-### Unsuspend organization
-
-Daytona provides a method to unsuspend an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/unsuspend' \
-  --request POST \
-  --header 'Authorization: Bearer YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Unsuspend organization (API)**](/docs/en/tools/api/#daytona/tag/organizations/POST/organizations/{organizationId}/unsuspend)
 
 ### Usage overview
 
@@ -799,22 +689,3 @@ curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/experimental-conf
 For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
 
 > [**Update experimental configuration (API)**](/docs/en/tools/api/#daytona/tag/organizations/PUT/organizations/{organizationId}/experimental-config)
-
-### Get OTEL config by sandbox auth token
-
-Daytona provides a method to get the OTEL configuration by sandbox authentication token.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/otel-config/by-sandbox-auth-token/AUTH_TOKEN' \
-  --header 'Authorization: Bearer YOUR_API_KEY'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Get organization OTEL config by sandbox auth token (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/otel-config/by-sandbox-auth-token/{authToken})
