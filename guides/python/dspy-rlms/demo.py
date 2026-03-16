@@ -102,6 +102,9 @@ finally:
 # ── Plot ─────────────────────────────────────────────────────────────────────
 
 # Group by character
+required_keys = {"chapter", "character", "wealth"}
+wealth_data = [r for r in wealth_data if required_keys <= r.keys()]
+
 series = defaultdict(lambda: ([], []))
 for row in wealth_data:
     xs, ys = series[row["character"]]
