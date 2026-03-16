@@ -67,7 +67,7 @@ runs:
     - uses: ruby/setup-ruby@v1
       if: inputs.install-ruby == 'true'
       with:
-        ruby-version: '3.2'
+        ruby-version: '3.4.5'
         bundler-cache: true
 
     - uses: actions/setup-node@v4
