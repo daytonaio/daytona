@@ -29,7 +29,7 @@ RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/proxy\n\t./libs/c
 ENV NX_DAEMON=false
 ENV GONOSUMDB=github.com/daytonaio/daytona
 
-RUN go mod download
+RUN go -C apps/proxy mod download && go -C libs/common-go mod download && go -C libs/api-client-go mod download
 
 # Go source
 COPY apps/proxy/ apps/proxy/

@@ -28,7 +28,7 @@ RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/ssh-gateway\n\t./
 ENV NX_DAEMON=false
 ENV GONOSUMDB=github.com/daytonaio/daytona
 
-RUN go mod download
+RUN go -C apps/ssh-gateway mod download && go -C libs/api-client-go mod download
 
 # Go source
 COPY apps/ssh-gateway/ apps/ssh-gateway/

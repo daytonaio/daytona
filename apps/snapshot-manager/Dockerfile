@@ -27,7 +27,7 @@ RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/snapshot-manager\
 ENV NX_DAEMON=false
 ENV GONOSUMDB=github.com/daytonaio/daytona
 
-RUN go mod download
+RUN cd apps/snapshot-manager && go mod download
 
 # Go source
 COPY apps/snapshot-manager/ apps/snapshot-manager/

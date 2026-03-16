@@ -29,7 +29,9 @@ RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/otel-collector/ex
 ENV NX_DAEMON=false
 ENV GONOSUMDB=github.com/daytonaio/daytona
 
-RUN go mod download
+RUN go -C apps/otel-collector/exporter mod download && \
+    go -C libs/api-client-go mod download && \
+    go -C libs/common-go mod download
 
 # Go source
 COPY apps/otel-collector/ apps/otel-collector/

@@ -30,7 +30,10 @@ RUN head -1 go.work > go.work.tmp && printf '\nuse (\n\t./apps/runner\n\t./apps/
 ENV NX_DAEMON=false
 ENV GONOSUMDB=github.com/daytonaio/daytona
 
-RUN go mod download
+RUN go -C apps/runner mod download \
+  && go -C apps/daemon mod download \
+  && go -C libs/common-go mod download \
+  && go -C libs/api-client-go mod download
 
 # Go source
 COPY apps/runner/ apps/runner/
