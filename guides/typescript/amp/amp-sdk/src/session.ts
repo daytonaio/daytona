@@ -30,9 +30,11 @@ function formatToolUse(block: { name: string; input?: Record<string, unknown> })
 export class AmpSession {
   private threadId: string | null = null
   private systemPrompt: string | null = null
+  private sessionId: string
 
   constructor(private sandbox: Sandbox) {
-    debug('AmpSession constructed. Initial threadId:', this.threadId)
+    this.sessionId = `amp-session-${Date.now()}`
+    debug('AmpSession constructed. Initial threadId:', this.threadId, 'sessionId:', this.sessionId)
   }
 
   // Handle a single JSON line from Amp's --stream-json output
@@ -104,34 +106,47 @@ export class AmpSession {
     }
   }
 
-  // Run an amp command and stream output
+  // Run an amp command using Daytona session commands and stream output
   private async runAmpCommand(args: string[]): Promise<void> {
     const command = ['amp', '--dangerously-allow-all', '--stream-json', '-m smart', ...args].join(' ')
     debug('running:', command)
 
-    const result = await this.sandbox.process.executeCommand(
-      command,
-      '/home/daytona',
-      undefined,
-      600,
-    )
+    // Execute the command in the Daytona session asynchronously
+    const result = await this.sandbox.process.executeSessionCommand(this.sessionId, {
+      command: `cd /home/daytona && ${command}`,
+      runAsync: true,
+    })
 
-    if (result.result) {
-      for (const line of result.result.split('\n').filter(Boolean)) {
-        this.handleJsonLine(line)
-      }
+    if (!result.cmdId) {
+      throw new Error('Failed to start amp command in sandbox session')
     }
+
+    // Stream the command output using session command logs
+    await this.sandbox.process.getSessionCommandLogs(
+      this.sessionId,
+      result.cmdId,
+      (stdout: string) => {
+        for (const line of stdout.split('\n').filter(Boolean)) {
+          this.handleJsonLine(line)
+        }
+      },
+      (stderr: string) => {
+        debug('stderr:', stderr)
+      },
+    )
   }
 
   // Fallback: get most recent thread ID by parsing `amp threads list` text output
   private async getThreadIdFromList(): Promise<string | null> {
-    const result = await this.sandbox.process.executeCommand('amp threads list')
-    if (result.exitCode !== 0 || !result.result) {
-      debug('failed to list threads via text output:', result.result)
+    const result = await this.sandbox.process.executeSessionCommand(this.sessionId, {
+      command: 'cd /home/daytona && amp threads list',
+    })
+    if (result.exitCode !== 0 || !result.output) {
+      debug('failed to list threads via text output:', result.output)
       return null
     }
 
-    const lines = result.result.split('\n').map((l) => l.trim()).filter(Boolean)
+    const lines = result.output.split('\n').map((l) => l.trim()).filter(Boolean)
     if (lines.length <= 2) {
       return null
     }
@@ -177,6 +192,10 @@ export class AmpSession {
   async initialize(options?: { systemPrompt?: string }): Promise<void> {
     console.log('Starting Amp Code...')
 
+    // Create the Daytona session for executing commands
+    await this.sandbox.process.createSession(this.sessionId)
+    debug('created Daytona session:', this.sessionId)
+
     if (options?.systemPrompt?.trim()) {
       this.systemPrompt = options.systemPrompt.trim()
       // Send system prompt as first message
@@ -186,5 +205,15 @@ export class AmpSession {
     }
 
     console.log('Agent ready. Press Ctrl+C at any time to exit.\n')
+  }
+
+  // Cleanup the Daytona session
+  async cleanup(): Promise<void> {
+    try {
+      await this.sandbox.process.deleteSession(this.sessionId)
+      debug('deleted Daytona session:', this.sessionId)
+    } catch (e) {
+      debug('error deleting session:', e)
+    }
   }
 }

@@ -83,8 +83,23 @@ async function main() {
     // Set up readline interface for user input
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 
-    // Register cleanup handler on readline SIGINT
-    rl.once('SIGINT', cleanup)
+    // Enhanced cleanup handler to also cleanup the Daytona session
+    const cleanupWithSession = async () => {
+      try {
+        console.log('\nCleaning up...')
+        await ampSession.cleanup()
+        if (sandbox) await sandbox.delete()
+      } catch (e) {
+        console.error('Error during cleanup:', e)
+      } finally {
+        process.exit(0)
+      }
+    }
+
+    // Re-register cleanup handler with session cleanup
+    process.removeAllListeners('SIGINT')
+    process.once('SIGINT', cleanupWithSession)
+    rl.once('SIGINT', cleanupWithSession)
 
     // Start the interactive prompt loop
     while (true) {
