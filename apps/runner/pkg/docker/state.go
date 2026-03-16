@@ -56,7 +56,7 @@ func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.Inspec
 		return enums.SandboxStateDestroying, nil
 
 	case container.StateExited:
-		if ct.State.ExitCode == 0 || ct.State.ExitCode == 137 || ct.State.ExitCode == 143 {
+		if ct.State.ExitCode == 0 || ct.State.ExitCode == 137 || ct.State.ExitCode == 143 || ct.State.ExitCode == 255 {
 			return enums.SandboxStateStopped, nil
 		}
 		return enums.SandboxStateError, fmt.Errorf("sandbox exited with code %d, reason: %s", ct.State.ExitCode, ct.State.Error)
