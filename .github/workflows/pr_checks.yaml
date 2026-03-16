@@ -26,9 +26,7 @@ jobs:
         with:
           go-version-file: go.work
           cache: true
-          cache-dependency-path: |
-            **/go.sum
-            go.work.sum
+          cache-dependency-path: '**/go.sum'
       - name: go work
         run: |
           GONOSUMDB=github.com/daytonaio/daytona go work sync
@@ -70,9 +68,7 @@ jobs:
         with:
           go-version-file: go.work
           cache: true
-          cache-dependency-path: |
-            **/go.sum
-            go.work.sum
+          cache-dependency-path: '**/go.sum'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
@@ -94,6 +90,7 @@ jobs:
         with:
           go-version-file: go.work
           cache: true
+          cache-dependency-path: '**/go.sum'
       - name: format
         run: |
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
