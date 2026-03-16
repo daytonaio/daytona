@@ -68,12 +68,13 @@ User:
 
 ## How It Works
 
-This example runs the Amp CLI once per user turn, using threads for session continuity:
+This example uses a PTY (pseudo-terminal) to stream output from Amp CLI, running one command per user turn with thread-based session continuity:
 
-1. First prompt: Run `amp --dangerously-allow-all --stream-json -m smart -x "prompt"` and capture the thread ID
-2. Follow-up prompts: Run `amp threads continue <thread-id> --dangerously-allow-all --stream-json -m smart -x "prompt"`
-3. Thread ID is retrieved via `amp threads list --json` after the first turn
-4. Each command streams JSON output for real-time display of assistant messages and tool usage
+1. A PTY is created for streaming output from Amp commands
+2. First prompt: Run `amp --dangerously-allow-all --stream-json -m smart -x "prompt"` and capture the thread ID from the streaming JSON init message
+3. Follow-up prompts: Run `amp --dangerously-allow-all --stream-json -m smart -x "prompt" threads continue <thread-id>`
+4. If the thread ID isn't captured from the stream, fall back to parsing `amp threads list` text output
+5. Each command streams JSON output for real-time display of assistant messages and tool usage
 
 ## Learn More
 

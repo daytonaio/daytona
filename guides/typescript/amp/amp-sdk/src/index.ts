@@ -65,7 +65,7 @@ async function main() {
       throw new Error('Error installing Amp CLI: ' + installResult.result)
     }
 
-    // Daytona-aware system prompt (same pattern as letta-code agent)
+    // Daytona-aware system prompt
     const previewLink = await sandbox.getPreviewLink(1234)
     const previewUrlPattern = previewLink.url.replace(/1234/, '{PORT}')
     const defaultSystemPrompt = [

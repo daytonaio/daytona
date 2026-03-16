@@ -9,7 +9,7 @@ const ITALIC = ESC + '[3m'
 const DIM = ESC + '[2m'
 const RESET = ESC + '[0m'
 
-/** Basic markdown to ANSI (same as letta-code): **bold**, *italic*, `code` */
+/** Basic markdown to ANSI: **bold**, *italic*, `code` */
 export function renderMarkdown(text: string): string {
   return text
     .replace(/\*\*(.+?)\*\*/g, `${BOLD}$1${RESET}`)
