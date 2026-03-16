@@ -5,6 +5,9 @@ inputs:
   install-go:
     description: Install Go
     default: 'true'
+  go-cache:
+    description: Enable Go module caching via actions/setup-go
+    default: 'true'
   install-node:
     description: Install Node.js
     default: 'true'
@@ -52,6 +55,9 @@ runs:
       if: inputs.install-go == 'true'
       with:
         go-version-file: go.work
+        cache: ${{ inputs.go-cache }}
+        cache-dependency-path: |
+          **/go.sum
 
     - uses: actions/setup-java@v4
       if: inputs.install-java == 'true'
