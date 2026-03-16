@@ -7,17 +7,17 @@ This guide demonstrates how to configure the [Mastra coding agent](https://githu
 
 ---
 
-## Workflow Overview
+### 1. Workflow Overview
 
 Once configured, you can use Mastra Studio to interact with the coding agent through a ChatGPT-like interface. This enables human-in-the-loop workflows where you can guide the agent, review its decisions, and iterate on solutions in real-time; all while the agent executes tasks securely within Daytona sandboxes.
 
-## Project Setup
+### 2. Project Setup
 
-:::caution[Node.js version]
+:::note[Node.js Version]
 Node.js version 20 or higher is required to run the coding agent. Please ensure your environment meets this requirement before proceeding.
 :::
 
-### Clone the Repository
+#### Clone the Repository
 
 Clone the Mastra coding agent template repository, which includes the agent implementation and Daytona integration:
 
@@ -26,7 +26,7 @@ git clone https://github.com/mastra-ai/template-coding-agent.git
 cd template-coding-agent
 ```
 
-### Configure Environment
+#### Configure Environment
 
 Create a `.env` file in the project root directory:
 
@@ -53,7 +53,7 @@ Next, configure Daytona as your sandbox provider by adding your API key (availab
 DAYTONA_API_KEY=your-daytona-api-key-here
 ```
 
-### Install Dependencies
+#### Install Dependencies
 
 Install the required packages using pnpm:
 
@@ -61,7 +61,7 @@ Install the required packages using pnpm:
 pnpm install
 ```
 
-## Running the Agent
+### 3. Running the Agent
 
 Mastra Studio provides a ChatGPT-like interface for interacting with your coding agent. This mode offers:
 
@@ -152,17 +152,17 @@ Below is an example of terminal logs generated when the agent calls the `writeFi
 
 These logs show complete visibility into tool execution including arguments, results, token usage with caching metrics, and unique identifiers for debugging.
 
-## Example Usage
+### 4. Example Usage
 
 Let's walk through a practical example to see the Mastra coding agent and Daytona sandbox integration in action. We'll ask the agent to complete the following task:
 
 > _"Create a Python file with a function that reverses a string, write a test file for it, and run the tests."_
 
-### Agent Workflow
+#### Agent Workflow
 
 The agent executes this task through a series of coordinated steps, utilizing different tools to interact with the Daytona sandbox:
 
-#### 1. Create Sandbox
+##### 1. Create Sandbox
 
 The agent first provisions a new Daytona sandbox for Python development:
 
@@ -187,7 +187,7 @@ The agent first provisions a new Daytona sandbox for Python development:
 }
 ```
 
-#### 2. Write Project Files
+##### 2. Write Project Files
 
 Next, the agent creates both the implementation and test files in a single operation:
 
@@ -223,7 +223,7 @@ Next, the agent creates both the implementation and test files in a single opera
 }
 ```
 
-#### 3. Execute Tests
+##### 3. Execute Tests
 
 Finally, the agent runs the test suite to verify the implementation:
 
@@ -254,7 +254,7 @@ Finally, the agent runs the test suite to verify the implementation:
 }
 ```
 
-### Agent Response
+#### Agent Response
 
 After successfully completing all steps, the agent provides a detailed summary:
 
