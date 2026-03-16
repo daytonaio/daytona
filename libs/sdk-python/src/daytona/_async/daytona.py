@@ -623,36 +623,6 @@ class AsyncDaytona:
             code_toolbox,
         )
 
-    @intercept_errors(message_prefix="Failed to find sandbox: ")
-    @with_instrumentation()
-    async def find_one(
-        self, sandbox_id_or_name: str | None = None, labels: dict[str, str] | None = None
-    ) -> AsyncSandbox:
-        """Finds a Sandbox by its ID or name or labels.
-
-        Args:
-            sandbox_id_or_name (str | None): The ID or name of the Sandbox to retrieve.
-            labels (dict[str, str] | None): Labels to filter Sandboxes.
-
-        Returns:
-            Sandbox: First Sandbox that matches the ID or name or labels.
-
-        Raises:
-            DaytonaError: If no Sandbox is found.
-
-        Example:
-            ```python
-            sandbox = await daytona.find_one(labels={"my-label": "my-value"})
-            print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
-            ```
-        """
-        if sandbox_id_or_name:
-            return await self.get(sandbox_id_or_name)
-        sandboxes = await self.list(labels, page=1, limit=1)
-        if len(sandboxes.items) == 0:
-            raise DaytonaError(f"No sandbox found with labels {labels}")
-        return sandboxes.items[0]
-
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation()
     async def list(

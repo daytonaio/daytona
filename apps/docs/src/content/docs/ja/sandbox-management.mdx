@@ -250,9 +250,9 @@ Daytona SDK は、Python と TypeScript でサンドボックスを停止・起�
 
     print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-    # The sandbox ID can later be used to find the sandbox and start it
+    # The sandbox ID can later be used to get the sandbox and start it
 
-    sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+    sandbox = daytona.get("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
     # Start Sandbox
 
@@ -270,9 +270,9 @@ Daytona SDK は、Python と TypeScript でサンドボックスを停止・起�
 
     console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-    // The sandbox ID can later be used to find the sandbox and start it
+    // The sandbox ID can later be used to get the sandbox and start it
 
-    const sandbox = await daytona.findOne("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
+    const sandbox = await daytona.get("7cd11133-96c1-4cc8-9baa-c757b8f8c916");
 
     // Start Sandbox
     await sandbox.start();

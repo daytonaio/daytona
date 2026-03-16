@@ -187,32 +187,6 @@ await daytona.delete(sandbox);
 
 ***
 
-#### findOne()
-
-```ts
-findOne(filter: SandboxFilter): Promise<Sandbox>
-```
-
-ID またはラベルでサンドボックスを検索します。
-
-**パラメータ**:
-
-- `filter` _SandboxFilter_ - サンドボックスのフィルター
-
-
-**戻り値**:
-
-- `Promise<Sandbox>` - ID またはラベルに一致する最初のサンドボックス。
-
-**例:**
-
-```ts
-const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
-```
-
-***
-
 #### get()
 
 ```ts
@@ -432,14 +406,6 @@ const resources: SandboxResources = {
     disk: 20    // 20GiB disk
 };
 ```
-## SandboxFilter
-
-サンドボックスのフィルター。
-
-**プロパティ**:
-
-- `id?` _string_ - 取得するサンドボックスの ID
-- `labels?` _Record\<string, string\>_ - サンドボックスを絞り込むためのラベル
 ## VolumeMount
 
 サンドボックスのボリュームマウントを表します。

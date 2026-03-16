@@ -380,42 +380,6 @@ func TestGet(t *testing.T) {
 	})
 }
 
-// TestFindOne tests the FindOne method
-func TestFindOne(t *testing.T) {
-	t.Run("validates labels parameter", func(t *testing.T) {
-		// Setup test environment
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-
-		client, err := NewClient()
-		require.NoError(t, err)
-
-		ctx := context.Background()
-
-		// Test with nil ID and empty labels - should return error from List
-		sandbox, err := client.FindOne(ctx, nil, map[string]string{})
-		assert.Error(t, err) // Will fail when trying to call API
-		assert.Nil(t, sandbox)
-	})
-
-	t.Run("calls Get when ID is provided", func(t *testing.T) {
-		// Setup test environment
-		os.Clearenv()
-		os.Setenv("DAYTONA_API_KEY", "test-api-key")
-
-		client, err := NewClient()
-		require.NoError(t, err)
-
-		ctx := context.Background()
-		emptyID := ""
-
-		// Test with empty string ID
-		sandbox, err := client.FindOne(ctx, &emptyID, nil)
-		assert.Error(t, err)
-		assert.Nil(t, sandbox)
-	})
-}
-
 // TestList tests the List method
 func TestList(t *testing.T) {
 	tests := []struct {

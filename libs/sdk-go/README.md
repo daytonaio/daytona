@@ -197,7 +197,6 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "long-running-command")
 - `Create(ctx, params, options...) (*Sandbox, <-chan string, error)` - Create a sandbox and returns a channel for streaming build logs
   - Options: `WithTimeout(time.Duration)`
 - `Get(ctx, sandboxIDOrName) (*Sandbox, error)` - Get a sandbox by ID or name
-- `FindOne(ctx, idOrName, labels) (*Sandbox, error)` - Find a sandbox by ID/name or labels
 - `List(ctx, labels, page, limit) (*PaginatedSandboxes, error)` - List sandboxes with pagination
 
 ### Sandbox Properties and Methods
