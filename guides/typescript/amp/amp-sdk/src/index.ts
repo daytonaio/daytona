@@ -60,9 +60,10 @@ async function main() {
 
     // Install Amp CLI in the sandbox
     console.log('Installing Amp CLI...')
-    await sandbox.process.executeCommand('npm install -g @sourcegraph/amp').then((r: any) => {
-      if (r.exitCode) throw new Error('Error installing Amp CLI: ' + r.result)
-    })
+    const installResult = await sandbox.process.executeCommand('npm install -g @sourcegraph/amp')
+    if (installResult.exitCode !== 0) {
+      throw new Error('Error installing Amp CLI: ' + installResult.result)
+    }
 
     // Daytona-aware system prompt (same pattern as letta-code agent)
     const previewLink = await sandbox.getPreviewLink(1234)
