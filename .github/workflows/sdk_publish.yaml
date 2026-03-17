@@ -43,31 +43,10 @@ jobs:
           fetch-tags: true
           fetch-depth: 0
 
-      - uses: actions/setup-go@v5
+      - uses: ./.github/actions/setup-toolchain
         with:
-          go-version-file: go.work
-      - uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'temurin'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
+          install-swag: 'false'
       - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
-
-      - name: System dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
-          corepack enable
-          python3 -m pip install --upgrade pip
-          python3 -m pip install "poetry==2.1.3"
 
       - name: Configure git
         run: |
@@ -81,15 +60,6 @@ jobs:
           echo "---" > ~/.gem/credentials
           echo ":rubygems_api_key: $RUBYGEMS_API_KEY" >> ~/.gem/credentials
           chmod 0600 ~/.gem/credentials
-
-      - name: Project dependencies
-        run: |
-          yarn install --immutable
-          GONOSUMDB=github.com/daytonaio/daytona go work sync
-          poetry lock
-          poetry install
-          go env -w GOFLAGS="-buildvcs=false"
-          poetry env list --full-path
 
       - name: Publish projects
         run: |

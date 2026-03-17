@@ -158,7 +158,9 @@
         "context": "{workspaceRoot}",
         "file": "{projectRoot}/Dockerfile",
         "tags": ["daytonaio/daytona-{projectName}:$VERSION$ARCH"],
-        "build-args": ["VERSION=$VERSION"]
+        "build-args": ["VERSION=$VERSION"],
+        "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH"],
+        "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH,mode=max"]
       },
       "configurations": {
         "production": {
@@ -167,14 +169,18 @@
         "production-multi-platform": {
           "push": true,
           "platforms": ["linux/amd64", "linux/arm64"],
-          "tags": ["daytonaio/daytona-{projectName}:$VERSION"]
+          "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
+          "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache,mode=max"]
         },
         "local-registry": {
           "push": true,
           "tags": [
-            "registry:5000/daytonaio/daytona-{projectName}:$VERSION",
-            "registry:5000/daytonaio/daytona-{projectName}:latest"
-          ]
+            "registry:5000/daytonaio/test-daytona-{projectName}:$VERSION",
+            "registry:5000/daytonaio/test-daytona-{projectName}:latest"
+          ],
+          "cache-from": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache,mode=max"]
         }
       },
       "dependsOn": ["check-version-env"]

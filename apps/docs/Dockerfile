@@ -36,13 +36,14 @@ ENV PUBLIC_ALGOLIA_CLI_INDEX_NAME=${PUBLIC_ALGOLIA_CLI_INDEX_NAME}
 ARG PUBLIC_ALGOLIA_SDK_INDEX_NAME=sdk
 ENV PUBLIC_ALGOLIA_SDK_INDEX_NAME=${PUBLIC_ALGOLIA_SDK_INDEX_NAME}
 
-ARG VERSION=0.0.1
-ENV VERSION=${VERSION}
+ENV VERSION=12345.67890.0
 ENV NX_DAEMON=false
 
 RUN yarn nx build docs --configuration=production --nxBail=true
 
 FROM node:22-alpine AS docs
+
+ARG VERSION=0.0.1
 
 WORKDIR /daytona
 
@@ -51,5 +52,11 @@ COPY --from=build /daytona/dist/apps/docs dist/apps/docs
 COPY --from=build /daytona/apps/docs/server dist/apps/docs/server
 
 WORKDIR /daytona/dist/apps/docs
+
+RUN VER=$(echo ${VERSION} | sed 's/^v//') && \
+  MAJOR=$(echo ${VER} | cut -d. -f1) && \
+  MINOR=$(echo ${VER} | cut -d. -f2) && \
+  find . -type f \( -name "*.mjs" -o -name "*.js" -o -name "*.html" \) \
+    -exec sed -i "s/12345\.67890/${MAJOR}.${MINOR}/g" {} +
 
 ENTRYPOINT ["sh", "-c", "node server/index.mjs"]

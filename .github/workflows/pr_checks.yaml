@@ -25,7 +25,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-          cache: false
+          cache: true
+          cache-dependency-path: '**/go.sum'
       - name: go work
         run: |
           GONOSUMDB=github.com/daytonaio/daytona go work sync
@@ -40,6 +41,14 @@ jobs:
         with:
           node-version: 22
       - run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
       - run: yarn install --immutable
       - name: Check CLI reference docs are up to date
         run: |
@@ -58,7 +67,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-          cache: false
+          cache: true
+          cache-dependency-path: '**/go.sum'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
@@ -79,7 +89,8 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.work
-          cache: false
+          cache: true
+          cache-dependency-path: '**/go.sum'
       - name: format
         run: |
           sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
@@ -104,10 +115,18 @@ jobs:
       - name: Install Dependencies
         run: |
           corepack enable
-          yarn install --immutable
           python -m pip install --upgrade pip
           pip install "poetry==2.1.3"
           poetry install
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
       - name: Lint Python Code
         run: |
           source "$(poetry env info --path)/bin/activate"
@@ -118,36 +137,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: ./.github/actions/setup-toolchain
         with:
-          go-version-file: go.work
-          cache: true
-      - uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: 'temurin'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.4.5'
-      - name: Install Ruby dependencies
-        run: |
-          bundle install
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install "poetry==2.1.3"
-          poetry install
-      - run: corepack enable
+          run-go-work-sync: 'false'
       - name: generate-api-clients
         run: |
           source "$(poetry env info --path)/bin/activate"
-          go install github.com/swaggo/swag/cmd/swag@v1.16.4
           go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0
           echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
-          yarn install --immutable
           mkdir -p dist/apps/api
           yarn generate:api-client
           yarn lint:fix
@@ -161,34 +158,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.work
-          cache: true
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: corepack enable
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-      - name: Install Ruby dependencies
-        run: |
-          bundle install
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install "poetry==2.1.3"
-          poetry install
+      - uses: ./.github/actions/setup-toolchain
       - name: Build all
         run: |
           source "$(poetry env info --path)/bin/activate"
-          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
-          go install github.com/swaggo/swag/cmd/swag@v1.16.4
-          yarn
           VERSION=0.0.0-dev yarn build --nxBail=true
 
   license-check:
