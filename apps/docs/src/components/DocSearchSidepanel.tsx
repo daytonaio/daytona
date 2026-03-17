@@ -80,6 +80,24 @@ export default function DocSearchSidepanel() {
         .DocSearch-Sidepanel-SuggestedQuestion {color: var(--secondary-text-color);}
         .DocSearch-Sidepanel-SuggestedQuestion:hover {color: var(--primary-text-color); border: 1px solid var(--primary-text-color);}
         .DocSearch-Markdown-Content > h3, .DocSearch-Markdown-Content > h2 {color: var(--primary-text-color);}
+        .DocSearch-Sidepanel-Action-expand svg {
+          display: none;
+        }
+        .DocSearch-Sidepanel-Action-expand::before {
+          content: '';
+          width: 14px;
+          height: 14px;
+          display: block;
+          background-color: currentColor;
+          -webkit-mask: var(--docsearch-sidepanel-expand-icon) center / contain no-repeat;
+          mask: var(--docsearch-sidepanel-expand-icon) center / contain no-repeat;
+        }
+        .DocSearch-Sidepanel-Container {
+          --docsearch-sidepanel-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 13 13' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 0.5C8 0.223858 8.22386 0 8.5 0H12.5C12.7761 0 13 0.223858 13 0.5V4.5C13 4.77614 12.7761 5 12.5 5C12.2239 5 12 4.77614 12 4.5V1.70711L8.18689 5.52022C7.99162 5.71548 7.67504 5.71548 7.47978 5.52022C7.28452 5.32496 7.28452 5.00838 7.47978 4.81311L11.2929 1H8.5C8.22386 1 8 0.776142 8 0.5ZM5.52022 7.47978C5.71548 7.67504 5.71548 7.99162 5.52022 8.18689L1.70711 12H4.5C4.77614 12 5 12.2239 5 12.5C5 12.7761 4.77614 13 4.5 13H0.5C0.223858 13 0 12.7761 0 12.5V8.5C0 8.22386 0.223858 8 0.5 8C0.776142 8 1 8.22386 1 8.5V11.2929L4.81311 7.47978C5.00838 7.28452 5.32496 7.28452 5.52022 7.47978Z' fill='black'/%3E%3C/svg%3E");
+        }
+        .DocSearch-Sidepanel-Container.is-expanded {
+          --docsearch-sidepanel-expand-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 13 13' fill='none'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M8 0.5C8 0.223858 8.22386 0 8.5 0H12.5C12.7761 0 13 0.223858 13 0.5V4.5C13 4.77614 12.7761 5 12.5 5C12.2239 5 12 4.77614 12 4.5V1.70711L8.18689 5.52022C7.99162 5.71548 7.67504 5.71548 7.47978 5.52022C7.28452 5.32496 7.28452 5.00838 7.47978 4.81311L11.2929 1H8.5C8.22386 1 8 0.776142 8 0.5Z' fill='black' transform='translate(-8 8)'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5.52022 7.47978C5.71548 7.67504 5.71548 7.99162 5.52022 8.18689L1.70711 12H4.5C4.77614 12 5 12.2239 5 12.5C5 12.7761 4.77614 13 4.5 13H0.5C0.223858 13 0 12.7761 0 12.5V8.5C0 8.22386 0.223858 8 0.5 8C0.776142 8 1 8.22386 1 8.5V11.2929L4.81311 7.47978C5.00838 7.28452 5.32496 7.28452 5.52022 7.47978Z' fill='black' transform='translate(8 -8)'/%3E%3C/svg%3E");
+        }
       `}</style>
       <Sidepanel {...(sidepanelProps as any)} />
     </>
