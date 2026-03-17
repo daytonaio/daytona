@@ -130,11 +130,35 @@ If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll
 
 ## Network allow list format
 
-The `networkAllowList` parameter accepts up to 10 CIDR network blocks separated by commas:
+The `networkAllowList` parameter is a **comma-separated list of IPv4 CIDR blocks**.
+
+- **IPv4 only**: hostnames, domains, and IPv6 are not supported
+- **CIDR required**: every entry must include a `/` prefix length (for example `/32`)
+- **CIDR format**: use standard CIDR notation (`A.B.C.D/N`). Do not include extra `/` segments
+- **Max 10 entries**: the list cannot contain more than 10 comma-separated items
+- **Whitespace is ignored**: entries are trimmed, so spaces around commas are ok
+
+### Examples
+
+The following are valid:
 
 - **Single IP**: `208.80.154.232/32` (Wikipedia)
 - **Subnet**: `192.168.1.0/24` (Private network)
 - **Multiple networks**: `208.80.154.232/32,199.16.156.103/32,10.0.0.0/8`
+
+### Prefix length rules
+
+For IPv4, the CIDR prefix length must be an integer in the range `0` to `32` (inclusive).
+
+- `0.0.0.0/0` allows access to all IPv4 addresses
+
+### Common validation errors
+
+- **Missing prefix length**: `208.80.154.232` is invalid. Use `208.80.154.232/32`
+- **Invalid IPv4 address**: `example.com/32` and `999.1.2.3/32` are invalid
+- **Invalid prefix length**: `10.0.0.0/33` is invalid (must be 0 to 32)
+- **Too many entries**: more than 10 items will be rejected
+- **Trailing commas**: avoid a trailing comma like `10.0.0.0/8,`. Empty items are skipped during validation, but they still count toward the 10-item limit because the limit is based on the number of comma-separated items
 
 ## Organization configuration
 
