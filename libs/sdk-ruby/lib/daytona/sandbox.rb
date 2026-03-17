@@ -554,6 +554,8 @@ module Daytona
     # @return [void]
     # @raise [Daytona::Sdk::Error]
     def wait_for_states(operation:, target_states:)
+      interval = INITIAL_POLL_INTERVAL
+      start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       loop do
         case state
         when *target_states then return
@@ -561,13 +563,22 @@ module Daytona
           raise Sdk::Error, "Sandbox #{id} failed to #{operation} with state: #{state}, error reason: #{error_reason}"
         end
 
-        sleep(IDLE_DURATION)
+        sleep(interval)
+        if Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time > 5
+          interval = [interval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL].min
+        end
         refresh
       end
     end
 
-    IDLE_DURATION = 0.1
-    private_constant :IDLE_DURATION
+    INITIAL_POLL_INTERVAL = 0.1
+    private_constant :INITIAL_POLL_INTERVAL
+
+    MAX_POLL_INTERVAL = 1.0
+    private_constant :MAX_POLL_INTERVAL
+
+    BACKOFF_MULTIPLIER = 1.1
+    private_constant :BACKOFF_MULTIPLIER
 
     NO_TIMEOUT = 0
     private_constant :NO_TIMEOUT
