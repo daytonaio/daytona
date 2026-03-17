@@ -17,18 +17,6 @@ OpenTelemetry collection is currently an experimental feature and may change in 
 
 Daytona can collect traces, logs, and metrics directly from your sandboxes. This provides complete observability across your entire Daytona environment, from [SDK calls](#sdk-tracing-configuration) to sandbox runtime behavior.
 
-### Configure Sandbox Collection
-
-To enable telemetry collection from sandboxes:
-
-1. Navigate to the [Daytona Dashboard](https://app.daytona.io)
-2. Go to **Settings** → **Experimental**
-3. Configure the following fields:
-   - **OTLP Endpoint**: Your OpenTelemetry collector endpoint (e.g., `https://otlp.nr-data.net`)
-   - **OTLP Headers**: Authentication headers in `key=value` format (e.g., `api-key=YOUR_API_KEY`)
-
-Once configured, all sandboxes will automatically export their telemetry data to your specified OTLP endpoint.
-
 ### What Gets Collected from Sandboxes
 
 When sandbox telemetry is enabled, the following data is collected:
@@ -70,7 +58,20 @@ Sandbox telemetry collection works independently from SDK tracing. You can enabl
 - **SDK tracing only**: Monitor Daytona API operations and SDK calls
 - **Sandbox telemetry only**: Monitor application behavior inside sandboxes
 - **Both**: Get complete end-to-end observability across your entire stack
-  :::
+:::
+
+### Configure Sandbox Collection
+
+To enable telemetry collection from sandboxes:
+
+1. Navigate to the [Daytona Dashboard](https://app.daytona.io)
+2. Go to **Settings** → **Experimental**
+3. Configure the following fields:
+   
+- **OTLP Endpoint**: Your OpenTelemetry collector endpoint (e.g., `https://otlp.nr-data.net`)
+- **OTLP Headers**: Authentication headers in `key=value` format (e.g., `api-key=YOUR_API_KEY`)
+
+Once configured, all sandboxes will automatically export their telemetry data to your specified OTLP endpoint.
 
 ---
 
