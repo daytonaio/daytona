@@ -5,7 +5,7 @@ package pty
 
 func (cl *wsClient) close() {
 	cl.closeOnce.Do(func() {
-		close(cl.send)
+		close(cl.done)
 		_ = cl.conn.Close()
 	})
 }
