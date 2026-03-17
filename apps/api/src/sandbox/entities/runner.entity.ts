@@ -92,16 +92,19 @@ export class Runner {
   currentDiskUsagePercentage: number
 
   @Column({
+    type: 'float',
     default: 0,
   })
   currentAllocatedCpu: number
 
   @Column({
+    type: 'float',
     default: 0,
   })
   currentAllocatedMemoryGiB: number
 
   @Column({
+    type: 'float',
     default: 0,
   })
   currentAllocatedDiskGiB: number
