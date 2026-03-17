@@ -900,7 +900,7 @@ export const CreateSandboxSheet = ({ className }: { className?: string }) => {
             </div>
           </form>
         </ScrollArea>
-        <SheetFooter className="p-5 pt-3 border-t border-border">
+        <SheetFooter className="p-5 pt-3 border-t border-border sm:justify-start">
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => (
