@@ -12,7 +12,6 @@ import (
 	"net"
 	"time"
 
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/docker"
 	"golang.org/x/crypto/ssh"
 )
@@ -270,7 +269,7 @@ func (s *Service) getSandboxDetails(sandboxId string) (*SandboxDetails, error) {
 	}
 
 	// Get container IP address
-	containerIP := common.GetContainerIpAddress(context.Background(), container)
+	containerIP := docker.GetContainerIpAddress(context.Background(), container)
 	if containerIP == "" {
 		return nil, fmt.Errorf("sandbox IP not found for %s", sandboxId)
 	}

@@ -12,7 +12,6 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/daytonaio/runner/pkg/common"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -26,7 +25,7 @@ func (d *DockerClient) GetDaemonVersion(ctx context.Context, sandboxId string) (
 		return "", err
 	}
 
-	containerIP := common.GetContainerIpAddress(ctx, c)
+	containerIP := GetContainerIpAddress(ctx, c)
 	if containerIP == "" {
 		return "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}

@@ -141,7 +141,7 @@ func run() int {
 
 	backupInfoCache := cache.NewBackupInfoCache(ctx, cfg.BackupInfoCacheRetention)
 
-	dockerClient, err := docker.NewDockerClient(docker.DockerClientConfig{
+	dockerClient, err := docker.NewDockerClient(ctx, docker.DockerClientConfig{
 		ApiClient:                    cli,
 		BackupInfoCache:              backupInfoCache,
 		Logger:                       logger,

@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/common-go/pkg/utils"
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/daytonaio/runner/pkg/netrules"
+	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/api/types/system"
 	"github.com/docker/docker/client"
 )
@@ -37,9 +38,10 @@ type DockerClientConfig struct {
 	VolumeCleanupExclusionPeriod time.Duration
 	BackupTimeoutMin             int
 	InitializeDaemonTelemetry    bool
+	InterSandboxNetworkEnabled   bool
 }
 
-func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
+func NewDockerClient(ctx context.Context, config DockerClientConfig) (*DockerClient, error) {
 	logger := slog.Default().With(slog.String("component", "docker-client"))
 	if config.Logger != nil {
 		logger = config.Logger.With(slog.String("component", "docker-client"))
@@ -62,19 +64,40 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 
 	var info system.Info
 	err := utils.RetryWithExponentialBackoff(
-		context.Background(),
+		ctx,
 		"get Docker info",
 		8,
 		1*time.Second,
 		5*time.Second,
 		func() error {
 			var infoErr error
-			info, infoErr = config.ApiClient.Info(context.Background())
+			info, infoErr = config.ApiClient.Info(ctx)
 			return infoErr
 		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get Docker info: %w", err)
+	}
+
+	if !config.InterSandboxNetworkEnabled {
+		if _, err := config.ApiClient.NetworkInspect(ctx, RUNNER_BRIDGE_NETWORK_NAME, network.InspectOptions{}); err != nil {
+			_, err := config.ApiClient.NetworkCreate(ctx, RUNNER_BRIDGE_NETWORK_NAME, network.CreateOptions{
+				Driver: "bridge",
+				Options: map[string]string{
+					"com.docker.network.bridge.enable_icc": "false",
+				},
+				IPAM: &network.IPAM{
+					Driver: "default",
+					Config: []network.IPAMConfig{
+						{Subnet: "172.20.0.0/16"},
+					},
+				},
+			})
+
+			if err != nil {
+				return nil, fmt.Errorf("failed to create %s network: %w", RUNNER_BRIDGE_NETWORK_NAME, err)
+			}
+		}
 	}
 
 	filesystem := ""
@@ -107,6 +130,7 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 		volumeCleanupExclusionPeriod: config.VolumeCleanupExclusionPeriod,
 		backupTimeoutMin:             config.BackupTimeoutMin,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
+		interSandboxNetworkEnabled:   config.InterSandboxNetworkEnabled,
 		filesystem:                   filesystem,
 	}, nil
 }
@@ -114,6 +138,8 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 func (d *DockerClient) ApiClient() client.APIClient {
 	return d.apiClient
 }
+
+const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
 
 type DockerClient struct {
 	apiClient                    client.APIClient
@@ -140,4 +166,5 @@ type DockerClient struct {
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool
 	filesystem                   string
+	interSandboxNetworkEnabled   bool
 }
