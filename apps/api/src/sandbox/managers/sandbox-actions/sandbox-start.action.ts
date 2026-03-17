@@ -641,6 +641,13 @@ export class SandboxStartAction extends SandboxAction {
         )
         break
       }
+      case SandboxState.PULLING_SNAPSHOT: {
+        if (await this.checkTimeoutError(sandbox, 30, 'Timeout while pulling snapshot')) {
+          return DONT_SYNC_AGAIN
+        }
+        await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode)
+        break
+      }
       case SandboxState.DESTROYED: {
         this.logger.warn(
           `Sandbox ${sandbox.id} is in destroyed state while starting on runner ${sandbox.runnerId}, prev runner ${sandbox.prevRunnerId}`,
