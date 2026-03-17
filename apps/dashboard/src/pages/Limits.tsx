@@ -35,7 +35,7 @@ export default function Limits() {
   const tiersQuery = useTiersQuery()
 
   const organizationTier = organizationTierQuery.data
-  const tiers = tiersQuery.data
+  const tiers = tiersQuery.data?.sort((a, b) => a.tier - b.tier)
   const wallet = walletQuery.data
 
   const { getRegionName } = useRegions()
