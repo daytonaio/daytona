@@ -792,7 +792,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
    * The sandbox entity is mutated in-place by repository.update() on each iteration,
    * and the lock guarantees no concurrent modification.
    */
-  async syncInstanceState(sandboxId: string): Promise<void> {
+  async syncInstanceState(sandboxId: string, force?: boolean): Promise<void> {
     // Track the start time of the sync operation.
     const startedAt = new Date()
 
@@ -839,7 +839,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               break
             }
             case SandboxDesiredState.STOPPED: {
-              syncState = await this.sandboxStopAction.run(sandbox, lockCode)
+              syncState = await this.sandboxStopAction.run(sandbox, lockCode, force)
               break
             }
             case SandboxDesiredState.DESTROYED: {
@@ -917,7 +917,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @TrackJobExecution()
   @WithSpan()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    await this.syncInstanceState(event.sandbox.id)
+    await this.syncInstanceState(event.sandbox.id, event.force)
   }
 
   @OnAsyncEvent({

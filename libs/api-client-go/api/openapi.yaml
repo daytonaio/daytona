@@ -2184,6 +2184,14 @@ paths:
         schema:
           type: string
         style: simple
+      - description: Force stop the sandbox using SIGKILL instead of SIGTERM
+        explode: true
+        in: query
+        name: force
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           content:

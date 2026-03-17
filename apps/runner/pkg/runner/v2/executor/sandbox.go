@@ -52,7 +52,12 @@ func (e *Executor) startSandbox(ctx context.Context, job *apiclient.Job) (any, e
 }
 
 func (e *Executor) stopSandbox(ctx context.Context, job *apiclient.Job) (any, error) {
-	err := e.docker.Stop(ctx, job.ResourceId)
+	var payload dto.StopSandboxDTO
+	if job.Payload != nil {
+		_ = e.parsePayload(job.Payload, &payload)
+	}
+
+	err := e.docker.Stop(ctx, job.ResourceId, payload.Force)
 	if err != nil {
 		return nil, common.FormatRecoverableError(err)
 	}

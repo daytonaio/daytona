@@ -713,6 +713,14 @@ const docTemplate = `{
                         "name": "sandboxId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Stop sandbox",
+                        "name": "sandbox",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/StopSandboxDTO"
+                        }
                     }
                 ],
                 "responses": {
@@ -1896,6 +1904,14 @@ const docTemplate = `{
             "properties": {
                 "daemonVersion": {
                     "type": "string"
+                }
+            }
+        },
+        "StopSandboxDTO": {
+            "type": "object",
+            "properties": {
+                "force": {
+                    "type": "boolean"
                 }
             }
         },

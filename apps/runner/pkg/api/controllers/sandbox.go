@@ -324,8 +324,9 @@ func Start(ctx *gin.Context) {
 //	@Summary		Stop sandbox
 //	@Description	Stop sandbox
 //	@Produce		json
-//	@Param			sandboxId	path		string	true	"Sandbox ID"
-//	@Success		200			{string}	string	"Sandbox stopped"
+//	@Param			sandboxId	path		string				true	"Sandbox ID"
+//	@Param			sandbox		body		dto.StopSandboxDTO	false	"Stop sandbox"
+//	@Success		200			{string}	string				"Sandbox stopped"
 //	@Failure		400			{object}	common_errors.ErrorResponse
 //	@Failure		401			{object}	common_errors.ErrorResponse
 //	@Failure		404			{object}	common_errors.ErrorResponse
@@ -337,13 +338,17 @@ func Start(ctx *gin.Context) {
 func Stop(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
+	var stopDto dto.StopSandboxDTO
+	// Allow empty body for backwards compatibility
+	_ = ctx.ShouldBindJSON(&stopDto)
+
 	runner, err := runner.GetInstance(nil)
 	if err != nil {
 		ctx.Error(err)
 		return
 	}
 
-	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId, stopDto.Force)
 	if err != nil {
 		ctx.Error(err)
 		return

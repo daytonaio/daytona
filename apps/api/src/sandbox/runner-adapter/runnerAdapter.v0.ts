@@ -253,8 +253,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     }
   }
 
-  async stopSandbox(sandboxId: string): Promise<void> {
-    await this.sandboxApiClient.stop(sandboxId)
+  async stopSandbox(sandboxId: string, force?: boolean): Promise<void> {
+    await this.sandboxApiClient.stop(sandboxId, { force })
   }
 
   async destroySandbox(sandboxId: string): Promise<void> {

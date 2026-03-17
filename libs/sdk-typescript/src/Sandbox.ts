@@ -311,6 +311,7 @@ export class Sandbox implements SandboxDto {
    *
    * @param {number} [timeout] - Maximum time to wait in seconds. 0 means no timeout.
    *                            Defaults to 60-second timeout.
+   * @param {boolean} [force] - If true, uses SIGKILL instead of SIGTERM. Defaults to false.
    * @returns {Promise<void>}
    *
    * @example
@@ -319,12 +320,12 @@ export class Sandbox implements SandboxDto {
    * console.log('Sandbox stopped successfully');
    */
   @WithInstrumentation()
-  public async stop(timeout = 60): Promise<void> {
+  public async stop(timeout = 60, force = false): Promise<void> {
     if (timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.stopSandbox(this.id, undefined, force, { timeout: timeout * 1000 })
     await this.refreshDataSafe()
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? Math.max(0.001, timeout - timeElapsed / 1000) : timeout)

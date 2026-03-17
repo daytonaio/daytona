@@ -335,6 +335,11 @@ definitions:
       daemonVersion:
         type: string
     type: object
+  StopSandboxDTO:
+    properties:
+      force:
+        type: boolean
+    type: object
   TagImageRequestDTO:
     properties:
       sourceImage:
@@ -874,6 +879,11 @@ paths:
           name: sandboxId
           required: true
           type: string
+        - description: Stop sandbox
+          in: body
+          name: sandbox
+          schema:
+            $ref: '#/definitions/StopSandboxDTO'
       produces:
         - application/json
       responses:
