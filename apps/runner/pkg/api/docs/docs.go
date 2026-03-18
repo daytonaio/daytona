@@ -1761,13 +1761,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "currentAllocatedCpu": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "currentAllocatedDiskGiB": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "currentAllocatedMemoryGiB": {
-                    "type": "integer"
+                    "type": "number"
                 },
                 "currentCpuLoadAverage": {
                     "type": "number"
