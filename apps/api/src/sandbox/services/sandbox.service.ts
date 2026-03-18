@@ -1143,7 +1143,7 @@ export class SandboxService {
     sandboxIdOrName: string,
     organizationId: string,
     port: number,
-    expiresInSeconds = 60,
+    expiresInSeconds = 300,
   ): Promise<SignedPortPreviewUrlDto> {
     if (port < 1 || port > 65535) {
       throw new BadRequestError('Invalid port')

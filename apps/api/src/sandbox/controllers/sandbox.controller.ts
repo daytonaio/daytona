@@ -986,7 +986,7 @@ export class SandboxController {
     name: 'expiresInSeconds',
     required: false,
     type: 'integer',
-    description: 'Expiration time in seconds (default: 60 seconds)',
+    description: 'Expiration time in seconds (default: 300 seconds)',
   })
   @ApiResponse({
     status: 200,
