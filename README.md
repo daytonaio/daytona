@@ -71,7 +71,7 @@ npm install @daytonaio/sdk
 
 1. Create an account at https://app.daytona.io
 1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
-1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+1. Follow the [Getting Started docs](https://www.daytona.io/docs/en/getting-started/) to start using the Daytona SDK
 
 ## Creating your first Sandbox
 
