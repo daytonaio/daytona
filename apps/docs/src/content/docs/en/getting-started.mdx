@@ -1017,7 +1017,9 @@ sandbox = daytona.create(
     CreateSandboxFromSnapshotParams(labels={"project": "my-app", "env": "dev"})
 )
 
-found = daytona.find_one(labels={"project": "my-app"})
+# List sandboxes by label and pick one
+result = daytona.list(labels={"project": "my-app"})
+found = result.items[0]
 print(f"Found sandbox: {found.id}")
 ```
 
@@ -1031,7 +1033,9 @@ const sandbox = await daytona.create({
     labels: { project: 'my-app', env: 'dev' }
 });
 
-const found = await daytona.findOne({ labels: { project: 'my-app' } });
+// List sandboxes by label and pick one
+const result = await daytona.list({ project: 'my-app' });
+const found = result.items[0];
 console.log(`Found sandbox: ${found.id}`);
 ```
 
@@ -1063,10 +1067,12 @@ func main() {
         log.Fatal(err)
     }
 
-    found, err := client.FindOne(context.Background(), nil, map[string]string{"project": "my-app"})
+    // List sandboxes by label and pick one
+    result, err := client.List(context.Background(), map[string]string{"project": "my-app"}, nil, nil)
     if err != nil {
         log.Fatal(err)
     }
+    found := result.Items[0]
     fmt.Printf("Found sandbox: %s\n", found.ID)
 }
 ```
@@ -1081,7 +1087,9 @@ sandbox = daytona.create(
     Daytona::CreateSandboxFromSnapshotParams.new(labels: { 'project' => 'my-app', 'env' => 'dev' })
 )
 
-found = daytona.find_one(labels: { 'project' => 'my-app' })
+# List sandboxes by label and pick one
+result = daytona.list({ 'project' => 'my-app' })
+found = result.items[0]
 puts "Found sandbox: #{found.id}"
 ```
 
