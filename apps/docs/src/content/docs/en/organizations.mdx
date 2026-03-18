@@ -604,39 +604,6 @@ For more information, see the [API](/docs/en/tools/api/#daytona/tag/organization
 
 > [**Get organization current usage overview (API)**](/docs/en/tools/api/#daytona/tag/organizations/GET/organizations/{organizationId}/usage)
 
-### Update quota
-
-Daytona provides a method to update the quota for an organization.
-
-<Tabs syncKey="language">
-<TabItem label="API" icon="seti:json">
-
-```bash
-curl 'https://app.daytona.io/api/organizations/ORGANIZATION_ID/quota' \
-  --request PATCH \
-  --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_API_KEY' \
-  --data '{
-  "maxCpuPerSandbox": 8,
-  "maxMemoryPerSandbox": 32,
-  "maxDiskPerSandbox": 100,
-  "snapshotQuota": 1000,
-  "maxSnapshotSize": 100,
-  "volumeQuota": 1000,
-  "authenticatedRateLimit": 1000,
-  "sandboxCreateRateLimit": 100,
-  "sandboxLifecycleRateLimit": 100,
-  "authenticatedRateLimitTtlSeconds": 60
-}'
-```
-
-</TabItem>
-</Tabs>
-
-For more information, see the [API](/docs/en/tools/api/#daytona/tag/organizations) reference:
-
-> [**Update organization quota (API)**](/docs/en/tools/api/#daytona/tag/organizations/PATCH/organizations/{organizationId}/quota)
-
 ### Update sandbox default limited network egress
 
 Daytona provides a method to update the sandbox default limited network egress for an organization.
