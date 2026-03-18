@@ -613,7 +613,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
 
             // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id)
+            const processPromise = this.syncInstanceState(row.sandbox_id, true)
             pendingProcesses.push(processPromise)
             processedCount++
 
@@ -711,7 +711,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
    * The sandbox entity is mutated in-place by repository.update() on each iteration,
    * and the lock guarantees no concurrent modification.
    */
-  async syncInstanceState(sandboxId: string): Promise<void> {
+  async syncInstanceState(sandboxId: string, skipV2Break?: boolean): Promise<void> {
     // Track the start time of the sync operation.
     const startedAt = new Date()
 
@@ -789,7 +789,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
 
         // Do not sync again for v2 runners
         // Job completion will update the sandbox state
-        if (sandbox.runnerId && (await this.runnerService.getRunnerApiVersion(sandbox.runnerId)) === '2') {
+        if (
+          !skipV2Break &&
+          sandbox.runnerId &&
+          (await this.runnerService.getRunnerApiVersion(sandbox.runnerId)) === '2'
+        ) {
           break
         }
 
