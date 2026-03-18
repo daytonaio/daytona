@@ -154,7 +154,7 @@ daytona create [flags]
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{}'
 ```
 
@@ -278,7 +278,7 @@ daytona create --cpu 2 --memory 4096 --disk 8
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -451,7 +451,7 @@ daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/start' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -547,7 +547,7 @@ daytona list [flags]
 
 ```bash
 curl 'https://app.daytona.io/api/sandbox' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -566,6 +566,81 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**list (CLI)**](/docs/en/tools/cli/#daytona-list)
 >
 > [**list (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox)
+
+## Get Sandboxes
+
+Daytona provides methods to get a sandbox by its ID or name using the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Get a sandbox by ID or name
+sandbox = daytona.get("my-awesome-sandbox")
+print(sandbox.state)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Get a sandbox by ID or name
+const sandbox = await daytona.get("my-awesome-sandbox");
+console.log(`Sandbox state: ${sandbox.state}`);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Get a sandbox by ID or name
+sandbox = daytona.get('my-awesome-sandbox')
+puts sandbox.state
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Get a sandbox by ID or name
+sandbox, err := client.Get(ctx, "my-sandbox-id-or-name")
+if err != nil {
+    return err
+}
+fmt.Println(sandbox.State)
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona info [SANDBOX_ID] | [SANDBOX_NAME] [flags]
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
+
+> [**get (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonaget)
+>
+> [**get (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#get)
+>
+> [**get (Ruby SDK)**](/docs/en/ruby-sdk/daytona#get)
+>
+> [**Get (Go SDK)**](/docs/en/go-sdk/daytona/#Client.Get)
+>
+> [**info (CLI)**](/docs/en/tools/cli/#daytona-info)
+>
+> [**get (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName})
 
 ### Sandbox details page
 
@@ -619,8 +694,8 @@ sandbox.stop()
 
 print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-# The sandbox ID can later be used to find the sandbox and start it
-sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+# The sandbox ID can later be used to get the sandbox and start it
+sandbox = daytona.get("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
 # Start sandbox
 sandbox.start()
@@ -637,8 +712,8 @@ await sandbox.stop();
 
 console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-// The sandbox ID can later be used to find the sandbox and start it
-const found = await daytona.findOne({ idOrName: '7cd11133-96c1-4cc8-9baa-c757b8f8c916' });
+// The sandbox ID can later be used to get the sandbox and start it
+const found = await daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916');
 
 // Start sandbox
 await found.start();
@@ -655,8 +730,8 @@ sandbox.stop
 
 puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-# The sandbox ID can later be used to find the sandbox and start it
-sandbox = daytona.find_one(id: '7cd11133-96c1-4cc8-9baa-c757b8f8c916')
+# The sandbox ID can later be used to get the sandbox and start it
+sandbox = daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
 
 # Start sandbox
 sandbox.start
@@ -691,7 +766,7 @@ daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -706,14 +781,6 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**stop (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#stop)
 >
 > [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Stop)
->
-> [**find_one (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonafind_one)
->
-> [**findOne (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#findone)
->
-> [**find_one (Ruby SDK)**](/docs/en/ruby-sdk/daytona#find_one)
->
-> [**FindOne (Go SDK)**](/docs/en/go-sdk/daytona/#Client.FindOne)
 >
 > [**stop (CLI)**](/docs/en/tools/cli/#daytona-stop)
 >
@@ -773,7 +840,7 @@ daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -827,7 +894,7 @@ sandbox.recover
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -889,7 +956,7 @@ end
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -982,7 +1049,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -1064,7 +1131,7 @@ daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 </TabItem>
 </Tabs>
@@ -1156,7 +1223,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1260,7 +1327,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1374,7 +1441,7 @@ err = sandbox.SetAutoDeleteInterval(ctx, &disableInterval)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
