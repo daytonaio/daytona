@@ -64,7 +64,7 @@ export class SandboxStartAction extends SandboxAction {
           // Using the PULLING_SNAPSHOT state for the case where the runner isn't assigned yet as well
           return this.handleUnassignedRunnerSandbox(sandbox, lockCode)
         } else {
-          return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox, lockCode)
+          return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
         }
       }
       case SandboxState.PENDING_BUILD: {
@@ -82,9 +82,7 @@ export class SandboxStartAction extends SandboxAction {
         return this.handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox, lockCode)
       }
       case SandboxState.RESTORING:
-      case SandboxState.CREATING: {
-        return this.handleRunnerSandboxPullingSnapshotStateCheck(sandbox, lockCode)
-      }
+      case SandboxState.CREATING:
       case SandboxState.STARTING: {
         return this.handleRunnerSandboxStartedStateCheck(sandbox, lockCode)
       }
@@ -540,40 +538,14 @@ export class SandboxStartAction extends SandboxAction {
     return SYNC_AGAIN
   }
 
-  //  used to check if sandbox is pulling snapshot on runner and update sandbox state accordingly
-  private async handleRunnerSandboxPullingSnapshotStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
+  //  used to check if sandbox is started on runner and update sandbox state accordingly
+  //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
+  private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     //  edge case when sandbox is being transferred to a new runner
     if (!sandbox.runnerId) {
       return SYNC_AGAIN
     }
 
-    const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
-
-    const runnerAdapter = await this.runnerAdapterFactory.create(runner)
-    const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-
-    if (sandboxInfo.state === SandboxState.PULLING_SNAPSHOT) {
-      await this.updateSandboxState(sandbox, SandboxState.PULLING_SNAPSHOT, lockCode)
-    } else if (sandboxInfo.state === SandboxState.ERROR) {
-      await this.updateSandboxState(
-        sandbox,
-        SandboxState.ERROR,
-        lockCode,
-        undefined,
-        'Sandbox is in error state on runner',
-      )
-    } else if (sandboxInfo.state === SandboxState.UNKNOWN) {
-      await this.updateSandboxState(sandbox, SandboxState.UNKNOWN, lockCode)
-    } else {
-      await this.updateSandboxState(sandbox, SandboxState.STARTING, lockCode)
-    }
-
-    return SYNC_AGAIN
-  }
-
-  //  used to check if sandbox is started on runner and update sandbox state accordingly
-  //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
-  private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox, lockCode: LockCode): Promise<SyncState> {
     const runner = await this.runnerService.findOneOrFail(sandbox.runnerId)
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
