@@ -100,6 +100,14 @@ export abstract class SandboxAction {
       updateData.recoverable = recoverable
     }
 
-    await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
+    const whereCondition: Partial<Pick<Sandbox, 'state' | 'pending'>> = { state: sandbox.state }
+    if (state !== SandboxState.ARCHIVED) {
+      whereCondition.pending = true
+    }
+
+    await this.sandboxRepository.updateWhere(sandbox.id, {
+      updateData,
+      whereCondition,
+    })
   }
 }
