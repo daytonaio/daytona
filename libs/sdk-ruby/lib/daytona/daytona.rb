@@ -84,21 +84,6 @@ module Daytona
       to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
     end
 
-    # Finds a Sandbox by its ID or labels.
-    #
-    # @param id [String, Nil]
-    # @param labels [Hash<String, String>]
-    # @return [Daytona::Sandbox]
-    # @raise [Daytona::Sdk::Error]
-    def find_one(id: nil, labels: nil)
-      return get(id) if id
-
-      response = list(labels)
-      raise Sdk::Error, "No sandbox found with labels #{labels}" if response.items.empty?
-
-      response.items.first
-    end
-
     # Lists Sandboxes filtered by labels.
     #
     # @param labels [Hash<String, String>]
@@ -139,7 +124,7 @@ module Daytona
     # @return [void]
     def stop(sandbox, timeout = Sandbox::DEFAULT_TIMEOUT) = sandbox.stop(timeout)
 
-    instrument :create, :delete, :get, :find_one, :list, :start, :stop, component: 'Daytona'
+    instrument :create, :delete, :get, :list, :start, :stop, component: 'Daytona'
 
     private
 

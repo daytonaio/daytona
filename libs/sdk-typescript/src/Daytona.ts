@@ -188,18 +188,6 @@ export type CreateSandboxFromSnapshotParams = CreateSandboxBaseParams & {
 }
 
 /**
- * Filter for Sandboxes.
- *
- * @interface
- * @property {string} [idOrName] - The ID or name of the Sandbox to retrieve
- * @property {Record<string, string>} [labels] - Labels to filter Sandboxes
- */
-export type SandboxFilter = {
-  idOrName?: string
-  labels?: Record<string, string>
-}
-
-/**
  * Main class for interacting with the Daytona API.
  * Provides methods for creating, managing, and interacting with Daytona Sandboxes.
  * Can be initialized either with explicit configuration or using environment variables.
@@ -618,30 +606,6 @@ export class Daytona implements AsyncDisposable {
       this.sandboxApi,
       codeToolbox,
     )
-  }
-
-  /**
-   * Finds a Sandbox by its ID or name or labels.
-   *
-   * @param {SandboxFilter} filter - Filter for Sandboxes
-   * @returns {Promise<Sandbox>} First Sandbox that matches the ID or name or labels.
-   *
-   * @example
-   * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-   * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
-   */
-  @WithInstrumentation()
-  public async findOne(filter: SandboxFilter): Promise<Sandbox> {
-    if (filter.idOrName) {
-      return this.get(filter.idOrName)
-    }
-
-    const result = await this.list(filter.labels, 1, 1)
-    if (result.items.length === 0) {
-      const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
-      throw new DaytonaError(errMsg)
-    }
-    return result.items[0]
   }
 
   /**

@@ -82,7 +82,6 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func NewClientWithConfig\(config \*types.DaytonaConfig\) \(\*Client, error\)](<#NewClientWithConfig>)
   - [func \(c \*Client\) Close\(ctx context.Context\) error](<#Client.Close>)
   - [func \(c \*Client\) Create\(ctx context.Context, params any, opts ...func\(\*options.CreateSandbox\)\) \(\*Sandbox, error\)](<#Client.Create>)
-  - [func \(c \*Client\) FindOne\(ctx context.Context, sandboxIDOrName \*string, labels map\[string\]string\) \(\*Sandbox, error\)](<#Client.FindOne>)
   - [func \(c \*Client\) Get\(ctx context.Context, sandboxIDOrName string\) \(\*Sandbox, error\)](<#Client.Get>)
   - [func \(c \*Client\) List\(ctx context.Context, labels map\[string\]string, page \*int, limit \*int\) \(\*PaginatedSandboxes, error\)](<#Client.List>)
 - [type CodeInterpreterService](<#CodeInterpreterService>)
@@ -401,33 +400,6 @@ Optional parameters can be configured using functional options:
 - \[options.WithLogChannel\]: Receive build logs during image builds
 
 Returns the created [Sandbox](<#Sandbox>) or an error if creation fails.
-
-<a name="Client.FindOne"></a>
-### func \(\*Client\) FindOne
-
-```go
-func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error)
-```
-
-FindOne finds a single sandbox by ID/name or by matching labels.
-
-If sandboxIDOrName is provided and non\-empty, FindOne delegates to [Client.Get](<#Client.Get>). Otherwise, it searches for sandboxes matching the provided labels and returns the first match.
-
-This method is useful when you need to find a sandbox but may have either its identifier or its labels:
-
-```
-// Find by name
-name := "my-sandbox"
-sandbox, err := client.FindOne(ctx, &name, nil)
-
-// Find by labels
-sandbox, err := client.FindOne(ctx, nil, map[string]string{
-    "environment": "production",
-    "team":        "backend",
-})
-```
-
-Returns [errors.DaytonaNotFoundError](<https://pkg.go.dev/errors/#DaytonaNotFoundError>) if no matching sandbox is found.
 
 <a name="Client.Get"></a>
 ### func \(\*Client\) Get

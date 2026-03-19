@@ -619,8 +619,8 @@ sandbox.stop()
 
 print(sandbox.id) # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-# The sandbox ID can later be used to find the sandbox and start it
-sandbox = daytona.find_one("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
+# The sandbox ID can later be used to get the sandbox and start it
+sandbox = daytona.get("7cd11133-96c1-4cc8-9baa-c757b8f8c916")
 
 # Start sandbox
 sandbox.start()
@@ -637,8 +637,8 @@ await sandbox.stop();
 
 console.log(sandbox.id) // 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
-// The sandbox ID can later be used to find the sandbox and start it
-const found = await daytona.findOne({ idOrName: '7cd11133-96c1-4cc8-9baa-c757b8f8c916' });
+// The sandbox ID can later be used to get the sandbox and start it
+const found = await daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916');
 
 // Start sandbox
 await found.start();
@@ -656,7 +656,7 @@ sandbox.stop
 puts sandbox.id # 7cd11133-96c1-4cc8-9baa-c757b8f8c916
 
 # The sandbox ID can later be used to find the sandbox and start it
-sandbox = daytona.find_one(id: '7cd11133-96c1-4cc8-9baa-c757b8f8c916')
+sandbox = daytona.get('7cd11133-96c1-4cc8-9baa-c757b8f8c916')
 
 # Start sandbox
 sandbox.start
@@ -706,14 +706,6 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 > [**stop (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#stop)
 >
 > [**Stop (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Stop)
->
-> [**find_one (Python SDK)**](/docs/en/python-sdk/sync/daytona#daytonafind_one)
->
-> [**findOne (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#findone)
->
-> [**find_one (Ruby SDK)**](/docs/en/ruby-sdk/daytona#find_one)
->
-> [**FindOne (Go SDK)**](/docs/en/go-sdk/daytona/#Client.FindOne)
 >
 > [**stop (CLI)**](/docs/en/tools/cli/#daytona-stop)
 >
