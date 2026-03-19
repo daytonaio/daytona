@@ -39,7 +39,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
-    protected readonly redisLockProvider: RedisLockProvider,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   /**
