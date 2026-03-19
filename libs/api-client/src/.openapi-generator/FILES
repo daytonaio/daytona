@@ -152,6 +152,7 @@ models/resize-sandbox.ts
 models/runner-full.ts
 models/runner-health-metrics.ts
 models/runner-healthcheck.ts
+models/runner-service-health.ts
 models/runner-snapshot-dto.ts
 models/runner-state.ts
 models/runner.ts

@@ -48,7 +48,11 @@ func TagImage(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), request.SourceImage, false)
 	if err != nil {
@@ -99,7 +103,11 @@ func PullSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gin
 			return
 		}
 
-		runner := runner.GetInstance(nil)
+		runner, err := runner.GetInstance(nil)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 
 		cacheKey := request.Snapshot
 		if request.DestinationRef != nil {
@@ -161,7 +169,12 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 			return
 		}
 
-		runner := runner.GetInstance(nil)
+		runner, err := runner.GetInstance(nil)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+
 		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
 		if err != nil {
 			logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
@@ -210,7 +223,11 @@ func SnapshotExists(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), snapshot, false)
 	if err != nil {
@@ -247,9 +264,13 @@ func RemoveSnapshot(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		runner := runner.GetInstance(nil)
+		runner, err := runner.GetInstance(nil)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 
-		err := runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, true)
+		err = runner.Docker.RemoveImage(ctx.Request.Context(), snapshot, true)
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -325,7 +346,11 @@ func GetBuildLogs(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		reader := bufio.NewReader(file)
-		runner := runner.GetInstance(nil)
+		runner, err := runner.GetInstance(nil)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 
 		checkSnapshotRef := snapshotRef
 
@@ -400,7 +425,11 @@ func GetSnapshotInfo(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	exists, err := runner.Docker.ImageExists(ctx.Request.Context(), snapshot, false)
 	if err != nil {
@@ -456,7 +485,11 @@ func InspectSnapshotInRegistry(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	digest, err := runner.Docker.InspectImageInRegistry(ctx.Request.Context(), request.Snapshot, request.Registry)
 	if err != nil {
