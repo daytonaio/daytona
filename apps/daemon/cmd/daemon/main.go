@@ -125,6 +125,16 @@ func run() int {
 			return 2
 		}
 
+		// Defer entrypoint session deletion concurrently with toolbox shutdown
+		defer func() {
+			delErr := sessionService.Delete(context.Background(), util.EntrypointSessionID)
+			if delErr != nil {
+				logger.Error("Failed to delete entrypoint session", "error", delErr)
+			} else {
+				logger.Debug("Deleted entrypoint session", "session_id", util.EntrypointSessionID)
+			}
+		}()
+
 		logger.Debug("Created entrypoint session", "session_id", util.EntrypointSessionID)
 
 		// Execute command asynchronously via session
@@ -210,19 +220,6 @@ func run() int {
 		logger.Error("Error occurred", "error", err)
 	case sig := <-sigChan:
 		logger.Info("Received signal, shutting down gracefully...", "signal", sig)
-	}
-
-	if len(args) > 0 {
-		// Handle entrypoint command shutdown
-		_, err = sessionService.Get(util.EntrypointSessionID)
-		if err != nil {
-			logger.Error("Failed to get entrypoint session", "error", err)
-		} else {
-			delErr := sessionService.Delete(context.Background(), util.EntrypointSessionID)
-			if delErr != nil {
-				logger.Error("Failed to delete entrypoint session", "error", delErr)
-			}
-		}
 	}
 
 	// Toolbox server graceful shutdown
