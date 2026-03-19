@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,6 +42,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
 		}
@@ -55,11 +57,9 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		timer := time.AfterFunc(timeout, func() {
 			timeoutReached = true
 			if cmd.Process != nil {
-				// kill the process group
-				err := cmd.Process.Kill()
-				if err != nil {
-					logger.Error("failed to kill process", "error", err)
-					return
+				// Kill the entire process group so child processes are also terminated
+				if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+					logger.Error("failed to kill process group", "error", err)
 				}
 			}
 		})
