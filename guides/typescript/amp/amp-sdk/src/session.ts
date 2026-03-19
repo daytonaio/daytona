@@ -38,6 +38,11 @@ export class AmpSession {
     debug('AmpSession constructed. Initial threadId:', this.threadId)
   }
 
+  // Quote a string so it is passed to a shell command literally.
+  private shellQuote(s: string): string {
+    return `'${s.replace(/'/g, "'\\''")}'`
+  }
+
   // Handle a single JSON line from Amp's --stream-json output
   private handleJsonLine(line: string): void {
     try {
@@ -172,10 +177,10 @@ export class AmpSession {
 
     if (this.threadId) {
       // Continue existing thread. Place -x before subcommand so it's treated as a global option.
-      await this.runAmpCommand(['-x', JSON.stringify(prompt), 'threads', 'continue', this.threadId])
+      await this.runAmpCommand(['-x', this.shellQuote(prompt), 'threads', 'continue', this.threadId])
     } else {
       // Start new thread; thread/session id should be captured from streamed JSON init message
-      await this.runAmpCommand(['-x', JSON.stringify(prompt)])
+      await this.runAmpCommand(['-x', this.shellQuote(prompt)])
 
       // If we still don't have a threadId from the stream, fall back to parsing `amp threads list`
       if (!this.threadId) {
