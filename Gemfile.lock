@@ -102,7 +102,7 @@ GEM
     io-console (0.8.2)
     jaro_winkler (1.6.1)
     jmespath (1.6.2)
-    json (2.18.0)
+    json (2.19.2)
     kramdown (2.5.2)
       rexml (>= 3.4.4)
     kramdown-parser-gfm (1.1.0)
