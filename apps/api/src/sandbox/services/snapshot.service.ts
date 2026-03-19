@@ -12,13 +12,14 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw, ILike, FindOptionsWhere } from 'typeorm'
+import { Repository, Not, In, Raw, ILike, Like, LessThan, FindOptionsWhere } from 'typeorm'
 import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
@@ -50,8 +51,12 @@ import { RegionService } from '../../region/services/region.service'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
+import { LogExecution } from '../../common/decorators/log-execution.decorator'
+import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
+const FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS = 3
+
 @Injectable()
 export class SnapshotService {
   private readonly logger = new Logger(SnapshotService.name)
@@ -791,5 +796,23 @@ export class SnapshotService {
       { runnerId: payload.runnerId },
       { state: SnapshotRunnerState.REMOVING },
     )
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-failed-snapshot-runners' })
+  @LogExecution('cleanup-failed-snapshot-runners')
+  @WithInstrumentation()
+  async cleanupFailedSnapshotRunners() {
+    const cutoff = new Date()
+    cutoff.setHours(cutoff.getHours() - FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS)
+
+    const result = await this.snapshotRunnerRepository.delete({
+      snapshotRef: Like('daytona-%'),
+      state: SnapshotRunnerState.ERROR,
+      updatedAt: LessThan(cutoff),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} failed snapshot runners`)
+    }
   }
 }
