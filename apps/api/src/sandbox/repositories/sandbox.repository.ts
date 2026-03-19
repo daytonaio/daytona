@@ -92,9 +92,18 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
     sandbox.assertValid()
     const invariantChanges = sandbox.enforceInvariants()
 
-    const result = await this.repository.update(id, { ...updateData, ...invariantChanges })
+    const result = await this.repository.update(
+      {
+        id: previousSandbox.id,
+        state: previousSandbox.state,
+        desiredState: previousSandbox.desiredState,
+        pending: previousSandbox.pending,
+        organizationId: previousSandbox.organizationId,
+      },
+      { ...updateData, ...invariantChanges },
+    )
     if (!result.affected) {
-      throw new NotFoundException('Sandbox not found after update')
+      throw new ConflictException('Sandbox was modified by another operation, please try again')
     }
     sandbox.updatedAt = new Date()
 
