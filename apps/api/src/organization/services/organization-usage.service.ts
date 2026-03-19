@@ -21,8 +21,11 @@ import {
 } from '../dto/sandbox-usage-overview-internal.dto'
 import {
   PendingSnapshotUsageOverviewInternalDto,
+  PendingTotalSnapshotUsageOverviewInternalDto,
   SnapshotUsageOverviewInternalDto,
   SnapshotUsageOverviewWithPendingInternalDto,
+  TotalSnapshotUsageOverviewInternalDto,
+  TotalSnapshotUsageOverviewWithPendingInternalDto,
 } from '../dto/snapshot-usage-overview-internal.dto'
 import {
   PendingVolumeUsageOverviewInternalDto,
@@ -115,13 +118,16 @@ export class OrganizationUsageService {
     )
 
     const snapshotUsage = await this.getSnapshotUsageOverview(organizationId)
+    const totalSnapshotUsage = await this.getTotalSnapshotUsageOverview(organizationId)
     const volumeUsage = await this.getVolumeUsageOverview(organizationId)
 
     return {
       regionUsage,
       totalSnapshotQuota: organization.snapshotQuota,
-      totalVolumeQuota: organization.volumeQuota,
       currentSnapshotUsage: snapshotUsage.currentSnapshotUsage,
+      totalSnapshotQuotaAll: organization.totalSnapshotQuota,
+      currentTotalSnapshotUsage: totalSnapshotUsage.currentTotalSnapshotUsage,
+      totalVolumeQuota: organization.volumeQuota,
       currentVolumeUsage: volumeUsage.currentVolumeUsage,
     }
   }
@@ -259,6 +265,42 @@ export class OrganizationUsageService {
 
       // get pending usage separately since it's not stored in DB
       const pendingUsageOverview = await this.getCachedPendingVolumeUsageOverview(organizationId)
+
+      return {
+        ...usageOverview,
+        ...pendingUsageOverview,
+      }
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
+  }
+
+  /**
+   * Get the current and pending usage overview for total snapshot count (all snapshots regardless of state).
+   *
+   * @param organizationId
+   */
+  async getTotalSnapshotUsageOverview(
+    organizationId: string,
+  ): Promise<TotalSnapshotUsageOverviewWithPendingInternalDto> {
+    let cachedUsageOverview = await this.getCachedTotalSnapshotUsageOverview(organizationId)
+
+    if (cachedUsageOverview) {
+      return cachedUsageOverview
+    }
+
+    const lockKey = `org:${organizationId}:fetch-total-snapshot-usage-from-db`
+    await this.redisLockProvider.waitForLock(lockKey, 60)
+
+    try {
+      cachedUsageOverview = await this.getCachedTotalSnapshotUsageOverview(organizationId)
+
+      if (cachedUsageOverview) {
+        return cachedUsageOverview
+      }
+
+      const usageOverview = await this.fetchTotalSnapshotUsageFromDb(organizationId)
+      const pendingUsageOverview = await this.getCachedPendingTotalSnapshotUsageOverview(organizationId)
 
       return {
         ...usageOverview,
@@ -497,6 +539,81 @@ export class OrganizationUsageService {
   }
 
   /**
+   * Get the cached overview for current and pending usage for total snapshot count.
+   *
+   * @param organizationId
+   */
+  private async getCachedTotalSnapshotUsageOverview(
+    organizationId: string,
+  ): Promise<TotalSnapshotUsageOverviewWithPendingInternalDto | null> {
+    const script = `
+      return {
+        redis.call("GET", KEYS[1]),
+        redis.call("GET", KEYS[2])
+      }
+    `
+    const result = (await this.redis.eval(
+      script,
+      2,
+      this.getCurrentQuotaUsageCacheKey(organizationId, 'total_snapshot_count'),
+      this.getPendingQuotaUsageCacheKey(organizationId, 'total_snapshot_count'),
+    )) as (string | null)[]
+
+    const [currentTotalSnapshotUsage, pendingTotalSnapshotUsage] = result
+
+    if (currentTotalSnapshotUsage === null) {
+      return null
+    }
+
+    const isStale = await this.isCacheStale(organizationId, 'total_snapshot')
+
+    if (isStale) {
+      return null
+    }
+
+    const parsedCurrentTotalSnapshotUsage = this.parseNonNegativeCachedValue(currentTotalSnapshotUsage)
+
+    if (parsedCurrentTotalSnapshotUsage === null) {
+      return null
+    }
+
+    const parsedPendingTotalSnapshotUsage = this.parseNonNegativeCachedValue(pendingTotalSnapshotUsage)
+
+    return {
+      currentTotalSnapshotUsage: parsedCurrentTotalSnapshotUsage,
+      pendingTotalSnapshotUsage: parsedPendingTotalSnapshotUsage,
+    }
+  }
+
+  /**
+   * Get the cached pending usage overview for total snapshot count.
+   *
+   * @param organizationId
+   */
+  private async getCachedPendingTotalSnapshotUsageOverview(
+    organizationId: string,
+  ): Promise<PendingTotalSnapshotUsageOverviewInternalDto> {
+    const script = `
+      return {
+        redis.call("GET", KEYS[1])
+      }
+    `
+    const result = (await this.redis.eval(
+      script,
+      1,
+      this.getPendingQuotaUsageCacheKey(organizationId, 'total_snapshot_count'),
+    )) as (string | null)[]
+
+    const [pendingTotalSnapshotUsage] = result
+
+    const parsedPendingTotalSnapshotUsage = this.parseNonNegativeCachedValue(pendingTotalSnapshotUsage)
+
+    return {
+      pendingTotalSnapshotUsage: parsedPendingTotalSnapshotUsage,
+    }
+  }
+
+  /**
    * Get the cached overview for current and pending usage for volume-related organization quotas.
    *
    * @param organizationId
@@ -677,6 +794,28 @@ export class OrganizationUsageService {
   }
 
   /**
+   * Fetch the total snapshot count (all snapshots regardless of state) from the database and cache the results.
+   *
+   * @param organizationId
+   */
+  private async fetchTotalSnapshotUsageFromDb(organizationId: string): Promise<TotalSnapshotUsageOverviewInternalDto> {
+    const totalSnapshotUsage = await this.snapshotRepository.count({
+      where: {
+        organizationId,
+      },
+    })
+
+    const cacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, 'total_snapshot_count')
+    await this.redis.setex(cacheKey, this.CACHE_TTL_SECONDS, totalSnapshotUsage)
+
+    await this.resetCacheStaleness(organizationId, 'total_snapshot')
+
+    return {
+      currentTotalSnapshotUsage: totalSnapshotUsage,
+    }
+  }
+
+  /**
    * Fetch the current usage overview for volume-related organization quotas from the database and cache the results.
    *
    * @param organizationId
@@ -709,7 +848,10 @@ export class OrganizationUsageService {
     quotaType: 'cpu' | 'memory' | 'disk',
     regionId: string,
   ): string
-  private getCurrentQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
+  private getCurrentQuotaUsageCacheKey(
+    organizationId: string,
+    quotaType: 'snapshot_count' | 'total_snapshot_count' | 'volume_count',
+  ): string
   private getCurrentQuotaUsageCacheKey(
     organizationId: string,
     quotaType: OrganizationUsageQuotaType,
@@ -726,7 +868,10 @@ export class OrganizationUsageService {
     quotaType: 'cpu' | 'memory' | 'disk',
     regionId: string,
   ): string
-  private getPendingQuotaUsageCacheKey(organizationId: string, quotaType: 'snapshot_count' | 'volume_count'): string
+  private getPendingQuotaUsageCacheKey(
+    organizationId: string,
+    quotaType: 'snapshot_count' | 'total_snapshot_count' | 'volume_count',
+  ): string
   private getPendingQuotaUsageCacheKey(
     organizationId: string,
     quotaType: OrganizationUsageQuotaType,
@@ -748,7 +893,7 @@ export class OrganizationUsageService {
   ): Promise<void>
   private async updateCurrentQuotaUsage(
     organizationId: string,
-    quotaType: 'snapshot_count' | 'volume_count',
+    quotaType: 'snapshot_count' | 'total_snapshot_count' | 'volume_count',
     delta: number,
   ): Promise<void>
   private async updateCurrentQuotaUsage(
@@ -785,6 +930,7 @@ export class OrganizationUsageService {
         pendingQuotaUsageCacheKey = this.getPendingQuotaUsageCacheKey(organizationId, quotaType, regionId)
         break
       case 'snapshot_count':
+      case 'total_snapshot_count':
       case 'volume_count':
         currentQuotaUsageCacheKey = this.getCurrentQuotaUsageCacheKey(organizationId, quotaType)
         pendingQuotaUsageCacheKey = this.getPendingQuotaUsageCacheKey(organizationId, quotaType)
@@ -1036,6 +1182,57 @@ export class OrganizationUsageService {
   }
 
   /**
+   * Increments the pending usage for total snapshot count (all snapshots).
+   *
+   * @param organizationId
+   * @param snapshotCount - The count of snapshots to increment.
+   */
+  async incrementPendingTotalSnapshotUsage(organizationId: string, snapshotCount: number): Promise<void> {
+    const script = `
+      local totalSnapshotCountKey = KEYS[1]
+
+      local snapshotCountIncrement = tonumber(ARGV[1])
+      local ttl = tonumber(ARGV[2])
+    
+      redis.call("INCRBY", totalSnapshotCountKey, snapshotCountIncrement)
+      redis.call("EXPIRE", totalSnapshotCountKey, ttl)
+    `
+
+    await this.redis.eval(
+      script,
+      1,
+      this.getPendingQuotaUsageCacheKey(organizationId, 'total_snapshot_count'),
+      snapshotCount.toString(),
+      this.CACHE_TTL_SECONDS.toString(),
+    )
+  }
+
+  /**
+   * Decrements the pending usage for total snapshot count (all snapshots).
+   *
+   * @param organizationId
+   * @param snapshotCount - If provided, the count of snapshots to decrement.
+   */
+  async decrementPendingTotalSnapshotUsage(organizationId: string, snapshotCount?: number): Promise<void> {
+    const script = `
+      local totalSnapshotCountKey = KEYS[1]
+
+      local snapshotCountDecrement = tonumber(ARGV[1])
+      
+      if snapshotCountDecrement then
+        redis.call("DECRBY", totalSnapshotCountKey, snapshotCountDecrement)
+      end
+    `
+
+    await this.redis.eval(
+      script,
+      1,
+      this.getPendingQuotaUsageCacheKey(organizationId, 'total_snapshot_count'),
+      snapshotCount?.toString() ?? '0',
+    )
+  }
+
+  /**
    * Increments the pending usage for volume-related organization quotas.
    *
    * Pending usage is used to protect against race conditions to prevent quota abuse.
@@ -1150,7 +1347,10 @@ export class OrganizationUsageService {
    * Reset the timestamp of the last time the cached usage of organization quotas for a given resource type was populated from the database.
    */
   private resetCacheStaleness(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<void>
-  private resetCacheStaleness(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<void>
+  private resetCacheStaleness(
+    organizationId: string,
+    resourceType: 'snapshot' | 'total_snapshot' | 'volume',
+  ): Promise<void>
   private async resetCacheStaleness(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
@@ -1166,7 +1366,10 @@ export class OrganizationUsageService {
    * @returns `true` if the cached usage is stale, `false` otherwise
    */
   private async isCacheStale(organizationId: string, resourceType: 'sandbox', regionId: string): Promise<boolean>
-  private async isCacheStale(organizationId: string, resourceType: 'snapshot' | 'volume'): Promise<boolean>
+  private async isCacheStale(
+    organizationId: string,
+    resourceType: 'snapshot' | 'total_snapshot' | 'volume',
+  ): Promise<boolean>
   private async isCacheStale(
     organizationId: string,
     resourceType: OrganizationUsageResourceType,
@@ -1298,6 +1501,7 @@ export class OrganizationUsageService {
 
     try {
       await this.updateCurrentQuotaUsage(event.snapshot.organizationId, 'snapshot_count', 1)
+      await this.updateCurrentQuotaUsage(event.snapshot.organizationId, 'total_snapshot_count', 1)
     } catch (error) {
       this.logger.warn(
         `Error updating cached snapshot quota usage for organization ${event.snapshot.organizationId}`,

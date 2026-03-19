@@ -49,6 +49,12 @@ export interface UpdateOrganizationQuota {
      * @type {number}
      * @memberof UpdateOrganizationQuota
      */
+    'totalSnapshotQuota': number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateOrganizationQuota
+     */
     'maxSnapshotSize': number | null;
     /**
      * 

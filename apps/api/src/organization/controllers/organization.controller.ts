@@ -361,6 +361,7 @@ export class OrganizationController {
         maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
         maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
         snapshotQuota: req.body?.snapshotQuota,
+        totalSnapshotQuota: req.body?.totalSnapshotQuota,
         maxSnapshotSize: req.body?.maxSnapshotSize,
         volumeQuota: req.body?.volumeQuota,
       }),

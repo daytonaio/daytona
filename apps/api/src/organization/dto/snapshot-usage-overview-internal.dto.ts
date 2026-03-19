@@ -13,3 +13,14 @@ export type PendingSnapshotUsageOverviewInternalDto = {
 
 export type SnapshotUsageOverviewWithPendingInternalDto = SnapshotUsageOverviewInternalDto &
   PendingSnapshotUsageOverviewInternalDto
+
+export type TotalSnapshotUsageOverviewInternalDto = {
+  currentTotalSnapshotUsage: number
+}
+
+export type PendingTotalSnapshotUsageOverviewInternalDto = {
+  pendingTotalSnapshotUsage: number | null
+}
+
+export type TotalSnapshotUsageOverviewWithPendingInternalDto = TotalSnapshotUsageOverviewInternalDto &
+  PendingTotalSnapshotUsageOverviewInternalDto

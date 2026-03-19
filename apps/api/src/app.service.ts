@@ -181,6 +181,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
         maxMemoryPerSandbox: this.configService.getOrThrow('admin.maxMemoryPerSandbox'),
         maxDiskPerSandbox: this.configService.getOrThrow('admin.maxDiskPerSandbox'),
         snapshotQuota: this.configService.getOrThrow('admin.snapshotQuota'),
+        totalSnapshotQuota: this.configService.getOrThrow('admin.totalSnapshotQuota'),
         maxSnapshotSize: this.configService.getOrThrow('admin.maxSnapshotSize'),
         volumeQuota: this.configService.getOrThrow('admin.volumeQuota'),
       },

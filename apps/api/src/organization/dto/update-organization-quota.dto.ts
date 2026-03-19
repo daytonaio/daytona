@@ -20,6 +20,9 @@ export class UpdateOrganizationQuotaDto {
   snapshotQuota?: number
 
   @ApiProperty({ nullable: true })
+  totalSnapshotQuota?: number
+
+  @ApiProperty({ nullable: true })
   maxSnapshotSize?: number
 
   @ApiProperty({ nullable: true })

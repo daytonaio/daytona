@@ -70,6 +70,13 @@ export class Organization {
 
   @Column({
     type: 'int',
+    default: 300,
+    name: 'total_snapshot_quota',
+  })
+  totalSnapshotQuota: number
+
+  @Column({
+    type: 'int',
     default: 100,
     name: 'volume_quota',
   })

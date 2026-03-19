@@ -67,6 +67,12 @@ export interface CreateOrganizationQuota {
      * @type {number}
      * @memberof CreateOrganizationQuota
      */
+    'totalSnapshotQuota'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof CreateOrganizationQuota
+     */
     'maxSnapshotSize'?: number;
     /**
      * 
