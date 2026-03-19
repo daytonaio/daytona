@@ -21,7 +21,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
 import { UpdateOrganizationInvitationDialog } from './UpdateOrganizationInvitationDialog'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -48,6 +49,9 @@ export function OrganizationInvitationTable({
   loadingInvitationAction,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const { paginationParams, handlePaginationChange } = usePersistedPageSize(
+    LocalStorageKey.PaginationPageSize_MemberInvitations,
+  )
   const [invitationToCancel, setInvitationToCancel] = useState<string | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [invitationToUpdate, setInvitationToUpdate] = useState<OrganizationInvitation | null>(null)
@@ -94,15 +98,12 @@ export function OrganizationInvitationTable({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
-    },
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
+      pagination: paginationParams,
     },
   })
 

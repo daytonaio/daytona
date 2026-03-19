@@ -12,7 +12,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
@@ -43,6 +44,7 @@ interface VolumeTableProps {
 
 export function VolumeTable({ data, loading, processingVolumeAction, onDelete, onBulkDelete }: VolumeTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const { paginationParams, handlePaginationChange } = usePersistedPageSize(LocalStorageKey.PaginationPageSize_Volumes)
 
   const deletePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_VOLUMES),
@@ -63,6 +65,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
@@ -71,14 +74,10 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
     state: {
       sorting,
       columnFilters,
+      pagination: paginationParams,
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
-    },
   })
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 

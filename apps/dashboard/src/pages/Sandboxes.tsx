@@ -20,13 +20,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { RoutePath } from '@/enums/RoutePath'
 import { SnapshotFilters, SnapshotQueryParams, useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useConfig } from '@/hooks/useConfig'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useRegions } from '@/hooks/useRegions'
 import {
   DEFAULT_SANDBOX_SORTING,
@@ -66,32 +66,33 @@ const Sandboxes: React.FC = () => {
 
   // Pagination
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
-
-  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    setPaginationParams({ pageIndex, pageSize })
-  }, [])
+  const { paginationParams, setPaginationParams, handlePaginationChange } = usePersistedPageSize(
+    LocalStorageKey.PaginationPageSize_Sandboxes,
+  )
 
   // Filters
 
   const [filters, setFilters] = useState<SandboxFilters>({})
 
-  const handleFiltersChange = useCallback((filters: SandboxFilters) => {
-    setFilters(filters)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleFiltersChange = useCallback(
+    (filters: SandboxFilters) => {
+      setFilters(filters)
+      setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+    },
+    [setPaginationParams],
+  )
 
   // Sorting
 
   const [sorting, setSorting] = useState<SandboxSorting>(DEFAULT_SANDBOX_SORTING)
 
-  const handleSortingChange = useCallback((sorting: SandboxSorting) => {
-    setSorting(sorting)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleSortingChange = useCallback(
+    (sorting: SandboxSorting) => {
+      setSorting(sorting)
+      setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+    },
+    [setPaginationParams],
+  )
 
   // Sandboxes Data
 
@@ -183,7 +184,7 @@ const Sandboxes: React.FC = () => {
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [sandboxesData?.items.length, paginationParams.pageIndex])
+  }, [sandboxesData?.items.length, paginationParams.pageIndex, setPaginationParams])
 
   // Ephemeral Sandbox States
 

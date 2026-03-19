@@ -8,10 +8,12 @@ import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/Pag
 import { DateRangePicker, DateRangePickerRef, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { useApi } from '@/hooks/useApi'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { PaginatedAuditLogs } from '@daytonaio/api-client'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { DateRange } from 'react-day-picker'
@@ -34,9 +36,15 @@ const AuditLogs: React.FC = () => {
 
   const { selectedOrganization } = useSelectedOrganization()
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
+  const [paginationParams, setPaginationParams] = useState(() => {
+    const stored = getLocalStorageItem(LocalStorageKey.PaginationPageSize_AuditLogs)
+    if (stored) {
+      const parsed = parseInt(stored, 10)
+      if (!isNaN(parsed) && PAGE_SIZE_OPTIONS.includes(parsed as (typeof PAGE_SIZE_OPTIONS)[number])) {
+        return { pageIndex: 0, pageSize: parsed }
+      }
+    }
+    return { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE }
   })
   const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined)
   const [cursorHistory, setCursorHistory] = useState<string[]>([])
@@ -88,7 +96,8 @@ const AuditLogs: React.FC = () => {
   const handlePaginationChange = useCallback(
     ({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
       if (pageSize !== paginationParams.pageSize) {
-        // Reset to first page when changing page size
+        // Persist page size and reset to first page when changing page size
+        setLocalStorageItem(LocalStorageKey.PaginationPageSize_AuditLogs, pageSize.toString())
         setPaginationParams({ pageIndex: 0, pageSize })
         setCurrentCursor(undefined)
         setCursorHistory([])
@@ -165,7 +174,7 @@ const AuditLogs: React.FC = () => {
 
   const handleDateRangeChange = useCallback((range: DateRange) => {
     setDateRange(range)
-    setPaginationParams({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE })
+    setPaginationParams((prev) => ({ pageIndex: 0, pageSize: prev.pageSize }))
     setCurrentCursor(undefined)
     setCursorHistory([])
     setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
