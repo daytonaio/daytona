@@ -43,8 +43,9 @@ func (s *SandboxService) GetSandboxInfo(ctx context.Context, sandboxId string) (
 	}
 
 	sandboxInfo := &models.SandboxInfo{
-		SandboxState: sandboxState,
-		BackupState:  backupInfo.State,
+		SandboxState:   sandboxState,
+		BackupState:    backupInfo.State,
+		BackupSnapshot: backupInfo.Snapshot,
 	}
 
 	var backupErrReason string

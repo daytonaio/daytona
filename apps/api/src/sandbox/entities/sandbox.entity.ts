@@ -238,19 +238,18 @@ export class Sandbox {
       backupState,
     }
     switch (backupState) {
-      case BackupState.NONE:
-        update.backupSnapshot = null
-        break
       case BackupState.COMPLETED: {
         const now = new Date()
         update.lastBackupAt = now
-        update.existingBackupSnapshots = [
-          ...sandbox.existingBackupSnapshots,
-          {
-            snapshotName: sandbox.backupSnapshot,
-            createdAt: now,
-          },
-        ]
+        if (sandbox.backupSnapshot) {
+          update.existingBackupSnapshots = [
+            ...sandbox.existingBackupSnapshots,
+            {
+              snapshotName: sandbox.backupSnapshot,
+              createdAt: now,
+            },
+          ]
+        }
         update.backupErrorReason = null
         break
       }

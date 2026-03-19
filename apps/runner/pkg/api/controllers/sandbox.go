@@ -133,7 +133,7 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 
 		err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
 		if err != nil {
-			setErr := runner.BackupInfoCache.SetBackupState(ctx.Request.Context(), sandboxId, enums.BackupStateFailed, err)
+			setErr := runner.BackupInfoCache.SetBackupState(ctx.Request.Context(), sandboxId, enums.BackupStateFailed, createBackupDTO.Snapshot, err)
 			if setErr != nil {
 				logger.DebugContext(ctx.Request.Context(), "failed to update backup info", "error", setErr)
 			}
@@ -392,18 +392,20 @@ func Info(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
-		State:         info.SandboxState,
-		BackupState:   info.BackupState,
-		BackupError:   info.BackupErrorReason,
-		DaemonVersion: daemonVersion,
+		State:          info.SandboxState,
+		BackupState:    info.BackupState,
+		BackupSnapshot: info.BackupSnapshot,
+		BackupError:    info.BackupErrorReason,
+		DaemonVersion:  daemonVersion,
 	})
 }
 
 type SandboxInfoResponse struct {
-	State         enums.SandboxState `json:"state"`
-	BackupState   enums.BackupState  `json:"backupState"`
-	BackupError   *string            `json:"backupError,omitempty"`
-	DaemonVersion *string            `json:"daemonVersion,omitempty"`
+	State          enums.SandboxState `json:"state"`
+	BackupState    enums.BackupState  `json:"backupState"`
+	BackupSnapshot string             `json:"backupSnapshot,omitempty"`
+	BackupError    *string            `json:"backupError,omitempty"`
+	DaemonVersion  *string            `json:"daemonVersion,omitempty"`
 } //	@name	SandboxInfoResponse
 
 // Recover godoc
