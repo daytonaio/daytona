@@ -37,6 +37,7 @@ type DockerClientConfig struct {
 	VolumeCleanupExclusionPeriod time.Duration
 	BackupTimeoutMin             int
 	InitializeDaemonTelemetry    bool
+	VolumeMountDriver            string
 }
 
 func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
@@ -108,6 +109,7 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 		backupTimeoutMin:             config.BackupTimeoutMin,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		filesystem:                   filesystem,
+		volumeMountDriver:            config.VolumeMountDriver,
 	}, nil
 }
 
@@ -140,4 +142,5 @@ type DockerClient struct {
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool
 	filesystem                   string
+	volumeMountDriver            string
 }
