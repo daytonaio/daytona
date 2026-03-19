@@ -32,6 +32,8 @@ import {
   ApiParam,
   ApiHeader,
   ApiBearerAuth,
+  getSchemaPath,
+  ApiExtraModels,
 } from '@nestjs/swagger'
 import {
   FileInfoDto,
@@ -130,6 +132,7 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 
 @ApiTags('toolbox')
 @Controller('toolbox')
+@ApiExtraModels(UploadFileDto)
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @SkipThrottle({ anonymous: true, authenticated: true })
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
@@ -707,7 +710,17 @@ export class ToolboxController {
     description: 'Files uploaded successfully',
   })
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ type: [UploadFileDto] })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: { $ref: getSchemaPath(UploadFileDto) },
+        },
+      },
+    },
+  })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
   @Audit({
     action: AuditAction.TOOLBOX_BULK_UPLOAD_FILES,
