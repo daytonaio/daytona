@@ -430,6 +430,9 @@ export class RunnerService {
 
     if (serviceHealth !== undefined) {
       updateData.serviceHealth = serviceHealth
+    } else {
+      // Clear any previously stored service health when no new health data is provided
+      updateData.serviceHealth = null
     }
 
     const unhealthyServices = serviceHealth?.filter((s) => !s.healthy) ?? []

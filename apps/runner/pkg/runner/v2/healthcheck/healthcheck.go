@@ -126,7 +126,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 
 	err := s.docker.Ping(reqCtx)
 	if err != nil {
-		s.log.WarnContext(ctx, "Failed to ping Docker daemon", "error", err)
+		s.log.WarnContext(reqCtx, "Failed to ping Docker daemon", "error", err)
 
 		errStr := err.Error()
 		dockerHealth.Healthy = false
@@ -138,7 +138,7 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 	// Collect metrics
 	m, err := s.collector.Collect(reqCtx)
 	if err != nil {
-		s.log.WarnContext(ctx, "Failed to collect metrics for healthcheck", "error", err)
+		s.log.WarnContext(reqCtx, "Failed to collect metrics for healthcheck", "error", err)
 	} else {
 		healthcheck.SetMetrics(apiclient.RunnerHealthMetrics{
 			CurrentCpuLoadAverage:        m.CPULoadAverage,
@@ -162,6 +162,6 @@ func (s *Service) sendHealthcheck(ctx context.Context) error {
 		return err
 	}
 
-	s.log.DebugContext(ctx, "Healthcheck sent successfully")
+	s.log.DebugContext(reqCtx, "Healthcheck sent successfully")
 	return nil
 }
