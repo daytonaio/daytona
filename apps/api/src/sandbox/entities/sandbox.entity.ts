@@ -238,6 +238,9 @@ export class Sandbox {
       backupState,
     }
     switch (backupState) {
+      case BackupState.NONE:
+        update.backupSnapshot = null
+        break
       case BackupState.COMPLETED: {
         const now = new Date()
         update.lastBackupAt = now

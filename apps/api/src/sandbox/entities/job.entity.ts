@@ -137,6 +137,18 @@ export class Job {
     this.updatedAt = new Date()
   }
 
+  getPayload<T = Record<string, any>>(): T | null {
+    if (!this.payload) {
+      return null
+    }
+
+    try {
+      return JSON.parse(this.payload)
+    } catch {
+      return null
+    }
+  }
+
   getResultMetadata(): Record<string, any> | null {
     if (!this.resultMetadata) {
       return null
