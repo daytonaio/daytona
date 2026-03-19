@@ -20,6 +20,9 @@ import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
+import { RedisLockProvider } from '../common/redis-lock.provider'
+import { ResourceType } from '../enums/resource-type.enum'
+import { getStateChangeLockKey } from '../utils/lock-key.util'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -36,6 +39,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   /**
@@ -82,6 +86,18 @@ export class JobStateHandlerService {
       case JobType.RECOVER_SANDBOX:
         await this.handleRecoverSandboxJobCompletion(job)
         break
+      default:
+        break
+    }
+
+    switch (job.resourceType) {
+      case ResourceType.SANDBOX: {
+        const lockKey = getStateChangeLockKey(job.resourceId)
+        this.redisLockProvider
+          .unlock(lockKey)
+          .catch((error) => this.logger.error(`Error unlocking Redis lock for sandbox ${job.resourceId}:`, error)) // Clean up lock after job completion
+        break
+      }
       default:
         break
     }
