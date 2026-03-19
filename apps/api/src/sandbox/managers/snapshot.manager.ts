@@ -6,7 +6,7 @@
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, IsNull, LessThan, Not, Repository } from 'typeorm'
+import { In, IsNull, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -47,6 +47,7 @@ import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
 const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
+const BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS = 7
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
@@ -999,7 +1000,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_HOUR, { name: 'cleanup-old-buildinfo-snapshot-runners' })
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-old-buildinfo-snapshot-runners' })
   @TrackJobExecution()
   @LogExecution('cleanup-old-buildinfo-snapshot-runners')
   @WithInstrumentation()
@@ -1010,24 +1011,24 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
 
     try {
-      const oneDayAgo = new Date()
-      oneDayAgo.setDate(oneDayAgo.getDate() - 1)
+      const staleEntries = await this.snapshotRunnerRepository
+        .createQueryBuilder('sr')
+        .select('sr.id')
+        .innerJoin(BuildInfo, 'bi', 'sr."snapshotRef" = bi."snapshotRef"')
+        .where('sr.state = :readyState', { readyState: SnapshotRunnerState.READY })
+        .andWhere(`bi.lastUsedAt < now() - interval '${BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS} days'`)
+        .andWhere(`sr.updatedAt < now() - interval '${BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS} days'`)
+        .andWhere("sr.snapshotRef LIKE 'daytona-%'")
+        .limit(500)
+        .getMany()
 
-      // Find all BuildInfo entities that haven't been used in over a day
-      const oldBuildInfos = await this.buildInfoRepository.find({
-        where: {
-          lastUsedAt: LessThan(oneDayAgo),
-        },
-      })
-
-      if (oldBuildInfos.length === 0) {
+      if (staleEntries.length === 0) {
         return
       }
 
-      const snapshotRefs = oldBuildInfos.map((buildInfo) => buildInfo.snapshotRef)
-
+      const ids = staleEntries.map((sr) => sr.id)
       const result = await this.snapshotRunnerRepository.update(
-        { snapshotRef: In(snapshotRefs) },
+        { id: In(ids) },
         { state: SnapshotRunnerState.REMOVING },
       )
 
