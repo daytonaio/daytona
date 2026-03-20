@@ -127,7 +127,7 @@ var PushCmd = &cobra.Command{
 			pushOutput = io.Discard
 		}
 
-		err = jsonmessage.DisplayJSONMessagesStream(pushReader, pushOutput, 0, showDynamicProgress, nil)
+		err = jsonmessage.DisplayJSONMessagesStream(pushReader, pushOutput, os.Stdout.Fd(), showDynamicProgress, nil)
 		if err != nil {
 			return err
 		}
