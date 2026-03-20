@@ -188,6 +188,8 @@ definitions:
         type: boolean
       osUser:
         type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
       snapshot:
         type: string
       storageQuota:
@@ -284,6 +286,8 @@ definitions:
         $ref: '#/definitions/enums.BackupState'
       daemonVersion:
         type: string
+      recoverable:
+        type: boolean
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object

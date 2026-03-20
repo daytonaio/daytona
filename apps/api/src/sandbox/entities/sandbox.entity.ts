@@ -233,6 +233,7 @@ export class Sandbox {
     backupSnapshot?: string | null,
     backupRegistryId?: string | null,
     backupErrorReason?: string | null,
+    recoverable?: boolean,
   ): Partial<Sandbox> {
     const update: Partial<Sandbox> = {
       backupState,
@@ -263,6 +264,9 @@ export class Sandbox {
     }
     if (backupErrorReason !== undefined) {
       update.backupErrorReason = backupErrorReason
+    }
+    if (recoverable !== undefined) {
+      update.recoverable = recoverable
     }
     return update
   }
