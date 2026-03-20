@@ -43,6 +43,9 @@ import { nanoid } from 'nanoid'
 @Index('sandbox_pending_idx', ['id'], {
   where: `"pending" = true`,
 })
+@Index('idx_sandbox_recoverable', ['id'], {
+  where: '"recoverable" = true',
+})
 @Index('idx_sandbox_authtoken', ['authToken'])
 @Index('sandbox_labels_gin_full_idx', { synchronize: false })
 export class Sandbox {
