@@ -48,22 +48,20 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		// set maximum execution time
-		timeout := 360 * time.Second
-		if request.Timeout != nil && *request.Timeout > 0 {
-			timeout = time.Duration(*request.Timeout) * time.Second
-		}
-
 		timeoutReached := false
-		timer := time.AfterFunc(timeout, func() {
-			timeoutReached = true
-			if cmd.Process != nil {
-				// Kill the entire process group so child processes are also terminated
-				if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
-					logger.Error("failed to kill process group", "error", err)
+		if request.Timeout != nil && *request.Timeout > 0 {
+			timeout := time.Duration(*request.Timeout) * time.Second
+			timer := time.AfterFunc(timeout, func() {
+				timeoutReached = true
+				if cmd.Process != nil {
+					// Kill the entire process group so child processes are also terminated
+					if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+						logger.Error("failed to kill process group", "error", err)
+					}
 				}
-			}
-		})
-		defer timer.Stop()
+			})
+			defer timer.Stop()
+		}
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
