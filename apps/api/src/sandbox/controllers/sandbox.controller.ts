@@ -365,7 +365,7 @@ export class SandboxController {
     description: 'Sandbox details',
     type: SandboxDto,
   })
-  @UseGuards(OrGuard([SandboxAccessGuard, RegionSandboxAccessGuard]))
+  @UseGuards(SandboxAccessGuard)
   async getSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
