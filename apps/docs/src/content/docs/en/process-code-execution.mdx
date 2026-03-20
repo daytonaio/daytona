@@ -612,8 +612,9 @@ Daytona provides methods to retrieve information about the internal entrypoint s
 # Entrypoint session details
 session = sandbox.process.get_entrypoint_session()
 print(f"Entrypoint session: {session.session_id}")
-for cmd in session.commands:
-    print(f"Command: {cmd.command}")
+cmd = session.commands[0]
+print(f"Entrypoint command id: {cmd.id}")
+print(f"Command: {cmd.command}")
 
 # Entrypoint logs (HTTP)
 logs = sandbox.process.get_entrypoint_logs()
@@ -638,7 +639,9 @@ asyncio.run(stream_entrypoint_logs())
 // Entrypoint session details
 const session = await sandbox.process.getEntrypointSession();
 console.log(`Entrypoint session: ${session.sessionId}`);
-session.commands.forEach((cmd) => console.log(`Command: ${cmd.command}`));
+const cmd = session.commands[0]
+console.log(`Entrypoint command id: ${cmd.id}`);
+console.log(`Command: ${cmd.command}`);
 
 // Entrypoint logs (HTTP)
 const logs = await sandbox.process.getEntrypointLogs();
@@ -659,9 +662,9 @@ await sandbox.process.getEntrypointLogs(
 # Entrypoint session details
 session = sandbox.process.get_entrypoint_session
 puts "Entrypoint session: #{session.session_id}"
-session.commands.each do |cmd|
-  puts "Command: #{cmd.command}"
-end
+cmd = session.commands.first
+puts "Entrypoint command id: #{cmd.id}"
+puts "Command: #{cmd.command}"
 
 # Entrypoint logs (HTTP)
 logs = sandbox.process.get_entrypoint_logs
@@ -685,9 +688,10 @@ if err != nil {
 	log.Fatal(err)
 }
 fmt.Printf("Entrypoint session: %s\n", info.GetSessionId())
-for _, cmd := range info.GetCommands() {
-	fmt.Printf("Command: %s\n", cmd.GetCommand())
-}
+cmds := info.GetCommands()
+cmd := cmds[0]
+fmt.Printf("Entrypoint command id: %s\n", cmd.GetId())
+fmt.Printf("Command: %s\n", cmd.GetCommand())
 
 // Entrypoint logs (HTTP)
 logs, err := sandbox.Process.GetEntrypointLogs(ctx)
