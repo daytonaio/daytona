@@ -32,13 +32,14 @@ Run the agent:
 npm run start
 ```
 
-The agent gets a Daytona-aware system prompt: sandbox context, the preview URL pattern, and instructions to always run server commands in the background with `&` as the last action so the user gets control back.
+The agent gets a Daytona-aware system prompt: sandbox context, the preview URL pattern, and instructions to write server startup commands to `/home/daytona/start.sh` instead of executing them directly in Amp.
 
 The agent will:
 
 1. Create a Daytona sandbox
 2. Install the Amp CLI in the sandbox
 3. Start an interactive prompt loop using CLI-per-turn mode with thread continuity
+4. If `/home/daytona/start.sh` exists after a turn, run it via a Daytona process session command
 
 Example session:
 
