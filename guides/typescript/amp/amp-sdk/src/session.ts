@@ -23,7 +23,7 @@ function formatToolUse(block: { name: string; input?: Record<string, unknown> })
     (inp?.file_path && `${block.name} ${inp.file_path}`) ||
     (inp?.query && `${block.name}: ${inp.query}`) ||
     block.name
-  return `\n🔧 ${description}`
+  return `🔧 ${description}`
 }
 
 // Represents an Amp Code session within a Daytona sandbox
@@ -74,7 +74,8 @@ export class AmpSession {
         }
 
         if (outputs.length > 0) {
-          process.stdout.write(outputs.join(''))
+          const rendered = outputs.join('\n')
+          process.stdout.write(rendered.endsWith('\n') ? rendered : `${rendered}\n`)
         }
         return
       }
@@ -89,8 +90,9 @@ export class AmpSession {
           is_error?: boolean
         }>
         if (toolResults.length > 0) {
-          const lines = toolResults.map((b) => (b.is_error ? `\n⚠ ${b.content}` : `\n${b.content}`))
-          process.stdout.write(lines.join(''))
+          const lines = toolResults.map((b) => (b.is_error ? `⚠ ${b.content}` : b.content))
+          const rendered = lines.join('\n')
+          process.stdout.write(rendered.endsWith('\n') ? rendered : `${rendered}\n`)
         }
         return
       }
@@ -150,7 +152,10 @@ export class AmpSession {
       return null
     }
 
-    const lines = result.result.split('\n').map((l) => l.trim()).filter(Boolean)
+    const lines = result.result
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)
     if (lines.length <= 2) {
       return null
     }
@@ -189,7 +194,7 @@ export class AmpSession {
       debug('after initial prompt, threadId is:', this.threadId)
     }
 
-    console.log('\n')
+    console.log()
   }
 
   // Initialize the session with an optional system prompt
@@ -211,9 +216,7 @@ export class AmpSession {
     if (options?.systemPrompt?.trim()) {
       this.systemPrompt = options.systemPrompt.trim()
       // Send system prompt as first message
-      await this.processPrompt(
-        `Follow these instructions for the rest of this conversation:\n\n${this.systemPrompt}`,
-      )
+      await this.processPrompt(`Follow these instructions for the rest of this conversation:\n\n${this.systemPrompt}`)
     }
 
     console.log('Agent ready. Press Ctrl+C at any time to exit.\n')
