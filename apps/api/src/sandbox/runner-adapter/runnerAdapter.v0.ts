@@ -259,8 +259,8 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     await this.sandboxApiClient.stop(sandboxId, { force })
   }
 
-  async destroySandbox(sandboxId: string): Promise<void> {
-    await this.sandboxApiClient.destroy(sandboxId)
+  async destroySandbox(sandboxId: string, snapshotRef?: string): Promise<void> {
+    await this.sandboxApiClient.destroy(sandboxId, snapshotRef)
   }
 
   async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void> {

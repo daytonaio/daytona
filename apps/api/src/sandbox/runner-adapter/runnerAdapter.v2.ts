@@ -7,7 +7,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { create, toJson } from '@bufbuild/protobuf'
 import { SnapshotSandboxPayloadSchema, ForkSandboxPayloadSchema, RegistrySchema } from '@daytona/runner-proto'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, IsNull, Not } from 'typeorm'
+import { Repository, IsNull, Not, In } from 'typeorm'
 import {
   RunnerAdapter,
   RunnerInfo,
@@ -217,10 +217,45 @@ export class RunnerAdapterV2 implements RunnerAdapter {
     this.logger.debug(`Created STOP_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
   }
 
-  async destroySandbox(sandboxId: string): Promise<void> {
-    await this.jobService.createJob(null, JobType.DESTROY_SANDBOX, this.runner.id, ResourceType.SANDBOX, sandboxId)
+  async destroySandbox(sandboxId: string, snapshotRef?: string): Promise<void> {
+    if (snapshotRef) {
+      await this.cancelIncompleteSnapshotJob(snapshotRef).catch((e) =>
+        this.logger.warn(`Failed to cancel image processing job for ${snapshotRef}: ${e.message}`),
+      )
+    }
+
+    const payload = snapshotRef ? { snapshotRef } : undefined
+
+    await this.jobService.createJob(
+      null,
+      JobType.DESTROY_SANDBOX,
+      this.runner.id,
+      ResourceType.SANDBOX,
+      sandboxId,
+      payload,
+    )
 
     this.logger.debug(`Created DESTROY_SANDBOX job for sandbox ${sandboxId} on runner ${this.runner.id}`)
+  }
+
+  private async cancelIncompleteSnapshotJob(snapshotRef: string): Promise<void> {
+    const incompleteJob = await this.jobRepository.findOne({
+      where: {
+        runnerId: this.runner.id,
+        resourceType: ResourceType.SNAPSHOT,
+        resourceId: snapshotRef,
+        completedAt: IsNull(),
+        type: In([JobType.BUILD_SNAPSHOT, JobType.PULL_SNAPSHOT]),
+      },
+      order: { createdAt: 'DESC' },
+    })
+
+    if (incompleteJob) {
+      await this.jobService.updateJobStatus(incompleteJob.id, JobStatus.FAILED, 'Image processing cancelled')
+      this.logger.debug(
+        `Cancelled ${incompleteJob.type} job ${incompleteJob.id} for ${snapshotRef} on runner ${this.runner.id}`,
+      )
+    }
   }
 
   async recoverSandbox(sandbox: Sandbox): Promise<void> {

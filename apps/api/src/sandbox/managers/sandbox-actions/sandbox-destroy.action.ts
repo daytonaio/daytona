@@ -4,6 +4,7 @@
  */
 
 import { Injectable } from '@nestjs/common'
+import { Not, In } from 'typeorm'
 import { Sandbox } from '../../entities/sandbox.entity'
 import { SandboxState } from '../../enums/sandbox-state.enum'
 import { DONT_SYNC_AGAIN, SandboxAction, SyncState, SYNC_AGAIN } from './sandbox.action'
@@ -44,6 +45,37 @@ export class SandboxDestroyAction extends SandboxAction {
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
     try {
+      if (sandbox.state === SandboxState.BUILDING_SNAPSHOT || sandbox.state === SandboxState.PULLING_SNAPSHOT) {
+        let snapshotRef = sandbox.snapshot
+        if (!snapshotRef) {
+          const fullSandbox = await this.sandboxRepository.findOne({
+            where: { id: sandbox.id },
+            relations: ['buildInfo'],
+          })
+          snapshotRef = fullSandbox?.buildInfo?.snapshotRef
+        }
+
+        // Skip if another sandbox is building/pulling the same snapshot on that runner
+        if (snapshotRef) {
+          const otherBuildingSandbox = await this.sandboxRepository.findOne({
+            where: {
+              id: Not(sandbox.id),
+              runnerId: sandbox.runnerId,
+              state: In([SandboxState.BUILDING_SNAPSHOT, SandboxState.PULLING_SNAPSHOT]),
+              buildInfo: { snapshotRef },
+            },
+            relations: ['buildInfo'],
+          })
+          if (otherBuildingSandbox) {
+            snapshotRef = undefined
+          }
+        }
+
+        await runnerAdapter.destroySandbox(sandbox.id, snapshotRef)
+        await this.updateSandboxState(sandbox, SandboxState.DESTROYED, lockCode)
+        return DONT_SYNC_AGAIN
+      }
+
       const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
 
       if (sandboxInfo.state === SandboxState.DESTROYED) {
