@@ -22,6 +22,13 @@ import (
 func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO, sandboxId *string) (*image.InspectResponse, error) {
 	defer timer.Timer()()
 
+	pullCtx, cancel := context.WithCancel(ctx)
+	defer func() {
+		cancel()
+		d.imageProcessingCancels.Delete(imageName)
+	}()
+	d.imageProcessingCancels.Store(imageName, cancel)
+
 	tag := "latest"
 	lastColonIndex := strings.LastIndex(imageName, ":")
 	if lastColonIndex != -1 {
@@ -29,20 +36,20 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 
 	if tag != "latest" {
-		inspect, err := d.apiClient.ImageInspect(ctx, imageName)
+		inspect, err := d.apiClient.ImageInspect(pullCtx, imageName)
 		if err == nil {
 			return &inspect, nil
 		}
 	}
 
-	d.logger.InfoContext(ctx, "Pulling image", "imageName", imageName)
+	d.logger.InfoContext(pullCtx, "Pulling image", "imageName", imageName)
 
 	if sandboxId != nil {
 		d.pullTracker.Add(*sandboxId)
 		defer d.pullTracker.Remove(*sandboxId)
 	}
 
-	responseBody, err := d.apiClient.ImagePull(ctx, imageName, image.PullOptions{
+	responseBody, err := d.apiClient.ImagePull(pullCtx, imageName, image.PullOptions{
 		RegistryAuth: getRegistryAuth(reg),
 		Platform:     "linux/amd64",
 	})
@@ -56,9 +63,9 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 		return nil, err
 	}
 
-	d.logger.InfoContext(ctx, "Image pulled successfully", "imageName", imageName)
+	d.logger.InfoContext(pullCtx, "Image pulled successfully", "imageName", imageName)
 
-	inspect, err := d.apiClient.ImageInspect(ctx, imageName)
+	inspect, err := d.apiClient.ImageInspect(pullCtx, imageName)
 	if err != nil {
 		return nil, err
 	}

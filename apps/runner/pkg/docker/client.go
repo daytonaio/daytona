@@ -145,6 +145,20 @@ func (d *DockerClient) ApiClient() client.APIClient {
 
 const RUNNER_BRIDGE_NETWORK_NAME = "runner-bridge"
 
+func (d *DockerClient) CancelImageProcessing(snapshotRef string) bool {
+	if cancelFn, ok := d.imageProcessingCancels.LoadAndDelete(snapshotRef); ok {
+		fn, ok := cancelFn.(context.CancelFunc)
+		if !ok {
+			d.logger.Error("Unexpected type in imageProcessingCancels", "snapshotRef", snapshotRef)
+			return false
+		}
+		fn()
+		d.logger.Info("Cancelled image processing", "snapshotRef", snapshotRef)
+		return true
+	}
+	return false
+}
+
 type DockerClient struct {
 	apiClient                    client.APIClient
 	backupInfoCache              *cache.BackupInfoCache
@@ -173,4 +187,5 @@ type DockerClient struct {
 	initializeDaemonTelemetry    bool
 	filesystem                   string
 	interSandboxNetworkEnabled   bool
+	imageProcessingCancels       sync.Map // map[string]context.CancelFunc keyed by snapshot ref
 }

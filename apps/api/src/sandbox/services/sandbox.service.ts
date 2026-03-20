@@ -1236,7 +1236,12 @@ export class SandboxService {
   async destroy(sandboxIdOrName: string, organizationId?: string): Promise<Sandbox> {
     const sandbox = await this.findOneByIdOrName(sandboxIdOrName, organizationId)
 
-    if (sandbox.pending && sandbox.state !== SandboxState.PENDING_BUILD) {
+    if (
+      sandbox.pending &&
+      sandbox.state !== SandboxState.PENDING_BUILD &&
+      sandbox.state !== SandboxState.BUILDING_SNAPSHOT &&
+      sandbox.state !== SandboxState.PULLING_SNAPSHOT
+    ) {
       throw new SandboxError('Sandbox state change in progress')
     }
 

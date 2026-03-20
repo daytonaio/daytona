@@ -70,11 +70,18 @@ func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, e
 }
 
 func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
-	if job.Payload == nil || *job.Payload == "" {
-		return nil, errors.New("payload is required")
+	var snapshotRef string
+	if job.Payload != nil && *job.Payload != "" {
+		snapshotRef = *job.Payload
+	} else if job.ResourceId != "" {
+		snapshotRef = job.ResourceId
+	} else {
+		return nil, errors.New("snapshot reference is required")
 	}
 
-	return nil, e.docker.RemoveImage(ctx, *job.Payload, true)
+	e.docker.CancelImageProcessing(snapshotRef)
+
+	return nil, e.docker.RemoveImage(ctx, snapshotRef, true)
 }
 
 func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
