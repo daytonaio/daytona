@@ -22,6 +22,13 @@ options:
   - name: name
     shorthand: 'n'
     usage: Specify the Snapshot name
+  - name: no-progress
+    default_value: 'false'
+    usage: Disable dynamic progress output and animations
+  - name: quiet
+    shorthand: q
+    default_value: 'false'
+    usage: Suppress all non-error output
   - name: region
     usage: |
       ID of the region where the snapshot will be available (defaults to organization default region)
