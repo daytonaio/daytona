@@ -93,6 +93,9 @@ const DEFAULT_MEMORY = 1
 const DEFAULT_DISK = 3
 const DEFAULT_GPU = 0
 
+const LAST_ACTIVITY_LOCK_KEY_PREFIX = 'sandbox:update-last-activity'
+const LAST_ACTIVITY_LOCK_TTL_SECONDS = 45
+
 @Injectable()
 export class SandboxService {
   private readonly logger = new Logger(SandboxService.name)
@@ -514,6 +517,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      this.primeLastActivityLock(insertedSandbox.id)
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -596,6 +600,7 @@ export class SandboxService {
       updateData,
       entity: warmPoolSandbox,
     })
+    this.primeLastActivityLock(updatedSandbox.id)
 
     // Defensive invalidation of orgId cache since the sandbox moved from unassigned to a real organization
     this.sandboxLookupCacheInvalidationService.invalidateOrgId({
@@ -737,6 +742,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      this.primeLastActivityLock(insertedSandbox.id)
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -1621,14 +1627,18 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    // Prevent spamming updates
-    const lockKey = `sandbox:update-last-activity:${sandboxId}`
-    const acquired = await this.redisLockProvider.lock(lockKey, 45)
+    const lockKey = `${LAST_ACTIVITY_LOCK_KEY_PREFIX}:${sandboxId}`
+    const acquired = await this.redisLockProvider.lock(lockKey, LAST_ACTIVITY_LOCK_TTL_SECONDS)
     if (!acquired) {
       return
     }
 
     await this.sandboxRepository.update(sandboxId, { updateData: { lastActivityAt } }, true)
+  }
+
+  private primeLastActivityLock(sandboxId: string): void {
+    const lockKey = `${LAST_ACTIVITY_LOCK_KEY_PREFIX}:${sandboxId}`
+    void this.redisLockProvider.lock(lockKey, LAST_ACTIVITY_LOCK_TTL_SECONDS)
   }
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {
