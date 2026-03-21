@@ -4,11 +4,11 @@
 package process
 
 import (
-	"bytes"
 	"errors"
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -34,13 +34,12 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		cmdParts := parseCommand(request.Command)
-		if len(cmdParts) == 0 {
+		if strings.TrimSpace(request.Command) == "" {
 			c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
 			return
 		}
 
-		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+		cmd := exec.Command("bash", "-c", request.Command)
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
 		}
@@ -102,38 +101,3 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 	}
 }
 
-// parseCommand splits a command string properly handling quotes
-func parseCommand(command string) []string {
-	var args []string
-	var current bytes.Buffer
-	var inQuotes bool
-	var quoteChar rune
-
-	for _, r := range command {
-		switch {
-		case r == '"' || r == '\'':
-			if !inQuotes {
-				inQuotes = true
-				quoteChar = r
-			} else if quoteChar == r {
-				inQuotes = false
-				quoteChar = 0
-			} else {
-				current.WriteRune(r)
-			}
-		case r == ' ' && !inQuotes:
-			if current.Len() > 0 {
-				args = append(args, current.String())
-				current.Reset()
-			}
-		default:
-			current.WriteRune(r)
-		}
-	}
-
-	if current.Len() > 0 {
-		args = append(args, current.String())
-	}
-
-	return args
-}
