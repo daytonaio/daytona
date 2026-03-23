@@ -25,6 +25,9 @@ export default defineConfig((mode) => ({
         rewriteWsOrigin: true,
       },
     },
+    watch: {
+      ignored: ['**/node_modules'],
+    },
   },
   plugins: [
     react(),
