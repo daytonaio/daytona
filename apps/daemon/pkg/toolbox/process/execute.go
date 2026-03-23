@@ -13,6 +13,7 @@ import (
 	"syscall"
 	"time"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -67,7 +68,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			if timeoutReached.Load() {
-				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
+				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
 				return
 			}
 			if exitError, ok := err.(*exec.ExitError); ok {
