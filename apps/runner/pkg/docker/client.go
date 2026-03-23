@@ -37,6 +37,7 @@ type DockerClientConfig struct {
 	VolumeCleanupDryRun          bool
 	VolumeCleanupExclusionPeriod time.Duration
 	BackupTimeoutMin             int
+	SnapshotPullTimeout          time.Duration
 	InitializeDaemonTelemetry    bool
 }
 
@@ -108,6 +109,7 @@ func NewDockerClient(config DockerClientConfig) (*DockerClient, error) {
 		volumeCleanupDryRun:          config.VolumeCleanupDryRun,
 		volumeCleanupExclusionPeriod: config.VolumeCleanupExclusionPeriod,
 		backupTimeoutMin:             config.BackupTimeoutMin,
+		snapshotPullTimeout:          config.SnapshotPullTimeout,
 		initializeDaemonTelemetry:    config.InitializeDaemonTelemetry,
 		filesystem:                   filesystem,
 	}, nil
@@ -139,6 +141,7 @@ type DockerClient struct {
 	volumeCleanupDryRun          bool
 	volumeCleanupExclusionPeriod time.Duration
 	backupTimeoutMin             int
+	snapshotPullTimeout          time.Duration
 	volumeCleanupMutex           sync.Mutex
 	lastVolumeCleanup            time.Time
 	initializeDaemonTelemetry    bool

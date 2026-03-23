@@ -40,7 +40,24 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	if state == enums.SandboxStatePullingSnapshot {
-		return "", "", common_errors.NewConflictError(fmt.Errorf("sandbox %s is currently pulling snapshot", sandboxDto.Id))
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+
+		timeout := time.After(d.snapshotPullTimeout)
+
+		for state == enums.SandboxStatePullingSnapshot {
+			select {
+			case <-ctx.Done():
+				return "", "", ctx.Err()
+			case <-timeout:
+				return "", "", fmt.Errorf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id)
+			case <-ticker.C:
+				state, err = d.GetSandboxState(ctx, sandboxDto.Id)
+				if err != nil && state == enums.SandboxStateError {
+					return "", "", err
+				}
+			}
+		}
 	}
 
 	if state == enums.SandboxStateStarted || state == enums.SandboxStateStarting {
@@ -81,13 +98,10 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, daemonVersion, nil
 	}
 
-	d.pullTracker.Add(sandboxDto.Id)
-	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
+	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, &sandboxDto.Id)
 	if err != nil {
-		d.pullTracker.Remove(sandboxDto.Id)
 		return "", "", err
 	}
-	d.pullTracker.Remove(sandboxDto.Id)
 
 	err = d.validateImageArchitecture(image)
 	if err != nil {
