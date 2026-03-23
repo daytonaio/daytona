@@ -89,8 +89,7 @@ async function main() {
     await ampSession.initialize({
       systemPrompt: defaultSystemPrompt,
     })
-    const serverSessionId = 'amp-server-session'
-    await activeSandbox.process.createSession(serverSessionId)
+    const serverSessions: string[] = []
 
     const startServerFromScript = async () => {
       // Only run when Amp has produced a start script for this turn.
@@ -104,7 +103,11 @@ async function main() {
       console.log(`Running \`${clippedStartScript}\` via session command...`)
       // Execute server startup outside Amp so long-running/background commands
       // do not keep the Amp response from completing.
-      await activeSandbox.process.executeSessionCommand(serverSessionId, {
+      const sessionId = `amp-server-session-${Date.now()}`
+      await activeSandbox.process.createSession(sessionId)
+      serverSessions.push(sessionId)
+
+      await activeSandbox.process.executeSessionCommand(sessionId, {
         command: 'cd /home/daytona && chmod +x start.sh && ./start.sh',
         runAsync: true,
       })
@@ -118,7 +121,7 @@ async function main() {
       try {
         console.log('\nCleaning up...')
         await ampSession.cleanup()
-        await activeSandbox.process.deleteSession(serverSessionId)
+        await Promise.allSettled(serverSessions.map((id) => activeSandbox.process.deleteSession(id)))
         if (sandbox) await sandbox.delete()
       } catch (e) {
         console.error('Error during cleanup:', e)
