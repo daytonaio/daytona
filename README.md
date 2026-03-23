@@ -95,11 +95,13 @@ from daytona import Daytona, DaytonaConfig
 config = DaytonaConfig(
     api_key="YOUR_API_KEY",
 )
+
 daytona = Daytona(config)
 sandbox = daytona.create()
 response = sandbox.process.code_run(
     'print("Hello World!")'
 )
+
 print(response.result)
 ```
 
@@ -109,11 +111,12 @@ print(response.result)
 import { Daytona } from "@daytonaio/sdk";
 
 const daytona = new Daytona({
-  apiKey:
-    "YOUR_API_KEY",
+  apiKey: "YOUR_API_KEY",
 });
+
 const sandbox = await daytona.create();
 const response = await sandbox.process.codeRun('print("Hello World!")');
+
 console.log(response.result);
 ```
 
@@ -125,9 +128,11 @@ require 'daytona'
 config = Daytona::Config.new(
   api_key: 'YOUR_API_KEY',
 )
+
 daytona = Daytona::Daytona.new(config)
 sandbox = daytona.create
 response = sandbox.process.code_run(code: 'print("Hello World!")')
+
 puts response.result
 ```
 
