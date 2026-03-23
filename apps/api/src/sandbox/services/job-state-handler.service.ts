@@ -417,28 +417,23 @@ export class JobStateHandlerService {
       // perform stale-snapshot checks when the field is present.
       const jobSnapshot = job.getPayload<{ snapshot?: string }>()?.snapshot
 
+      // Ignore stale backup results if the job's snapshot doesn't match the current DB snapshot.
+      // Old v2 runners may not include snapshot in the payload — skip this check for them.
+      if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
+        this.logger.warn(
+          `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+        )
+        return
+      }
+
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
-        // Only accept completion if the job's snapshot matches the current DB snapshot
-        if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
-          this.logger.warn(
-            `Ignoring stale backup completion for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
-          )
-          return
-        }
         this.logger.debug(
           `CREATE_BACKUP job ${job.id} completed successfully, marking sandbox ${sandboxId} as BACKUP_COMPLETED`,
         )
         Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.COMPLETED))
       } else if (job.status === JobStatus.FAILED) {
-        // Ignore stale failure if it belongs to an older snapshot
-        if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
-          this.logger.warn(
-            `Ignoring stale backup failure for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
-          )
-          return
-        }
         this.logger.error(`CREATE_BACKUP job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         Object.assign(
           updateData,

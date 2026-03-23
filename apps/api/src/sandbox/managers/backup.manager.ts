@@ -428,6 +428,13 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
           break
         }
         case BackupState.ERROR: {
+          // Only accept failure if the runner-reported snapshot matches the DB snapshot
+          if (sandboxInfo.backupSnapshot && sandboxInfo.backupSnapshot !== sandbox.backupSnapshot) {
+            this.logger.warn(
+              `Ignoring stale backup failure for sandbox ${sandbox.id}: runner snapshot ${sandboxInfo.backupSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+            )
+            break
+          }
           await this.sandboxService.updateSandboxBackupState(
             sandbox.id,
             BackupState.ERROR,
