@@ -28,6 +28,7 @@ from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
 from ..common.process import (
+    _VALID_ENV_KEY_REGEX,
     CodeRunParams,
     ExecuteResponse,
     ExecutionArtifacts,
@@ -131,9 +132,9 @@ class AsyncProcess:
             result = await sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        if env and len(env.items()) > 0:
+        if env:
             for key in env:
-                if not re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", key):
+                if not _VALID_ENV_KEY_REGEX.match(key):
                     raise ValueError(f"Invalid environment variable name: {key!r}")
             safe_env_exports = (
                 " ".join(
@@ -151,7 +152,7 @@ class AsyncProcess:
         response = await self._api_client.execute_command(request=execute_request)
 
         # Post-process the output to extract ExecutionArtifacts
-        artifacts = AsyncProcess._parse_output(response.result.splitlines())
+        artifacts = AsyncProcess._parse_output(response.result.split("\n"))
 
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme

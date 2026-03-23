@@ -10,8 +10,9 @@ from ..common.process import CodeRunParams
 
 class SandboxJsCodeToolbox:
     def get_run_command(self, code: str, params: CodeRunParams | None = None) -> str:
+        # Prepend argv fix: node - places '-' at argv[1]; splice it out to match legacy node -e behaviour
         # Encode the provided code in base64
-        base64_code = base64.b64encode(code.encode()).decode()
+        base64_code = base64.b64encode(("process.argv.splice(1, 1);\n" + code).encode()).decode()
 
         # Build command-line arguments string
         argv = ""
@@ -19,9 +20,5 @@ class SandboxJsCodeToolbox:
             argv = " ".join(params.argv)
 
         # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-        # Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
-        # Capture the exit code before filtering to preserve node's exit status
-        return (
-            f"_dtn_out=$(echo '{base64_code}' | base64 -d | node /dev/stdin {argv} 2>&1); _dtn_ec=$?; "
-            f"printf '%s\\n' \"$_dtn_out\" | grep -v 'npm notice'; exit $_dtn_ec"
-        )
+        # Use node - to read from stdin (node /dev/stdin does not work when stdin is a pipe)
+        return f"printf '%s' '{base64_code}' | base64 -d | node - {argv}"

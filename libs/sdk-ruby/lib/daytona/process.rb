@@ -70,7 +70,7 @@ module Daytona
 
       response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
       # Post-process the output to extract ExecutionArtifacts
-      artifacts = parse_output(response.result.split("\n"))
+      artifacts = parse_output(response.result.split("\n", -1))
 
       # Create new response with processed output and charts
       ExecuteResponse.new(
@@ -548,15 +548,17 @@ module Daytona
     # @return [Daytona::ExecutionArtifacts] The artifacts from the command execution
     def parse_output(lines)
       artifacts = ExecutionArtifacts.new('', [])
+      stdout_lines = []
 
       lines.each do |line|
         if line.start_with?(ARTIFACT_PREFIX)
           parse_json_line(line:, artifacts:)
         else
-          artifacts.stdout += "#{line}\n"
+          stdout_lines << line
         end
       end
 
+      artifacts.stdout = stdout_lines.join("\n")
       artifacts
     end
 

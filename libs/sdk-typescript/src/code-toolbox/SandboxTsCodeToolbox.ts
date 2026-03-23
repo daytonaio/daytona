@@ -9,12 +9,22 @@ import { Buffer } from 'buffer'
 
 export class SandboxTsCodeToolbox implements SandboxCodeToolbox {
   public getRunCommand(code: string, params?: CodeRunParams): string {
-    const base64Code = Buffer.from(code).toString('base64')
+    // Prepend argv fix: ts-node places the script path at argv[1]; splice it out to match legacy node -e behaviour
+    const base64Code = Buffer.from('process.argv.splice(1, 1);\n' + code).toString('base64')
     const argv = params?.argv ? params.argv.join(' ') : ''
 
     // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-    // Use /dev/stdin instead of -e "$(cat)" which would expand as a process arg and hit ARG_MAX
+    // ts-node does not support reading from stdin via - or /dev/stdin when stdin is a pipe,
+    // so write to a temp file, execute it, then clean up
     // Capture the exit code before filtering to preserve ts-node's exit status
-    return `_dtn_out=$(echo '${base64Code}' | base64 -d | npx ts-node -O '{"module":"CommonJS"}' /dev/stdin ${argv} 2>&1); _dtn_ec=$?; printf '%s\\n' "$_dtn_out" | grep -v 'npm notice'; exit $_dtn_ec`
+    return [
+      `_f=/tmp/dtn_$$.ts`,
+      `printf '%s' '${base64Code}' | base64 -d > "$_f"`,
+      `_dtn_out=$(npx ts-node -O '{"module":"CommonJS"}' "$_f" ${argv} 2>&1)`,
+      `_dtn_ec=$?`,
+      `rm -f "$_f"`,
+      `printf '%s\\n' "$_dtn_out" | grep -v 'npm notice'`,
+      `exit $_dtn_ec`,
+    ].join('; ')
   }
 }
