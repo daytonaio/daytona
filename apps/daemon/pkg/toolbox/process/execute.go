@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -48,11 +49,11 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		// set maximum execution time
-		timeoutReached := false
+		var timeoutReached atomic.Bool
 		if request.Timeout != nil && *request.Timeout > 0 {
 			timeout := time.Duration(*request.Timeout) * time.Second
 			timer := time.AfterFunc(timeout, func() {
-				timeoutReached = true
+				timeoutReached.Store(true)
 				if cmd.Process != nil {
 					// Kill the entire process group so child processes are also terminated
 					if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
@@ -65,7 +66,7 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			if timeoutReached {
+			if timeoutReached.Load() {
 				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
 				return
 			}
