@@ -137,7 +137,7 @@ export class Process {
    *
    * @param {string} code - Code to execute
    * @param {CodeRunParams} params - Parameters for code execution
-   * @param {number} [timeout] - Maximum time in seconds to wait for execution to complete. 0 means wait indefinitely. Defaults to 6 minutes.
+   * @param {number} [timeout] - Maximum time in seconds to wait for execution to complete.
    * @returns {Promise<ExecuteResponse>} Code execution results containing:
    *                                    - exitCode: The execution's exit status
    *                                    - result: Standard output from the code

@@ -82,7 +82,7 @@ module Daytona
     #
     # @param code [String] Code to execute
     # @param params [CodeRunParams, nil] Parameters for code execution
-    # @param timeout [Integer, nil] Maximum time in seconds to wait for the code to complete. 0 means wait indefinitely. Defaults to 6 minutes.
+    # @param timeout [Integer, nil] Maximum time in seconds to wait for the code to complete.
     # @return [ExecuteResponse] Code execution result containing exit_code, result, and artifacts
     #
     # @example

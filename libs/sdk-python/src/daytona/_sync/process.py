@@ -175,7 +175,7 @@ class Process:
             code (str): Code to execute.
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely. Defaults to 6 minutes.
+                to complete.
 
         Returns:
             ExecuteResponse: Code execution result containing:
