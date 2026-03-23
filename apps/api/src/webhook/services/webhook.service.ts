@@ -4,14 +4,13 @@
  */
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
-import { OnEvent } from '@nestjs/event-emitter'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { Svix } from 'svix'
-import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { Organization } from '../../organization/entities/organization.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { WebhookInitialization } from '../entities/webhook-initialization.entity'
 import { Repository } from 'typeorm'
+import { NotFoundException } from '@nestjs/common'
 
 @Injectable()
 export class WebhookService implements OnModuleInit {
@@ -187,6 +186,9 @@ export class WebhookService implements OnModuleInit {
       }
     } catch (error) {
       this.logger.debug(`Failed to generate app portal access for organization ${organizationId}:`, error)
+      if (error.code === 404) {
+        throw new NotFoundException(`Organization ${organizationId} not found in Svix`)
+      }
       throw error
     }
   }
