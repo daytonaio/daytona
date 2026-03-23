@@ -15,12 +15,7 @@ import (
 var StartCmd = &cobra.Command{
 	Use:   "start [SANDBOX_ID] | [SANDBOX_NAME]",
 	Short: "Start a sandbox",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("expected exactly one argument: [SANDBOX_ID] or [SANDBOX_NAME]")
-		}
-		return nil
-	},
+	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
