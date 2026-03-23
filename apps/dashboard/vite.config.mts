@@ -26,7 +26,7 @@ export default defineConfig((mode) => ({
       },
     },
     watch: {
-      ignored: ['**/node_modules'],
+      ignored: ['**/node_modules/**'],
     },
   },
   plugins: [

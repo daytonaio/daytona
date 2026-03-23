@@ -38,7 +38,7 @@ module.exports = composePlugins(
     config.mode = process.env.NODE_ENV
 
     config.watchOptions = {
-      ignored: ['**/node_modules'],
+      ignored: /node_modules/,
     }
     return config
   },
