@@ -168,16 +168,18 @@ func run() int {
 	recordingService := recording.NewRecordingService(logger, recordingsDir)
 
 	toolBoxServer := toolbox.NewServer(toolbox.ServerConfig{
-		Logger:                logger,
-		WorkDir:               workDir,
-		ConfigDir:             configDir,
-		OtelEndpoint:          c.OtelEndpoint,
-		SandboxId:             c.SandboxId,
-		SessionService:        sessionService,
-		RecordingService:      recordingService,
-		OrganizationId:        c.OrganizationId,
-		RegionId:              c.RegionId,
-		EntrypointLogFilePath: entrypointLogFilePath,
+		Logger:                   logger,
+		WorkDir:                  workDir,
+		ConfigDir:                configDir,
+		OtelEndpoint:             c.OtelEndpoint,
+		SandboxId:                c.SandboxId,
+		SessionService:           sessionService,
+		RecordingService:         recordingService,
+		OrganizationId:           c.OrganizationId,
+		RegionId:                 c.RegionId,
+		EntrypointLogFilePath:    entrypointLogFilePath,
+		TerminationGracePeriod:   c.TerminationGracePeriod,
+		TerminationCheckInterval: c.TerminationCheckInterval,
 	})
 
 	// Start the toolbox server in a go routine

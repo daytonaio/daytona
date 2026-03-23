@@ -31,7 +31,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
-	"github.com/daytonaio/daemon/pkg/toolbox/process"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/execute"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/interpreter"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/pty"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
@@ -50,53 +50,59 @@ import (
 )
 
 type ServerConfig struct {
-	Logger                *slog.Logger
-	WorkDir               string
-	ConfigDir             string
-	ComputerUse           computeruse.IComputerUse
-	SandboxId             string
-	OtelEndpoint          *string
-	SessionService        *session_svc.SessionService
-	RecordingService      *recording.RecordingService
-	OrganizationId        *string
-	RegionId              *string
-	EntrypointLogFilePath string
+	Logger                   *slog.Logger
+	WorkDir                  string
+	ConfigDir                string
+	ComputerUse              computeruse.IComputerUse
+	SandboxId                string
+	OtelEndpoint             *string
+	SessionService           *session_svc.SessionService
+	RecordingService         *recording.RecordingService
+	OrganizationId           *string
+	RegionId                 *string
+	EntrypointLogFilePath    string
+	TerminationGracePeriod   time.Duration
+	TerminationCheckInterval time.Duration
 }
 
 func NewServer(config ServerConfig) *server {
 	return &server{
-		logger:                config.Logger.With(slog.String("component", "toolbox_server")),
-		WorkDir:               config.WorkDir,
-		SandboxId:             config.SandboxId,
-		otelEndpoint:          config.OtelEndpoint,
-		telemetry:             Telemetry{},
-		sessionService:        config.SessionService,
-		configDir:             config.ConfigDir,
-		recordingService:      config.RecordingService,
-		organizationId:        config.OrganizationId,
-		regionId:              config.RegionId,
-		entrypointLogFilePath: config.EntrypointLogFilePath,
+		logger:                   config.Logger.With(slog.String("component", "toolbox_server")),
+		WorkDir:                  config.WorkDir,
+		SandboxId:                config.SandboxId,
+		otelEndpoint:             config.OtelEndpoint,
+		telemetry:                Telemetry{},
+		sessionService:           config.SessionService,
+		configDir:                config.ConfigDir,
+		recordingService:         config.RecordingService,
+		organizationId:           config.OrganizationId,
+		regionId:                 config.RegionId,
+		entrypointLogFilePath:    config.EntrypointLogFilePath,
+		terminationGracePeriod:   config.TerminationGracePeriod,
+		terminationCheckInterval: config.TerminationCheckInterval,
 	}
 }
 
 type server struct {
-	WorkDir               string
-	ComputerUse           computeruse.IComputerUse
-	SandboxId             string
-	logger                *slog.Logger
-	otelEndpoint          *string
-	authToken             string
-	telemetry             Telemetry
-	sessionService        *session_svc.SessionService
-	configDir             string
-	recordingService      *recording.RecordingService
-	entrypointLogFilePath string
-	entrypointLogCancel   context.CancelFunc
-	httpServer            *http.Server
-	organizationId        *string
-	regionId              *string
-	ctx                   context.Context
-	cancel                context.CancelFunc
+	WorkDir                  string
+	ComputerUse              computeruse.IComputerUse
+	SandboxId                string
+	logger                   *slog.Logger
+	otelEndpoint             *string
+	authToken                string
+	telemetry                Telemetry
+	sessionService           *session_svc.SessionService
+	configDir                string
+	recordingService         *recording.RecordingService
+	entrypointLogFilePath    string
+	entrypointLogCancel      context.CancelFunc
+	httpServer               *http.Server
+	organizationId           *string
+	regionId                 *string
+	ctx                      context.Context
+	cancel                   context.CancelFunc
+	terminationGracePeriod   time.Duration
+	terminationCheckInterval time.Duration
 }
 
 type Telemetry struct {
@@ -185,7 +191,8 @@ func (s *server) Start() error {
 	processLogger := s.logger.With(slog.String("component", "process_controller"))
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand(processLogger))
+		executeController := execute.NewExecuteController(processLogger, s.terminationGracePeriod, s.terminationCheckInterval)
+		processController.POST("/execute", executeController.ExecuteCommand)
 
 		sessionController := session.NewSessionController(s.logger, s.configDir, s.sessionService)
 		sessionGroup := processController.Group("/session")
