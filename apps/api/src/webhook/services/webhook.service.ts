@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit, NotFoundException } from '@nestjs/common'
 import { TypedConfigService } from '../../config/typed-config.service'
 import { Svix } from 'svix'
 import { Organization } from '../../organization/entities/organization.entity'
 import { InjectRepository } from '@nestjs/typeorm'
 import { WebhookInitialization } from '../entities/webhook-initialization.entity'
 import { Repository } from 'typeorm'
-import { NotFoundException } from '@nestjs/common'
 
 @Injectable()
 export class WebhookService implements OnModuleInit {
