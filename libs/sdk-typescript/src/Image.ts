@@ -558,6 +558,22 @@ export class Image {
   }
 
   /**
+   * Finds all heredoc delimiters in a Dockerfile line.
+   *
+   * @param {string} line - The Dockerfile line to scan.
+   * @returns {string[]} The list of heredoc delimiter names found.
+   */
+  private static findHeredocDelimiters(line: string): string[] {
+    const matches: string[] = []
+    const re = /<<[-~]?['"]?([A-Za-z_]\w*)['"]?/g
+    let m: RegExpExecArray | null
+    while ((m = re.exec(line)) !== null) {
+      matches.push(m[1])
+    }
+    return matches
+  }
+
+  /**
    * Extracts source files from COPY commands in a Dockerfile.
    *
    * @param {string} dockerfileContent - The content of the Dockerfile.
@@ -567,20 +583,35 @@ export class Image {
   private static extractCopySources(dockerfileContent: string, pathPrefix = ''): Array<[string, string]> {
     const sources: Array<[string, string]> = []
     const lines = dockerfileContent.split('\n')
+    let i = 0
 
-    for (const line of lines) {
+    while (i < lines.length) {
+      const line = lines[i]
+
       // Skip empty lines and comments
       if (!line.trim() || line.trim().startsWith('#')) {
+        i++
+        continue
+      }
+
+      // Skip lines that are part of a heredoc block (<<DELIMITER ... DELIMITER)
+      const heredocDelimiters = Image.findHeredocDelimiters(line)
+      if (heredocDelimiters.length > 0) {
+        i++
+        for (const delimiter of heredocDelimiters) {
+          while (i < lines.length) {
+            if (lines[i].trim() === delimiter) {
+              i++
+              break
+            }
+            i++
+          }
+        }
         continue
       }
 
       // Check if the line contains a COPY command
       if (/^\s*COPY\s+(?!.*--from=)/i.test(line)) {
-        // Skip COPY instructions that use heredoc syntax (inline content, not file references)
-        if (line.includes('<<')) {
-          continue
-        }
-
         const importErrorPrefix = '"extractCopySources" is not supported: '
         const fg = dynamicRequire('fast-glob', importErrorPrefix)
 
@@ -602,6 +633,8 @@ export class Image {
           }
         }
       }
+
+      i++
     }
 
     return sources

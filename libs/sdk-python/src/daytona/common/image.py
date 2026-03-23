@@ -465,6 +465,18 @@ class Image(BaseModel):
         return img
 
     @staticmethod
+    def __find_heredoc_delimiters(line: str) -> list[str]:
+        """Finds all heredoc delimiters in a Dockerfile line.
+
+        Args:
+            line: str: The Dockerfile line to scan.
+
+        Returns:
+            list[str]: The list of heredoc delimiter names found (e.g. ['EOF', 'SCRIPT']).
+        """
+        return re.findall(r"<<[-~]?['\"]?([A-Za-z_]\w*)['\"]?", line)
+
+    @staticmethod
     def __extract_copy_sources(dockerfile_content: str, path_prefix: str = "") -> list[tuple[str, str]]:
         """Extracts source files from COPY commands in a Dockerfile.
 
@@ -478,18 +490,30 @@ class Image(BaseModel):
         sources: list[tuple[str, str]] = []
         # Split the Dockerfile into lines
         lines = dockerfile_content.split("\n")
+        i = 0
 
-        for line in lines:
+        while i < len(lines):
+            line = lines[i]
+
             # Skip empty lines and comments
             if not line.strip() or line.strip().startswith("#"):
+                i += 1
+                continue
+
+            # Skip lines that are part of a heredoc block (<<DELIMITER ... DELIMITER)
+            heredoc_delimiters = Image.__find_heredoc_delimiters(line)
+            if heredoc_delimiters:
+                i += 1
+                for delimiter in heredoc_delimiters:
+                    while i < len(lines):
+                        if lines[i].strip() == delimiter:
+                            i += 1
+                            break
+                        i += 1
                 continue
 
             # Check if the line contains a COPY command (at the beginning of the line)
             if re.match(r"^\s*COPY\s+(?!.*--from=)", line, re.IGNORECASE):
-                # Skip COPY instructions that use heredoc syntax (inline content, not file references)
-                if "<<" in line:
-                    continue
-
                 # Extract the sources from the COPY command
                 command_parts = Image.__parse_copy_command(line)
 
@@ -512,6 +536,8 @@ class Image(BaseModel):
                         else:
                             # If no files match, include the pattern anyway
                             sources.append((full_path_pattern, source))
+
+            i += 1
 
         return sources
 

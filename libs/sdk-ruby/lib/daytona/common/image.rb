@@ -351,6 +351,14 @@ module Daytona
         LATEST_PYTHON_MICRO_VERSIONS.select { |v| v.start_with?(python_version) }.last
       end
 
+      # Finds all heredoc delimiters in a Dockerfile line
+      #
+      # @param line [String] The Dockerfile line to scan
+      # @return [Array<String>] The list of heredoc delimiter names found
+      def find_heredoc_delimiters(line)
+        line.scan(/<<[-~]?['"]?([A-Za-z_]\w*)['"]?/).flatten
+      end
+
       # Extracts source files from COPY commands in a Dockerfile
       #
       # @param dockerfile_content [String] The content of the Dockerfile
@@ -359,42 +367,63 @@ module Daytona
       def extract_copy_sources(dockerfile_content, path_prefix = '') # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/MethodLength
         sources = []
         lines = dockerfile_content.split("\n")
+        i = 0
 
-        lines.each do |line|
+        while i < lines.length
+          line = lines[i]
+
           # Skip empty lines and comments
-          next if line.strip.empty? || line.strip.start_with?('#')
+          if line.strip.empty? || line.strip.start_with?('#')
+            i += 1
+            next
+          end
+
+          # Skip lines that are part of a heredoc block (<<DELIMITER ... DELIMITER)
+          heredoc_delimiters = find_heredoc_delimiters(line)
+          unless heredoc_delimiters.empty?
+            i += 1
+            heredoc_delimiters.each do |delimiter|
+              while i < lines.length
+                if lines[i].strip == delimiter
+                  i += 1
+                  break
+                end
+                i += 1
+              end
+            end
+            next
+          end
 
           # Check if the line contains a COPY command (at the beginning of the line)
-          next unless line.match?(/^\s*COPY\s+(?!.*--from=)/i)
+          if line.match?(/^\s*COPY\s+(?!.*--from=)/i)
+            # Extract the sources from the COPY command
+            command_parts = parse_copy_command(line)
+            if command_parts
+              # Get source paths from the parsed command parts
+              command_parts['sources'].each do |source|
+                # Handle absolute and relative paths differently
+                full_path_pattern = if Pathname.new(source).absolute?
+                                      # Absolute path - use as is
+                                      source
+                                    else
+                                      # Relative path - add prefix
+                                      File.join(path_prefix, source)
+                                    end
 
-          # Skip COPY instructions that use heredoc syntax (inline content, not file references)
-          next if line.include?('<<')
+                # Handle glob patterns
+                matching_files = Dir.glob(full_path_pattern)
 
-          # Extract the sources from the COPY command
-          command_parts = parse_copy_command(line)
-          next unless command_parts
-
-          # Get source paths from the parsed command parts
-          command_parts['sources'].each do |source|
-            # Handle absolute and relative paths differently
-            full_path_pattern = if Pathname.new(source).absolute?
-                                  # Absolute path - use as is
-                                  source
-                                else
-                                  # Relative path - add prefix
-                                  File.join(path_prefix, source)
-                                end
-
-            # Handle glob patterns
-            matching_files = Dir.glob(full_path_pattern)
-
-            if matching_files.any?
-              matching_files.each { |matching_file| sources << [matching_file, source] }
-            else
-              # If no files match, include the pattern anyway
-              sources << [full_path_pattern, source]
+                if matching_files.any?
+                  matching_files.each { |matching_file| sources << [matching_file, source] }
+                else
+                  # If no files match, include the pattern anyway
+                  sources << [full_path_pattern, source]
+                end
+              end
             end
           end
+
+          i += 1
         end
 
         sources
