@@ -81,9 +81,9 @@ go get github.com/daytonaio/daytona/libs/sdk-go
 
 ## Quick Start
 
-1. Create an account at https://app.daytona.io
-1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
-1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+1. Create an account at [app.daytona.io](https://app.daytona.io)
+2. Generate a [new API key](https://app.daytona.io/dashboard/keys)
+3. Follow [documentation](https://www.daytona.io/docs/) to start using Daytona
 
 ## Creating your first Sandbox
 
