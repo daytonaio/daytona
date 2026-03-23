@@ -8,6 +8,7 @@ import (
 )
 
 type BackupInfo struct {
-	State enums.BackupState
-	Error error
+	State    enums.BackupState
+	Snapshot string
+	Error    error
 }

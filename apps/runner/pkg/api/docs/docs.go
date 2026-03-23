@@ -1819,6 +1819,9 @@ const docTemplate = `{
                 "backupError": {
                     "type": "string"
                 },
+                "backupSnapshot": {
+                    "type": "string"
+                },
                 "backupState": {
                     "$ref": "#/definitions/enums.BackupState"
                 },

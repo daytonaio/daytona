@@ -19,6 +19,7 @@ export interface RunnerSandboxInfo {
   state: SandboxState
   daemonVersion?: string
   backupState?: BackupState
+  backupSnapshot?: string
   backupErrorReason?: string
 }
 

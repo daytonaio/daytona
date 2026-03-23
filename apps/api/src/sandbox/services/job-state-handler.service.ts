@@ -412,6 +412,20 @@ export class JobStateHandlerService {
         return
       }
 
+      // Parse the job payload to get the snapshot this job was for.
+      // Old v2 runners may not include snapshot in the payload, so we only
+      // perform stale-snapshot checks when the field is present.
+      const jobSnapshot = job.getPayload<{ snapshot?: string }>()?.snapshot
+
+      // Ignore stale backup results if the job's snapshot doesn't match the current DB snapshot.
+      // Old v2 runners may not include snapshot in the payload — skip this check for them.
+      if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
+        this.logger.warn(
+          `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+        )
+        return
+      }
+
       const updateData: Partial<Sandbox> = {}
 
       if (job.status === JobStatus.COMPLETED) {
