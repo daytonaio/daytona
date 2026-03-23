@@ -235,7 +235,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) SetLabels\(ctx context.Context, labels map\[string\]string\) error](<#Sandbox.SetLabels>)
   - [func \(s \*Sandbox\) Start\(ctx context.Context\) error](<#Sandbox.Start>)
   - [func \(s \*Sandbox\) StartWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StartWithTimeout>)
-  - [func \(s \*Sandbox\) Stop\(ctx context.Context, force bool\) error](<#Sandbox.Stop>)
+  - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
   - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration, force bool\) error](<#Sandbox.StopWithTimeout>)
   - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
@@ -4026,17 +4026,17 @@ if err != nil {
 ### func \(\*Sandbox\) Stop
 
 ```go
-func (s *Sandbox) Stop(ctx context.Context, force bool) error
+func (s *Sandbox) Stop(ctx context.Context) error
 ```
 
 Stop stops the sandbox with a default timeout of 60 seconds.
 
-Stopping a sandbox preserves its state. Use [Sandbox.Start](<#Sandbox.Start>) to resume. For custom timeout, use [Sandbox.StopWithTimeout](<#Sandbox.StopWithTimeout>). Set force to true to use SIGKILL instead of SIGTERM.
+Stopping a sandbox preserves its state. Use [Sandbox.Start](<#Sandbox.Start>) to resume. For custom timeout or force stop, use [Sandbox.StopWithTimeout](<#Sandbox.StopWithTimeout>).
 
 Example:
 
 ```
-err := sandbox.Stop(ctx, false)
+err := sandbox.Stop(ctx)
 ```
 
 <a name="Sandbox.StopWithTimeout"></a>

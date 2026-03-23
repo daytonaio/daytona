@@ -252,15 +252,14 @@ func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration)
 // Stop stops the sandbox with a default timeout of 60 seconds.
 //
 // Stopping a sandbox preserves its state. Use [Sandbox.Start] to resume.
-// For custom timeout, use [Sandbox.StopWithTimeout].
-// Set force to true to use SIGKILL instead of SIGTERM.
+// For custom timeout or force stop, use [Sandbox.StopWithTimeout].
 //
 // Example:
 //
-//	err := sandbox.Stop(ctx, false)
-func (s *Sandbox) Stop(ctx context.Context, force bool) error {
+//	err := sandbox.Stop(ctx)
+func (s *Sandbox) Stop(ctx context.Context) error {
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Stop", func(ctx context.Context) error {
-		return s.StopWithTimeout(ctx, 60*time.Second, force)
+		return s.StopWithTimeout(ctx, 60*time.Second, false)
 	})
 }
 
