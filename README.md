@@ -97,7 +97,6 @@ config = DaytonaConfig(
 )
 daytona = Daytona(config)
 sandbox = daytona.create()
-
 response = sandbox.process.code_run(
     'print("Hello World!")'
 )
