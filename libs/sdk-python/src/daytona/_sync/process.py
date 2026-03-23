@@ -108,7 +108,7 @@ class Process:
                 specified, uses the sandbox working directory.
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -177,7 +177,7 @@ class Process:
             code (str): Code to execute.
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Code execution result containing:
