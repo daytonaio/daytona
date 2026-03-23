@@ -40,7 +40,7 @@ func TerminateProcessTreeGracefully(ctx context.Context, logger *slog.Logger, pr
 	}
 
 	// Wait for graceful termination
-	if err == nil && waitForTermination(ctx, pid, gracePeriod, checkInterval) {
+	if err == nil && waitForTermination(ctx, pid, isGroupLeader, gracePeriod, checkInterval) {
 		logger.DebugContext(ctx, "PID terminated gracefully", "PID", pid)
 		return nil
 	}
@@ -91,8 +91,11 @@ func signalProcessTree(pid int, sig syscall.Signal) error {
 	return nil
 }
 
-// waitForTermination waits for a process and its children to terminate
-func waitForTermination(ctx context.Context, pid int, timeout, interval time.Duration) bool {
+// waitForTermination waits for a process (and its descendants) to terminate.
+// For process group leaders it checks the entire group via kill(-pid, 0),
+// so it returns true only once every member of the group has exited.
+// For non-leaders it checks whether the parent process still exists.
+func waitForTermination(ctx context.Context, pid int, isGroupLeader bool, timeout, interval time.Duration) bool {
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -104,10 +107,16 @@ func waitForTermination(ctx context.Context, pid int, timeout, interval time.Dur
 		case <-timeoutCtx.Done():
 			return false
 		case <-ticker.C:
-			_, err := process.NewProcess(int32(pid))
-			if err != nil {
-				// Process doesn't exist anymore
-				return true
+			if isGroupLeader {
+				// Check if any process in the group still exists.
+				if syscall.Kill(-pid, 0) != nil {
+					return true
+				}
+			} else {
+				if _, err := process.NewProcess(int32(pid)); err != nil {
+					// Process no longer exists.
+					return true
+				}
 			}
 		}
 	}

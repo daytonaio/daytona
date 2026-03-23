@@ -93,7 +93,7 @@ func (ec *ExecuteController) ExecuteCommand(c *gin.Context) {
 			ec.terminationCheckInterval,
 		)
 		if err != nil {
-			ec.logger.ErrorContext(timeoutCtx, "Failed to terminate process group", "Error", err)
+			ec.logger.ErrorContext(timeoutCtx, "Failed to terminate process group", "error", err)
 		}
 		<-done // Wait for process cleanup
 		c.Error(common_errors.NewRequestTimeoutError(fmt.Errorf("command execution timed out after %d seconds. The timeout can be increased by adjusting the timeout parameter in the request", *request.Timeout)))
