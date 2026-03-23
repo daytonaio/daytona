@@ -92,16 +92,10 @@ go get github.com/daytonaio/daytona/libs/sdk-go
 ```py
 from daytona import Daytona, DaytonaConfig
 
-config = DaytonaConfig(
-    api_key="YOUR_API_KEY",
-)
-
+config = DaytonaConfig(api_key="YOUR_API_KEY")
 daytona = Daytona(config)
 sandbox = daytona.create()
-response = sandbox.process.code_run(
-    'print("Hello World!")'
-)
-
+response = sandbox.process.code_run('print("Hello World!")')
 print(response.result)
 ```
 
@@ -110,13 +104,9 @@ print(response.result)
 ```jsx
 import { Daytona } from "@daytonaio/sdk";
 
-const daytona = new Daytona({
-  apiKey: "YOUR_API_KEY",
-});
-
+const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
 const sandbox = await daytona.create();
 const response = await sandbox.process.codeRun('print("Hello World!")');
-
 console.log(response.result);
 ```
 
@@ -125,14 +115,10 @@ console.log(response.result);
 ```ruby
 require 'daytona'
 
-config = Daytona::Config.new(
-  api_key: 'YOUR_API_KEY',
-)
-
+config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
 daytona = Daytona::Daytona.new(config)
 sandbox = daytona.create
 response = sandbox.process.code_run(code: 'print("Hello World!")')
-
 puts response.result
 ```
 
@@ -144,15 +130,12 @@ package main
 import (
   "context"
   "fmt"
-
   "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
   "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
-  config := &types.DaytonaConfig{
-    APIKey: "YOUR_API_KEY",
-  }
+  config := &types.DaytonaConfig{APIKey: "YOUR_API_KEY",}
   client, _ := daytona.NewClientWithConfig(config)
   ctx := context.Background()
   sandbox, _ := client.Create(ctx, nil)
