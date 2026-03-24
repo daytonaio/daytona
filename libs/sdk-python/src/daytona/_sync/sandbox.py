@@ -34,7 +34,7 @@ from pydantic import ConfigDict, PrivateAttr
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.timeout import http_timeout, with_timeout
-from ..common.errors import DaytonaError, DaytonaNotFoundError
+from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaValidationError
 from ..common.lsp_server import LspLanguageId, LspLanguageIdLiteral
 from ..common.protocols import SandboxCodeToolbox
 from ..common.sandbox import Resources
@@ -431,7 +431,7 @@ class Sandbox(SandboxDto):
             ```
         """
         if interval < 0:
-            raise DaytonaError("Auto-stop interval must be a non-negative integer")
+            raise DaytonaValidationError("Auto-stop interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_autostop_interval(self.id, interval)
         self.auto_stop_interval = interval
@@ -459,7 +459,7 @@ class Sandbox(SandboxDto):
             ```
         """
         if interval < 0:
-            raise DaytonaError("Auto-archive interval must be a non-negative integer")
+            raise DaytonaValidationError("Auto-archive interval must be a non-negative integer")
 
         _ = self._sandbox_api.set_auto_archive_interval(self.id, interval)
         self.auto_archive_interval = interval

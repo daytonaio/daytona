@@ -5,7 +5,7 @@
 
 import * as pathe from 'pathe'
 import { quote, parse as parseShellQuote } from 'shell-quote'
-import { DaytonaError } from './errors/DaytonaError'
+import { DaytonaNotFoundError, DaytonaValidationError } from './errors/DaytonaError'
 import { dynamicRequire } from './utils/Import'
 
 const SUPPORTED_PYTHON_SERIES = ['3.9', '3.10', '3.11', '3.12', '3.13'] as const
@@ -116,8 +116,8 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = expandTilde(requirementsTxt)
-    if (!fs.existsSync(expandedPath)) {
-      throw new Error(`Requirements file ${requirementsTxt} does not exist`)
+    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaNotFoundError(`Requirements file ${requirementsTxt} does not exist`)
     }
 
     const extraArgs = this.formatPipInstallArgs(options)
@@ -145,8 +145,21 @@ export class Image {
     const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
     const toml = dynamicRequire('@iarna/toml', importErrorPrefix)
     const fs = dynamicRequire('fs', importErrorPrefix)
+    const expandedPath = expandTilde(pyprojectToml)
 
-    const tomlData = toml.parse(fs.readFileSync(expandTilde(pyprojectToml), 'utf-8')) as any
+    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaNotFoundError(`pyproject.toml file ${pyprojectToml} does not exist`)
+    }
+
+    let tomlData: any
+
+    try {
+      tomlData = toml.parse(fs.readFileSync(expandedPath, 'utf-8')) as any
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      throw new DaytonaValidationError(`Invalid pyproject.toml file ${pyprojectToml}: ${errorMessage}`)
+    }
+
     const dependencies: string[] = []
 
     if (!tomlData || !tomlData.project || !Array.isArray(tomlData.project.dependencies)) {
@@ -154,15 +167,19 @@ export class Image {
         'No [project.dependencies] section in pyproject.toml file. ' +
         'See https://packaging.python.org/en/latest/guides/writing-pyproject-toml ' +
         'for further file format guidelines.'
-      throw new DaytonaError(msg)
+      throw new DaytonaValidationError(msg)
     }
 
     dependencies.push(...tomlData.project.dependencies)
 
     if (options?.optionalDependencies && tomlData.project['optional-dependencies']) {
-      const optionalGroups = tomlData.project['optional-dependencies'] as Record<string, string[]>
+      const optionalGroups = tomlData.project['optional-dependencies']
+      if (typeof optionalGroups !== 'object' || Array.isArray(optionalGroups)) {
+        throw new DaytonaValidationError('optional-dependencies must be a mapping in pyproject.toml')
+      }
+
       for (const group of options.optionalDependencies) {
-        const deps = optionalGroups[group]
+        const deps = (optionalGroups as Record<string, string[]>)[group]
         if (Array.isArray(deps)) {
           dependencies.push(...deps)
         }
@@ -187,12 +204,17 @@ export class Image {
   addLocalFile(localPath: string, remotePath: string): Image {
     const importErrorPrefix = '"addLocalFile" is not supported: '
     const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
+    const fs = dynamicRequire('fs', importErrorPrefix)
 
     if (remotePath.endsWith('/')) {
       remotePath = remotePath + pathe.basename(localPath)
     }
 
     const expandedPath = expandTilde(localPath)
+    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaNotFoundError(`Local file ${localPath} does not exist`)
+    }
+
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
     this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
 
@@ -214,8 +236,12 @@ export class Image {
   addLocalDir(localPath: string, remotePath: string): Image {
     const importErrorPrefix = '"addLocalDir" is not supported: '
     const expandTilde = dynamicRequire('expand-tilde', importErrorPrefix)
+    const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = expandTilde(localPath)
+    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
+      throw new DaytonaNotFoundError(`Local directory ${localPath} does not exist`)
+    }
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
     this._dockerfile += `COPY ${expandedPath} ${remotePath}\n`
@@ -266,7 +292,7 @@ export class Image {
       .map(([key]) => key)
 
     if (nonStringKeys.length) {
-      throw new Error(`Image ENV variables must be strings. Invalid keys: ${nonStringKeys}`)
+      throw new DaytonaValidationError(`Image ENV variables must be strings. Invalid keys: ${nonStringKeys}`)
     }
 
     for (const [key, val] of Object.entries(envVars)) {
@@ -305,7 +331,7 @@ export class Image {
    */
   entrypoint(entrypointCommands: string[]): Image {
     if (!Array.isArray(entrypointCommands) || !entrypointCommands.every((x) => typeof x === 'string')) {
-      throw new Error('entrypoint_commands must be a list of strings')
+      throw new DaytonaValidationError('entrypoint_commands must be a list of strings')
     }
 
     const argsStr = entrypointCommands.map((arg) => `"${arg}"`).join(', ')
@@ -327,7 +353,7 @@ export class Image {
    */
   cmd(cmd: string[]): Image {
     if (!Array.isArray(cmd) || !cmd.every((x) => typeof x === 'string')) {
-      throw new Error('Image CMD must be a list of strings')
+      throw new DaytonaValidationError('Image CMD must be a list of strings')
     }
 
     const cmdStr = cmd.map((arg) => `"${arg}"`).join(', ')
@@ -356,7 +382,7 @@ export class Image {
 
       const expandedPath = expandTilde(contextDir)
       if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
-        throw new Error(`Context directory ${contextDir} does not exist`)
+        throw new DaytonaNotFoundError(`Context directory ${contextDir} does not exist`)
       }
     }
 
@@ -393,8 +419,8 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = pathe.resolve(expandTilde(path))
-    if (!fs.existsSync(expandedPath)) {
-      throw new Error(`Dockerfile ${path} does not exist`)
+    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaNotFoundError(`Dockerfile ${path} does not exist`)
     }
 
     const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
@@ -518,7 +544,7 @@ export class Image {
           flatten(item)
         }
       } else {
-        throw new Error(`${functionName}: ${argName} must only contain strings`)
+        throw new DaytonaValidationError(`${functionName}: ${argName} must only contain strings`)
       }
     }
 
@@ -539,7 +565,7 @@ export class Image {
     }
 
     if (!SUPPORTED_PYTHON_SERIES.includes(pythonVersion)) {
-      throw new Error(
+      throw new DaytonaValidationError(
         `Unsupported Python version: ${pythonVersion}. ` +
           `Daytona supports the following series: ${SUPPORTED_PYTHON_SERIES.join(', ')}`,
       )

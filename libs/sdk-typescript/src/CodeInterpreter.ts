@@ -10,7 +10,7 @@
 import WebSocket from 'isomorphic-ws'
 import { InterpreterApi, InterpreterContext } from '@daytonaio/toolbox-api-client'
 import { Configuration } from '@daytonaio/api-client'
-import { DaytonaError, DaytonaTimeoutError } from './errors/DaytonaError'
+import { DaytonaError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
 import { ExecutionError, ExecutionResult, RunCodeOptions } from './types/CodeInterpreter'
 import { createSandboxWebSocket } from './utils/WebSocket'
 
@@ -69,7 +69,7 @@ export class CodeInterpreter {
    */
   public async runCode(code: string, options: RunCodeOptions = {}): Promise<ExecutionResult> {
     if (!code || !code.trim()) {
-      throw new DaytonaError('Code is required for execution')
+      throw new DaytonaValidationError('Code is required for execution')
     }
 
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/interpreter/execute`
