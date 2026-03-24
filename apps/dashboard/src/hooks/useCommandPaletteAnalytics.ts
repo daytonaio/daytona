@@ -3,17 +3,11 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import posthog from 'posthog-js'
 import { usePostHog } from 'posthog-js/react'
 import { useCallback, useMemo } from 'react'
 
 function isTrackingEnabled(): boolean {
   return import.meta.env.PROD
-}
-
-export function trackCommandPaletteOpened(trigger: string) {
-  if (!isTrackingEnabled()) return
-  posthog?.capture('command_palette_opened', { trigger })
 }
 
 /**
@@ -32,40 +26,48 @@ function normalizeCommandId(commandId: string): string {
 }
 
 export function useCommandPaletteAnalytics() {
-  const posthog = usePostHog()
+  const posthogClient = usePostHog()
+
+  const trackOpened = useCallback(
+    (trigger: string) => {
+      if (!isTrackingEnabled()) return
+      posthogClient?.capture('command_palette_opened', { trigger })
+    },
+    [posthogClient],
+  )
 
   const trackCommandExecuted = useCallback(
     (props: { commandId: string; groupId: string; pageId: string }) => {
       if (!isTrackingEnabled()) return
-      posthog?.capture('command_palette_command_executed', {
+      posthogClient?.capture('command_palette_command_executed', {
         ...props,
         commandId: normalizeCommandId(props.commandId),
       })
     },
-    [posthog],
+    [posthogClient],
   )
 
   const trackPageNavigated = useCallback(
     (props: { fromPage: string; toPage: string; commandId: string; groupId: string }) => {
       if (!isTrackingEnabled()) return
-      posthog?.capture('command_palette_page_navigated', {
+      posthogClient?.capture('command_palette_page_navigated', {
         ...props,
         commandId: normalizeCommandId(props.commandId),
       })
     },
-    [posthog],
+    [posthogClient],
   )
 
   const trackSearched = useCallback(
     (props: { pageId: string; queryLength: number; resultCount: number }) => {
       if (!isTrackingEnabled()) return
-      posthog?.capture('command_palette_searched', props)
+      posthogClient?.capture('command_palette_searched', props)
     },
-    [posthog],
+    [posthogClient],
   )
 
   return useMemo(
-    () => ({ trackCommandExecuted, trackPageNavigated, trackSearched }),
-    [trackCommandExecuted, trackPageNavigated, trackSearched],
+    () => ({ trackOpened, trackCommandExecuted, trackPageNavigated, trackSearched }),
+    [trackOpened, trackCommandExecuted, trackPageNavigated, trackSearched],
   )
 }

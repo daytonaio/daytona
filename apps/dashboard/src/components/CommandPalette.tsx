@@ -5,7 +5,7 @@
 
 'use client'
 
-import { trackCommandPaletteOpened, useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
+import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useDeepCompareMemo } from '@/hooks/useDeepCompareMemo'
 import { cn, pluralize } from '@/lib/utils'
 import { useCommandState } from 'cmdk'
@@ -283,6 +283,7 @@ export function CommandPaletteProvider({
   enableGlobalShortcut = true,
 }: CommandPaletteProviderProps) {
   const storeRef = useRef<StoreApi<CommandPaletteStore> | null>(null)
+  const analytics = useCommandPaletteAnalytics()
 
   if (!storeRef.current) {
     storeRef.current = createCommandPaletteStore(defaultPage)
@@ -296,7 +297,7 @@ export function CommandPaletteProvider({
         e.preventDefault()
         const state = storeRef.current?.getState()
         if (state && !state.isOpen) {
-          trackCommandPaletteOpened('keyboard')
+          analytics.trackOpened('keyboard')
         }
         state?.actions.setIsOpen(!state.isOpen)
       }
@@ -304,7 +305,7 @@ export function CommandPaletteProvider({
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [enableGlobalShortcut])
+  }, [enableGlobalShortcut, analytics])
 
   return <CommandPaletteContext.Provider value={storeRef.current}>{children}</CommandPaletteContext.Provider>
 }
@@ -574,7 +575,7 @@ function CommandEmpty({ search }: { search: string }) {
 function SearchAnalyticsTracker({ search, pageId }: { search: string; pageId: string }) {
   const resultCount = useCommandState((state) => state.filtered.count)
   const analytics = useCommandPaletteAnalytics()
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const resultCountRef = useRef(resultCount)
   resultCountRef.current = resultCount
 
