@@ -12,7 +12,7 @@ description = "Python SDK for Daytona"
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
 dependencies = [
-    "environs>=10.0.0,<15.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
     "pydantic>=2.4.2,<3.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",

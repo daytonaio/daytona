@@ -188,3 +188,26 @@ Experimental configuration options
 **Returns**:
 
 - `Hash, nil` - Experimental configuration hash
+
+#### read_env()
+
+```ruby
+def read_env(name)
+
+```
+
+Reads a DAYTONA_-prefixed environment variable using the same precedence
+as the Config initializer: runtime ENV first, then .env.local, then .env.
+Only names starting with DAYTONA_ are accepted.
+
+**Parameters**:
+
+- `name` _String_ - The environment variable name. Must start with DAYTONA_.
+
+**Returns**:
+
+- `String, nil` - The value of the environment variable, or nil if not set.
+
+**Raises**:
+
+- `ArgumentError` - If name does not start with DAYTONA_.

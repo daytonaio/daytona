@@ -53,7 +53,7 @@ export const RUNTIME =
             : Runtime.UNKNOWN
 
 export function getEnvVar(name: string): string | undefined {
-  if (RUNTIME === Runtime.NODE || RUNTIME === Runtime.BUN) {
+  if (RUNTIME === Runtime.NODE || RUNTIME === Runtime.BUN || RUNTIME === Runtime.SERVERLESS) {
     return process.env[name]
   }
   if (RUNTIME === Runtime.DENO) {
@@ -61,6 +61,38 @@ export function getEnvVar(name: string): string | undefined {
   }
 
   return undefined
+}
+
+export class DaytonaEnvReader {
+  private readonly envLocalVars: Record<string, string>
+  private readonly envVars: Record<string, string>
+
+  constructor() {
+    this.envLocalVars = DaytonaEnvReader.parseFileVars('.env.local')
+    this.envVars = DaytonaEnvReader.parseFileVars('.env')
+  }
+
+  get(name: string): string | undefined {
+    if (!name.startsWith('DAYTONA_')) {
+      throw new Error(`DaytonaEnvReader: variable name must start with 'DAYTONA_', got '${name}'`)
+    }
+    // 1. Runtime env
+    const runtimeVal = getEnvVar(name)
+    if (runtimeVal !== undefined) return runtimeVal
+    // 2. .env.local
+    if (name in this.envLocalVars) return this.envLocalVars[name]
+    // 3. .env
+    return this.envVars[name]
+  }
+
+  private static parseFileVars(path: string): Record<string, string> {
+    if (RUNTIME !== Runtime.NODE || typeof require === 'undefined') return {}
+    const fs = require('fs')
+    if (!fs.existsSync(path)) return {}
+    const dotenv = require('dotenv')
+    const parsed = dotenv.parse(fs.readFileSync(path)) as Record<string, string>
+    return Object.fromEntries(Object.entries(parsed).filter(([k]) => k.startsWith('DAYTONA_')))
+  }
 }
 
 export function isServerlessRuntime(): boolean {
