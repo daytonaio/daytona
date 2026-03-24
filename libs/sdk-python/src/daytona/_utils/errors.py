@@ -8,6 +8,7 @@ import json
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any, NoReturn, TypeVar, cast
 
+import httpx
 from daytona_api_client.exceptions import (
     BadRequestException,
     ConflictException,
@@ -92,6 +93,15 @@ def intercept_errors(
                     error_code=error_code,
                     exception=e,
                 ) from None
+
+            # Preserve typed transport failures from the manual httpx streaming paths.
+            if isinstance(e, httpx.TimeoutException):
+                msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
+                raise DaytonaTimeoutError(msg) from None
+
+            if isinstance(e, httpx.NetworkError):
+                msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
+                raise DaytonaConnectionError(msg) from None
 
             if isinstance(e, TimeoutError):
                 msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)

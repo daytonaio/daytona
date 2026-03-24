@@ -712,7 +712,7 @@ export class Daytona implements AsyncDisposable {
    * @private
    * @param {CodeLanguage} [language] - Programming language for the toolbox
    * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
-   * @throws {DaytonaError} - `DaytonaError` - When an unsupported language is specified
+   * @throws {DaytonaValidationError} - `DaytonaValidationError` - When an unsupported language is specified
    */
   private getCodeToolbox(language?: CodeLanguage) {
     switch (language) {
@@ -725,7 +725,7 @@ export class Daytona implements AsyncDisposable {
         return new SandboxPythonCodeToolbox()
       default: {
         const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
-        throw new DaytonaError(errMsg)
+        throw new DaytonaValidationError(errMsg)
       }
     }
   }
