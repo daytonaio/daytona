@@ -4,6 +4,7 @@
 package telemetry
 
 import (
+	"crypto/tls"
 	"os"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -18,6 +19,7 @@ type Config struct {
 	ServiceVersion string
 	Environment    string
 	ExtraLabels    map[string]string
+	TLSConfig      *tls.Config
 }
 
 func (c Config) Attributes() []attribute.KeyValue {
