@@ -22,9 +22,9 @@ module Daytona
       argv = params&.argv&.join(' ') || ''
 
       # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-      # echo is a shell builtin so the base64 string doesn't hit ARG_MAX
+      # printf is a shell builtin that does not invoke execve(), so the base64 string bypasses the kernel ARG_MAX limit
       # Use -u flag to ensure unbuffered output for real-time error reporting
-      "echo '#{encoded_code}' | base64 -d | python3 -u - #{argv}"
+      "printf '%s' '#{encoded_code}' | base64 -d | python3 -u - #{argv}"
     end
 
     private

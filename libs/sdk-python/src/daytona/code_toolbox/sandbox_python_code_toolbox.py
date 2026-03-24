@@ -30,9 +30,10 @@ class SandboxPythonCodeToolbox(SandboxCodeToolbox):
             argv = " ".join(params.argv)
 
         # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-        # echo is a shell builtin so the base64 string doesn't hit ARG_MAX
+        # printf is a shell builtin that does not invoke execve(),
+        # so the base64 string bypasses the kernel ARG_MAX limit
         # Use -u flag to ensure unbuffered output for real-time error reporting
-        return f"echo '{base64_code}' | base64 -d | python3 -u - {argv}"
+        return f"printf '%s' '{base64_code}' | base64 -d | python3 -u - {argv}"
 
     @staticmethod
     def _is_matplotlib_imported(code: str) -> bool:

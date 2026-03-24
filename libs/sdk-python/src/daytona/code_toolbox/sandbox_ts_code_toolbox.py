@@ -20,17 +20,18 @@ class SandboxTsCodeToolbox:
             argv = " ".join(params.argv)
 
         # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-        # ts-node does not support - for stdin; write to a temp file keyed on shell PID, execute, then clean up
-        # Capture output to a second temp file so npm notice lines can be filtered without variable buffering
+        # ts-node does not support - for stdin; use shell PID ($$) for the temp file — each code_run spawns its own
+        # shell process so $$ is unique across concurrent calls; cleaned up before exit
+        # npm_config_loglevel=error suppresses npm notice/warn output at source, preserving streaming and real errors
         parts = [
             "_f=/tmp/dtn_$$.ts",
-            "_o=/tmp/dtn_o_$$.log",
             f"printf '%s' '{base64_code}' | base64 -d > \"$_f\"",
-            f'npx ts-node -T --ignore-diagnostics 5107 -O \'{{"module":"CommonJS"}}\' "$_f" {argv} > "$_o" 2>&1',
+            (
+                f"npm_config_loglevel=error npx ts-node -T --ignore-diagnostics 5107"
+                f' -O \'{{"module":"CommonJS"}}\' "$_f" {argv}'
+            ),
             "_dtn_ec=$?",
             'rm -f "$_f"',
-            "grep -v -e 'npm notice' -e 'npm warn exec' \"$_o\" || true",
-            'rm -f "$_o"',
             "exit $_dtn_ec",
         ]
         return "; ".join(parts)
