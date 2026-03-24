@@ -59,7 +59,7 @@ def fetch_chapters() -> list[str]:
 
 # ── Configure DSPy ───────────────────────────────────────────────────────────
 
-lm = dspy.LM("openrouter/google/gemini-3-flash-preview")
+lm = dspy.LM("openrouter/anthropic/claude-sonnet-4.6")
 dspy.configure(lm=lm)
 
 # ── Run RLM analysis ────────────────────────────────────────────────────────
@@ -102,6 +102,9 @@ finally:
 # ── Plot ─────────────────────────────────────────────────────────────────────
 
 # Group by character
+required_keys = {"chapter", "character", "wealth"}
+wealth_data = [r for r in wealth_data if required_keys <= r.keys()]
+
 series = defaultdict(lambda: ([], []))
 for row in wealth_data:
     xs, ys = series[row["character"]]
