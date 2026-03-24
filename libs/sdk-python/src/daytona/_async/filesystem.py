@@ -22,10 +22,16 @@ from daytona_toolbox_api_client_async import (
 )
 from python_multipart.multipart import MultipartParser, parse_options_header
 
-from .._utils.errors import intercept_errors
+from .._utils.errors import create_daytona_error, intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from ..common.errors import DaytonaError
-from ..common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
+from ..common.filesystem import (
+    FileDownloadErrorDetails,
+    FileDownloadRequest,
+    FileDownloadResponse,
+    FileUpload,
+    parse_file_download_error_payload,
+)
 
 
 class AsyncFileSystem:
@@ -143,6 +149,12 @@ class AsyncFileSystem:
             timeout = int(args[1]) if len(args) == 2 else 30 * 60
             response = (await self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout))[0]
             if response.error:
+                if response.error_details:
+                    raise create_daytona_error(
+                        response.error_details.message,
+                        status_code=response.error_details.status_code,
+                        error_code=response.error_details.error_code,
+                    )
                 raise DaytonaError(response.error)
             result = response.result
             if isinstance(result, str):
@@ -158,6 +170,12 @@ class AsyncFileSystem:
             )
         )[0]
         if response.error:
+            if response.error_details:
+                raise create_daytona_error(
+                    response.error_details.message,
+                    status_code=response.error_details.status_code,
+                    error_code=response.error_details.error_code,
+                )
             raise DaytonaError(response.error)
         return None
 
@@ -177,7 +195,8 @@ class AsyncFileSystem:
 
         Raises:
             Exception: Only if the request itself fails (network issues, invalid request/response, etc.). Individual
-            file download errors are returned in the `FileDownloadResponse.error` field.
+            file download errors are returned in `FileDownloadResponse.error`. When the daemon provides structured
+            per-file metadata, it is also available in `FileDownloadResponse.error_details`.
 
         Example:
             ```python
@@ -200,6 +219,7 @@ class AsyncFileSystem:
             def __init__(self, dst: str | None):
                 self.dst: str | None = dst
                 self.error: str | None = None
+                self.error_details: FileDownloadErrorDetails | None = None
                 self.result: str | bytes | io.BytesIO | None = None
 
         src_file_meta_dict: dict[str, FileMeta] = {}
@@ -232,6 +252,7 @@ class AsyncFileSystem:
 
                     writer: io.BytesIO | AsyncBufferedIOBase | None = None
                     mode: str | None = None
+                    part_content_type: str | None = None
                     source: str | None = None
                     header_field = bytearray()
                     header_value = bytearray()
@@ -278,13 +299,14 @@ class AsyncFileSystem:
                     )
 
                     async def _process_events() -> None:
-                        nonlocal writer, mode, source
+                        nonlocal writer, mode, part_content_type, source
                         for event_tag, event_payload in events:
                             if event_tag == "begin":
                                 part_headers.clear()
                                 error_buffer.clear()
                                 writer = None
                                 mode = None
+                                part_content_type = None
                                 source = None
 
                             elif event_tag == "headers_finished":
@@ -295,6 +317,7 @@ class AsyncFileSystem:
                                 source = cd_params.get(b"filename", b"").decode("utf-8", errors="ignore") or None
                                 if not source:
                                     raise DaytonaError("No source path found for this file")
+                                part_content_type = hdrs.get("content-type")
 
                                 if name == "error":
                                     mode = "error"
@@ -332,9 +355,13 @@ class AsyncFileSystem:
 
                             elif event_tag == "end":
                                 if mode == "error" and error_buffer:
-                                    error_text = bytes(error_buffer).decode("utf-8", errors="ignore").strip()
+                                    error_text, error_details = parse_file_download_error_payload(
+                                        bytes(error_buffer),
+                                        part_content_type,
+                                    )
                                     if source:
                                         src_file_meta_dict[source].error = error_text
+                                        src_file_meta_dict[source].error_details = error_details
                                     else:
                                         raise DaytonaError(f"Error happened for unknown file with error {error_text}")
                                     error_buffer.clear()
@@ -342,6 +369,7 @@ class AsyncFileSystem:
                                     await writer.close()
                                 writer = None
                                 mode = None
+                                part_content_type = None
                                 source = None
 
                     async for chunk in resp.aiter_bytes(64 * 1024):
@@ -375,6 +403,7 @@ class AsyncFileSystem:
                     source=f.source,
                     result=res,
                     error=err,
+                    error_details=meta.error_details,
                 )
             )
 
