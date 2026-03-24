@@ -192,11 +192,12 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     metadata?: { [key: string]: string },
     otelEndpoint?: string,
     skipStart?: boolean,
+    snapshotRef?: string,
   ): Promise<StartSandboxResponse | undefined> {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
-      snapshot: sandbox.snapshot,
+      snapshot: snapshotRef ?? sandbox.snapshot,
       osUser: sandbox.osUser,
       cpuQuota: sandbox.cpu,
       gpuQuota: sandbox.gpu,

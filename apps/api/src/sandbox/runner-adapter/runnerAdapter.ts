@@ -72,6 +72,7 @@ export interface RunnerAdapter {
     metadata?: { [key: string]: string },
     otelEndpoint?: string,
     skipStart?: boolean,
+    snapshotRef?: string,
   ): Promise<StartSandboxResponse | undefined>
   startSandbox(
     sandboxId: string,

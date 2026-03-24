@@ -363,20 +363,20 @@ export class SandboxStartAction extends SandboxAction {
 
     let internalRegistry: DockerRegistry
     let entrypoint: string[]
+    let snapshotRef: string
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
       const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-      const snapshotRef = snapshot.ref
+      snapshotRef = snapshot.ref
 
       internalRegistry = await this.dockerRegistryService.findInternalRegistryBySnapshotRef(snapshotRef, runner.region)
       if (!internalRegistry) {
         throw new Error('No registry found for snapshot')
       }
 
-      sandbox.snapshot = snapshotRef
       entrypoint = snapshot.entrypoint
     } else {
-      sandbox.snapshot = sandbox.buildInfo.snapshotRef
+      snapshotRef = sandbox.buildInfo.snapshotRef
       entrypoint = this.snapshotService.getEntrypointFromDockerfile(sandbox.buildInfo.dockerfileContent)
     }
 
@@ -391,6 +391,8 @@ export class SandboxStartAction extends SandboxAction {
       entrypoint,
       metadata,
       this.configService.get('sandboxOtel.endpointUrl'),
+      undefined,
+      snapshotRef,
     )
 
     await this.updateSandboxState(sandbox, SandboxState.CREATING, lockCode, undefined, undefined, result?.daemonVersion)
@@ -823,8 +825,6 @@ export class SandboxStartAction extends SandboxAction {
 
     await this.updateSandboxState(sandbox, SandboxState.RESTORING, lockCode, runner.id)
 
-    sandbox.snapshot = validBackup
-
     const metadata = {
       ...organization?.sandboxMetadata,
       sandboxName: sandbox.name,
@@ -836,6 +836,8 @@ export class SandboxStartAction extends SandboxAction {
       undefined,
       metadata,
       this.configService.get('sandboxOtel.endpointUrl'),
+      undefined,
+      validBackup,
     )
     return null
   }
