@@ -14,16 +14,17 @@ export class SandboxTsCodeToolbox implements SandboxCodeToolbox {
     const argv = params?.argv ? params.argv.join(' ') : ''
 
     // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
-    // ts-node does not support reading from stdin via - or /dev/stdin when stdin is a pipe,
-    // so write to a temp file, execute it, then clean up
-    // Capture the exit code before filtering to preserve ts-node's exit status
+    // ts-node does not support - for stdin; write to a temp file keyed on shell PID, execute, then clean up
+    // Capture output to a second temp file so npm notice lines can be filtered without variable buffering
     return [
       `_f=/tmp/dtn_$$.ts`,
+      `_o=/tmp/dtn_o_$$.log`,
       `printf '%s' '${base64Code}' | base64 -d > "$_f"`,
-      `_dtn_out=$(npx ts-node -O '{"module":"CommonJS"}' "$_f" ${argv} 2>&1)`,
+      `npx ts-node -T --ignore-diagnostics 5107 -O '{"module":"CommonJS"}' "$_f" ${argv} > "$_o" 2>&1`,
       `_dtn_ec=$?`,
       `rm -f "$_f"`,
-      `printf '%s\\n' "$_dtn_out" | grep -v 'npm notice'`,
+      `grep -v -e 'npm notice' -e 'npm warn exec' "$_o" || true`,
+      `rm -f "$_o"`,
       `exit $_dtn_ec`,
     ].join('; ')
   }
