@@ -9,10 +9,21 @@ import { Buffer } from 'buffer'
 
 export class SandboxTsCodeToolbox implements SandboxCodeToolbox {
   public getRunCommand(code: string, params?: CodeRunParams): string {
-    const base64Code = Buffer.from(code).toString('base64')
+    // Prepend argv fix: ts-node places the script path at argv[1]; splice it out to match legacy node -e behaviour
+    const base64Code = Buffer.from('process.argv.splice(1, 1);\n' + code).toString('base64')
     const argv = params?.argv ? params.argv.join(' ') : ''
 
-    // eslint-disable-next-line no-useless-escape
-    return `sh -c 'echo ${base64Code} | base64 --decode | npx ts-node -O "{\\\"module\\\":\\\"CommonJS\\\"}" -e "$(cat)" x ${argv} 2>&1 | grep -vE "npm notice"'`
+    // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+    // ts-node does not support - for stdin; use shell PID ($$) for the temp file — each code_run spawns its own
+    // shell process so $$ is unique across concurrent calls; cleaned up before exit
+    // npm_config_loglevel=error suppresses npm notice/warn output at source, preserving streaming and real errors
+    return [
+      `_f=/tmp/dtn_$$.ts`,
+      `printf '%s' '${base64Code}' | base64 -d > "$_f"`,
+      `npm_config_loglevel=error npx ts-node -T --ignore-diagnostics 5107 -O '{"module":"CommonJS"}' "$_f" ${argv}`,
+      `_dtn_ec=$?`,
+      `rm -f "$_f"`,
+      `exit $_dtn_ec`,
+    ].join('; ')
   }
 }

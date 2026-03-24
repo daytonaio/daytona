@@ -5,15 +5,17 @@ require 'base64'
 module Daytona
   class SandboxJsCodeToolbox
     def get_run_command(code, params = nil)
+      # Prepend argv fix: node - places '-' at argv[1]; splice it out to match legacy node -e behaviour
       # Encode the provided code in base64
-      base64_code = Base64.strict_encode64(code)
+      base64_code = Base64.strict_encode64("process.argv.splice(1, 1);\n" + code)
 
       # Build command-line arguments string
       argv = ''
       argv = params.argv.join(' ') if params&.argv && !params.argv.empty?
 
-      # Combine everything into the final command for JavaScript
-      " sh -c 'echo #{base64_code} | base64 --decode | node -e \"$(cat)\" #{argv} 2>&1 | grep -vE \"npm notice\"' "
+      # Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+      # Use node - to read from stdin (node /dev/stdin does not work when stdin is a pipe)
+      "printf '%s' '#{base64_code}' | base64 -d | node - #{argv}"
     end
   end
 end

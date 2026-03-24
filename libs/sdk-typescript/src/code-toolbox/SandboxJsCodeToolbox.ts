@@ -9,9 +9,12 @@ import { Buffer } from 'buffer'
 
 export class SandboxJsCodeToolbox implements SandboxCodeToolbox {
   public getRunCommand(code: string, params?: CodeRunParams): string {
-    const base64Code = Buffer.from(code).toString('base64')
+    // Prepend argv fix: node - places '-' at argv[1]; splice it out to match legacy node -e behaviour
+    const base64Code = Buffer.from('process.argv.splice(1, 1);\n' + code).toString('base64')
     const argv = params?.argv ? params.argv.join(' ') : ''
 
-    return `sh -c 'echo ${base64Code} | base64 --decode | node -e "$(cat)" ${argv} 2>&1 | grep -vE "npm notice"'`
+    // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+    // Use node - to read from stdin (node /dev/stdin does not work when stdin is a pipe)
+    return `printf '%s' '${base64Code}' | base64 -d | node - ${argv}`
   }
 }
