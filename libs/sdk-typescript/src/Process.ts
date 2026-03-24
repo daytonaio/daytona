@@ -73,7 +73,7 @@ export class Process {
    * @param {string} command - Shell command to execute
    * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
-   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
+   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
    *                                    - exitCode: The command's exit status
    *                                    - result: Standard output from the command

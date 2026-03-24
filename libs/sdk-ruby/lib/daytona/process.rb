@@ -40,7 +40,7 @@ module Daytona
     # @param command [String] Shell command to execute
     # @param cwd [String, nil] Working directory for command execution. If not specified, uses the sandbox working directory
     # @param env [Hash<String, String>, nil] Environment variables to set for the command
-    # @param timeout [Integer, nil] Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely
+    # @param timeout [Integer, nil] Maximum time in seconds to wait for the command to complete.
     # @return [ExecuteResponse] Command execution results containing exit_code, result, and artifacts
     #
     # @example

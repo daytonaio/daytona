@@ -9,8 +9,11 @@ import (
 	"log/slog"
 	"net/http"
 	"os/exec"
+	"sync/atomic"
+	"syscall"
 	"time"
 
+	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -41,34 +44,31 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 		}
 
 		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		if request.Cwd != nil {
 			cmd.Dir = *request.Cwd
 		}
 
 		// set maximum execution time
-		timeout := 360 * time.Second
+		var timeoutReached atomic.Bool
 		if request.Timeout != nil && *request.Timeout > 0 {
-			timeout = time.Duration(*request.Timeout) * time.Second
-		}
-
-		timeoutReached := false
-		timer := time.AfterFunc(timeout, func() {
-			timeoutReached = true
-			if cmd.Process != nil {
-				// kill the process group
-				err := cmd.Process.Kill()
-				if err != nil {
-					logger.Error("failed to kill process", "error", err)
-					return
+			timeout := time.Duration(*request.Timeout) * time.Second
+			timer := time.AfterFunc(timeout, func() {
+				timeoutReached.Store(true)
+				if cmd.Process != nil {
+					// Kill the entire process group so child processes are also terminated
+					if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+						logger.Error("failed to kill process group", "error", err)
+					}
 				}
-			}
-		})
-		defer timer.Stop()
+			})
+			defer timer.Stop()
+		}
 
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			if timeoutReached {
-				c.AbortWithError(http.StatusRequestTimeout, errors.New("command execution timeout"))
+			if timeoutReached.Load() {
+				c.Error(common_errors.NewRequestTimeoutError(errors.New("command execution timeout")))
 				return
 			}
 			if exitError, ok := err.(*exec.ExitError); ok {
