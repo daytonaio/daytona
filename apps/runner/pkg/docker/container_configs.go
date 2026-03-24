@@ -166,12 +166,23 @@ func (d *DockerClient) getContainerHostConfig(sandboxDto dto.CreateSandboxDTO, v
 
 func (d *DockerClient) getContainerNetworkingConfig() *network.NetworkingConfig {
 	containerNetwork := config.GetContainerNetwork()
+	var networkingConfig *network.NetworkingConfig
 	if containerNetwork != "" {
-		return &network.NetworkingConfig{
+		networkingConfig = &network.NetworkingConfig{
 			EndpointsConfig: map[string]*network.EndpointSettings{
 				containerNetwork: {},
 			},
 		}
 	}
-	return nil
+
+	if !d.interSandboxNetworkEnabled {
+		if networkingConfig == nil {
+			networkingConfig = &network.NetworkingConfig{
+				EndpointsConfig: map[string]*network.EndpointSettings{},
+			}
+		}
+		networkingConfig.EndpointsConfig[RUNNER_BRIDGE_NETWORK_NAME] = &network.EndpointSettings{}
+	}
+
+	return networkingConfig
 }

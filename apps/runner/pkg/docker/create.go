@@ -49,7 +49,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 			return "", "", err
 		}
 
-		containerIP := common.GetContainerIpAddress(ctx, c)
+		containerIP := GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
 			return "", "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
@@ -132,7 +132,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 
 	containerShortId := runningContainer.ID[:12]
 
-	ip := common.GetContainerIpAddress(ctx, runningContainer)
+	ip := GetContainerIpAddress(ctx, runningContainer)
 	if sandboxDto.NetworkBlockAll != nil && *sandboxDto.NetworkBlockAll {
 		go func() {
 			err = d.netRulesManager.SetNetworkRules(containerShortId, ip, "")
