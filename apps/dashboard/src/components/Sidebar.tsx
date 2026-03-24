@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { trackCommandPaletteOpened } from '@/hooks/useCommandPaletteAnalytics'
+import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { Logo, LogoText } from '@/assets/Logo'
 import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
 import {
@@ -339,6 +339,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   usePylonCommands()
 
   const commandPaletteActions = useCommandPaletteActions()
+  const { trackOpened } = useCommandPaletteAnalytics()
 
   useNavCommands(commandItems)
 
@@ -366,7 +367,7 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
               variant="outline"
               className="flex items-center gap-2 justify-between dark:bg-input/30 dark:hover:bg-sidebar-accent hover:shadow-[0_0_0_1px_hsl(var(--sidebar-border))]"
               onClick={() => {
-                trackCommandPaletteOpened('sidebar_search')
+                trackOpened('sidebar_search')
                 commandPaletteActions.setIsOpen(true)
               }}
             >
