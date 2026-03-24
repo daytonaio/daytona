@@ -9,6 +9,8 @@ type ExecuteRequest struct {
 	Timeout *uint32 `json:"timeout,omitempty" validate:"optional"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty" validate:"optional"`
+	// Enable TTY mode for interactive commands
+	TTY *bool `json:"tty,omitempty" validate:"optional"`
 } // @name ExecuteRequest
 
 // TODO: Set ExitCode as required once all sandboxes migrated to the new daemon
