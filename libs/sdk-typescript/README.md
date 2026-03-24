@@ -2,7 +2,7 @@
 
 The official TypeScript SDK for [Daytona](https://daytona.io), an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://www.daytona.io/docs/en/sandboxes/) — that you can manage programmatically using the Daytona SDK.
 
-The SDK provides an interface for sandbox management, file system operations, Git operations, language server protocol support, process and code execution, computer use. For more information, see the [documentation](https://www.daytona.io/docs/en/typescript-sdk/).
+The SDK provides an interface for sandbox management, file system operations, Git operations, language server protocol support, process and code execution, and computer use. For more information, see the [documentation](https://www.daytona.io/docs/en/typescript-sdk/).
 
 ## Installation
 
