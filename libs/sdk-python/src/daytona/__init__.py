@@ -94,7 +94,6 @@ __all__ = [
     "OutputMessage",
     "OutputHandler",
     "DaytonaTimeoutError",
-    "DaytonaNotFoundError",
 ]
 
 # Mapping of symbol name -> (absolute module path, attribute name) for external packages
