@@ -1,0 +1,105 @@
+---
+title: Run Sandbox Agent SDK in a Daytona Sandbox
+description: Use the Sandbox Agent SDK with the Daytona provider to create and control coding-agent sessions from a local script.
+---
+
+This guide shows how to run [Sandbox Agent](https://github.com/rivet-dev/sandbox-agent) inside a Daytona sandbox and control it with the [Sandbox Agent SDK](https://sandboxagent.dev/docs/sdk-overview).
+
+---
+
+### 1. Workflow Overview
+
+The flow is split into two parts:
+
+- A local Node.js script starts a Daytona sandbox and boots the Sandbox Agent server in it.
+- The script opens a session, sends a prompt to an agent (Claude in this example), and streams the response.
+
+When the script exits, the sandbox is destroyed.
+
+---
+
+### 2. Prerequisites
+
+- `DAYTONA_API_KEY`
+- `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`
+
+:::note[Network Access]
+Some model provider endpoints require Daytona Tier 3+. See [network limits](/docs/en/network-limits) for details.
+:::
+
+---
+
+### 3. Project Setup
+
+Install dependencies:
+
+```bash
+npm install sandbox-agent @daytonaio/sdk dotenv tsx
+```
+
+Create a `.env` file:
+
+```bash
+DAYTONA_API_KEY=your_daytona_api_key
+OPENAI_API_KEY=your_openai_api_key
+# ANTHROPIC_API_KEY=your_anthropic_api_key
+```
+
+Create an `index.ts` with the code below, then run:
+
+```bash
+node --import tsx index.ts
+```
+
+---
+
+### 4. Full Example Code
+
+The example forwards your provider keys into the sandbox so the agent can authenticate:
+
+```ts
+const envVars: Record<string, string> = {};
+if (process.env.ANTHROPIC_API_KEY) envVars.ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
+if (process.env.OPENAI_API_KEY) envVars.OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+```
+
+It then starts Sandbox Agent with the Daytona provider:
+
+```ts
+import { SandboxAgent } from "sandbox-agent";
+import { daytona } from "sandbox-agent/daytona";
+
+const sdk = await SandboxAgent.start({
+  sandbox: daytona({
+    create: { envVars },
+  }),
+});
+
+console.log("Inspector URL:", sdk.inspectorUrl);
+```
+
+The printed inspector URL is where you can open the Sandbox Agent inspector UI.
+
+Before prompting, it ensures the target agent is installed, then creates a session and sends a prompt:
+
+```ts
+const agentInfo = await sdk.getAgent("claude", { config: true });
+if (!agentInfo.installed) await sdk.installAgent("claude");
+
+const session = await sdk.createSession({ agent: "claude" });
+const response = await session.prompt([
+  { type: "text", text: "Summarize this repository" },
+]);
+```
+
+Finally, it cleans up the sandbox:
+
+```ts
+await sdk.destroySandbox();
+```
+
+---
+
+### 5. Customize the Agent
+
+To use a different agent, update the `getAgent`, `installAgent`, and `createSession` calls (for example, `"codex"`), and ensure the corresponding provider credentials are available in the environment.
