@@ -409,17 +409,16 @@ const Sandboxes: React.FC = () => {
       toast.success(`Starting sandbox with ID: ${id}`)
       await markAllSandboxQueriesAsStale()
     } catch (error) {
-      handleApiError(
-        error,
-        'Failed to start sandbox',
-        error instanceof OrganizationSuspendedError &&
+      handleApiError(error, 'Failed to start sandbox', {
+        action:
+          error instanceof OrganizationSuspendedError &&
           config.billingApiUrl &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
-          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
-            Go to billing
-          </Button>
-        ) : undefined,
-      )
+            <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
+              Go to billing
+            </Button>
+          ) : undefined,
+      })
       revertSandboxStateOptimisticUpdate(id, previousState)
     } finally {
       setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))

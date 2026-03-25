@@ -5,180 +5,224 @@
 
 import { AuditLogTable } from '@/components/AuditLogTable'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { DateRangePicker, DateRangePickerRef, QuickRangesConfig } from '@/components/ui/date-range-picker'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
+import { RefreshSegmentedButton } from '@/components/RefreshSegmentedButton'
+import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { useApi } from '@/hooks/useApi'
-import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useAuditLogsQuery, type AuditLogsQueryParams } from '@/hooks/queries/useAuditLogsQuery'
 import { handleApiError } from '@/lib/error-handling'
 import { PaginatedAuditLogs } from '@daytonaio/api-client'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
-import { useInterval } from 'usehooks-ts'
+
+const EMPTY_AUDIT_LOGS: PaginatedAuditLogs = {
+  items: [],
+  total: 0,
+  page: 1,
+  totalPages: 0,
+  nextToken: undefined,
+}
+
+const AUDIT_LOG_QUICK_RANGES: QuickRangesConfig = {
+  minutes: [5, 15, 30],
+  hours: [1, 3, 6, 12],
+  days: [1, 2, 7, 30, 90],
+  months: [6],
+  years: [1],
+}
+
+interface AuditLogsPaginationState {
+  pageIndex: number
+  pageSize: number
+  cursors: Record<number, string>
+}
+
+function useAuditLogsPagination(initialPageSize: number) {
+  const [pagination, setPagination] = useState<AuditLogsPaginationState>({
+    pageIndex: 0,
+    pageSize: initialPageSize,
+    cursors: {},
+  })
+
+  const currentCursor = pagination.cursors[pagination.pageIndex]
+
+  const resetPagination = useCallback(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize: initialPageSize,
+      cursors: {},
+    })
+  }, [initialPageSize])
+
+  const setPageSize = useCallback((pageSize: number) => {
+    setPagination({
+      pageIndex: 0,
+      pageSize,
+      cursors: {},
+    })
+  }, [])
+
+  const setOffsetPage = useCallback((pageIndex: number, pageSize: number) => {
+    setPagination({
+      pageIndex,
+      pageSize,
+      cursors: {},
+    })
+  }, [])
+
+  const goNextWithCursor = useCallback((nextCursor: string) => {
+    setPagination((prev) => {
+      const nextPageIndex = prev.pageIndex + 1
+      return {
+        ...prev,
+        pageIndex: nextPageIndex,
+        cursors: {
+          ...prev.cursors,
+          [nextPageIndex]: nextCursor,
+        },
+      }
+    })
+  }, [])
+
+  const goPreviousPage = useCallback(() => {
+    setPagination((prev) => {
+      if (prev.pageIndex === 0) {
+        return prev
+      }
+
+      const nextPageIndex = prev.pageIndex - 1
+      const nextCursors = { ...prev.cursors }
+      delete nextCursors[prev.pageIndex]
+
+      return {
+        ...prev,
+        pageIndex: nextPageIndex,
+        cursors: nextCursors,
+      }
+    })
+  }, [])
+
+  return {
+    pagination,
+    currentCursor,
+    resetPagination,
+    setPageSize,
+    setOffsetPage,
+    goNextWithCursor,
+    goPreviousPage,
+  }
+}
 
 const AuditLogs: React.FC = () => {
-  const { auditApi } = useApi()
-
-  const [data, setData] = useState<PaginatedAuditLogs>({
-    items: [],
-    total: 0,
-    page: 1,
-    totalPages: 0,
-    nextToken: undefined,
-  })
-  const [loadingData, setLoadingData] = useState(true)
-  const [autoRefresh, setAutoRefresh] = useState(false)
+  const [refreshInterval, setRefreshInterval] = useState<number | false>(false)
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined })
-  const dateRangePickerRef = useRef<DateRangePickerRef>(null)
+  const { pagination, currentCursor, resetPagination, setPageSize, setOffsetPage, goNextWithCursor, goPreviousPage } =
+    useAuditLogsPagination(DEFAULT_PAGE_SIZE)
+  const scrollToTableTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
 
-  const { selectedOrganization } = useSelectedOrganization()
-
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
-  const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined)
-  const [cursorHistory, setCursorHistory] = useState<string[]>([])
-
-  // Quick ranges configuration
-  const auditLogQuickRanges: QuickRangesConfig = useMemo(
+  const queryParams = useMemo<AuditLogsQueryParams>(
     () => ({
-      minutes: [5, 15, 30],
-      hours: [1, 3, 6, 12],
-      days: [1, 2, 7, 30, 90],
-      months: [6],
-      years: [1],
+      page: pagination.pageIndex + 1,
+      pageSize: pagination.pageSize,
+      from: dateRange.from,
+      to: dateRange.to,
+      cursor: currentCursor,
     }),
-    [],
+    [pagination.pageIndex, pagination.pageSize, dateRange.from, dateRange.to, currentCursor],
   )
 
-  const fetchData = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-
-      if (showTableLoadingState) {
-        setLoadingData(true)
-      }
-
-      try {
-        const response = (
-          await auditApi.getOrganizationAuditLogs(
-            selectedOrganization.id,
-            paginationParams.pageIndex + 1,
-            paginationParams.pageSize,
-            dateRange.from,
-            dateRange.to,
-            currentCursor,
-          )
-        ).data
-
-        setData(response)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch audit logs')
-      } finally {
-        setLoadingData(false)
-      }
-    },
-    [auditApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize, dateRange, currentCursor],
-  )
+  const {
+    data = EMPTY_AUDIT_LOGS,
+    isLoading,
+    isRefetching,
+    isPlaceholderData,
+    error,
+    refetch,
+    dataUpdatedAt,
+  } = useAuditLogsQuery(queryParams, {
+    refetchInterval: refreshInterval,
+  })
 
   const handlePaginationChange = useCallback(
     ({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-      if (pageSize !== paginationParams.pageSize) {
-        // Reset to first page when changing page size
-        setPaginationParams({ pageIndex: 0, pageSize })
-        setCurrentCursor(undefined)
-        setCursorHistory([])
-      } else if (pageIndex > paginationParams.pageIndex) {
-        // Next page - use cursor if available
+      if (isPlaceholderData) {
+        return
+      }
+
+      if (pageSize !== pagination.pageSize) {
+        scrollToTableTop()
+        setPageSize(pageSize)
+        return
+      }
+
+      const pageDelta = pageIndex - pagination.pageIndex
+
+      if (pageDelta === 0) {
+        return
+      }
+
+      if (Math.abs(pageDelta) > 1) {
+        scrollToTableTop()
+        setOffsetPage(pageIndex, pageSize)
+        return
+      }
+
+      if (pageDelta > 0) {
+        scrollToTableTop()
         if (data.nextToken) {
-          // Store current cursor in history before moving to next
-          if (currentCursor) {
-            setCursorHistory((prev) => [...prev, currentCursor])
-          }
-          setCurrentCursor(data.nextToken)
-          setPaginationParams((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))
+          goNextWithCursor(data.nextToken)
         } else {
-          // Regular offset pagination
-          setCurrentCursor(undefined)
-          setCursorHistory([])
-          setPaginationParams({ pageIndex, pageSize })
+          setOffsetPage(pageIndex, pageSize)
         }
-      } else if (pageIndex < paginationParams.pageIndex) {
-        // Previous page - check if we can go back in cursor history
-        if (currentCursor && cursorHistory.length > 0) {
-          // Go back in cursor pagination
-          const previousCursor = cursorHistory[cursorHistory.length - 1]
-          setCursorHistory((prev) => prev.slice(0, -1))
-          setCurrentCursor(previousCursor)
-          setPaginationParams((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))
-        } else {
-          // Go back to offset pagination
-          setCurrentCursor(undefined)
-          setCursorHistory([])
-          setPaginationParams({ pageIndex, pageSize })
-        }
+        return
+      }
+
+      scrollToTableTop()
+      if (currentCursor !== undefined) {
+        goPreviousPage()
       } else {
-        // Same page, just update params
-        setPaginationParams({ pageIndex, pageSize })
+        setOffsetPage(pageIndex, pageSize)
       }
-      setLoadingData(true)
     },
-    [paginationParams.pageIndex, paginationParams.pageSize, data.nextToken, currentCursor, cursorHistory],
+    [
+      isPlaceholderData,
+      pagination.pageIndex,
+      pagination.pageSize,
+      currentCursor,
+      goNextWithCursor,
+      goPreviousPage,
+      setOffsetPage,
+      setPageSize,
+      scrollToTableTop,
+      data.nextToken,
+    ],
   )
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
-
-  // Auto-refresh
-  useInterval(
-    () => {
-      fetchData(false)
-    },
-    autoRefresh ? 5000 : null,
-  )
-
-  // handle case where there are no items on the current page, and we are not on the first page
-  useEffect(() => {
-    if (data.items.length === 0 && paginationParams.pageIndex > 0) {
-      setPaginationParams((prev) => ({
-        ...prev,
-        pageIndex: prev.pageIndex - 1,
-      }))
+    if (error) {
+      handleApiError(error, 'Failed to fetch audit logs', { toastId: 'audit-logs-fetch' })
     }
-  }, [data.items.length, paginationParams.pageIndex])
+  }, [error])
 
-  const handleAutoRefreshChange = useCallback(
-    (enabled: boolean) => {
-      setAutoRefresh(enabled)
-      if (enabled) {
-        // Fetch immediately when enabling auto refresh
-        fetchData(false)
-      }
+  useEffect(() => {
+    if (!isLoading && data.items.length === 0 && pagination.pageIndex > 0) {
+      goPreviousPage()
+    }
+  }, [isLoading, data.items.length, pagination.pageIndex, goPreviousPage])
+
+  const handleDateRangeChange = useCallback(
+    (range: DateRange) => {
+      setDateRange(range)
+      resetPagination()
     },
-    [fetchData],
+    [resetPagination],
   )
-
-  const handleDateRangeChange = useCallback((range: DateRange) => {
-    setDateRange(range)
-    setPaginationParams({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE })
-    setCurrentCursor(undefined)
-    setCursorHistory([])
-    setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
-  }, [])
 
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Audit Logs</PageTitle>
-        <div className="flex items-center gap-2 ml-auto">
-          <Label htmlFor="auto-refresh">Auto Refresh</Label>
-          <Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={handleAutoRefreshChange} />
-        </div>
       </PageHeader>
 
       <PageContent size="full">
@@ -187,24 +231,32 @@ const AuditLogs: React.FC = () => {
             <DateRangePicker
               value={dateRange}
               onChange={handleDateRangeChange}
-              quickRangesEnabled={true}
-              quickRanges={auditLogQuickRanges}
-              timeSelection={true}
-              ref={dateRangePickerRef}
-              disabled={loadingData}
+              quickRangesEnabled
+              quickRanges={AUDIT_LOG_QUICK_RANGES}
+              timeSelection
+              disabled={isLoading}
             />
           </div>
+          <RefreshSegmentedButton
+            className="ml-auto"
+            value={refreshInterval}
+            onChange={setRefreshInterval}
+            onRefresh={refetch}
+            isRefreshing={isRefetching}
+            lastUpdatedAt={dataUpdatedAt}
+          />
         </div>
 
         <AuditLogTable
           data={data.items}
-          loading={loadingData}
+          loading={isLoading}
+          isRefetching={isRefetching}
           pageCount={data.totalPages}
           totalItems={data.total}
           onPaginationChange={handlePaginationChange}
           pagination={{
-            pageIndex: paginationParams.pageIndex,
-            pageSize: paginationParams.pageSize,
+            pageIndex: pagination.pageIndex,
+            pageSize: pagination.pageSize,
           }}
         />
       </PageContent>
