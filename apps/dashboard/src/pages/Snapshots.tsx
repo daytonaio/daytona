@@ -17,6 +17,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useActivateSnapshotMutation } from '@/hooks/mutations/useActivateSnapshotMutation'
+import { useDeactivateSnapshotMutation } from '@/hooks/mutations/useDeactivateSnapshotMutation'
+import { useDeleteSnapshotMutation } from '@/hooks/mutations/useDeleteSnapshotMutation'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SNAPSHOT_SORTING,
@@ -24,9 +27,8 @@ import {
   SnapshotSorting,
   useSnapshotsQuery,
 } from '@/hooks/queries/useSnapshotsQuery'
-import { useApi } from '@/hooks/useApi'
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { useRegions } from '@/hooks/useRegions'
+import { useSnapshotWsSync } from '@/hooks/useSnapshotWsSync'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
@@ -37,16 +39,18 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 const Snapshots: React.FC = () => {
-  const { notificationSocket } = useNotificationSocket()
   const queryClient = useQueryClient()
+  useSnapshotWsSync()
 
-  const { snapshotApi } = useApi()
   const { getRegionName } = useRegions()
   const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+  const deleteSnapshotMutation = useDeleteSnapshotMutation({ invalidateOnSuccess: false })
+  const activateSnapshotMutation = useActivateSnapshotMutation({ invalidateOnSuccess: false })
+  const deactivateSnapshotMutation = useDeactivateSnapshotMutation({ invalidateOnSuccess: false })
 
   const [paginationParams, setPaginationParams] = useState({
     pageIndex: 0,
@@ -64,7 +68,10 @@ const Snapshots: React.FC = () => {
     [paginationParams, sorting],
   )
 
-  const baseQueryKey = useMemo(() => queryKeys.snapshots.all, [])
+  const snapshotListQueryKey = useMemo(
+    () => queryKeys.snapshots.list(selectedOrganization?.id ?? ''),
+    [selectedOrganization?.id],
+  )
 
   const queryKey = useMemo(
     () => queryKeys.snapshots.list(selectedOrganization?.id ?? '', queryParams),
@@ -98,12 +105,12 @@ const Snapshots: React.FC = () => {
 
   const markAllSnapshotQueriesAsStale = useCallback(
     async (shouldRefetchActiveQueries = false) => {
-      queryClient.invalidateQueries({
-        queryKey: baseQueryKey,
+      return queryClient.invalidateQueries({
+        queryKey: snapshotListQueryKey,
         refetchType: shouldRefetchActiveQueries ? 'active' : 'none',
       })
     },
-    [queryClient, baseQueryKey],
+    [queryClient, snapshotListQueryKey],
   )
 
   const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
@@ -114,38 +121,6 @@ const Snapshots: React.FC = () => {
     setSorting(newSorting)
     setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
   }, [])
-
-  useEffect(() => {
-    const handleSnapshotCreatedEvent = () => {
-      markAllSnapshotQueriesAsStale(true)
-    }
-
-    const handleSnapshotStateUpdatedEvent = (data: {
-      snapshot: SnapshotDto
-      oldState: SnapshotState
-      newState: SnapshotState
-    }) => {
-      updateSnapshotInCache(data.snapshot.id, data.snapshot)
-    }
-
-    const handleSnapshotRemovedEvent = () => {
-      markAllSnapshotQueriesAsStale(true)
-    }
-
-    if (!notificationSocket) {
-      return
-    }
-
-    notificationSocket.on('snapshot.created', handleSnapshotCreatedEvent)
-    notificationSocket.on('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
-    notificationSocket.on('snapshot.removed', handleSnapshotRemovedEvent)
-
-    return () => {
-      notificationSocket.off('snapshot.created', handleSnapshotCreatedEvent)
-      notificationSocket.off('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
-      notificationSocket.off('snapshot.removed', handleSnapshotRemovedEvent)
-    }
-  }, [notificationSocket, markAllSnapshotQueriesAsStale, updateSnapshotInCache])
 
   useEffect(() => {
     if (snapshotsData?.items.length === 0 && paginationParams.pageIndex > 0) {
@@ -161,7 +136,11 @@ const Snapshots: React.FC = () => {
     updateSnapshotInCache(snapshot.id, { state: SnapshotState.REMOVING })
 
     try {
-      await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
+      await deleteSnapshotMutation.mutateAsync({
+        snapshotId: snapshot.id,
+        organizationId: selectedOrganization?.id,
+      })
+      await markAllSnapshotQueriesAsStale(true)
       setSnapshotToDelete(null)
       setShowDeleteDialog(false)
       toast.success(`Deleting snapshot ${snapshot.name}`)
@@ -178,7 +157,11 @@ const Snapshots: React.FC = () => {
     updateSnapshotInCache(snapshot.id, { state: SnapshotState.PENDING })
 
     try {
-      await snapshotApi.activateSnapshot(snapshot.id, selectedOrganization?.id)
+      await activateSnapshotMutation.mutateAsync({
+        snapshotId: snapshot.id,
+        organizationId: selectedOrganization?.id,
+      })
+      await markAllSnapshotQueriesAsStale(true)
       toast.success(`Activating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to activate snapshot')
@@ -193,7 +176,11 @@ const Snapshots: React.FC = () => {
     updateSnapshotInCache(snapshot.id, { state: SnapshotState.INACTIVE })
 
     try {
-      await snapshotApi.deactivateSnapshot(snapshot.id, selectedOrganization?.id)
+      await deactivateSnapshotMutation.mutateAsync({
+        snapshotId: snapshot.id,
+        organizationId: selectedOrganization?.id,
+      })
+      await markAllSnapshotQueriesAsStale(true)
       toast.success(`Deactivating snapshot ${snapshot.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to deactivate snapshot')
@@ -284,7 +271,11 @@ const Snapshots: React.FC = () => {
       ids: snapshots.map((s) => s.id),
       actionName: 'Deleting',
       optimisticState: SnapshotState.REMOVING,
-      apiCall: (id) => snapshotApi.removeSnapshot(id, selectedOrganization?.id),
+      apiCall: (id) =>
+        deleteSnapshotMutation.mutateAsync({
+          snapshotId: id,
+          organizationId: selectedOrganization?.id,
+        }),
       toastMessages: {
         successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deleted.`,
         errorTitle: `Failed to delete ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
@@ -298,7 +289,11 @@ const Snapshots: React.FC = () => {
       ids: snapshots.map((s) => s.id),
       actionName: 'Deactivating',
       optimisticState: SnapshotState.INACTIVE,
-      apiCall: (id) => snapshotApi.deactivateSnapshot(id, selectedOrganization?.id),
+      apiCall: (id) =>
+        deactivateSnapshotMutation.mutateAsync({
+          snapshotId: id,
+          organizationId: selectedOrganization?.id,
+        }),
       toastMessages: {
         successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} deactivated.`,
         errorTitle: `Failed to deactivate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
@@ -312,7 +307,11 @@ const Snapshots: React.FC = () => {
       ids: snapshots.map((s) => s.id),
       actionName: 'Activating',
       optimisticState: SnapshotState.ACTIVE,
-      apiCall: (id) => snapshotApi.activateSnapshot(id, selectedOrganization?.id),
+      apiCall: (id) =>
+        activateSnapshotMutation.mutateAsync({
+          snapshotId: id,
+          organizationId: selectedOrganization?.id,
+        }),
       toastMessages: {
         successTitle: `${pluralize(snapshots.length, 'Snapshot', 'Snapshots')} activated.`,
         errorTitle: `Failed to activate ${pluralize(snapshots.length, 'snapshot', 'snapshots')}.`,
