@@ -165,7 +165,8 @@ Downloads multiple files from the Sandbox. If the files already exist locally, t
 **Throws**:
 
 If the request itself fails (network issues, invalid request/response, etc.). Individual
-file download errors are returned in the `FileDownloadResponse.error` field.
+file download errors are returned in `FileDownloadResponse.error`. When the daemon provides structured
+per-file metadata, it is also available in `FileDownloadResponse.errorDetails`.
 
 **Example:**
 
@@ -509,8 +510,18 @@ Represents metadata for a file download operation.
 
 - `destination?` _string_ - Destination path in the local filesystem where the file content will be streamed to.
 - `error?` _string_ - Error message if the download failed, undefined if successful.
+- `errorDetails?` _FileDownloadErrorDetails_ - Structured error metadata for a failed download item.
 - `result?` _string \| Buffer\<ArrayBufferLike\> \| Uint8Array\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
     or bytes content (if no destination in the request), undefined if failed or no data received.
+## FileDownloadErrorDetails
+
+Structured error metadata for a failed bulk file download item.
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code for the per-file failure.
+- `message` _string_ - Human-readable error message.
+- `statusCode?` _number_ - HTTP-style status code for the per-file failure.
 ## FileDownloadRequest
 
 Represents a request to download a single file from the Sandbox.
@@ -528,6 +539,7 @@ Represents the response to a single file download request.
 **Properties**:
 
 - `error?` _string_ - Error message if the download failed, undefined if successful.
+- `errorDetails?` _FileDownloadErrorDetails_ - Structured error metadata when the server provides it.
 - `result?` _string \| Buffer\<ArrayBufferLike\>_ - The download result - file path (if destination provided in the request)
     or bytes content (if no destination in the request), undefined if failed or no data received.
 - `source` _string_ - The original source path requested for download.
