@@ -31,7 +31,7 @@ export class Migration1774438866002 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "sandbox" ADD "sshPass" character varying(32) NOT NULL DEFAULT replace((uuid_generate_v4()), '-', '')`,
+      `ALTER TABLE "sandbox" ADD "sshPass" character varying(32) NOT NULL DEFAULT REPLACE(uuid_generate_v4()::text, '-', '')`,
     )
 
     await queryRunner.query(`ALTER TABLE "sandbox" DROP CONSTRAINT "sandbox_organizationId_name_unique"`)
