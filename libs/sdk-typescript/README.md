@@ -20,7 +20,7 @@ yarn add @daytonaio/sdk
 
 ## Get API key
 
-Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. For more information, see the [API keys](/docs/en/api-keys) documentation.
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. For more information, see the [API keys](https://www.daytona.io/docs/en/api-keys/) documentation.
 
 ## Configuration
 
