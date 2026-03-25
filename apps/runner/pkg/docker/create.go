@@ -43,14 +43,22 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 
-		timeout := time.After(d.snapshotPullTimeout)
+		timeout := time.NewTimer(d.snapshotPullTimeout)
+		defer func() {
+			if !timeout.Stop() {
+				select {
+				case <-timeout.C:
+				default:
+				}
+			}
+		}()
 
 		for state == enums.SandboxStatePullingSnapshot {
 			select {
 			case <-ctx.Done():
 				return "", "", ctx.Err()
-			case <-timeout:
-				return "", "", fmt.Errorf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id)
+			case <-timeout.C:
+				return "", "", common_errors.NewRequestTimeoutError(fmt.Errorf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id))
 			case <-ticker.C:
 				state, err = d.GetSandboxState(ctx, sandboxDto.Id)
 				if err != nil && state == enums.SandboxStateError {
