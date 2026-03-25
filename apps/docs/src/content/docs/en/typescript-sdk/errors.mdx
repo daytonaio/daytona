@@ -4,18 +4,273 @@ hideTitleOnPage: true
 ---
 
 
+## DaytonaAuthenticationError
+
+Error thrown when authentication fails (HTTP 401).
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Example:**
+
+```ts
+try {
+  await daytona.list()
+} catch (error) {
+  if (error instanceof DaytonaAuthenticationError) {
+    console.log(error.statusCode)
+  }
+}
+```
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaAuthenticationError()
+
+```ts
+new DaytonaAuthenticationError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaAuthenticationError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaAuthenticationError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## DaytonaAuthorizationError
+
+Error thrown when the request is forbidden (HTTP 403).
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Example:**
+
+```ts
+try {
+  await daytona.get('sandbox-without-access')
+} catch (error) {
+  if (error instanceof DaytonaAuthorizationError) {
+    console.log(error.message)
+  }
+}
+```
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaAuthorizationError()
+
+```ts
+new DaytonaAuthorizationError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaAuthorizationError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaAuthorizationError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## DaytonaConflictError
+
+Error thrown when a resource conflict occurs (HTTP 409).
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Example:**
+
+```ts
+try {
+  await daytona.create({ name: 'existing-sandbox' })
+} catch (error) {
+  if (error instanceof DaytonaConflictError) {
+    console.log(error.errorCode)
+  }
+}
+```
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaConflictError()
+
+```ts
+new DaytonaConflictError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaConflictError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaConflictError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## DaytonaConnectionError
+
+Error thrown when a network connection fails.
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Example:**
+
+```ts
+try {
+  await ptyHandle.waitForConnection()
+} catch (error) {
+  if (error instanceof DaytonaConnectionError) {
+    console.log(error.message)
+  }
+}
+```
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaConnectionError()
+
+```ts
+new DaytonaConnectionError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaConnectionError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaConnectionError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
 ## DaytonaError
 
 Base error for Daytona SDK.
 
 **Properties**:
 
+- `errorCode?` _string_ - Machine-readable error code if available
 - `headers?` _AxiosHeaders_ - Response headers if available
 - `statusCode?` _number_ - HTTP status code if available
-    
 
 
 
+
+
+**Example:**
+
+```ts
+try {
+  await daytona.get('missing-sandbox')
+} catch (error) {
+  if (error instanceof DaytonaError) {
+    console.log(error.statusCode)
+    console.log(error.errorCode)
+    console.log(error.message)
+  }
+}
+```
 
 **Extends:**
 
@@ -25,7 +280,12 @@ Base error for Daytona SDK.
 
 - `DaytonaNotFoundError`
 - `DaytonaRateLimitError`
+- `DaytonaAuthenticationError`
+- `DaytonaAuthorizationError`
+- `DaytonaConflictError`
+- `DaytonaValidationError`
 - `DaytonaTimeoutError`
+- `DaytonaConnectionError`
 
 ### Constructors
 
@@ -33,9 +293,10 @@ Base error for Daytona SDK.
 
 ```ts
 new DaytonaError(
-   message: string, 
-   statusCode?: number, 
-   headers?: AxiosHeaders): DaytonaError
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaError
 ```
 
 **Parameters**:
@@ -43,6 +304,7 @@ new DaytonaError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
+- `errorCode?` _string_
 
 
 **Returns**:
@@ -56,18 +318,32 @@ Error.constructor
 ```
 ## DaytonaNotFoundError
 
-Base error for Daytona SDK.
+Error thrown when a resource is not found (HTTP 404).
 
 **Properties**:
 
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
     - _Inherited from_: `DaytonaError.headers`
 - `statusCode?` _number_ - HTTP status code if available
-    
+
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
+
+**Example:**
+
+```ts
+try {
+  await sandbox.fs.downloadFile('/workspace/missing.txt')
+} catch (error) {
+  if (error instanceof DaytonaNotFoundError) {
+    console.log(error.statusCode)
+  }
+}
+```
 
 **Extends:**
 
@@ -79,9 +355,10 @@ Base error for Daytona SDK.
 
 ```ts
 new DaytonaNotFoundError(
-   message: string, 
-   statusCode?: number, 
-   headers?: AxiosHeaders): DaytonaNotFoundError
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaNotFoundError
 ```
 
 **Parameters**:
@@ -89,6 +366,7 @@ new DaytonaNotFoundError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
+- `errorCode?` _string_
 
 
 **Returns**:
@@ -104,14 +382,28 @@ Error thrown when rate limit is exceeded.
 
 **Properties**:
 
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
     - _Inherited from_: `DaytonaError.headers`
 - `statusCode?` _number_ - HTTP status code if available
-    
+
     - _Inherited from_: `DaytonaError.statusCode`
 
 
 
+
+**Example:**
+
+```ts
+try {
+  await daytona.list()
+} catch (error) {
+  if (error instanceof DaytonaRateLimitError) {
+    console.log(error.errorCode)
+  }
+}
+```
 
 **Extends:**
 
@@ -123,9 +415,10 @@ Error thrown when rate limit is exceeded.
 
 ```ts
 new DaytonaRateLimitError(
-   message: string, 
-   statusCode?: number, 
-   headers?: AxiosHeaders): DaytonaRateLimitError
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaRateLimitError
 ```
 
 **Parameters**:
@@ -133,6 +426,7 @@ new DaytonaRateLimitError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
+- `errorCode?` _string_
 
 
 **Returns**:
@@ -148,12 +442,28 @@ Error thrown when a timeout occurs.
 
 **Properties**:
 
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
 - `headers?` _AxiosHeaders_ - Response headers if available
     - _Inherited from_: `DaytonaError.headers`
 - `statusCode?` _number_ - HTTP status code if available
+
     - _Inherited from_: `DaytonaError.statusCode`
 
 
+
+
+**Example:**
+
+```ts
+try {
+  await sandbox.waitUntilStarted(1)
+} catch (error) {
+  if (error instanceof DaytonaTimeoutError) {
+    console.log(error.message)
+  }
+}
+```
 
 **Extends:**
 
@@ -165,9 +475,10 @@ Error thrown when a timeout occurs.
 
 ```ts
 new DaytonaTimeoutError(
-   message: string, 
-   statusCode?: number, 
-   headers?: AxiosHeaders): DaytonaTimeoutError
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaTimeoutError
 ```
 
 **Parameters**:
@@ -175,6 +486,7 @@ new DaytonaTimeoutError(
 - `message` _string_
 - `statusCode?` _number_
 - `headers?` _AxiosHeaders_
+- `errorCode?` _string_
 
 
 **Returns**:
@@ -184,3 +496,135 @@ new DaytonaTimeoutError(
 ##### Overrides
 
 `DaytonaError`.`constructor`
+## DaytonaValidationError
+
+Error thrown when input validation fails (HTTP 400 or client-side validation).
+
+**Properties**:
+
+- `errorCode?` _string_ - Machine-readable error code if available
+    - _Inherited from_: `DaytonaError.errorCode`
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Example:**
+
+```ts
+try {
+  Image.debianSlim('3.8' as never)
+} catch (error) {
+  if (error instanceof DaytonaValidationError) {
+    console.log(error.message)
+  }
+}
+```
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaValidationError()
+
+```ts
+new DaytonaValidationError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaValidationError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaValidationError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## createAxiosDaytonaError()
+
+```ts
+function createAxiosDaytonaError(error: AxiosError): DaytonaError
+```
+
+Creates the appropriate Daytona error subclass from an Axios error.
+
+**Parameters**:
+
+- `error` _AxiosError_
+
+
+**Returns**:
+
+- `DaytonaError`
+
+***
+
+
+## createDaytonaError()
+
+```ts
+function createDaytonaError(
+   message: string,
+   statusCode?: number,
+   headers?: AxiosHeaders,
+   errorCode?: string): DaytonaError
+```
+
+Creates the appropriate Daytona error subclass from structured error metadata.
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+- `errorCode?` _string_
+
+
+**Returns**:
+
+- `DaytonaError`
+
+***
+
+
+## errorClassFromStatusCode()
+
+```ts
+function errorClassFromStatusCode(statusCode?: number): typeof DaytonaError
+```
+
+Maps an HTTP status code to the corresponding Daytona error class.
+
+**Parameters**:
+
+- `statusCode?` _number_
+
+
+### Returns
+
+*typeof* `DaytonaError`
+
+***
+
+
+## ResponseHeaders
+
+```ts
+type ResponseHeaders = InstanceType<typeof AxiosHeaders>;
+```
