@@ -8,8 +8,8 @@ import { MigrationInterface, QueryRunner } from 'typeorm'
 /**
  * Reconciliation migration that resolves drift between the database schema and the current entity definitions in the codebase.
  */
-export class Migration1772116860405 implements MigrationInterface {
-  name = 'Migration1772116860405'
+export class Migration1774438866001 implements MigrationInterface {
+  name = 'Migration1774438866001'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     /**
@@ -38,11 +38,6 @@ export class Migration1772116860405 implements MigrationInterface {
     await queryRunner.query(
       `CREATE INDEX IF NOT EXISTS "sandbox_active_only_idx" ON "sandbox" ("id") WHERE (state <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum]))`,
     )
-
-    /**
-     * The initial migration incorrectly added the column, it was never actually added to the entity definition.
-     */
-    await queryRunner.query(`ALTER TABLE "sandbox" DROP COLUMN "sshPass"`)
 
     /** Add missing column defaults for runner that the entity defines but the original migration omitted. */
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" SET DEFAULT '0'`)
@@ -84,10 +79,6 @@ export class Migration1772116860405 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "diskGiB" DROP DEFAULT`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "memoryGiB" DROP DEFAULT`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" DROP DEFAULT`)
-
-    await queryRunner.query(
-      `ALTER TABLE "sandbox" ADD "sshPass" character varying(32) NOT NULL DEFAULT replace((uuid_generate_v4()), '-', '')`,
-    )
 
     await queryRunner.query(`DROP INDEX IF EXISTS "sandbox_active_only_idx"`)
 
