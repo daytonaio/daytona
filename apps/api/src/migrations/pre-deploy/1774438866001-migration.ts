@@ -32,13 +32,6 @@ export class Migration1774438866001 implements MigrationInterface {
     )
     await queryRunner.query(`ALTER TABLE "sandbox" RENAME CONSTRAINT "public.sandbox_id_pk" TO "sandbox_id_pk"`)
 
-    /**
-     * Index reconciliation due to missing partial sandbox index in migrations.
-     */
-    await queryRunner.query(
-      `CREATE INDEX IF NOT EXISTS "sandbox_active_only_idx" ON "sandbox" ("id") WHERE (state <> ALL (ARRAY['destroyed'::sandbox_state_enum, 'archived'::sandbox_state_enum]))`,
-    )
-
     /** Add missing column defaults for runner that the entity defines but the original migration omitted. */
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" SET DEFAULT '0'`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "memoryGiB" SET DEFAULT '0'`)
@@ -81,8 +74,6 @@ export class Migration1774438866001 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "diskGiB" DROP DEFAULT`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "memoryGiB" DROP DEFAULT`)
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "cpu" DROP DEFAULT`)
-
-    await queryRunner.query(`DROP INDEX IF EXISTS "sandbox_active_only_idx"`)
 
     await queryRunner.query(`ALTER TABLE "sandbox" RENAME CONSTRAINT "sandbox_id_pk" TO "public.sandbox_id_pk"`)
 
