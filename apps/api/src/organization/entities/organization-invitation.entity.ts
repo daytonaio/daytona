@@ -41,6 +41,10 @@ export class OrganizationInvitation {
   })
   role: OrganizationMemberRole
 
+  /** `onDelete: CASCADE` applies to the owning side FK (invitationId) only.
+   *  The inverse side FK (roleId) defaults to NO ACTION — deleting a role that is still
+   *  assigned will fail, requiring explicit unassignment first.
+   */
   @ManyToMany(() => OrganizationRole, (role) => role.invitations, {
     cascade: true,
     onDelete: 'CASCADE',

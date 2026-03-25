@@ -45,8 +45,10 @@ export class Migration1774438866001 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "runner" ALTER COLUMN "diskGiB" SET DEFAULT '0'`)
 
     /**
-     * Recreate roleId FKs with NO ACTION instead of CASCADE to match the entity definition.
-     * Deleting a role should fail if it is still assigned, not silently cascade.
+     * Recreate roleId FKs on junction tables with NO ACTION instead of CASCADE.
+     * TypeORM's onDelete: CASCADE on ManyToMany only applies to the owning side FK,
+     * the inverse side (roleId) defaults to NO ACTION. The original migrations incorrectly
+     * created both FKs with CASCADE. This aligns the database with TypeORM's expected schema.
      */
     await queryRunner.query(
       `ALTER TABLE "organization_role_assignment_invitation" DROP CONSTRAINT "organization_role_assignment_invitation_roleId_fk"`,
