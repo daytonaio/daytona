@@ -14,6 +14,8 @@ export class Migration1774438866002 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_organizationId_name_unique" UNIQUE ("organizationId", "name")`,
     )
+
+    await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "authToken" DROP DEFAULT`)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -24,5 +26,7 @@ export class Migration1774438866002 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "sandbox" ADD CONSTRAINT "sandbox_organizationId_name_unique" UNIQUE ("organizationId", "name")`,
     )
+
+    await queryRunner.query(`ALTER TABLE "sandbox" ALTER COLUMN "authToken" SET DEFAULT MD5(random()::text)`)
   }
 }

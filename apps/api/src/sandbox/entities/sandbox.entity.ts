@@ -206,7 +206,7 @@ export class Sandbox {
   @Column({ default: false, type: 'boolean' })
   pending: boolean | undefined = false
 
-  @Column({ default: () => 'md5((random()))', type: 'character varying' })
+  @Column({ type: 'character varying' })
   authToken = nanoid(32).toLocaleLowerCase()
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
