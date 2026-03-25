@@ -207,7 +207,7 @@ export class Sandbox {
   pending: boolean | undefined = false
 
   @Column({ type: 'character varying' })
-  authToken = nanoid(32).toLocaleLowerCase()
+  authToken = nanoid(32).toLowerCase()
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.sandboxes, {
     nullable: true,
