@@ -20,6 +20,7 @@ import json
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_toolbox_api_client.models.display_info import DisplayInfo
+from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -44,8 +45,8 @@ class DisplayInfoResponse(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
-        return json.dumps(self.to_dict())
+        json_ready = TypeAdapter(Dict[str, Any]).dump_python(self.to_dict(), mode="json")
+        return json.dumps(json_ready)
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
