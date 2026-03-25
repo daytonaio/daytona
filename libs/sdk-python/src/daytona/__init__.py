@@ -28,8 +28,18 @@ from .common.daytona import (
     CreateSandboxFromSnapshotParams,
     DaytonaConfig,
 )
-from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
-from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
+from .common.errors import (
+    DaytonaAuthenticationError,
+    DaytonaAuthorizationError,
+    DaytonaConflictError,
+    DaytonaConnectionError,
+    DaytonaError,
+    DaytonaNotFoundError,
+    DaytonaRateLimitError,
+    DaytonaTimeoutError,
+    DaytonaValidationError,
+)
+from .common.filesystem import FileDownloadErrorDetails, FileDownloadRequest, FileDownloadResponse, FileUpload
 from .common.image import Image
 from .common.lsp_server import LspCompletionPosition, LspLanguageId
 from .common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, OutputHandler, SessionExecuteRequest
@@ -62,6 +72,7 @@ __all__ = [
     "CompositeChart",
     "FileDownloadRequest",
     "FileDownloadResponse",
+    "FileDownloadErrorDetails",
     "FileUpload",
     "VolumeMount",
     "AsyncDaytona",
@@ -89,4 +100,9 @@ __all__ = [
     "OutputHandler",
     "DaytonaTimeoutError",
     "DaytonaNotFoundError",
+    "DaytonaAuthenticationError",
+    "DaytonaAuthorizationError",
+    "DaytonaConflictError",
+    "DaytonaValidationError",
+    "DaytonaConnectionError",
 ]

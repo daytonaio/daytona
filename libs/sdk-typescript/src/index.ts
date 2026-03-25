@@ -13,12 +13,30 @@ export type {
   VolumeMount,
 } from './Daytona'
 export { FileSystem } from './FileSystem'
+export type {
+  DownloadMetadata,
+  FileDownloadErrorDetails,
+  FileDownloadRequest,
+  FileDownloadResponse,
+  FilePermissionsParams,
+  FileUpload,
+} from './FileSystem'
 export { Git } from './Git'
 export { LspLanguageId } from './LspServer'
 export { Process } from './Process'
 // export { LspServer } from './LspServer'
 // export type { LspLanguageId, Position } from './LspServer'
-export { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError } from './errors/DaytonaError'
+export {
+  DaytonaAuthenticationError,
+  DaytonaAuthorizationError,
+  DaytonaConflictError,
+  DaytonaConnectionError,
+  DaytonaError,
+  DaytonaNotFoundError,
+  DaytonaRateLimitError,
+  DaytonaTimeoutError,
+  DaytonaValidationError,
+} from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { SandboxCodeToolbox } from './Sandbox'
