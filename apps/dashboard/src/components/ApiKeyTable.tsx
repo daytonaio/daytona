@@ -4,7 +4,8 @@
  */
 
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { getRelativeTimeString } from '@/lib/utils'
 import { ApiKeyList, ApiKeyListPermissionsEnum, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
 
@@ -47,21 +48,19 @@ interface DataTableProps {
 
 export function ApiKeyTable({ data, loading, isLoadingKey, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const { paginationParams, handlePaginationChange } = usePersistedPageSize(LocalStorageKey.PaginationPageSize_ApiKeys)
   const columns = getColumns({ onRevoke, isLoadingKey })
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
-    },
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
+      pagination: paginationParams,
     },
   })
 

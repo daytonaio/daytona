@@ -27,7 +27,8 @@ import {
 import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
@@ -39,6 +40,9 @@ interface DataTableProps {
 
 export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const { paginationParams, handlePaginationChange } = usePersistedPageSize(
+    LocalStorageKey.PaginationPageSize_Registries,
+  )
 
   const writePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_REGISTRIES),
@@ -57,15 +61,12 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
-    },
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
+      pagination: paginationParams,
     },
   })
 

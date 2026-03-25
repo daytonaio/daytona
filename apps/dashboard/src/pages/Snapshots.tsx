@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { queryKeys } from '@/hooks/queries/queryKeys'
 import {
   DEFAULT_SNAPSHOT_SORTING,
@@ -26,6 +26,7 @@ import {
 } from '@/hooks/queries/useSnapshotsQuery'
 import { useApi } from '@/hooks/useApi'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useRegions } from '@/hooks/useRegions'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { createBulkActionToast } from '@/lib/bulk-action-toast'
@@ -48,10 +49,9 @@ const Snapshots: React.FC = () => {
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
+  const { paginationParams, setPaginationParams, handlePaginationChange } = usePersistedPageSize(
+    LocalStorageKey.PaginationPageSize_Snapshots,
+  )
 
   const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
 
@@ -106,14 +106,13 @@ const Snapshots: React.FC = () => {
     [queryClient, baseQueryKey],
   )
 
-  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    setPaginationParams({ pageIndex, pageSize })
-  }, [])
-
-  const handleSortingChange = useCallback((newSorting: SnapshotSorting) => {
-    setSorting(newSorting)
-    setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
-  }, [])
+  const handleSortingChange = useCallback(
+    (newSorting: SnapshotSorting) => {
+      setSorting(newSorting)
+      setPaginationParams((prev) => ({ ...prev, pageIndex: 0 }))
+    },
+    [setPaginationParams],
+  )
 
   useEffect(() => {
     const handleSnapshotCreatedEvent = () => {
@@ -154,7 +153,7 @@ const Snapshots: React.FC = () => {
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [snapshotsData?.items.length, paginationParams.pageIndex])
+  }, [snapshotsData?.items.length, paginationParams.pageIndex, setPaginationParams])
 
   const handleDelete = async (snapshot: SnapshotDto) => {
     setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))

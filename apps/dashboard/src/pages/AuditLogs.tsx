@@ -8,8 +8,9 @@ import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/Pag
 import { DateRangePicker, DateRangePickerRef, QuickRangesConfig } from '@/components/ui/date-range-picker'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { useApi } from '@/hooks/useApi'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { PaginatedAuditLogs } from '@daytonaio/api-client'
@@ -34,10 +35,7 @@ const AuditLogs: React.FC = () => {
 
   const { selectedOrganization } = useSelectedOrganization()
 
-  const [paginationParams, setPaginationParams] = useState({
-    pageIndex: 0,
-    pageSize: DEFAULT_PAGE_SIZE,
-  })
+  const { paginationParams, setPaginationParams } = usePersistedPageSize(LocalStorageKey.PaginationPageSize_AuditLogs)
   const [currentCursor, setCurrentCursor] = useState<string | undefined>(undefined)
   const [cursorHistory, setCursorHistory] = useState<string[]>([])
 
@@ -127,7 +125,14 @@ const AuditLogs: React.FC = () => {
       }
       setLoadingData(true)
     },
-    [paginationParams.pageIndex, paginationParams.pageSize, data.nextToken, currentCursor, cursorHistory],
+    [
+      paginationParams.pageIndex,
+      paginationParams.pageSize,
+      data.nextToken,
+      currentCursor,
+      cursorHistory,
+      setPaginationParams,
+    ],
   )
 
   useEffect(() => {
@@ -150,7 +155,7 @@ const AuditLogs: React.FC = () => {
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [data.items.length, paginationParams.pageIndex])
+  }, [data.items.length, paginationParams.pageIndex, setPaginationParams])
 
   const handleAutoRefreshChange = useCallback(
     (enabled: boolean) => {
@@ -163,13 +168,16 @@ const AuditLogs: React.FC = () => {
     [fetchData],
   )
 
-  const handleDateRangeChange = useCallback((range: DateRange) => {
-    setDateRange(range)
-    setPaginationParams({ pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE })
-    setCurrentCursor(undefined)
-    setCursorHistory([])
-    setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
-  }, [])
+  const handleDateRangeChange = useCallback(
+    (range: DateRange) => {
+      setDateRange(range)
+      setPaginationParams((prev) => ({ pageIndex: 0, pageSize: prev.pageSize }))
+      setCurrentCursor(undefined)
+      setCursorHistory([])
+      setData((prev) => ({ ...prev, page: 1, nextToken: undefined }))
+    },
+    [setPaginationParams],
+  )
 
   return (
     <PageLayout>

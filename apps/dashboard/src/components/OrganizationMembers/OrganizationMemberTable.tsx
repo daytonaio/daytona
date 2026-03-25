@@ -22,7 +22,8 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
 import { UpdateOrganizationMemberAccess } from '@/components/OrganizationMembers/UpdateOrganizationMemberAccessDialog'
 import { capitalize } from '@/lib/utils'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -47,6 +48,7 @@ export function OrganizationMemberTable({
   ownerMode,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
+  const { paginationParams, handlePaginationChange } = usePersistedPageSize(LocalStorageKey.PaginationPageSize_Members)
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
   const [isUpdateMemberAccessDialogOpen, setIsUpdateMemberAccessDialogOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<string | null>(null)
@@ -73,15 +75,12 @@ export function OrganizationMemberTable({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: handlePaginationChange,
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
-    },
-    initialState: {
-      pagination: {
-        pageSize: DEFAULT_PAGE_SIZE,
-      },
+      pagination: paginationParams,
     },
   })
 
