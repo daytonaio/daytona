@@ -40,7 +40,7 @@ export class Migration1772116860405 implements MigrationInterface {
     )
 
     /**
-     * The intial migration incorrectly added the column, it was never actually added to the entity definition.
+     * The initial migration incorrectly added the column, it was never actually added to the entity definition.
      */
     await queryRunner.query(`ALTER TABLE "sandbox" DROP COLUMN "sshPass"`)
 
