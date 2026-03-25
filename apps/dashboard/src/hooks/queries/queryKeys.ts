@@ -4,6 +4,7 @@
  */
 
 import { SnapshotQueryParams } from './useSnapshotsQuery'
+import type { AuditLogsQueryParams } from './useAuditLogsQuery'
 
 export const queryKeys = {
   config: {
@@ -69,6 +70,22 @@ export const queryKeys = {
         },
       ] as const
     },
+  },
+  audit: {
+    all: ['audit'] as const,
+    logs: (organizationId: string, params: AuditLogsQueryParams) =>
+      [
+        ...queryKeys.audit.all,
+        organizationId,
+        'logs',
+        {
+          page: params.page,
+          pageSize: params.pageSize,
+          ...(params.from && { from: params.from.toISOString() }),
+          ...(params.to && { to: params.to.toISOString() }),
+          ...(params.cursor && { cursor: params.cursor }),
+        },
+      ] as const,
   },
   sandboxes: {
     all: ['sandboxes'] as const,
