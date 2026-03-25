@@ -129,7 +129,8 @@ Error for when a resource conflict occurs (HTTP 409).
 
 ```python
 try:
-    daytona.create(name="existing-sandbox")
+    params = CreateSandboxFromSnapshotParams(name="existing-sandbox")
+    daytona.create(params)
 except DaytonaConflictError as exc:
     print(exc.error_code)
 ```
@@ -185,3 +186,22 @@ except DaytonaConnectionError as exc:
     print(exc.message)
 ```
 
+#### error\_class\_from\_status\_code
+
+```python
+def error_class_from_status_code(
+        status_code: int | None) -> type[DaytonaError]
+```
+
+Map an HTTP status code to the corresponding DaytonaError subclass.
+
+#### create\_daytona\_error
+
+```python
+def create_daytona_error(message: str,
+                         status_code: int | None = None,
+                         headers: Mapping[str, Any] | None = None,
+                         error_code: str | None = None) -> DaytonaError
+```
+
+Create the appropriate DaytonaError subclass from structured error metadata.

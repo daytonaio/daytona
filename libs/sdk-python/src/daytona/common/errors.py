@@ -107,7 +107,8 @@ class DaytonaConflictError(DaytonaError):
     Example:
         ```python
         try:
-            daytona.create(name="existing-sandbox")
+            params = CreateSandboxFromSnapshotParams(name="existing-sandbox")
+            daytona.create(params)
         except DaytonaConflictError as exc:
             print(exc.error_code)
         ```
