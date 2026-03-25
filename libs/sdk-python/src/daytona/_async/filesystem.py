@@ -22,14 +22,14 @@ from daytona_toolbox_api_client_async import (
 )
 from python_multipart.multipart import MultipartParser, parse_options_header
 
-from .._utils.errors import create_daytona_error, intercept_errors
+from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
-from ..common.errors import DaytonaError
 from ..common.filesystem import (
     FileDownloadErrorDetails,
     FileDownloadRequest,
     FileDownloadResponse,
     FileUpload,
+    create_file_download_error,
     parse_file_download_error_payload,
 )
 
@@ -149,13 +149,7 @@ class AsyncFileSystem:
             timeout = int(args[1]) if len(args) == 2 else 30 * 60
             response = (await self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout))[0]
             if response.error:
-                if response.error_details:
-                    raise create_daytona_error(
-                        response.error_details.message,
-                        status_code=response.error_details.status_code,
-                        error_code=response.error_details.error_code,
-                    )
-                raise DaytonaError(response.error)
+                raise create_file_download_error(response)
             result = response.result
             if isinstance(result, str):
                 result = result.encode("utf-8")
@@ -170,13 +164,7 @@ class AsyncFileSystem:
             )
         )[0]
         if response.error:
-            if response.error_details:
-                raise create_daytona_error(
-                    response.error_details.message,
-                    status_code=response.error_details.status_code,
-                    error_code=response.error_details.error_code,
-                )
-            raise DaytonaError(response.error)
+            raise create_file_download_error(response)
         return None
 
     @intercept_errors(message_prefix="Failed to download files: ")

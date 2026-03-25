@@ -122,6 +122,14 @@ export interface DownloadMetadata {
   result?: Buffer | string | Uint8Array
 }
 
+function createFileDownloadError(error: string, errorDetails?: FileDownloadErrorDetails): DaytonaError {
+  if (!errorDetails) {
+    return new DaytonaError(error)
+  }
+
+  return createDaytonaError(errorDetails.message, errorDetails.statusCode, undefined, errorDetails.errorCode)
+}
+
 /**
  * Provides file system operations within a Sandbox.
  *
@@ -209,16 +217,7 @@ export class FileSystem {
       const response = await this.downloadFiles([{ source: remotePath }], timeout)
 
       if (response[0].error) {
-        if (response[0].errorDetails) {
-          throw createDaytonaError(
-            response[0].errorDetails.message,
-            response[0].errorDetails.statusCode,
-            undefined,
-            response[0].errorDetails.errorCode,
-          )
-        }
-
-        throw new DaytonaError(response[0].error)
+        throw createFileDownloadError(response[0].error, response[0].errorDetails)
       }
 
       return response[0].result as Buffer
@@ -227,16 +226,7 @@ export class FileSystem {
     const response = await this.downloadFiles([{ source: remotePath, destination: dst }], timeout)
 
     if (response[0].error) {
-      if (response[0].errorDetails) {
-        throw createDaytonaError(
-          response[0].errorDetails.message,
-          response[0].errorDetails.statusCode,
-          undefined,
-          response[0].errorDetails.errorCode,
-        )
-      }
-
-      throw new DaytonaError(response[0].error)
+      throw createFileDownloadError(response[0].error, response[0].errorDetails)
     }
   }
 

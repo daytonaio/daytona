@@ -7,6 +7,8 @@ import json
 from dataclasses import dataclass
 from typing import Any, cast
 
+from .errors import DaytonaError, create_daytona_error
+
 
 @dataclass
 class FileUpload:
@@ -64,6 +66,21 @@ class FileDownloadErrorDetails:
     message: str
     status_code: int | None = None
     error_code: str | None = None
+
+
+def create_file_download_error(response: FileDownloadResponse) -> DaytonaError:
+    """Create the appropriate Daytona exception for a failed file download response."""
+
+    assert response.error is not None
+
+    if response.error_details is None:
+        return DaytonaError(response.error)
+
+    return create_daytona_error(
+        response.error_details.message,
+        status_code=response.error_details.status_code,
+        error_code=response.error_details.error_code,
+    )
 
 
 def parse_file_download_error_payload(
