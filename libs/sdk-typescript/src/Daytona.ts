@@ -20,7 +20,6 @@ import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import {
   DaytonaAuthenticationError,
   createAxiosDaytonaError,
-  createDaytonaError,
   DaytonaError,
   DaytonaTimeoutError,
   DaytonaValidationError,
@@ -764,8 +763,7 @@ export class Daytona implements AsyncDisposable {
           throw createAxiosDaytonaError(error)
         }
 
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        throw createDaytonaError(errorMessage)
+        throw new DaytonaError(error instanceof Error ? error.message : String(error))
       },
     )
 
