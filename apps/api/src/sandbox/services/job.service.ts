@@ -76,7 +76,10 @@ export class JobService {
       return job
     } catch (error) {
       if (error.code === '23505') {
-        if (error.constraint === 'IDX_UNIQUE_INCOMPLETE_JOB') {
+        if (
+          error.constraint === 'IDX_UNIQUE_INCOMPLETE_JOB' ||
+          error.constraint === 'IDX_UNIQUE_INCOMPLETE_BACKUP_JOB'
+        ) {
           this.logger.error(`An incomplete job already exists for ${resourceType} ${resourceId} on runner ${runnerId}`)
         }
         throw new ConflictException('An operation is already in progress for this resource')
