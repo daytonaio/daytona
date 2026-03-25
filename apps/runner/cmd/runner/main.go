@@ -160,6 +160,7 @@ func run() int {
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
 		SnapshotPullTimeout:          cfg.SnapshotPullTimeout,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
+		InterSandboxNetworkEnabled:   cfg.InterSandboxNetworkEnabled,
 	})
 	if err != nil {
 		logger.Error("Error creating Docker client wrapper", "error", err)
