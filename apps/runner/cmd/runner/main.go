@@ -141,7 +141,7 @@ func run() int {
 
 	backupInfoCache := cache.NewBackupInfoCache(ctx, cfg.BackupInfoCacheRetention)
 
-	dockerClient, err := docker.NewDockerClient(docker.DockerClientConfig{
+	dockerClient, err := docker.NewDockerClient(ctx, docker.DockerClientConfig{
 		ApiClient:                    cli,
 		BackupInfoCache:              backupInfoCache,
 		Logger:                       logger,
@@ -158,7 +158,9 @@ func run() int {
 		VolumeCleanupDryRun:          cfg.VolumeCleanupDryRun,
 		VolumeCleanupExclusionPeriod: cfg.VolumeCleanupExclusionPeriod,
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
+		SnapshotPullTimeout:          cfg.SnapshotPullTimeout,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
+		InterSandboxNetworkEnabled:   cfg.InterSandboxNetworkEnabled,
 	})
 	if err != nil {
 		logger.Error("Error creating Docker client wrapper", "error", err)

@@ -40,7 +40,7 @@ module Daytona
     # @param command [String] Shell command to execute
     # @param cwd [String, nil] Working directory for command execution. If not specified, uses the sandbox working directory
     # @param env [Hash<String, String>, nil] Environment variables to set for the command
-    # @param timeout [Integer, nil] Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely
+    # @param timeout [Integer, nil] Maximum time in seconds to wait for the command to complete.
     # @return [ExecuteResponse] Command execution results containing exit_code, result, and artifacts
     #
     # @example
@@ -54,21 +54,23 @@ module Daytona
     #
     #   # Command with timeout
     #   result = sandbox.process.exec("sleep 10", timeout: 5)
-    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
-      command = "echo '#{Base64.encode64(command)}' | base64 -d | sh"
-
+    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
       if env && !env.empty?
+        env.each_key do |key|
+          unless key.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/)
+            raise ArgumentError,
+                  "Invalid environment variable name: '#{key}'"
+          end
+        end
         safe_env_exports = env.map do |key, value|
-          "export #{key}=$(echo '#{Base64.encode64(value)}' | base64 -d)"
-        end.join(';')
+          "export #{key}=\"$(echo '#{Base64.strict_encode64(value)}' | base64 -d)\""
+        end.join('; ')
         command = "#{safe_env_exports}; #{command}"
       end
 
-      command = "sh -c \"#{command}\""
-
       response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
       # Post-process the output to extract ExecutionArtifacts
-      artifacts = parse_output(response.result.split("\n"))
+      artifacts = parse_output(response.result.split("\n", -1))
 
       # Create new response with processed output and charts
       ExecuteResponse.new(
@@ -546,15 +548,17 @@ module Daytona
     # @return [Daytona::ExecutionArtifacts] The artifacts from the command execution
     def parse_output(lines)
       artifacts = ExecutionArtifacts.new('', [])
+      stdout_lines = []
 
       lines.each do |line|
         if line.start_with?(ARTIFACT_PREFIX)
           parse_json_line(line:, artifacts:)
         else
-          artifacts.stdout += "#{line}\n"
+          stdout_lines << line
         end
       end
 
+      artifacts.stdout = stdout_lines.join("\n")
       artifacts
     end
 

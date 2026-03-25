@@ -31,10 +31,10 @@ func (d *DockerClient) GetSandboxState(ctx context.Context, sandboxId string) (e
 		return enums.SandboxStateError, err
 	}
 
-	return d.getSandboxState(ctx, ct)
+	return d.getSandboxState(ct)
 }
 
-func (d *DockerClient) getSandboxState(ctx context.Context, ct *container.InspectResponse) (enums.SandboxState, error) {
+func (d *DockerClient) getSandboxState(ct *container.InspectResponse) (enums.SandboxState, error) {
 	if ct == nil {
 		return enums.SandboxStateUnknown, errors.New("invalid sandbox reference")
 	}

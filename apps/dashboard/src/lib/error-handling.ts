@@ -6,12 +6,18 @@
 import { Action, toast } from 'sonner'
 import { DaytonaError } from '@/api/errors'
 
-export function handleApiError(error: unknown, message: string, toastAction?: React.ReactNode | Action) {
+interface HandleApiErrorOptions {
+  action?: React.ReactNode | Action
+  toastId?: string
+}
+
+export function handleApiError(error: unknown, message: string, options?: HandleApiErrorOptions) {
   const isDaytonaError = error instanceof DaytonaError
 
   toast.error(message, {
+    ...(options?.toastId ? { id: options.toastId } : {}),
     description: isDaytonaError ? error.message : 'Please try again or check the console for more details',
-    action: toastAction,
+    action: options?.action,
   })
 
   if (!isDaytonaError) {

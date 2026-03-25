@@ -36,10 +36,14 @@ func InitLogger(ctx context.Context, logger *slog.Logger, config Config) (*slog.
 	}
 
 	// Create OTLP log exporter
-	exporter, err := otlploghttp.New(ctx,
-		otlploghttp.WithEndpointURL(config.Endpoint+"/v1/logs"),
+	logOpts := []otlploghttp.Option{
+		otlploghttp.WithEndpointURL(config.Endpoint + "/v1/logs"),
 		otlploghttp.WithHeaders(config.Headers),
-	)
+	}
+	if config.TLSConfig != nil {
+		logOpts = append(logOpts, otlploghttp.WithTLSClientConfig(config.TLSConfig))
+	}
+	exporter, err := otlploghttp.New(ctx, logOpts...)
 	if err != nil {
 		return logger, nil, fmt.Errorf("failed to create OTLP log exporter: %w", err)
 	}

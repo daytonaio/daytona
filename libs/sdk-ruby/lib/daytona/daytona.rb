@@ -149,10 +149,13 @@ module Daytona
         raise Sdk::Error, 'auto_archive_interval must be a non-negative integer'
       end
 
+      labels = params.labels&.dup || {}
+      labels[LABEL_CODE_TOOLBOX_LANGUAGE] = params.language.to_s if params.language
+
       create_sandbox = DaytonaApiClient::CreateSandbox.new(
         user: params.os_user,
         env: params.env_vars || {},
-        labels: params.labels,
+        labels: labels,
         public: params.public,
         target: config.target,
         auto_stop_interval: params.auto_stop_interval,

@@ -110,7 +110,12 @@ curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
 
 ## Signed preview URL
 
-The signed preview URL embeds the authentication token directly in the URL, eliminating the need for separate headers. You can set a custom expiry time for the token (defaults to 60 seconds). The token persists across sandbox restarts until it expires. Tokens can be revoked manually before expiry if needed.
+The signed preview URL embeds the authentication token directly in the URL, eliminating the need for separate headers. The token persists across sandbox restarts until it expires, or is revoked manually before expiry. Set a custom expiry time for the token: 
+
+- Default: `60` seconds
+- Minimum: `1` second
+- Maximum: `86,400` seconds (24 hours)
+- Recommended: `3600` seconds (1 hour)
 
 :::tip
 Always set the `expires_in_seconds` parameter explicitly. The default of 60 seconds is short due to security considerations. Most use cases should use at least 3600 (1 hour).

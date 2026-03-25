@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/netrules"
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
@@ -146,7 +145,7 @@ func (dm *DockerMonitor) handleContainerEvent(event events.Message) {
 			return
 		}
 		shortContainerID := containerID[:12]
-		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, common.GetContainerIpAddress(dm.ctx, &ct))
+		err = dm.netRulesManager.AssignNetworkRules(shortContainerID, GetContainerIpAddress(dm.ctx, &ct))
 		if err != nil {
 			dm.log.Error("Error assigning network rules", "error", err)
 		}
@@ -226,7 +225,7 @@ func (dm *DockerMonitor) reconcileNetworkRules(table string, chain string) {
 			continue
 		}
 
-		ipAddress := common.GetContainerIpAddress(dm.ctx, &container)
+		ipAddress := GetContainerIpAddress(dm.ctx, &container)
 
 		// Check if the container IP matches the rule's source IP
 		// Handle CIDR notation by extracting just the IP part

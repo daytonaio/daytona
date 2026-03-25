@@ -73,7 +73,7 @@ export class Process {
    * @param {string} command - Shell command to execute
    * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
-   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
+   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
    *                                    - exitCode: The command's exit status
    *                                    - result: Standard output from the command
@@ -99,21 +99,22 @@ export class Process {
     env?: Record<string, string>,
     timeout?: number,
   ): Promise<ExecuteResponse> {
-    const base64UserCmd = Buffer.from(command).toString('base64')
-    command = `echo '${base64UserCmd}' | base64 -d | sh`
-
-    if (env && Object.keys(env).length > 0) {
+    if (env && Object.keys(env).length) {
+      const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
+      for (const key of Object.keys(env)) {
+        if (!validKeyPattern.test(key)) {
+          throw new Error(`Invalid environment variable name: '${key}'`)
+        }
+      }
       const safeEnvExports =
         Object.entries(env)
           .map(([key, value]) => {
             const encodedValue = Buffer.from(value).toString('base64')
-            return `export ${key}=$(echo '${encodedValue}' | base64 -d)`
+            return `export ${key}="$(echo '${encodedValue}' | base64 -d)"`
           })
-          .join(';') + ';'
-      command = `${safeEnvExports} ${command}`
+          .join('; ') + '; '
+      command = `${safeEnvExports}${command}`
     }
-
-    command = `sh -c "${command}"`
 
     const response = await this.apiClient.executeCommand({
       command,

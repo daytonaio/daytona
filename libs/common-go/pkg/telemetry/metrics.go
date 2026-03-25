@@ -35,10 +35,14 @@ func InitMetrics(ctx context.Context, config Config, meterName string) (*sdk_met
 	}
 
 	// Create OTLP HTTP metrics exporter
-	exporter, err := otlpmetrichttp.New(ctx,
-		otlpmetrichttp.WithEndpointURL(config.Endpoint+"/v1/metrics"),
+	metricOpts := []otlpmetrichttp.Option{
+		otlpmetrichttp.WithEndpointURL(config.Endpoint + "/v1/metrics"),
 		otlpmetrichttp.WithHeaders(config.Headers),
-	)
+	}
+	if config.TLSConfig != nil {
+		metricOpts = append(metricOpts, otlpmetrichttp.WithTLSClientConfig(config.TLSConfig))
+	}
+	exporter, err := otlpmetrichttp.New(ctx, metricOpts...)
 	if err != nil {
 		return nil, err
 	}

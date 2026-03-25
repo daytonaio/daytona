@@ -258,6 +258,8 @@ Below is a full list of environment variables with their default values:
 | `HEALTHCHECK_TIMEOUT`                   | string  | `10s`                             | Health check timeout duration                         |
 | `API_VERSION`                           | number  | `2`                               | Runner API version (default: 2)                       |
 | `SNAPSHOT_ERROR_CACHE_RETENTION`        | string  | `10m`                             | Snapshot error cache retention duration (minimum: 5m) |
+| `CONTAINER_NETWORK`                     | string  | (none)                            | Custom docker network for sandboxes                   |
+| `INTER_SANDBOX_NETWORK_ENABLED`         | boolean | `false`                           | Enable or disable inter-sandbox network connectivity  |
 
 ### SSH Gateway
 

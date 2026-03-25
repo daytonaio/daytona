@@ -27,6 +27,7 @@ from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
 from ..common.process import (
+    _VALID_ENV_KEY_REGEX,
     CodeRunParams,
     ExecuteResponse,
     ExecutionArtifacts,
@@ -108,7 +109,7 @@ class Process:
                 specified, uses the sandbox working directory.
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -130,28 +131,27 @@ class Process:
             result = sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        base64_user_cmd = base64.b64encode(command.encode()).decode()
-        command = f"echo '{base64_user_cmd}' | base64 -d | sh"
-
-        if env and len(env.items()) > 0:
+        if env:
+            for key in env:
+                if not _VALID_ENV_KEY_REGEX.match(key):
+                    raise ValueError(f"Invalid environment variable name: {key!r}")
             safe_env_exports = (
-                ";".join(
+                " ".join(
                     [
-                        f"export {key}=$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)"
+                        f"""export {key}="$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
                         for key, value in env.items()
                     ]
                 )
-                + ";"
+                + " "
             )
-            command = f"{safe_env_exports} {command}"
+            command = f"{safe_env_exports}{command}"
 
-        command = f'sh -c "{command}"'
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
         response = self._api_client.execute_command(request=execute_request)
 
         # Post-process the output to extract ExecutionArtifacts
-        artifacts = Process._parse_output(response.result.splitlines())
+        artifacts = Process._parse_output(response.result.split("\n"))
 
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
@@ -177,7 +177,7 @@ class Process:
             code (str): Code to execute.
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Code execution result containing:
