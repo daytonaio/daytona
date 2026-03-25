@@ -135,7 +135,7 @@ import (
 )
 
 func main() {
-  config := &types.DaytonaConfig{APIKey: "YOUR_API_KEY",}
+  config := &types.DaytonaConfig{APIKey: "YOUR_API_KEY"}
   client, _ := daytona.NewClientWithConfig(config)
   ctx := context.Background()
   sandbox, _ := client.Create(ctx, nil)
