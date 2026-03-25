@@ -158,6 +158,7 @@ func run() int {
 		VolumeCleanupDryRun:          cfg.VolumeCleanupDryRun,
 		VolumeCleanupExclusionPeriod: cfg.VolumeCleanupExclusionPeriod,
 		BackupTimeoutMin:             cfg.BackupTimeoutMin,
+		SnapshotPullTimeout:          cfg.SnapshotPullTimeout,
 		InitializeDaemonTelemetry:    cfg.InitializeDaemonTelemetry,
 	})
 	if err != nil {
