@@ -739,4 +739,13 @@ class AsyncFileSystem:
                 response = await client.post(
                     url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
                 )
-                _ = response.raise_for_status()
+
+                if not response.is_success:
+                    try:
+                        detail = ", ".join(response.json()["errors"])
+                    except Exception:
+                        detail = response.text
+                    raise DaytonaError(
+                        f"{response.status_code}: {detail}",
+                        status_code=response.status_code,
+                    )
