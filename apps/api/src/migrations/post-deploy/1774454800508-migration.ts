@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1772460237544 implements MigrationInterface {
-  name = 'Migration1772460237544'
+export class Migration1774454800508 implements MigrationInterface {
+  name = 'Migration1774454800508'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Drop dual-write triggers and function (no longer needed after deployment)
