@@ -20,6 +20,9 @@ export const useUpdateRegistryMutation = () => {
 
   return useMutation<DockerRegistry, unknown, UpdateRegistryMutationVariables>({
     mutationFn: async ({ registryId, registry, organizationId }) => {
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
       const response = await dockerRegistryApi.updateRegistry(registryId, registry, organizationId)
       return response.data
     },

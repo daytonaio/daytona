@@ -100,17 +100,15 @@ export function VolumeTable({
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const selectedVolumes = selectedRows.map((row) => row.original)
-  const selectableCount = useMemo(
-    () =>
-      data.filter(
-        (volume) =>
-          isVolumeDeletable(volume) &&
-          !processingVolumeAction[volume.id] &&
-          volume.state !== VolumeState.PENDING_DELETE &&
-          volume.state !== VolumeState.DELETING,
-      ).length,
-    [data, processingVolumeAction],
-  )
+  const selectableCount = table.getRowModel().rows.filter((row) => {
+    const volume = row.original
+    return (
+      isVolumeDeletable(volume) &&
+      !processingVolumeAction[volume.id] &&
+      volume.state !== VolumeState.PENDING_DELETE &&
+      volume.state !== VolumeState.DELETING
+    )
+  }).length
   const bulkActionCounts = useMemo(() => getVolumeBulkActionCounts(selectedVolumes), [selectedVolumes])
   const [pendingBulkAction, setPendingBulkAction] = useState<VolumeBulkAction | null>(null)
 

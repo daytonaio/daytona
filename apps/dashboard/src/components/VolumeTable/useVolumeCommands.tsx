@@ -10,7 +10,11 @@ import { useMemo } from 'react'
 import { CommandConfig, useRegisterCommands } from '../CommandPalette'
 
 export function isVolumeDeletable(volume: VolumeDto) {
-  return ![VolumeState.PENDING_DELETE, VolumeState.DELETING, VolumeState.DELETED].includes(volume.state)
+  return (
+    volume.state !== VolumeState.PENDING_DELETE &&
+    volume.state !== VolumeState.DELETING &&
+    volume.state !== VolumeState.DELETED
+  )
 }
 
 export function getVolumeBulkActionCounts(volumes: VolumeDto[]) {

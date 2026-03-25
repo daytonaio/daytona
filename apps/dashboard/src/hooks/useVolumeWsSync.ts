@@ -22,7 +22,7 @@ export function useVolumeWsSync() {
 
     const upsertVolumeInCache = (volume: VolumeDto) => {
       queryClient.setQueriesData<VolumeDto[]>({ queryKey }, (previousVolumes) => {
-        if (!previousVolumes) return previousVolumes
+        if (!previousVolumes) return [volume]
 
         if (!previousVolumes.some((existingVolume) => existingVolume.id === volume.id)) {
           return [volume, ...previousVolumes]
@@ -34,21 +34,21 @@ export function useVolumeWsSync() {
 
     const removeVolumeFromCache = (volumeId: string) => {
       queryClient.setQueriesData<VolumeDto[]>({ queryKey }, (previousVolumes) => {
-        if (!previousVolumes) return previousVolumes
+        if (!previousVolumes) return []
         return previousVolumes.filter((volume) => volume.id !== volumeId)
       })
     }
 
-    const invalidate = () => {
+    const invalidate = (refetchType: 'active' | 'none' = 'none') => {
       queryClient.invalidateQueries({
         queryKey,
-        refetchType: 'none',
+        refetchType,
       })
     }
 
     const handleVolumeCreatedEvent = (volume: VolumeDto) => {
       upsertVolumeInCache(volume)
-      invalidate()
+      invalidate('active')
     }
 
     const handleVolumeStateUpdatedEvent = (data: {
@@ -58,11 +58,11 @@ export function useVolumeWsSync() {
     }) => {
       if (data.newState === VolumeState.DELETED) {
         removeVolumeFromCache(data.volume.id)
+        invalidate('active')
       } else {
         upsertVolumeInCache(data.volume)
+        invalidate()
       }
-
-      invalidate()
     }
 
     const handleVolumeLastUsedAtUpdatedEvent = (volume: VolumeDto) => {

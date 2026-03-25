@@ -70,6 +70,10 @@ const Volumes: React.FC = () => {
 
   const handleCreate = async () => {
     const volumeName = newVolumeName.trim()
+    if (!volumeName) {
+      toast.error('Volume name is required')
+      return
+    }
 
     try {
       await createVolumeMutation.mutateAsync({

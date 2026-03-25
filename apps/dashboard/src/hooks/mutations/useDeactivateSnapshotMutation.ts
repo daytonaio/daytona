@@ -24,6 +24,9 @@ export const useDeactivateSnapshotMutation = ({
 
   return useMutation<void, unknown, DeactivateSnapshotMutationVariables>({
     mutationFn: async ({ snapshotId, organizationId }) => {
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
       await snapshotApi.deactivateSnapshot(snapshotId, organizationId)
     },
     onSuccess: async (_data, { organizationId }) => {

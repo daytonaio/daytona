@@ -18,6 +18,9 @@ export const useDeleteRegistryMutation = () => {
 
   return useMutation<void, unknown, DeleteRegistryMutationVariables>({
     mutationFn: async ({ registryId, organizationId }) => {
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
       await dockerRegistryApi.deleteRegistry(registryId, organizationId)
     },
     onSuccess: async (_data, { organizationId }) => {

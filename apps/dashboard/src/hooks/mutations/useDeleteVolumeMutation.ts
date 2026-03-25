@@ -22,6 +22,9 @@ export const useDeleteVolumeMutation = ({ invalidateOnSuccess = true }: UseDelet
 
   return useMutation<void, unknown, DeleteVolumeMutationVariables>({
     mutationFn: async ({ volumeId, organizationId }) => {
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
       await volumeApi.deleteVolume(volumeId, organizationId)
     },
     onSuccess: async (_data, { organizationId }) => {

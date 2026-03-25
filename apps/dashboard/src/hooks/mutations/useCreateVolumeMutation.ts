@@ -19,6 +19,9 @@ export const useCreateVolumeMutation = () => {
 
   return useMutation<VolumeDto, unknown, CreateVolumeMutationVariables>({
     mutationFn: async ({ volume, organizationId }) => {
+      if (!organizationId) {
+        throw new Error('No organization selected')
+      }
       const response = await volumeApi.createVolume(volume, organizationId)
       return response.data
     },
