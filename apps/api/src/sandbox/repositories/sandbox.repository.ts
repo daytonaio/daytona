@@ -151,7 +151,7 @@ export class SandboxRepository extends BaseRepository<Sandbox> {
       })
 
       if (!sandbox) {
-        throw new ConflictException('Sandbox was modified by another operation, please try again')
+        throw new ConflictException('Sandbox was modified by another operation, please try again.')
       }
 
       const previousSandbox = { ...sandbox }
