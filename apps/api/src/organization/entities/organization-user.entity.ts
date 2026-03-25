@@ -29,6 +29,10 @@ export class OrganizationUser {
   @JoinColumn({ name: 'organizationId' })
   organization: Organization
 
+  /** `onDelete: CASCADE` applies to the owning side FK (organizationId, userId) only.
+   *  The inverse side FK (roleId) defaults to NO ACTION — deleting a role that is still
+   *  assigned will fail, requiring explicit unassignment first.
+   */
   @ManyToMany(() => OrganizationRole, (role) => role.users, {
     cascade: true,
     onDelete: 'CASCADE',
