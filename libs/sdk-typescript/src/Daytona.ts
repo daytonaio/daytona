@@ -17,7 +17,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
-import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
+import { createAxiosDaytonaError, DaytonaError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
@@ -752,33 +752,11 @@ export class Daytona implements AsyncDisposable {
         return response
       },
       (error) => {
-        let errorMessage: string
-
-        if (error instanceof AxiosError && error.message.includes('timeout of')) {
-          errorMessage = 'Operation timed out'
-        } else {
-          errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+        if (error instanceof AxiosError) {
+          throw createAxiosDaytonaError(error)
         }
 
-        if (typeof errorMessage === 'object') {
-          try {
-            errorMessage = JSON.stringify(errorMessage)
-          } catch {
-            errorMessage = String(errorMessage)
-          }
-        }
-
-        const statusCode = error.response?.status
-        const headers = error.response?.headers
-
-        switch (statusCode) {
-          case 404:
-            throw new DaytonaNotFoundError(errorMessage, statusCode, headers)
-          case 429:
-            throw new DaytonaRateLimitError(errorMessage, statusCode, headers)
-          default:
-            throw new DaytonaError(errorMessage, statusCode, headers)
-        }
+        throw new DaytonaError(error instanceof Error ? error.message : String(error))
       },
     )
 

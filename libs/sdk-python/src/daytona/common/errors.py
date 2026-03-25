@@ -151,3 +151,34 @@ class DaytonaConnectionError(DaytonaError):
             print(exc.message)
         ```
     """
+
+
+STATUS_CODE_TO_ERROR: dict[int, type[DaytonaError]] = {
+    400: DaytonaValidationError,
+    401: DaytonaAuthenticationError,
+    403: DaytonaAuthorizationError,
+    404: DaytonaNotFoundError,
+    409: DaytonaConflictError,
+    429: DaytonaRateLimitError,
+}
+
+
+def error_class_from_status_code(status_code: int | None) -> type[DaytonaError]:
+    """Map an HTTP status code to the corresponding DaytonaError subclass."""
+
+    if status_code is None:
+        return DaytonaError
+
+    return STATUS_CODE_TO_ERROR.get(status_code, DaytonaError)
+
+
+def create_daytona_error(
+    message: str,
+    status_code: int | None = None,
+    headers: Mapping[str, Any] | None = None,
+    error_code: str | None = None,
+) -> DaytonaError:
+    """Create the appropriate DaytonaError subclass from structured error metadata."""
+
+    error_cls = error_class_from_status_code(status_code)
+    return error_cls(message, status_code=status_code, headers=headers, error_code=error_code)

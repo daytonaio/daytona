@@ -11,8 +11,6 @@ import { AxiosError, AxiosHeaders } from 'axios'
 
 export type ResponseHeaders = InstanceType<typeof AxiosHeaders>
 
-const STATUS_CODE_TO_ERROR: Record<number, typeof DaytonaError> = {}
-
 /**
  * Base error for Daytona SDK.
  *
@@ -39,7 +37,7 @@ export class DaytonaError extends Error {
 
   constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
     super(message)
-    this.name = 'DaytonaError'
+    this.name = new.target.name
     this.statusCode = statusCode
     this.headers = headers
     this.errorCode = errorCode
@@ -61,10 +59,6 @@ export class DaytonaError extends Error {
  * ```
  */
 export class DaytonaNotFoundError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaNotFoundError'
-  }
 }
 
 /**
@@ -82,10 +76,6 @@ export class DaytonaNotFoundError extends DaytonaError {
  * ```
  */
 export class DaytonaRateLimitError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaRateLimitError'
-  }
 }
 
 /**
@@ -103,10 +93,6 @@ export class DaytonaRateLimitError extends DaytonaError {
  * ```
  */
 export class DaytonaAuthenticationError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaAuthenticationError'
-  }
 }
 
 /**
@@ -124,10 +110,6 @@ export class DaytonaAuthenticationError extends DaytonaError {
  * ```
  */
 export class DaytonaAuthorizationError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaAuthorizationError'
-  }
 }
 
 /**
@@ -145,10 +127,6 @@ export class DaytonaAuthorizationError extends DaytonaError {
  * ```
  */
 export class DaytonaConflictError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaConflictError'
-  }
 }
 
 /**
@@ -166,10 +144,6 @@ export class DaytonaConflictError extends DaytonaError {
  * ```
  */
 export class DaytonaValidationError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaValidationError'
-  }
 }
 
 /**
@@ -187,10 +161,6 @@ export class DaytonaValidationError extends DaytonaError {
  * ```
  */
 export class DaytonaTimeoutError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaTimeoutError'
-  }
 }
 
 /**
@@ -208,18 +178,16 @@ export class DaytonaTimeoutError extends DaytonaError {
  * ```
  */
 export class DaytonaConnectionError extends DaytonaError {
-  constructor(message: string, statusCode?: number, headers?: ResponseHeaders, errorCode?: string) {
-    super(message, statusCode, headers, errorCode)
-    this.name = 'DaytonaConnectionError'
-  }
 }
 
-STATUS_CODE_TO_ERROR[400] = DaytonaValidationError
-STATUS_CODE_TO_ERROR[401] = DaytonaAuthenticationError
-STATUS_CODE_TO_ERROR[403] = DaytonaAuthorizationError
-STATUS_CODE_TO_ERROR[404] = DaytonaNotFoundError
-STATUS_CODE_TO_ERROR[409] = DaytonaConflictError
-STATUS_CODE_TO_ERROR[429] = DaytonaRateLimitError
+const STATUS_CODE_TO_ERROR: Record<number, typeof DaytonaError> = {
+  400: DaytonaValidationError,
+  401: DaytonaAuthenticationError,
+  403: DaytonaAuthorizationError,
+  404: DaytonaNotFoundError,
+  409: DaytonaConflictError,
+  429: DaytonaRateLimitError,
+}
 
 /**
  * Maps an HTTP status code to the corresponding Daytona error class.
@@ -245,15 +213,40 @@ export function createDaytonaError(
   return new ErrorClass(message, statusCode, headers, errorCode)
 }
 
+function isAxiosTimeoutError(error: AxiosError): boolean {
+  return error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout of')
+}
+
+function getAxiosResponseDataObject(error: AxiosError): Record<string, unknown> | undefined {
+  if (!error.response?.data || typeof error.response.data !== 'object') {
+    return undefined
+  }
+
+  return error.response.data as Record<string, unknown>
+}
+
+function extractAxiosErrorCode(responseData?: Record<string, unknown>): string | undefined {
+  if (typeof responseData?.error === 'string') {
+    return responseData.error
+  }
+
+  if (typeof responseData?.code === 'string') {
+    return responseData.code
+  }
+
+  if (typeof responseData?.error_code === 'string') {
+    return responseData.error_code
+  }
+
+  return undefined
+}
+
 function extractAxiosErrorMessage(error: AxiosError): string {
-  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout of')) {
+  if (isAxiosTimeoutError(error)) {
     return 'Operation timed out'
   }
 
-  const responseData =
-    error.response?.data && typeof error.response.data === 'object'
-      ? (error.response.data as Record<string, unknown>)
-      : undefined
+  const responseData = getAxiosResponseDataObject(error)
   const responseMessage: unknown = responseData?.message || error.response?.data
   const message: unknown = responseMessage || error.message || String(error)
 
@@ -275,17 +268,10 @@ export function createAxiosDaytonaError(error: AxiosError): DaytonaError {
   const message = extractAxiosErrorMessage(error)
   const statusCode = error.response?.status
   const headers = error.response?.headers as ResponseHeaders | undefined
-  const responseData =
-    error.response?.data && typeof error.response.data === 'object'
-      ? (error.response.data as Record<string, unknown>)
-      : undefined
-  const errorCode: string | undefined =
-    (typeof responseData?.error === 'string' && responseData.error) ||
-    (typeof responseData?.code === 'string' && responseData.code) ||
-    (typeof responseData?.error_code === 'string' && responseData.error_code) ||
-    undefined
+  const responseData = getAxiosResponseDataObject(error)
+  const errorCode = extractAxiosErrorCode(responseData)
 
-  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.message.includes('timeout of')) {
+  if (isAxiosTimeoutError(error)) {
     return new DaytonaTimeoutError(message, statusCode, headers, errorCode)
   }
 

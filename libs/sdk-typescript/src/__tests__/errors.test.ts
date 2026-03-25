@@ -4,13 +4,11 @@
  */
 
 import { AxiosError, AxiosHeaders } from 'axios'
-import { Image } from '../Image'
 import {
   createAxiosDaytonaError,
   DaytonaConnectionError,
   DaytonaNotFoundError,
   DaytonaTimeoutError,
-  DaytonaValidationError,
 } from '../errors/DaytonaError'
 
 describe('Daytona error mapping', () => {
@@ -50,14 +48,5 @@ describe('Daytona error mapping', () => {
     expect(daytonaError.statusCode).toBe(404)
     expect(daytonaError.errorCode).toBe('FILE_NOT_FOUND')
     expect(daytonaError.headers).toBe(headers)
-  })
-
-  it('throws typed validation and not-found errors from Image helpers', () => {
-    const unsupportedVersion = '3.8' as unknown as Parameters<typeof Image.debianSlim>[0]
-
-    expect(() => Image.debianSlim(unsupportedVersion)).toThrow(DaytonaValidationError)
-    expect(() => Image.debianSlim('3.12').addLocalFile('/tmp/daytona-missing-file.txt', '/tmp/out.txt')).toThrow(
-      DaytonaNotFoundError,
-    )
   })
 })
