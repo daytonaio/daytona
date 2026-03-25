@@ -15,7 +15,7 @@ import toml
 from pydantic import BaseModel, PrivateAttr
 
 from .._sync.object_storage import ObjectStorage
-from .errors import DaytonaError
+from .errors import DaytonaNotFoundError, DaytonaValidationError
 
 SupportedPythonSeries = Literal["3.9", "3.10", "3.11", "3.12", "3.13"]
 SUPPORTED_PYTHON_SERIES = list(get_args(SupportedPythonSeries))
@@ -111,8 +111,8 @@ class Image(BaseModel):
             ```
         """
         requirements_txt = os.path.expanduser(requirements_txt)
-        if not Path(requirements_txt).exists():
-            raise DaytonaError(f"Requirements file {requirements_txt} does not exist")
+        if not Path(requirements_txt).is_file():
+            raise DaytonaNotFoundError(f"Requirements file {requirements_txt} does not exist")
 
         extra_args = self.__format_pip_install_args(find_links, index_url, extra_index_urls, pre, extra_options)
 
@@ -154,10 +154,18 @@ class Image(BaseModel):
                 .pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
             ```
         """
-        toml_data: dict[str, object] = toml.load(os.path.expanduser(pyproject_toml))
+        pyproject_toml = os.path.expanduser(pyproject_toml)
+        if not Path(pyproject_toml).is_file():
+            raise DaytonaNotFoundError(f"pyproject.toml file {pyproject_toml} does not exist")
+
+        try:
+            toml_data: dict[str, object] = toml.load(pyproject_toml)
+        except toml.TomlDecodeError as error:
+            raise DaytonaValidationError(f"Invalid pyproject.toml file {pyproject_toml}: {error}") from error
+
         project_section = toml_data.get("project")
         if not isinstance(project_section, dict):
-            raise DaytonaError(
+            raise DaytonaValidationError(
                 (
                     "No [project] section in pyproject.toml file. "
                     "See https://packaging.python.org/en/latest/guides/writing-pyproject-toml "
@@ -174,13 +182,13 @@ class Image(BaseModel):
                 "See https://packaging.python.org/en/latest/guides/writing-pyproject-toml "
                 "for further file format guidelines."
             )
-            raise DaytonaError(msg)
+            raise DaytonaValidationError(msg)
 
         dependencies.extend(str(dep) for dep in declared_dependencies)
         if optional_dependencies:
             optionals = cast(dict[str, list[str]] | None, project_section.get("optional-dependencies", {}))
             if not isinstance(optionals, dict):
-                raise DaytonaError("optional-dependencies must be a mapping in pyproject.toml")
+                raise DaytonaValidationError("optional-dependencies must be a mapping in pyproject.toml")
             for dep_group_name in optional_dependencies:
                 group = optionals.get(dep_group_name)
                 if group is None:
@@ -218,6 +226,9 @@ class Image(BaseModel):
             remote_path = remote_path + Path(local_path).name
 
         local_path = os.path.expanduser(local_path)
+        if not Path(local_path).is_file():
+            raise DaytonaNotFoundError(f"Local file {local_path} does not exist")
+
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
         self._dockerfile += f"COPY {archive_path} {remote_path}\n"
@@ -240,6 +251,9 @@ class Image(BaseModel):
             ```
         """
         local_path = os.path.expanduser(local_path)
+        if not Path(local_path).is_dir():
+            raise DaytonaNotFoundError(f"Local directory {local_path} does not exist")
+
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
         self._dockerfile += f"COPY {archive_path} {remote_path}\n"
@@ -372,7 +386,7 @@ class Image(BaseModel):
         if context_dir:
             context_dir = os.path.expanduser(context_dir)
             if not os.path.isdir(context_dir):
-                raise DaytonaError(f"Context directory {context_dir} does not exist")
+                raise DaytonaNotFoundError(f"Context directory {context_dir} does not exist")
 
         for context_path, original_path in Image.__extract_copy_sources(
             "\n".join(dockerfile_commands), context_dir or ""
@@ -402,6 +416,9 @@ class Image(BaseModel):
             ```
         """
         path = Path(os.path.expanduser(path))
+        if not path.is_file():
+            raise DaytonaNotFoundError(f"Dockerfile {path} does not exist")
+
         dockerfile = path.read_text()
         img = Image()
         img._dockerfile = dockerfile
@@ -635,11 +652,11 @@ class Image(BaseModel):
             # If Python version is unspecified, match the local version, up to the minor component
             python_version = series_version = f"{sys.version_info.major}.{sys.version_info.minor}"
         elif not re.match(r"^3(?:\.\d{1,2}){1,2}(rc\d*)?$", python_version):
-            raise DaytonaError(f"Invalid Python version: {python_version!r}")
+            raise DaytonaValidationError(f"Invalid Python version: {python_version!r}")
         else:
             components = python_version.split(".")
             if len(components) == 3 and not allow_micro_granularity:
-                raise DaytonaError(
+                raise DaytonaValidationError(
                     (
                         "Python version must be specified as 'major.minor' for this interface;"
                         f" micro-level specification ({python_version!r}) is not valid."
@@ -648,7 +665,7 @@ class Image(BaseModel):
             series_version = f"{components[0]}.{components[1]}"
 
         if series_version not in SUPPORTED_PYTHON_SERIES:
-            raise DaytonaError(
+            raise DaytonaValidationError(
                 (
                     f"Unsupported Python version: {python_version!r}. "
                     f"Daytona supports the following series: {SUPPORTED_PYTHON_SERIES!r}."
