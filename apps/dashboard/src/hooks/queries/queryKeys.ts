@@ -75,6 +75,10 @@ export const queryKeys = {
     all: ['registries'] as const,
     list: (organizationId: string) => [...queryKeys.registries.all, organizationId, 'list'] as const,
   },
+  volumes: {
+    all: ['volumes'] as const,
+    list: (organizationId: string) => [...queryKeys.volumes.all, organizationId, 'list'] as const,
+  },
   audit: {
     all: ['audit'] as const,
     logs: (organizationId: string, params: AuditLogsQueryParams) =>

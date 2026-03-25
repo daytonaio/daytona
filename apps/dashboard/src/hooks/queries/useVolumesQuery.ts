@@ -1,0 +1,28 @@
+/*
+ * Copyright Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+import { VolumeDto } from '@daytonaio/api-client'
+import { useQuery } from '@tanstack/react-query'
+import { useApi } from '../useApi'
+import { useSelectedOrganization } from '../useSelectedOrganization'
+import { queryKeys } from './queryKeys'
+
+export function useVolumesQuery() {
+  const { volumeApi } = useApi()
+  const { selectedOrganization } = useSelectedOrganization()
+
+  return useQuery<VolumeDto[]>({
+    queryKey: queryKeys.volumes.list(selectedOrganization?.id ?? ''),
+    queryFn: async () => {
+      if (!selectedOrganization) {
+        throw new Error('No organization selected')
+      }
+
+      const response = await volumeApi.listVolumes(selectedOrganization.id)
+      return response.data
+    },
+    enabled: !!selectedOrganization,
+  })
+}
