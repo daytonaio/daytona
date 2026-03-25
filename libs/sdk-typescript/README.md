@@ -52,8 +52,10 @@ Create a sandbox to run your code securely in an isolated environment.
 import { Daytona } from '@daytonaio/sdk'
 
 const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
-const sandbox = await daytona.create();
-const response = await sandbox.process.codeRun('print("Hello World!")');
+const sandbox = await daytona.create({
+  language: 'typescript'
+});
+const response = await sandbox.process.codeRun('console.log("Hello World!")');
 console.log(response.result);
 ```
 
