@@ -44,6 +44,7 @@ import "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 - [type ScreenshotOptions](<#ScreenshotOptions>)
 - [type ScreenshotRegion](<#ScreenshotRegion>)
 - [type ScreenshotResponse](<#ScreenshotResponse>)
+- [type SignedPreviewLink](<#SignedPreviewLink>)
 - [type Snapshot](<#Snapshot>)
 - [type SnapshotParams](<#SnapshotParams>)
 - [type Volume](<#Volume>)
@@ -504,6 +505,20 @@ type ScreenshotResponse struct {
     Width     int
     Height    int
     SizeBytes *int // Size in bytes
+}
+```
+
+<a name="SignedPreviewLink"></a>
+## type SignedPreviewLink
+
+SignedPreviewLink contains the signed URL, authentication token, port, and sandbox ID for a sandbox preview.
+
+```go
+type SignedPreviewLink struct {
+    SandboxID string
+    Port      int
+    Token     string
+    URL       string
 }
 ```
 

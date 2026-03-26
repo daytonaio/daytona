@@ -225,6 +225,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) Delete\(ctx context.Context\) error](<#Sandbox.Delete>)
   - [func \(s \*Sandbox\) DeleteWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.DeleteWithTimeout>)
   - [func \(s \*Sandbox\) GetPreviewLink\(ctx context.Context, port int\) \(\*types.PreviewLink, error\)](<#Sandbox.GetPreviewLink>)
+  - [func \(s \*Sandbox\) GetSignedPreviewLink\(ctx context.Context, port int, expiresInSeconds int\) \(\*types.SignedPreviewLink, error\)](<#Sandbox.GetSignedPreviewLink>)
   - [func \(s \*Sandbox\) GetUserHomeDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetUserHomeDir>)
   - [func \(s \*Sandbox\) GetWorkingDir\(ctx context.Context\) \(string, error\)](<#Sandbox.GetWorkingDir>)
   - [func \(s \*Sandbox\) RefreshData\(ctx context.Context\) error](<#Sandbox.RefreshData>)
@@ -3805,6 +3806,25 @@ if err != nil {
     return err
 }
 fmt.Printf("URL: %s\nToken: %s\n", preview.URL, preview.Token)
+```
+
+<a name="Sandbox.GetSignedPreviewLink"></a>
+### func \(\*Sandbox\) GetSignedPreviewLink
+
+```go
+func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInSeconds int) (*types.SignedPreviewLink, error)
+```
+
+GetSignedPreviewLink retrieves a signed preview url for the sandbox at the specified port valid for upto \<expiresInSeconds\> seconds.
+
+Example:
+
+```
+preview, err := sandbox.GetSignedPreviewLink(ctx, 3000, 3600)
+if err != nil {
+    return err
+}
+fmt.Printf("Sandbox ID: %s\nPort: %d\nURL: %s\nToken: %s\n", preview.SandboxID, preview.Port, preview.URL, preview.Token)
 ```
 
 <a name="Sandbox.GetUserHomeDir"></a>
