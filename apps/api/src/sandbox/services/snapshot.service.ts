@@ -55,7 +55,6 @@ import { LogExecution } from '../../common/decorators/log-execution.decorator'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 
 const IMAGE_NAME_REGEX = /^[a-zA-Z0-9_.\-:]+(\/[a-zA-Z0-9_.\-:]+)*(@sha256:[a-f0-9]{64})?$/
-const FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS = 3
 
 @Injectable()
 export class SnapshotService {
@@ -802,8 +801,9 @@ export class SnapshotService {
   @LogExecution('cleanup-failed-snapshot-runners')
   @WithInstrumentation()
   async cleanupFailedSnapshotRunners() {
+    const retentionHours = this.configService.get('failedSnapshotRunnerRetentionHours')
     const cutoff = new Date()
-    cutoff.setHours(cutoff.getHours() - FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS)
+    cutoff.setHours(cutoff.getHours() - retentionHours)
 
     const result = await this.snapshotRunnerRepository.delete({
       snapshotRef: Like('daytona-%'),
