@@ -1,0 +1,39 @@
+# coding: utf-8
+
+from __future__ import annotations
+
+# flake8: noqa
+{{>partial_header}}
+
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # import models into model package
+{{#models}}
+{{#model}}
+    from {{modelPackage}}.{{classFilename}} import {{classname}}
+{{/model}}
+{{/models}}
+
+_DYNAMIC_IMPORTS: dict[str, str] = {
+{{#models}}
+{{#model}}
+    "{{classname}}": "{{modelPackage}}.{{classFilename}}",
+{{/model}}
+{{/models}}
+}
+
+
+def __getattr__(attr_name: str) -> object:
+    module_path = _DYNAMIC_IMPORTS.get(attr_name)
+    if module_path is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {attr_name!r}")
+    mod = importlib.import_module(module_path)
+    value = getattr(mod, attr_name)
+    globals()[attr_name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return list(_DYNAMIC_IMPORTS.keys())
