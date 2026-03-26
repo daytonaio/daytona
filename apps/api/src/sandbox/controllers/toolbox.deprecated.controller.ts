@@ -32,8 +32,6 @@ import {
   ApiParam,
   ApiHeader,
   ApiBearerAuth,
-  getSchemaPath,
-  ApiExtraModels,
 } from '@nestjs/swagger'
 import {
   FileInfoDto,
@@ -111,7 +109,6 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
-import { UploadFileDto } from '../dto/upload-file.dto'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -132,7 +129,6 @@ const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 
 @ApiTags('toolbox')
 @Controller('toolbox')
-@ApiExtraModels(UploadFileDto)
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @SkipThrottle({ anonymous: true, authenticated: true })
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
@@ -716,7 +712,18 @@ export class ToolboxController {
       properties: {
         files: {
           type: 'array',
-          items: { $ref: getSchemaPath(UploadFileDto) },
+          items: {
+            type: 'object',
+            properties: {
+              file: {
+                type: 'string',
+                format: 'binary',
+              },
+              path: {
+                type: 'string',
+              },
+            },
+          },
         },
       },
     },
