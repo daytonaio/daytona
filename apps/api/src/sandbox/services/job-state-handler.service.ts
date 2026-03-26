@@ -412,13 +412,6 @@ export class JobStateHandlerService {
         return
       }
 
-      if (sandbox.backupState !== BackupState.IN_PROGRESS) {
-        this.logger.warn(
-          `Sandbox ${sandboxId} is not in backup state IN_PROGRESS for CREATE_BACKUP job ${job.id}. Backup state: ${sandbox.backupState}`,
-        )
-        return
-      }
-
       // Parse the job payload to get the snapshot this job was for.
       // Old v2 runners may not include snapshot in the payload, so we only
       // perform stale-snapshot checks when the field is present.
