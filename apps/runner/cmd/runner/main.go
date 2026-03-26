@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -112,9 +113,24 @@ func run() int {
 		return 2
 	}
 
+	// Resolve allowed domains for network rules
+	var allowedDomains []string
+	if cfg.NetworkAllowedDomains != "" {
+		for _, d := range strings.Split(cfg.NetworkAllowedDomains, ",") {
+			d = strings.TrimSpace(d)
+			if d != "" {
+				allowedDomains = append(allowedDomains, d)
+			}
+		}
+	}
+	allowedCIDRs := netrules.ResolveDomainsToCIDRs(allowedDomains, logger)
+	if len(allowedCIDRs) > 0 {
+		logger.Info("Resolved allowed domains for network rules", "domains", allowedDomains, "cidrs", allowedCIDRs)
+	}
+
 	// Initialize net rules manager
 	persistent := cfg.Environment != "development"
-	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent)
+	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent, allowedCIDRs)
 	if err != nil {
 		logger.Error("Failed to initialize net rules manager", "error", err)
 		return 2

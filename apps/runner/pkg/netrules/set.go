@@ -37,6 +37,13 @@ func (manager *NetRulesManager) SetNetworkRules(name string, sourceIp string, ne
 		}
 	}
 
+	// Add rules for always-allowed domains (resolved at startup)
+	for _, cidr := range manager.allowedCIDRs {
+		if err := manager.ipt.AppendUnique("filter", chainName, "-j", "RETURN", "-d", cidr.String(), "-p", "all"); err != nil {
+			return err
+		}
+	}
+
 	// Add a final rule to block all other traffic
 	if err := manager.ipt.AppendUnique("filter", chainName, "-j", "DROP", "-p", "all"); err != nil {
 		return err

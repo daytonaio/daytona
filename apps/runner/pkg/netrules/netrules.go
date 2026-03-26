@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net"
 	"os/exec"
 	"strings"
 	"sync"
@@ -17,16 +18,17 @@ import (
 
 // NetRulesManager provides thread-safe operations for managing network rules
 type NetRulesManager struct {
-	log        *slog.Logger
-	ipt        *iptables.IPTables
-	mu         sync.Mutex
-	persistent bool
-	ctx        context.Context
-	cancel     context.CancelFunc
+	log          *slog.Logger
+	ipt          *iptables.IPTables
+	mu           sync.Mutex
+	persistent   bool
+	allowedCIDRs []*net.IPNet
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
 // NewNetRulesManager creates a new instance of NetRulesManager
-func NewNetRulesManager(logger *slog.Logger, persistent bool) (*NetRulesManager, error) {
+func NewNetRulesManager(logger *slog.Logger, persistent bool, allowedCIDRs []*net.IPNet) (*NetRulesManager, error) {
 	ipt, err := iptables.NewWithProtocol(iptables.ProtocolIPv4)
 	if err != nil {
 		return nil, err
@@ -39,11 +41,12 @@ func NewNetRulesManager(logger *slog.Logger, persistent bool) (*NetRulesManager,
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &NetRulesManager{
-		log:        logger.With(slog.String("component", "netrules_manager")),
-		ipt:        ipt,
-		persistent: persistent,
-		ctx:        ctx,
-		cancel:     cancel,
+		log:          logger.With(slog.String("component", "netrules_manager")),
+		ipt:          ipt,
+		persistent:   persistent,
+		allowedCIDRs: allowedCIDRs,
+		ctx:          ctx,
+		cancel:       cancel,
 	}, nil
 }
 
