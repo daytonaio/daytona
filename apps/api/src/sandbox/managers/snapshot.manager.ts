@@ -43,11 +43,11 @@ import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { SnapshotInfoResponse } from '@daytonaio/runner-api-client'
 import { SnapshotActivatedEvent } from '../events/snapshot-activated.event'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 const SYNC_AGAIN = 'sync-again'
 const DONT_SYNC_AGAIN = 'dont-sync-again'
 const DEFAULT_SNAPSHOT_DEACTIVATION_TIMEOUT_MINUTES = 14 * 24 * 60 // 14 days
-const BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS = 7
 type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
@@ -76,6 +76,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
     private readonly snapshotService: SnapshotService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   async onApplicationShutdown() {
@@ -1016,8 +1017,12 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .select('sr.id')
         .innerJoin(BuildInfo, 'bi', 'sr."snapshotRef" = bi."snapshotRef"')
         .where('sr.state = :readyState', { readyState: SnapshotRunnerState.READY })
-        .andWhere(`bi.lastUsedAt < now() - interval '${BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS} days'`)
-        .andWhere(`sr.updatedAt < now() - interval '${BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS} days'`)
+        .andWhere(
+          `bi.lastUsedAt < now() - interval '${this.configService.get('buildInfoSnapshotRunnerStalenessDays')} days'`,
+        )
+        .andWhere(
+          `sr.updatedAt < now() - interval '${this.configService.get('buildInfoSnapshotRunnerStalenessDays')} days'`,
+        )
         .andWhere("sr.snapshotRef LIKE 'daytona-%'")
         .limit(500)
         .getMany()
