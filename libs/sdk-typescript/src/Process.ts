@@ -73,7 +73,7 @@ export class Process {
    * @param {string} command - Shell command to execute
    * @param {string} [cwd] - Working directory for command execution. If not specified, uses the sandbox working directory.
    * @param {Record<string, string>} [env] - Environment variables to set for the command
-   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
+   * @param {number} [timeout] - Maximum time in seconds to wait for the command to complete.
    * @returns {Promise<ExecuteResponse>} Command execution results containing:
    *                                    - exitCode: The command's exit status
    *                                    - result: Standard output from the command
@@ -99,21 +99,22 @@ export class Process {
     env?: Record<string, string>,
     timeout?: number,
   ): Promise<ExecuteResponse> {
-    const base64UserCmd = Buffer.from(command).toString('base64')
-    command = `echo '${base64UserCmd}' | base64 -d | sh`
-
-    if (env && Object.keys(env).length > 0) {
+    if (env && Object.keys(env).length) {
+      const validKeyPattern = /^[A-Za-z_][A-Za-z0-9_]*$/
+      for (const key of Object.keys(env)) {
+        if (!validKeyPattern.test(key)) {
+          throw new Error(`Invalid environment variable name: '${key}'`)
+        }
+      }
       const safeEnvExports =
         Object.entries(env)
           .map(([key, value]) => {
             const encodedValue = Buffer.from(value).toString('base64')
-            return `export ${key}=$(echo '${encodedValue}' | base64 -d)`
+            return `export ${key}="$(echo '${encodedValue}' | base64 -d)"`
           })
-          .join(';') + ';'
-      command = `${safeEnvExports} ${command}`
+          .join('; ') + '; '
+      command = `${safeEnvExports}${command}`
     }
-
-    command = `sh -c "${command}"`
 
     const response = await this.apiClient.executeCommand({
       command,
@@ -237,6 +238,24 @@ export class Process {
    */
   public async getSession(sessionId: string): Promise<Session> {
     const response = await this.apiClient.getSession(sessionId)
+    return response.data
+  }
+
+  /**
+   * Get the sandbox entrypoint session
+   *
+   * @returns {Promise<Session>} Entrypoint session information including:
+   *                            - sessionId: The entrypoint session's unique identifier
+   *                            - commands: List of commands executed in the entrypoint session
+   *
+   * @example
+   * const session = await process.getEntrypointSession();
+   * session.commands.forEach(cmd => {
+   *   console.log(`Command: ${cmd.command}`);
+   * });
+   */
+  public async getEntrypointSession(): Promise<Session> {
+    const response = await this.apiClient.getEntrypointSession()
     return response.data
   }
 
@@ -386,6 +405,66 @@ export class Process {
     }
 
     const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/${sessionId}/command/${commandId}/logs?follow=true`
+
+    const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
+
+    await stdDemuxStream(ws, onStdout, onStderr)
+  }
+
+  /**
+   * Get the logs for the sandbox entrypoint session.
+   *
+   * @returns {Promise<SessionCommandLogsResponse>} Command logs containing: output (combined stdout and stderr), stdout and stderr
+   *
+   * @example
+   * const logs = await process.getEntrypointLogs();
+   * console.log('[STDOUT]:', logs.stdout);
+   * console.log('[STDERR]:', logs.stderr);
+   */
+  public async getEntrypointLogs(): Promise<SessionCommandLogsResponse>
+  /**
+   * Asynchronously retrieve and process the logs for the entrypoint session as they become available.
+   *
+   * @param {function} onStdout - Callback function to handle stdout log chunks
+   * @param {function} onStderr - Callback function to handle stderr log chunks
+   * @returns {Promise<void>}
+   *
+   * @example
+   * const logs = await process.getEntrypointLogs((chunk) => {
+   *   console.log('[STDOUT]:', chunk);
+   * }, (chunk) => {
+   *   console.log('[STDERR]:', chunk);
+   * });
+   */
+  public async getEntrypointLogs(onStdout: (chunk: string) => void, onStderr: (chunk: string) => void): Promise<void>
+
+  @WithInstrumentation()
+  public async getEntrypointLogs(
+    onStdout?: (chunk: string) => void,
+    onStderr?: (chunk: string) => void,
+  ): Promise<SessionCommandLogsResponse | void> {
+    if (!onStdout && !onStderr) {
+      const response = await this.apiClient.getEntrypointLogs()
+
+      // Parse the response data if it's available
+      if (response.data) {
+        // Convert string to bytes for demuxing
+        const outputBytes = new TextEncoder().encode(response.data || '')
+        const demuxedCommandLogs = parseSessionCommandLogs(outputBytes)
+
+        return {
+          output: response.data,
+          stdout: demuxedCommandLogs.stdout,
+          stderr: demuxedCommandLogs.stderr,
+        }
+      }
+
+      return {
+        output: response.data,
+      }
+    }
+
+    const url = `${this.clientConfig.basePath.replace(/^http/, 'ws')}/process/session/entrypoint/logs?follow=true`
 
     const ws = await createSandboxWebSocket(url, this.clientConfig.baseOptions?.headers || {}, this.getPreviewToken)
 

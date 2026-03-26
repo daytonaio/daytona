@@ -655,52 +655,6 @@ func (c *Client) doGet(ctx context.Context, sandboxIDOrName string) (*Sandbox, e
 	return sandbox, nil
 }
 
-// FindOne finds a single sandbox by ID/name or by matching labels.
-//
-// If sandboxIDOrName is provided and non-empty, FindOne delegates to [Client.Get].
-// Otherwise, it searches for sandboxes matching the provided labels and returns
-// the first match.
-//
-// This method is useful when you need to find a sandbox but may have either its
-// identifier or its labels:
-//
-//	// Find by name
-//	name := "my-sandbox"
-//	sandbox, err := client.FindOne(ctx, &name, nil)
-//
-//	// Find by labels
-//	sandbox, err := client.FindOne(ctx, nil, map[string]string{
-//	    "environment": "production",
-//	    "team":        "backend",
-//	})
-//
-// Returns [errors.DaytonaNotFoundError] if no matching sandbox is found.
-func (c *Client) FindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error) {
-	return withInstrumentation(ctx, c.Otel, "Client", "FindOne", func(ctx context.Context) (*Sandbox, error) {
-		return c.doFindOne(ctx, sandboxIDOrName, labels)
-	})
-}
-
-func (c *Client) doFindOne(ctx context.Context, sandboxIDOrName *string, labels map[string]string) (*Sandbox, error) {
-	if sandboxIDOrName != nil && *sandboxIDOrName != "" {
-		return c.Get(ctx, *sandboxIDOrName)
-	}
-
-	pages := 1
-	limit := 1
-	result, err := c.List(ctx, labels, &pages, &limit)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(result.Items) == 0 {
-		labelsJSON, _ := json.Marshal(labels)
-		return nil, errors.NewDaytonaNotFoundError(fmt.Sprintf("No sandbox found with labels %s", labelsJSON), nil)
-	}
-
-	return result.Items[0], nil
-}
-
 // List retrieves sandboxes with optional label filtering and pagination.
 //
 // Parameters:

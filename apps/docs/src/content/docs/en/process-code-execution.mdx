@@ -601,6 +601,168 @@ For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SD
 >
 > [**list sessions (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session)
 
+### Entrypoint session
+
+Daytona provides methods to retrieve information about the internal entrypoint session in sandboxes. In each sandbox, the configured entrypoint command is executed inside a dedicated internal session, and you can fetch the session details (including the commands) and read its logs.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+
+```python
+# Entrypoint session details
+session = sandbox.process.get_entrypoint_session()
+print(f"Entrypoint session: {session.session_id}")
+cmd = session.commands[0]
+print(f"Entrypoint command id: {cmd.id}")
+print(f"Command: {cmd.command}")
+
+# Entrypoint logs (HTTP)
+logs = sandbox.process.get_entrypoint_logs()
+print(f"[STDOUT]: {logs.stdout}")
+print(f"[STDERR]: {logs.stderr}")
+
+# Stream entrypoint logs (WebSocket)
+async def stream_entrypoint_logs():
+    await sandbox.process.get_entrypoint_logs_async(
+        lambda log: print(f"[STDOUT]: {log}"),
+        lambda log: print(f"[STDERR]: {log}"),
+    )
+
+# Use asyncio.run in scripts; in notebooks or async apps, await stream_entrypoint_logs() instead.
+asyncio.run(stream_entrypoint_logs())
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+
+```typescript
+// Entrypoint session details
+const session = await sandbox.process.getEntrypointSession();
+console.log(`Entrypoint session: ${session.sessionId}`);
+const cmd = session.commands[0]
+console.log(`Entrypoint command id: ${cmd.id}`);
+console.log(`Command: ${cmd.command}`);
+
+// Entrypoint logs (HTTP)
+const logs = await sandbox.process.getEntrypointLogs();
+console.log('[STDOUT]:', logs.stdout);
+console.log('[STDERR]:', logs.stderr);
+
+// Stream entrypoint logs (WebSocket)
+await sandbox.process.getEntrypointLogs(
+    (chunk) => console.log('[STDOUT]:', chunk),
+    (chunk) => console.log('[STDERR]:', chunk),
+);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+
+```ruby
+# Entrypoint session details
+session = sandbox.process.get_entrypoint_session
+puts "Entrypoint session: #{session.session_id}"
+cmd = session.commands.first
+puts "Entrypoint command id: #{cmd.id}"
+puts "Command: #{cmd.command}"
+
+# Entrypoint logs (HTTP)
+logs = sandbox.process.get_entrypoint_logs
+puts "[STDOUT]: #{logs.stdout}"
+puts "[STDERR]: #{logs.stderr}"
+
+# Stream entrypoint logs (WebSocket)
+sandbox.process.get_entrypoint_logs_async(
+  on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+  on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+)
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+
+```go
+// Entrypoint session details
+info, err := sandbox.Process.GetEntrypointSession(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("Entrypoint session: %s\n", info.GetSessionId())
+cmds := info.GetCommands()
+cmd := cmds[0]
+fmt.Printf("Entrypoint command id: %s\n", cmd.GetId())
+fmt.Printf("Command: %s\n", cmd.GetCommand())
+
+// Entrypoint logs (HTTP)
+logs, err := sandbox.Process.GetEntrypointLogs(ctx)
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Println(logs)
+
+// Stream entrypoint logs (WebSocket)
+stdout := make(chan string, 100)
+stderr := make(chan string, 100)
+go func() {
+	for msg := range stderr {
+		log.Printf("[STDERR]: %s", msg)
+	}
+}()
+go func() {
+	if err := sandbox.Process.GetEntrypointLogsStream(ctx, stdout, stderr); err != nil {
+		log.Println("Entrypoint log stream error:", err)
+	}
+}()
+for msg := range stdout {
+	fmt.Printf("[STDOUT]: %s\n", msg)
+}
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+
+```bash
+# Get entrypoint session details
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/entrypoint'
+
+# Get entrypoint logs (HTTP)
+curl 'https://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/entrypoint/logs'
+
+# Follow entrypoint logs in real-time (WebSocket)
+# wss://proxy.app.daytona.io/toolbox/{sandboxId}/process/session/entrypoint/logs?follow=true
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/) references:
+
+> [**get_entrypoint_session (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_session)
+>
+> [**get_entrypoint_logs (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_logs)
+>
+> [**get_entrypoint_logs_async (Python SDK)**](/docs/en/python-sdk/sync/process/#processget_entrypoint_logs_async)
+>
+> [**getEntrypointSession (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getentrypointsession)
+>
+> [**getEntrypointLogs (TypeScript SDK)**](/docs/en/typescript-sdk/process/#getentrypointlogs)
+>
+> [**get_entrypoint_session (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_session)
+>
+> [**get_entrypoint_logs (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_logs)
+>
+> [**get_entrypoint_logs_async (Ruby SDK)**](/docs/en/ruby-sdk/process/#get_entrypoint_logs_async)
+>
+> [**GetEntrypointSession (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointSession)
+>
+> [**GetEntrypointLogs (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointLogs)
+>
+> [**GetEntrypointLogsStream (Go SDK)**](/docs/en/go-sdk/daytona/#ProcessService.GetEntrypointLogsStream)
+>
+> [**GetEntrypointSession (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session/entrypoint)
+>
+> [**GetEntrypointLogs (API)**](/docs/en/tools/api/#daytona-toolbox/tag/process/GET/process/session/entrypoint/logs)
+
 ### Execute interactive commands
 
 Daytona provides methods to execute interactive commands in sessions. You can send input to running commands that expect user interaction, such as confirmations or interactive tools like database CLIs and package managers.

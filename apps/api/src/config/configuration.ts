@@ -323,6 +323,7 @@ const configuration = {
     key: process.env.ENCRYPTION_KEY,
     salt: process.env.ENCRYPTION_SALT,
   },
+  failedSnapshotRunnerRetentionHours: parseInt(process.env.FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS || '3', 10),
 }
 
 export { configuration }

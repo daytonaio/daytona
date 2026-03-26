@@ -92,7 +92,6 @@ export class SandboxArchiveAction extends SandboxAction {
 
     try {
       const sandboxInfo = await runnerAdapter.sandboxInfo(sandbox.id)
-      this.logger.log(`sandbox info from runner: state: ${sandboxInfo.state}, backupState: ${sandboxInfo.backupState}`)
       if (sandboxInfo.state === SandboxState.DESTROYED) {
         if (isFromErrorState) {
           this.logger.warn(`Transitioning sandbox ${sandbox.id} from ERROR to ARCHIVED state (runner draining)`)

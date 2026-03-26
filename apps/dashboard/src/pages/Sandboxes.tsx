@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
@@ -63,7 +64,8 @@ const Sandboxes: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
   const config = useConfig()
   const queryClient = useQueryClient()
-  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
+    useSelectedOrganization()
 
   // Pagination
 
@@ -407,17 +409,16 @@ const Sandboxes: React.FC = () => {
       toast.success(`Starting sandbox with ID: ${id}`)
       await markAllSandboxQueriesAsStale()
     } catch (error) {
-      handleApiError(
-        error,
-        'Failed to start sandbox',
-        error instanceof OrganizationSuspendedError &&
+      handleApiError(error, 'Failed to start sandbox', {
+        action:
+          error instanceof OrganizationSuspendedError &&
           config.billingApiUrl &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
-          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
-            Go to billing
-          </Button>
-        ) : undefined,
-      )
+            <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
+              Go to billing
+            </Button>
+          ) : undefined,
+      })
       revertSandboxStateOptimisticUpdate(id, previousState)
     } finally {
       setSandboxIsLoading((prev) => ({ ...prev, [id]: false }))
@@ -934,7 +935,7 @@ const Sandboxes: React.FC = () => {
               </Button>
             </>
           )}
-          <CreateSandboxSheet />
+          {authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES) && <CreateSandboxSheet />}
         </div>
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">

@@ -15,7 +15,7 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [SNAPSHOT_ID]",
+	Use:     "delete [SNAPSHOT_ID | SNAPSHOT_NAME]",
 	Short:   "Delete a snapshot",
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
@@ -70,15 +70,19 @@ var DeleteCmd = &cobra.Command{
 			return cmd.Help()
 		}
 
-		// Handle case when a snapshot ID is provided
-		snapshotIdArg := args[0]
+		snapshotIdOrName := args[0]
 
-		res, err := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshotIdArg).Execute()
+		snapshot, res, err := apiClient.SnapshotsAPI.GetSnapshot(ctx, snapshotIdOrName).Execute()
 		if err != nil {
 			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshotIdArg))
+		res, err = apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshot.Id).Execute()
+		if err != nil {
+			return apiclient_cli.HandleErrorResponse(res, err)
+		}
+
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshotIdOrName))
 
 		return nil
 	},

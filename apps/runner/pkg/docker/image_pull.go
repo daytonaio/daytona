@@ -19,7 +19,7 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO) (*image.InspectResponse, error) {
+func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto.RegistryDTO, sandboxId *string) (*image.InspectResponse, error) {
 	defer timer.Timer()()
 
 	tag := "latest"
@@ -36,6 +36,11 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 
 	d.logger.InfoContext(ctx, "Pulling image", "imageName", imageName)
+
+	if sandboxId != nil {
+		d.pullTracker.Add(*sandboxId)
+		defer d.pullTracker.Remove(*sandboxId)
+	}
 
 	responseBody, err := d.apiClient.ImagePull(ctx, imageName, image.PullOptions{
 		RegistryAuth: getRegistryAuth(reg),

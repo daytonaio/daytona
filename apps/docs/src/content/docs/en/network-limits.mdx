@@ -4,7 +4,7 @@ title: Network Limits (Firewall)
 
 import { TabItem, Tabs } from '@astrojs/starlight/components'
 
-Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your [organization's billing tier](/docs/en/limits/) or manually configured for specific sandboxes.
+Daytona provides network egress limiting for sandboxes to control internet access. This feature can be automatically applied based on your [organization's limits](/docs/en/limits/) or manually configured for specific sandboxes.
 
 ## Tier-based network restrictions
 
@@ -121,16 +121,83 @@ func main() {
 ```
 
 </TabItem>
-</Tabs>
+<TabItem label="API" icon="seti:json">
 
+```bash
+# Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "networkAllowList": "208.80.154.232/32,199.16.156.103/32,192.168.1.0/24"
+  }'
+
+# Or block all network access
+curl 'https://app.daytona.io/api/sandbox' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+    "networkBlockAll": true
+  }'
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+# Allow access to specific IP addresses (Wikipedia, X/Twitter, private network)
+daytona create --network-allow-list '208.80.154.232/32,199.16.156.103/32,192.168.1.0/24'
+
+# Or block all network access
+daytona create --network-block-all
+```
+
+</TabItem>
+</Tabs>
 
 :::note
 If both `networkBlockAll` and `networkAllowList` are specified, `networkBlockAll` takes precedence and all network access will be blocked, ignoring the allow list.
 :::
 
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams), [TypeScript SDK](/docs/en/typescript-sdk/daytona#createsandboxbaseparams), [Ruby SDK](/docs/en/ruby-sdk/sandbox#network_allow_list), [Go SDK](/docs/en/go-sdk/types#SandboxBaseParams), [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox), and [CLI](/docs/en/tools/cli#daytona-create) references:
+
+> [**network_allow_list (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
+>
+> [**network_block_all (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
+>
+> [**network_allow_list (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
+>
+> [**network_block_all (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
+>
+> [**network_allow_list (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#network_allow_list)
+>
+> [**network_block_all (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#network_allow_list)
+>
+> [**network_allow_list (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
+>
+> [**network_block_all (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
+>
+> [**networkAllowList (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
+>
+> [**networkBlockAll (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
+>
+> [**--network-allow-list (CLI)**](/docs/en/tools/cli#daytona-create)
+>
+> [**--network-block-all (CLI)**](/docs/en/tools/cli#daytona-create)
+
 ## Network allow list format
 
-The `networkAllowList` parameter accepts up to 10 CIDR network blocks separated by commas:
+The network allow list is a comma-separated list of IPv4 CIDR blocks. Set your allowed networks using the `networkAllowList` parameter when [creating a sandbox](/docs/en/sandboxes#create-sandboxes).
+
+- **IPv4 only**: hostnames, domains, and IPv6 are not supported
+- **CIDR required**: every entry must include a `/` prefix length integer in the range `0` to `32` (inclusive), for example: `/32`
+- **CIDR format**: use standard CIDR notation (`A.B.C.D/N`). Do not include extra `/` segments
+- **Max 10 entries**: the list cannot contain more than 10 comma-separated items
+- **Whitespace is ignored**: entries are trimmed, so spaces around commas are ok
+
+The following examples are valid:
 
 - **Single IP**: `208.80.154.232/32` (Wikipedia)
 - **Subnet**: `192.168.1.0/24` (Private network)
@@ -168,7 +235,6 @@ Enabling unrestricted network access may pose security risks when executing untr
 
 Test network connectivity before starting critical development work and consider upgrading your tier if you need access to many external services.
 :::
-
 
 ## Essential services
 
@@ -278,7 +344,6 @@ This list is continuously updated. If you require access to additional essential
 ### LLM observability
 
 - **Langfuse**: `*.langfuse.com`, `*.cloud.langfuse.com`
-
 
 ## Troubleshooting
 

@@ -22,10 +22,10 @@ export class SandboxPythonCodeToolbox implements SandboxCodeToolbox {
     // Build command-line arguments string
     const argv = params?.argv ? params.argv.join(' ') : ''
 
-    // Execute the bootstrapper code directly
+    // Pipe the base64-encoded code via stdin to avoid OS ARG_MAX limits on large payloads
+    // printf is a shell builtin that does not invoke execve(), so the base64 string bypasses the kernel ARG_MAX limit
     // Use -u flag to ensure unbuffered output for real-time error reporting
-    // eslint-disable-next-line no-useless-escape
-    return `sh -c 'python3 -u -c "exec(__import__(\\\"base64\\\").b64decode(\\\"${base64Code}\\\").decode())" ${argv}'`
+    return `printf '%s' '${base64Code}' | base64 -d | python3 -u - ${argv}`
   }
 
   /**

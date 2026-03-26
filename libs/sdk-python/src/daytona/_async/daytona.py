@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-import os
 import warnings
 from copy import deepcopy
 from importlib.metadata import version
@@ -25,7 +24,6 @@ from daytona_api_client_async import (
 )
 from daytona_api_client_async import VolumesApi as VolumesApi
 from daytona_toolbox_api_client_async import ApiClient as ToolboxApiClient
-from environs import Env
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
@@ -35,6 +33,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes import service_attributes
 
 from .._utils.enum import to_enum
+from .._utils.env import DaytonaEnvReader
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
@@ -150,6 +149,8 @@ class AsyncDaytona:
             api_url = config.api_url or config.server_url
             self._target = config.target
 
+        env_reader: DaytonaEnvReader | None = None
+
         if config is None or (
             not all([self._api_key, api_url, self._target])
             and not all(
@@ -161,19 +162,14 @@ class AsyncDaytona:
                 ]
             )
         ):
-            # Initialize env - it automatically reads from .env and .env.local
-            env = Env()
-            _ = env.read_env()
-            _ = env.read_env(".env", override=True)
-            _ = env.read_env(".env.local", override=True)
+            env_reader = DaytonaEnvReader()
+            self._api_key = self._api_key or (env_reader.get("DAYTONA_API_KEY") if not self._jwt_token else None)
+            self._jwt_token = self._jwt_token or env_reader.get("DAYTONA_JWT_TOKEN")
+            self._organization_id = self._organization_id or env_reader.get("DAYTONA_ORGANIZATION_ID")
+            api_url = api_url or env_reader.get("DAYTONA_API_URL") or env_reader.get("DAYTONA_SERVER_URL")
+            self._target = self._target or env_reader.get("DAYTONA_TARGET")
 
-            self._api_key = self._api_key or (env.str("DAYTONA_API_KEY", None) if not self._jwt_token else None)
-            self._jwt_token = self._jwt_token or env.str("DAYTONA_JWT_TOKEN", None)
-            self._organization_id = self._organization_id or env.str("DAYTONA_ORGANIZATION_ID", None)
-            api_url = api_url or env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", None)
-            self._target = self._target or env.str("DAYTONA_TARGET", None)
-
-            if env.str("DAYTONA_SERVER_URL", None) and not env.str("DAYTONA_API_URL", None):
+            if env_reader.get("DAYTONA_SERVER_URL") and not env_reader.get("DAYTONA_API_URL"):
                 warnings.warn(
                     "Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. "
                     + "Use `DAYTONA_API_URL` instead.",
@@ -230,9 +226,9 @@ class AsyncDaytona:
         )
 
         # Initialize OpenTelemetry if enabled
-        otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or os.environ.get(
-            "DAYTONA_EXPERIMENTAL_OTEL_ENABLED"
-        ) == "true"
+        otel_enabled = (config and config._experimental and config._experimental.get("otelEnabled")) or (
+            env_reader or DaytonaEnvReader()
+        ).get("DAYTONA_EXPERIMENTAL_OTEL_ENABLED") == "true"
         if otel_enabled:
             self._init_otel(sdk_version)
 
@@ -622,36 +618,6 @@ class AsyncDaytona:
             self._sandbox_api,
             code_toolbox,
         )
-
-    @intercept_errors(message_prefix="Failed to find sandbox: ")
-    @with_instrumentation()
-    async def find_one(
-        self, sandbox_id_or_name: str | None = None, labels: dict[str, str] | None = None
-    ) -> AsyncSandbox:
-        """Finds a Sandbox by its ID or name or labels.
-
-        Args:
-            sandbox_id_or_name (str | None): The ID or name of the Sandbox to retrieve.
-            labels (dict[str, str] | None): Labels to filter Sandboxes.
-
-        Returns:
-            Sandbox: First Sandbox that matches the ID or name or labels.
-
-        Raises:
-            DaytonaError: If no Sandbox is found.
-
-        Example:
-            ```python
-            sandbox = await daytona.find_one(labels={"my-label": "my-value"})
-            print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
-            ```
-        """
-        if sandbox_id_or_name:
-            return await self.get(sandbox_id_or_name)
-        sandboxes = await self.list(labels, page=1, limit=1)
-        if len(sandboxes.items) == 0:
-            raise DaytonaError(f"No sandbox found with labels {labels}")
-        return sandboxes.items[0]
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
     @with_instrumentation()

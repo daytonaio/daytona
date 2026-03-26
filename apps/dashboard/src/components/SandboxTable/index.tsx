@@ -4,6 +4,7 @@
  */
 
 import { RoutePath } from '@/enums/RoutePath'
+import { useCommandPaletteAnalytics } from '@/hooks/useCommandPaletteAnalytics'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { cn } from '@/lib/utils'
 import {
@@ -159,7 +160,9 @@ export function SandboxTable({
   })
 
   const { setIsOpen } = useCommandPaletteActions()
+  const { trackOpened } = useCommandPaletteAnalytics()
   const handleOpenCommandPalette = () => {
+    trackOpened('sandbox_selection_toast')
     setIsOpen(true)
   }
 

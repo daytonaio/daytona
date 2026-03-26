@@ -90,7 +90,7 @@ Execute a shell command in the Sandbox
 - `command` _String_ - Shell command to execute
 - `cwd` _String, nil_ - Working directory for command execution. If not specified, uses the sandbox working directory
 - `env` _Hash\<String, String\>, nil_ - Environment variables to set for the command
-- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely
+- `timeout` _Integer, nil_ - Maximum time in seconds to wait for the command to complete.
 
 **Returns**:
 
@@ -197,6 +197,29 @@ Gets a session in the Sandbox
 
 ```ruby
 session = sandbox.process.get_session("my-session")
+session.commands.each do |cmd|
+  puts "Command: #{cmd.command}"
+end
+
+```
+
+#### get_entrypoint_session()
+
+```ruby
+def get_entrypoint_session()
+
+```
+
+Gets the Sandbox entrypoint session
+
+**Returns**:
+
+- `DaytonaApiClient:Session` - Entrypoint session information including session_id and commands
+
+**Examples:**
+
+```ruby
+session = sandbox.process.get_entrypoint_session()
 session.commands.each do |cmd|
   puts "Command: #{cmd.command}"
 end
@@ -324,6 +347,56 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 sandbox.process.get_session_command_logs_async(
   session_id: "my-session",
   command_id: "cmd-123",
+  on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
+  on_stderr: ->(log) { puts "[STDERR]: #{log}" }
+)
+
+```
+
+#### get_entrypoint_logs()
+
+```ruby
+def get_entrypoint_logs()
+
+```
+
+Get the sandbox entrypoint logs
+
+**Returns**:
+
+- `Daytona:SessionCommandLogsResponse` - Entrypoint logs including output, stdout, and stderr
+
+**Examples:**
+
+```ruby
+logs = sandbox.process.get_entrypoint_logs()
+puts "Command stdout: #{logs.stdout}"
+puts "Command stderr: #{logs.stderr}"
+
+```
+
+#### get_entrypoint_logs_async()
+
+```ruby
+def get_entrypoint_logs_async(on_stdout:, on_stderr:)
+
+```
+
+Asynchronously retrieves and processes the sandbox entrypoint logs as they become available
+
+**Parameters**:
+
+- `on_stdout` _Proc_ - Callback function to handle stdout log chunks as they arrive
+- `on_stderr` _Proc_ - Callback function to handle stderr log chunks as they arrive
+
+**Returns**:
+
+- `WebSocket:Client:Simple:Client`
+
+**Examples:**
+
+```ruby
+sandbox.process.get_entrypoint_logs_async(
   on_stdout: ->(log) { puts "[STDOUT]: #{log}" },
   on_stderr: ->(log) { puts "[STDERR]: #{log}" }
 )

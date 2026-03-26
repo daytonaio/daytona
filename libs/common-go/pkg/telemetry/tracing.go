@@ -31,10 +31,14 @@ func InitTracer(ctx context.Context, config Config, exporterFilters ...ExporterF
 		return nil, err
 	}
 
-	traceExporter, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpointURL(config.Endpoint+"/v1/traces"),
+	traceOpts := []otlptracehttp.Option{
+		otlptracehttp.WithEndpointURL(config.Endpoint + "/v1/traces"),
 		otlptracehttp.WithHeaders(config.Headers),
-	)
+	}
+	if config.TLSConfig != nil {
+		traceOpts = append(traceOpts, otlptracehttp.WithTLSClientConfig(config.TLSConfig))
+	}
+	traceExporter, err := otlptracehttp.New(ctx, traceOpts...)
 	if err != nil {
 		return nil, err
 	}

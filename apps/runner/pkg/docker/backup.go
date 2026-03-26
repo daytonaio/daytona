@@ -42,6 +42,11 @@ func (d *DockerClient) CreateBackupAsync(ctx context.Context, containerId string
 
 	d.logger.InfoContext(ctx, "Creating backup for container", "containerId", containerId)
 
+	cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, backupDto.Snapshot, nil)
+	if cacheErr != nil {
+		d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
+	}
+
 	go func() {
 		err := d.createBackup(containerId, backupDto)
 		if err != nil {
@@ -65,7 +70,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 	backup_context_map.Set(containerId, backupContext{ctx, cancel})
 
-	cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, nil)
+	cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateInProgress, backupDto.Snapshot, nil)
 	if cacheErr != nil {
 		d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 	}
@@ -73,7 +78,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 	err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, backupDto.Snapshot, nil)
 			if cacheErr != nil {
 				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 			}
@@ -83,7 +88,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 		}
 
 		if errors.Is(err, context.DeadlineExceeded) {
-			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, backupDto.Snapshot, err)
 			if cacheErr != nil {
 				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 			}
@@ -94,7 +99,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 		d.logger.ErrorContext(ctx, "Error committing container", "containerId", containerId, "error", err)
 
-		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, backupDto.Snapshot, err)
 		if cacheErr != nil {
 			d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 		}
@@ -105,7 +110,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 	err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, nil)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateNone, backupDto.Snapshot, nil)
 			if cacheErr != nil {
 				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 			}
@@ -115,7 +120,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 		}
 
 		if errors.Is(err, context.DeadlineExceeded) {
-			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+			cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, backupDto.Snapshot, err)
 			if cacheErr != nil {
 				d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 			}
@@ -126,7 +131,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 
 		d.logger.ErrorContext(ctx, "Error pushing image", "image", backupDto.Snapshot, "error", err)
 
-		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, err)
+		cacheErr := d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateFailed, backupDto.Snapshot, err)
 		if cacheErr != nil {
 			d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 		}
@@ -134,7 +139,7 @@ func (d *DockerClient) createBackup(containerId string, backupDto dto.CreateBack
 		return err
 	}
 
-	cacheErr = d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, nil)
+	cacheErr = d.backupInfoCache.SetBackupState(ctx, containerId, enums.BackupStateCompleted, backupDto.Snapshot, nil)
 	if cacheErr != nil {
 		d.logger.DebugContext(ctx, "Failed to update backup info", "error", cacheErr)
 	}

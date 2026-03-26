@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import re
 import warnings
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
@@ -19,6 +20,8 @@ from .charts import Chart
 STDOUT_PREFIX: bytes = b"\x01\x01\x01"
 STDERR_PREFIX: bytes = b"\x02\x02\x02"
 MAX_PREFIX_LEN: int = max(len(STDOUT_PREFIX), len(STDERR_PREFIX))
+
+_VALID_ENV_KEY_REGEX = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
 @dataclass

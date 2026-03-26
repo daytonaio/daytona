@@ -330,6 +330,7 @@ class Sandbox(SandboxDto):
         self.wait_for_sandbox_stop(timeout=0)
 
     @intercept_errors(message_prefix="Failed to remove sandbox: ")
+    @with_timeout()
     @with_instrumentation()
     def delete(self, timeout: float | None = 60) -> None:
         """Deletes the Sandbox.

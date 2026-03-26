@@ -18,6 +18,9 @@ module DaytonaApiClient
     # Runner metrics
     attr_accessor :metrics
 
+    # Health status of individual services on the runner
+    attr_accessor :service_health
+
     # Runner domain
     attr_accessor :domain
 
@@ -34,6 +37,7 @@ module DaytonaApiClient
     def self.attribute_map
       {
         :'metrics' => :'metrics',
+        :'service_health' => :'serviceHealth',
         :'domain' => :'domain',
         :'proxy_url' => :'proxyUrl',
         :'api_url' => :'apiUrl',
@@ -55,6 +59,7 @@ module DaytonaApiClient
     def self.openapi_types
       {
         :'metrics' => :'RunnerHealthMetrics',
+        :'service_health' => :'Array<RunnerServiceHealth>',
         :'domain' => :'String',
         :'proxy_url' => :'String',
         :'api_url' => :'String',
@@ -86,6 +91,12 @@ module DaytonaApiClient
 
       if attributes.key?(:'metrics')
         self.metrics = attributes[:'metrics']
+      end
+
+      if attributes.key?(:'service_health')
+        if (value = attributes[:'service_health']).is_a?(Array)
+          self.service_health = value
+        end
       end
 
       if attributes.key?(:'domain')
@@ -143,6 +154,7 @@ module DaytonaApiClient
       return true if self.equal?(o)
       self.class == o.class &&
           metrics == o.metrics &&
+          service_health == o.service_health &&
           domain == o.domain &&
           proxy_url == o.proxy_url &&
           api_url == o.api_url &&
@@ -158,7 +170,7 @@ module DaytonaApiClient
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [metrics, domain, proxy_url, api_url, app_version].hash
+      [metrics, service_health, domain, proxy_url, api_url, app_version].hash
     end
 
     # Builds the object from hash

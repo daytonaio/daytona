@@ -27,6 +27,7 @@ from .._utils.stream import std_demux_stream
 from .._utils.timeout import http_timeout
 from ..common.charts import Chart, parse_chart
 from ..common.process import (
+    _VALID_ENV_KEY_REGEX,
     CodeRunParams,
     ExecuteResponse,
     ExecutionArtifacts,
@@ -108,7 +109,7 @@ class Process:
                 specified, uses the sandbox working directory.
             env (dict[str, str] | None): Environment variables to set for the command.
             timeout (int | None): Maximum time in seconds to wait for the command
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Command execution results containing:
@@ -130,28 +131,27 @@ class Process:
             result = sandbox.process.exec("sleep 10", timeout=5)
             ```
         """
-        base64_user_cmd = base64.b64encode(command.encode()).decode()
-        command = f"echo '{base64_user_cmd}' | base64 -d | sh"
-
-        if env and len(env.items()) > 0:
+        if env:
+            for key in env:
+                if not _VALID_ENV_KEY_REGEX.match(key):
+                    raise ValueError(f"Invalid environment variable name: {key!r}")
             safe_env_exports = (
-                ";".join(
+                " ".join(
                     [
-                        f"export {key}=$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)"
+                        f"""export {key}="$(echo '{base64.b64encode(value.encode()).decode()}' | base64 -d)";"""
                         for key, value in env.items()
                     ]
                 )
-                + ";"
+                + " "
             )
-            command = f"{safe_env_exports} {command}"
+            command = f"{safe_env_exports}{command}"
 
-        command = f'sh -c "{command}"'
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
         response = self._api_client.execute_command(request=execute_request)
 
         # Post-process the output to extract ExecutionArtifacts
-        artifacts = Process._parse_output(response.result.splitlines())
+        artifacts = Process._parse_output(response.result.split("\n"))
 
         # Create new response with processed output and charts
         # TODO: Remove model_construct once everything is migrated to pydantic # pylint: disable=fixme
@@ -177,7 +177,7 @@ class Process:
             code (str): Code to execute.
             params (CodeRunParams | None): Parameters for code execution.
             timeout (int | None): Maximum time in seconds to wait for the code
-                to complete. 0 means wait indefinitely.
+                to complete.
 
         Returns:
             ExecuteResponse: Code execution result containing:
@@ -284,6 +284,24 @@ class Process:
             ```
         """
         return self._api_client.get_session(session_id=session_id)
+
+    @intercept_errors(message_prefix="Failed to get sandbox entrypoint session: ")
+    def get_entrypoint_session(self) -> Session:
+        """Gets the sandbox entrypoint session.
+
+        Returns:
+            Session: Entrypoint session information including:
+                - session_id: The entrypoint session's unique identifier
+                - commands: List of commands executed in the entrypoint session
+
+        Example:
+            ```python
+            session = sandbox.process.get_entrypoint_session()
+            for cmd in session.commands:
+                print(f"Command: {cmd.command}")
+            ```
+        """
+        return self._api_client.get_entrypoint_session()
 
     @intercept_errors(message_prefix="Failed to get session command: ")
     @with_instrumentation()
@@ -431,6 +449,58 @@ class Process:
         _, url, headers, *_ = self._api_client._get_session_command_logs_serialize(
             session_id=session_id,
             command_id=command_id,
+            follow=True,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
+        )
+
+        url = re.sub(r"^http", "ws", url)
+
+        async with websockets.connect(url, additional_headers=headers) as ws:
+            await std_demux_stream(ws, on_stdout, on_stderr)
+
+    @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+    @with_instrumentation()
+    def get_entrypoint_logs(self) -> SessionCommandLogsResponse:
+        """Get the logs for the entrypoint session.
+
+        Returns:
+            SessionCommandLogsResponse: Command logs including:
+                - output: Combined command output (stdout and stderr)
+                - stdout: Standard output from the command
+                - stderr: Standard error from the command
+
+        Example:
+            ```python
+            logs = sandbox.process.get_entrypoint_logs()
+            print(f"Command stdout: {logs.stdout}")
+            print(f"Command stderr: {logs.stderr}")
+            ```
+        """
+        response = self._api_client.get_entrypoint_logs_without_preload_content()
+
+        return parse_session_command_logs(response.data)
+
+    @intercept_errors(message_prefix="Failed to get entrypoint logs: ")
+    async def get_entrypoint_logs_async(self, on_stdout: OutputHandler[str], on_stderr: OutputHandler[str]) -> None:
+        """Asynchronously retrieves and processes the logs for the entrypoint session as they become available.
+
+        Args:
+            on_stdout OutputHandler[str]: Callback function to handle stdout log chunks as they arrive.
+            on_stderr OutputHandler[str]: Callback function to handle stderr log chunks as they arrive.
+
+        Example:
+            ```python
+            await sandbox.process.get_entrypoint_logs_async(
+                lambda log: print(f"[STDOUT]: {log}"),
+                lambda log: print(f"[STDERR]: {log}"),
+            )
+            ```
+        """
+
+        _, url, headers, *_ = self._api_client._get_entrypoint_logs_serialize(
             follow=True,
             _request_auth=None,
             _content_type=None,

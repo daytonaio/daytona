@@ -250,39 +250,6 @@ sandbox = daytona.get("my-sandbox-id")
 print(sandbox.status)
 ```
 
-#### Daytona.find\_one
-
-```python
-@intercept_errors(message_prefix="Failed to find sandbox: ")
-def find_one(sandbox_id: Optional[str] = None,
-             labels: Optional[Dict[str, str]] = None) -> Sandbox
-```
-
-ID またはラベルでサンドボックスを検索します。
-
-**引数**:
-
-- `sandbox_id` _Optional[str]_ - 取得するサンドボックスの ID。
-- `labels` _Optional[Dict[str, str]]_ - サンドボックスをフィルタリングするためのラベル。
-  
-
-**戻り値**:
-
-- `Sandbox` - ID またはラベルに一致する最初のサンドボックス。
-  
-
-**送出**:
-
-- `DaytonaError` - サンドボックスが見つからない場合。
-  
-
-**例**:
-
-```python
-sandbox = daytona.find_one(labels={"my-label": "my-value"})
-print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
-```
-
 #### Daytona.list
 
 ```python

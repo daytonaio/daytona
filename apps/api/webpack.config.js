@@ -36,6 +36,10 @@ module.exports = composePlugins(
       config.entry[`migrations/${key}`] = migrationEntries[key]
     }
     config.mode = process.env.NODE_ENV
+
+    config.watchOptions = {
+      ignored: /node_modules/,
+    }
     return config
   },
 )

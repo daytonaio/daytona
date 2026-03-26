@@ -20,13 +20,19 @@ import (
 	"github.com/daytonaio/common-go/pkg/log"
 )
 
-func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
+func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombinedOutput, suppressInputEcho bool) (*SessionExecute, error) {
 	session, ok := s.sessions.Get(sessionId)
 	if !ok {
 		return nil, common_errors.NewNotFoundError(errors.New("session not found"))
 	}
 
-	cmdId := uuid.NewString()
+	if cmdId == util.EmptyCommandID {
+		cmdId = uuid.NewString()
+	}
+
+	if _, ok := session.commands.Get(cmdId); ok {
+		return nil, common_errors.NewConflictError(errors.New("command with the given ID already exists"))
+	}
 
 	command := &Command{
 		Id:                cmdId,
@@ -49,12 +55,18 @@ func (s *SessionService) Execute(sessionId, cmd string, async, isCombinedOutput,
 
 	defer logFile.Close()
 
+	inputPipeCommand := `cat /dev/null > "$ip" &`
+	if async {
+		inputPipeCommand = `while :; do sleep 3600; done > "$ip" &`
+	}
+
 	cmdToExec := fmt.Sprintf(cmdWrapperFormat+"\n",
 		logFilePath, // %q  -> log
 		logDir,      // %q  -> dir
 		command.InputFilePath(session.Dir(s.configDir)), // %q  -> input
 		toOctalEscapes(log.STDOUT_PREFIX),               // %s  -> stdout prefix
 		toOctalEscapes(log.STDERR_PREFIX),               // %s  -> stderr prefix
+		inputPipeCommand,                                // %s  -> stdin behavior
 		cmd,                                             // %s  -> verbatim script body
 		exitCodeFilePath,                                // %q
 	)
@@ -151,12 +163,16 @@ var cmdWrapperFormat string = `
 	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$sp" ) >> "$log" & r1=$!
 	( while IFS= read -r line || [ -n "$line" ]; do printf '%s%%s\n' "$line"; done < "$ep" ) >> "$log" & r2=$!
 
-	# Keep input FIFO open to prevent blocking when command opens stdin
-	sleep infinity > "$ip" &
+	# Sync commands should see EOF immediately; async commands keep stdin open for SendInput.
+	%s
+	ip_pid=$!
 
 	# Run your command
 	{ %s; } < "$ip" > "$sp" 2> "$ep"
 	echo "$?" >> %s
+
+	# Stop the stdin holder so it doesn't outlive the command
+	kill "$ip_pid" 2>/dev/null; wait "$ip_pid" 2>/dev/null
 
 	# drain labelers (cleanup via trap)
 	wait "$r1" "$r2"

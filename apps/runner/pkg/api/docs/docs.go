@@ -1754,6 +1754,12 @@ const docTemplate = `{
                 },
                 "metrics": {
                     "$ref": "#/definitions/RunnerMetrics"
+                },
+                "serviceHealth": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/RunnerServiceInfo"
+                    }
                 }
             }
         },
@@ -1789,10 +1795,31 @@ const docTemplate = `{
                 }
             }
         },
+        "RunnerServiceInfo": {
+            "type": "object",
+            "required": [
+                "healthy",
+                "serviceName"
+            ],
+            "properties": {
+                "errorReason": {
+                    "type": "string"
+                },
+                "healthy": {
+                    "type": "boolean"
+                },
+                "serviceName": {
+                    "type": "string"
+                }
+            }
+        },
         "SandboxInfoResponse": {
             "type": "object",
             "properties": {
                 "backupError": {
+                    "type": "string"
+                },
+                "backupSnapshot": {
                     "type": "string"
                 },
                 "backupState": {

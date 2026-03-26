@@ -138,7 +138,7 @@ from daytona_interpreter import DaytonaInterpreter
 load_dotenv()
 
 # Configure the LLM
-lm = dspy.LM("openrouter/google/gemini-3-flash-preview")
+lm = dspy.LM("openrouter/anthropic/claude-sonnet-4.6")
 dspy.configure(lm=lm)
 
 # Create an RLM with the Daytona interpreter
@@ -168,7 +168,7 @@ from daytona_interpreter import DaytonaInterpreter
 
 load_dotenv()
 
-lm = dspy.LM("openrouter/google/gemini-3-flash-preview")
+lm = dspy.LM("openrouter/anthropic/claude-sonnet-4.6")
 dspy.configure(lm=lm)
 
 # Define tools that run on the host

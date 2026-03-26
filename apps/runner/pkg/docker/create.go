@@ -39,13 +39,42 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", "", err
 	}
 
-	if state == enums.SandboxStateStarted || state == enums.SandboxStatePullingSnapshot || state == enums.SandboxStateStarting {
+	if state == enums.SandboxStatePullingSnapshot {
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+
+		timeout := time.NewTimer(d.snapshotPullTimeout)
+		defer func() {
+			if !timeout.Stop() {
+				select {
+				case <-timeout.C:
+				default:
+				}
+			}
+		}()
+
+		for state == enums.SandboxStatePullingSnapshot {
+			select {
+			case <-ctx.Done():
+				return "", "", ctx.Err()
+			case <-timeout.C:
+				return "", "", common_errors.NewRequestTimeoutError(fmt.Errorf("timed out waiting for sandbox %s snapshot pull to complete", sandboxDto.Id))
+			case <-ticker.C:
+				state, err = d.GetSandboxState(ctx, sandboxDto.Id)
+				if err != nil && state == enums.SandboxStateError {
+					return "", "", err
+				}
+			}
+		}
+	}
+
+	if state == enums.SandboxStateStarted || state == enums.SandboxStateStarting {
 		c, err := d.ContainerInspect(ctx, sandboxDto.Id)
 		if err != nil {
 			return "", "", err
 		}
 
-		containerIP := common.GetContainerIpAddress(ctx, c)
+		containerIP := GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
 			return "", "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
@@ -77,7 +106,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return sandboxDto.Id, daemonVersion, nil
 	}
 
-	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry)
+	image, err := d.PullImage(ctx, sandboxDto.Snapshot, sandboxDto.Registry, &sandboxDto.Id)
 	if err != nil {
 		return "", "", err
 	}
@@ -125,7 +154,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 
 	containerShortId := runningContainer.ID[:12]
 
-	ip := common.GetContainerIpAddress(ctx, runningContainer)
+	ip := GetContainerIpAddress(ctx, runningContainer)
 	if sandboxDto.NetworkBlockAll != nil && *sandboxDto.NetworkBlockAll {
 		go func() {
 			err = d.netRulesManager.SetNetworkRules(containerShortId, ip, "")

@@ -93,6 +93,9 @@ const DEFAULT_MEMORY = 1
 const DEFAULT_DISK = 3
 const DEFAULT_GPU = 0
 
+const LAST_ACTIVITY_LOCK_KEY_PREFIX = 'sandbox:update-last-activity'
+const LAST_ACTIVITY_LOCK_TTL_SECONDS = 45
+
 @Injectable()
 export class SandboxService {
   private readonly logger = new Logger(SandboxService.name)
@@ -514,6 +517,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      this.primeLastActivityLock(insertedSandbox.id)
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -596,6 +600,7 @@ export class SandboxService {
       updateData,
       entity: warmPoolSandbox,
     })
+    this.primeLastActivityLock(updatedSandbox.id)
 
     // Defensive invalidation of orgId cache since the sandbox moved from unassigned to a real organization
     this.sandboxLookupCacheInvalidationService.invalidateOrgId({
@@ -737,6 +742,7 @@ export class SandboxService {
       sandbox.pending = true
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
+      this.primeLastActivityLock(insertedSandbox.id)
 
       this.eventEmitter.emit(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox))
 
@@ -1621,14 +1627,18 @@ export class SandboxService {
   }
 
   async updateLastActivityAt(sandboxId: string, lastActivityAt: Date): Promise<void> {
-    // Prevent spamming updates
-    const lockKey = `sandbox:update-last-activity:${sandboxId}`
-    const acquired = await this.redisLockProvider.lock(lockKey, 45)
+    const lockKey = `${LAST_ACTIVITY_LOCK_KEY_PREFIX}:${sandboxId}`
+    const acquired = await this.redisLockProvider.lock(lockKey, LAST_ACTIVITY_LOCK_TTL_SECONDS)
     if (!acquired) {
       return
     }
 
     await this.sandboxRepository.update(sandboxId, { updateData: { lastActivityAt } }, true)
+  }
+
+  private primeLastActivityLock(sandboxId: string): void {
+    const lockKey = `${LAST_ACTIVITY_LOCK_KEY_PREFIX}:${sandboxId}`
+    void this.redisLockProvider.lock(lockKey, LAST_ACTIVITY_LOCK_TTL_SECONDS)
   }
 
   async getToolboxProxyUrl(sandboxId: string): Promise<string> {
@@ -1790,7 +1800,7 @@ export class SandboxService {
     return await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-destroyed-sandboxes' })
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-destroyed-sandboxes' })
   @LogExecution('cleanup-destroyed-sandboxes')
   @WithInstrumentation()
   async cleanupDestroyedSandboxes() {
@@ -1822,6 +1832,42 @@ export class SandboxService {
 
     if (destroyedSandboxs.affected > 0) {
       this.logger.debug(`Cleaned up ${destroyedSandboxs.affected} build failed sandboxes`)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-build-failed-sandboxes' })
+  @LogExecution('cleanup-stale-build-failed-sandboxes')
+  @WithInstrumentation()
+  async cleanupStaleBuildFailedSandboxes() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const result = await this.sandboxRepository.delete({
+      state: SandboxState.BUILD_FAILED,
+      desiredState: SandboxDesiredState.STARTED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} stale build failed sandboxes`)
+    }
+  }
+
+  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-error-sandboxes' })
+  @LogExecution('cleanup-stale-error-sandboxes')
+  @WithInstrumentation()
+  async cleanupStaleErrorSandboxes() {
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const result = await this.sandboxRepository.delete({
+      state: SandboxState.ERROR,
+      desiredState: SandboxDesiredState.DESTROYED,
+      updatedAt: LessThan(sevenDaysAgo),
+    })
+
+    if (result.affected > 0) {
+      this.logger.debug(`Cleaned up ${result.affected} stale error sandboxes`)
     }
   }
 

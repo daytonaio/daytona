@@ -32,7 +32,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 	}
 
 	if c.State.Running {
-		containerIP := common.GetContainerIpAddress(ctx, c)
+		containerIP := GetContainerIpAddress(ctx, c)
 		if containerIP == "" {
 			return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 		}
@@ -67,7 +67,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 		return nil, "", err
 	}
 
-	containerIP := common.GetContainerIpAddress(ctx, runningContainer)
+	containerIP := GetContainerIpAddress(ctx, runningContainer)
 	if containerIP == "" {
 		return nil, "", errors.New("sandbox IP not found? Is the sandbox started?")
 	}

@@ -16,6 +16,9 @@
 // May contain unused imports in some cases
 // @ts-ignore
 import type { RunnerMetrics } from './runner-metrics';
+// May contain unused imports in some cases
+// @ts-ignore
+import type { RunnerServiceInfo } from './runner-service-info';
 
 /**
  * 
@@ -35,5 +38,11 @@ export interface RunnerInfoResponseDTO {
      * @memberof RunnerInfoResponseDTO
      */
     'metrics'?: RunnerMetrics;
+    /**
+     * 
+     * @type {Array<RunnerServiceInfo>}
+     * @memberof RunnerInfoResponseDTO
+     */
+    'serviceHealth'?: Array<RunnerServiceInfo>;
 }
 

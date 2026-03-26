@@ -34,6 +34,12 @@ export interface SandboxInfoResponse {
     'backupError'?: string;
     /**
      * 
+     * @type {string}
+     * @memberof SandboxInfoResponse
+     */
+    'backupSnapshot'?: string;
+    /**
+     * 
      * @type {EnumsBackupState}
      * @memberof SandboxInfoResponse
      */

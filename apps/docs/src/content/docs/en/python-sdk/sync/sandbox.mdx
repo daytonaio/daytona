@@ -281,6 +281,7 @@ print("Sandbox stopped successfully")
 
 ```python
 @intercept_errors(message_prefix="Failed to remove sandbox: ")
+@with_timeout()
 @with_instrumentation()
 def delete(timeout: float | None = 60) -> None
 ```

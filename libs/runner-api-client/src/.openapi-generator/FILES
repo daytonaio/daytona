@@ -28,6 +28,7 @@ models/registry-dto.ts
 models/resize-sandbox-dto.ts
 models/runner-info-response-dto.ts
 models/runner-metrics.ts
+models/runner-service-info.ts
 models/sandbox-info-response.ts
 models/snapshot-digest-response.ts
 models/snapshot-exists-response.ts

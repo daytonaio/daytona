@@ -40,7 +40,11 @@ func Create(ctx *gin.Context) {
 		return
 	}
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	_, daemonVersion, err := runner.Docker.Create(ctx.Request.Context(), createSandboxDto)
 	if err != nil {
@@ -75,9 +79,13 @@ func Create(ctx *gin.Context) {
 func Destroy(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-	err := runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.Destroy(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		common.ContainerOperationCount.WithLabelValues("destroy", string(common.PrometheusOperationStatusFailure)).Inc()
 		ctx.Error(err)
@@ -117,11 +125,15 @@ func CreateBackup(logger *slog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		runner := runner.GetInstance(nil)
+		runner, err := runner.GetInstance(nil)
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
 
 		err = runner.Docker.CreateBackupAsync(ctx.Request.Context(), sandboxId, createBackupDTO)
 		if err != nil {
-			setErr := runner.BackupInfoCache.SetBackupState(ctx.Request.Context(), sandboxId, enums.BackupStateFailed, err)
+			setErr := runner.BackupInfoCache.SetBackupState(ctx.Request.Context(), sandboxId, enums.BackupStateFailed, createBackupDTO.Snapshot, err)
 			if setErr != nil {
 				logger.DebugContext(ctx.Request.Context(), "failed to update backup info", "error", setErr)
 			}
@@ -161,7 +173,11 @@ func Resize(ctx *gin.Context) {
 
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.Resize(ctx.Request.Context(), sandboxId, resizeDto)
 	if err != nil {
@@ -201,7 +217,11 @@ func UpdateNetworkSettings(ctx *gin.Context) {
 	}
 
 	sandboxId := ctx.Param("sandboxId")
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.UpdateNetworkSettings(ctx.Request.Context(), sandboxId, updateNetworkSettingsDto)
 	if err != nil {
@@ -268,10 +288,14 @@ func GetNetworkSettings(ctx *gin.Context) {
 func Start(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	var metadata map[string]string
-	err := ctx.ShouldBindJSON(&metadata)
+	err = ctx.ShouldBindJSON(&metadata)
 	if err != nil {
 		ctx.Error(common_errors.NewInvalidBodyRequestError(err))
 		return
@@ -313,9 +337,13 @@ func Start(ctx *gin.Context) {
 func Stop(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
-	err := runner.Docker.Stop(ctx.Request.Context(), sandboxId)
+	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId)
 	if err != nil {
 		ctx.Error(err)
 		return
@@ -343,7 +371,11 @@ func Stop(ctx *gin.Context) {
 func Info(ctx *gin.Context) {
 	sandboxId := ctx.Param("sandboxId")
 
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	info, err := runner.SandboxService.GetSandboxInfo(ctx.Request.Context(), sandboxId)
 	if err != nil {
@@ -360,18 +392,20 @@ func Info(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
-		State:         info.SandboxState,
-		BackupState:   info.BackupState,
-		BackupError:   info.BackupErrorReason,
-		DaemonVersion: daemonVersion,
+		State:          info.SandboxState,
+		BackupState:    info.BackupState,
+		BackupSnapshot: info.BackupSnapshot,
+		BackupError:    info.BackupErrorReason,
+		DaemonVersion:  daemonVersion,
 	})
 }
 
 type SandboxInfoResponse struct {
-	State         enums.SandboxState `json:"state"`
-	BackupState   enums.BackupState  `json:"backupState"`
-	BackupError   *string            `json:"backupError,omitempty"`
-	DaemonVersion *string            `json:"daemonVersion,omitempty"`
+	State          enums.SandboxState `json:"state"`
+	BackupState    enums.BackupState  `json:"backupState"`
+	BackupSnapshot string             `json:"backupSnapshot,omitempty"`
+	BackupError    *string            `json:"backupError,omitempty"`
+	DaemonVersion  *string            `json:"daemonVersion,omitempty"`
 } //	@name	SandboxInfoResponse
 
 // Recover godoc
@@ -401,7 +435,11 @@ func Recover(ctx *gin.Context) {
 	}
 
 	sandboxId := ctx.Param("sandboxId")
-	runner := runner.GetInstance(nil)
+	runner, err := runner.GetInstance(nil)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
 
 	err = runner.Docker.RecoverSandbox(ctx.Request.Context(), sandboxId, recoverDto)
 	if err != nil {

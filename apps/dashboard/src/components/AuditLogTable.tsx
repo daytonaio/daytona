@@ -5,6 +5,7 @@
 
 import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRelativeTimeString } from '@/lib/utils'
@@ -15,6 +16,7 @@ import { TextSearch } from 'lucide-react'
 interface Props {
   data: AuditLog[]
   loading: boolean
+  isRefetching?: boolean
   pagination: {
     pageIndex: number
     pageSize: number
@@ -24,7 +26,15 @@ interface Props {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-export function AuditLogTable({ data, loading, pagination, pageCount, onPaginationChange, totalItems }: Props) {
+export function AuditLogTable({
+  data,
+  loading,
+  isRefetching = false,
+  pagination,
+  pageCount,
+  onPaginationChange,
+  totalItems,
+}: Props) {
   const columns = getColumns()
 
   const table = useReactTable({
@@ -73,14 +83,10 @@ export function AuditLogTable({ data, loading, pagination, pageCount, onPaginati
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <AuditLogTableSkeleton columns={columns} />
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className={isRefetching ? 'opacity-70 transition-opacity' : undefined}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
@@ -111,6 +117,35 @@ export function AuditLogTable({ data, loading, pagination, pageCount, onPaginati
       </div>
       <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
     </div>
+  )
+}
+
+function AuditLogTableSkeleton({ columns }: { columns: ColumnDef<AuditLog>[] }) {
+  return (
+    <>
+      {Array.from({ length: 25 }).map((_, rowIndex) => (
+        <TableRow key={rowIndex}>
+          {columns.map((column, columnIndex) => (
+            <TableCell
+              key={`${rowIndex}-${column.id ?? columnIndex}`}
+              style={{
+                minWidth: column.size,
+                maxWidth: column.size,
+              }}
+            >
+              {columnIndex === 0 || columnIndex === 3 || columnIndex === 4 ? (
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              ) : (
+                <Skeleton className="h-4 w-32" />
+              )}
+            </TableCell>
+          ))}
+        </TableRow>
+      ))}
+    </>
   )
 }
 

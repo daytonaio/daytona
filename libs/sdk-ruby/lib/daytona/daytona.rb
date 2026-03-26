@@ -33,7 +33,7 @@ module Daytona
       @config = config
       ensure_access_token_defined
 
-      otel_enabled = config._experimental&.dig('otel_enabled') || ENV['DAYTONA_EXPERIMENTAL_OTEL_ENABLED'] == 'true'
+      otel_enabled = config._experimental&.dig('otel_enabled') || config.read_env('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') == 'true'
       @otel_state = (::Daytona.init_otel(Sdk::VERSION) if otel_enabled)
 
       @api_client = build_api_client
@@ -84,21 +84,6 @@ module Daytona
       to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
     end
 
-    # Finds a Sandbox by its ID or labels.
-    #
-    # @param id [String, Nil]
-    # @param labels [Hash<String, String>]
-    # @return [Daytona::Sandbox]
-    # @raise [Daytona::Sdk::Error]
-    def find_one(id: nil, labels: nil)
-      return get(id) if id
-
-      response = list(labels)
-      raise Sdk::Error, "No sandbox found with labels #{labels}" if response.items.empty?
-
-      response.items.first
-    end
-
     # Lists Sandboxes filtered by labels.
     #
     # @param labels [Hash<String, String>]
@@ -139,7 +124,7 @@ module Daytona
     # @return [void]
     def stop(sandbox, timeout = Sandbox::DEFAULT_TIMEOUT) = sandbox.stop(timeout)
 
-    instrument :create, :delete, :get, :find_one, :list, :start, :stop, component: 'Daytona'
+    instrument :create, :delete, :get, :list, :start, :stop, component: 'Daytona'
 
     private
 
@@ -164,10 +149,13 @@ module Daytona
         raise Sdk::Error, 'auto_archive_interval must be a non-negative integer'
       end
 
+      labels = params.labels&.dup || {}
+      labels[LABEL_CODE_TOOLBOX_LANGUAGE] = params.language.to_s if params.language
+
       create_sandbox = DaytonaApiClient::CreateSandbox.new(
         user: params.os_user,
         env: params.env_vars || {},
-        labels: params.labels,
+        labels: labels,
         public: params.public,
         target: config.target,
         auto_stop_interval: params.auto_stop_interval,

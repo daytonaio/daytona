@@ -1,86 +1,113 @@
-# Daytona SDK for TypeScript
+# Daytona TypeScript SDK
 
-A TypeScript SDK for interacting with the Daytona API, providing a simple interface for Daytona Sandbox management, Git operations, file system operations, and language server protocol support.
+The official TypeScript SDK for [Daytona](https://daytona.io), an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://www.daytona.io/docs/en/sandboxes/) — that you can manage programmatically using the Daytona SDK.
+
+The SDK provides an interface for sandbox management, file system operations, Git operations, language server protocol support, process and code execution, and computer use. For more information, see the [documentation](https://www.daytona.io/docs/en/typescript-sdk/).
 
 ## Installation
 
-You can install the package using npm:
+Install the package using **npm**:
 
 ```bash
 npm install @daytonaio/sdk
 ```
 
-Or using yarn:
+or using **yarn**:
 
 ```bash
 yarn add @daytonaio/sdk
 ```
 
-## Quick Start
+## Get API key
 
-Here's a simple example of using the SDK:
-
-```typescript
-import { Daytona } from '@daytonaio/sdk'
-
-// Initialize using environment variables
-const daytona = new Daytona()
-
-// Create a sandbox
-const sandbox = await daytona.create()
-
-// Run code in the sandbox
-const response = await sandbox.process.codeRun('console.log("Hello World!")')
-console.log(response.result)
-
-// Clean up when done
-await daytona.delete(sandbox)
-```
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. For more information, see the [API keys](https://www.daytona.io/docs/en/api-keys/) documentation.
 
 ## Configuration
 
-The SDK can be configured using environment variables or by passing a configuration object:
+Configure the SDK using [environment variables](https://www.daytona.io/docs/en/configuration/#environment-variables) or by passing a [configuration object](https://www.daytona.io/docs/en/configuration/#configuration-in-code):
+
+- `DAYTONA_API_KEY`: Your Daytona [API key](https://www.daytona.io/docs/en/api-keys/)
+- `DAYTONA_API_URL`: The Daytona [API URL](https://www.daytona.io/docs/en/tools/api/)
+- `DAYTONA_TARGET`: Your target [region](https://www.daytona.io/docs/en/regions/) environment (e.g. `us`, `eu`)
 
 ```typescript
 import { Daytona } from '@daytonaio/sdk'
 
-// Initialize with configuration
+// Initialize with environment variables
+const daytona = new Daytona();
+
+// Initialize with configuration object
 const daytona = new Daytona({
-  apiKey: 'your-api-key',
-  apiUrl: 'your-api-url',
+  apiKey: 'YOUR_API_KEY',
+  apiUrl: 'YOUR_API_URL',
   target: 'us',
-})
+});
 ```
 
-Or using environment variables:
+## Create a sandbox
 
-- `DAYTONA_API_KEY`: Your Daytona API key
-- `DAYTONA_API_URL`: The Daytona API URL
-- `DAYTONA_TARGET`: Your target environment
-
-You can also customize sandbox creation:
+Create a sandbox to run your code securely in an isolated environment.
 
 ```typescript
+import { Daytona } from '@daytonaio/sdk'
+
+const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
 const sandbox = await daytona.create({
-  language: 'typescript',
-  envVars: { NODE_ENV: 'development' },
-  autoStopInterval: 60, // Auto-stop after 1 hour of inactivity,
-  autoArchiveInterval: 60, // Auto-archive after a Sandbox has been stopped for 1 hour
-  autoDeleteInterval: 120, // Auto-delete after a Sandbox has been stopped for 2 hours
-})
+  language: 'typescript'
+});
+const response = await sandbox.process.codeRun('console.log("Hello World!")');
+console.log(response.result);
 ```
 
-## Features
+## Examples and guides
 
-- **Sandbox Management**: Create, manage and remove sandboxes
-- **Git Operations**: Clone repositories, manage branches, and more
-- **File System Operations**: Upload, download, search and manipulate files
-- **Language Server Protocol**: Interact with language servers for code intelligence
-- **Process Management**: Execute code and commands in sandboxes
+Daytona provides [examples](https://www.daytona.io/docs/en/getting-started/#examples) and [guides](https://www.daytona.io/docs/en/guides/) for common sandbox operations, best practices, and a wide range of topics, from basic usage to advanced topics, showcasing various types of integrations between Daytona and other tools.
 
-## Examples
+### Create a sandbox with custom resources
 
-### Execute Commands
+Create a sandbox with [custom resources](https://www.daytona.io/docs/en/sandboxes/#resources) (CPU, memory, disk).
+
+```typescript
+import { Daytona, Image } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+    image: Image.debianSlim('3.12'),
+    resources: { cpu: 2, memory: 4, disk: 8 }
+});
+```
+
+### Create an ephemeral sandbox
+
+Create an [ephemeral sandbox](https://www.daytona.io/docs/en/sandboxes/#ephemeral-sandboxes) that is automatically deleted when stopped.
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+    ephemeral: true,
+    autoStopInterval: 5
+});
+```
+
+### Create a sandbox from a snapshot
+
+Create a sandbox from a [snapshot](https://www.daytona.io/docs/en/snapshots/).
+
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+const daytona = new Daytona();
+const sandbox = await daytona.create({
+    snapshot: 'my-snapshot-name',
+    language: 'typescript'
+});
+```
+
+### Execute commands
+
+Execute commands in the sandbox.
 
 ```typescript
 // Execute a shell command
@@ -96,7 +123,9 @@ console.log(\`Sum: \${x + y}\`)
 console.log(response.result)
 ```
 
-### File Operations
+### File operations
+
+Upload, download, and search files in the sandbox.
 
 ```typescript
 // Upload a file
@@ -109,7 +138,9 @@ const content = await sandbox.fs.downloadFile('path/to/file.txt')
 const matches = await sandbox.fs.findFiles(root_dir, 'search_pattern')
 ```
 
-### Git Operations
+### Git operations
+
+Clone, list branches, and add files to the sandbox.
 
 ```typescript
 // Clone a repository
@@ -122,7 +153,9 @@ const branches = await sandbox.git.branches('path/to/repo')
 await sandbox.git.add('path/to/repo', ['file1.txt', 'file2.txt'])
 ```
 
-### Language Server Protocol
+### Language server protocol
+
+Create and start a language server to get code completions, document symbols, and more.
 
 ```typescript
 // Create and start a language server

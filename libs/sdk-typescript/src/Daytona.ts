@@ -24,7 +24,7 @@ import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
-import { getEnvVar, RUNTIME, Runtime } from './utils/Runtime'
+import { DaytonaEnvReader, RUNTIME, Runtime } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
 import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
 import { NodeSDK } from '@opentelemetry/sdk-node'
@@ -188,18 +188,6 @@ export type CreateSandboxFromSnapshotParams = CreateSandboxBaseParams & {
 }
 
 /**
- * Filter for Sandboxes.
- *
- * @interface
- * @property {string} [idOrName] - The ID or name of the Sandbox to retrieve
- * @property {Record<string, string>} [labels] - Labels to filter Sandboxes
- */
-export type SandboxFilter = {
-  idOrName?: string
-  labels?: Record<string, string>
-}
-
-/**
  * Main class for interacting with the Daytona API.
  * Provides methods for creating, managing, and interacting with Daytona Sandboxes.
  * Can be initialized either with explicit configuration or using environment variables.
@@ -259,27 +247,31 @@ export class Daytona implements AsyncDisposable {
       this.target = config?.target
     }
 
-    if (
-      (!config ||
-        (!(this.apiKey && apiUrl && this.target) &&
-          !(this.jwtToken && this.organizationId && apiUrl && this.target))) &&
-      RUNTIME !== Runtime.BROWSER
-    ) {
-      if (RUNTIME === Runtime.NODE && typeof require !== 'undefined') {
-        const dotenv = require('dotenv')
-        dotenv.config({ quiet: true })
-        dotenv.config({ path: '.env.local', override: true, quiet: true })
+    let _envReader: DaytonaEnvReader | null | undefined
+    const envReader = (): DaytonaEnvReader | null => {
+      if (_envReader === undefined) {
+        _envReader = RUNTIME !== Runtime.BROWSER ? new DaytonaEnvReader() : null
       }
-      this.apiKey = this.apiKey || (this.jwtToken ? undefined : getEnvVar('DAYTONA_API_KEY'))
-      this.jwtToken = this.jwtToken || getEnvVar('DAYTONA_JWT_TOKEN')
-      this.organizationId = this.organizationId || getEnvVar('DAYTONA_ORGANIZATION_ID')
-      apiUrl = apiUrl || getEnvVar('DAYTONA_API_URL') || getEnvVar('DAYTONA_SERVER_URL')
-      this.target = this.target || getEnvVar('DAYTONA_TARGET')
+      return _envReader
+    }
 
-      if (getEnvVar('DAYTONA_SERVER_URL') && !getEnvVar('DAYTONA_API_URL')) {
-        console.warn(
-          '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
-        )
+    if (
+      !config ||
+      (!(this.apiKey && apiUrl && this.target) && !(this.jwtToken && this.organizationId && apiUrl && this.target))
+    ) {
+      const reader = envReader()
+      if (reader) {
+        this.apiKey = this.apiKey || (this.jwtToken ? undefined : reader.get('DAYTONA_API_KEY'))
+        this.jwtToken = this.jwtToken || reader.get('DAYTONA_JWT_TOKEN')
+        this.organizationId = this.organizationId || reader.get('DAYTONA_ORGANIZATION_ID')
+        apiUrl = apiUrl || reader.get('DAYTONA_API_URL') || reader.get('DAYTONA_SERVER_URL')
+        this.target = this.target || reader.get('DAYTONA_TARGET')
+
+        if (reader.get('DAYTONA_SERVER_URL') && !reader.get('DAYTONA_API_URL')) {
+          console.warn(
+            '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
+          )
+        }
       }
     }
 
@@ -319,7 +311,7 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
-    if (!config?._experimental?.otelEnabled && process.env.DAYTONA_EXPERIMENTAL_OTEL_ENABLED !== 'true') {
+    if (!config?._experimental?.otelEnabled && envReader()?.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') !== 'true') {
       return
     }
 
@@ -618,30 +610,6 @@ export class Daytona implements AsyncDisposable {
       this.sandboxApi,
       codeToolbox,
     )
-  }
-
-  /**
-   * Finds a Sandbox by its ID or name or labels.
-   *
-   * @param {SandboxFilter} filter - Filter for Sandboxes
-   * @returns {Promise<Sandbox>} First Sandbox that matches the ID or name or labels.
-   *
-   * @example
-   * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-   * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
-   */
-  @WithInstrumentation()
-  public async findOne(filter: SandboxFilter): Promise<Sandbox> {
-    if (filter.idOrName) {
-      return this.get(filter.idOrName)
-    }
-
-    const result = await this.list(filter.labels, 1, 1)
-    if (result.items.length === 0) {
-      const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
-      throw new DaytonaError(errMsg)
-    }
-    return result.items[0]
   }
 
   /**

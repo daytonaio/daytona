@@ -20,6 +20,9 @@ import { sanitizeSandboxError } from '../utils/sanitize-error.util'
 import { OrganizationUsageService } from '../../organization/services/organization-usage.service'
 import { SandboxRepository } from '../repositories/sandbox.repository'
 import { Sandbox } from '../entities/sandbox.entity'
+import { RedisLockProvider } from '../common/redis-lock.provider'
+import { ResourceType } from '../enums/resource-type.enum'
+import { getStateChangeLockKey } from '../utils/lock-key.util'
 
 /**
  * Service for handling entity state updates based on job completion (v2 runners only).
@@ -36,6 +39,7 @@ export class JobStateHandlerService {
     @InjectRepository(SnapshotRunner)
     private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly organizationUsageService: OrganizationUsageService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   /**
@@ -82,6 +86,18 @@ export class JobStateHandlerService {
       case JobType.RECOVER_SANDBOX:
         await this.handleRecoverSandboxJobCompletion(job)
         break
+      default:
+        break
+    }
+
+    switch (job.resourceType) {
+      case ResourceType.SANDBOX: {
+        const lockKey = getStateChangeLockKey(job.resourceId)
+        this.redisLockProvider
+          .unlock(lockKey)
+          .catch((error) => this.logger.error(`Error unlocking Redis lock for sandbox ${job.resourceId}:`, error)) // Clean up lock after job completion
+        break
+      }
       default:
         break
     }
@@ -393,6 +409,20 @@ export class JobStateHandlerService {
       const sandbox = await this.sandboxRepository.findOne({ where: { id: sandboxId } })
       if (!sandbox) {
         this.logger.warn(`Sandbox ${sandboxId} not found for CREATE_BACKUP job ${job.id}`)
+        return
+      }
+
+      // Parse the job payload to get the snapshot this job was for.
+      // Old v2 runners may not include snapshot in the payload, so we only
+      // perform stale-snapshot checks when the field is present.
+      const jobSnapshot = job.getPayload<{ snapshot?: string }>()?.snapshot
+
+      // Ignore stale backup results if the job's snapshot doesn't match the current DB snapshot.
+      // Old v2 runners may not include snapshot in the payload — skip this check for them.
+      if (jobSnapshot && jobSnapshot !== sandbox.backupSnapshot) {
+        this.logger.warn(
+          `Ignoring stale backup ${job.status} for sandbox ${sandboxId}: job snapshot ${jobSnapshot} does not match DB snapshot ${sandbox.backupSnapshot}`,
+        )
         return
       }
 

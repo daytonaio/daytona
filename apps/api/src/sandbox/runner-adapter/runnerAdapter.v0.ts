@@ -168,6 +168,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
   async runnerInfo(signal?: AbortSignal): Promise<RunnerInfo> {
     const response = await this.runnerApiClient.runnerInfo({ signal })
     return {
+      serviceHealth: response.data.serviceHealth,
       metrics: response.data.metrics,
       appVersion: response.data.appVersion,
     }
@@ -178,6 +179,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     return {
       state: this.convertSandboxState(sandboxInfo.data.state),
       backupState: this.convertBackupState(sandboxInfo.data.backupState),
+      backupSnapshot: sandboxInfo.data.backupSnapshot,
       backupErrorReason: sandboxInfo.data.backupError,
       daemonVersion: sandboxInfo.data.daemonVersion,
     }
