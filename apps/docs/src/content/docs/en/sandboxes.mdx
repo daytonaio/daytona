@@ -697,6 +697,16 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
 </TabItem>
 </Tabs>
 
+If a sandbox does not stop gracefully or you need a faster shutdown, use force stop (`force=true` / `--force`) to terminate it immediately. Force stop is ungraceful and should be used when quick termination is more important than process cleanup. 
+
+Common use cases for force stop include:
+
+- the sandbox is stuck and does not stop gracefully
+- you need to reduce stop time and can accept immediate termination
+- the entrypoint ignores termination signals or hangs during shutdown
+
+Avoid force stop for normal shutdowns where the process should flush buffers, write final state, or run cleanup hooks.
+
 For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/daytona/), [CLI](/docs/en/tools/cli/), and [API](/docs/en/tools/api/#daytona) references:
 
 > [**stop (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxstop)
