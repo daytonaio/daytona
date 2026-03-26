@@ -67,12 +67,12 @@ export interface RunnerAdapter {
   sandboxInfo(sandboxId: string): Promise<RunnerSandboxInfo>
   createSandbox(
     sandbox: Sandbox,
+    snapshotRef: string,
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
     otelEndpoint?: string,
     skipStart?: boolean,
-    snapshotRef?: string,
   ): Promise<StartSandboxResponse | undefined>
   startSandbox(
     sandboxId: string,

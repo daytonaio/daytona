@@ -573,12 +573,12 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
       // Pass undefined for entrypoint as the backup snapshot already has it baked in and use skipStart
       await newRunnerAdapter.createSandbox(
         sandbox,
+        sandbox.backupSnapshot,
         registry,
         undefined,
         metadata,
         undefined,
         true,
-        sandbox.backupSnapshot,
       )
       this.logger.debug(`Created sandbox ${sandbox.id} on new runner ${newRunnerId} with skipStart`)
     } catch (e) {

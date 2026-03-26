@@ -387,12 +387,11 @@ export class SandboxStartAction extends SandboxAction {
 
     const result = await runnerAdapter.createSandbox(
       sandbox,
+      snapshotRef,
       internalRegistry,
       entrypoint,
       metadata,
       this.configService.get('sandboxOtel.endpointUrl'),
-      undefined,
-      snapshotRef,
     )
 
     await this.updateSandboxState(sandbox, SandboxState.CREATING, lockCode, undefined, undefined, result?.daemonVersion)
@@ -832,12 +831,11 @@ export class SandboxStartAction extends SandboxAction {
 
     await runnerAdapter.createSandbox(
       sandbox,
+      validBackup,
       registry,
       undefined,
       metadata,
       this.configService.get('sandboxOtel.endpointUrl'),
-      undefined,
-      validBackup,
     )
     return null
   }
