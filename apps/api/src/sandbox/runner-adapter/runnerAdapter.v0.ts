@@ -187,6 +187,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
 
   async createSandbox(
     sandbox: Sandbox,
+    snapshotRef: string,
     registry?: DockerRegistry,
     entrypoint?: string[],
     metadata?: { [key: string]: string },
@@ -196,7 +197,7 @@ export class RunnerAdapterV0 implements RunnerAdapter {
     const createSandboxDto: CreateSandboxDTO = {
       id: sandbox.id,
       userId: sandbox.organizationId,
-      snapshot: sandbox.snapshot,
+      snapshot: snapshotRef,
       osUser: sandbox.osUser,
       cpuQuota: sandbox.cpu,
       gpuQuota: sandbox.gpu,
