@@ -7,7 +7,7 @@ import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
 import * as crypto from 'crypto'
 import * as pathe from 'pathe'
-import { DaytonaError } from './errors/DaytonaError'
+import { DaytonaNotFoundError } from './errors/DaytonaError'
 import { dynamicImport } from './utils/Import'
 import { WithInstrumentation } from './utils/otel.decorator'
 
@@ -67,7 +67,7 @@ export class ObjectStorage {
 
     if (!fs.existsSync(path)) {
       const errMsg = `Path does not exist: ${path}`
-      throw new DaytonaError(errMsg)
+      throw new DaytonaNotFoundError(errMsg)
     }
 
     // Compute hash for the path

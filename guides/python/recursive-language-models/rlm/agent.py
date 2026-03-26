@@ -17,9 +17,8 @@ from rlm.sandbox import SandboxExecutor, SandboxManager
 from rlm.types import AgentResult, Config, Iteration, UsageStats
 
 if TYPE_CHECKING:
-    from output_logging.console import ConsoleOutput
-
     from daytona import Sandbox
+    from output_logging.console import ConsoleOutput
 
 
 logger = logging.getLogger(__name__)

@@ -22,9 +22,8 @@ from threading import Event, Lock, Thread
 from typing import TYPE_CHECKING, Callable
 
 import requests
-from rlm.types import CodeBlockResult
-
 from daytona import SessionExecuteRequest
+from rlm.types import CodeBlockResult
 
 if TYPE_CHECKING:
     from daytona import Sandbox

@@ -32,7 +32,7 @@ import { FileSystem } from './FileSystem'
 import { Git } from './Git'
 import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
-import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
+import { DaytonaError, DaytonaNotFoundError, DaytonaTimeoutError, DaytonaValidationError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
@@ -269,7 +269,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async start(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -294,7 +294,7 @@ export class Sandbox implements SandboxDto {
    */
   public async recover(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -322,7 +322,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async stop(timeout = 60, force = false): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
     await this.sandboxApi.stopSandbox(this.id, undefined, force, { timeout: timeout * 1000 })
@@ -355,7 +355,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async waitUntilStarted(timeout = 60) {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const checkInterval = 100 // Wait 100 ms between checks
@@ -375,7 +375,7 @@ export class Sandbox implements SandboxDto {
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox failed to become ready within the timeout period')
+        throw new DaytonaTimeoutError('Sandbox failed to become ready within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -396,7 +396,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async waitUntilStopped(timeout = 60) {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const checkInterval = 100 // Wait 100 ms between checks
@@ -417,7 +417,7 @@ export class Sandbox implements SandboxDto {
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox failed to become stopped within the timeout period')
+        throw new DaytonaTimeoutError('Sandbox failed to become stopped within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
@@ -478,7 +478,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async setAutostopInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
-      throw new DaytonaError('autoStopInterval must be a non-negative integer')
+      throw new DaytonaValidationError('autoStopInterval must be a non-negative integer')
     }
 
     await this.sandboxApi.setAutostopInterval(this.id, interval)
@@ -504,7 +504,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async setAutoArchiveInterval(interval: number): Promise<void> {
     if (!Number.isInteger(interval) || interval < 0) {
-      throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
+      throw new DaytonaValidationError('autoArchiveInterval must be a non-negative integer')
     }
     await this.sandboxApi.setAutoArchiveInterval(this.id, interval)
     this.autoArchiveInterval = interval
@@ -613,7 +613,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async resize(resources: Resources, timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const startTime = Date.now()
@@ -642,7 +642,7 @@ export class Sandbox implements SandboxDto {
   @WithInstrumentation()
   public async waitForResizeComplete(timeout = 60): Promise<void> {
     if (timeout < 0) {
-      throw new DaytonaError('Timeout must be a non-negative number')
+      throw new DaytonaValidationError('Timeout must be a non-negative number')
     }
 
     const checkInterval = 100 // Wait 100 ms between checks
@@ -663,7 +663,7 @@ export class Sandbox implements SandboxDto {
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
-        throw new DaytonaError('Sandbox resize did not complete within the timeout period')
+        throw new DaytonaTimeoutError('Sandbox resize did not complete within the timeout period')
       }
 
       await new Promise((resolve) => setTimeout(resolve, checkInterval))

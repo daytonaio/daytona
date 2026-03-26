@@ -5,10 +5,9 @@ import base64
 import re
 from pathlib import Path
 
-from openai import OpenAI
-
 # pylint: disable=import-error
 from daytona import CreateSandboxFromSnapshotParams, Daytona
+from openai import OpenAI
 
 CODING_MODEL = "gpt-5.1"
 SUMMARY_MODEL = "gpt-4o"

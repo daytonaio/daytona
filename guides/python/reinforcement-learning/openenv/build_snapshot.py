@@ -15,9 +15,8 @@ Usage:
 import argparse
 import os
 
-from dotenv import load_dotenv
-
 from daytona import CreateSnapshotParams, Daytona, DaytonaConfig, Image
+from dotenv import load_dotenv
 
 OPENENV_REPO = "https://github.com/meta-pytorch/OpenEnv.git"
 SERVER_CMD = "cd /app/env && uvicorn finqa_env.server.app:app --host 0.0.0.0 --port 8000"
