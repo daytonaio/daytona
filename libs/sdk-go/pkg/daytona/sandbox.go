@@ -533,6 +533,37 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewL
 	})
 }
 
+// GetSignedPreviewLink retrieves a signed preview url for the sandbox at the
+// specified port valid for upto <expiresInSeconds> seconds.
+//
+// Example:
+//
+//	preview, err := sandbox.GetSignedPreviewLink(ctx, 3000, 3600)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Sandbox ID: %s\nPort: %d\nURL: %s\nToken: %s\n", preview.SandboxID, preview.Port, preview.URL, preview.Token)
+func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInSeconds int) (*types.SignedPreviewLink, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetSignedPreviewLink", func(ctx context.Context) (*types.SignedPreviewLink, error) {
+		result, httpResp, err := s.client.apiClient.SandboxAPI.GetSignedPortPreviewUrl(
+			s.client.getAuthContext(ctx),
+			s.ID,
+			int32(port),
+		).ExpiresInSeconds(int32(expiresInSeconds)).Execute()
+
+		if err != nil {
+			return nil, s.client.handleAPIError(err, httpResp)
+		}
+
+		return &types.SignedPreviewLink{
+			SandboxID: result.GetSandboxId(),
+			Port:      int(result.GetPort()),
+			Token:     result.GetToken(),
+			URL:       result.GetUrl(),
+		}, nil
+	})
+}
+
 // SetAutoArchiveInterval sets the auto-archive interval in minutes.
 //
 // The sandbox will be automatically archived after being stopped for this
