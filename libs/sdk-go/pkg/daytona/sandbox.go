@@ -533,8 +533,8 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewL
 	})
 }
 
-// GetSignedPreviewLink retrieves a signed preview url for the sandbox at the
-// specified port valid for upto <expiresInSeconds> seconds.
+// GetSignedPreviewLink retrieves a signed preview URL for the sandbox at the
+// specified port, valid for up to expiresInSeconds seconds.
 //
 // Example:
 //
