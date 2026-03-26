@@ -447,10 +447,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath(
-            '/docs/guides/opencode/opencode-plugin',
-            locale
-          ),
+          href: localizePath('/docs/guides/opencode/opencode-plugin', locale),
           label: t('sidebarconfig.opencode'),
           disablePagination: true,
           hideInSidebar: true,
@@ -588,10 +585,7 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath(
-            '/docs/guides/amp/amp-sdk-coding-agent',
-            locale
-          ),
+          href: localizePath('/docs/guides/amp/amp-sdk-coding-agent', locale),
           label: t('sidebarconfig.amp'),
           disablePagination: true,
           attrs: {
@@ -621,22 +615,15 @@ export const getSidebarConfig = (
         },
         {
           type: 'link',
-          href: localizePath('/docs/guides/reinforcement-learning', locale),
-          label: t('sidebarconfig.reinforcementLearning'),
-          disablePagination: true,
-          attrs: {
-            icon: 'nabla.svg',
-          },
-        },
-        {
-          type: 'link',
           href: localizePath(
             '/docs/guides/reinforcement-learning/trl-grpo-training',
             locale
           ),
-          label: t('sidebarconfig.trlGrpo'),
+          label: t('sidebarconfig.trl'),
           disablePagination: true,
-          hideInSidebar: true,
+          attrs: {
+            icon: 'trl.svg',
+          },
         },
         {
           type: 'link',
@@ -644,9 +631,11 @@ export const getSidebarConfig = (
             '/docs/guides/reinforcement-learning/openenv-finqa',
             locale
           ),
-          label: t('sidebarconfig.openenvFinqa'),
+          label: t('sidebarconfig.openenv'),
           disablePagination: true,
-          hideInSidebar: true,
+          attrs: {
+            icon: 'openenv.svg',
+          },
         },
         {
           type: 'link',
