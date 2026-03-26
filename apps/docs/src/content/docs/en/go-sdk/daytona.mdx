@@ -236,7 +236,7 @@ result, err := sandbox.Process.ExecuteCommand(ctx, "ls -la")
   - [func \(s \*Sandbox\) Start\(ctx context.Context\) error](<#Sandbox.Start>)
   - [func \(s \*Sandbox\) StartWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StartWithTimeout>)
   - [func \(s \*Sandbox\) Stop\(ctx context.Context\) error](<#Sandbox.Stop>)
-  - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.StopWithTimeout>)
+  - [func \(s \*Sandbox\) StopWithTimeout\(ctx context.Context, timeout time.Duration, force bool\) error](<#Sandbox.StopWithTimeout>)
   - [func \(s \*Sandbox\) WaitForResize\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForResize>)
   - [func \(s \*Sandbox\) WaitForStart\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStart>)
   - [func \(s \*Sandbox\) WaitForStop\(ctx context.Context, timeout time.Duration\) error](<#Sandbox.WaitForStop>)
@@ -4031,7 +4031,7 @@ func (s *Sandbox) Stop(ctx context.Context) error
 
 Stop stops the sandbox with a default timeout of 60 seconds.
 
-Stopping a sandbox preserves its state. Use [Sandbox.Start](<#Sandbox.Start>) to resume. For custom timeout, use [Sandbox.StopWithTimeout](<#Sandbox.StopWithTimeout>).
+Stopping a sandbox preserves its state. Use [Sandbox.Start](<#Sandbox.Start>) to resume. For custom timeout or force stop, use [Sandbox.StopWithTimeout](<#Sandbox.StopWithTimeout>).
 
 Example:
 
@@ -4043,17 +4043,17 @@ err := sandbox.Stop(ctx)
 ### func \(\*Sandbox\) StopWithTimeout
 
 ```go
-func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error
+func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration, force bool) error
 ```
 
 StopWithTimeout stops the sandbox with a custom timeout.
 
-The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded. 0 means no timeout.
+The method blocks until the sandbox reaches the "stopped" state or the timeout is exceeded. 0 means no timeout. Set force to true to use SIGKILL instead of SIGTERM.
 
 Example:
 
 ```
-err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
+err := sandbox.StopWithTimeout(ctx, 2*time.Minute, false)
 ```
 
 <a name="Sandbox.WaitForResize"></a>

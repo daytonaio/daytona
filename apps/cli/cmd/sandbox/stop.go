@@ -12,6 +12,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var forceFlag bool
+
 var StopCmd = &cobra.Command{
 	Use:   "stop [SANDBOX_ID] | [SANDBOX_NAME]",
 	Short: "Stop a sandbox",
@@ -26,7 +28,11 @@ var StopCmd = &cobra.Command{
 
 		sandboxIdOrNameArg := args[0]
 
-		_, res, err := apiClient.SandboxAPI.StopSandbox(ctx, sandboxIdOrNameArg).Execute()
+		req := apiClient.SandboxAPI.StopSandbox(ctx, sandboxIdOrNameArg)
+		if forceFlag {
+			req = req.Force(forceFlag)
+		}
+		_, res, err := req.Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -37,4 +43,5 @@ var StopCmd = &cobra.Command{
 }
 
 func init() {
+	StopCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force stop the sandbox using SIGKILL")
 }

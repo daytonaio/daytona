@@ -80,7 +80,7 @@ export interface RunnerAdapter {
     metadata?: { [key: string]: string },
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined>
-  stopSandbox(sandboxId: string): Promise<void>
+  stopSandbox(sandboxId: string, force?: boolean): Promise<void>
   destroySandbox(sandboxId: string): Promise<void>
   createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void>
 
