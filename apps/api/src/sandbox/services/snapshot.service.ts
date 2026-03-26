@@ -800,7 +800,7 @@ export class SnapshotService {
   @LogExecution('cleanup-failed-snapshot-runners')
   @WithInstrumentation()
   async cleanupFailedSnapshotRunners() {
-    const retentionHours = this.configService.get('failedSnapshotRunnerRetentionHours')
+    const retentionHours = this.configService.getOrThrow('failedSnapshotRunnerRetentionHours')
     const cutoff = new Date()
     cutoff.setHours(cutoff.getHours() - retentionHours)
 
