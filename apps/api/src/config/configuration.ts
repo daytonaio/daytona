@@ -324,6 +324,7 @@ const configuration = {
     salt: process.env.ENCRYPTION_SALT,
   },
   failedSnapshotRunnerRetentionHours: parseInt(process.env.FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS || '3', 10),
+  buildInfoSnapshotRunnerStalenessDays: parseInt(process.env.BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS || '7', 10),
 }
 
 export { configuration }
