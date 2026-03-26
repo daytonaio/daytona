@@ -99,18 +99,27 @@ export async function handleLanguageRouting(
   slug = '',
   redirectFn: (path: string) => Response
 ): Promise<Response> {
-  // Don't handle already-localized paths to prevent infinite loops
-  if (isLocalizedPath(slug)) {
-    return new Response('Not Found', { status: 404 })
+  const serveCustom404 = async (): Promise<Response> => {
+    const response = await proxyLocalizedContent('/docs/404', request)
+    return new Response(response.body, {
+      status: 404,
+      statusText: 'Not Found',
+      headers: response.headers,
+    })
   }
+
+  if (isLocalizedPath(slug)) return await serveCustom404()
 
   const preferredLanguage = getPreferredLanguage(request)
 
   if (preferredLanguage !== defaultLocale) {
-    // Redirect to localized version (changes URL)
     return redirectFn(`/docs/${preferredLanguage}/${slug}`)
-  } else {
-    // Proxy to English version (maintains clean URL)
-    return proxyLocalizedContent(`/docs/${defaultLocale}/${slug}`, request)
   }
+
+  const response = await proxyLocalizedContent(
+    `/docs/${defaultLocale}/${slug}`,
+    request
+  )
+  if (response.status === 404) return await serveCustom404()
+  return response
 }
