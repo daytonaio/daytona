@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package volume;
+
+option go_package = "github.com/daytonaio/runner/pkg/volume/multiplexer/api";
+
+// VolumeMultiplexer service manages volumes in the FUSE daemon
+service VolumeMultiplexer {
+    // Register a new volume with the multiplexer
+    rpc RegisterVolume(RegisterVolumeRequest) returns (RegisterVolumeResponse);
+    
+    // Unregister a volume from the multiplexer
+    rpc UnregisterVolume(UnregisterVolumeRequest) returns (Empty);
+    
+    // Increment reference count when a volume is bind-mounted
+    rpc IncrementRefCount(RefCountRequest) returns (Empty);
+    
+    // Decrement reference count when a volume is unmounted
+    rpc DecrementRefCount(RefCountRequest) returns (Empty);
+    
+    // Get statistics about the multiplexer daemon
+    rpc GetStats(Empty) returns (MultiplexerStats);
+    
+    // Health check for the daemon
+    rpc HealthCheck(Empty) returns (HealthStatus);
+}
+
+message RegisterVolumeRequest {
+    string volume_id = 1;
+    ProviderConfig config = 2;
+    bool read_only = 3;
+}
+
+message RegisterVolumeResponse {
+    bool success = 1;
+    string error = 2;
+}
+
+message UnregisterVolumeRequest {
+    string volume_id = 1;
+    bool force = 2; // Force removal even if ref count > 0
+}
+
+message RefCountRequest {
+    string volume_id = 1;
+}
+
+message ProviderConfig {
+    string type = 1;        // "s3", "gcs", "azure"
+    string endpoint = 2;
+    string access_key = 3;
+    string secret_key = 4;
+    string region = 5;
+    string bucket_name = 6;
+    string subpath = 7;
+    map<string, string> options = 8;
+}
+
+message MultiplexerStats {
+    int64 start_time = 1;
+    int64 uptime_seconds = 2;
+    int32 total_volumes = 3;
+    int32 active_volumes = 4;
+    uint64 total_reads = 5;
+    uint64 total_writes = 6;
+    uint64 total_bytes_read = 7;
+    uint64 total_bytes_written = 8;
+    double cache_hit_rate = 9;
+    repeated VolumeStats volume_stats = 10;
+}
+
+message VolumeStats {
+    string volume_id = 1;
+    int64 registered_at = 2;
+    int64 last_accessed_at = 3;
+    uint64 read_operations = 4;
+    uint64 write_operations = 5;
+    uint64 bytes_read = 6;
+    uint64 bytes_written = 7;
+    uint64 cache_hits = 8;
+    uint64 cache_misses = 9;
+    int32 active_file_handles = 10;
+}
+
+message HealthStatus {
+    bool healthy = 1;
+    string status = 2;
+    int64 last_check = 3;
+}
+
+message Empty {}
