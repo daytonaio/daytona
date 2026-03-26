@@ -80,7 +80,7 @@ export interface RunnerAdapter {
     skipStart?: boolean,
   ): Promise<StartSandboxResponse | undefined>
   stopSandbox(sandboxId: string): Promise<void>
-  destroySandbox(sandboxId: string): Promise<void>
+  destroySandbox(sandboxId: string, snapshotRef?: string): Promise<void>
   createBackup(sandbox: Sandbox, backupSnapshotName: string, registry?: DockerRegistry): Promise<void>
 
   removeSnapshot(snapshotName: string): Promise<void>
