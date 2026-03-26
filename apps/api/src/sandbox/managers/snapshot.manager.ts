@@ -1018,10 +1018,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         .innerJoin(BuildInfo, 'bi', 'sr."snapshotRef" = bi."snapshotRef"')
         .where('sr.state = :readyState', { readyState: SnapshotRunnerState.READY })
         .andWhere(
-          `bi.lastUsedAt < now() - interval '${this.configService.get('buildInfoSnapshotRunnerStalenessDays')} days'`,
+          `bi.lastUsedAt < now() - interval '${this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')} days'`,
         )
         .andWhere(
-          `sr.updatedAt < now() - interval '${this.configService.get('buildInfoSnapshotRunnerStalenessDays')} days'`,
+          `sr.updatedAt < now() - interval '${this.configService.getOrThrow('buildInfoSnapshotRunnerStalenessDays')} days'`,
         )
         .andWhere("sr.snapshotRef LIKE 'daytona-%'")
         .limit(500)
