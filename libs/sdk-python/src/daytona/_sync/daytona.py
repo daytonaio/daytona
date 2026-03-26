@@ -53,6 +53,7 @@ from ..common.daytona import (
 from ..common.errors import DaytonaError
 from ..common.image import Image
 from ..common.protocols import SandboxCodeToolbox
+from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
@@ -671,6 +672,15 @@ class Daytona:
         assert isinstance(self._api_client.configuration, Configuration)
         config = deepcopy(self._api_client.configuration)
         config.host = ""
+        # Retry only on RemoteDisconnected (stale pool connections).
+        # The daemon may close idle connections; urllib3 would normally not retry
+        # POST, causing RemoteDisconnected to propagate. Using a targeted subclass
+        # (instead of urllib3.Retry with allowed_methods=None) avoids also retrying
+        # IncompleteRead, where the server already started processing and sending a
+        # response — retrying that would execute the operation a second time.
+        config.retries = RemoteDisconnectedRetry(  # pyright: ignore[reportAttributeAccessIssue]
+            total=3, raise_on_status=False
+        )
         toolbox_api_client = ToolboxApiClient(config)
         toolbox_api_client.default_headers = deepcopy(cast(dict[str, str], self._api_client.default_headers))
 
