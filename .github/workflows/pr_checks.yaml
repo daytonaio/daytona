@@ -1,0 +1,184 @@
+name: '[PR] Validate code'
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+  go-work:
+    name: Go work
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      - name: go work
+        run: |
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          git diff --exit-code -- 'go.work*' '*/go.mod' '*/go.sum' || (echo "Go workspace files are not up to date! Please run 'go work sync' and commit the changes." && exit 1)
+
+  cli-docs:
+    name: CLI docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+      - name: Check CLI reference docs are up to date
+        run: |
+          cd apps/docs
+          node tools/update-cli-reference.js --local
+          git diff --exit-code -- src/content/docs/en/tools/cli.mdx || (echo "CLI reference docs on the docs site are out of sync! Please run 'cd apps/docs && node tools/update-cli-reference.js --local' and commit the changes." && exit 1)
+
+  golangci:
+    name: Go lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory: [apps/daemon, apps/runner, apps/cli, apps/proxy, libs/sdk-go, apps/otel-collector/exporter]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
+        with:
+          version: v2.6.2
+          working-directory: ${{ matrix.working-directory }}
+          args: --timeout=5m ./...
+      - name: format
+        run: |
+          cd ${{ matrix.working-directory }}
+          go fmt ./...
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+
+  lint-computer-use:
+    name: Go lint (Computer Use)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+          cache-dependency-path: '**/go.sum'
+      - name: format
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          cd libs/computer-use
+          go fmt ./...
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
+        with:
+          version: v2.6.2
+          working-directory: libs/computer-use
+          args: --timeout=5m ./...
+
+  lint-python:
+    name: Python lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Dependencies
+        run: |
+          corepack enable
+          python -m pip install --upgrade pip
+          pip install "poetry==2.1.3"
+          poetry install
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+      - name: Lint Python Code
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          yarn lint:py
+
+  format-lint-api-clients:
+    name: Format, lint and generate API clients
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-toolchain
+        with:
+          run-go-work-sync: 'false'
+      - name: generate-api-clients
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          go install github.com/princjef/gomarkdoc/cmd/gomarkdoc@v1.1.0
+          echo -e 'DEFAULT_PACKAGE_VERSION=0.0.0-dev\nDEFAULT_GEM_VERSION=0.0.0.pre.dev\n\nPYPI_PKG_VERSION=\nNPM_PKG_VERSION=\nNPM_TAG=\nPYPI_TOKEN=\nNPM_TOKEN=' > .env
+          mkdir -p dist/apps/api
+          yarn generate:api-client
+          yarn lint:fix
+          yarn format
+          poetry lock
+          yarn docs
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix', 'yarn docs' and commit" && exit 1)
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-toolchain
+      - name: Build all
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          VERSION=0.0.0-dev yarn build --nxBail=true
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check AGPL License Headers
+        uses: apache/skywalking-eyes/header@8c96ee223558797cdd9eba82c0919258e1cf2dad # main
+        with:
+          token: ${{ github.token }}
+          config: .licenserc.yaml
+          mode: 'check'
+
+      - name: Check Apache License Headers
+        uses: apache/skywalking-eyes/header@8c96ee223558797cdd9eba82c0919258e1cf2dad # main
+        with:
+          token: ${{ github.token }}
+          config: .licenserc-clients.yaml
+          mode: 'check'

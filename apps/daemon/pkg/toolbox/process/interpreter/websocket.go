@@ -1,0 +1,188 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package interpreter
+
+import (
+	"encoding/json"
+	"log/slog"
+	"time"
+
+	"github.com/daytonaio/daemon/internal/util"
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
+)
+
+// attachWebSocket connects a WebSocket client to the interpreter context
+func (c *Context) attachWebSocket(ws *websocket.Conn) {
+	pongCh := util.SetupWSKeepAlive(ws, c.logger)
+
+	clientId := uuid.NewString()
+	cl := &wsClient{
+		id:     clientId,
+		conn:   ws,
+		send:   make(chan wsFrame, 1024),
+		pongCh: pongCh,
+		done:   make(chan struct{}),
+		logger: c.logger.With(slog.String("clientId", clientId)),
+	}
+
+	c.mu.Lock()
+	if c.client != nil {
+		c.client.close()
+	}
+	c.client = cl
+	c.mu.Unlock()
+
+	c.logger.Debug("Client attached to interpreter context", "clientId", cl.id, "contextId", c.info.ID)
+
+	go c.clientWriter(cl)
+	// Continuously read from the WebSocket so that gorilla/websocket's
+	// PingHandler is invoked for incoming ping frames. Without this,
+	// client keepalive pings go unanswered and the connection is closed
+	// with code 1011 after ~50s.
+	go func() {
+		for {
+			if _, _, err := ws.ReadMessage(); err != nil {
+				return
+			}
+		}
+	}()
+
+	// Wait for clientWriter to exit (signals disconnection)
+	<-cl.done
+
+	c.mu.Lock()
+	if c.client != nil && c.client.id == cl.id {
+		c.client = nil
+	}
+	c.mu.Unlock()
+
+	cl.close()
+	c.logger.Debug("Client detached from interpreter context", "clientId", cl.id, "contextId", c.info.ID)
+}
+
+// clientWriter sends output messages to the WebSocket client
+func (c *Context) clientWriter(cl *wsClient) {
+	defer close(cl.done)
+
+	for {
+		// Priority: always flush pending pong responses before writing data.
+		// This ensures keepalive pongs are never delayed by data writes.
+		util.WritePendingPongs(cl.conn, cl.pongCh, writeWait, cl.logger)
+
+		select {
+		case <-c.ctx.Done():
+			return
+		case pong := <-cl.pongCh:
+			// Pong arrived while waiting for data — write it immediately.
+			if err := cl.conn.WriteControl(websocket.PongMessage, pong, time.Now().Add(writeWait)); err != nil {
+				cl.logger.Debug("failed to write pong", "error", err)
+			}
+		case frame, ok := <-cl.send:
+			if !ok {
+				return
+			}
+
+			err := cl.writeFrame(frame)
+			if err != nil {
+				c.logger.Debug("Failed to write frame", "error", err)
+			}
+			if frame.close != nil {
+				return
+			}
+		}
+	}
+}
+
+// emitOutput sends an output message to the connected WebSocket client
+func (c *Context) emitOutput(msg *OutputMessage) {
+	c.mu.Lock()
+	cl := c.client
+	c.mu.Unlock()
+
+	if cl == nil {
+		return
+	}
+
+	select {
+	case cl.send <- wsFrame{output: msg}:
+	default:
+		c.logger.Debug("Client send channel full - closing slow consumer")
+		cl.requestClose(websocket.ClosePolicyViolation, "slow consumer")
+
+		c.mu.Lock()
+		if c.client != nil && c.client.id == cl.id {
+			c.client = nil
+		}
+		c.mu.Unlock()
+	}
+}
+
+// close closes a WebSocket client connection
+func (cl *wsClient) close() {
+	cl.closeOnce.Do(func() {
+		close(cl.send)
+
+		// Wait for clientWriter to drain remaining messages with a timeout
+		// This ensures close frames and other pending messages have time to be sent
+		timer := time.NewTimer(5 * time.Second)
+		select {
+		case <-cl.done:
+			// clientWriter has finished processing all messages
+			if !timer.Stop() {
+				<-timer.C
+			}
+		case <-timer.C:
+			// Timeout reached, proceed with closing
+			cl.logger.Debug("Timeout waiting for client writer to finish")
+		}
+
+		// Close the connection. The background read goroutine started in
+		// attachWebSocket is the sole reader — gorilla's default CloseHandler
+		// (invoked during ReadMessage) handles the RFC 6455 close handshake.
+		// We must not call NextReader/ReadMessage here to avoid violating
+		// gorilla's single-concurrent-reader rule.
+		_ = cl.conn.Close()
+	})
+}
+
+func (cl *wsClient) writeFrame(frame wsFrame) error {
+	if frame.output == nil && frame.close == nil {
+		return nil
+	}
+
+	err := cl.conn.SetWriteDeadline(time.Now().Add(writeWait))
+	if err != nil {
+		return err
+	}
+
+	if frame.close != nil {
+		payload := websocket.FormatCloseMessage(frame.close.code, frame.close.message)
+		return cl.conn.WriteMessage(websocket.CloseMessage, payload)
+	}
+
+	data, err := json.Marshal(frame.output)
+	if err != nil {
+		return err
+	}
+
+	return cl.conn.WriteMessage(websocket.TextMessage, data)
+}
+
+func (cl *wsClient) requestClose(code int, message string) {
+	frame := wsFrame{
+		close: &closeRequest{
+			code:    code,
+			message: message,
+		},
+	}
+
+	select {
+	case cl.send <- frame:
+	default:
+		cl.logger.Debug("Couldn't send close frame to client - closing connection")
+	}
+
+	cl.close()
+}

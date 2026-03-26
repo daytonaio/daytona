@@ -1,0 +1,13 @@
+name: daytona volume get
+synopsis: Get volume details
+usage: daytona volume get [VOLUME_ID] [flags]
+options:
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona volume - Manage Daytona volumes

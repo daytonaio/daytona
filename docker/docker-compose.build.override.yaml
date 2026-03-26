@@ -1,0 +1,25 @@
+name: daytona
+services:
+  api:
+    build:
+      context: ../
+      dockerfile: apps/api/Dockerfile
+      target: daytona
+  
+  proxy:
+    build:
+      context: ../
+      dockerfile: apps/proxy/Dockerfile
+      target: proxy
+
+  runner:
+    build:
+      context: ../
+      dockerfile: apps/runner/Dockerfile
+      target: runner
+
+  ssh-gateway:
+    build:
+      context: ../
+      dockerfile: apps/ssh-gateway/Dockerfile
+      target: ssh-gateway

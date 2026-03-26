@@ -1,0 +1,9 @@
+name: daytona version
+synopsis: Print the version number
+usage: daytona version [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

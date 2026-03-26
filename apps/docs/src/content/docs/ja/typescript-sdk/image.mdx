@@ -1,0 +1,465 @@
+---
+title: "イメージ"
+hideTitleOnPage: true
+---
+
+
+## Image
+
+Daytona のサンドボックス用イメージ定義を表します。
+このクラスを直接インスタンス化しないでください。代わりに `Image.base()`、`Image.debianSlim()`、`Image.fromDockerfile()` などの静的ファクトリメソッドを使用してください。
+
+### Accessors
+
+#### contextList
+
+##### Get Signature
+
+```ts
+get contextList(): Context[]
+```
+
+###### Returns
+
+`Context`[]
+
+イメージに追加されるコンテキストファイルの一覧。
+
+***
+
+#### dockerfile
+
+##### Get Signature
+
+```ts
+get dockerfile(): string
+```
+
+**Returns**:
+
+- `string` - Dockerfile の内容。
+
+### Methods
+
+#### base()
+
+```ts
+static base(image: string): Image
+```
+
+既存のベースイメージから Image を作成します。
+
+**Parameters**:
+
+- `image` _string_ - 使用するベースイメージ。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image.base('python:3.12-slim-bookworm')
+```
+
+***
+
+#### debianSlim()
+
+```ts
+static debianSlim(pythonVersion?: "3.9" | "3.10" | "3.11" | "3.12" | "3.13"): Image
+```
+
+公式の Python Docker イメージに基づく Debian slim イメージを作成します。
+
+**Parameters**:
+
+- `pythonVersion?` _使用する Python のバージョン。_ - `"3.9"` | `"3.10"` | `"3.11"` | `"3.12"` | `"3.13"`
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image.debianSlim('3.12')
+```
+
+***
+
+#### fromDockerfile()
+
+```ts
+static fromDockerfile(path: string): Image
+```
+
+既存の Dockerfile から Image を作成します。
+
+**Parameters**:
+
+- `path` _string_ - Dockerfile へのパス。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image.fromDockerfile('Dockerfile')
+```
+
+***
+
+#### addLocalDir()
+
+```ts
+addLocalDir(localPath: string, remotePath: string): Image
+```
+
+ローカルディレクトリをイメージに追加します。
+
+**Parameters**:
+
+- `localPath` _string_ - ローカルディレクトリのパス。
+- `remotePath` _string_ - イメージ内のディレクトリのパス。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .addLocalDir('src', '/home/daytona/src')
+```
+
+***
+
+#### addLocalFile()
+
+```ts
+addLocalFile(localPath: string, remotePath: string): Image
+```
+
+ローカルファイルをイメージに追加します。
+
+**Parameters**:
+
+- `localPath` _string_ - ローカルファイルのパス。
+- `remotePath` _string_ - イメージ内のファイルのパス。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
+```
+
+***
+
+#### cmd()
+
+```ts
+cmd(cmd: string[]): Image
+```
+
+イメージのデフォルトコマンドを設定します。
+
+**Parameters**:
+
+- `cmd` _string\[\]_ - デフォルトとして設定するコマンド。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .cmd(['/bin/bash'])
+```
+
+***
+
+#### dockerfileCommands()
+
+```ts
+dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
+```
+
+任意の Dockerfile 形式のコマンドでイメージを拡張します。
+
+**Parameters**:
+
+- `dockerfileCommands` _string\[\]_ - Dockerfile に追加するコマンド。
+- `contextDir?` _string_ - コンテキストディレクトリのパス。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .dockerfileCommands(['RUN echo "Hello, world!"'])
+```
+
+***
+
+#### entrypoint()
+
+```ts
+entrypoint(entrypointCommands: string[]): Image
+```
+
+イメージのエントリーポイントを設定します。
+
+**Parameters**:
+
+- `entrypointCommands` _string\[\]_ - エントリーポイントとして設定するコマンド。
+
+
+**Returns**:
+
+- `Image` - Image インスタンス。
+
+**Example:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .entrypoint(['/bin/bash'])
+```
+
+***
+
+#### env()
+
+```ts
+env(envVars: Record<string, string>): Image
+```
+
+イメージ内の環境変数を設定します。
+
+**パラメーター**:
+
+- `envVars` _Record\<string, string\>_ - 設定する環境変数。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .env({ FOO: 'bar' })
+```
+
+***
+
+#### pipInstall()
+
+```ts
+pipInstall(packages: string | string[], options?: PipInstallOptions): Image
+```
+
+pip を使用してパッケージをインストールするコマンドを追加します。
+
+**パラメーター**:
+
+- `packages` _インストールするパッケージ_ - `string` | `string`[]
+- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https://pypi.org/simple'] })
+```
+
+***
+
+#### pipInstallFromPyproject()
+
+```ts
+pipInstallFromPyproject(pyprojectToml: string, options?: PyprojectOptions): Image
+```
+
+pyproject.toml ファイルから依存関係をインストールします。
+
+**パラメーター**:
+
+- `pyprojectToml` _string_ - pyproject.toml ファイルのパス。
+- `options?` _PyprojectOptions_ - pip インストールコマンドのオプション。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image.debianSlim('3.12')
+image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] })
+```
+
+***
+
+#### pipInstallFromRequirements()
+
+```ts
+pipInstallFromRequirements(requirementsTxt: string, options?: PipInstallOptions): Image
+```
+
+requirements.txt ファイルから依存関係をインストールします。
+
+**パラメーター**:
+
+- `requirementsTxt` _string_ - requirements.txt ファイルのパス。
+- `options?` _PipInstallOptions_ - pip インストールコマンドのオプション。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image.debianSlim('3.12')
+image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi.org/simple'] })
+```
+
+***
+
+#### runCommands()
+
+```ts
+runCommands(...commands: (string | string[])[]): Image
+```
+
+イメージ内でコマンドを実行します。
+
+**パラメーター**:
+
+- `commands` _...\(string \| string\[\]\)\[\]_ - 実行するコマンド。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .runCommands(
+   'echo "Hello, world!"',
+   ['bash', '-c', 'echo Hello, world, again!']
+ )
+```
+
+***
+
+#### workdir()
+
+```ts
+workdir(dirPath: string): Image
+```
+
+イメージ内の作業ディレクトリを設定します。
+
+**パラメーター**:
+
+- `dirPath` _string_ - 作業ディレクトリのパス。
+
+**戻り値**:
+
+- `Image` - Image インスタンス。
+
+**例:**
+
+```ts
+const image = Image
+ .debianSlim('3.12')
+ .workdir('/home/daytona')
+```
+
+***
+
+
+## コンテキスト
+
+イメージに追加するコンテキストファイルを表します。
+
+**プロパティ**:
+
+- `archivePath` _string_ - オブジェクトストレージ内のアーカイブの内部パス。
+- `sourcePath` _string_ - ソースファイルまたはディレクトリへのパス。
+## PipInstallOptions
+
+pip install コマンド用のオプション。
+
+**プロパティ**:
+
+- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
+- `extraOptions?` _string_ - pip install コマンドで使用する追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+- `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
+- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
+- `pre?` _boolean_ - プレリリース版をインストールするかどうか。
+    
+
+
+
+
+### により拡張
+
+- `PyprojectOptions`
+## PyprojectOptions
+
+pyproject.toml からの pip install コマンド用オプション。
+
+**プロパティ**:
+
+- `extraIndexUrls?` _string\[\]_ - pip install コマンドで使用する追加のインデックス URL。
+    - _継承元_: `PipInstallOptions.extraIndexUrls`
+- `extraOptions?` _string_ - pip install コマンドに渡す追加オプション。指定した文字列がそのまま pip install コマンドに渡されます。
+    - _継承元_: `PipInstallOptions.extraOptions`
+- `findLinks?` _string\[\]_ - pip install コマンドで使用する find-links。
+    - _継承元_: `PipInstallOptions.findLinks`
+- `indexUrl?` _string_ - pip install コマンドで使用するインデックス URL。
+    - _継承元_: `PipInstallOptions.indexUrl`
+- `optionalDependencies?` _string\[\]_ - 任意でインストールする依存関係。
+- `pre?` _boolean_ - プレリリース版をインストールするかどうか。
+    - _継承元_: `PipInstallOptions.pre`
+
+
+
+**継承:** 
+
+- `PipInstallOptions`

@@ -1,0 +1,77 @@
+---
+import architectureLight from '@assets/docs/architecture-light.svg'
+import architectureDark from '@assets/docs/architecture-dark.svg'
+---
+
+<theme-aware-image>
+  <picture>
+    <source
+      srcset={architectureDark.src}
+      data-dark-src={architectureDark.src}
+      data-light-src={architectureLight.src}
+    />
+    <img
+      src={architectureLight.src}
+      alt="Daytona architecture diagram"
+      class="architecture-diagram theme-image"
+    />
+  </picture>
+</theme-aware-image>
+
+<style>
+  .architecture-diagram {
+    width: 100%;
+    height: auto;
+    margin: 2rem 0;
+    display: block;
+  }
+</style>
+
+<script>
+  class ThemeAwareImage extends HTMLElement {
+    constructor() {
+      super()
+      this.updateImage(
+        document.documentElement.dataset.theme as 'light' | 'dark'
+      )
+
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if (mutation.attributeName === 'data-theme') {
+            const theme = document.documentElement.dataset.theme as
+              | 'light'
+              | 'dark'
+            this.updateImage(theme)
+          }
+        })
+      })
+
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme'],
+      })
+    }
+
+    updateImage(theme: 'light' | 'dark') {
+      const sources = this.querySelectorAll('source')
+      const images = this.querySelectorAll('img')
+
+      sources.forEach(source => {
+        const newSrc =
+          theme === 'dark' ? source.dataset.darkSrc : source.dataset.lightSrc
+        if (newSrc) {
+          source.srcset = newSrc
+        }
+      })
+
+      images.forEach(img => {
+        const source = img.previousElementSibling as HTMLSourceElement
+        if (source) {
+          img.src = source.srcset
+        }
+      })
+    }
+  }
+
+  customElements.define('theme-aware-image', ThemeAwareImage)
+</script>

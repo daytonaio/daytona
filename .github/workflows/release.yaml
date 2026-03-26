@@ -1,0 +1,324 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+
+env:
+  VERSION: ${{ inputs.version }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
+  DAYTONA_API_URL: ${{ secrets.DAYTONA_API_URL }}
+  DAYTONA_AUTH0_DOMAIN: ${{ secrets.DAYTONA_AUTH0_DOMAIN }}
+  DAYTONA_AUTH0_CLIENT_ID: ${{ secrets.DAYTONA_AUTH0_CLIENT_ID }}
+  DAYTONA_AUTH0_CALLBACK_PORT: ${{ secrets.DAYTONA_AUTH0_CALLBACK_PORT }}
+  DAYTONA_AUTH0_CLIENT_SECRET: ${{ secrets.DAYTONA_AUTH0_CLIENT_SECRET }}
+  DAYTONA_AUTH0_AUDIENCE: ${{ secrets.DAYTONA_AUTH0_AUDIENCE }}
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+  GONOSUMDB: github.com/daytonaio/daytona
+
+jobs:
+  publish:
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-toolchain
+        with:
+          run-go-work-sync: 'false'
+
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Tag Go modules
+        run: |
+          git tag libs/api-client-go/${{ inputs.version }}
+          git tag libs/toolbox-api-client-go/${{ inputs.version }}
+          git tag libs/sdk-go/${{ inputs.version }}
+          git push origin libs/api-client-go/${{ inputs.version }} libs/toolbox-api-client-go/${{ inputs.version }} libs/sdk-go/${{ inputs.version }}
+
+      - name: Go work sync
+        run: |
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          go env -w GOFLAGS="-buildvcs=false"
+
+        # Write version to required folders so nx release can run
+      - name: Write package.json to required folders
+        run: |
+          mkdir dist
+          echo '{
+            "name": "api",
+            "version": "0.0.0"
+          }' > dist/package.json
+          echo '{
+            "name": "api",
+            "version": "0.0.0"
+          }' > apps/api/package.json
+          echo '{
+            "name": "dashboard",
+            "version": "0.0.0"
+          }' > apps/dashboard/package.json
+          echo '{
+            "name": "docs",
+            "version": "0.0.0"
+          }' > apps/docs/package.json
+          echo '{
+            "name": "runner",
+            "version": "0.0.0"
+          }' > apps/runner/package.json
+
+      - name: Create release
+        run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+
+  build_projects:
+    needs: publish
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-toolchain
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+
+      - name: Install gettext
+        run: sudo apt-get install -y gettext
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Build projects
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          yarn build:production
+          yarn nx build-amd64 runner --configuration=production --nxBail=true
+
+      - name: Build runner .deb package
+        run: VERSION="${VERSION#v}" yarn nx package-deb runner
+
+      - name: Build CLI
+        run: |
+          cd ./apps/cli
+          GOOS=linux GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=linux GOARCH=arm64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=darwin GOARCH=arm64 ./hack/build.sh --skip-env-file
+          GOOS=windows GOARCH=amd64 ./hack/build.sh --skip-env-file
+          GOOS=windows GOARCH=arm64 ./hack/build.sh --skip-env-file
+          cd ../..
+
+      - name: Upload runner to release assets
+        run: |
+          gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
+
+      - name: Upload runner .deb to release assets
+        run: |
+          DEB_VERSION="${VERSION#v}"
+          gh release upload ${{ inputs.version }} "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
+
+      - name: Upload daemon to release assets
+        run: |
+          gh release upload ${{ inputs.version }} dist/apps/daemon-amd64#daytona-daemon-${{ inputs.version }}-amd64 --clobber
+
+      - name: Upload CLI to release assets
+        run: |
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-amd64#daytona-cli-${{ inputs.version }}-linux-amd64 --clobber
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-arm64#daytona-cli-${{ inputs.version }}-linux-arm64 --clobber
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-amd64#daytona-cli-${{ inputs.version }}-darwin-amd64 --clobber
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-arm64#daytona-cli-${{ inputs.version }}-darwin-arm64 --clobber
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${{ inputs.version }}-windows-amd64.exe --clobber
+          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${{ inputs.version }}-windows-arm64.exe --clobber
+
+      - name: Upload computer-use artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: computer-use-amd64
+          path: dist/libs/computer-use-amd64
+          retention-days: 1
+          overwrite: true
+
+      - name: Upload runner artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner-amd64
+          path: dist/apps/runner-amd64
+          retention-days: 1
+          overwrite: true
+
+  # Separately build docker images for AMD64 and ARM64
+  docker_build:
+    needs: build_projects
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: [self-hosted, Linux, X64, github-actions-runner-amd64]
+            arch: amd64
+          - runner: [self-hosted, Linux, ARM64, github-actions-runner-arm]
+            arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Download computer-use artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: computer-use-amd64
+          path: dist/libs/
+
+      - name: Download runner artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: runner-amd64
+          path: dist/apps/
+
+      - name: Check artifacts
+        run: |
+          ls -la dist/libs/
+          ls -la dist/apps/
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate go.work.sum
+        run: GONOSUMDB=github.com/daytonaio/daytona go work sync
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Project dependencies
+        run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+
+      - name: Publish docker images
+        run: |
+          VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
+
+  # Push combined manifest
+  docker_push_manifest:
+    needs: docker_build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Project dependencies
+        run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Push manifest
+        run: |
+          VERSION=${{ inputs.version }} yarn push-manifest
+
+  sync_gosum:
+    needs: build_projects
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+
+      - name: Configure git
+        run: |
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Project dependencies
+        run: corepack enable
+      - name: Get yarn cache directory
+        id: yarn-cache
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: yarn-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: yarn-${{ runner.os }}-${{ runner.arch }}-
+      - run: yarn install --immutable
+
+      - name: Sync go.sum and create PR
+        run: |
+          git checkout -b sync-gosum-${{ inputs.version }}
+          GONOSUMDB=github.com/daytonaio/daytona go work sync
+          if git diff --quiet -- **/go.sum; then
+            echo "No go.sum changes detected; skipping commit and PR creation."
+          else
+            git add **/go.sum
+            git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
+            git push origin sync-gosum-${{ inputs.version }}
+            gh pr create \
+              --title "chore: sync go.sum for ${{ inputs.version }}" \
+              --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
+              --base main \
+              --head sync-gosum-${{ inputs.version }}
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

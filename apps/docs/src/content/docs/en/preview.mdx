@@ -1,0 +1,217 @@
+---
+title: Preview
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components'
+
+Daytona provides preview URLs for accessing services running in your sandboxes. Any process listening for HTTP traffic on ports `3000` - `9999` can be previewed through a generated URL.
+
+Daytona supports two types of preview URLs, each with a different authentication mechanism:
+
+- [Standard preview URL](#standard-preview-url) uses the sandbox ID in the URL and requires a token sent via header
+- [Signed preview URL](#signed-preview-url) embeds the authentication token directly in the URL, requiring no headers
+
+## Authentication
+
+If a sandbox has its `public` property set to `true`, preview links are publicly accessible without authentication. Otherwise, authentication is required. The authentication mechanism depends on the preview URL type.
+
+:::note
+Standard and signed preview tokens are not interchangeable. The token from `get_preview_link()` must be sent via the `x-daytona-preview-token` header. The token from `create_signed_preview_url()` is embedded in the URL itself: it cannot be used as a header value, and vice versa.
+:::
+
+## Standard preview URL
+
+The standard preview URL includes your sandbox ID in the URL and provides a separate token for authentication via the `x-daytona-preview-token` request header.
+
+URL structure: `https://{port}-{sandboxId}.{daytonaProxyDomain}`
+
+The token resets automatically when the sandbox restarts. Any previously issued standard preview tokens become invalid. Call the `get_preview_link()` method again after starting the sandbox to obtain a fresh token. Use standard preview URLs for programmatic access and API integrations where you control the HTTP headers.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+preview_info = sandbox.get_preview_link(3000)
+
+print(f"URL: {preview_info.url}")
+print(f"Token: {preview_info.token}")
+
+# Use with requests
+import requests
+response = requests.get(
+    preview_info.url,
+    headers={"x-daytona-preview-token": preview_info.token}
+)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+const previewInfo = await sandbox.getPreviewLink(3000);
+
+console.log(`URL: ${previewInfo.url}`);
+console.log(`Token: ${previewInfo.token}`);
+
+// Use with fetch
+const response = await fetch(previewInfo.url, {
+  headers: { 'x-daytona-preview-token': previewInfo.token }
+});
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+preview_info = sandbox.preview_url(3000)
+
+puts "Preview link url: #{preview_info.url}"
+puts "Preview link token: #{preview_info.token}"
+```
+
+</TabItem>
+<TabItem label="Go" icon="seti:go">
+```go
+preview, err := sandbox.GetPreviewLink(ctx, 3000)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("URL: %s\n", preview.URL)
+fmt.Printf("Token: %s\n", preview.Token)
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/preview-url' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), [Go SDK](/docs/en/go-sdk/daytona), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
+
+> [**get_preview_link (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxget_preview_link)
+>
+> [**getPreviewLink (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#getpreviewlink)
+>
+> [**preview_url (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#preview_url)
+>
+> [**GetPreviewLink (Go SDK)**](/docs/en/go-sdk/daytona#Sandbox.GetPreviewLink)
+>
+> [**Get Port Preview URL (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}/ports/{port}/preview-url)
+
+### Authentication
+
+Authenticate by sending the token in the `x-daytona-preview-token` header:
+
+```bash
+curl -H "x-daytona-preview-token: vg5c0ylmcimr8b_v1ne0u6mdnvit6gc0" \
+  https://3000-sandbox-123456.proxy.daytona.work
+```
+
+## Signed preview URL
+
+The signed preview URL embeds the authentication token directly in the URL, eliminating the need for separate headers. The token persists across sandbox restarts until it expires, or is revoked manually before expiry. Set a custom expiry time for the token: 
+
+- Default: `60` seconds
+- Minimum: `1` second
+- Maximum: `86,400` seconds (24 hours)
+- Recommended: `3600` seconds (1 hour)
+
+:::tip
+Always set the `expires_in_seconds` parameter explicitly. The default of 60 seconds is short due to security considerations. Most use cases should use at least 3600 (1 hour).
+:::
+
+URL structure: `https://{port}-{token}.{daytonaProxyDomain}`
+
+Use signed preview URLs when sharing links with users who cannot set custom headers, embedding previews in iframes or emails, or creating time-limited shareable links.
+
+<Tabs syncKey="language">
+<TabItem label="Python" icon="seti:python">
+```python
+# Create a signed preview URL that expires in 3600 seconds (1 hour)
+signed_url = sandbox.create_signed_preview_url(3000, expires_in_seconds=3600)
+
+print(f"URL: {signed_url.url}")  # Token is embedded in the URL
+print(f"Token: {signed_url.token}")  # Can be used to revoke access
+
+# Use directly - no headers needed
+import requests
+response = requests.get(signed_url.url)
+
+# Revoke the token before expiry if needed
+sandbox.expire_signed_preview_url(3000, signed_url.token)
+```
+
+</TabItem>
+<TabItem label="TypeScript" icon="seti:typescript">
+```typescript
+// Create a signed preview URL that expires in 3600 seconds (1 hour)
+const signedUrl = await sandbox.getSignedPreviewUrl(3000, 3600);
+
+console.log(`URL: ${signedUrl.url}`);  // Token is embedded in the URL
+console.log(`Token: ${signedUrl.token}`);  // Can be used to revoke access
+
+// Use directly - no headers needed
+const response = await fetch(signedUrl.url);
+
+// Revoke the token before expiry if needed
+await sandbox.expireSignedPreviewUrl(3000, signedUrl.token);
+```
+
+</TabItem>
+<TabItem label="Ruby" icon="seti:ruby">
+```ruby
+# Create a signed preview URL that expires in 3600 seconds (1 hour)
+signed_url = sandbox.create_signed_preview_url(3000, 3600)
+
+puts "URL: #{signed_url.url}"
+puts "Token: #{signed_url.token}"
+```
+
+</TabItem>
+<TabItem label="CLI" icon="seti:shell">
+```bash
+daytona preview-url <sandbox-name> --port 3000 --expires 3600
+```
+
+</TabItem>
+<TabItem label="API" icon="seti:json">
+```bash
+curl 'https://app.daytona.io/api/sandbox/{sandboxId}/ports/3000/signed-preview-url?expiresInSeconds=3600' \
+  --header 'Authorization: Bearer <API_KEY>'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [TypeScript SDK](/docs/en/typescript-sdk/sandbox), [Ruby SDK](/docs/en/ruby-sdk/sandbox), and [API](/docs/en/tools/api/#daytona/tag/sandbox) references:
+
+> [**create_signed_preview_url (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxcreate_signed_preview_url)
+>
+> [**getSignedPreviewUrl (TypeScript SDK)**](/docs/en/typescript-sdk/sandbox#getsignedpreviewurl)
+>
+> [**create_signed_preview_url (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#create_signed_preview_url)
+>
+> [**Get Signed Preview URL (API)**](/docs/en/tools/api/#daytona/tag/sandbox/GET/sandbox/{sandboxIdOrName}/ports/{port}/signed-preview-url)
+
+### Authentication
+
+The token is embedded in the URL itself, so no additional headers are required:
+
+```bash
+curl https://3000-<value>.proxy.daytona.work
+```
+
+:::tip
+Port `22222` is used by the [web terminal](/docs/en/web-terminal) to access the terminal using preview URLs.
+:::
+
+## Warning page
+
+When opening a preview link in a browser for the first time, Daytona displays a warning page. This warning informs users about potential risks of visiting the preview URL and only appears when loading the link in a browser.
+
+To skip the warning page:
+
+- Send the `X-Daytona-Skip-Preview-Warning: true` header
+- Upgrade to [Tier 3](/docs/en/limits)
+- Deploy a [custom preview proxy](/docs/en/custom-domain-authentication)

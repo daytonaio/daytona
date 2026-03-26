@@ -1,0 +1,402 @@
+@charset "UTF-8";
+/*!
+ * Hamburgers
+ * @description Tasty CSS-animated hamburgers
+ * @author Jonathan Suh @jonsuh
+ * @site https://jonsuh.com/hamburgers
+ * @link https://github.com/jonsuh/hamburgers
+ */
+
+// Settings
+// ==================================================
+$hamburger-padding-x: 0 !default;
+$hamburger-padding-y: 0 !default;
+$hamburger-layer-width: 10px !default;
+$hamburger-layer-height: 1px !default;
+$hamburger-layer-spacing: 2px !default;
+$hamburger-layer-color: var(--primary-text-color) !default;
+$hamburger-layer-border-radius: 6px !default;
+$hamburger-hover-opacity: 1 !default;
+$hamburger-active-layer-color: $hamburger-layer-color !default;
+$hamburger-active-hover-opacity: $hamburger-hover-opacity !default;
+
+// To use CSS filters as the hover effect instead of opacity,
+// set $hamburger-hover-use-filter as true and
+// change the value of $hamburger-hover-filter accordingly.
+$hamburger-hover-use-filter: false !default;
+$hamburger-hover-filter: opacity(50%) !default;
+$hamburger-active-hover-filter: $hamburger-hover-filter !default;
+
+// Types (Remove or comment out what you don’t need)
+// ==================================================
+$hamburger-types: (
+  3dx,
+  3dx-r,
+  3dy,
+  3dy-r,
+  3dxy,
+  3dxy-r,
+  arrow,
+  arrow-r,
+  arrowalt,
+  arrowalt-r,
+  arrowturn,
+  arrowturn-r,
+  boring,
+  collapse,
+  collapse-r,
+  elastic,
+  elastic-r,
+  emphatic,
+  emphatic-r,
+  minus,
+  slider,
+  slider-r,
+  spin,
+  spin-r,
+  spring,
+  spring-r,
+  stand,
+  stand-r,
+  squeeze,
+  vortex,
+  vortex-r
+) !default;
+
+// Base Hamburger (We need this)
+// ==================================================
+
+// Hamburger types
+// ==================================================
+
+// ==================================================
+// Cooking up additional types:
+//
+// The Sass for each hamburger type should be nested
+// inside an @if directive to check whether or not
+// it exists in $hamburger-types so only the CSS for
+// included types are generated.
+//
+// e.g. hamburgers/types/_new-type.scss
+//
+// @if index($hamburger-types, new-type) {
+//   .hamburger--new-type {
+//     ...
+//   }
+// }
+
+// Hamburger
+// ==================================================
+.hamburger {
+  padding: $hamburger-padding-y $hamburger-padding-x;
+  display: inline-block;
+  cursor: pointer;
+  outline: none;
+  transition-property: opacity, filter;
+  transition-duration: 0.15s;
+  transition-timing-function: linear;
+
+  // Normalize (<button>)
+  font: inherit;
+  color: inherit;
+  text-transform: none;
+  background-color: transparent;
+  border: 0;
+  margin: 0;
+  overflow: visible;
+
+  &:hover {
+    @if $hamburger-hover-use-filter == true {
+      filter: $hamburger-hover-filter;
+    } @else {
+      opacity: $hamburger-hover-opacity;
+    }
+  }
+
+  &.is-active {
+    @include for-hover-state {
+      &:hover {
+        @if $hamburger-hover-use-filter == true {
+          filter: $hamburger-active-hover-filter;
+        } @else {
+          opacity: $hamburger-active-hover-opacity;
+        }
+      }
+    }
+
+    .hamburger-inner,
+    .hamburger-inner::after,
+    .hamburger-inner::before {
+      background-color: $hamburger-active-layer-color;
+    }
+  }
+}
+
+.search {
+  img {
+    width: $hamburger-layer-width;
+  }
+}
+
+.hamburger-box {
+  width: 10px;
+  height: 10px;
+  display: block;
+  position: relative;
+  padding: 10px;
+  border: var(--border);
+
+  @include for-tablet-screen-sizes {
+    width: 9px;
+    height: 9px;
+  }
+
+  @include for-mobile-screen-sizes {
+    width: 9px;
+    height: 8px;
+  }
+}
+
+.hamburger-inner {
+  display: block;
+  top: 50%;
+  margin-top: calc($hamburger-layer-height / -2);
+  left: 8px;
+
+  &,
+  &::after,
+  &::before {
+    width: 13px;
+    height: $hamburger-layer-height;
+    background-color: $hamburger-layer-color;
+    border-radius: $hamburger-layer-border-radius;
+    position: absolute;
+    transition-property: transform;
+    transition-duration: 0.15s;
+    transition-timing-function: ease;
+    background-color: #fff;
+  }
+
+  &::after,
+  &::before {
+    content: '';
+    display: block;
+  }
+
+  &::before {
+    top: ($hamburger-layer-spacing + $hamburger-layer-height) * -1;
+  }
+
+  &::after {
+    bottom: ($hamburger-layer-spacing + $hamburger-layer-height) * -1;
+  }
+}
+
+@if index($hamburger-types, spin) {
+  /*
+	 * Spin
+	 */
+  .hamburger--spin {
+    .hamburger-inner {
+      transition-duration: 0.22s;
+      transition-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+
+      &::before {
+        transition:
+          top 0.1s 0.25s ease-in,
+          opacity 0.1s ease-in;
+      }
+
+      &::after {
+        transition:
+          bottom 0.1s 0.25s ease-in,
+          transform 0.22s cubic-bezier(0.55, 0.055, 0.675, 0.19);
+      }
+    }
+
+    &.is-active {
+      .hamburger-inner {
+        transform: rotate(225deg);
+        transition-delay: 0.12s;
+        transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+
+        &::before {
+          top: 0;
+          opacity: 0;
+          transition:
+            top 0.1s ease-out,
+            opacity 0.1s 0.12s ease-out;
+        }
+
+        &::after {
+          bottom: 0;
+          transform: rotate(-90deg);
+          transition:
+            bottom 0.1s ease-out,
+            transform 0.22s 0.12s cubic-bezier(0.215, 0.61, 0.355, 1);
+        }
+      }
+    }
+  }
+}
+
+.mobile-menu {
+  display: none;
+  background-color: #0a0a0a;
+  color: var(--primary-text-color);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+
+  .nav__item a {
+    border: none;
+  }
+}
+
+.mobile-navigation {
+  display: none;
+
+  @include for-tablet-screen-sizes {
+    display: flex;
+    align-items: center;
+
+    .nav__items_side_menu {
+      column-gap: 0;
+    }
+  }
+  position: relative;
+  z-index: 999;
+  background: var(--bg-color);
+  padding: 20px;
+
+  @include for-tablet-screen-sizes {
+    padding: 20px 0;
+    align-items: center;
+  }
+  @include for-mobile-screen-sizes {
+    padding: 20px;
+  }
+}
+
+.mobile-menu.show-menu {
+  height: 100vh;
+  margin-top: 70px;
+  padding: 10px 20px 40px;
+  background: var(--bg-color);
+
+  @include for-tablet-screen-sizes {
+    padding: 0 60px;
+    margin-top: 63px;
+    z-index: 999;
+  }
+
+  @include for-mobile-screen-sizes {
+    padding: 10px 20px 40px;
+  }
+}
+
+.mobile-menu {
+  transition: 0.6s;
+  width: 100%;
+  height: 100%;
+  top: -100%;
+  display: none;
+  box-sizing: border-box;
+
+  ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    gap: 16px;
+    margin-bottom: 40px;
+
+    li {
+      border-top: var(--border);
+      padding-top: 16px;
+    }
+  }
+
+  a {
+    font-family: 'Berkeley Mono', monospace;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--primary-text-color);
+  }
+}
+
+@include for-tablet-screen-sizes {
+  .mobile-menu.show-menu {
+    display: block;
+    padding: 0;
+    margin-top: 138px;
+    height: fit-content;
+  }
+
+  @include for-mobile-screen-sizes {
+    .mobile-menu.show-menu {
+      padding: 0 20px;
+    }
+  }
+
+  .hamburger.show-menu .hamburger-inner {
+    background-color: transparent !important;
+    &::before {
+      top: -1px;
+      transform: rotate(45deg) translateY(1px) translateX(1px);
+    }
+
+    &::after {
+      bottom: 1px;
+      transform: rotate(-45deg) translateY(1px) translateX(-1px);
+    }
+  }
+
+  .hamburger.show-menu {
+    display: block;
+  }
+}
+
+.mobile-nav-btn {
+  display: none;
+
+  @include for-tablet-screen-sizes {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+    margin-bottom: 28px;
+    margin-left: unset;
+  }
+
+  .github {
+    background: var(--block-bg-color);
+    border-radius: 3px;
+
+    a {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      line-height: 2.14;
+    }
+  }
+
+  .call {
+    background: #007fff33;
+    text-align: center;
+    border-radius: 3px;
+
+    a {
+      line-height: 2.14;
+      color: #007fff;
+    }
+  }
+
+  .call .nav__link {
+    transition: 0.6s;
+  }
+}

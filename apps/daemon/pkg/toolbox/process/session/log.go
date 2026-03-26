@@ -1,0 +1,86 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package session
+
+import (
+	"net/http"
+
+	"github.com/daytonaio/daemon/internal/util"
+	"github.com/daytonaio/daemon/pkg/session"
+	"github.com/gin-gonic/gin"
+)
+
+// GetSessionCommandLogs godoc
+//
+//	@Summary		Get session command logs
+//	@Description	Get logs for a specific command within a session. Supports both HTTP and WebSocket streaming.
+//	@Tags			process
+//	@Produce		text/plain
+//	@Param			sessionId	path		string	true	"Session ID"
+//	@Param			commandId	path		string	true	"Command ID"
+//	@Param			follow		query		boolean	false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200			{string}	string	"Log content"
+//	@Router			/process/session/{sessionId}/command/{commandId}/logs [get]
+//
+//	@id				GetSessionCommandLogs
+func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
+	sessionId := c.Param("sessionId")
+	cmdId := c.Param("commandId")
+
+	sdkVersion := util.ExtractSdkVersionFromHeader(c.Request.Header)
+	versionComparison, err := util.CompareVersions(sdkVersion, "0.27.0-0")
+	if err != nil {
+		s.logger.DebugContext(c.Request.Context(), "failed to compare versions", "error", err)
+		versionComparison = util.Pointer(1)
+	}
+
+	opts := session.FetchLogsOptions{
+		IsCombinedOutput:   session.IsCombinedOutput(sdkVersion, versionComparison, c.Request.Header),
+		IsWebsocketUpgrade: c.Request.Header.Get("Upgrade") == "websocket",
+		Follow:             c.Query("follow") == "true",
+	}
+
+	logBytes, err := s.sessionService.GetSessionCommandLogs(sessionId, cmdId, c.Request, c.Writer, opts)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if logBytes == nil {
+		return
+	}
+
+	c.String(http.StatusOK, string(logBytes))
+}
+
+// GetEntrypointLogs godoc
+//
+//	@Summary		Get entrypoint logs
+//	@Description	Get logs for a sandbox entrypoint session. Supports both HTTP and WebSocket streaming.
+//	@Tags			process
+//	@Produce		text/plain
+//	@Param			follow	query		boolean	false	"Follow logs in real-time (WebSocket only)"
+//	@Success		200		{string}	string	"Entrypoint log content"
+//	@Router			/process/session/entrypoint/logs [get]
+//
+//	@id				GetEntrypointLogs
+func (s *SessionController) GetEntrypointLogs(c *gin.Context) {
+	opts := session.FetchLogsOptions{
+		IsCombinedOutput:   false,
+		IsWebsocketUpgrade: c.Request.Header.Get("Upgrade") == "websocket",
+		Follow:             c.Query("follow") == "true",
+	}
+
+	logBytes, err := s.sessionService.GetSessionCommandLogs(util.EntrypointSessionID, util.EntrypointCommandID, c.Request, c.Writer, opts)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if logBytes == nil {
+		return
+	}
+
+	c.String(http.StatusOK, string(logBytes))
+}

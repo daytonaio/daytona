@@ -1,0 +1,37 @@
+/**
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
+export const TIER_REQUIREMENTS: Record<number, string[]> = {
+  1: ['Email verification'],
+  2: ['Credit card linked', 'GitHub connected', 'Top up $25 (one time)'],
+  3: ['Business email verified', 'Top up $500 (one time)'],
+  4: ['Top up $2,000 (every 30 days)'],
+}
+
+export const TIER_RATE_LIMITS: Record<
+  number,
+  { authenticatedRateLimit: number; sandboxCreateRateLimit: number; sandboxLifecycleRateLimit: number }
+> = {
+  1: {
+    authenticatedRateLimit: 10_000,
+    sandboxCreateRateLimit: 300,
+    sandboxLifecycleRateLimit: 10_000,
+  },
+  2: {
+    authenticatedRateLimit: 20_000,
+    sandboxCreateRateLimit: 400,
+    sandboxLifecycleRateLimit: 20_000,
+  },
+  3: {
+    authenticatedRateLimit: 40_000,
+    sandboxCreateRateLimit: 500,
+    sandboxLifecycleRateLimit: 40_000,
+  },
+  4: {
+    authenticatedRateLimit: 50_000,
+    sandboxCreateRateLimit: 600,
+    sandboxLifecycleRateLimit: 50_000,
+  },
+}

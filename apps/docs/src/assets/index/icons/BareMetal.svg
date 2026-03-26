@@ -1,0 +1,18 @@
+<svg width="164" height="89" viewBox="0 0 164 89" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect x="0.5" y="35" width="163" height="27" stroke="white"/>
+<line x1="12.5" y1="44.5" x2="12.5" y2="52.5" stroke="white"/>
+<line x1="22.5" y1="44.5" x2="22.5" y2="52.5" stroke="white"/>
+<line x1="32.5" y1="44.5" x2="32.5" y2="52.5" stroke="white"/>
+<line x1="42.5" y1="44.5" x2="42.5" y2="52.5" stroke="white"/>
+<line x1="52.5" y1="44.5" x2="52.5" y2="52.5" stroke="white"/>
+<line x1="82.5" y1="68.5" x2="82.5" y2="87.5" stroke="white"/>
+<line x1="163" y1="88" y2="88" stroke="white"/>
+<rect x="144" y="44.5" width="8" height="8" fill="#2ECC71"/>
+<rect x="0.5" y="1" width="163" height="27" stroke="white"/>
+<line x1="12.5" y1="10.5" x2="12.5" y2="18.5" stroke="white"/>
+<line x1="22.5" y1="10.5" x2="22.5" y2="18.5" stroke="white"/>
+<line x1="32.5" y1="10.5" x2="32.5" y2="18.5" stroke="white"/>
+<line x1="42.5" y1="10.5" x2="42.5" y2="18.5" stroke="white"/>
+<line x1="52.5" y1="10.5" x2="52.5" y2="18.5" stroke="white"/>
+<rect x="144" y="10.5" width="8" height="8" fill="#2ECC71"/>
+</svg>

@@ -1,0 +1,68 @@
+---
+title: カスタムプレビュープロキシ
+description: 独自のドメインとロジックでプレビュープロキシをカスタマイズします。
+---
+
+Daytona では、サンドボックスのプレビューURLを処理するために、独自のカスタムプレビュープロキシをデプロイできます。これにより、カスタムドメイン、認証、エラーハンドリング、スタイリングなど、プレビューエクスペリエンスを完全に制御できます。
+
+**カスタムプレビュープロキシで可能なこと:**
+
+- **カスタムドメイン:** 独自ドメイン配下でプロキシをホスト（例: `preview.yourcompany.com`）
+- **ユーザー認証:** プライベートプレビュー向けの独自認証ロジックを実装
+- **スマートなサンドボックス管理:** 転送前に停止中のサンドボックスを自動的に起動
+- **カスタムエラーページ:** ブランドに合わせてエラーページの見た目をカスタマイズ
+- **プレビュー警告の制御:** Daytona のプレビュー警告を無効化
+- **CORS 管理:** Daytona の既定の CORS 設定を上書き
+
+---
+
+## 仕組み
+
+ユーザーがプレビューURLにアクセスすると、カスタムプロキシがリクエストを受け取り、次のことが可能です:
+
+1. カスタムロジックでユーザーを認証する
+2. サンドボックスの状態を確認し、必要に応じて起動する
+3. 実際のサンドボックスへリクエストを転送する
+4. カスタムのスタイルやエラーページでレスポンスを処理する
+5. Daytonaの動作を制御するためのカスタムヘッダーを送信する
+
+---
+
+## Daytona ヘッダー
+
+プロキシは、Daytona の動作を制御するための特殊なヘッダーを送信できます：
+
+#### プレビュー警告の無効化
+
+Daytona のプレビュー警告ページを無効化するには、次を送信します：
+
+```
+X-Daytona-Skip-Preview-Warning: true
+```
+
+#### CORS の無効化
+
+Daytona の既定の CORS 設定を上書きするには、次を送信します：
+
+```
+X-Daytona-Disable-CORS: true
+```
+
+#### 認証
+
+非公開のプレビューリンクでは、次を送信する必要があります：
+
+```
+X-Daytona-Preview-Token: {sandboxToken}
+```
+
+`sandboxToken` は [Daytona SDK または API](/docs/ja/preview-and-authentication) から取得できます。
+
+---
+
+## 例
+
+カスタムプレビュー用プロキシのサンプルは [GitHub](https://github.com/daytonaio/daytona-proxy-samples) にあります。
+
+- [TypeScript サンプル](https://github.com/daytonaio/daytona-proxy-samples/tree/main/typescript)
+- [Go サンプル](https://github.com/daytonaio/daytona-proxy-samples/tree/main/go)

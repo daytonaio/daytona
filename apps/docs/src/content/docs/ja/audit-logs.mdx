@@ -1,0 +1,113 @@
+---
+title: 監査ログ
+description: Daytona の組織全体にわたるすべてのユーザー操作を表示および監視します。
+---
+
+Daytona の監査ログは、組織全体のユーザーおよびシステムのアクティビティを詳細に記録します。サンドボックスのライフサイクルイベント、ユーザーアクセス、システム変更などの追跡にご利用ください。
+
+[Dashboard](https://app.daytona.io/dashboard/audit-logs) から監査ログにアクセスできます。
+
+## 前提条件
+
+監査ログを利用できるのは次のユーザーです：
+- **管理者** - すべての監査ログへのフルアクセス
+- **メンバー** - 監査ログの権限が付与されている場合のみアクセス可能
+
+監査ログにアクセスできない場合は、組織の管理者にお問い合わせください。
+
+## リアルタイム更新
+
+監査ログページの右上にある**リアルタイム更新**のトグルを有効にすると、新しいイベントの発生に合わせてログが自動的に更新されます。
+
+## ログ構造
+
+各ログエントリには次の列が含まれます:
+
+| Field     | 説明                                       |
+|---------- |--------------------------------------------|
+| **Time**  | アクションが発生した日時のタイムスタンプ（UTC） |
+| **User**  | アクションを実行したユーザーのメールアドレス   |
+| **Action**| 実行された操作                               |
+| **Target**| 影響を受けたリソースの種類                    |
+| **Outcome**| 結果のステータスコードとメッセージ            |
+
+### 例
+
+```text
+Time:       5時間前 (7/31/2025, 8:15:27 AM)
+User:       janedoe@acme.com
+Action:     create
+Target:     sandbox (ID: 10f249ad-...)
+Outcome:    Success (200)
+```
+
+## ユースケース
+
+- **セキュリティ監査**: 不正アクセスやサンドボックスの不正利用を監視
+- **デバッグ**: サンドボックスのライフサイクルに関する問題を把握（例：起動失敗）
+- **コンプライアンス向けエクスポート**: 内部監査や外部監査に向けてログをエクスポート（近日対応）
+
+## アクション
+
+以下は、Daytona によって記録されるアクションの全一覧です：
+
+```text
+create, read, update, delete, login,
+set_default, update_role, update_assigned_roles, update_quota,
+suspend, unsuspend, accept, decline,
+link_account, unlink_account, leave_organization,
+regenerate_key_pair, update_scheduling,
+start, stop, replace_labels, create_backup,
+update_public_status, set_auto_stop_interval,
+set_auto_archive_interval, set_auto_delete_interval, archive,
+get_port_preview_url, toggle_state, set_general_status, activate,
+update_network_settings,
+toolbox_delete_file, toolbox_download_file, toolbox_create_folder,
+toolbox_move_file, toolbox_set_file_permissions, toolbox_replace_in_files,
+toolbox_upload_file, toolbox_bulk_upload_files,
+toolbox_git_add_files, toolbox_git_create_branch, toolbox_git_delete_branch,
+toolbox_git_clone_repository, toolbox_git_commit_changes,
+toolbox_git_pull_changes, toolbox_git_push_changes,
+toolbox_git_checkout_branch, toolbox_execute_command,
+toolbox_create_session, toolbox_session_execute_command,
+toolbox_delete_session, toolbox_computer_use_start,
+toolbox_computer_use_stop, toolbox_computer_use_restart_process
+```
+
+## ターゲット
+
+各アクションは特定のリソースタイプを対象とします。対象となり得るものは次のとおりです:
+
+```text
+api_key, organization, organization_invitation,
+organization_role, organization_user, docker_registry,
+runner, sandbox, snapshot, user, volume
+```
+
+## 結果
+
+Outcome フィールドはアクションの結果を示します。ステータスは標準的な HTTP セマンティクスに従います:
+
+| 結果 | 説明 |
+|---------|-------------|
+| **情報** | 情報（1xx コード） |
+| **成功** | アクション成功（2xx コード） |
+| **リダイレクト** | リダイレクト（3xx コード） |
+| **エラー** | クライアント/サーバー エラー（4xx/5xx） |
+
+エラーの例:
+
+- `400` – サンドボックスが起動していません
+- `403` – 認可されていません
+- `500` – 内部エラー
+
+{/* ## Filtering & Pagination
+
+You can filter and search logs by:
+
+- Action type
+- Target resource
+- Outcome status
+- User email
+
+Use the page size selector to change how many results are shown per page. */} 

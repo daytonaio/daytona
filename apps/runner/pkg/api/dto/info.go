@@ -1,0 +1,28 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: AGPL-3.0
+
+package dto
+
+type RunnerMetrics struct {
+	CurrentCpuLoadAverage        float64 `json:"currentCpuLoadAverage"`
+	CurrentCpuUsagePercentage    float64 `json:"currentCpuUsagePercentage"`
+	CurrentMemoryUsagePercentage float64 `json:"currentMemoryUsagePercentage"`
+	CurrentDiskUsagePercentage   float64 `json:"currentDiskUsagePercentage"`
+	CurrentAllocatedCpu          float64 `json:"currentAllocatedCpu"`
+	CurrentAllocatedMemoryGiB    float64 `json:"currentAllocatedMemoryGiB"`
+	CurrentAllocatedDiskGiB      float64 `json:"currentAllocatedDiskGiB"`
+	CurrentSnapshotCount         int     `json:"currentSnapshotCount"`
+	CurrentStartedSandboxes      int64   `json:"currentStartedSandboxes"`
+} //	@name	RunnerMetrics
+
+type RunnerServiceInfo struct {
+	ServiceName string  `json:"serviceName" validate:"required"`
+	Healthy     bool    `json:"healthy" validate:"required"`
+	ErrorReason *string `json:"errorReason,omitempty"`
+} // @name RunnerServiceInfo
+
+type RunnerInfoResponseDTO struct {
+	ServiceHealth []*RunnerServiceInfo `json:"serviceHealth,omitempty"`
+	Metrics       *RunnerMetrics       `json:"metrics,omitempty"`
+	AppVersion    string               `json:"appVersion"`
+} //	@name	RunnerInfoResponseDTO

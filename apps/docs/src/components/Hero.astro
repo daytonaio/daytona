@@ -1,0 +1,37 @@
+---
+import { PAGE_TITLE_ID } from './TableOfContent/constants'
+const { data } = Astro.props.entry
+const { title = data.title, tagline, image, actions = [] } = data.hero || {}
+---
+
+<div class="hero">
+  <h1 id={PAGE_TITLE_ID} data-page-title set:html={title} />
+  {tagline && <div class="tagline" set:html={tagline} />}
+</div>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: 100%;
+    margin-top: 40px;
+    margin-bottom: 60px;
+    @include for-mobile-screen-sizes {
+      margin-bottom: 40px;
+    }
+
+    .hero-highlight {
+      color: var(--hover-color);
+    }
+    .hero-lowlight {
+      color: var(--secondary-text-color);
+    }
+  }
+  .tagline {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    color: var(--primary-text-color);
+  }
+</style>

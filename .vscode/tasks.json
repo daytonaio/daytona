@@ -1,0 +1,18 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "debug-build-runner",
+      "type": "shell",
+      "command": "yarn nx build runner --output-style=stream",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": ["$go"]
+    }
+  ]
+}

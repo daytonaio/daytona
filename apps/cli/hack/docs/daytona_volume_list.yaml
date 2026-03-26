@@ -1,0 +1,13 @@
+name: daytona volume list
+synopsis: List all volumes
+usage: daytona volume list [flags]
+options:
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona volume - Manage Daytona volumes

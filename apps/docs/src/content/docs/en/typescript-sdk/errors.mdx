@@ -1,0 +1,186 @@
+---
+title: "Errors"
+hideTitleOnPage: true
+---
+
+
+## DaytonaError
+
+Base error for Daytona SDK.
+
+**Properties**:
+
+- `headers?` _AxiosHeaders_ - Response headers if available
+- `statusCode?` _number_ - HTTP status code if available
+    
+
+
+
+
+**Extends:**
+
+- `Error`
+
+### Extended by
+
+- `DaytonaNotFoundError`
+- `DaytonaRateLimitError`
+- `DaytonaTimeoutError`
+
+### Constructors
+
+#### new DaytonaError()
+
+```ts
+new DaytonaError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+
+
+**Returns**:
+
+- `DaytonaError`
+
+##### Overrides
+
+```ts
+Error.constructor
+```
+## DaytonaNotFoundError
+
+Base error for Daytona SDK.
+
+**Properties**:
+
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+    
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaNotFoundError()
+
+```ts
+new DaytonaNotFoundError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaNotFoundError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+
+
+**Returns**:
+
+- `DaytonaNotFoundError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## DaytonaRateLimitError
+
+Error thrown when rate limit is exceeded.
+
+**Properties**:
+
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+    
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaRateLimitError()
+
+```ts
+new DaytonaRateLimitError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaRateLimitError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+
+
+**Returns**:
+
+- `DaytonaRateLimitError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`
+## DaytonaTimeoutError
+
+Error thrown when a timeout occurs.
+
+**Properties**:
+
+- `headers?` _AxiosHeaders_ - Response headers if available
+    - _Inherited from_: `DaytonaError.headers`
+- `statusCode?` _number_ - HTTP status code if available
+    - _Inherited from_: `DaytonaError.statusCode`
+
+
+
+**Extends:**
+
+- `DaytonaError`
+
+### Constructors
+
+#### new DaytonaTimeoutError()
+
+```ts
+new DaytonaTimeoutError(
+   message: string, 
+   statusCode?: number, 
+   headers?: AxiosHeaders): DaytonaTimeoutError
+```
+
+**Parameters**:
+
+- `message` _string_
+- `statusCode?` _number_
+- `headers?` _AxiosHeaders_
+
+
+**Returns**:
+
+- `DaytonaTimeoutError`
+
+##### Overrides
+
+`DaytonaError`.`constructor`

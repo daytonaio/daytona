@@ -1,0 +1,83 @@
+name: SDK and CLI Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+      pypi_pkg_version:
+        description: 'PyPI package version (default: version)'
+        required: false
+      npm_pkg_version:
+        description: 'NPM package version (default: version)'
+        required: false
+      npm_tag:
+        description: 'NPM tag (default: latest)'
+        required: false
+        default: 'latest'
+      rubygems_pkg_version:
+        description: 'RubyGems package version (default: version)'
+        required: false
+
+env:
+  VERSION: ${{ inputs.version }}
+  PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
+  NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
+  RUBYGEMS_PKG_VERSION: ${{ inputs.rubygems_pkg_version || inputs.version}}
+  NPM_TAG: ${{ inputs.npm_tag }}
+  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+  RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+  POETRY_VIRTUALENVS_IN_PROJECT: true
+
+jobs:
+  publish:
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-toolchain
+        with:
+          install-swag: 'false'
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Configure RubyGems credentials
+        run: |
+          mkdir -p ~/.gem
+          echo "---" > ~/.gem/credentials
+          echo ":rubygems_api_key: $RUBYGEMS_API_KEY" >> ~/.gem/credentials
+          chmod 0600 ~/.gem/credentials
+
+      - name: Publish projects
+        run: |
+          source "$(poetry env info --path)/bin/activate"
+          yarn publish
+
+  update-homebrew-tap:
+    if: ${{ inputs.npm_tag == 'latest' }}
+    needs: publish
+    runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
+    name: Update Homebrew CLI tap
+    steps:
+      - name: Update version
+        run: |
+          curl -f -X POST -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${GITHUBBOT_TOKEN}" \
+          https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
+          -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"
+
+        env:
+          GITHUBBOT_TOKEN: ${{ secrets.GITHUBBOT_TOKEN }}

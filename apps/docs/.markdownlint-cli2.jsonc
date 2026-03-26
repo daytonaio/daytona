@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/DavidAnson/markdownlint-cli2/24eb4dce508ab81398d14d75179123fca425f12d/schema/markdownlint-cli2-config-schema.json",
+  "config": {
+    "no-emphasis-as-heading": false,
+    "line-length": false,
+    "no-inline-html": false,
+    "first-line-h1": false,
+    "no-bare-urls": false,
+    "no-duplicate-heading": false,
+    "emphasis-style": {
+      "style": "underscore",
+    },
+    "ol-prefix": false,
+    "fenced-code-language": false,
+    "single-title": false,
+    "heading-increment": false,
+  },
+}

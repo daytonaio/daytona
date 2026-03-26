@@ -1,0 +1,6 @@
+{
+  "files.watcherExclude": {
+    "**/libs/*api-client*/**": true,
+    "**/node_modules/**": true
+  }
+}

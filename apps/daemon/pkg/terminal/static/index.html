@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Web Terminal</title>
+    <link rel="stylesheet" href="/xterm.css" />
+    <script src="/xterm.js"></script>
+    <script src="/xterm-addon-fit.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        background: #000;
+      }
+      #terminal {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="terminal"></div>
+    <script>
+      const term = new Terminal({
+        cursorBlink: true,
+        fontSize: 14,
+        fontFamily: 'monospace',
+        theme: {
+          background: '#000000',
+          foreground: '#ffffff',
+        },
+      })
+
+      const fitAddon = new FitAddon.FitAddon()
+      term.loadAddon(fitAddon)
+      term.open(document.getElementById('terminal'))
+      fitAddon.fit()
+
+      // Connect to WebSocket
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+      const socket = new WebSocket(`${protocol}//${window.location.host}/ws`)
+
+      socket.onopen = () => {
+        console.log('WebSocket connected')
+
+        // WebSocket -> Terminal
+        socket.onmessage = (event) => {
+          // Remove the Uint8Array conversion
+          term.write(event.data)
+        }
+
+        // Handle xterm data
+        term.onData((data) => {
+          socket.send(data)
+        })
+
+        // Handle resize
+        term.onResize((size) => {
+          socket.send(
+            JSON.stringify({
+              rows: size.rows,
+              cols: size.cols,
+            }),
+          )
+        })
+
+        // Initial size
+        socket.send(
+          JSON.stringify({
+            rows: term.rows,
+            cols: term.cols,
+          }),
+        )
+      }
+
+      // WebSocket -> Terminal
+      socket.onmessage = (event) => {
+        term.write(new Uint8Array(event.data))
+      }
+
+      socket.onclose = () => {
+        term.write('\r\nConnection closed\r\n')
+      }
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        fitAddon.fit()
+      })
+    </script>
+  </body>
+</html>

@@ -1,0 +1,87 @@
+# OpenTelemetry Collector configuration for Daytona
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+        include_metadata: true
+
+exporters:
+  daytona_exporter:
+    # Sandbox authentication header name
+    sandbox_auth_token_header: 'sandbox-auth-token'
+
+    # Cache TTL for endpoint configurations
+    cache_ttl: 5m
+
+    # Default timeout for OTLP export requests
+    default_timeout: 30s
+
+    sending_queue:
+      queue_size: ${env:DAYTONA_EXPORTER_SENDING_QUEUE_SIZE:-1000}
+
+    # Retry settings for failed exports
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 5m
+
+    # Daytona API configuration
+    api_url: ${env:DAYTONA_API_URL:-http://localhost:3000/api}
+    api_key: ${env:DAYTONA_API_KEY:-otel_collector_api_key}
+
+    # Optional Redis configuration for caching
+    redis:
+      host: '${env:REDIS_HOST:-redis}'
+      port: '${env:REDIS_PORT:-6379}'
+      password: '${env:REDIS_PASSWORD:-}'
+
+  clickhouse:
+    endpoint: ${env:CLICKHOUSE_ENDPOINT}
+    database: otel
+    ttl: ${env:CLICKHOUSE_TTL:-72h}
+    username: default
+    password: ${env:CLICKHOUSE_PASSWORD}
+
+    sending_queue:
+      queue_size: ${env:CLICKHOUSE_EXPORTER_SENDING_QUEUE_SIZE:-1000}
+
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
+extensions:
+  healthcheckv2:
+    use_v2: true
+    component_health:
+      include_permanent_errors: false
+      include_recoverable_errors: true
+      recovery_duration: 5m
+    http:
+      endpoint: '0.0.0.0:13133'
+      status:
+        enabled: true
+        path: '/health/status'
+      config:
+        enabled: true
+        path: '/health/config'
+    grpc:
+      endpoint: '0.0.0.0:13132'
+      transport: 'tcp'
+
+service:
+  extensions: [healthcheckv2]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [daytona_exporter, clickhouse]
+    metrics:
+      receivers: [otlp]
+      exporters: [daytona_exporter, clickhouse]
+    logs:
+      receivers: [otlp]
+      exporters: [daytona_exporter, clickhouse]

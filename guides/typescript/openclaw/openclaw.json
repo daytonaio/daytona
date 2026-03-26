@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "defaults": { "model": { "primary": "anthropic/claude-sonnet-4-5" } }
+  },
+  "auth": {
+    "profiles": {
+      "anthropic:api": { "provider": "anthropic", "mode": "api_key" }
+    },
+    "order": { "anthropic": ["anthropic:api"] }
+  },
+  "channels": { "whatsapp": { "allowFrom": [] } }
+}

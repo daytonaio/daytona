@@ -1,0 +1,9 @@
+name: daytona volume delete
+synopsis: Delete a volume
+usage: daytona volume delete [VOLUME_ID] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona volume - Manage Daytona volumes

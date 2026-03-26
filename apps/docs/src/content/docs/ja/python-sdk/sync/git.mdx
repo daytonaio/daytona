@@ -1,0 +1,387 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+## Git
+
+```python
+class Git()
+```
+
+サンドボックス内での Git 操作を提供します。
+
+**例**:
+
+```python
+# リポジトリをクローン
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# リポジトリのステータスを確認
+status = sandbox.git.status("workspace/repo")
+print(f"Modified files: {status.modified}")
+
+# 変更をステージしてコミット
+sandbox.git.add("workspace/repo", ["file.txt"])
+sandbox.git.commit(
+    path="workspace/repo",
+    message="Update file",
+    author="John Doe",
+    email="john@example.com"
+)
+```
+
+#### Git.__init__
+
+```python
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
+             get_root_dir: Callable[[], str])
+```
+
+新しい Git ハンドラーのインスタンスを初期化します。
+
+**引数**:
+
+- `sandbox_id` _str_ - サンドボックス ID。
+- `toolbox_api` _ToolboxApi_ - サンドボックス操作用の API クライアント。
+- `get_root_dir` _Callable[[], str]_ - サンドボックスのデフォルトのルートディレクトリを取得する関数。
+
+#### Git.add
+
+```python
+@intercept_errors(message_prefix="Failed to add files: ")
+def add(path: str, files: List[str]) -> None
+```
+
+指定したファイルを次回のコミットに向けてステージします。コマンドラインで
+`git add` を実行するのと同様です。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `files` _List[str]_ - ステージするファイルまたはディレクトリのリスト。リポジトリルートからの相対パス。
+  
+
+**例**:
+
+```python
+# 単一ファイルをステージ
+sandbox.git.add("workspace/repo", ["file.txt"])
+
+# 複数ファイルをステージ
+sandbox.git.add("workspace/repo", [
+    "src/main.py",
+    "tests/test_main.py",
+    "README.md"
+])
+```
+
+#### Git.branches
+
+```python
+@intercept_errors(message_prefix="Failed to list branches: ")
+def branches(path: str) -> ListBranchResponse
+```
+
+リポジトリ内のブランチを一覧表示します。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+  
+
+**戻り値**:
+
+- `ListBranchResponse` - リポジトリ内のブランチ一覧。
+  
+
+**例**:
+
+```python
+response = sandbox.git.branches("workspace/repo")
+print(f"Branches: {response.branches}")
+```
+
+#### Git.clone
+
+```python
+@intercept_errors(message_prefix="Failed to clone repository: ")
+def clone(url: str,
+          path: str,
+          branch: Optional[str] = None,
+          commit_id: Optional[str] = None,
+          username: Optional[str] = None,
+          password: Optional[str] = None) -> None
+```
+
+指定したパスに Git リポジトリをクローンします。特定のブランチやコミットの
+クローンに対応し、認証情報が提供された場合はリモートリポジトリへの
+認証も可能です。
+
+**引数**:
+
+- `url` _str_ - クローン元のリポジトリ URL。
+- `path` _str_ - リポジトリをクローンするパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `branch` _Optional[str]_ - クローンするブランチ。未指定の場合は
+  デフォルトブランチをクローンします。
+- `commit_id` _Optional[str]_ - チェックアウトする特定のコミット。指定した場合、
+  リポジトリはこのコミットで detached HEAD 状態になります。
+- `username` _Optional[str]_ - 認証用の Git ユーザー名。
+- `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
+  
+
+**例**:
+
+```python
+# デフォルトブランチをクローン
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo"
+)
+
+# 認証付きで特定のブランチをクローン
+sandbox.git.clone(
+    url="https://github.com/user/private-repo.git",
+    path="workspace/private",
+    branch="develop",
+    username="user",
+    password="token"
+)
+
+# 特定のコミットをクローン
+sandbox.git.clone(
+    url="https://github.com/user/repo.git",
+    path="workspace/repo-old",
+    commit_id="abc123"
+)
+```
+
+#### Git.commit
+
+```python
+@intercept_errors(message_prefix="Failed to commit changes: ")
+def commit(path: str,
+           message: str,
+           author: str,
+           email: str,
+           allow_empty: bool = False) -> GitCommitResponse
+```
+
+ステージ済みの変更で新しいコミットを作成します。コミットする前に必ず add() メソッドで
+変更をステージしてください。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `message` _str_ - 変更内容を説明するコミットメッセージ。
+- `author` _str_ - コミット作者の名前。
+- `email` _str_ - コミット作者のメールアドレス。
+- `allow_empty` _bool, optional_ - 変更がステージされていない場合でも空のコミットを作成できるようにします。デフォルトは False。
+  
+
+**例**:
+
+```python
+# 変更をステージしてコミットする
+sandbox.git.add("workspace/repo", ["README.md"])
+sandbox.git.commit(
+    path="workspace/repo",
+    message="Update documentation",
+    author="John Doe",
+    email="john@example.com",
+    allow_empty=True
+)
+```
+
+#### Git.push
+
+```python
+@intercept_errors(message_prefix="Failed to push changes: ")
+def push(path: str,
+         username: Optional[str] = None,
+         password: Optional[str] = None) -> None
+```
+
+現在のブランチのすべてのローカルコミットをリモート
+リポジトリにプッシュします。リモートリポジトリが認証を要求する場合は、
+username と password/token を指定してください。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `username` _Optional[str]_ - 認証用の Git ユーザー名。
+- `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
+  
+
+**例**:
+
+```python
+# 認証なしでプッシュ（公開リポジトリや SSH の場合）
+sandbox.git.push("workspace/repo")
+
+# 認証ありでプッシュ
+sandbox.git.push(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### Git.pull
+
+```python
+@intercept_errors(message_prefix="Failed to pull changes: ")
+def pull(path: str,
+         username: Optional[str] = None,
+         password: Optional[str] = None) -> None
+```
+
+リモートリポジトリから変更をプルします。リモートリポジトリが認証を要求する場合は、
+username と password/token を指定してください。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `username` _Optional[str]_ - 認証用の Git ユーザー名。
+- `password` _Optional[str]_ - 認証用の Git パスワードまたはトークン。
+  
+
+**例**:
+
+```python
+# 認証なしでプル
+sandbox.git.pull("workspace/repo")
+
+# 認証ありでプル
+sandbox.git.pull(
+    path="workspace/repo",
+    username="user",
+    password="github_token"
+)
+```
+
+#### Git.status
+
+```python
+@intercept_errors(message_prefix="Failed to get status: ")
+def status(path: str) -> GitStatus
+```
+
+現在の Git リポジトリのステータスを取得します。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+  
+
+**戻り値**:
+
+- `GitStatus` - リポジトリのステータス情報（以下を含む）:
+  - current_branch: 現在のブランチ名
+  - file_status: ファイルの状態のリスト
+  - ahead: リモートに未プッシュのローカルコミット数
+  - behind: ローカルに未プルのリモートコミット数
+  - branch_published: ブランチがリモートリポジトリに公開済みかどうか
+  
+
+**例**:
+
+```python
+status = sandbox.git.status("workspace/repo")
+print(f"On branch: {status.current_branch}")
+print(f"Commits ahead: {status.ahead}")
+print(f"Commits behind: {status.behind}")
+```
+
+#### Git.checkout\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to checkout branch: ")
+def checkout_branch(path: str, branch: str) -> None
+```
+
+リポジトリでブランチをチェックアウトします。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `branch` _str_ - チェックアウトするブランチ名
+  
+
+**例**:
+
+```python
+# ブランチをチェックアウト
+sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+```
+
+#### Git.create\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to create branch: ")
+def create_branch(path: str, name: str) -> None
+```
+
+リポジトリでブランチを作成します。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `name` _str_ - 作成する新しいブランチ名
+  
+
+**例**:
+
+```python
+# 新しいブランチを作成
+sandbox.git.create_branch("workspace/repo", "new-feature")
+```
+
+#### Git.delete\_branch
+
+```python
+@intercept_errors(message_prefix="Failed to delete branch: ")
+def delete_branch(path: str, name: str) -> None
+```
+
+リポジトリ内のブランチを削除します。
+
+**引数**:
+
+- `path` _str_ - Git リポジトリのルートへのパス。相対パスはユーザーの
+  ルートディレクトリを基準に解決されます。
+- `name` _str_ - 削除するブランチ名
+  
+
+**例**:
+
+```python
+# ブランチを削除する
+sandbox.git.delete_branch("workspace/repo", "old-feature")
+```
+
+
+## GitCommitResponse
+
+```python
+class GitCommitResponse()
+```
+
+Git の commit に対するレスポンス。
+
+**属性**:
+
+- `sha` _str_ - コミットの SHA
+

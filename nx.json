@@ -1,0 +1,294 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "namedInputs": {
+    "default": [
+      "{projectRoot}/**/*",
+      "!{projectRoot}/**/*.gem",
+      "!{projectRoot}/dist/**",
+      "!{projectRoot}/node_modules/**",
+      "!{projectRoot}/.venv/**",
+      "!{projectRoot}/build/**",
+      "!{projectRoot}/*.egg-info/**",
+      "!{projectRoot}/coverage/**",
+      "!{projectRoot}/.nx/**",
+      "!{projectRoot}/**/*_test.go",
+      "sharedGlobals"
+    ],
+    "pythonLib": [
+      "default",
+      "{workspaceRoot}/pyproject.toml",
+      { "env": "PYPI_PKG_VERSION" },
+      { "env": "DEFAULT_PACKAGE_VERSION" }
+    ],
+    "production": [
+      "default",
+      "!{projectRoot}/.eslintrc.json",
+      "!{projectRoot}/eslint.config.mjs",
+      "!{projectRoot}/**/?(*.)+(spec|test).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/tsconfig.spec.json",
+      "!{projectRoot}/jest.config.[jt]s",
+      "!{projectRoot}/src/test-setup.[jt]s",
+      "!{projectRoot}/test-setup.[jt]s"
+    ],
+    "goProduction": ["default", "{workspaceRoot}/go.work", "{workspaceRoot}/go.work.sum", "sharedGlobals"],
+    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml"],
+    "apiClient": [
+      "{workspaceRoot}/dist/apps/api/openapi.json",
+      "{workspaceRoot}/apps/daemon/pkg/toolbox/docs/swagger.json",
+      { "env": "DEFAULT_PACKAGE_VERSION" },
+      { "dependentTasksOutputFiles": "**/*", "transitive": true }
+    ],
+    "pythonApiClient": [
+      "apiClient",
+      "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
+      "{workspaceRoot}/hack/python-client/postprocess.sh"
+    ]
+  },
+  "neverConnectToCloud": true,
+  "plugins": [
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      },
+      "exclude": ["apps/daytona-e2e/**/*"]
+    },
+    {
+      "plugin": "@nx/vite/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "testTargetName": "test",
+        "serveTargetName": "serve",
+        "devTargetName": "dev",
+        "previewTargetName": "preview",
+        "serveStaticTargetName": "serve-static",
+        "typecheckTargetName": "typecheck",
+        "buildDepsTargetName": "build-deps",
+        "watchDepsTargetName": "watch-deps"
+      }
+    },
+    {
+      "plugin": "@nx/react/router-plugin",
+      "options": {
+        "buildTargetName": "build",
+        "devTargetName": "dev",
+        "startTargetName": "start",
+        "watchDepsTargetName": "watch-deps",
+        "buildDepsTargetName": "build-deps",
+        "typecheckTargetName": "typecheck"
+      }
+    }
+  ],
+  "generators": {
+    "@nx/react": {
+      "application": {
+        "babel": true,
+        "style": "scss",
+        "linter": "eslint",
+        "bundler": "vite"
+      },
+      "component": {
+        "style": "scss"
+      },
+      "library": {
+        "style": "scss",
+        "linter": "eslint"
+      }
+    }
+  },
+  "targetDefaults": {
+    "@nx/webpack:webpack": {
+      "cache": true,
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{options.outputPath}"]
+    },
+    "@nx/js:swc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "@nx-go/nx-go:build": {
+      "cache": true,
+      "outputs": ["{options.outputPath}"],
+      "inputs": ["goProduction", "^goProduction", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "@nx-go/nx-go:test": {
+      "cache": true,
+      "inputs": ["default", "^goProduction", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "@nx-go/nx-go:lint": {
+      "cache": true,
+      "inputs": ["default", "^goProduction"]
+    },
+    "@nx-go/nx-go:tidy": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"]
+    },
+    "check-version-env": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "if [ -z \"$VERSION\" ]; then echo \"VERSION is not set\" && exit 1; else echo \"VERSION is set to: $VERSION\"; fi"
+      }
+    },
+    "docker": {
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "context": "{workspaceRoot}",
+        "file": "{projectRoot}/Dockerfile",
+        "tags": ["daytonaio/daytona-{projectName}:$VERSION$ARCH"],
+        "build-args": ["VERSION=$VERSION"],
+        "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH"],
+        "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache$ARCH,mode=max"]
+      },
+      "configurations": {
+        "production": {
+          "push": true
+        },
+        "production-multi-platform": {
+          "push": true,
+          "platforms": ["linux/amd64", "linux/arm64"],
+          "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
+          "cache-from": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=daytonaio/daytona-{projectName}:buildcache,mode=max"]
+        },
+        "local-registry": {
+          "push": true,
+          "tags": [
+            "registry:5000/daytonaio/test-daytona-{projectName}:$VERSION",
+            "registry:5000/daytonaio/test-daytona-{projectName}:latest"
+          ],
+          "cache-from": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache"],
+          "cache-to": ["type=registry,ref=registry:5000/daytonaio/test-daytona-{projectName}:buildcache,mode=max"]
+        }
+      },
+      "dependsOn": ["check-version-env"]
+    },
+    "push-manifest": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          "docker manifest create daytonaio/daytona-{projectName}:$VERSION daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push daytonaio/daytona-{projectName}:$VERSION",
+          "docker manifest create daytonaio/daytona-{projectName}:latest daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push daytonaio/daytona-{projectName}:latest"
+        ]
+      }
+    },
+    "deps-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["poetry run deptry .", "poetry lock --regenerate"],
+        "parallel": false
+      },
+      "cache": true,
+      "inputs": ["pythonLib"],
+      "outputs": ["{projectRoot}/poetry.lock"]
+    },
+    "build-py-lib": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "rm -rf dist",
+          "if [ -n \"$PYPI_PKG_VERSION\" ] || [ -n \"$DEFAULT_PACKAGE_VERSION\" ]; then VER=${PYPI_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; sed -i \"s/^VERSION = \\\".*\\\"$/VERSION = \\\"$VER\\\"/\" setup.py && poetry version \"$VER\"; fi && poetry build"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["deps-check"],
+      "cache": true,
+      "inputs": ["pythonLib", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{projectRoot}/dist/**"]
+    },
+    "format": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": []
+    },
+    "lint": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": []
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["default", "^default"],
+      "outputs": []
+    },
+    "generate:api-client": {
+      "cache": true
+    },
+    "docs": {
+      "cache": true,
+      "inputs": ["default", { "dependentTasksOutputFiles": "**/*", "transitive": true }]
+    },
+    "tidy": {
+      "cache": true,
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/go.mod", "{projectRoot}/go.sum"]
+    },
+    "build": {
+      "cache": true,
+      "inputs": ["production", "^production", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
+      "outputs": ["{options.outputPath}"]
+    }
+  },
+  "release": {
+    "projects": ["apps/*", "libs/*"],
+    "changelog": {
+      "workspaceChangelog": {
+        "file": false,
+        "createRelease": "github"
+      }
+    },
+    "version": {
+      "manifestRootsToUpdate": ["dist"],
+      "conventionalCommits": true
+    },
+    "conventionalCommits": {
+      "types": {
+        "refactor": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Refactor"
+          }
+        },
+        "chore": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Chores"
+          }
+        },
+        "__INVALID__": {
+          "semverBump": "patch",
+          "changelog": {
+            "title": "Uncategorized changes"
+          }
+        }
+      }
+    }
+  }
+}

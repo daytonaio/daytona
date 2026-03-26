@@ -1,0 +1,12 @@
+name: daytona login
+synopsis: Log in to Daytona
+usage: daytona login [flags]
+options:
+  - name: api-key
+    usage: API key to use for authentication
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

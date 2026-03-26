@@ -1,0 +1,42 @@
+{
+  "name": "dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/dashboard/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "build": {
+      "configurations": {
+        "production": {
+          "mode": "production"
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "sdk-typescript"
+        }
+      ]
+    },
+    "storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "storybook dev -p 6006 -c .storybook",
+        "cwd": "apps/dashboard"
+      }
+    },
+    "build-storybook": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "storybook build -c .storybook -o ../../dist/storybook",
+        "cwd": "apps/dashboard"
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && prettier --write \"**/*.{ts,tsx,js,jsx,json,css,mjs,html}\" --config ../../.prettierrc"
+      }
+    }
+  }
+}

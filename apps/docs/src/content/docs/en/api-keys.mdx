@@ -1,0 +1,164 @@
+---
+title: API Keys
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona API keys authenticate requests to the [Daytona API](/docs/en/tools/api). They are used by the Daytona [SDKs](/docs/en/getting-started#sdks) and [CLI](/docs/en/getting-started#cli) to access and manage resources in your organization.
+
+## Create an API key
+
+Daytona provides options to create API keys in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or programmatically using the [API](/docs/en/tools/api/#daytona/tag/api-keys).
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys)
+2. Click the **Create Key** button
+3. Enter the name of the API key, set the expiration date, and [select permissions](#permissions--scopes)
+4. Click **Create** to create the API key
+5. Copy the API key to your clipboard
+
+To use the API key in your application, set the `DAYTONA_API_KEY` environment variable. Daytona supports multiple options to configure your environment: [in code](/docs/en/configuration#configuration-in-code), [environment variables](/docs/en/configuration#environment-variables), [.env file](/docs/en/configuration#env-file), and [default values](/docs/en/configuration#default-values).
+
+API keys support optional expiration and can be revoked at any time. After creation, you can only retrieve a masked key value when listing keys.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys' \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
+  --data '{
+  "name": "My API Key",
+  "permissions": ["write:sandboxes", "delete:sandboxes"],
+  "expiresAt": "2030-01-01T00:00:00.000Z"
+}'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**Create API key (API)**](/docs/en/tools/api/#daytona/tag/api-keys/POST/api-keys)
+
+## Permissions & Scopes
+
+| **Resource** | **Scope**               | **Description**          |
+| ------------ | ----------------------- | ------------------------ |
+| Sandboxes    | **`write:sandboxes`**   | Create/modify sandboxes  |
+|              | **`delete:sandboxes`**  | Delete sandboxes         |
+| Snapshots    | **`write:snapshots`**   | Create/modify snapshots  |
+|              | **`delete:snapshots`**  | Delete snapshots         |
+| Registries   | **`write:registries`**  | Create/modify registries |
+|              | **`delete:registries`** | Delete registries        |
+| Volumes      | **`read:volumes`**      | View volumes             |
+|              | **`write:volumes`**     | Create/modify volumes    |
+|              | **`delete:volumes`**    | Delete volumes           |
+| Audit        | **`read:audit_logs`**   | View audit logs          |
+| Regions      | **`write:regions`**     | Create/modify regions    |
+|              | **`delete:regions`**    | Delete regions           |
+| Runners      | **`read:runners`**      | View runners             |
+|              | **`write:runners`**     | Create/modify runners    |
+|              | **`delete:runners`**    | Delete runners           |
+
+## List API keys
+
+Daytona provides methods to list all API keys for the current user or organization.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**list (API)**](/docs/en/tools/api/#daytona/tag/api-keys/GET/api-keys)
+
+## Get current API key
+
+Daytona provides methods to get details of the API key used to authenticate the current request.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys/current' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**get current (API)**](/docs/en/tools/api/#daytona/tag/api-keys/GET/api-keys/current)
+
+## Get API key
+
+Daytona provides methods to get a single API key by name.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys/my-api-key' \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**get (API)**](/docs/en/tools/api/#daytona/tag/api-keys/GET/api-keys/{name})
+
+## Delete API key
+
+Daytona provides options to delete an API key in [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) or programmatically using the API. The key is revoked immediately and cannot be recovered.
+
+1. Navigate to [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys)
+2. Click **Revoke** next to the API key you want to delete
+3. Confirm the revocation
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys/my-api-key' \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**delete (API)**](/docs/en/tools/api/#daytona/tag/api-keys/DELETE/api-keys/{name})
+
+## Delete API key for user
+
+Daytona provides options for organization admins to delete an API key for a specific user.
+
+<Tabs syncKey="language">
+<TabItem label="API" icon="seti:json">
+
+```bash
+curl 'https://app.daytona.io/api/api-keys/{userId}/my-api-key' \
+  --request DELETE \
+  --header 'Authorization: Bearer YOUR_API_KEY'
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [API](/docs/en/tools/api/#daytona/tag/api-keys) reference:
+
+> [**delete for user (API)**](/docs/en/tools/api/#daytona/tag/api-keys/DELETE/api-keys/{userId}/{name})

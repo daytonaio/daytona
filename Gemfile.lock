@@ -1,0 +1,300 @@
+PATH
+  remote: libs/api-client-ruby
+  specs:
+    daytona_api_client (0.0.0.pre.dev)
+      typhoeus (~> 1.0, >= 1.0.1)
+
+PATH
+  remote: libs/sdk-ruby
+  specs:
+    daytona (0.0.0.pre.dev)
+      aws-sdk-s3 (~> 1.0)
+      daytona_api_client (= 0.0.0.pre.dev)
+      daytona_toolbox_api_client (= 0.0.0.pre.dev)
+      dotenv (~> 2.0)
+      opentelemetry-exporter-otlp (~> 0.29)
+      opentelemetry-exporter-otlp-metrics (~> 0.1)
+      opentelemetry-metrics-sdk (~> 0.2)
+      opentelemetry-sdk (~> 1.4)
+      toml (~> 0.3)
+      websocket-client-simple (~> 0.6)
+
+PATH
+  remote: libs/toolbox-api-client-ruby
+  specs:
+    daytona_toolbox_api_client (0.0.0.pre.dev)
+      typhoeus (~> 1.0, >= 1.0.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    addressable (2.8.8)
+      public_suffix (>= 2.0.2, < 8.0)
+    ast (2.4.3)
+    aws-eventstream (1.4.0)
+    aws-partitions (1.1209.0)
+    aws-sdk-core (3.241.4)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      base64
+      bigdecimal
+      jmespath (~> 1, >= 1.6.1)
+      logger
+    aws-sdk-kms (1.121.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-s3 (1.212.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.12.1)
+      aws-eventstream (~> 1, >= 1.0.2)
+    backport (1.2.0)
+    base64 (0.3.0)
+    benchmark (0.5.0)
+    bigdecimal (4.0.1)
+    byebug (13.0.0)
+      reline (>= 0.6.0)
+    coderay (1.1.3)
+    crack (1.0.1)
+      bigdecimal
+      rexml
+    csv (3.3.5)
+    diff-lcs (1.6.2)
+    dotenv (2.8.1)
+    ethon (0.15.0)
+      ffi (>= 1.15.0)
+    event_emitter (0.2.6)
+    ffi (1.17.3-aarch64-linux-gnu)
+    ffi (1.17.3-aarch64-linux-musl)
+    ffi (1.17.3-arm-linux-gnu)
+    ffi (1.17.3-arm-linux-musl)
+    ffi (1.17.3-arm64-darwin)
+    ffi (1.17.3-x86_64-darwin)
+    ffi (1.17.3-x86_64-linux-gnu)
+    ffi (1.17.3-x86_64-linux-musl)
+    google-protobuf (4.33.5)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-aarch64-linux-gnu)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-aarch64-linux-musl)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-arm64-darwin)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-x86_64-darwin)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-x86_64-linux-gnu)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.33.5-x86_64-linux-musl)
+      bigdecimal
+      rake (>= 13)
+    googleapis-common-protos-types (1.22.0)
+      google-protobuf (~> 4.26)
+    hashdiff (1.2.1)
+    io-console (0.8.2)
+    jaro_winkler (1.6.1)
+    jmespath (1.6.2)
+    json (2.18.0)
+    kramdown (2.5.2)
+      rexml (>= 3.4.4)
+    kramdown-parser-gfm (1.1.0)
+      kramdown (~> 2.0)
+    language_server-protocol (3.17.0.5)
+    lint_roller (1.1.0)
+    logger (1.7.0)
+    method_source (1.1.0)
+    mutex_m (0.3.0)
+    nokogiri (1.19.1-aarch64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.1-aarch64-linux-musl)
+      racc (~> 1.4)
+    nokogiri (1.19.1-arm-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.1-arm-linux-musl)
+      racc (~> 1.4)
+    nokogiri (1.19.1-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.1-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.19.1-x86_64-linux-gnu)
+      racc (~> 1.4)
+    nokogiri (1.19.1-x86_64-linux-musl)
+      racc (~> 1.4)
+    observer (0.1.2)
+    open3 (0.2.1)
+    opentelemetry-api (1.7.0)
+    opentelemetry-common (0.23.0)
+      opentelemetry-api (~> 1.0)
+    opentelemetry-exporter-otlp (0.31.1)
+      google-protobuf (>= 3.18)
+      googleapis-common-protos-types (~> 1.3)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-common (~> 0.20)
+      opentelemetry-sdk (~> 1.10)
+      opentelemetry-semantic_conventions
+    opentelemetry-exporter-otlp-metrics (0.6.1)
+      google-protobuf (>= 3.18, < 5.0)
+      googleapis-common-protos-types (~> 1.3)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-common (~> 0.20)
+      opentelemetry-metrics-api (~> 0.2)
+      opentelemetry-metrics-sdk (~> 0.5)
+      opentelemetry-sdk (~> 1.2)
+      opentelemetry-semantic_conventions
+    opentelemetry-metrics-api (0.4.0)
+      opentelemetry-api (~> 1.0)
+    opentelemetry-metrics-sdk (0.11.2)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-metrics-api (~> 0.2)
+      opentelemetry-sdk (~> 1.2)
+    opentelemetry-registry (0.4.0)
+      opentelemetry-api (~> 1.1)
+    opentelemetry-sdk (1.10.0)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-common (~> 0.20)
+      opentelemetry-registry (~> 0.2)
+      opentelemetry-semantic_conventions
+    opentelemetry-semantic_conventions (1.36.0)
+      opentelemetry-api (~> 1.0)
+    ostruct (0.6.3)
+    parallel (1.27.0)
+    parser (3.3.10.1)
+      ast (~> 2.4.1)
+      racc
+    parslet (2.0.0)
+    prism (1.8.0)
+    pry (0.16.0)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+      reline (>= 0.6.0)
+    pry-byebug (3.12.0)
+      byebug (~> 13.0)
+      pry (>= 0.13, < 0.17)
+    public_suffix (7.0.2)
+    racc (1.8.1)
+    rainbow (3.1.1)
+    rake (13.3.1)
+    rbs (3.10.2)
+      logger
+    regexp_parser (2.11.3)
+    reline (0.6.3)
+      io-console (~> 0.5)
+    reverse_markdown (3.0.2)
+      nokogiri
+    rexml (3.4.4)
+    rspec (3.13.2)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.6)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.7)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.6)
+    rubocop (1.84.2)
+      json (~> 2.3)
+      language_server-protocol (~> 3.17.0.2)
+      lint_roller (~> 1.1.0)
+      parallel (~> 1.10)
+      parser (>= 3.3.0.2)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 2.9.3, < 3.0)
+      rubocop-ast (>= 1.49.0, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 2.4.0, < 4.0)
+    rubocop-ast (1.49.0)
+      parser (>= 3.3.7.2)
+      prism (~> 1.7)
+    rubocop-rake (0.7.1)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.1)
+    ruby-progressbar (1.13.0)
+    solargraph (0.58.2)
+      ast (~> 2.4.3)
+      backport (~> 1.2)
+      benchmark (~> 0.4)
+      bundler (>= 2.0)
+      diff-lcs (~> 1.4)
+      jaro_winkler (~> 1.6, >= 1.6.1)
+      kramdown (~> 2.3)
+      kramdown-parser-gfm (~> 1.1)
+      logger (~> 1.6)
+      observer (~> 0.1)
+      open3 (~> 0.2.1)
+      ostruct (~> 0.6)
+      parser (~> 3.0)
+      prism (~> 1.4)
+      rbs (>= 3.6.1, <= 4.0.0.dev.4)
+      reverse_markdown (~> 3.0)
+      rubocop (~> 1.76)
+      thor (~> 1.0)
+      tilt (~> 2.0)
+      yard (~> 0.9, >= 0.9.24)
+      yard-activesupport-concern (~> 0.0)
+      yard-solargraph (~> 0.1)
+    thor (1.5.0)
+    tilt (2.7.0)
+    toml (0.3.0)
+      parslet (>= 1.8.0, < 3.0.0)
+    typhoeus (1.5.0)
+      ethon (>= 0.9.0, < 0.16.0)
+    unicode-display_width (3.2.0)
+      unicode-emoji (~> 4.1)
+    unicode-emoji (4.2.0)
+    webmock (3.26.1)
+      addressable (>= 2.8.0)
+      crack (>= 0.3.2)
+      hashdiff (>= 0.4.0, < 2.0.0)
+    websocket (1.2.11)
+    websocket-client-simple (0.9.0)
+      base64
+      event_emitter
+      mutex_m
+      websocket
+    yard (0.9.38)
+    yard-activesupport-concern (0.0.1)
+      yard (>= 0.8)
+    yard-markdown (0.5.0)
+      csv
+      yard
+    yard-solargraph (0.1.0)
+      yard (~> 0.9)
+
+PLATFORMS
+  aarch64-linux
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+DEPENDENCIES
+  daytona (>= 0.0.0.pre.dev)!
+  daytona_api_client (>= 0.0.0.pre.dev)!
+  daytona_toolbox_api_client (>= 0.0.0.pre.dev)!
+  pry (~> 0.15)
+  pry-byebug
+  rake (~> 13.0)
+  rspec (~> 3.6, >= 3.6.0)
+  rubocop (= 1.84.2)
+  rubocop-rake (~> 0.7)
+  solargraph (~> 0.57)
+  webmock (~> 3.25)
+  yard-markdown (~> 0.5.0)
+
+BUNDLED WITH
+   2.6.9

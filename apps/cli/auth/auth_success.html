@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Daytona</title>
+    <link rel="icon" href="https://www.daytona.io/favicon.ico" />
+    <style>
+      body {
+        font-family:
+          Berkeley Mono,
+          monospace;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+      }
+
+      .container {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .logo {
+        max-width: 300px;
+        margin-top: 1rem;
+      }
+
+      h1 {
+        color: #333;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: #666;
+        margin-bottom: 1.5rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <img
+        src="https://raw.githubusercontent.com/daytonaio/daytona/main/assets/images/Daytona-logotype-black.png"
+        alt="Daytona"
+        class="logo"
+      />
+      <h1>Authentication Successful</h1>
+      <p>You can now close this window and return to the CLI.</p>
+    </div>
+
+    <script>
+      // Function to close the page after 10 seconds
+      setTimeout(function () {
+        window.close()
+      }, 10 * 1000)
+    </script>
+  </body>
+</html>

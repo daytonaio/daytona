@@ -1,0 +1,158 @@
+---
+title: Daytona MCP Server
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona Model Context Protocol (MCP) server enables AI agents to interact with [Daytona Sandboxes](/docs/en/sandboxes) programmatically. This guide covers how to set up and use the MCP server with various AI agents.
+
+## Install Daytona CLI
+
+Install the Daytona CLI to manage the MCP server.
+
+<Tabs syncKey="os">
+<TabItem label="Mac/Linux">
+
+```bash
+brew install daytonaio/cli/daytona
+```
+
+</TabItem>
+<TabItem label="Windows">
+
+```bash
+powershell -Command "irm https://get.daytona.io/windows | iex"
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [CLI](/docs/en/tools/cli) reference.
+
+## Authenticate with Daytona
+
+Authenticate with Daytona to enable MCP server access.
+
+<Tabs>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona login
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [CLI](/docs/en/tools/cli#daytona-login) reference:
+
+> [**login (CLI)**](/docs/en/tools/cli#daytona-login)
+
+## Initialize MCP server
+
+Daytona provides methods to initialize the MCP server with your preferred AI agent. Supported agents include Claude, Cursor, and Windsurf.
+
+<Tabs>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+# Initialize with Claude
+daytona mcp init claude
+
+# Initialize with Cursor
+daytona mcp init cursor
+
+# Initialize with Windsurf
+daytona mcp init windsurf
+```
+
+</TabItem>
+</Tabs>
+
+After initialization, open your AI agent application to begin using Daytona features.
+
+For more information, see the [CLI](/docs/en/tools/cli#daytona-mcp-init) reference:
+
+> [**mcp init (CLI)**](/docs/en/tools/cli#daytona-mcp-init)
+
+## Configure MCP server
+
+Daytona provides methods to generate MCP configuration for integration with other AI agents.
+
+<Tabs>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona mcp config
+```
+
+</TabItem>
+</Tabs>
+
+This command outputs a JSON configuration that you can copy into your agent's settings:
+
+```json
+{
+  "mcpServers": {
+    "daytona-mcp": {
+      "command": "daytona",
+      "args": ["mcp", "start"],
+      "env": {
+        "HOME": "${HOME}",
+        "PATH": "${HOME}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin"
+      },
+      "logFile": "${HOME}/Library/Logs/daytona/daytona-mcp-server.log"
+    }
+  }
+}
+```
+
+:::note
+For Windows users, add the following to the `env` field:
+<br />
+```json
+"APPDATA": "${APPDATA}"
+```
+:::
+
+For more information, see the [CLI](/docs/en/tools/cli#daytona-mcp-config) reference:
+
+> [**mcp config (CLI)**](/docs/en/tools/cli#daytona-mcp-config)
+
+## Start MCP server
+
+Daytona provides methods to manually start the MCP server.
+
+<Tabs>
+<TabItem label="CLI" icon="seti:shell">
+
+```bash
+daytona mcp start
+```
+
+</TabItem>
+</Tabs>
+
+For more information, see the [CLI](/docs/en/tools/cli#daytona-mcp-start) reference:
+
+> [**mcp start (CLI)**](/docs/en/tools/cli#daytona-mcp-start)
+
+## Available tools
+
+Daytona MCP server provides the following tools for interacting with Daytona Sandboxes:
+
+- [Sandbox management](/docs/en/sandboxes)
+- [File system operations](/docs/en/file-system-operations)
+- [Git operations](/docs/en/git-operations)
+- [Process and code execution](/docs/en/process-code-execution)
+- [Computer use](/docs/en/computer-use)
+- [Preview](/docs/en/preview)
+
+## Troubleshooting
+
+To troubleshoot issues with the Daytona MCP server, try the following:
+
+- **Authentication issues**: run `daytona login` to refresh credentials
+- **Connection errors**: verify MCP server configuration, check server status
+- **Sandbox errors**: use `daytona list` to check sandbox status
+
+If the issue persists, contact [support@daytona.io](mailto:support@daytona.io).

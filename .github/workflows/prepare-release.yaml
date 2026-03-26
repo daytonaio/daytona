@@ -1,0 +1,50 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release (start with "v")
+        required: true
+        default: 'v0.0.0-dev'
+
+env:
+  VERSION: ${{ inputs.version }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - uses: ./.github/actions/setup-toolchain
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
+
+      - name: Configure git
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+          git config --global user.name "Daytona Release Bot"
+          git config --global user.email "daytona-release@users.noreply.github.com"
+
+      - name: Create release branch
+        run: |
+          git checkout -b prepare-release-${{ inputs.version }}
+
+      - name: Prepare release
+        run: |
+          VERSION=${{ inputs.version }} yarn prepare-release
+
+      - name: Push branch and create PR
+        run: |
+          git push origin prepare-release-${{ inputs.version }}
+          gh pr create \
+            --title "chore: prepare release ${{ inputs.version }}" \
+            --body "Automated PR to prepare release ${{ inputs.version }}" \
+            --base main \
+            --head prepare-release-${{ inputs.version }}

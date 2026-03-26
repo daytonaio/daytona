@@ -1,0 +1,129 @@
+---
+title: "AsyncVolume"
+hideTitleOnPage: true
+---
+
+## ボリューム
+
+```python
+class Volume(VolumeDto)
+```
+
+Daytonaのボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント）を表します。サンドボックス間で共有可能なストレージです。
+
+**属性**:
+
+- `id` _StrictStr_ - ボリュームの一意な識別子。
+- `name` _StrictStr_ - ボリューム名。
+- `organization_id` _StrictStr_ - ボリュームが属する組織ID。
+- `state` _StrictStr_ - ボリュームの状態。
+- `created_at` _StrictStr_ - ボリュームの作成日時。
+- `updated_at` _StrictStr_ - ボリュームの最終更新日時。
+- `last_used_at` _StrictStr_ - ボリュームの最終使用日時。
+
+
+## AsyncVolumeService
+
+```python
+class AsyncVolumeService()
+```
+
+Daytonaのボリューム（ボリューム（S3互換オブジェクトストレージをバックエンドとするFUSEベースの共有ストレージマウント））を管理するサービスです。ボリュームの一覧、取得、作成、削除に使用できます。
+
+#### AsyncVolumeService.list
+
+```python
+async def list() -> List[Volume]
+```
+
+すべてのボリュームを一覧表示します。
+
+**Returns**:
+
+- `List[Volume]` - すべてのボリュームのリスト。
+  
+
+**Example**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volumes = await daytona.volume.list()
+    for volume in volumes:
+        print(f"{volume.name} ({volume.id})")
+```
+
+#### AsyncVolumeService.get
+
+```python
+async def get(name: str, create: bool = False) -> Volume
+```
+
+名前を指定してボリュームを取得します。
+
+**Arguments**:
+
+- `name` _str_ - 取得するボリューム名。
+- `create` _bool_ - True の場合、存在しなければ新規にボリュームを作成します。
+  
+
+**Returns**:
+
+- `Volume` - 取得したボリュームオブジェクト。
+  
+
+**Example**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.get("test-volume-name", create=True)
+    print(f"{volume.name} ({volume.id})")
+```
+
+#### AsyncVolumeService.create
+
+```python
+async def create(name: str) -> Volume
+```
+
+新しいボリュームを作成します。
+
+**Arguments**:
+
+- `name` _str_ - 作成するボリューム名。
+  
+
+**Returns**:
+
+- `Volume` - 作成されたボリュームオブジェクト。
+  
+
+**Example**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.create("test-volume")
+    print(f"{volume.name} ({volume.id}); state: {volume.state}")
+```
+
+#### AsyncVolumeService.delete
+
+```python
+async def delete(volume: Volume) -> None
+```
+
+ボリュームを削除します。
+
+**Arguments**:
+
+- `volume` _Volume_ - 削除するボリューム。
+  
+
+**Example**:
+
+```python
+async with AsyncDaytona() as daytona:
+    volume = await daytona.volume.get("test-volume")
+    await daytona.volume.delete(volume)
+    print("Volume deleted")
+```
+

@@ -1,0 +1,86 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+dist
+tmp
+out-tsc
+
+# dependencies
+node_modules
+package-lock.json
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.cursor
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+.nx/cache
+.nx/workspace-data
+
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+# yarn
+# https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+.eslintcache
+.tmp/
+.env.local
+
+# Python package metadata
+*.egg-info/
+*.egg
+*.pyc
+__pycache__/
+
+# Ruby gem artifacts
+*.gem
+**/.bundle/
+**/vendor/bundle
+**/Gemfile.lock
+!/Gemfile.lock
+
+examples/**/*.png
+
+**/.venv
+**/poetry.lock
+!/poetry.lock
+.astro
+.github/instructions/nx.instructions.md
+
+go.work.sum
+
+.claude/worktrees

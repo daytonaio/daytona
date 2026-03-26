@@ -1,0 +1,121 @@
+---
+title: Python SDK リファレンス
+description: Python SDK を使用して Daytona サンドボックスとやり取りする
+next: /docs/python-sdk/daytona
+---
+
+import { TabItem, Tabs } from '@astrojs/starlight/components'
+
+Daytona の Python SDK は、Daytona サンドボックスとプログラム的にやり取りするための堅牢なインターフェースを提供します。
+
+## インストール
+
+pip で Daytona の Python SDK をインストールします:
+
+```bash
+pip install daytona
+```
+
+または poetry を使用します:
+
+```bash
+poetry add daytona
+```
+
+## はじめに
+
+Daytona の Python SDK を使い始めるためのシンプルな例を示します。
+
+<Tabs syncKey="language">
+  <TabItem label="Sync" icon="seti:python">
+    ```python
+    from daytona import Daytona
+
+    def main():
+        # SDK を初期化（既定で環境変数を使用）
+        daytona = Daytona()
+
+        # サンドボックスを新規作成
+        sandbox = daytona.create()
+
+        # コマンドを実行
+        response = sandbox.process.exec("echo 'Hello, World!'")
+        print(response.result)
+
+    if __name__ == "__main__":
+        main()
+    ```
+  </TabItem>
+
+  <TabItem label="Async" icon="seti:python">
+    ```python
+    import asyncio
+    from daytona import AsyncDaytona
+
+    async def main():
+        # SDK を初期化（既定で環境変数を使用）
+        async with AsyncDaytona() as daytona:
+            # サンドボックスを新規作成
+            sandbox = await daytona.create()
+
+            # コマンドを実行
+            response = await sandbox.process.exec("echo 'Hello, World!'")
+            print(response.result)
+
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
+  </TabItem>
+</Tabs>
+
+## 構成
+
+SDK は環境変数を使うか、コンストラクタにオプションを渡して設定できます:
+
+<Tabs syncKey="language">
+  <TabItem label="Sync" icon="seti:python">
+    ```python
+    from daytona import Daytona, DaytonaConfig
+
+    # 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+    daytona = Daytona()
+
+    # 明示的な設定を使用
+    config = DaytonaConfig(
+        api_key="your-api-key",
+        api_url="https://app.daytona.io/api",
+        target="us"
+    )
+    daytona = Daytona(config)
+    ```
+  </TabItem>
+
+  <TabItem label="Async" icon="seti:python">
+    ```python
+    import asyncio
+    from daytona import AsyncDaytona, DaytonaConfig
+
+    async def main():
+        try:
+            # 環境変数を使用 (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
+            daytona = AsyncDaytona()
+            # 非同期コードをここに記述
+            pass
+        finally:
+            await daytona.close()
+
+        # 明示的な設定を使用
+        config = DaytonaConfig(
+            api_key="your-api-key",
+            api_url="https://app.daytona.io/api",
+            target="us"
+        )
+        async with AsyncDaytona(config) as daytona:
+            # ここにコードを記述
+            pass
+
+    if __name__ == "__main__":
+        asyncio.run(main())
+    ```
+  </TabItem>
+</Tabs>

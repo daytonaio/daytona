@@ -1,0 +1,9 @@
+name: daytona logout
+synopsis: Logout from Daytona
+usage: daytona logout [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI

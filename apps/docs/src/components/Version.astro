@@ -1,0 +1,8 @@
+---
+import { major, minor } from 'semver'
+
+const version = import.meta.env.VERSION || '0.0.1'
+const [maj, min] = [major(version), minor(version)]
+---
+
+{maj}.{min}

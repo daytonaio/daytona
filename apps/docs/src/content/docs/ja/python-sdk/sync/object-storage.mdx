@@ -1,0 +1,43 @@
+---
+title: "オブジェクトストレージ"
+hideTitleOnPage: true
+---
+
+## ObjectStorage
+
+```python
+class ObjectStorage()
+```
+
+オブジェクトストレージサービスと連携するための ObjectStorage クラス。
+
+**属性**:
+
+- `endpoint_url` _str_ - オブジェクトストレージサービスのエンドポイントURL。
+- `aws_access_key_id` _str_ - オブジェクトストレージサービスのアクセスキーID。
+- `aws_secret_access_key` _str_ - オブジェクトストレージサービスのシークレットアクセスキー。
+- `aws_session_token` _str_ - オブジェクトストレージサービスのセッショントークン。短期認証情報に使用。
+- `bucket_name` _str_ - 使用するバケット名。既定値は "daytona-volume-builds"。
+
+#### ObjectStorage.upload
+
+```python
+def upload(path: str,
+           organization_id: str,
+           archive_base_path: str | None = None) -> str
+```
+
+ファイルをオブジェクトストレージサービスにアップロードします。
+
+**引数**:
+
+- `path` _str_ - アップロードするファイルのパス。
+- `organization_id` _str_ - 使用する組織ID。
+- `archive_base_path` _str_ - アーカイブのベースパス。
+  
+
+**戻り値**:
+
+- `str` - アップロードしたファイルのハッシュ。
+
+

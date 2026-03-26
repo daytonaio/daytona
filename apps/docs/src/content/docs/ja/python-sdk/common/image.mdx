@@ -1,0 +1,418 @@
+---
+title: "イメージ（画像）"
+hideTitleOnPage: true
+---
+
+## イメージ
+
+```python
+class Image(BaseModel)
+```
+
+Daytona のサンドボックス用イメージ定義を表します。
+このクラスを直接インスタンス化しないでください。代わりに `Image.base()`、`Image.debian_slim()`、`Image.from_dockerfile()` などの静的ファクトリメソッドを使用します。
+
+#### Image.dockerfile
+
+```python
+def dockerfile() -> str
+```
+
+このイメージ向けに生成された Dockerfile を返します。
+
+#### Image.pip_install
+
+```python
+def pip_install(*packages: Union[str, list[str]],
+                find_links: Optional[list[str]] = None,
+                index_url: Optional[str] = None,
+                extra_index_urls: Optional[list[str]] = None,
+                pre: bool = False,
+                extra_options: str = "") -> "Image"
+```
+
+pip を使用してパッケージをインストールするコマンドを追加します。
+
+**引数**:
+
+- `*packages` - インストールするパッケージ。
+- `find_links` - Optional[list[str]]: 使用する find-links。
+- `index_url` - Optional[str]: 使用する index URL。
+- `extra_index_urls` - Optional[list[str]]: 使用する追加の index URL。
+- `pre` - bool = False: プレリリース版パッケージをインストールするかどうか。
+- `extra_options` - str = "": pip に渡す追加オプション。指定した文字列は
+  そのまま pip install コマンドに渡されます。
+  
+
+**戻り値**:
+
+- `Image` - pip install コマンドが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").pip_install("requests", "pandas")
+```
+
+#### Image.pip_install_from_requirements
+
+```python
+def pip_install_from_requirements(requirements_txt: str,
+                                  find_links: Optional[list[str]] = None,
+                                  index_url: Optional[str] = None,
+                                  extra_index_urls: Optional[list[str]] = None,
+                                  pre: bool = False,
+                                  extra_options: str = "") -> "Image"
+```
+
+requirements.txt から依存関係をインストールします。
+
+**引数**:
+
+- `requirements_txt` - str: requirements.txt へのパス。
+- `find_links` - Optional[list[str]]: 使用する find-links。
+- `index_url` - Optional[str]: 使用する index URL。
+- `extra_index_urls` - Optional[list[str]]: 使用する追加の index URL。
+- `pre` - bool = False: プレリリース版パッケージをインストールするかどうか。
+- `extra_options` - str = "": pip に渡す追加オプション。
+  
+
+**戻り値**:
+
+- `Image` - pip install コマンドが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").pip_install_from_requirements("requirements.txt")
+```
+
+#### Image.pip_install_from_pyproject
+
+```python
+def pip_install_from_pyproject(pyproject_toml: str,
+                               optional_dependencies: list[str],
+                               find_links: Optional[str] = None,
+                               index_url: Optional[str] = None,
+                               extra_index_url: Optional[str] = None,
+                               pre: bool = False,
+                               extra_options: str = "") -> "Image"
+```
+
+pyproject.toml から依存関係をインストールします。
+
+**引数**:
+
+- `pyproject_toml` - str: pyproject.toml へのパス。
+- `optional_dependencies` - list[str] = []: pyproject.toml からインストールする任意の依存関係。
+- `find_links` - Optional[str] = None: 使用する find-links。
+- `index_url` - Optional[str] = None: 使用する index URL。
+- `extra_index_url` - Optional[str] = None: 使用する追加の index URL。
+- `pre` - bool = False: プレリリース版パッケージをインストールするかどうか。
+- `extra_options` - str = "": pip に渡す追加オプション。指定した文字列は
+  そのまま pip install コマンドに渡されます。
+  
+
+**戻り値**:
+
+- `Image` - pip install コマンドが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12")                 .pip_install_from_pyproject("pyproject.toml", optional_dependencies=["dev"])
+```
+
+#### Image.add_local_file
+
+```python
+def add_local_file(local_path: Union[str, Path], remote_path: str) -> "Image"
+```
+
+ローカルファイルをイメージに追加します。
+
+**引数**:
+
+- `local_path` - Union[str, Path]: ローカルファイルへのパス。
+- `remote_path` - str: イメージ内のファイルのパス。
+  
+
+**戻り値**:
+
+- `Image` - ローカルファイルが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").add_local_file("package.json", "/home/daytona/package.json")
+```
+
+#### Image.add\_local\_dir
+
+```python
+def add_local_dir(local_path: Union[str, Path], remote_path: str) -> "Image"
+```
+
+ローカルディレクトリをイメージに追加します。
+
+**引数**:
+
+- `local_path` - Union[str, Path]: ローカルディレクトリへのパス。
+- `remote_path` - str: イメージ内のディレクトリへのパス。
+  
+
+**戻り値**:
+
+- `Image` - ローカルディレクトリが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").add_local_dir("src", "/home/daytona/src")
+```
+
+#### Image.run\_commands
+
+```python
+def run_commands(*commands: Union[str, list[str]]) -> "Image"
+```
+
+イメージ内でコマンドを実行します。
+
+**引数**:
+
+- `*commands` - 実行するコマンド列。
+  
+
+**戻り値**:
+
+- `Image` - コマンドが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").run_commands(
+    'echo "Hello, world!"',
+    ['bash', '-c', 'echo Hello, world, again!']
+)
+```
+
+#### Image.env
+
+```python
+def env(env_vars: dict[str, str]) -> "Image"
+```
+
+イメージ内の環境変数を設定します。
+
+**引数**:
+
+- `env_vars` - dict[str, str]: 設定する環境変数。
+  
+
+**戻り値**:
+
+- `Image` - 環境変数が追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").env({"PROJECT_ROOT": "/home/daytona"})
+```
+
+#### Image.workdir
+
+```python
+def workdir(path: Union[str, Path]) -> "Image"
+```
+
+イメージ内の作業ディレクトリを設定します。
+
+**引数**:
+
+- `path` - Union[str, Path]: 作業ディレクトリへのパス。
+  
+
+**戻り値**:
+
+- `Image` - 作業ディレクトリが設定されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").workdir("/home/daytona")
+```
+
+#### Image.entrypoint
+
+```python
+def entrypoint(entrypoint_commands: list[str]) -> "Image"
+```
+
+イメージのエントリポイントを設定します。
+
+**引数**:
+
+- `entrypoint_commands` - list[str]: エントリポイントとして設定するコマンド。
+  
+
+**戻り値**:
+
+- `Image` - エントリポイントが設定されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").entrypoint(["/bin/bash"])
+```
+
+#### Image.cmd
+
+```python
+def cmd(cmd: list[str]) -> "Image"
+```
+
+イメージのデフォルトコマンドを設定します。
+
+**引数**:
+
+- `cmd` - list[str]: デフォルトコマンドとして設定するコマンド。
+  
+
+**戻り値**:
+
+- `Image` - デフォルトコマンドが設定されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").cmd(["/bin/bash"])
+```
+
+#### Image.dockerfile\_commands
+
+```python
+def dockerfile_commands(
+        dockerfile_commands: list[str],
+        context_dir: Optional[Union[Path, str]] = None) -> "Image"
+```
+
+任意のDockerfile風のコマンドをイメージに追加します。
+
+**引数**:
+
+- `*dockerfile_commands` - Dockerfileに追加するコマンド。
+- `context_dir` - Optional[Union[Path, str]]: コンテキストディレクトリへのパス。
+  
+
+**戻り値**:
+
+- `Image` - Dockerfileコマンドが追加されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
+```
+
+#### Image.from\_dockerfile
+
+```python
+@staticmethod
+def from_dockerfile(path: Union[str, Path]) -> "Image"
+```
+
+既存のDockerfileからImageを作成します。
+
+**引数**:
+
+- `path` - Union[str, Path]: Dockerfileへのパス。
+  
+
+**戻り値**:
+
+- `Image` - Dockerfileを元に作成されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.from_dockerfile("Dockerfile")
+```
+
+#### Image.base
+
+```python
+@staticmethod
+def base(image: str) -> "Image"
+```
+
+既存のベースイメージからImageを作成します。
+
+**引数**:
+
+- `image` - str: 使用するベースイメージ。
+  
+
+**戻り値**:
+
+- `Image` - ベースイメージを基に作成されたイメージ。
+  
+
+**例**:
+
+```python
+image = Image.base("python:3.12-slim-bookworm")
+```
+
+#### Image.debian\_slim
+
+```python
+@staticmethod
+def debian_slim(
+        python_version: Optional[SupportedPythonSeries] = None) -> "Image"
+```
+
+公式の Python Docker イメージをベースにした Debian slim イメージを作成します。
+
+**引数**:
+
+- `python_version` - Optional[SupportedPythonSeries]: 使用する Python のバージョン。
+  
+
+**戻り値**:
+
+- `Image` - Debian slim イメージを追加した Image。
+  
+
+**例**:
+
+```python
+image = Image.debian_slim("3.12")
+```
+
+
+## コンテキスト
+
+```python
+class Context(BaseModel)
+```
+
+イメージに関するコンテキスト。
+
+**属性**:
+
+- `source_path` _str_ - 元ファイルまたはディレクトリへのパス。
+- `archive_path` _Optional[str]_ - オブジェクトストレージ内のアーカイブファイル内でのパス。
+

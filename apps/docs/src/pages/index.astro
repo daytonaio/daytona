@@ -1,0 +1,11 @@
+---
+import { handleLanguageRouting } from '../i18n/routing'
+
+export const prerender = false
+
+return await handleLanguageRouting(
+  Astro.request,
+  Astro.params.slug,
+  (path: string) => Astro.redirect(path)
+)
+---

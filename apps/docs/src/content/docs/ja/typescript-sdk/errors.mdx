@@ -1,0 +1,103 @@
+---
+title: "エラー"
+hideTitleOnPage: true
+---
+
+
+## DaytonaError
+
+Daytona SDKの基底エラー。
+
+**継承:**
+
+- `Error`
+
+### 派生クラス
+
+- `DaytonaNotFoundError`
+
+### コンストラクタ
+
+#### new DaytonaError()
+
+_継承元_: `Error.constructor`
+
+```ts
+new DaytonaError(message?: string): DaytonaError
+```
+
+**パラメータ**:
+
+- `message?` _string_
+
+
+**戻り値**:
+
+- `DaytonaError`
+
+#### new DaytonaError()
+
+_継承元_: `Error.constructor`
+
+```ts
+new DaytonaError(message?: string, options?: ErrorOptions): DaytonaError
+```
+
+**パラメータ**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**戻り値**:
+
+- `DaytonaError`
+
+***
+
+
+## DaytonaNotFoundError
+
+Daytona SDK の基本となるエラー。
+
+**継承:**
+
+- `DaytonaError`
+
+### コンストラクタ
+
+#### new DaytonaNotFoundError()
+
+_継承元_: `DaytonaError.constructor`
+
+```ts
+new DaytonaNotFoundError(message?: string): DaytonaNotFoundError
+```
+
+**パラメータ**:
+
+- `message?` _string_
+
+
+**戻り値**:
+
+- `DaytonaNotFoundError`
+
+#### new DaytonaNotFoundError()
+
+_継承元_: `DaytonaError.constructor`
+
+```ts
+new DaytonaNotFoundError(message?: string, options?: ErrorOptions): DaytonaNotFoundError
+```
+
+**パラメータ**:
+
+- `message?` _string_
+- `options?` _ErrorOptions_
+
+
+**戻り値**:
+
+- `DaytonaNotFoundError`
+

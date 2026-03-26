@@ -1,0 +1,207 @@
+---
+title: "スナップショット"
+hideTitleOnPage: true
+---
+
+
+## SnapshotService
+
+Daytona スナップショットを管理するためのサービス。スナップショットの一覧表示、取得、作成、削除に利用できます。
+
+### Constructors
+
+#### new SnapshotService()
+
+```ts
+new SnapshotService(
+   clientConfig: Configuration, 
+   snapshotsApi: SnapshotsApi, 
+   objectStorageApi: ObjectStorageApi): SnapshotService
+```
+
+**Parameters**:
+
+- `clientConfig` _Configuration_
+- `snapshotsApi` _SnapshotsApi_
+- `objectStorageApi` _ObjectStorageApi_
+
+
+**Returns**:
+
+- `SnapshotService`
+
+### Methods
+
+#### activate()
+
+```ts
+activate(snapshot: Snapshot): Promise<Snapshot>
+```
+
+スナップショットを有効化します。
+
+**Parameters**:
+
+- `snapshot` _Snapshot_ - 有効化するスナップショット
+
+
+**Returns**:
+
+- `Promise<Snapshot>` - 有効化された Snapshot インスタンス
+
+***
+
+#### create()
+
+```ts
+create(params: CreateSnapshotParams, options: {
+  onLogs: (chunk: string) => void;
+  timeout: number;
+}): Promise<Snapshot>
+```
+
+指定された Image 定義から新しいスナップショットを作成して登録します。
+
+**Parameters**:
+
+- `params` _CreateSnapshotParams_ - スナップショット作成用のパラメータ。
+- `options` _作成処理のオプション。_
+- `onLogs?` _\(chunk: string\) =\> void_ - スナップショット作成時のログを処理するコールバック関数。
+- `timeout?` _number_ - 既定ではタイムアウトなし。秒単位（0 はタイムアウトなし）。
+
+
+**Returns**:
+
+- `Promise<Snapshot>`
+
+**Example:**
+
+```ts
+const image = Image.debianSlim('3.12').pipInstall('numpy');
+await daytona.snapshot.create({ name: 'my-snapshot', image: image }, { onLogs: console.log });
+```
+
+***
+
+#### delete()
+
+```ts
+delete(snapshot: Snapshot): Promise<void>
+```
+
+スナップショットを削除します。
+
+**Parameters**:
+
+- `snapshot` _Snapshot_ - 削除するスナップショット
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+スナップショットが存在しない、または削除できない場合
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const snapshot = await daytona.snapshot.get("snapshot-name");
+await daytona.snapshot.delete(snapshot);
+console.log("Snapshot deleted successfully");
+```
+
+***
+
+#### get()
+
+```ts
+get(name: string): Promise<Snapshot>
+```
+
+名前を指定してスナップショットを取得します。
+
+**Parameters**:
+
+- `name` _string_ - 取得するスナップショットの名前
+
+
+**Returns**:
+
+- `Promise<Snapshot>` - 要求されたスナップショット
+
+**Throws**:
+
+スナップショットが存在しない、またはアクセスできない場合
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const snapshot = await daytona.snapshot.get("snapshot-name");
+console.log(`Snapshot ${snapshot.name} is in state ${snapshot.state}`);
+```
+
+***
+
+#### list()
+
+```ts
+list(): Promise<Snapshot[]>
+```
+
+すべてのスナップショットを一覧表示します。
+
+**Returns**:
+
+- `Promise<Snapshot[]>` - ユーザーがアクセス可能なすべてのスナップショットの一覧
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const snapshots = await daytona.snapshot.list();
+console.log(`Found ${snapshots.length} snapshots`);
+snapshots.forEach(snapshot => console.log(`${snapshot.name} (${snapshot.imageName})`));
+```
+
+***
+
+
+## CreateSnapshotParams
+
+```ts
+type CreateSnapshotParams = {
+  entrypoint: string[];
+  image: string | Image;
+  name: string;
+  resources: Resources;
+};
+```
+
+新規スナップショットを作成するためのパラメータ。
+
+**型宣言**:
+
+- `entrypoint?` _string\[\]_
+- `image` _string \| Image_
+- `name` _string_
+- `resources?` _Resources_
+
+
+## スナップショット
+
+```ts
+type Snapshot = SnapshotDto & {
+  __brand: "Snapshot";
+};
+```
+
+あらかじめ構成されたサンドボックスである Daytona のスナップショットを表します。
+
+**型定義**:
+
+- `\_\_brand` _"Snapshot"_
+

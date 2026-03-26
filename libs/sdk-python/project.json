@@ -1,0 +1,78 @@
+{
+  "name": "sdk-python",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-python",
+  "targets": {
+    "docs": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/python-sdk/**/*"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npm run docs"
+      }
+    },
+    "add-api-clients": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./scripts/add-api-clients.sh"
+      },
+      "dependsOn": [
+        {
+          "target": "publish",
+          "projects": [
+            "api-client-python",
+            "api-client-python-async",
+            "toolbox-api-client-python",
+            "toolbox-api-client-python-async"
+          ]
+        }
+      ]
+    },
+    "deps-check": {
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "dependsOn": ["add-api-clients"]
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": ["rm -rf dist", "./scripts/build-sdk.sh"],
+        "parallel": false
+      },
+      "inputs": ["pythonLib"],
+      "outputs": ["{projectRoot}/dist/**"]
+    },
+    "build:_publish": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "pythonLib",
+        { "dependentTasksOutputFiles": "**/*", "transitive": true }
+      ],
+      "outputs": ["{projectRoot}/dist/**"],
+      "options": {
+        "command": "yarn nx run sdk-python:build"
+      },
+      "dependsOn": ["deps-check"]
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "commands": [
+          "poetry publish --username __token__ --password $PYPI_TOKEN --no-interaction",
+          "sed -i 's/^name = \"[^\"]*\"/name = \"daytona_sdk\"/' pyproject.toml",
+          "poetry publish --username __token__ --password $PYPI_TOKEN --no-interaction",
+          "sed -i 's/^name = \"[^\"]*\"/name = \"daytona\"/' pyproject.toml"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build:_publish"]
+    }
+  }
+}

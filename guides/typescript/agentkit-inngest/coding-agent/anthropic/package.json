@@ -1,0 +1,21 @@
+{
+  "name": "daytona-coding-agent",
+  "version": "1.0.0",
+  "description": "AgentKit coding agent powered by Daytona",
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "start": "tsc; node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@daytonaio/sdk": "^0.117.0",
+    "@inngest/agent-kit": "^0.13.2",
+    "dotenv": "^17.2.3",
+    "zod": "^4.1.13"
+  }
+}

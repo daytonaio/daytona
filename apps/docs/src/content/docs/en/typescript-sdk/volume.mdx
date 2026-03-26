@@ -1,0 +1,168 @@
+---
+title: "Volume"
+hideTitleOnPage: true
+---
+
+
+## VolumeService
+
+Service for managing Daytona Volumes.
+
+This service provides methods to list, get, create, and delete Volumes.
+
+Volumes can be mounted to Sandboxes with an optional subpath parameter to mount
+only a specific S3 prefix within the volume. When no subpath is specified,
+the entire volume is mounted.
+
+### Constructors
+
+#### new VolumeService()
+
+```ts
+new VolumeService(volumesApi: VolumesApi): VolumeService
+```
+
+**Parameters**:
+
+- `volumesApi` _VolumesApi_
+
+
+**Returns**:
+
+- `VolumeService`
+
+### Methods
+
+#### create()
+
+```ts
+create(name: string): Promise<Volume>
+```
+
+Creates a new Volume with the specified name.
+
+**Parameters**:
+
+- `name` _string_ - Name for the new Volume
+
+
+**Returns**:
+
+- `Promise<Volume>` - The newly created Volume
+
+**Throws**:
+
+If the Volume cannot be created
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.create("my-data-volume");
+console.log(`Created volume ${volume.name} with ID ${volume.id}`);
+```
+
+***
+
+#### delete()
+
+```ts
+delete(volume: Volume): Promise<void>
+```
+
+Deletes a Volume.
+
+**Parameters**:
+
+- `volume` _Volume_ - Volume to delete
+
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+If the Volume does not exist or cannot be deleted
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name");
+await daytona.volume.delete(volume);
+console.log("Volume deleted successfully");
+```
+
+***
+
+#### get()
+
+```ts
+get(name: string, create: boolean): Promise<Volume>
+```
+
+Gets a Volume by its name.
+
+**Parameters**:
+
+- `name` _string_ - Name of the Volume to retrieve
+- `create` _boolean = false_ - Whether to create the Volume if it does not exist
+
+
+**Returns**:
+
+- `Promise<Volume>` - The requested Volume
+
+**Throws**:
+
+If the Volume does not exist or cannot be accessed
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volume = await daytona.volume.get("volume-name", true);
+console.log(`Volume ${volume.name} is in state ${volume.state}`);
+```
+
+***
+
+#### list()
+
+```ts
+list(): Promise<Volume[]>
+```
+
+Lists all available Volumes.
+
+**Returns**:
+
+- `Promise<Volume[]>` - List of all Volumes accessible to the user
+
+**Example:**
+
+```ts
+const daytona = new Daytona();
+const volumes = await daytona.volume.list();
+console.log(`Found ${volumes.length} volumes`);
+volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
+```
+
+***
+
+
+## Volume
+
+```ts
+type Volume = VolumeDto & {
+  __brand: "Volume";
+};
+```
+
+Represents a Daytona Volume which is a shared storage volume for Sandboxes.
+
+**Type declaration**:
+
+- `\_\_brand` _"Volume"_
+

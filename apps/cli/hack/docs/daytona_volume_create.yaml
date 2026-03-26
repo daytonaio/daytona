@@ -1,0 +1,14 @@
+name: daytona volume create
+synopsis: Create a volume
+usage: daytona volume create [NAME] [flags]
+options:
+  - name: size
+    shorthand: s
+    default_value: '10'
+    usage: Size of the volume in GB
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona volume - Manage Daytona volumes
