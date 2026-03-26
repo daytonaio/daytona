@@ -46,7 +46,7 @@ jobs:
       - uses: ./.github/actions/setup-toolchain
         with:
           install-swag: 'false'
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |
@@ -75,6 +75,9 @@ jobs:
       - name: Update version
         run: |
           curl -f -X POST -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.GITHUBBOT_TOKEN }}" \
+          -H "Authorization: Bearer ${GITHUBBOT_TOKEN}" \
           https://api.github.com/repos/daytonaio/homebrew-cli/dispatches \
           -d "{\"event_type\": \"update-version\", \"client_payload\": {\"version\": \"${{ env.VERSION }}\"}}"
+
+        env:
+          GITHUBBOT_TOKEN: ${{ secrets.GITHUBBOT_TOKEN }}

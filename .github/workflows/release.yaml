@@ -36,7 +36,7 @@ jobs:
         with:
           run-go-work-sync: 'false'
 
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |
@@ -96,7 +96,7 @@ jobs:
           fetch-depth: 0
 
       - uses: ./.github/actions/setup-toolchain
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Install gettext
         run: sudo apt-get install -y gettext
@@ -219,7 +219,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Project dependencies
         run: corepack enable
@@ -285,7 +285,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.1
+      - uses: dev-hanz-ops/install-gh-cli-action@af38ce09b1ec248aeb08eea2b16bbecea9e059f8 # v0.2.1
 
       - name: Configure git
         run: |
