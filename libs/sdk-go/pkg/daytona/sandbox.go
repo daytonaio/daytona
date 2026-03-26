@@ -564,6 +564,33 @@ func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInS
 	})
 }
 
+// ExpireSignedPreviewLink expires a previously generated signed preview link.
+//
+// This invalidates the signed preview link token, preventing any further access.
+//
+// Example:
+//
+//	err := sandbox.ExpireSignedPreviewLink(ctx, 3000, "preview-token-to-expire")
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token string) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExpireSignedPreviewLink", func(ctx context.Context) error {
+		httpResp, err := s.client.apiClient.SandboxAPI.ExpireSignedPortPreviewUrl(
+			s.client.getAuthContext(ctx),
+			s.ID,
+			int32(port),
+			token,
+		).Execute()
+
+		if err != nil {
+			return s.client.handleAPIError(err, httpResp)
+		}
+
+		return nil
+	})
+}
+
 // SetAutoArchiveInterval sets the auto-archive interval in minutes.
 //
 // The sandbox will be automatically archived after being stopped for this
