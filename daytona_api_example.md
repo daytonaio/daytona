@@ -1,0 +1,84 @@
+# Daytona Sandbox API Calls: Example, Usage, and Advantages
+
+## How API Calls Work in Daytona Sandbox Environment
+
+Daytona provides a TypeScript SDK (`@daytonaio/sdk`) to interact with its sandbox (workspace) API. Here's how it works:
+
+1. **Authentication**: Set `DAYTONA_API_KEY` environment variable (get from [Daytona dashboard](https://app.daytona.io)).
+2. **SDK Initialization**: `const daytona = new Daytona({ apiKey: process.env.DAYTONA_API_KEY! });`
+3. **API Calls**: SDK methods (e.g., `sandbox.startSandbox()`) are async promises that send HTTP/gRPC requests to Daytona's cloud servers. Responses include JSON data, streams for exec output.
+4. **Sandbox Context**: Calls operate on remote ephemeral workspaces (VMs/containers) for code execution without local setup.
+5. **Error Handling**: Use try/catch; SDK throws on auth/network failures.
+
+API calls are **remote** – your local code triggers actions in Daytona's cloud sandboxes.
+
+## Examples
+
+### Example 1: Simple Sandbox Start (Minimal API Call)
+```typescript
+import { Daytona } from '@daytonaio/sdk';
+
+async function startSandboxExample() {
+  const daytona = new Daytona({ apiKey: process.env.DAYTONA_API_KEY! });
+
+  try {
+    // Single API call: Start a sandbox (returns Sandbox object)
+    const sandbox = await daytona.sandbox.startSandbox({
+      organizationId: 'your-org-id', // From listOrganizations()
+      template: { image: 'mcr.microsoft.com/devcontainers/typescript-node' }
+    });
+
+    console.log('Sandbox started:', sandbox.id);
+    return sandbox;
+  } catch (error) {
+    console.error('API call failed:', error);
+  }
+}
+
+startSandboxExample();
+```
+**What happens**: SDK POSTs to Daytona's API, provisions a remote TypeScript/Node VM, returns sandbox metadata.
+
+### Example 2: Full Flow with Exec (From `advanced_example.ts`)
+```typescript
+// ... (init daytona as above)
+const orgs = await daytona.organizations.listOrganizations(); // GET /orgs
+const org = orgs[0];
+const users = await daytona.users.listUsersInOrganization(org.id); // GET /users
+const sandbox = await daytona.sandbox.startSandbox({ organizationId: org.id }); // POST /sandboxes
+
+// API call: Exec command with streaming
+const { stream } = await daytona.sandbox.streamExec(sandbox.id, {
+  cmd: 'node',
+  args: ['-e', 'console.log("Hello from Daytona sandbox!");']
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk); // Live output stream
+}
+```
+**Output**: Lists org/users, starts sandbox, runs Node code remotely, streams "Hello from Daytona sandbox!" live.
+
+### Example 3: Install Packages & Create File
+```typescript
+await daytona.sandbox.installPackages(sandbox.id, { nodejs: ['express'] }); // Installs via package manager
+await daytona.sandbox.createFile(sandbox.id, '/app/server.js', `const express = require('express');\napp = express();\napp.get('/', (req, res) => res.send('API ready!'));\napp.listen(3000);`); // Writes file remotely
+```
+
+## Advantages of Daytona Sandbox API Calls
+| Advantage | Description |
+|-----------|-------------|
+| **Ephemeral & Isolated** | Sandboxes spin up/down on-demand; no local Docker/VM setup. |
+| **Multi-Language** | Supports Node, Python, Go, etc., via templates/images. |
+| **Live Streaming** | Real-time command output/logs without polling. |
+| **Scalable** | Cloud-backed; parallel sandboxes for CI/CD/tests. |
+| **Secure** | API-key auth; isolated workspaces prevent local pollution. |
+| **Easy Integration** | SDK for TS/JS; works in scripts, VSCode extensions, GitHub Actions. |
+| **Cost-Effective** | Pay-per-use; free tier available. |
+
+## Run Examples
+1. `export DAYTONA_API_KEY=your_key`
+2. `npm install @daytonaio/sdk ts-node`
+3. Save example to `example.ts`, run `npx ts-node example.ts`
+
+See `advanced_example.ts` for advanced usage. For full docs: [Daytona SDK](https://docs.daytona.io).
