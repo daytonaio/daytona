@@ -300,7 +300,7 @@ export class SnapshotService {
       if (exists) {
         const existingSnapshot = await this.snapshotRepository.findOne({
           where: { ref: snapshot.ref, size: Not(IsNull()) },
-          select: ['size'],
+          select: ['id', 'size'],
         })
 
         if (existingSnapshot?.size != null) {
