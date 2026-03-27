@@ -51,9 +51,45 @@ func NewNetRulesManager(logger *slog.Logger, persistent bool, allowedCIDRs []*ne
 }
 
 func (manager *NetRulesManager) Start() error {
+	if err := manager.ensureAllowedChain(); err != nil {
+		return err
+	}
+
 	// Start periodic reconciliation
 	if manager.persistent {
 		go manager.persistRulesLoop()
+	}
+
+	return nil
+}
+
+// ensureAllowedChain creates (or replaces) the shared DAYTONA-ALLOWED chain
+// that holds always-allowed domain CIDRs. Per-sandbox chains jump here via
+// -g (goto) so that a RETURN propagates back to DOCKER-USER.
+func (manager *NetRulesManager) ensureAllowedChain() error {
+	if len(manager.allowedCIDRs) == 0 {
+		return nil
+	}
+
+	manager.mu.Lock()
+	defer manager.mu.Unlock()
+
+	// Create the chain (ignore "already exists")
+	if err := manager.ipt.NewChain("filter", AllowedChainName); err != nil {
+		if !strings.Contains(err.Error(), "Chain already exists") {
+			return err
+		}
+	}
+
+	// Rebuild from scratch so the rule set matches the current CIDR list
+	if err := manager.ipt.ClearChain("filter", AllowedChainName); err != nil {
+		return err
+	}
+
+	for _, cidr := range manager.allowedCIDRs {
+		if err := manager.ipt.AppendUnique("filter", AllowedChainName, "-j", "RETURN", "-d", cidr.String(), "-p", "all"); err != nil {
+			return err
+		}
 	}
 
 	return nil

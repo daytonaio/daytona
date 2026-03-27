@@ -37,9 +37,10 @@ func (manager *NetRulesManager) SetNetworkRules(name string, sourceIp string, ne
 		}
 	}
 
-	// Add rules for always-allowed domains (resolved at startup)
-	for _, cidr := range manager.allowedCIDRs {
-		if err := manager.ipt.AppendUnique("filter", chainName, "-j", "RETURN", "-d", cidr.String(), "-p", "all"); err != nil {
+	// Jump to the shared always-allowed chain (uses goto so that RETURN
+	// propagates back to DOCKER-USER, matching the per-sandbox RETURN semantics)
+	if len(manager.allowedCIDRs) > 0 {
+		if err := manager.ipt.AppendUnique("filter", chainName, "-g", AllowedChainName, "-p", "all"); err != nil {
 			return err
 		}
 	}

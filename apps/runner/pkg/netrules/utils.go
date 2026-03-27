@@ -13,6 +13,8 @@ import (
 const (
 	// ChainPrefix is the prefix used for all Daytona sandbox chains
 	ChainPrefix = "DAYTONA-SB-"
+	// AllowedChainName is the shared chain for always-allowed domain CIDRs
+	AllowedChainName = "DAYTONA-ALLOWED"
 )
 
 // ParseCidrNetworks parses a comma-separated list of CIDR networks and returns them as an array
