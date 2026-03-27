@@ -559,10 +559,20 @@ class FileSystem:
             print(f"Found {len(result.files)} test files")
             ```
         """
-        return self._api_client.search_files(
-            path=path,
-            pattern=pattern,
-        )
+        try:
+            response = self._api_client.search_files(
+                path=path,
+                pattern=pattern,
+            )
+        except Exception as e:
+            # The Toolbox API returns {"files": null} when the directory doesn't exist
+            # or has no matches, which fails Pydantic validation. Return empty list.
+            if "files" in str(e):
+                return SearchFilesResponse(files=[])
+            raise
+        if response.files is None:
+            response.files = []
+        return response
 
     @intercept_errors(message_prefix="Failed to set file permissions: ")
     @with_instrumentation()
