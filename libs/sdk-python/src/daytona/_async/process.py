@@ -149,7 +149,10 @@ class AsyncProcess:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        response = await self._api_client.execute_command(request=execute_request)
+        response = await self._api_client.execute_command(
+            request=execute_request,
+            _request_timeout=http_timeout(timeout),
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.split("\n"))

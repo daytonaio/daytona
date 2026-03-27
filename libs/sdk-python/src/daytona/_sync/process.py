@@ -148,7 +148,10 @@ class Process:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        response = self._api_client.execute_command(request=execute_request)
+        response = self._api_client.execute_command(
+            request=execute_request,
+            _request_timeout=http_timeout(timeout),
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = Process._parse_output(response.result.split("\n"))
