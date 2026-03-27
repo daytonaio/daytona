@@ -149,7 +149,10 @@ class AsyncProcess:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        response = await self._api_client.execute_command(request=execute_request)
+        response = await self._api_client.execute_command(
+            request=execute_request,
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.split("\n"))
@@ -375,7 +378,7 @@ class AsyncProcess:
         response = await self._api_client.session_execute_command(
             session_id=session_id,
             request=req,
-            _request_timeout=http_timeout(timeout),
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
         )
 
         stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")

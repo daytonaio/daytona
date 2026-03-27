@@ -3993,11 +3993,18 @@ type SandboxAPIStopSandboxRequest struct {
 	ApiService SandboxAPI
 	sandboxIdOrName string
 	xDaytonaOrganizationID *string
+	force *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r SandboxAPIStopSandboxRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SandboxAPIStopSandboxRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Force stop the sandbox using SIGKILL instead of SIGTERM
+func (r SandboxAPIStopSandboxRequest) Force(force bool) SandboxAPIStopSandboxRequest {
+	r.force = &force
 	return r
 }
 
@@ -4042,6 +4049,9 @@ func (a *SandboxAPIService) StopSandboxExecute(r SandboxAPIStopSandboxRequest) (
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

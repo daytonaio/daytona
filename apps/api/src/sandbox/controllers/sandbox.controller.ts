@@ -503,6 +503,12 @@ export class SandboxController {
     description: 'ID or name of the sandbox',
     type: 'string',
   })
+  @ApiQuery({
+    name: 'force',
+    required: false,
+    type: 'boolean',
+    description: 'Force stop the sandbox using SIGKILL instead of SIGTERM',
+  })
   @ApiResponse({
     status: 200,
     description: 'Sandbox has been stopped',
@@ -515,12 +521,18 @@ export class SandboxController {
     targetType: AuditTarget.SANDBOX,
     targetIdFromRequest: (req) => req.params.sandboxIdOrName,
     targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      query: (req) => ({
+        force: req.query?.force === 'true',
+      }),
+    },
   })
   async stopSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxIdOrName') sandboxIdOrName: string,
+    @Query('force', new ParseBoolPipe({ optional: true })) force?: boolean,
   ): Promise<SandboxDto> {
-    const sandbox = await this.sandboxService.stop(sandboxIdOrName, authContext.organizationId)
+    const sandbox = await this.sandboxService.stop(sandboxIdOrName, authContext.organizationId, force)
     return this.sandboxService.toSandboxDto(sandbox)
   }
 

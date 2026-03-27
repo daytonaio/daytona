@@ -148,7 +148,10 @@ class Process:
 
         execute_request = ExecuteRequest(command=command, cwd=cwd, timeout=timeout)
 
-        response = self._api_client.execute_command(request=execute_request)
+        response = self._api_client.execute_command(
+            request=execute_request,
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = Process._parse_output(response.result.split("\n"))
@@ -374,7 +377,7 @@ class Process:
         response = self._api_client.session_execute_command(
             session_id=session_id,
             request=req,
-            _request_timeout=http_timeout(timeout),
+            _request_timeout=http_timeout(timeout + 5 if timeout else None),
         )
 
         stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")

@@ -38,7 +38,7 @@ def intercept_errors(
         def process_n_raise_exception(e: Exception) -> NoReturn:
             if isinstance(e, DaytonaError):
                 msg = f"{message_prefix}{str(e)}" if message_prefix else str(e)
-                raise e.__class__(msg) from None
+                raise e.__class__(msg, status_code=e.status_code, headers=e.headers) from None
 
             if isinstance(
                 e, (OpenApiException, OpenApiExceptionAsync, OpenApiExceptionToolbox, OpenApiExceptionToolboxAsync)

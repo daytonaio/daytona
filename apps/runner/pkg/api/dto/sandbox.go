@@ -69,3 +69,7 @@ type IsRecoverableResponse struct {
 type StartSandboxResponse struct {
 	DaemonVersion string `json:"daemonVersion"`
 } //	@name	StartSandboxResponse
+
+type StopSandboxDTO struct {
+	Force bool `json:"force,omitempty"`
+} //	@name	StopSandboxDTO

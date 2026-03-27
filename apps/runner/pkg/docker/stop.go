@@ -12,7 +12,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
+func (d *DockerClient) Stop(ctx context.Context, containerId string, force bool) error {
 	// Deduce sandbox state first
 	state, err := d.GetSandboxState(ctx, containerId)
 	if err == nil && state == enums.SandboxStateStopped {
@@ -31,9 +31,16 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
 		backup_context.cancel()
 	}
 
-	err = d.stopContainerWithRetry(ctx, containerId, 10)
-	if err != nil {
-		return err
+	if force {
+		err = d.apiClient.ContainerKill(ctx, containerId, "KILL")
+		if err != nil {
+			return fmt.Errorf("error killing sandbox %s: %w", containerId, err)
+		}
+	} else {
+		err = d.stopContainerWithRetry(ctx, containerId, 10)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Wait for container to actually stop

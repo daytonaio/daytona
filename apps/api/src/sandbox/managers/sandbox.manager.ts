@@ -8,6 +8,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
 import { randomUUID } from 'crypto'
 
+import { SandboxConflictError } from '../errors/sandbox-conflict.error'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -569,16 +570,19 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     const newRunner = await this.runnerService.findOneOrFail(newRunnerId)
     const newRunnerAdapter = await this.runnerAdapterFactory.create(newRunner)
 
-    const originalSnapshot = sandbox.snapshot
-    sandbox.snapshot = sandbox.backupSnapshot
-
     try {
       // Pass undefined for entrypoint as the backup snapshot already has it baked in and use skipStart
-      await newRunnerAdapter.createSandbox(sandbox, registry, undefined, metadata, undefined, true)
+      await newRunnerAdapter.createSandbox(
+        sandbox,
+        sandbox.backupSnapshot,
+        registry,
+        undefined,
+        metadata,
+        undefined,
+        true,
+      )
       this.logger.debug(`Created sandbox ${sandbox.id} on new runner ${newRunnerId} with skipStart`)
     } catch (e) {
-      // Restore original snapshot on failure
-      sandbox.snapshot = originalSnapshot
       this.logger.error(`Failed to create sandbox ${sandbox.id} on new runner ${newRunnerId}`, e)
       throw e
     }
@@ -792,7 +796,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
    * The sandbox entity is mutated in-place by repository.update() on each iteration,
    * and the lock guarantees no concurrent modification.
    */
-  async syncInstanceState(sandboxId: string): Promise<void> {
+  async syncInstanceState(sandboxId: string, force?: boolean): Promise<void> {
     // Track the start time of the sync operation.
     const startedAt = new Date()
 
@@ -839,7 +843,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
               break
             }
             case SandboxDesiredState.STOPPED: {
-              syncState = await this.sandboxStopAction.run(sandbox, lockCode)
+              syncState = await this.sandboxStopAction.run(sandbox, lockCode, force)
               break
             }
             case SandboxDesiredState.DESTROYED: {
@@ -852,6 +856,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
           }
         } catch (error) {
+          if (error instanceof SandboxConflictError) {
+            this.logger.warn(
+              `Sandbox ${sandboxId} was modified by another operation during sync, skipping error transition`,
+            )
+            break
+          }
+
           this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
           const { recoverable, errorReason } = sanitizeSandboxError(error)
@@ -917,7 +928,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
   @TrackJobExecution()
   @WithSpan()
   private async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
-    await this.syncInstanceState(event.sandbox.id)
+    await this.syncInstanceState(event.sandbox.id, event.force)
   }
 
   @OnAsyncEvent({

@@ -753,7 +753,7 @@ puts 'Sandbox recovered successfully'
 #### stop()
 
 ```ruby
-def stop(timeout)
+def stop(timeout, force:)
 
 ```
 
@@ -762,6 +762,7 @@ Stops the Sandbox and waits for it to be stopped.
 **Parameters**:
 
 - `timeout` _Numeric_ - Maximum wait time in seconds (defaults to 60 s).
+- `force` _Boolean_ - If true, uses SIGKILL instead of SIGTERM (defaults to false).
 
 **Returns**:
 

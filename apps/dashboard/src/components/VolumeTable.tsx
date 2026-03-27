@@ -5,13 +5,14 @@
 
 import { DebouncedInput } from '@/components/DebouncedInput'
 import { Pagination } from '@/components/Pagination'
+import { SelectionToast } from '@/components/SelectionToast'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
@@ -30,8 +31,11 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { AnimatePresence } from 'motion/react'
+import { useCallback, useMemo, useState } from 'react'
 import { TableEmptyState } from './TableEmptyState'
+import { VolumeBulkAction, VolumeBulkActionAlertDialog } from './VolumeTable/BulkActionAlertDialog'
+import { getVolumeBulkActionCounts, isVolumeDeletable, useVolumeCommands } from './VolumeTable/useVolumeCommands'
 
 interface VolumeTableProps {
   data: VolumeDto[]
@@ -39,11 +43,24 @@ interface VolumeTableProps {
   processingVolumeAction: Record<string, boolean>
   onDelete: (volume: VolumeDto) => void
   onBulkDelete: (volumes: VolumeDto[]) => void
+  onCreateVolume?: () => void
 }
 
-export function VolumeTable({ data, loading, processingVolumeAction, onDelete, onBulkDelete }: VolumeTableProps) {
+export function VolumeTable({
+  data,
+  loading,
+  processingVolumeAction,
+  onDelete,
+  onBulkDelete,
+  onCreateVolume,
+}: VolumeTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
+  const { setIsOpen } = useCommandPaletteActions()
 
+  const writePermitted = useMemo(
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_VOLUMES),
+    [authenticatedUserHasPermission],
+  )
   const deletePermitted = useMemo(
     () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_VOLUMES),
     [authenticatedUserHasPermission],
@@ -72,7 +89,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
       sorting,
       columnFilters,
     },
-    enableRowSelection: true,
+    enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,
     initialState: {
       pagination: {
@@ -80,7 +97,59 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
       },
     },
   })
-  const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
+  const selectedRows = table.getSelectedRowModel().rows
+  const hasSelection = selectedRows.length > 0
+  const selectedVolumes = selectedRows.map((row) => row.original)
+  const selectableCount = table.getRowModel().rows.filter((row) => {
+    const volume = row.original
+    return (
+      isVolumeDeletable(volume) &&
+      !processingVolumeAction[volume.id] &&
+      volume.state !== VolumeState.PENDING_DELETE &&
+      volume.state !== VolumeState.DELETING
+    )
+  }).length
+  const bulkActionCounts = useMemo(() => getVolumeBulkActionCounts(selectedVolumes), [selectedVolumes])
+  const [pendingBulkAction, setPendingBulkAction] = useState<VolumeBulkAction | null>(null)
+
+  const toggleAllRowsSelected = useCallback(
+    (selected: boolean) => {
+      if (selected) {
+        for (const row of table.getRowModel().rows) {
+          const isProcessing = processingVolumeAction[row.original.id]
+          const isDeleting =
+            row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
+
+          if (!isProcessing && !isDeleting && isVolumeDeletable(row.original)) {
+            row.toggleSelected(true)
+          }
+        }
+      } else {
+        table.toggleAllRowsSelected(false)
+      }
+    },
+    [table, processingVolumeAction],
+  )
+
+  useVolumeCommands({
+    writePermitted,
+    deletePermitted,
+    selectedCount: selectedRows.length,
+    selectableCount,
+    toggleAllRowsSelected,
+    bulkActionCounts,
+    onDelete: () => setPendingBulkAction(VolumeBulkAction.Delete),
+    onCreateVolume,
+  })
+
+  const handleBulkActionConfirm = () => {
+    if (pendingBulkAction === VolumeBulkAction.Delete) {
+      onBulkDelete(selectedVolumes.filter(isVolumeDeletable))
+    }
+
+    setPendingBulkAction(null)
+    table.toggleAllRowsSelected(false)
+  }
 
   return (
     <div>
@@ -161,42 +230,23 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
-          <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-            <PopoverTrigger>
-              <Button variant="destructive" size="sm" className="h-8">
-                Bulk Delete
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent side="top">
-              <div className="flex flex-col gap-4">
-                <p>Are you sure you want to delete these Volumes?</p>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      onBulkDelete(
-                        table
-                          .getRowModel()
-                          .rows.filter((row) => row.getIsSelected())
-                          .map((row) => row.original),
-                      )
-                      setBulkDeleteConfirmationOpen(false)
-                    }}
-                  >
-                    Delete
-                  </Button>
-                  <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+      <Pagination table={table} selectionEnabled={deletePermitted} entityName="Volumes" className="mt-4" />
+      <AnimatePresence>
+        {hasSelection && (
+          <SelectionToast
+            className="absolute bottom-5 left-1/2 -translate-x-1/2 z-50"
+            selectedCount={selectedRows.length}
+            onClearSelection={() => table.resetRowSelection()}
+            onActionClick={() => setIsOpen(true)}
+          />
         )}
-        <Pagination table={table} selectionEnabled entityName="Volumes" />
-      </div>
+      </AnimatePresence>
+      <VolumeBulkActionAlertDialog
+        action={pendingBulkAction}
+        count={pendingBulkAction === VolumeBulkAction.Delete ? bulkActionCounts.deletable : 0}
+        onConfirm={handleBulkActionConfirm}
+        onCancel={() => setPendingBulkAction(null)}
+      />
     </div>
   )
 }
@@ -259,7 +309,12 @@ const getColumns = ({
           }
           onCheckedChange={(value) => {
             for (const row of table.getRowModel().rows) {
-              if (processingVolumeAction[row.original.id]) {
+              const isProcessing = processingVolumeAction[row.original.id]
+              const isDeleting =
+                row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
+              const isDeletable = isVolumeDeletable(row.original)
+
+              if (isProcessing || isDeleting || !isDeletable) {
                 row.toggleSelected(false)
               } else {
                 row.toggleSelected(!!value)

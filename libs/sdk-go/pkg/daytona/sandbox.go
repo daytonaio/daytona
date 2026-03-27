@@ -252,14 +252,14 @@ func (s *Sandbox) doStartWithTimeout(ctx context.Context, timeout time.Duration)
 // Stop stops the sandbox with a default timeout of 60 seconds.
 //
 // Stopping a sandbox preserves its state. Use [Sandbox.Start] to resume.
-// For custom timeout, use [Sandbox.StopWithTimeout].
+// For custom timeout or force stop, use [Sandbox.StopWithTimeout].
 //
 // Example:
 //
 //	err := sandbox.Stop(ctx)
 func (s *Sandbox) Stop(ctx context.Context) error {
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "Stop", func(ctx context.Context) error {
-		return s.StopWithTimeout(ctx, 60*time.Second)
+		return s.StopWithTimeout(ctx, 60*time.Second, false)
 	})
 }
 
@@ -267,17 +267,18 @@ func (s *Sandbox) Stop(ctx context.Context) error {
 //
 // The method blocks until the sandbox reaches the "stopped" state or the timeout
 // is exceeded. 0 means no timeout.
+// Set force to true to use SIGKILL instead of SIGTERM.
 //
 // Example:
 //
-//	err := sandbox.StopWithTimeout(ctx, 2*time.Minute)
-func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration) error {
+//	err := sandbox.StopWithTimeout(ctx, 2*time.Minute, false)
+func (s *Sandbox) StopWithTimeout(ctx context.Context, timeout time.Duration, force bool) error {
 	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "StopWithTimeout", func(ctx context.Context) error {
-		return s.doStopWithTimeout(ctx, timeout)
+		return s.doStopWithTimeout(ctx, timeout, force)
 	})
 }
 
-func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration) error {
+func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration, force bool) error {
 	if timeout < 0 {
 		return errors.NewDaytonaError("Timeout must be a non-negative number", 0, nil)
 	}
@@ -289,7 +290,11 @@ func (s *Sandbox) doStopWithTimeout(ctx context.Context, timeout time.Duration) 
 	}
 
 	authCtx := s.client.getAuthContext(ctx)
-	_, httpResp, err := s.client.apiClient.SandboxAPI.StopSandbox(authCtx, s.ID).Execute()
+	req := s.client.apiClient.SandboxAPI.StopSandbox(authCtx, s.ID)
+	if force {
+		req = req.Force(force)
+	}
+	_, httpResp, err := req.Execute()
 	if err != nil {
 		return errors.ConvertAPIError(err, httpResp)
 	}

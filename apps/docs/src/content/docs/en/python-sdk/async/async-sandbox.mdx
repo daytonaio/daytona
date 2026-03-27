@@ -254,7 +254,7 @@ print("Sandbox recovered successfully")
 @intercept_errors(message_prefix="Failed to stop sandbox: ")
 @with_timeout()
 @with_instrumentation()
-async def stop(timeout: float | None = 60)
+async def stop(timeout: float | None = 60, force: bool = False)
 ```
 
 Stops the Sandbox and waits for it to be fully stopped.
@@ -262,6 +262,7 @@ Stops the Sandbox and waits for it to be fully stopped.
 **Arguments**:
 
 - `timeout` _float | None_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
+- `force` _bool_ - If True, uses SIGKILL instead of SIGTERM to stop the sandbox. Default is False.
   
 
 **Raises**:
@@ -273,7 +274,7 @@ Stops the Sandbox and waits for it to be fully stopped.
 
 ```python
 sandbox = daytona.get("my-sandbox-id")
-sandbox.stop()
+await sandbox.stop()
 print("Sandbox stopped successfully")
 ```
 
