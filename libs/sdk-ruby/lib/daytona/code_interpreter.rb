@@ -144,9 +144,9 @@ module Daytona
       end
 
       # Wait for completion signal with idle timeout
-      # If timeout is specified, wait longer to detect actual timeout errors
-      # Otherwise use short idle timeout for normal completion
-      idle_timeout = timeout ? (timeout + 2.0) : 1.0
+      # Use a short idle timeout as a safety net — primary completion comes from
+      # the WebSocket close frame (delivered as empty message) or control messages
+      idle_timeout = 3.0
       max_wait = (timeout || 300) + 3 # Add buffer to configured timeout
       start_time = Time.now
       completion_reason = nil
@@ -315,9 +315,10 @@ module Daytona
     # @param completion_queue [Queue, nil] Queue to signal completion
     # @return [void]
     def handle_message(data, result, on_stdout, on_stderr, on_error, completion_queue = nil) # rubocop:disable Metrics/AbcSize, Metrics/ParameterLists
-      # Empty messages are just keepalives or noise, ignore them
+      # Empty messages signal WebSocket close frame delivery — treat as completion
       if data.nil? || data.empty?
-        puts '[DEBUG] Received empty message, ignoring' if ENV['DEBUG']
+        puts '[DEBUG] Received empty message, signaling completion' if ENV['DEBUG']
+        completion_queue&.push({ type: :completed })
         return
       end
 
