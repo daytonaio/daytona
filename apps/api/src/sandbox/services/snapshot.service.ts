@@ -694,7 +694,8 @@ export class SnapshotService {
   // TODO: revise/cleanup
   getEntrypointFromDockerfile(dockerfileContent: string): string[] {
     // Match ENTRYPOINT with either a string or JSON array
-    const entrypointMatch = dockerfileContent.match(/ENTRYPOINT\s+(.*)/)
+    const matches = [...dockerfileContent.matchAll(/ENTRYPOINT\s+(.*)/g)]
+    const entrypointMatch = matches.length ? matches[matches.length - 1] : null
     if (entrypointMatch) {
       const rawEntrypoint = entrypointMatch[1].trim()
       try {
