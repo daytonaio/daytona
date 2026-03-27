@@ -1,34 +1,77 @@
 # coding: utf-8
 
+from __future__ import annotations
+
 # flake8: noqa
 
 {{>partial_header}}
 
 __version__ = "{{packageVersion}}"
 
-# import apis into sdk package
-{{#apiInfo}}{{#apis}}from {{apiPackage}}.{{classFilename}} import {{classname}}
-{{/apis}}{{/apiInfo}}
-# import ApiClient
-from {{packageName}}.api_response import ApiResponse
-from {{packageName}}.api_client import ApiClient
-from {{packageName}}.configuration import Configuration
-from {{packageName}}.exceptions import OpenApiException
-from {{packageName}}.exceptions import ApiTypeError
-from {{packageName}}.exceptions import ApiValueError
-from {{packageName}}.exceptions import ApiKeyError
-from {{packageName}}.exceptions import ApiAttributeError
-from {{packageName}}.exceptions import ApiException
+import importlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # import apis into sdk package
+{{#apiInfo}}{{#apis}}    from {{apiPackage}}.{{classFilename}} import {{classname}}
+{{/apis}}{{/apiInfo}}    # import ApiClient
+    from {{packageName}}.api_response import ApiResponse
+    from {{packageName}}.api_client import ApiClient
+    from {{packageName}}.configuration import Configuration
+    from {{packageName}}.exceptions import OpenApiException
+    from {{packageName}}.exceptions import ApiTypeError
+    from {{packageName}}.exceptions import ApiValueError
+    from {{packageName}}.exceptions import ApiKeyError
+    from {{packageName}}.exceptions import ApiAttributeError
+    from {{packageName}}.exceptions import ApiException
 {{#hasHttpSignatureMethods}}
-from {{packageName}}.signing import HttpSigningConfiguration
+    from {{packageName}}.signing import HttpSigningConfiguration
 {{/hasHttpSignatureMethods}}
 
-# import models into sdk package
+    # import models into sdk package
 {{#models}}
 {{#model}}
-from {{modelPackage}}.{{classFilename}} import {{classname}}
+    from {{modelPackage}}.{{classFilename}} import {{classname}}
 {{/model}}
 {{/models}}
+
+_DYNAMIC_IMPORTS: dict[str, str] = {
+    # apis
+{{#apiInfo}}{{#apis}}    "{{classname}}": "{{apiPackage}}.{{classFilename}}",
+{{/apis}}{{/apiInfo}}    # ApiClient
+    "ApiResponse": "{{packageName}}.api_response",
+    "ApiClient": "{{packageName}}.api_client",
+    "Configuration": "{{packageName}}.configuration",
+    "OpenApiException": "{{packageName}}.exceptions",
+    "ApiTypeError": "{{packageName}}.exceptions",
+    "ApiValueError": "{{packageName}}.exceptions",
+    "ApiKeyError": "{{packageName}}.exceptions",
+    "ApiAttributeError": "{{packageName}}.exceptions",
+    "ApiException": "{{packageName}}.exceptions",
+{{#hasHttpSignatureMethods}}
+    "HttpSigningConfiguration": "{{packageName}}.signing",
+{{/hasHttpSignatureMethods}}
+    # models
+{{#models}}
+{{#model}}
+    "{{classname}}": "{{modelPackage}}.{{classFilename}}",
+{{/model}}
+{{/models}}
+}
+
+
+def __getattr__(attr_name: str) -> object:
+    module_path = _DYNAMIC_IMPORTS.get(attr_name)
+    if module_path is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {attr_name!r}")
+    mod = importlib.import_module(module_path)
+    value = getattr(mod, attr_name)
+    globals()[attr_name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return list(_DYNAMIC_IMPORTS.keys())
 {{#recursionLimit}}
 
 __import__('sys').setrecursionlimit({{{.}}})

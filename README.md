@@ -54,6 +54,18 @@ pip install daytona
 npm install @daytonaio/sdk
 ```
 
+### Ruby SDK
+
+```bash
+gem install daytona
+```
+
+### Go SDK
+
+```bash
+go get github.com/daytonaio/daytona/libs/sdk-go
+```
+
 ---
 
 ## Features
@@ -69,66 +81,45 @@ npm install @daytonaio/sdk
 
 ## Quick Start
 
-1. Create an account at https://app.daytona.io
-1. Generate a [new API key](https://app.daytona.io/dashboard/keys)
-1. Follow the [Getting Started docs](https://www.daytona.io/docs/getting-started/) to start using the Daytona SDK
+1. Create an account at [app.daytona.io](https://app.daytona.io)
+2. Generate a [new API key](https://app.daytona.io/dashboard/keys)
+3. Follow [documentation](https://www.daytona.io/docs/) to start using Daytona
 
 ## Creating your first Sandbox
 
 ### Python SDK
 
 ```py
-from daytona import Daytona, DaytonaConfig, CreateSandboxBaseParams
+from daytona import Daytona, DaytonaConfig
 
-# Initialize the Daytona client
-daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
-
-# Create the Sandbox instance
-sandbox = daytona.create(CreateSandboxBaseParams(language="python"))
-
-# Run code securely inside the Sandbox
-response = sandbox.process.code_run('print("Sum of 3 and 4 is " + str(3 + 4))')
-if response.exit_code != 0:
-    print(f"Error running code: {response.exit_code} {response.result}")
-else:
-    print(response.result)
-
-# Clean up the Sandbox
-daytona.delete(sandbox)
+config = DaytonaConfig(api_key="YOUR_API_KEY")
+daytona = Daytona(config)
+sandbox = daytona.create()
+response = sandbox.process.code_run('print("Hello World!")')
+print(response.result)
 ```
 
 ### Typescript SDK
 
 ```jsx
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from "@daytonaio/sdk";
 
-async function main() {
-  // Initialize the Daytona client
-  const daytona = new Daytona({
-    apiKey: 'YOUR_API_KEY',
-  })
+const daytona = new Daytona({apiKey: "YOUR_API_KEY"});
+const sandbox = await daytona.create();
+const response = await sandbox.process.codeRun('print("Hello World!")');
+console.log(response.result);
+```
 
-  let sandbox
-  try {
-    // Create the Sandbox instance
-    sandbox = await daytona.create({
-      language: 'typescript',
-    })
-    // Run code securely inside the Sandbox
-    const response = await sandbox.process.codeRun('console.log("Sum of 3 and 4 is " + (3 + 4))')
-    if (response.exitCode !== 0) {
-      console.error('Error running code:', response.exitCode, response.result)
-    } else {
-      console.log(response.result)
-    }
-  } catch (error) {
-    console.error('Sandbox flow error:', error)
-  } finally {
-    if (sandbox) await daytona.delete(sandbox)
-  }
-}
+### Ruby SDK
 
-main().catch(console.error)
+```ruby
+require 'daytona'
+
+config = Daytona::Config.new(api_key: 'YOUR_API_KEY')
+daytona = Daytona::Daytona.new(config)
+sandbox = daytona.create
+response = sandbox.process.code_run(code: 'print("Hello World!")')
+puts response.result
 ```
 
 ### Go SDK
@@ -137,54 +128,19 @@ main().catch(console.error)
 package main
 
 import (
- "context"
- "fmt"
- "log"
- "time"
-
- "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
- "github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
- "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
+  "context"
+  "fmt"
+  "github.com/daytonaio/daytona/libs/sdk-go/pkg/daytona"
+  "github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 )
 
 func main() {
- // Initialize the Daytona client with DAYTONA_API_KEY in env
- // Alternative is to use daytona.NewClientWithConfig(...) for more specific config
- client, err := daytona.NewClient()
- if err != nil {
-  log.Fatalf("Failed to create client: %v", err)
- }
-
- ctx := context.Background()
-
- // Create the Sandbox instance
- params := types.SnapshotParams{
-  SandboxBaseParams: types.SandboxBaseParams{
-   Language: types.CodeLanguagePython,
-  },
- }
-
- sandbox, err := client.Create(ctx, params, options.WithTimeout(90*time.Second))
- if err != nil {
-  log.Fatalf("Failed to create sandbox: %v", err)
- }
-
- // Run code securely inside the Sandbox
- response, err := sandbox.Process.ExecuteCommand(ctx, `python3 -c "print('Sum of 3 and 4 is', 3 + 4)"`)
- if err != nil {
-  log.Fatalf("Failed to execute command: %v", err)
- }
-
- if response.ExitCode != 0 {
-  fmt.Printf("Error running code: %d %s\n", response.ExitCode, response.Result)
- } else {
+  config := &types.DaytonaConfig{APIKey: "YOUR_API_KEY"}
+  client, _ := daytona.NewClientWithConfig(config)
+  ctx := context.Background()
+  sandbox, _ := client.Create(ctx, nil)
+  response, _ := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello World!'")
   fmt.Println(response.Result)
- }
-
- // Clean up the Sandbox
- if err := sandbox.Delete(ctx); err != nil {
-  log.Fatalf("Failed to delete sandbox: %v", err)
- }
 }
 ```
 

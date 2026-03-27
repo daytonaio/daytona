@@ -12,7 +12,7 @@ description = "Python SDK for Daytona"
 readme = "README.md"
 requires-python = ">=3.9,<4.0"
 dependencies = [
-    "environs>=10.0.0,<15.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
     "pydantic>=2.4.2,<3.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",
@@ -25,7 +25,8 @@ dependencies = [
     "opentelemetry-api>=1.27.0,<2.0.0",
     "opentelemetry-sdk>=1.27.0,<2.0.0",
     "opentelemetry-exporter-otlp-proto-http>=1.27.0,<2.0.0",
-    "opentelemetry-instrumentation-aiohttp-client>=0.59b0"
+    "opentelemetry-instrumentation-aiohttp-client>=0.59b0",
+    "urllib3>=2.1.0,<3.0.0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

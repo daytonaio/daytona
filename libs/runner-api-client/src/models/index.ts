@@ -20,5 +20,6 @@ export * from './snapshot-digest-response';
 export * from './snapshot-exists-response';
 export * from './snapshot-info-response';
 export * from './start-sandbox-response';
+export * from './stop-sandbox-dto';
 export * from './tag-image-request-dto';
 export * from './update-network-settings-dto';

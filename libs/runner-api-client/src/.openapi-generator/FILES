@@ -34,5 +34,6 @@ models/snapshot-digest-response.ts
 models/snapshot-exists-response.ts
 models/snapshot-info-response.ts
 models/start-sandbox-response.ts
+models/stop-sandbox-dto.ts
 models/tag-image-request-dto.ts
 models/update-network-settings-dto.ts

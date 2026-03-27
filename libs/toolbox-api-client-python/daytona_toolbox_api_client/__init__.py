@@ -1,5 +1,7 @@
 # coding: utf-8
 
+from __future__ import annotations
+
 # flake8: noqa
 
 """
@@ -16,108 +18,228 @@
 
 __version__ = "0.0.0-dev"
 
-# import apis into sdk package
-from daytona_toolbox_api_client.api.computer_use_api import ComputerUseApi
-from daytona_toolbox_api_client.api.file_system_api import FileSystemApi
-from daytona_toolbox_api_client.api.git_api import GitApi
-from daytona_toolbox_api_client.api.info_api import InfoApi
-from daytona_toolbox_api_client.api.interpreter_api import InterpreterApi
-from daytona_toolbox_api_client.api.lsp_api import LspApi
-from daytona_toolbox_api_client.api.port_api import PortApi
-from daytona_toolbox_api_client.api.process_api import ProcessApi
-from daytona_toolbox_api_client.api.server_api import ServerApi
+import importlib
+from typing import TYPE_CHECKING
 
-# import ApiClient
-from daytona_toolbox_api_client.api_response import ApiResponse
-from daytona_toolbox_api_client.api_client import ApiClient
-from daytona_toolbox_api_client.configuration import Configuration
-from daytona_toolbox_api_client.exceptions import OpenApiException
-from daytona_toolbox_api_client.exceptions import ApiTypeError
-from daytona_toolbox_api_client.exceptions import ApiValueError
-from daytona_toolbox_api_client.exceptions import ApiKeyError
-from daytona_toolbox_api_client.exceptions import ApiAttributeError
-from daytona_toolbox_api_client.exceptions import ApiException
+if TYPE_CHECKING:
+    # import apis into sdk package
+    from daytona_toolbox_api_client.api.computer_use_api import ComputerUseApi
+    from daytona_toolbox_api_client.api.file_system_api import FileSystemApi
+    from daytona_toolbox_api_client.api.git_api import GitApi
+    from daytona_toolbox_api_client.api.info_api import InfoApi
+    from daytona_toolbox_api_client.api.interpreter_api import InterpreterApi
+    from daytona_toolbox_api_client.api.lsp_api import LspApi
+    from daytona_toolbox_api_client.api.port_api import PortApi
+    from daytona_toolbox_api_client.api.process_api import ProcessApi
+    from daytona_toolbox_api_client.api.server_api import ServerApi
+    # import ApiClient
+    from daytona_toolbox_api_client.api_response import ApiResponse
+    from daytona_toolbox_api_client.api_client import ApiClient
+    from daytona_toolbox_api_client.configuration import Configuration
+    from daytona_toolbox_api_client.exceptions import OpenApiException
+    from daytona_toolbox_api_client.exceptions import ApiTypeError
+    from daytona_toolbox_api_client.exceptions import ApiValueError
+    from daytona_toolbox_api_client.exceptions import ApiKeyError
+    from daytona_toolbox_api_client.exceptions import ApiAttributeError
+    from daytona_toolbox_api_client.exceptions import ApiException
 
-# import models into sdk package
-from daytona_toolbox_api_client.models.command import Command
-from daytona_toolbox_api_client.models.completion_context import CompletionContext
-from daytona_toolbox_api_client.models.completion_item import CompletionItem
-from daytona_toolbox_api_client.models.completion_list import CompletionList
-from daytona_toolbox_api_client.models.computer_use_start_response import ComputerUseStartResponse
-from daytona_toolbox_api_client.models.computer_use_status_response import ComputerUseStatusResponse
-from daytona_toolbox_api_client.models.computer_use_stop_response import ComputerUseStopResponse
-from daytona_toolbox_api_client.models.create_context_request import CreateContextRequest
-from daytona_toolbox_api_client.models.create_session_request import CreateSessionRequest
-from daytona_toolbox_api_client.models.display_info import DisplayInfo
-from daytona_toolbox_api_client.models.display_info_response import DisplayInfoResponse
-from daytona_toolbox_api_client.models.execute_request import ExecuteRequest
-from daytona_toolbox_api_client.models.execute_response import ExecuteResponse
-from daytona_toolbox_api_client.models.file_info import FileInfo
-from daytona_toolbox_api_client.models.file_status import FileStatus
-from daytona_toolbox_api_client.models.files_download_request import FilesDownloadRequest
-from daytona_toolbox_api_client.models.git_add_request import GitAddRequest
-from daytona_toolbox_api_client.models.git_branch_request import GitBranchRequest
-from daytona_toolbox_api_client.models.git_checkout_request import GitCheckoutRequest
-from daytona_toolbox_api_client.models.git_clone_request import GitCloneRequest
-from daytona_toolbox_api_client.models.git_commit_info import GitCommitInfo
-from daytona_toolbox_api_client.models.git_commit_request import GitCommitRequest
-from daytona_toolbox_api_client.models.git_commit_response import GitCommitResponse
-from daytona_toolbox_api_client.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
-from daytona_toolbox_api_client.models.git_repo_request import GitRepoRequest
-from daytona_toolbox_api_client.models.git_status import GitStatus
-from daytona_toolbox_api_client.models.initialize_request import InitializeRequest
-from daytona_toolbox_api_client.models.interpreter_context import InterpreterContext
-from daytona_toolbox_api_client.models.is_port_in_use_response import IsPortInUseResponse
-from daytona_toolbox_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
-from daytona_toolbox_api_client.models.keyboard_press_request import KeyboardPressRequest
-from daytona_toolbox_api_client.models.keyboard_type_request import KeyboardTypeRequest
-from daytona_toolbox_api_client.models.list_branch_response import ListBranchResponse
-from daytona_toolbox_api_client.models.list_contexts_response import ListContextsResponse
-from daytona_toolbox_api_client.models.list_recordings_response import ListRecordingsResponse
-from daytona_toolbox_api_client.models.lsp_completion_params import LspCompletionParams
-from daytona_toolbox_api_client.models.lsp_document_request import LspDocumentRequest
-from daytona_toolbox_api_client.models.lsp_location import LspLocation
-from daytona_toolbox_api_client.models.lsp_position import LspPosition
-from daytona_toolbox_api_client.models.lsp_range import LspRange
-from daytona_toolbox_api_client.models.lsp_server_request import LspServerRequest
-from daytona_toolbox_api_client.models.lsp_symbol import LspSymbol
-from daytona_toolbox_api_client.models.match import Match
-from daytona_toolbox_api_client.models.mouse_click_request import MouseClickRequest
-from daytona_toolbox_api_client.models.mouse_click_response import MouseClickResponse
-from daytona_toolbox_api_client.models.mouse_drag_request import MouseDragRequest
-from daytona_toolbox_api_client.models.mouse_drag_response import MouseDragResponse
-from daytona_toolbox_api_client.models.mouse_move_request import MouseMoveRequest
-from daytona_toolbox_api_client.models.mouse_position_response import MousePositionResponse
-from daytona_toolbox_api_client.models.mouse_scroll_request import MouseScrollRequest
-from daytona_toolbox_api_client.models.port_list import PortList
-from daytona_toolbox_api_client.models.position import Position
-from daytona_toolbox_api_client.models.process_errors_response import ProcessErrorsResponse
-from daytona_toolbox_api_client.models.process_logs_response import ProcessLogsResponse
-from daytona_toolbox_api_client.models.process_restart_response import ProcessRestartResponse
-from daytona_toolbox_api_client.models.process_status import ProcessStatus
-from daytona_toolbox_api_client.models.process_status_response import ProcessStatusResponse
-from daytona_toolbox_api_client.models.pty_create_request import PtyCreateRequest
-from daytona_toolbox_api_client.models.pty_create_response import PtyCreateResponse
-from daytona_toolbox_api_client.models.pty_list_response import PtyListResponse
-from daytona_toolbox_api_client.models.pty_resize_request import PtyResizeRequest
-from daytona_toolbox_api_client.models.pty_session_info import PtySessionInfo
-from daytona_toolbox_api_client.models.recording import Recording
-from daytona_toolbox_api_client.models.replace_request import ReplaceRequest
-from daytona_toolbox_api_client.models.replace_result import ReplaceResult
-from daytona_toolbox_api_client.models.screenshot_response import ScreenshotResponse
-from daytona_toolbox_api_client.models.scroll_response import ScrollResponse
-from daytona_toolbox_api_client.models.search_files_response import SearchFilesResponse
-from daytona_toolbox_api_client.models.session import Session
-from daytona_toolbox_api_client.models.session_execute_request import SessionExecuteRequest
-from daytona_toolbox_api_client.models.session_execute_response import SessionExecuteResponse
-from daytona_toolbox_api_client.models.session_send_input_request import SessionSendInputRequest
-from daytona_toolbox_api_client.models.start_recording_request import StartRecordingRequest
-from daytona_toolbox_api_client.models.status import Status
-from daytona_toolbox_api_client.models.stop_recording_request import StopRecordingRequest
-from daytona_toolbox_api_client.models.user_home_dir_response import UserHomeDirResponse
-from daytona_toolbox_api_client.models.window_info import WindowInfo
-from daytona_toolbox_api_client.models.windows_response import WindowsResponse
-from daytona_toolbox_api_client.models.work_dir_response import WorkDirResponse
+    # import models into sdk package
+    from daytona_toolbox_api_client.models.command import Command
+    from daytona_toolbox_api_client.models.completion_context import CompletionContext
+    from daytona_toolbox_api_client.models.completion_item import CompletionItem
+    from daytona_toolbox_api_client.models.completion_list import CompletionList
+    from daytona_toolbox_api_client.models.computer_use_start_response import ComputerUseStartResponse
+    from daytona_toolbox_api_client.models.computer_use_status_response import ComputerUseStatusResponse
+    from daytona_toolbox_api_client.models.computer_use_stop_response import ComputerUseStopResponse
+    from daytona_toolbox_api_client.models.create_context_request import CreateContextRequest
+    from daytona_toolbox_api_client.models.create_session_request import CreateSessionRequest
+    from daytona_toolbox_api_client.models.display_info import DisplayInfo
+    from daytona_toolbox_api_client.models.display_info_response import DisplayInfoResponse
+    from daytona_toolbox_api_client.models.execute_request import ExecuteRequest
+    from daytona_toolbox_api_client.models.execute_response import ExecuteResponse
+    from daytona_toolbox_api_client.models.file_info import FileInfo
+    from daytona_toolbox_api_client.models.file_status import FileStatus
+    from daytona_toolbox_api_client.models.files_download_request import FilesDownloadRequest
+    from daytona_toolbox_api_client.models.git_add_request import GitAddRequest
+    from daytona_toolbox_api_client.models.git_branch_request import GitBranchRequest
+    from daytona_toolbox_api_client.models.git_checkout_request import GitCheckoutRequest
+    from daytona_toolbox_api_client.models.git_clone_request import GitCloneRequest
+    from daytona_toolbox_api_client.models.git_commit_info import GitCommitInfo
+    from daytona_toolbox_api_client.models.git_commit_request import GitCommitRequest
+    from daytona_toolbox_api_client.models.git_commit_response import GitCommitResponse
+    from daytona_toolbox_api_client.models.git_git_delete_branch_request import GitGitDeleteBranchRequest
+    from daytona_toolbox_api_client.models.git_repo_request import GitRepoRequest
+    from daytona_toolbox_api_client.models.git_status import GitStatus
+    from daytona_toolbox_api_client.models.initialize_request import InitializeRequest
+    from daytona_toolbox_api_client.models.interpreter_context import InterpreterContext
+    from daytona_toolbox_api_client.models.is_port_in_use_response import IsPortInUseResponse
+    from daytona_toolbox_api_client.models.keyboard_hotkey_request import KeyboardHotkeyRequest
+    from daytona_toolbox_api_client.models.keyboard_press_request import KeyboardPressRequest
+    from daytona_toolbox_api_client.models.keyboard_type_request import KeyboardTypeRequest
+    from daytona_toolbox_api_client.models.list_branch_response import ListBranchResponse
+    from daytona_toolbox_api_client.models.list_contexts_response import ListContextsResponse
+    from daytona_toolbox_api_client.models.list_recordings_response import ListRecordingsResponse
+    from daytona_toolbox_api_client.models.lsp_completion_params import LspCompletionParams
+    from daytona_toolbox_api_client.models.lsp_document_request import LspDocumentRequest
+    from daytona_toolbox_api_client.models.lsp_location import LspLocation
+    from daytona_toolbox_api_client.models.lsp_position import LspPosition
+    from daytona_toolbox_api_client.models.lsp_range import LspRange
+    from daytona_toolbox_api_client.models.lsp_server_request import LspServerRequest
+    from daytona_toolbox_api_client.models.lsp_symbol import LspSymbol
+    from daytona_toolbox_api_client.models.match import Match
+    from daytona_toolbox_api_client.models.mouse_click_request import MouseClickRequest
+    from daytona_toolbox_api_client.models.mouse_click_response import MouseClickResponse
+    from daytona_toolbox_api_client.models.mouse_drag_request import MouseDragRequest
+    from daytona_toolbox_api_client.models.mouse_drag_response import MouseDragResponse
+    from daytona_toolbox_api_client.models.mouse_move_request import MouseMoveRequest
+    from daytona_toolbox_api_client.models.mouse_position_response import MousePositionResponse
+    from daytona_toolbox_api_client.models.mouse_scroll_request import MouseScrollRequest
+    from daytona_toolbox_api_client.models.port_list import PortList
+    from daytona_toolbox_api_client.models.position import Position
+    from daytona_toolbox_api_client.models.process_errors_response import ProcessErrorsResponse
+    from daytona_toolbox_api_client.models.process_logs_response import ProcessLogsResponse
+    from daytona_toolbox_api_client.models.process_restart_response import ProcessRestartResponse
+    from daytona_toolbox_api_client.models.process_status import ProcessStatus
+    from daytona_toolbox_api_client.models.process_status_response import ProcessStatusResponse
+    from daytona_toolbox_api_client.models.pty_create_request import PtyCreateRequest
+    from daytona_toolbox_api_client.models.pty_create_response import PtyCreateResponse
+    from daytona_toolbox_api_client.models.pty_list_response import PtyListResponse
+    from daytona_toolbox_api_client.models.pty_resize_request import PtyResizeRequest
+    from daytona_toolbox_api_client.models.pty_session_info import PtySessionInfo
+    from daytona_toolbox_api_client.models.recording import Recording
+    from daytona_toolbox_api_client.models.replace_request import ReplaceRequest
+    from daytona_toolbox_api_client.models.replace_result import ReplaceResult
+    from daytona_toolbox_api_client.models.screenshot_response import ScreenshotResponse
+    from daytona_toolbox_api_client.models.scroll_response import ScrollResponse
+    from daytona_toolbox_api_client.models.search_files_response import SearchFilesResponse
+    from daytona_toolbox_api_client.models.session import Session
+    from daytona_toolbox_api_client.models.session_execute_request import SessionExecuteRequest
+    from daytona_toolbox_api_client.models.session_execute_response import SessionExecuteResponse
+    from daytona_toolbox_api_client.models.session_send_input_request import SessionSendInputRequest
+    from daytona_toolbox_api_client.models.start_recording_request import StartRecordingRequest
+    from daytona_toolbox_api_client.models.status import Status
+    from daytona_toolbox_api_client.models.stop_recording_request import StopRecordingRequest
+    from daytona_toolbox_api_client.models.user_home_dir_response import UserHomeDirResponse
+    from daytona_toolbox_api_client.models.window_info import WindowInfo
+    from daytona_toolbox_api_client.models.windows_response import WindowsResponse
+    from daytona_toolbox_api_client.models.work_dir_response import WorkDirResponse
+
+_DYNAMIC_IMPORTS: dict[str, str] = {
+    # apis
+    "ComputerUseApi": "daytona_toolbox_api_client.api.computer_use_api",
+    "FileSystemApi": "daytona_toolbox_api_client.api.file_system_api",
+    "GitApi": "daytona_toolbox_api_client.api.git_api",
+    "InfoApi": "daytona_toolbox_api_client.api.info_api",
+    "InterpreterApi": "daytona_toolbox_api_client.api.interpreter_api",
+    "LspApi": "daytona_toolbox_api_client.api.lsp_api",
+    "PortApi": "daytona_toolbox_api_client.api.port_api",
+    "ProcessApi": "daytona_toolbox_api_client.api.process_api",
+    "ServerApi": "daytona_toolbox_api_client.api.server_api",
+    # ApiClient
+    "ApiResponse": "daytona_toolbox_api_client.api_response",
+    "ApiClient": "daytona_toolbox_api_client.api_client",
+    "Configuration": "daytona_toolbox_api_client.configuration",
+    "OpenApiException": "daytona_toolbox_api_client.exceptions",
+    "ApiTypeError": "daytona_toolbox_api_client.exceptions",
+    "ApiValueError": "daytona_toolbox_api_client.exceptions",
+    "ApiKeyError": "daytona_toolbox_api_client.exceptions",
+    "ApiAttributeError": "daytona_toolbox_api_client.exceptions",
+    "ApiException": "daytona_toolbox_api_client.exceptions",
+    # models
+    "Command": "daytona_toolbox_api_client.models.command",
+    "CompletionContext": "daytona_toolbox_api_client.models.completion_context",
+    "CompletionItem": "daytona_toolbox_api_client.models.completion_item",
+    "CompletionList": "daytona_toolbox_api_client.models.completion_list",
+    "ComputerUseStartResponse": "daytona_toolbox_api_client.models.computer_use_start_response",
+    "ComputerUseStatusResponse": "daytona_toolbox_api_client.models.computer_use_status_response",
+    "ComputerUseStopResponse": "daytona_toolbox_api_client.models.computer_use_stop_response",
+    "CreateContextRequest": "daytona_toolbox_api_client.models.create_context_request",
+    "CreateSessionRequest": "daytona_toolbox_api_client.models.create_session_request",
+    "DisplayInfo": "daytona_toolbox_api_client.models.display_info",
+    "DisplayInfoResponse": "daytona_toolbox_api_client.models.display_info_response",
+    "ExecuteRequest": "daytona_toolbox_api_client.models.execute_request",
+    "ExecuteResponse": "daytona_toolbox_api_client.models.execute_response",
+    "FileInfo": "daytona_toolbox_api_client.models.file_info",
+    "FileStatus": "daytona_toolbox_api_client.models.file_status",
+    "FilesDownloadRequest": "daytona_toolbox_api_client.models.files_download_request",
+    "GitAddRequest": "daytona_toolbox_api_client.models.git_add_request",
+    "GitBranchRequest": "daytona_toolbox_api_client.models.git_branch_request",
+    "GitCheckoutRequest": "daytona_toolbox_api_client.models.git_checkout_request",
+    "GitCloneRequest": "daytona_toolbox_api_client.models.git_clone_request",
+    "GitCommitInfo": "daytona_toolbox_api_client.models.git_commit_info",
+    "GitCommitRequest": "daytona_toolbox_api_client.models.git_commit_request",
+    "GitCommitResponse": "daytona_toolbox_api_client.models.git_commit_response",
+    "GitGitDeleteBranchRequest": "daytona_toolbox_api_client.models.git_git_delete_branch_request",
+    "GitRepoRequest": "daytona_toolbox_api_client.models.git_repo_request",
+    "GitStatus": "daytona_toolbox_api_client.models.git_status",
+    "InitializeRequest": "daytona_toolbox_api_client.models.initialize_request",
+    "InterpreterContext": "daytona_toolbox_api_client.models.interpreter_context",
+    "IsPortInUseResponse": "daytona_toolbox_api_client.models.is_port_in_use_response",
+    "KeyboardHotkeyRequest": "daytona_toolbox_api_client.models.keyboard_hotkey_request",
+    "KeyboardPressRequest": "daytona_toolbox_api_client.models.keyboard_press_request",
+    "KeyboardTypeRequest": "daytona_toolbox_api_client.models.keyboard_type_request",
+    "ListBranchResponse": "daytona_toolbox_api_client.models.list_branch_response",
+    "ListContextsResponse": "daytona_toolbox_api_client.models.list_contexts_response",
+    "ListRecordingsResponse": "daytona_toolbox_api_client.models.list_recordings_response",
+    "LspCompletionParams": "daytona_toolbox_api_client.models.lsp_completion_params",
+    "LspDocumentRequest": "daytona_toolbox_api_client.models.lsp_document_request",
+    "LspLocation": "daytona_toolbox_api_client.models.lsp_location",
+    "LspPosition": "daytona_toolbox_api_client.models.lsp_position",
+    "LspRange": "daytona_toolbox_api_client.models.lsp_range",
+    "LspServerRequest": "daytona_toolbox_api_client.models.lsp_server_request",
+    "LspSymbol": "daytona_toolbox_api_client.models.lsp_symbol",
+    "Match": "daytona_toolbox_api_client.models.match",
+    "MouseClickRequest": "daytona_toolbox_api_client.models.mouse_click_request",
+    "MouseClickResponse": "daytona_toolbox_api_client.models.mouse_click_response",
+    "MouseDragRequest": "daytona_toolbox_api_client.models.mouse_drag_request",
+    "MouseDragResponse": "daytona_toolbox_api_client.models.mouse_drag_response",
+    "MouseMoveRequest": "daytona_toolbox_api_client.models.mouse_move_request",
+    "MousePositionResponse": "daytona_toolbox_api_client.models.mouse_position_response",
+    "MouseScrollRequest": "daytona_toolbox_api_client.models.mouse_scroll_request",
+    "PortList": "daytona_toolbox_api_client.models.port_list",
+    "Position": "daytona_toolbox_api_client.models.position",
+    "ProcessErrorsResponse": "daytona_toolbox_api_client.models.process_errors_response",
+    "ProcessLogsResponse": "daytona_toolbox_api_client.models.process_logs_response",
+    "ProcessRestartResponse": "daytona_toolbox_api_client.models.process_restart_response",
+    "ProcessStatus": "daytona_toolbox_api_client.models.process_status",
+    "ProcessStatusResponse": "daytona_toolbox_api_client.models.process_status_response",
+    "PtyCreateRequest": "daytona_toolbox_api_client.models.pty_create_request",
+    "PtyCreateResponse": "daytona_toolbox_api_client.models.pty_create_response",
+    "PtyListResponse": "daytona_toolbox_api_client.models.pty_list_response",
+    "PtyResizeRequest": "daytona_toolbox_api_client.models.pty_resize_request",
+    "PtySessionInfo": "daytona_toolbox_api_client.models.pty_session_info",
+    "Recording": "daytona_toolbox_api_client.models.recording",
+    "ReplaceRequest": "daytona_toolbox_api_client.models.replace_request",
+    "ReplaceResult": "daytona_toolbox_api_client.models.replace_result",
+    "ScreenshotResponse": "daytona_toolbox_api_client.models.screenshot_response",
+    "ScrollResponse": "daytona_toolbox_api_client.models.scroll_response",
+    "SearchFilesResponse": "daytona_toolbox_api_client.models.search_files_response",
+    "Session": "daytona_toolbox_api_client.models.session",
+    "SessionExecuteRequest": "daytona_toolbox_api_client.models.session_execute_request",
+    "SessionExecuteResponse": "daytona_toolbox_api_client.models.session_execute_response",
+    "SessionSendInputRequest": "daytona_toolbox_api_client.models.session_send_input_request",
+    "StartRecordingRequest": "daytona_toolbox_api_client.models.start_recording_request",
+    "Status": "daytona_toolbox_api_client.models.status",
+    "StopRecordingRequest": "daytona_toolbox_api_client.models.stop_recording_request",
+    "UserHomeDirResponse": "daytona_toolbox_api_client.models.user_home_dir_response",
+    "WindowInfo": "daytona_toolbox_api_client.models.window_info",
+    "WindowsResponse": "daytona_toolbox_api_client.models.windows_response",
+    "WorkDirResponse": "daytona_toolbox_api_client.models.work_dir_response",
+}
+
+
+def __getattr__(attr_name: str) -> object:
+    module_path = _DYNAMIC_IMPORTS.get(attr_name)
+    if module_path is None:
+        raise AttributeError(f"module {__name__!r} has no attribute {attr_name!r}")
+    mod = importlib.import_module(module_path)
+    value = getattr(mod, attr_name)
+    globals()[attr_name] = value
+    return value
+
+
+def __dir__() -> list[str]:
+    return list(_DYNAMIC_IMPORTS.keys())
 
 
 # --- Static __all__ generated by Mustache ---

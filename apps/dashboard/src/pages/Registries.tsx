@@ -18,7 +18,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useApi } from '@/hooks/useApi'
+import { useCreateRegistryMutation } from '@/hooks/mutations/useCreateRegistryMutation'
+import { useDeleteRegistryMutation } from '@/hooks/mutations/useDeleteRegistryMutation'
+import { useUpdateRegistryMutation } from '@/hooks/mutations/useUpdateRegistryMutation'
+import { useRegistriesQuery } from '@/hooks/queries/useRegistriesQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import {
@@ -27,13 +30,10 @@ import {
   type DockerRegistry,
 } from '@daytonaio/api-client'
 import { Info, Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 const Registries: React.FC = () => {
-  const { dockerRegistryApi } = useApi()
-  const [registries, setRegistries] = useState<DockerRegistry[]>([])
-  const [loading, setLoading] = useState(true)
   const [registryToDelete, setRegistryToDelete] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -44,39 +44,25 @@ const Registries: React.FC = () => {
   })
   const [registryToEdit, setRegistryToEdit] = useState<DockerRegistry | null>(null)
   const [showCreateOrEditDialog, setShowCreateOrEditDialog] = useState(false)
-  const [actionInProgress, setActionInProgress] = useState(false)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-
-  const fetchRegistries = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoading(true)
-      }
-      try {
-        const response = await dockerRegistryApi.listRegistries(selectedOrganization.id)
-        setRegistries(response.data)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch registries')
-      } finally {
-        setLoading(false)
-      }
-    },
-    [dockerRegistryApi, selectedOrganization],
-  )
+  const { data: registries = [], isLoading: loading, error: registriesError } = useRegistriesQuery()
+  const createRegistryMutation = useCreateRegistryMutation()
+  const updateRegistryMutation = useUpdateRegistryMutation()
+  const deleteRegistryMutation = useDeleteRegistryMutation()
+  const createOrEditInProgress = createRegistryMutation.isPending || updateRegistryMutation.isPending
+  const deleteInProgress = deleteRegistryMutation.isPending
 
   useEffect(() => {
-    fetchRegistries()
-  }, [fetchRegistries])
+    if (registriesError) {
+      handleApiError(registriesError, 'Failed to fetch registries')
+    }
+  }, [registriesError])
 
   const handleCreate = async () => {
-    setActionInProgress(true)
     try {
-      await dockerRegistryApi.createRegistry(
-        {
+      await createRegistryMutation.mutateAsync({
+        registry: {
           name: formData.name.trim(),
           url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
@@ -84,10 +70,9 @@ const Registries: React.FC = () => {
           project: formData.project.trim(),
           registryType: DockerRegistryRegistryTypeEnum.ORGANIZATION,
         },
-        selectedOrganization?.id,
-      )
+        organizationId: selectedOrganization?.id,
+      })
       toast.success('Registry created successfully')
-      await fetchRegistries(false)
       setShowCreateOrEditDialog(false)
       setFormData({
         name: '',
@@ -98,29 +83,25 @@ const Registries: React.FC = () => {
       })
     } catch (error) {
       handleApiError(error, 'Failed to create registry')
-    } finally {
-      setActionInProgress(false)
     }
   }
 
   const handleEdit = async () => {
     if (!registryToEdit) return
 
-    setActionInProgress(true)
     try {
-      await dockerRegistryApi.updateRegistry(
-        registryToEdit.id,
-        {
+      await updateRegistryMutation.mutateAsync({
+        registryId: registryToEdit.id,
+        registry: {
           name: formData.name.trim(),
           url: formData.url.trim() || 'docker.io',
           username: formData.username.trim(),
           password: formData.password.trim(),
           project: formData.project.trim(),
         },
-        selectedOrganization?.id,
-      )
+        organizationId: selectedOrganization?.id,
+      })
       toast.success('Registry edited successfully')
-      await fetchRegistries(false)
       setShowCreateOrEditDialog(false)
       setRegistryToEdit(null)
       setFormData({
@@ -132,22 +113,19 @@ const Registries: React.FC = () => {
       })
     } catch (error) {
       handleApiError(error, 'Failed to edit registry')
-    } finally {
-      setActionInProgress(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    setActionInProgress(true)
     try {
-      await dockerRegistryApi.deleteRegistry(id, selectedOrganization?.id)
+      await deleteRegistryMutation.mutateAsync({
+        registryId: id,
+        organizationId: selectedOrganization?.id,
+      })
       toast.success('Registry deleted successfully')
-      await fetchRegistries(false)
       setRegistryToDelete(null)
     } catch (error) {
       handleApiError(error, 'Failed to delete registry')
-    } finally {
-      setActionInProgress(false)
     }
   }
 
@@ -252,7 +230,7 @@ const Registries: React.FC = () => {
             Cancel
           </Button>
         </DialogClose>
-        {actionInProgress ? (
+        {createOrEditInProgress ? (
           <Button type="button" variant="default" disabled>
             {registryToEdit ? 'Editing...' : 'Adding...'}
           </Button>
@@ -369,9 +347,9 @@ const Registries: React.FC = () => {
                     handleDelete(registryToDelete)
                   }
                 }}
-                disabled={actionInProgress}
+                disabled={deleteInProgress}
               >
-                {actionInProgress ? 'Deleting...' : 'Delete'}
+                {deleteInProgress ? 'Deleting...' : 'Delete'}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -1525,10 +1525,11 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Stop sandbox
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [force] Force stop the sandbox using SIGKILL instead of SIGTERM
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        stopSandbox: async (sandboxIdOrName: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        stopSandbox: async (sandboxIdOrName: string, xDaytonaOrganizationID?: string, force?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'sandboxIdOrName' is not null or undefined
             assertParamExists('stopSandbox', 'sandboxIdOrName', sandboxIdOrName)
             const localVarPath = `/sandbox/{sandboxIdOrName}/stop`
@@ -1549,6 +1550,10 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication oauth2 required
+
+            if (force !== undefined) {
+                localVarQueryParameter['force'] = force;
+            }
 
 
     
@@ -2196,11 +2201,12 @@ export const SandboxApiFp = function(configuration?: Configuration) {
          * @summary Stop sandbox
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [force] Force stop the sandbox using SIGKILL instead of SIGTERM
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, options);
+        async stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, force?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, force, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SandboxApi.stopSandbox']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -2625,11 +2631,12 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
          * @summary Stop sandbox
          * @param {string} sandboxIdOrName ID or name of the sandbox
          * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+         * @param {boolean} [force] Force stop the sandbox using SIGKILL instead of SIGTERM
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
-            return localVarFp.stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
+        stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, force?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<Sandbox> {
+            return localVarFp.stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, force, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -3093,12 +3100,13 @@ export class SandboxApi extends BaseAPI {
      * @summary Stop sandbox
      * @param {string} sandboxIdOrName ID or name of the sandbox
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [force] Force stop the sandbox using SIGKILL instead of SIGTERM
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof SandboxApi
      */
-    public stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return SandboxApiFp(this.configuration).stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
+    public stopSandbox(sandboxIdOrName: string, xDaytonaOrganizationID?: string, force?: boolean, options?: RawAxiosRequestConfig) {
+        return SandboxApiFp(this.configuration).stopSandbox(sandboxIdOrName, xDaytonaOrganizationID, force, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

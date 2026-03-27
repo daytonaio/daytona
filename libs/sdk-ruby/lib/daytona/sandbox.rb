@@ -365,13 +365,14 @@ module Daytona
     # Stops the Sandbox and waits for it to be stopped.
     #
     # @param timeout [Numeric] Maximum wait time in seconds (defaults to 60 s).
+    # @param force [Boolean] If true, uses SIGKILL instead of SIGTERM (defaults to false).
     # @return [void]
-    def stop(timeout = DEFAULT_TIMEOUT) # rubocop:disable Metrics/MethodLength
+    def stop(timeout = DEFAULT_TIMEOUT, force: false) # rubocop:disable Metrics/MethodLength
       with_timeout(
         timeout:,
         message: "Sandbox #{id} failed to become stopped within the #{timeout} seconds timeout period",
         setup: proc {
-          sandbox_api.stop_sandbox(id)
+          sandbox_api.stop_sandbox(id, { force: force })
           refresh
         }
       ) do

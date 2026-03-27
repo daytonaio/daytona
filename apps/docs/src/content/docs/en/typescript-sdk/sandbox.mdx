@@ -779,7 +779,7 @@ console.log('Sandbox started successfully');
 #### stop()
 
 ```ts
-stop(timeout?: number): Promise<void>
+stop(timeout?: number, force?: boolean): Promise<void>
 ```
 
 Stops the Sandbox.
@@ -790,6 +790,7 @@ This method stops the Sandbox and waits for it to be fully stopped.
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
     Defaults to 60-second timeout.
+- `force?` _boolean = false_ - If true, uses SIGKILL instead of SIGTERM. Defaults to false.
 
 
 **Returns**:

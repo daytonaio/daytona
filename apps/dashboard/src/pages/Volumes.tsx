@@ -18,166 +18,161 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { VolumeTable } from '@/components/VolumeTable'
-import { useApi } from '@/hooks/useApi'
-import { useNotificationSocket } from '@/hooks/useNotificationSocket'
+import { useCreateVolumeMutation } from '@/hooks/mutations/useCreateVolumeMutation'
+import { useDeleteVolumeMutation } from '@/hooks/mutations/useDeleteVolumeMutation'
+import { queryKeys } from '@/hooks/queries/queryKeys'
+import { useVolumesQuery } from '@/hooks/queries/useVolumesQuery'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useVolumeWsSync } from '@/hooks/useVolumeWsSync'
+import { createBulkActionToast } from '@/lib/bulk-action-toast'
 import { handleApiError } from '@/lib/error-handling'
+import { pluralize } from '@/lib/utils'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 const Volumes: React.FC = () => {
-  const { volumeApi } = useApi()
-  const { notificationSocket } = useNotificationSocket()
-
-  const [volumes, setVolumes] = useState<VolumeDto[]>([])
-  const [loadingVolumes, setLoadingVolumes] = useState(true)
+  const queryClient = useQueryClient()
 
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newVolumeName, setNewVolumeName] = useState('')
-  const [loadingCreate, setLoadingCreate] = useState(false)
 
   const [volumeToDelete, setVolumeToDelete] = useState<VolumeDto | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [processingVolumeAction, setProcessingVolumeAction] = useState<Record<string, boolean>>({})
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+  useVolumeWsSync()
 
-  const fetchVolumes = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoadingVolumes(true)
-      }
-      try {
-        const volumes = (await volumeApi.listVolumes(selectedOrganization.id)).data
-        setVolumes(volumes)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch volumes')
-      } finally {
-        setLoadingVolumes(false)
-      }
+  const queryKey = useMemo(() => queryKeys.volumes.list(selectedOrganization?.id ?? ''), [selectedOrganization?.id])
+  const { data: volumes = [], isLoading: loadingVolumes, error: volumesError } = useVolumesQuery()
+  const createVolumeMutation = useCreateVolumeMutation()
+  const deleteVolumeMutation = useDeleteVolumeMutation({ invalidateOnSuccess: false })
+
+  useEffect(() => {
+    if (volumesError) {
+      handleApiError(volumesError, 'Failed to fetch volumes')
+    }
+  }, [volumesError])
+
+  const updateVolumeStateInCache = useCallback(
+    (volumeId: string, state: VolumeState) => {
+      queryClient.setQueriesData<VolumeDto[]>({ queryKey }, (previousVolumes) => {
+        if (!previousVolumes) return previousVolumes
+
+        return previousVolumes.map((volume) => (volume.id === volumeId ? { ...volume, state } : volume))
+      })
     },
-    [volumeApi, selectedOrganization],
+    [queryClient, queryKey],
   )
 
-  useEffect(() => {
-    fetchVolumes()
-  }, [fetchVolumes])
-
-  useEffect(() => {
-    const handleVolumeCreatedEvent = (volume: VolumeDto) => {
-      if (!volumes.some((v) => v.id === volume.id)) {
-        setVolumes((prev) => [volume, ...prev])
-      }
-    }
-
-    const handleVolumeStateUpdatedEvent = (data: {
-      volume: VolumeDto
-      oldState: VolumeState
-      newState: VolumeState
-    }) => {
-      if (data.newState === VolumeState.DELETED) {
-        setVolumes((prev) => prev.filter((v) => v.id !== data.volume.id))
-      } else if (!volumes.some((v) => v.id === data.volume.id)) {
-        setVolumes((prev) => [data.volume, ...prev])
-      } else {
-        setVolumes((prev) => prev.map((v) => (v.id === data.volume.id ? data.volume : v)))
-      }
-    }
-
-    const handleVolumeLastUsedAtUpdatedEvent = (volume: VolumeDto) => {
-      if (!volumes.some((v) => v.id === volume.id)) {
-        setVolumes((prev) => [volume, ...prev])
-      } else {
-        setVolumes((prev) => prev.map((v) => (v.id === volume.id ? volume : v)))
-      }
-    }
-
-    if (!notificationSocket) {
+  const handleCreate = async () => {
+    const volumeName = newVolumeName.trim()
+    if (!volumeName) {
+      toast.error('Volume name is required')
       return
     }
 
-    notificationSocket.on('volume.created', handleVolumeCreatedEvent)
-    notificationSocket.on('volume.state.updated', handleVolumeStateUpdatedEvent)
-    notificationSocket.on('volume.lastUsedAt.updated', handleVolumeLastUsedAtUpdatedEvent)
-
-    return () => {
-      notificationSocket.off('volume.created', handleVolumeCreatedEvent)
-      notificationSocket.off('volume.state.updated', handleVolumeStateUpdatedEvent)
-      notificationSocket.off('volume.lastUsedAt.updated', handleVolumeLastUsedAtUpdatedEvent)
-    }
-  }, [notificationSocket, volumes])
-
-  const handleCreate = async () => {
-    setLoadingCreate(true)
     try {
-      await volumeApi.createVolume(
-        {
-          name: newVolumeName,
+      await createVolumeMutation.mutateAsync({
+        volume: {
+          name: volumeName,
         },
-        selectedOrganization?.id,
-      )
+        organizationId: selectedOrganization?.id,
+      })
       setShowCreateDialog(false)
       setNewVolumeName('')
-      toast.success(`Creating volume ${newVolumeName}`)
+      toast.success(`Creating volume ${volumeName}`)
     } catch (error) {
       handleApiError(error, 'Failed to create volume')
-    } finally {
-      setLoadingCreate(false)
     }
   }
 
   const handleDelete = async (volume: VolumeDto) => {
     setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: true }))
 
-    // Optimistically update the volume state
-    setVolumes((prev) => prev.map((v) => (v.id === volume.id ? { ...v, state: VolumeState.PENDING_DELETE } : v)))
+    updateVolumeStateInCache(volume.id, VolumeState.PENDING_DELETE)
 
     try {
-      await volumeApi.deleteVolume(volume.id, selectedOrganization?.id)
+      await deleteVolumeMutation.mutateAsync({
+        volumeId: volume.id,
+        organizationId: selectedOrganization?.id,
+      })
+      if (selectedOrganization?.id) {
+        await queryClient.invalidateQueries({ queryKey })
+      }
       setVolumeToDelete(null)
       setShowDeleteDialog(false)
       toast.success(`Deleting volume ${volume.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete volume')
-      // Revert the optimistic update
-      setVolumes((prev) => prev.map((v) => (v.id === volume.id ? { ...v, state: volume.state } : v)))
+      updateVolumeStateInCache(volume.id, volume.state)
     } finally {
       setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: false }))
     }
   }
 
   const handleBulkDelete = async (volumes: VolumeDto[]) => {
-    setProcessingVolumeAction((prev) => ({ ...prev, ...volumes.reduce((acc, v) => ({ ...acc, [v.id]: true }), {}) }))
+    const previousStatesById = new Map(volumes.map((volume) => [volume.id, volume.state]))
+    let isCancelled = false
+    let processedCount = 0
+    let successCount = 0
+    let failureCount = 0
 
-    for (const volume of volumes) {
-      // Optimistically update the volume state
-      setVolumes((prev) => prev.map((v) => (v.id === volume.id ? { ...v, state: VolumeState.PENDING_DELETE } : v)))
+    const totalLabel = pluralize(volumes.length, 'volume', 'volumes')
+    const onCancel = () => {
+      isCancelled = true
+    }
 
-      try {
-        await volumeApi.deleteVolume(volume.id, selectedOrganization?.id)
-        toast.success(`Deleting volume ${volume.name}`)
-      } catch (error) {
-        handleApiError(error, 'Failed to delete volume')
+    const bulkToast = createBulkActionToast(`Deleting 0 of ${totalLabel}.`, {
+      action: { label: 'Cancel', onClick: onCancel },
+    })
 
-        // Revert the optimistic update
-        setVolumes((prev) => prev.map((v) => (v.id === volume.id ? { ...v, state: volume.state } : v)))
+    try {
+      for (const volume of volumes) {
+        if (isCancelled) break
 
-        // Wait for user decision
-        const shouldContinue = window.confirm(
-          `Failed to delete volume ${volume.name}. Do you want to continue with the remaining volumes?`,
-        )
+        processedCount += 1
+        bulkToast.loading(`Deleting ${processedCount} of ${totalLabel}.`, {
+          action: { label: 'Cancel', onClick: onCancel },
+        })
 
-        if (!shouldContinue) {
-          break
+        setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: true }))
+        updateVolumeStateInCache(volume.id, VolumeState.PENDING_DELETE)
+
+        try {
+          await deleteVolumeMutation.mutateAsync({
+            volumeId: volume.id,
+            organizationId: selectedOrganization?.id,
+          })
+          successCount += 1
+        } catch (error) {
+          failureCount += 1
+          updateVolumeStateInCache(volume.id, previousStatesById.get(volume.id) ?? volume.state)
+          console.error('Deleting volume failed', volume.id, error)
+        } finally {
+          setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: false }))
         }
-      } finally {
-        setProcessingVolumeAction((prev) => ({ ...prev, [volume.id]: false }))
       }
+
+      if (selectedOrganization?.id) {
+        await queryClient.invalidateQueries({ queryKey })
+      }
+
+      bulkToast.result(
+        { successCount, failureCount },
+        {
+          successTitle: `${pluralize(volumes.length, 'Volume', 'Volumes')} deleted.`,
+          errorTitle: `Failed to delete ${pluralize(volumes.length, 'volume', 'volumes')}.`,
+          warningTitle: 'Failed to delete some volumes.',
+          canceledTitle: 'Delete canceled.',
+        },
+      )
+    } catch (error) {
+      console.error('Deleting volumes failed', error)
+      bulkToast.error('Deleting volumes failed.')
     }
   }
 
@@ -237,7 +232,7 @@ const Volumes: React.FC = () => {
                   Cancel
                 </Button>
               </DialogClose>
-              {loadingCreate ? (
+              {createVolumeMutation.isPending ? (
                 <Button type="button" size="sm" variant="default" disabled>
                   Creating...
                 </Button>
@@ -247,7 +242,7 @@ const Volumes: React.FC = () => {
                   size="sm"
                   form="create-volume-form"
                   variant="default"
-                  disabled={!newVolumeName.trim()}
+                  disabled={!newVolumeName.trim() || createVolumeMutation.isPending}
                 >
                   Create
                 </Button>
@@ -262,6 +257,7 @@ const Volumes: React.FC = () => {
           data={volumes}
           loading={loadingVolumes}
           processingVolumeAction={processingVolumeAction}
+          onCreateVolume={() => setShowCreateDialog(true)}
           onDelete={(volume) => {
             setVolumeToDelete(volume)
             setShowDeleteDialog(true)
