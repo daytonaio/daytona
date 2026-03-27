@@ -109,6 +109,51 @@ func TestExecuteSyncCommandGetsEOFOnStdin(t *testing.T) {
 	}
 }
 
+func TestExecuteSyncHeredoc(t *testing.T) {
+	svc := newTestSessionService(t)
+	const sessionID = "heredoc-test"
+
+	if err := svc.Create(sessionID, false); err != nil {
+		t.Fatalf("create session: %v", err)
+	}
+	t.Cleanup(func() {
+		_ = svc.Delete(context.Background(), sessionID)
+	})
+
+	resultCh := make(chan *SessionExecute, 1)
+	errCh := make(chan error, 1)
+
+	go func() {
+		result, err := svc.Execute(
+			sessionID,
+			"",
+			"cat <<'__EOF__'\nhello from heredoc\n__EOF__",
+			false,
+			true,
+			true,
+		)
+		if err != nil {
+			errCh <- err
+			return
+		}
+		resultCh <- result
+	}()
+
+	select {
+	case err := <-errCh:
+		t.Fatalf("execute heredoc command: %v", err)
+	case result := <-resultCh:
+		if result.ExitCode == nil || *result.ExitCode != 0 {
+			t.Fatalf("expected exit code 0, got %#v", result.ExitCode)
+		}
+		if result.Output == nil || !strings.Contains(*result.Output, "hello from heredoc") {
+			t.Fatalf("expected heredoc output, got %#v", result.Output)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("heredoc command hung")
+	}
+}
+
 func TestExecuteAsyncCommandStillAcceptsInput(t *testing.T) {
 	svc := newTestSessionService(t)
 	const sessionID = "async-stdin"
