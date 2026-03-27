@@ -1077,7 +1077,7 @@ const docTemplate = `{
         },
         "/files/bulk-download": {
             "post": {
-                "description": "Download multiple files by providing their paths. Successful files are returned as multipart parts named \"file\". Per-file failures are returned as multipart parts named \"error\" with JSON payloads shaped like ErrorResponse.",
+                "description": "Download multiple files by providing their paths. Successful files are returned as multipart parts named ` + "`" + `file` + "`" + `. Per-file failures are returned as multipart parts named ` + "`" + `error` + "`" + ` with JSON payloads shaped like ErrorResponse.",
                 "consumes": [
                     "application/json"
                 ],
