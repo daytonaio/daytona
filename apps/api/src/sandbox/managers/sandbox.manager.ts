@@ -8,6 +8,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, IsNull, MoreThanOrEqual, Not, Raw } from 'typeorm'
 import { randomUUID } from 'crypto'
 
+import { SandboxConflictError } from '../errors/sandbox-conflict.error'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -855,6 +856,13 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
           }
         } catch (error) {
+          if (error instanceof SandboxConflictError) {
+            this.logger.warn(
+              `Sandbox ${sandboxId} was modified by another operation during sync, skipping error transition`,
+            )
+            break
+          }
+
           this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
           const { recoverable, errorReason } = sanitizeSandboxError(error)
