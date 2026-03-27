@@ -122,6 +122,9 @@ func run() int {
 				allowedDomains = append(allowedDomains, d)
 			}
 		}
+		if len(allowedDomains) == 0 {
+			logger.Warn("NETWORK_ALLOWED_DOMAINS is set but no valid domains were parsed; check for misconfiguration", "value", cfg.NetworkAllowedDomains)
+		}
 	}
 	allowedCIDRs := netrules.ResolveDomainsToCIDRs(allowedDomains, logger)
 	if len(allowedCIDRs) > 0 {
