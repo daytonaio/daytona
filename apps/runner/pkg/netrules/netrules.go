@@ -64,8 +64,9 @@ func (manager *NetRulesManager) Start() error {
 }
 
 // ensureAllowedChain creates (or replaces) the shared DAYTONA-ALLOWED chain
-// that holds always-allowed domain CIDRs. Per-sandbox chains jump here via
-// -g (goto) so that a RETURN propagates back to DOCKER-USER.
+// that holds always-allowed CIDRs. Per-sandbox chains jump here via -j; the
+// shared chain uses ACCEPT so matching packets are allowed immediately, while
+// unmatched packets return to the sandbox chain and hit its DROP rule.
 func (manager *NetRulesManager) ensureAllowedChain() error {
 	if len(manager.allowedCIDRs) == 0 {
 		return nil
