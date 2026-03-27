@@ -30,6 +30,11 @@ find "$MODELS_DIR" -type f -name "*.py" | while read -r f; do
   sed -i'' -E '/Field\(/ s/alias="([^"]+)"/serialization_alias="\1"/g' "$f"
 done
 
+# Remove hardcoded 300s HTTP timeout fallback from async REST clients
+# so that timeout=None means no timeout, matching TypeScript SDK behavior.
+# Server-side already handles stale connections.
+sed -i 's/timeout = _request_timeout or 5 \* 60/timeout = _request_timeout/' "$pkg_root/rest.py"
+
 echo "Postprocessed Python client at $PROJECT_ROOT"
 
 
