@@ -12,7 +12,7 @@ import {
   Logger,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not, In, Raw, ILike, Like, LessThan, FindOptionsWhere } from 'typeorm'
+import { Repository, Not, In, Raw, ILike, IsNull, FindOptionsWhere, Like, LessThan } from 'typeorm'
 import { v4 as uuidv4, validate as isUUID } from 'uuid'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -298,8 +298,21 @@ export class SnapshotService {
       const exists = await this.readySnapshotRunnerExists(snapshot.ref, regionId)
 
       if (exists) {
-        snapshot.state = SnapshotState.ACTIVE
-        snapshot.lastUsedAt = new Date()
+        const existingSnapshot = await this.snapshotRepository.findOne({
+          where: { ref: snapshot.ref, size: Not(IsNull()) },
+          select: ['id', 'size'],
+        })
+
+        if (existingSnapshot?.size != null) {
+          if (existingSnapshot.size > organization.maxSnapshotSize) {
+            throw new BadRequestException(
+              `Snapshot size (${existingSnapshot.size.toFixed(2)}GB) exceeds maximum allowed size of ${organization.maxSnapshotSize}GB`,
+            )
+          }
+          snapshot.size = existingSnapshot.size
+          snapshot.state = SnapshotState.ACTIVE
+          snapshot.lastUsedAt = new Date()
+        }
       }
 
       try {
