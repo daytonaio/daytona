@@ -87,7 +87,7 @@ func (manager *NetRulesManager) ensureAllowedChain() error {
 	}
 
 	for _, cidr := range manager.allowedCIDRs {
-		if err := manager.ipt.AppendUnique("filter", AllowedChainName, "-j", "RETURN", "-d", cidr.String(), "-p", "all"); err != nil {
+		if err := manager.ipt.AppendUnique("filter", AllowedChainName, "-j", "ACCEPT", "-d", cidr.String(), "-p", "all"); err != nil {
 			return err
 		}
 	}
