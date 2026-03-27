@@ -23,12 +23,13 @@ export const baseDataSourceOptions: DataSourceOptions = {
   namingStrategy: new CustomNamingStrategy(),
   entities: [join(__dirname, '../**/*.entity.ts')],
   entitySkipConstructor: true,
-  ssl: process.env.DB_TLS_ENABLED === 'true',
-  extra: {
-    ssl: {
-      rejectUnauthorized: process.env.DB_TLS_REJECT_UNAUTHORIZED !== 'false',
-    },
-  },
+  ssl:
+    process.env.DB_TLS_ENABLED === 'true'
+      ? {
+          rejectUnauthorized: process.env.DB_TLS_REJECT_UNAUTHORIZED !== 'false',
+        }
+      : false,
+  extra: {},
 }
 
 const AppDataSource = new DataSource({
