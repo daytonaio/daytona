@@ -113,6 +113,9 @@ export class JobStateHandlerService {
         )
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           updateData.daemonVersion = metadata.daemonVersion
@@ -155,6 +158,9 @@ export class JobStateHandlerService {
         this.logger.debug(`START_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STARTED`)
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
         const metadata = job.getResultMetadata()
         if (metadata?.daemonVersion && typeof metadata.daemonVersion === 'string') {
           updateData.daemonVersion = metadata.daemonVersion
@@ -443,6 +449,9 @@ export class JobStateHandlerService {
         )
         updateData.state = SandboxState.STARTED
         updateData.errorReason = null
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
+          Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
+        }
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`RECOVER_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR
