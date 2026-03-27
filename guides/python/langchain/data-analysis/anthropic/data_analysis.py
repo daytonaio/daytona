@@ -5,13 +5,14 @@
 
 import base64
 
-from daytona import ExecutionArtifacts
 from dotenv import load_dotenv
 from langchain.agents import create_agent  # pylint: disable=import-error
 from langchain_anthropic import ChatAnthropic  # pylint: disable=import-error
 
 # pylint: disable=import-error
 from langchain_daytona_data_analysis import DaytonaDataAnalysisTool
+
+from daytona import ExecutionArtifacts
 
 load_dotenv()
 

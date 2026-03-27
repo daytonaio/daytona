@@ -5,10 +5,10 @@ import base64
 import re
 from pathlib import Path
 
-from daytona import CreateSandboxFromSnapshotParams, Daytona
-
 # pylint: disable=import-error
 from litellm import completion  # pylint: disable=import-error
+
+from daytona import CreateSandboxFromSnapshotParams, Daytona
 
 CODING_MODEL = "anthropic/claude-sonnet-4-0"
 SUMMARY_MODEL = "anthropic/claude-haiku-4-5"
