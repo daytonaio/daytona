@@ -5,7 +5,7 @@
 
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, LessThan, EntityManager } from 'typeorm'
+import { Repository, LessThan, In, EntityManager } from 'typeorm'
 import { Job } from '../entities/job.entity'
 import { JobDto, JobStatus, JobType, ResourceType } from '../dto/job.dto'
 import { ResourceTypeForJobType } from '../dto/job-type-map.dto'
@@ -17,6 +17,17 @@ import { propagation, context as otelContext } from '@opentelemetry/api'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
 
 const REDIS_BLOCKING_COMMAND_TIMEOUT_BUFFER_MS = 3_000
+
+const DEFAULT_STALE_TIMEOUT_MINUTES = 10
+
+/**
+ * Per-job-type stale timeout overrides in minutes.
+ * Jobs not listed here use DEFAULT_STALE_TIMEOUT_MINUTES.
+ */
+const JOB_STALE_TIMEOUT_MINUTES: Partial<Record<JobType, number>> = {
+  [JobType.BUILD_SNAPSHOT]: 120,
+  [JobType.PULL_SNAPSHOT]: 120,
+}
 
 @Injectable()
 export class JobService {
@@ -382,41 +393,53 @@ export class JobService {
   /**
    * Cron job to check for stale jobs and mark them as failed
    * Runs every minute to find jobs that have been IN_PROGRESS for too long
+   * Different job types can have different timeout thresholds (see JOB_STALE_TIMEOUT_MINUTES)
    */
   @Cron(CronExpression.EVERY_MINUTE)
   async handleStaleJobs(): Promise<void> {
-    const staleThresholdMinutes = 10
-    const staleThreshold = new Date(Date.now() - staleThresholdMinutes * 60 * 1000)
-
     try {
-      // Find jobs that are IN_PROGRESS but haven't been updated in the threshold time
-      const staleJobs = await this.jobRepository.find({
-        where: {
-          status: JobStatus.IN_PROGRESS,
-          updatedAt: LessThan(staleThreshold),
-        },
-      })
+      // Group job types by their timeout value to minimize queries
+      const timeoutGroups = new Map<number, JobType[]>()
 
-      if (staleJobs.length === 0) {
-        return
+      for (const jobType of Object.values(JobType)) {
+        const timeout = JOB_STALE_TIMEOUT_MINUTES[jobType] ?? DEFAULT_STALE_TIMEOUT_MINUTES
+        const group = timeoutGroups.get(timeout) ?? []
+        group.push(jobType)
+        timeoutGroups.set(timeout, group)
       }
 
-      this.logger.warn(`Found ${staleJobs.length} stale jobs, marking as failed`)
+      for (const [timeoutMinutes, jobTypes] of timeoutGroups) {
+        const threshold = new Date(Date.now() - timeoutMinutes * 60 * 1000)
 
-      // Mark each stale job as failed with timeout error
-      for (const job of staleJobs) {
-        try {
-          await this.updateJobStatus(
-            job.id,
-            JobStatus.FAILED,
-            `Job timed out - no update received for ${staleThresholdMinutes} minutes`,
-          )
+        const staleJobs = await this.jobRepository.find({
+          where: {
+            status: JobStatus.IN_PROGRESS,
+            type: In(jobTypes),
+            updatedAt: LessThan(threshold),
+          },
+          take: 500,
+        })
 
-          this.logger.warn(
-            `Marked job ${job.id} (type: ${job.type}, resource: ${job.resourceType} ${job.resourceId}) as failed due to timeout`,
-          )
-        } catch (error) {
-          this.logger.error(`Error marking job ${job.id} as failed: ${error.message}`, error.stack)
+        if (staleJobs.length === 0) {
+          continue
+        }
+
+        this.logger.warn(`Found ${staleJobs.length} stale jobs for timeout ${timeoutMinutes}m, marking as failed`)
+
+        for (const job of staleJobs) {
+          try {
+            await this.updateJobStatus(
+              job.id,
+              JobStatus.FAILED,
+              `Job timed out - no update received for ${timeoutMinutes} minutes`,
+            )
+
+            this.logger.warn(
+              `Marked job ${job.id} (type: ${job.type}, resource: ${job.resourceType} ${job.resourceId}) as failed due to timeout`,
+            )
+          } catch (error) {
+            this.logger.error(`Error marking job ${job.id} as failed: ${error.message}`, error.stack)
+          }
         }
       }
     } catch (error) {
