@@ -75,10 +75,11 @@ func ResolveDomainsToCIDRs(domains []string, logger *slog.Logger) []*net.IPNet {
 				continue
 			}
 
-			if seen[ipStr] {
+			ip4Str := ip4.String()
+			if seen[ip4Str] {
 				continue
 			}
-			seen[ipStr] = true
+			seen[ip4Str] = true
 
 			cidrs = append(cidrs, &net.IPNet{
 				IP:   ip4,
