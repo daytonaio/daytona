@@ -893,87 +893,115 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   async handleSnapshotStatePending(snapshot: Snapshot): Promise<SyncState> {
-    let initialRunner: Runner | undefined = undefined
+    const pendingKey =
+      snapshot.buildInfo && snapshot.organizationId ? `org-build-pending:${snapshot.organizationId}` : undefined
+    let buildSlotReserved = false
 
-    if (!snapshot.initialRunnerId) {
-      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
-      const excludedRunnerIds = snapshot.buildInfo
-        ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
-        : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
+    try {
+      if (pendingKey) {
+        const pendingCount = await this.redis.incr(pendingKey)
+        await this.redis.expire(pendingKey, 7200)
+        buildSlotReserved = true
 
-      try {
-        const regions = await this.snapshotService.getSnapshotRegions(snapshot.id)
-        if (!regions.length) {
-          throw new Error('No regions found for snapshot')
+        const org = await this.organizationService.findOne(snapshot.organizationId)
+        const maxBuilds = org?.maxConcurrentBuilds ?? 100
+        const activeBuilds = await this.runnerService.getOrgActiveBuildCount(snapshot.organizationId)
+        if (activeBuilds + pendingCount > maxBuilds) {
+          this.logger.debug(
+            `Org ${snapshot.organizationId} has ${activeBuilds} active + ${pendingCount} pending / ${maxBuilds} max concurrent builds, deferring snapshot ${snapshot.id}`,
+          )
+          return DONT_SYNC_AGAIN
         }
-
-        initialRunner = await this.runnerService.getRandomAvailableRunner({
-          regions: regions.map((region) => region.id),
-          excludedRunnerIds: excludedRunnerIds,
-        })
-      } catch (error) {
-        this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)
       }
 
-      if (!initialRunner) {
-        // No runners available, retry later
-        return DONT_SYNC_AGAIN
-      }
+      let initialRunner: Runner | undefined = undefined
 
-      snapshot.initialRunnerId = initialRunner.id
-      await this.snapshotRepository.save(snapshot)
-    } else {
-      initialRunner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
-    }
+      if (!snapshot.initialRunnerId) {
+        // TODO: get only runners where the base snapshot is available (extract from buildInfo)
+        const excludedRunnerIds = snapshot.buildInfo
+          ? await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
+          : await this.runnerService.getRunnersWithMultipleSnapshotsPulling()
 
-    if (snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
-      await this.runnerService.createSnapshotRunnerEntry(
-        initialRunner.id,
-        snapshot.buildInfo.snapshotRef,
-        SnapshotRunnerState.BUILDING_SNAPSHOT,
-      )
-      await this.processBuildOnRunner(snapshot, initialRunner)
-    } else {
-      if (!snapshot.ref) {
-        const runnerAdapter = await this.runnerAdapterFactory.create(initialRunner)
-        const registry = await this.dockerRegistryService.findRegistryByImageName(
-          snapshot.imageName,
-          initialRunner.region,
-          snapshot.organizationId,
-        )
+        try {
+          const regions = await this.snapshotService.getSnapshotRegions(snapshot.id)
+          if (!regions.length) {
+            throw new Error('No regions found for snapshot')
+          }
 
-        const image = parseDockerImage(snapshot.imageName)
-        if (registry && !image.registry) {
-          image.registry = registry.url.replace(/^(https?:\/\/)/, '')
-        }
-        const imageName = image.getFullName()
-
-        const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(initialRunner.region)
-        if (!internalRegistry) {
-          throw new Error('No internal registry found for snapshot')
+          initialRunner = await this.runnerService.getRandomAvailableRunner({
+            regions: regions.map((region) => region.id),
+            excludedRunnerIds: excludedRunnerIds,
+          })
+        } catch (error) {
+          this.logger.warn(`Failed to get initial runner: ${fromAxiosError(error)}`)
         }
 
-        const snapshotDigestResponse = await runnerAdapter.inspectSnapshotInRegistry(imageName, registry)
-        await this.processSnapshotDigest(
-          snapshot,
-          internalRegistry,
-          snapshotDigestResponse.hash,
-          snapshotDigestResponse.sizeGB,
-        )
+        if (!initialRunner) {
+          // No runners available, retry later
+          return DONT_SYNC_AGAIN
+        }
+
+        snapshot.initialRunnerId = initialRunner.id
         await this.snapshotRepository.save(snapshot)
+      } else {
+        initialRunner = await this.runnerService.findOneOrFail(snapshot.initialRunnerId)
       }
 
-      await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
-      await this.runnerService.createSnapshotRunnerEntry(
-        initialRunner.id,
-        snapshot.ref,
-        SnapshotRunnerState.PULLING_SNAPSHOT,
-      )
-      await this.processPullOnInitialRunner(snapshot, initialRunner)
-    }
+      if (snapshot.buildInfo) {
+        await this.updateSnapshotState(snapshot.id, SnapshotState.BUILDING)
+        await this.runnerService.createSnapshotRunnerEntry(
+          initialRunner.id,
+          snapshot.buildInfo.snapshotRef,
+          SnapshotRunnerState.BUILDING_SNAPSHOT,
+        )
+        buildSlotReserved = false
+        await this.redis.decr(pendingKey)
+        await this.processBuildOnRunner(snapshot, initialRunner)
+      } else {
+        if (!snapshot.ref) {
+          const runnerAdapter = await this.runnerAdapterFactory.create(initialRunner)
+          const registry = await this.dockerRegistryService.findRegistryByImageName(
+            snapshot.imageName,
+            initialRunner.region,
+            snapshot.organizationId,
+          )
 
-    return SYNC_AGAIN
+          const image = parseDockerImage(snapshot.imageName)
+          if (registry && !image.registry) {
+            image.registry = registry.url.replace(/^(https?:\/\/)/, '')
+          }
+          const imageName = image.getFullName()
+
+          const internalRegistry = await this.dockerRegistryService.getAvailableInternalRegistry(initialRunner.region)
+          if (!internalRegistry) {
+            throw new Error('No internal registry found for snapshot')
+          }
+
+          const snapshotDigestResponse = await runnerAdapter.inspectSnapshotInRegistry(imageName, registry)
+          await this.processSnapshotDigest(
+            snapshot,
+            internalRegistry,
+            snapshotDigestResponse.hash,
+            snapshotDigestResponse.sizeGB,
+          )
+          await this.snapshotRepository.save(snapshot)
+        }
+
+        await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
+        await this.runnerService.createSnapshotRunnerEntry(
+          initialRunner.id,
+          snapshot.ref,
+          SnapshotRunnerState.PULLING_SNAPSHOT,
+        )
+        await this.processPullOnInitialRunner(snapshot, initialRunner)
+      }
+
+      return SYNC_AGAIN
+    } finally {
+      if (buildSlotReserved && pendingKey) {
+        await this.redis.decr(pendingKey)
+      }
+    }
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
