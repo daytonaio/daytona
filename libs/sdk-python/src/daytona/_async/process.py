@@ -378,7 +378,7 @@ class AsyncProcess:
         response = await self._api_client.session_execute_command(
             session_id=session_id,
             request=req,
-            _request_timeout=http_timeout(timeout),
+            _request_timeout=http_timeout(timeout + 5 if timeout else timeout),
         )
 
         stdout, stderr = demux_log(response.output.encode("utf-8", "ignore") if response.output else b"")
