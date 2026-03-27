@@ -396,6 +396,8 @@ func (c *Client) doCreate(ctx context.Context, params any, opts ...func(*options
 	var resources *types.Resources
 
 	switch p := params.(type) {
+	case types.SandboxBaseParams:
+		baseParams = p
 	case types.SnapshotParams:
 		baseParams = p.SandboxBaseParams
 		snapshot = p.Snapshot
