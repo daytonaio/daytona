@@ -137,11 +137,13 @@ class AsyncFileSystem:
 
     @intercept_errors(message_prefix="Failed to download file: ")
     @with_instrumentation()
-    async def download_file(self, *args: str) -> bytes | None:  # pyright: ignore[reportInconsistentOverload]
-        if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
-            remote_path = args[0]
-            timeout = int(args[1]) if len(args) == 2 else 30 * 60
-            response = (await self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout))[0]
+    async def download_file(  # pyright: ignore[reportInconsistentOverload]
+        self, remote_path: str, local_path: str | None = None, timeout: int = 30 * 60
+    ) -> bytes | None:
+        if local_path is None:
+            response = (
+                await self.download_files([FileDownloadRequest(source=remote_path)], timeout=timeout)
+            )[0]
             if response.error:
                 raise DaytonaError(response.error)
             result = response.result
@@ -149,9 +151,6 @@ class AsyncFileSystem:
                 result = result.encode("utf-8")
             return result
 
-        remote_path = args[0]
-        local_path = args[1]
-        timeout = int(args[2]) if len(args) == 3 else 30 * 60
         response = (
             await self.download_files(
                 [FileDownloadRequest(source=remote_path, destination=local_path)], timeout=timeout
@@ -630,14 +629,14 @@ class AsyncFileSystem:
         )
 
     @overload
-    async def upload_file(self, file: bytes, remote_path: str, timeout: int = 30 * 60) -> None:
+    async def upload_file(self, src: bytes, dst: str, timeout: int = 30 * 60) -> None:
         """Uploads a file to the specified path in the Sandbox. If a file already exists at
         the destination path, it will be overwritten. This method is useful when you want to upload
         small files that fit into memory.
 
         Args:
-            file (bytes): File contents as a bytes object.
-            remote_path (str): Path to the destination file. Relative paths are resolved based on
+            src (bytes): File contents as a bytes object.
+            dst (str): Path to the destination file. Relative paths are resolved based on
             the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
@@ -661,15 +660,15 @@ class AsyncFileSystem:
         """
 
     @overload
-    async def upload_file(self, local_path: str, remote_path: str, timeout: int = 30 * 60) -> None:
+    async def upload_file(self, src: str, dst: str, timeout: int = 30 * 60) -> None:
         """Uploads a file from the local file system to the specified path in the Sandbox.
         If a file already exists at the destination path, it will be overwritten. This method uses
         streaming to upload the file, so it is useful when you want to upload larger files that may
         not fit into memory.
 
         Args:
-            local_path (str): Path to the local file to upload.
-            remote_path (str): Path to the destination file in the Sandbox. Relative paths are
+            src (str): Path to the local file to upload.
+            dst (str): Path to the destination file in the Sandbox. Relative paths are
             resolved based on the sandbox working directory.
             timeout (int): Timeout for the upload operation in seconds. 0 means no timeout. Default is 30 minutes.
 
