@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -113,22 +112,14 @@ func run() int {
 		return 2
 	}
 
-	// Resolve allowed domains for network rules
-	var allowedDomains []string
-	if cfg.NetworkAllowedDomains != "" {
-		for _, d := range strings.Split(cfg.NetworkAllowedDomains, ",") {
-			d = strings.TrimSpace(d)
-			if d != "" {
-				allowedDomains = append(allowedDomains, d)
-			}
-		}
-		if len(allowedDomains) == 0 {
-			logger.Warn("NETWORK_ALLOWED_DOMAINS is set but no valid domains were parsed; check for misconfiguration", "value", cfg.NetworkAllowedDomains)
-		}
+	// Parse allowed CIDRs for network rules
+	allowedCIDRs, err := netrules.ParseCIDRList(cfg.NetworkAllowedCIDRs)
+	if err != nil {
+		logger.Error("Failed to parse NETWORK_ALLOWED_CIDRS", "error", err)
+		return 2
 	}
-	allowedCIDRs := netrules.ResolveDomainsToCIDRs(allowedDomains, logger)
 	if len(allowedCIDRs) > 0 {
-		logger.Info("Resolved allowed domains for network rules", "domains", allowedDomains, "cidrs", allowedCIDRs)
+		logger.Info("Loaded allowed CIDRs for network rules", "cidrs", allowedCIDRs)
 	}
 
 	// Initialize net rules manager

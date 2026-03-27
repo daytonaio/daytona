@@ -5,7 +5,6 @@ package netrules
 
 import (
 	"fmt"
-	"log/slog"
 	"net"
 	"strings"
 )
@@ -52,45 +51,10 @@ func ParseRuleArguments(rule string) ([]string, error) {
 	return nil, fmt.Errorf("invalid rule format: %s", rule)
 }
 
-// ResolveDomainsToCIDRs resolves a list of domain names to /32 CIDRs.
-// Logs a warning for domains that fail to resolve but does not return an error.
-func ResolveDomainsToCIDRs(domains []string, logger *slog.Logger) []*net.IPNet {
-	seen := make(map[string]bool)
-	var cidrs []*net.IPNet
-
-	for _, domain := range domains {
-		ips, err := net.LookupHost(domain)
-		if err != nil {
-			logger.Warn("Failed to resolve allowed domain", "domain", domain, "error", err)
-			continue
-		}
-
-		for _, ipStr := range ips {
-			ip := net.ParseIP(ipStr)
-			if ip == nil {
-				continue
-			}
-
-			// Only use IPv4 addresses (iptables manager uses ProtocolIPv4)
-			ip4 := ip.To4()
-			if ip4 == nil {
-				continue
-			}
-
-			ip4Str := ip4.String()
-			if seen[ip4Str] {
-				continue
-			}
-			seen[ip4Str] = true
-
-			cidrs = append(cidrs, &net.IPNet{
-				IP:   ip4,
-				Mask: net.CIDRMask(32, 32),
-			})
-		}
-	}
-
-	return cidrs
+// ParseCIDRList parses a comma-separated list of CIDR networks.
+// Returns nil with no error when the input is empty.
+func ParseCIDRList(networks string) ([]*net.IPNet, error) {
+	return parseCidrNetworks(networks)
 }
 
 // formatChainName adds the DAYTONA-SB- prefix to a chain name if it doesn't already have it
