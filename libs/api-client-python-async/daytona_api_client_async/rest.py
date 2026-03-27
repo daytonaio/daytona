@@ -126,7 +126,7 @@ class RESTClientObject:
         post_params = post_params or {}
         headers = headers or {}
         # url already contains the URL query string
-        timeout = _request_timeout or 5 * 60
+        timeout = _request_timeout
 
         if 'Content-Type' not in headers:
             headers['Content-Type'] = 'application/json'
