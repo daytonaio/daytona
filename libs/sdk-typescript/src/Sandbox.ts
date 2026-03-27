@@ -19,6 +19,7 @@ import {
   ResizeSandbox,
 } from '@daytonaio/api-client'
 import { Resources } from './Daytona'
+import { DaytonaEnvReader } from './utils/Runtime'
 import {
   FileSystemApi,
   GitApi,
@@ -141,7 +142,7 @@ export class Sandbox implements SandboxDto {
     this.processSandboxDto(sandboxDto)
 
     // Set the toolbox base URL
-    let baseUrl = this.toolboxProxyUrl
+    let baseUrl = DaytonaEnvReader.get('DAYTONA_TOOLBOX_PROXY_URL') || this.toolboxProxyUrl
     if (!baseUrl.endsWith('/')) {
       baseUrl += '/'
     }

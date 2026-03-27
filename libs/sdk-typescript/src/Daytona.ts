@@ -24,7 +24,7 @@ import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
 import { processStreamingResponse } from './utils/Stream'
-import { DaytonaEnvReader, RUNTIME, Runtime } from './utils/Runtime'
+import { DaytonaEnvReader } from './utils/Runtime'
 import { WithInstrumentation } from './utils/otel.decorator'
 import { context, trace, propagation, SpanStatusCode } from '@opentelemetry/api'
 import { NodeSDK } from '@opentelemetry/sdk-node'
@@ -247,31 +247,20 @@ export class Daytona implements AsyncDisposable {
       this.target = config?.target
     }
 
-    let _envReader: DaytonaEnvReader | null | undefined
-    const envReader = (): DaytonaEnvReader | null => {
-      if (_envReader === undefined) {
-        _envReader = RUNTIME !== Runtime.BROWSER ? new DaytonaEnvReader() : null
-      }
-      return _envReader
-    }
-
     if (
       !config ||
       (!(this.apiKey && apiUrl && this.target) && !(this.jwtToken && this.organizationId && apiUrl && this.target))
     ) {
-      const reader = envReader()
-      if (reader) {
-        this.apiKey = this.apiKey || (this.jwtToken ? undefined : reader.get('DAYTONA_API_KEY'))
-        this.jwtToken = this.jwtToken || reader.get('DAYTONA_JWT_TOKEN')
-        this.organizationId = this.organizationId || reader.get('DAYTONA_ORGANIZATION_ID')
-        apiUrl = apiUrl || reader.get('DAYTONA_API_URL') || reader.get('DAYTONA_SERVER_URL')
-        this.target = this.target || reader.get('DAYTONA_TARGET')
+      this.apiKey = this.apiKey || (this.jwtToken ? undefined : DaytonaEnvReader.get('DAYTONA_API_KEY'))
+      this.jwtToken = this.jwtToken || DaytonaEnvReader.get('DAYTONA_JWT_TOKEN')
+      this.organizationId = this.organizationId || DaytonaEnvReader.get('DAYTONA_ORGANIZATION_ID')
+      apiUrl = apiUrl || DaytonaEnvReader.get('DAYTONA_API_URL') || DaytonaEnvReader.get('DAYTONA_SERVER_URL')
+      this.target = this.target || DaytonaEnvReader.get('DAYTONA_TARGET')
 
-        if (reader.get('DAYTONA_SERVER_URL') && !reader.get('DAYTONA_API_URL')) {
-          console.warn(
-            '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
-          )
-        }
+      if (DaytonaEnvReader.get('DAYTONA_SERVER_URL') && !DaytonaEnvReader.get('DAYTONA_API_URL')) {
+        console.warn(
+          '[Deprecation Warning] Environment variable `DAYTONA_SERVER_URL` is deprecated and will be removed in future versions. Use `DAYTONA_API_URL` instead.',
+        )
       }
     }
 
@@ -311,7 +300,7 @@ export class Daytona implements AsyncDisposable {
     )
     this.clientConfig = configuration
 
-    if (!config?._experimental?.otelEnabled && envReader()?.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') !== 'true') {
+    if (!config?._experimental?.otelEnabled && DaytonaEnvReader.get('DAYTONA_EXPERIMENTAL_OTEL_ENABLED') !== 'true') {
       return
     }
 

@@ -64,6 +64,19 @@ export function getEnvVar(name: string): string | undefined {
 }
 
 export class DaytonaEnvReader {
+  private static _instance: DaytonaEnvReader | null | undefined
+
+  private static getInstance(): DaytonaEnvReader | null {
+    if (DaytonaEnvReader._instance === undefined) {
+      DaytonaEnvReader._instance = RUNTIME !== Runtime.BROWSER ? new DaytonaEnvReader() : null
+    }
+    return DaytonaEnvReader._instance
+  }
+
+  static get(name: string): string | undefined {
+    return DaytonaEnvReader.getInstance()?.getVar(name)
+  }
+
   private readonly envLocalVars: Record<string, string>
   private readonly envVars: Record<string, string>
 
@@ -72,7 +85,7 @@ export class DaytonaEnvReader {
     this.envVars = DaytonaEnvReader.parseFileVars('.env')
   }
 
-  get(name: string): string | undefined {
+  private getVar(name: string): string | undefined {
     if (!name.startsWith('DAYTONA_')) {
       throw new Error(`DaytonaEnvReader: variable name must start with 'DAYTONA_', got '${name}'`)
     }
