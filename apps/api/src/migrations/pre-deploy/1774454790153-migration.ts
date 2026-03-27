@@ -58,14 +58,15 @@ export class Migration1774454790153 implements MigrationInterface {
       FOR EACH ROW EXECUTE FUNCTION sync_sandbox_last_activity();
     `)
 
-    // Re-sync any rows that changed during the window between initial copy and trigger creation
+    // Re-sync any rows that were created or changed during the window between initial copy and trigger creation
     await queryRunner.query(`
-      UPDATE "sandbox_last_activity" sla
-      SET "lastActivityAt" = s."lastActivityAt"
-      FROM "sandbox" s
-      WHERE sla."sandboxId" = s.id
-        AND s."lastActivityAt" IS NOT NULL
-        AND sla."lastActivityAt" IS DISTINCT FROM s."lastActivityAt"
+      INSERT INTO "sandbox_last_activity" ("sandboxId", "lastActivityAt")
+      SELECT "id", COALESCE("lastActivityAt", "createdAt", NOW())
+      FROM "sandbox"
+      WHERE "state" != 'destroyed'
+      ON CONFLICT ("sandboxId") DO UPDATE
+        SET "lastActivityAt" = EXCLUDED."lastActivityAt"
+        WHERE "sandbox_last_activity"."lastActivityAt" IS DISTINCT FROM EXCLUDED."lastActivityAt"
     `)
   }
 
