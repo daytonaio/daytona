@@ -44,7 +44,7 @@ import { useEffect, useState } from 'react'
 import { Group, Panel, Separator } from 'react-resizable-panels'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { CreateSshAccessDialog } from './CreateSshAccessDialog'
+import { CreateSshAccessSheet } from './CreateSshAccessSheet'
 import { RevokeSshAccessDialog } from './RevokeSshAccessDialog'
 import { SandboxContentTabs } from './SandboxContentTabs'
 import { SandboxHeader } from './SandboxHeader'
@@ -290,7 +290,7 @@ export default function SandboxDetails() {
 
         {sandboxId && (
           <>
-            <CreateSshAccessDialog
+            <CreateSshAccessSheet
               sandboxId={sandboxId}
               open={createSshDialogOpen}
               onOpenChange={setCreateSshDialogOpen}

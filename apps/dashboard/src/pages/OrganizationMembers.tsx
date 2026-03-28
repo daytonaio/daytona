@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CreateOrganizationInvitationDialog } from '@/components/OrganizationMembers/CreateOrganizationInvitationDialog'
+import { CreateOrganizationInvitationSheet } from '@/components/OrganizationMembers/CreateOrganizationInvitationSheet'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationInvitationTable } from '@/components/OrganizationMembers/OrganizationInvitationTable'
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
@@ -18,7 +19,8 @@ import {
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytonaio/api-client'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
@@ -33,6 +35,7 @@ const OrganizationMembers: React.FC = () => {
 
   const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
   const [loadingInvitations, setLoadingInvitations] = useState(true)
+  const createInvitationSheetRef = useRef<{ open: () => void }>(null)
 
   const [loadingMemberAction, setLoadingMemberAction] = useState<Record<string, boolean>>({})
   const [loadingInvitationAction, setLoadingInvitationAction] = useState<Record<string, boolean>>({})
@@ -175,16 +178,34 @@ const OrganizationMembers: React.FC = () => {
     return authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
   }, [authenticatedUserOrganizationMember])
 
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!authenticatedUserIsOwner) {
+      return []
+    }
+
+    return [
+      {
+        id: 'create-organization-invitation',
+        label: 'Invite Member',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createInvitationSheetRef.current?.open(),
+      },
+    ]
+  }, [authenticatedUserIsOwner])
+
+  useRegisterCommands(rootCommands, { groupId: 'member-actions', groupLabel: 'Member actions', groupOrder: 0 })
+
   return (
     <PageLayout>
       <PageHeader>
         <PageTitle>Members</PageTitle>
         {authenticatedUserIsOwner && (
-          <CreateOrganizationInvitationDialog
+          <CreateOrganizationInvitationSheet
             className="ml-auto"
             availableRoles={roles}
             loadingAvailableRoles={loadingRoles}
             onCreateInvitation={handleCreateInvitation}
+            ref={createInvitationSheetRef}
           />
         )}
       </PageHeader>

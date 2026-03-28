@@ -5,6 +5,7 @@
 
 import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
+import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
@@ -51,8 +52,8 @@ import {
   SshAccessDto,
 } from '@daytonaio/api-client'
 import { QueryKey, useQueryClient } from '@tanstack/react-query'
-import { Check, Copy } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Check, Copy, PlusIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -271,6 +272,7 @@ const Sandboxes: React.FC = () => {
   const [revokeSshToken, setRevokeSshToken] = useState<string>('')
   const [sshSandboxId, setSshSandboxId] = useState<string>('')
   const [copied, setCopied] = useState<string | null>(null)
+  const createSandboxSheetRef = useRef<{ open: () => void }>(null)
 
   // Snapshot Filter
 
@@ -886,6 +888,28 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const writePermitted = useMemo(
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES),
+    [authenticatedUserHasPermission],
+  )
+
+  const rootCommands: CommandConfig[] = useMemo(() => {
+    if (!writePermitted) {
+      return []
+    }
+
+    return [
+      {
+        id: 'create-sandbox',
+        label: 'Create Sandbox',
+        icon: <PlusIcon className="w-4 h-4" />,
+        onSelect: () => createSandboxSheetRef.current?.open(),
+      },
+    ]
+  }, [writePermitted])
+
+  useRegisterCommands(rootCommands, { groupId: 'sandbox-actions', groupLabel: 'Sandbox actions', groupOrder: 0 })
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
 
@@ -935,7 +959,7 @@ const Sandboxes: React.FC = () => {
               </Button>
             </>
           )}
-          {authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES) && <CreateSandboxSheet />}
+          {writePermitted && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>
       <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">

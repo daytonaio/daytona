@@ -5,15 +5,14 @@
 
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -61,7 +60,7 @@ const defaultValues: FormValues = {
   regionId: undefined,
 }
 
-export const CreateSnapshotDialog = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
+export const CreateSnapshotSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
   const [open, setOpen] = useState(false)
 
   const { availableRegions: regions, loadingAvailableRegions: loadingRegions } = useRegions()
@@ -116,11 +115,12 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
       }
     },
   })
+  const { reset: resetForm } = form
 
   const resetState = useCallback(() => {
-    form.reset(defaultValues)
+    resetForm(defaultValues)
     resetCreateSnapshotMutation()
-  }, [resetCreateSnapshotMutation, form])
+  }, [resetForm, resetCreateSnapshotMutation])
 
   useEffect(() => {
     if (open) {
@@ -129,30 +129,25 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
   }, [open, resetState])
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen)
-      }}
-    >
-      <DialogTrigger asChild>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
         <Button variant="default" size="sm" className="ml-auto" title="Create Snapshot">
           <Plus className="w-4 h-4" />
           Create Snapshot
         </Button>
-      </DialogTrigger>
-      <DialogContent className={className}>
-        <DialogHeader>
-          <DialogTitle>Create New Snapshot</DialogTitle>
-          <DialogDescription>
+      </SheetTrigger>
+      <SheetContent className={`w-dvw sm:w-[500px] p-0 flex flex-col gap-0 ${className ?? ''}`}>
+        <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
+          <SheetTitle className="text-2xl">Create New Snapshot</SheetTitle>
+          <SheetDescription className="sr-only">
             Register a new snapshot to be used for spinning up sandboxes in your organization.
-          </DialogDescription>
-        </DialogHeader>
-        <ScrollArea fade="mask" className="h-[500px] overflow-auto -mx-5">
+          </SheetDescription>
+        </SheetHeader>
+        <ScrollArea fade="mask" className="flex-1 min-h-0">
           <form
             ref={formRef}
             id="create-snapshot-form"
-            className="gap-6 flex flex-col px-5"
+            className="gap-6 flex flex-col p-5"
             onSubmit={(e) => {
               e.preventDefault()
               e.stopPropagation()
@@ -319,12 +314,10 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
             </form.Field>
           </form>
         </ScrollArea>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Cancel
-            </Button>
-          </DialogClose>
+        <SheetFooter className="border-t border-border p-4 px-5">
+          <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => (
@@ -339,8 +332,8 @@ export const CreateSnapshotDialog = ({ className, ref }: { className?: string; r
               </Button>
             )}
           />
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
