@@ -27,7 +27,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Volume name is required'),
+  name: z.string().trim().min(1, 'Volume name is required'),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -108,12 +108,12 @@ export const CreateVolumeSheet = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" disabled={disabled} className={className} title="Create Volume">
+        <Button variant="default" size="sm" disabled={disabled} className={className}>
           <Plus className="w-4 h-4" />
           Create Volume
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
+      <SheetContent className="w-dvw sm:w-[420px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle className="text-2xl">Create New Volume</SheetTitle>
           <SheetDescription className="sr-only">Create a new volume for shared, persistent storage.</SheetDescription>

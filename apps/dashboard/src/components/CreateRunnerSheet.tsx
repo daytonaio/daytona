@@ -26,6 +26,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from '@/components/ui/spinner'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { getMaskedToken } from '@/lib/utils'
 
@@ -120,13 +121,13 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className="w-auto px-4" title="Create Runner">
+        <Button variant="default" size="sm" className="w-auto px-4">
           <Plus className="w-4 h-4" />
           Create Runner
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
+      <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle className="text-2xl">{createdRunner ? 'Runner Created' : 'Create New Runner'}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -218,7 +219,8 @@ export const CreateRunnerSheet: React.FC<CreateRunnerSheetProps> = ({ regions, o
               selector={(state) => [state.canSubmit, state.isSubmitting]}
               children={([canSubmit, isSubmitting]) => (
                 <Button type="submit" form="create-runner-form" variant="default" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting ? 'Creating...' : 'Create'}
+                  {isSubmitting && <Spinner />}
+                  Create
                 </Button>
               )}
             />
@@ -259,10 +261,21 @@ function CreatedRunnerDisplay({ createdRunner }: { createdRunner: CreateRunnerRe
               value={tokenRevealed ? createdRunner.apiKey : getMaskedToken(createdRunner.apiKey)}
               readOnly
             />
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => setTokenRevealed(!tokenRevealed)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label={tokenRevealed ? 'Hide runner token' : 'Show runner token'}
+              aria-pressed={tokenRevealed}
+              onClick={() => setTokenRevealed(!tokenRevealed)}
+            >
               {tokenRevealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </InputGroupButton>
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyToken(createdRunner.apiKey)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Copy runner token"
+              onClick={() => copyToken(createdRunner.apiKey)}
+            >
               <AnimatePresence initial={false} mode="wait">
                 {copiedToken ? (
                   <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />

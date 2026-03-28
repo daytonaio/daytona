@@ -143,13 +143,13 @@ export const CreateApiKeySheet: React.FC<CreateApiKeySheetProps> = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" title="Create Key" className={className}>
+        <Button variant="default" size="sm" className={className}>
           <Plus className="w-4 h-4" />
           Create Key
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
+      <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle className="text-2xl">{createdKey ? 'API Key Created' : 'Create New API Key'}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -406,10 +406,21 @@ function CreatedKeyDisplay({ createdKey, apiUrl }: { createdKey: ApiKeyResponse;
               value={apiKeyRevealed ? createdKey.value : getMaskedToken(createdKey.value)}
               readOnly
             />
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => setApiKeyRevealed(!apiKeyRevealed)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label={apiKeyRevealed ? 'Hide API key' : 'Show API key'}
+              aria-pressed={apiKeyRevealed}
+              onClick={() => setApiKeyRevealed(!apiKeyRevealed)}
+            >
               {apiKeyRevealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </InputGroupButton>
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyApiKey(createdKey.value)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Copy API key"
+              onClick={() => copyApiKey(createdKey.value)}
+            >
               <AnimatePresence initial={false} mode="wait">
                 {copiedApiKey ? (
                   <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />
@@ -426,7 +437,12 @@ function CreatedKeyDisplay({ createdKey, apiUrl }: { createdKey: ApiKeyResponse;
 
           <InputGroup className="pr-1 flex-1">
             <InputGroupInput id="api-url" value={apiUrl} readOnly />
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyApiUrl(apiUrl)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Copy API URL"
+              onClick={() => copyApiUrl(apiUrl)}
+            >
               <AnimatePresence initial={false} mode="wait">
                 {copiedApiUrl ? (
                   <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />

@@ -201,7 +201,7 @@ export const UpsertRegistrySheet = ({
           </Button>
         </SheetTrigger>
       )}
-      <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
+      <SheetContent className="w-dvw sm:w-[460px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle className="text-2xl">{isEditMode ? 'Edit Registry' : 'Add Registry'}</SheetTitle>
           <SheetDescription className="sr-only">

@@ -947,18 +947,6 @@ const Sandboxes: React.FC = () => {
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
         <div className="flex items-center gap-2 ml-auto">
-          {!sandboxesDataIsLoading && (!sandboxesData?.items || sandboxesData.items.length === 0) && (
-            <>
-              <Button variant="link" className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)} size="sm">
-                Onboarding guide
-              </Button>
-              <Button variant="link" className="text-primary" asChild size="sm">
-                <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
-                  Docs
-                </a>
-              </Button>
-            </>
-          )}
           {writePermitted && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>

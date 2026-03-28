@@ -131,7 +131,7 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className="ml-auto" title="Create Snapshot">
+        <Button variant="default" size="sm" className="ml-auto">
           <Plus className="w-4 h-4" />
           Create Snapshot
         </Button>

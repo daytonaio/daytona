@@ -330,7 +330,7 @@ export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref
       }}
     >
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" title="Create Sandbox">
+        <Button variant="default" size="sm">
           <Plus className="size-4" />
           Create Sandbox
         </Button>

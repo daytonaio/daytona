@@ -105,6 +105,7 @@ export const CreateEndpointSheet: React.FC<CreateEndpointSheetProps> = ({ onSucc
 
   const resetState = useCallback(() => {
     resetForm()
+    setEventsPopoverOpen(false)
   }, [resetForm])
 
   useEffect(() => {
@@ -128,7 +129,7 @@ export const CreateEndpointSheet: React.FC<CreateEndpointSheetProps> = ({ onSucc
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" title="Add Endpoint" className={className}>
+        <Button variant="default" size="sm" className={className}>
           <Plus className="w-4 h-4" />
           Add Endpoint
         </Button>

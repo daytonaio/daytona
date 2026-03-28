@@ -143,7 +143,7 @@ export const CreateOrganizationInvitationSheet: React.FC<CreateOrganizationInvit
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className={className} title="Invite Member">
+        <Button variant="default" size="sm" className={className}>
           <Plus className="w-4 h-4" />
           Invite Member
         </Button>

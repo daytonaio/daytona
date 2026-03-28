@@ -18,6 +18,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from '@/components/ui/spinner'
 import { ORGANIZATION_ROLE_PERMISSIONS_GROUPS } from '@/constants/OrganizationPermissionsGroups'
 import { OrganizationRolePermissionGroup } from '@/types/OrganizationRolePermissionGroup'
 import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
@@ -111,7 +112,7 @@ export const CreateOrganizationRoleSheet: React.FC<CreateOrganizationRoleSheetPr
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" className={className} title="Create Role">
+        <Button variant="default" size="sm" className={className}>
           <Plus className="w-4 h-4" />
           Create Role
         </Button>
@@ -271,7 +272,8 @@ export const CreateOrganizationRoleSheet: React.FC<CreateOrganizationRoleSheetPr
             selector={(state) => [state.canSubmit, state.isSubmitting]}
             children={([canSubmit, isSubmitting]) => (
               <Button type="submit" form="create-role-form" variant="default" disabled={!canSubmit || isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create'}
+                {isSubmitting && <Spinner />}
+                Create
               </Button>
             )}
           />

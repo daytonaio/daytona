@@ -8,11 +8,11 @@ import { CreateRegion, CreateRegionResponse } from '@daytonaio/api-client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
-import { Copy, Plus } from 'lucide-react'
+import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from '@/components/ui/spinner'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { getMaskedToken } from '@/lib/utils'
 
@@ -150,7 +151,7 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
     }
   }, [open, resetState])
 
-  const [, copyToClipboard] = useCopyToClipboard()
+  const [copiedText, copyToClipboard] = useCopyToClipboard()
 
   const showCredentials = useMemo(() => hasRegionCredentials(createdRegion), [createdRegion])
 
@@ -161,13 +162,13 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="default" size="sm" disabled={loadingData} className="w-auto px-4" title="Create Region">
+        <Button variant="default" size="sm" disabled={loadingData} className="w-auto px-4">
           <Plus className="w-4 h-4" />
           Create Region
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
+      <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
           <SheetTitle className="text-2xl">{createdRegion ? 'New Region Created' : 'Create New Region'}</SheetTitle>
           <SheetDescription className="sr-only">
@@ -182,79 +183,154 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
             {showCredentials ? (
               <div className="space-y-6">
                 {createdRegion?.proxyApiKey && (
-                  <div className="space-y-3">
-                    <Label htmlFor="proxy-api-key">Proxy API Key</Label>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span
-                        className="overflow-x-auto pr-2 cursor-text select-all"
-                        onMouseEnter={() => setIsProxyApiKeyRevealed(true)}
-                        onMouseLeave={() => setIsProxyApiKeyRevealed(false)}
-                      >
-                        {isProxyApiKeyRevealed ? createdRegion.proxyApiKey : getMaskedToken(createdRegion.proxyApiKey)}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(createdRegion.proxyApiKey ?? '')}
+                  <Field>
+                    <FieldLabel htmlFor="proxy-api-key">Proxy API Key</FieldLabel>
+                    <InputGroup className="pr-1 flex-1">
+                      <InputGroupInput
+                        id="proxy-api-key"
+                        value={
+                          isProxyApiKeyRevealed ? createdRegion.proxyApiKey : getMaskedToken(createdRegion.proxyApiKey)
+                        }
+                        readOnly
                       />
-                    </div>
-                  </div>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={isProxyApiKeyRevealed ? 'Hide proxy API key' : 'Show proxy API key'}
+                        aria-pressed={isProxyApiKeyRevealed}
+                        onClick={() => setIsProxyApiKeyRevealed((revealed) => !revealed)}
+                      >
+                        {isProxyApiKeyRevealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                      </InputGroupButton>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Copy proxy API key"
+                        onClick={() => copyToClipboard(createdRegion.proxyApiKey ?? '')}
+                      >
+                        {copiedText === createdRegion.proxyApiKey ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroup>
+                  </Field>
                 )}
 
                 {createdRegion?.sshGatewayApiKey && (
-                  <div className="space-y-3">
-                    <Label htmlFor="ssh-gateway-api-key">SSH Gateway API Key</Label>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span
-                        className="overflow-x-auto pr-2 cursor-text select-all"
-                        onMouseEnter={() => setIsSshGatewayApiKeyRevealed(true)}
-                        onMouseLeave={() => setIsSshGatewayApiKeyRevealed(false)}
-                      >
-                        {isSshGatewayApiKeyRevealed
-                          ? createdRegion.sshGatewayApiKey
-                          : getMaskedToken(createdRegion.sshGatewayApiKey)}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(createdRegion.sshGatewayApiKey ?? '')}
+                  <Field>
+                    <FieldLabel htmlFor="ssh-gateway-api-key">SSH Gateway API Key</FieldLabel>
+                    <InputGroup className="pr-1 flex-1">
+                      <InputGroupInput
+                        id="ssh-gateway-api-key"
+                        value={
+                          isSshGatewayApiKeyRevealed
+                            ? createdRegion.sshGatewayApiKey
+                            : getMaskedToken(createdRegion.sshGatewayApiKey)
+                        }
+                        readOnly
                       />
-                    </div>
-                  </div>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={
+                          isSshGatewayApiKeyRevealed ? 'Hide SSH gateway API key' : 'Show SSH gateway API key'
+                        }
+                        aria-pressed={isSshGatewayApiKeyRevealed}
+                        onClick={() => setIsSshGatewayApiKeyRevealed((revealed) => !revealed)}
+                      >
+                        {isSshGatewayApiKeyRevealed ? (
+                          <EyeOffIcon className="h-4 w-4" />
+                        ) : (
+                          <EyeIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Copy SSH gateway API key"
+                        onClick={() => copyToClipboard(createdRegion.sshGatewayApiKey ?? '')}
+                      >
+                        {copiedText === createdRegion.sshGatewayApiKey ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroup>
+                  </Field>
                 )}
 
                 {createdRegion?.snapshotManagerUsername && (
-                  <div className="space-y-3">
-                    <Label htmlFor="snapshot-manager-username">Snapshot manager username</Label>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span className="overflow-x-auto pr-2 cursor-text select-all">
-                        {createdRegion.snapshotManagerUsername}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(createdRegion.snapshotManagerUsername ?? '')}
+                  <Field>
+                    <FieldLabel htmlFor="snapshot-manager-username">Snapshot manager username</FieldLabel>
+                    <InputGroup className="pr-1 flex-1">
+                      <InputGroupInput
+                        id="snapshot-manager-username"
+                        value={createdRegion.snapshotManagerUsername}
+                        readOnly
                       />
-                    </div>
-                  </div>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Copy snapshot manager username"
+                        onClick={() => copyToClipboard(createdRegion.snapshotManagerUsername ?? '')}
+                      >
+                        {copiedText === createdRegion.snapshotManagerUsername ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroup>
+                  </Field>
                 )}
 
                 {createdRegion?.snapshotManagerPassword && (
-                  <div className="space-y-3">
-                    <Label htmlFor="snapshot-manager-password">Snapshot manager password</Label>
-                    <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                      <span
-                        className="overflow-x-auto pr-2 cursor-text select-all"
-                        onMouseEnter={() => setIsSnapshotManagerPasswordRevealed(true)}
-                        onMouseLeave={() => setIsSnapshotManagerPasswordRevealed(false)}
-                      >
-                        {isSnapshotManagerPasswordRevealed
-                          ? createdRegion.snapshotManagerPassword
-                          : getMaskedToken(createdRegion.snapshotManagerPassword)}
-                      </span>
-                      <Copy
-                        className="w-4 h-4 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={() => copyToClipboard(createdRegion.snapshotManagerPassword ?? '')}
+                  <Field>
+                    <FieldLabel htmlFor="snapshot-manager-password">Snapshot manager password</FieldLabel>
+                    <InputGroup className="pr-1 flex-1">
+                      <InputGroupInput
+                        id="snapshot-manager-password"
+                        value={
+                          isSnapshotManagerPasswordRevealed
+                            ? createdRegion.snapshotManagerPassword
+                            : getMaskedToken(createdRegion.snapshotManagerPassword)
+                        }
+                        readOnly
                       />
-                    </div>
-                  </div>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={
+                          isSnapshotManagerPasswordRevealed
+                            ? 'Hide snapshot manager password'
+                            : 'Show snapshot manager password'
+                        }
+                        aria-pressed={isSnapshotManagerPasswordRevealed}
+                        onClick={() => setIsSnapshotManagerPasswordRevealed((revealed) => !revealed)}
+                      >
+                        {isSnapshotManagerPasswordRevealed ? (
+                          <EyeOffIcon className="h-4 w-4" />
+                        ) : (
+                          <EyeIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label="Copy snapshot manager password"
+                        onClick={() => copyToClipboard(createdRegion.snapshotManagerPassword ?? '')}
+                      >
+                        {copiedText === createdRegion.snapshotManagerPassword ? (
+                          <CheckIcon className="h-4 w-4" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </InputGroupButton>
+                    </InputGroup>
+                  </Field>
                 )}
               </div>
             ) : (
@@ -381,7 +457,8 @@ export const CreateRegionSheet: React.FC<CreateRegionSheetProps> = ({
               selector={(state) => [state.canSubmit, state.isSubmitting]}
               children={([canSubmit, isSubmitting]) => (
                 <Button type="submit" form="create-region-form" variant="default" disabled={!canSubmit || isSubmitting}>
-                  {isSubmitting ? 'Creating...' : 'Create'}
+                  {isSubmitting && <Spinner />}
+                  Create
                 </Button>
               )}
             />

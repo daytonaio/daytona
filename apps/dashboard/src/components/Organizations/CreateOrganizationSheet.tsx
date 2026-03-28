@@ -4,18 +4,21 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Copy } from 'lucide-react'
+import { CheckIcon, CopyIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
 import { Organization, Region } from '@daytonaio/api-client'
 import { useForm } from '@tanstack/react-form'
 import { useMutation } from '@tanstack/react-query'
 import { z } from 'zod'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 import { Link } from 'react-router-dom'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Spinner } from '@/components/ui/spinner'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { RoutePath } from '@/enums/RoutePath'
 
@@ -53,6 +56,7 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
   const [createdOrg, setCreatedOrg] = useState<Organization | null>(null)
   const [copiedText, copyToClipboard] = useCopyToClipboard()
   const formRef = useRef<HTMLFormElement>(null)
+  const defaultRegionIdRef = useRef<string>(regions[0]?.id ?? '')
 
   const createOrganizationMutation = useMutation({
     mutationFn: async (value: FormValues) => {
@@ -98,14 +102,18 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
 
   const { reset: resetMutation } = createOrganizationMutation
 
+  useEffect(() => {
+    defaultRegionIdRef.current = regions[0]?.id ?? ''
+  }, [regions])
+
   const resetState = useCallback(() => {
     setCreatedOrg(null)
     resetForm({
       ...defaultValues,
-      defaultRegionId: regions[0]?.id ?? '',
+      defaultRegionId: defaultRegionIdRef.current,
     })
     resetMutation()
-  }, [resetForm, resetMutation, regions])
+  }, [resetForm, resetMutation])
 
   useEffect(() => {
     if (open) {
@@ -139,12 +147,21 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
               <div className="space-y-6">
                 <div className="space-y-3">
                   <FieldLabel htmlFor="organization-id">Organization ID</FieldLabel>
-                  <div className="p-3 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
-                    <span className="overflow-x-auto pr-2 cursor-text select-all">{createdOrg.id}</span>
-                    {(copiedText === createdOrg.id && <Check className="w-4 h-4" />) || (
-                      <Copy className="w-4 h-4 cursor-pointer" onClick={() => copyToClipboard(createdOrg.id)} />
-                    )}
-                  </div>
+                  <InputGroup className="pr-1 flex-1">
+                    <InputGroupInput id="organization-id" value={createdOrg.id} readOnly />
+                    <InputGroupButton
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label="Copy organization ID"
+                      onClick={() => copyToClipboard(createdOrg.id)}
+                    >
+                      {copiedText === createdOrg.id ? (
+                        <CheckIcon className="h-4 w-4" />
+                      ) : (
+                        <CopyIcon className="h-4 w-4" />
+                      )}
+                    </InputGroupButton>
+                  </InputGroup>
                 </div>
 
                 {createdOrg.defaultRegionId && (
@@ -158,32 +175,32 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
                   </div>
                 )}
 
-                <div className="p-3 rounded-md bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                  <p className="font-medium">Your organization is created.</p>
-                  <p className="text-sm mt-1">
-                    {billingApiUrl ? (
-                      <>
-                        To get started, add a payment method on the{' '}
-                        <Link
-                          to={RoutePath.BILLING_WALLET}
-                          className="text-blue-500 hover:underline"
-                          onClick={() => {
-                            onOpenChange(false)
-                          }}
-                        >
-                          wallet page
-                        </Link>
-                        .
-                      </>
-                    ) : null}
-                  </p>
-                </div>
+                <Alert variant="info">
+                  <InfoIcon />
+                  <AlertTitle>Your organization is created.</AlertTitle>
+                  {billingApiUrl ? (
+                    <AlertDescription>
+                      To get started, add a payment method on the{' '}
+                      <Link
+                        to={RoutePath.BILLING_WALLET}
+                        className="text-blue-500 hover:underline"
+                        onClick={() => {
+                          onOpenChange(false)
+                        }}
+                      >
+                        wallet page
+                      </Link>
+                      .
+                    </AlertDescription>
+                  ) : null}
+                </Alert>
               </div>
             ) : !loadingRegions && regions.length === 0 ? (
-              <div className="p-3 rounded-md bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                <p className="font-medium">No regions available</p>
-                <p className="text-sm mt-1">Organization cannot be created because no regions are available.</p>
-              </div>
+              <Alert variant="destructive">
+                <TriangleAlertIcon />
+                <AlertTitle>No regions available</AlertTitle>
+                <AlertDescription>Organization cannot be created because no regions are available.</AlertDescription>
+              </Alert>
             ) : (
               <form
                 ref={formRef}
@@ -277,7 +294,8 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
                   variant="default"
                   disabled={!canSubmit || isSubmitting || regions.length === 0}
                 >
-                  {isSubmitting ? 'Creating...' : 'Create'}
+                  {isSubmitting && <Spinner />}
+                  Create
                 </Button>
               )}
             />

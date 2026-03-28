@@ -187,7 +187,12 @@ function SshAccessCreated({ sshAccess }: { sshAccess: SshAccessDto }) {
         <FieldLabel htmlFor="ssh-command">SSH Command</FieldLabel>
         <InputGroup className="pr-1">
           <InputGroupInput id="ssh-command" value={sshAccess.sshCommand} readOnly />
-          <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyCommand(sshAccess.sshCommand)}>
+          <InputGroupButton
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Copy SSH command"
+            onClick={() => copyCommand(sshAccess.sshCommand)}
+          >
             <AnimatePresence initial={false} mode="wait">
               {copiedCommand ? (
                 <MotionCheckIcon className="size-4" key="copied" {...iconProps} />
