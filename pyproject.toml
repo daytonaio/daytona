@@ -55,6 +55,9 @@ reportPrivateUsage = "none"
 reportMissingTypeStubs = "none"
 reportExplicitAny = "none"
 
+[tool.isort]
+known_first_party = ["daytona", "daytona_api_client", "daytona_api_client_async", "daytona_toolbox_api_client", "daytona_toolbox_api_client_async"]
+
 [tool.black]
 target-version = ['py310']
 line-length = 120

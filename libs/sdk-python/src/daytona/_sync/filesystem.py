@@ -9,6 +9,8 @@ from contextlib import ExitStack
 from typing import overload
 
 import httpx
+from python_multipart.multipart import MultipartParser, parse_options_header
+
 from daytona_toolbox_api_client import (
     FileInfo,
     FilesDownloadRequest,
@@ -18,7 +20,6 @@ from daytona_toolbox_api_client import (
     ReplaceResult,
     SearchFilesResponse,
 )
-from python_multipart.multipart import MultipartParser, parse_options_header
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

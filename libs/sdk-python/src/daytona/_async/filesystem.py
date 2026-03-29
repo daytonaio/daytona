@@ -11,6 +11,8 @@ import aiofiles
 import aiofiles.os
 import httpx
 from aiofiles.threadpool.binary import AsyncBufferedIOBase
+from python_multipart.multipart import MultipartParser, parse_options_header
+
 from daytona_toolbox_api_client_async import (
     FileInfo,
     FilesDownloadRequest,
@@ -20,7 +22,6 @@ from daytona_toolbox_api_client_async import (
     ReplaceResult,
     SearchFilesResponse,
 )
-from python_multipart.multipart import MultipartParser, parse_options_header
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

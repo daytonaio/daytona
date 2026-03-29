@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import asyncio
 
+from deprecated import deprecated
+from pydantic import ConfigDict, PrivateAttr
+
 from daytona_api_client_async import BuildInfo
 from daytona_api_client_async import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client_async import PortPreviewUrl, ResizeSandbox
@@ -27,8 +30,6 @@ from daytona_toolbox_api_client_async import (
     LspApi,
     ProcessApi,
 )
-from deprecated import deprecated
-from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

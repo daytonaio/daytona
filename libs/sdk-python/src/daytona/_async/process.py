@@ -9,6 +9,8 @@ from collections.abc import Awaitable, Callable
 from typing import Any, cast
 
 import websockets
+from websockets.asyncio.client import connect
+
 from daytona_toolbox_api_client_async import (
     Command,
     CreateSessionRequest,
@@ -20,7 +22,6 @@ from daytona_toolbox_api_client_async import (
     Session,
     SessionSendInputRequest,
 )
-from websockets.asyncio.client import connect
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

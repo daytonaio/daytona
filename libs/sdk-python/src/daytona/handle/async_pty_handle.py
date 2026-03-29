@@ -10,8 +10,9 @@ from collections.abc import Awaitable, Callable
 from typing import Any, cast
 
 import websockets
-from daytona_toolbox_api_client_async import PtySessionInfo
 from websockets.asyncio.connection import Connection
+
+from daytona_toolbox_api_client_async import PtySessionInfo
 
 from ..common.errors import DaytonaError
 from ..common.pty import PtyResult, PtySize

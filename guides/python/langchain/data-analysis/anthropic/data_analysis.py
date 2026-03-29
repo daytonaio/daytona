@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 """LangChain data analysis example using Daytona sandboxes."""
+
 import base64
 
 from dotenv import load_dotenv

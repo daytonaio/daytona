@@ -8,6 +8,8 @@ import json
 import re
 
 import websockets
+from websockets.sync.client import connect
+
 from daytona_toolbox_api_client import (
     Command,
     CreateSessionRequest,
@@ -19,7 +21,6 @@ from daytona_toolbox_api_client import (
     Session,
     SessionSendInputRequest,
 )
-from websockets.sync.client import connect
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

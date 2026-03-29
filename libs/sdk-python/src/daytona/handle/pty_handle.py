@@ -8,9 +8,10 @@ import time
 from collections.abc import Callable, Generator
 from typing import Any, cast
 
-from daytona_toolbox_api_client import PtySessionInfo
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK
 from websockets.sync.client import ClientConnection
+
+from daytona_toolbox_api_client import PtySessionInfo
 
 from ..common.errors import DaytonaError
 from ..common.pty import PtyResult, PtySize

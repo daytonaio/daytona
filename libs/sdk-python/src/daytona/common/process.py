@@ -9,10 +9,11 @@ from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import ClassVar, TypeVar, Union
 
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
 from daytona_toolbox_api_client import SessionExecuteRequest as ApiSessionExecuteRequest
 from daytona_toolbox_api_client import SessionExecuteResponse as ApiSessionExecuteResponse
 from daytona_toolbox_api_client_async import SessionExecuteRequest as AsyncApiSessionExecuteRequest
-from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .charts import Chart
 
