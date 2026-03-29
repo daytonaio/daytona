@@ -805,6 +805,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -937,6 +938,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -2140,7 +2142,7 @@ const docTemplate = `{
         },
         "/process/execute": {
             "post": {
-                "description": "Execute a shell command and return the output and exit code",
+                "description": "Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2165,9 +2167,9 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "TTY execution response with session ID",
                         "schema": {
-                            "$ref": "#/definitions/ExecuteResponse"
+                            "$ref": "#/definitions/ExecuteTTYResponse"
                         }
                     }
                 }
@@ -3091,6 +3093,10 @@ const docTemplate = `{
                 "timeout": {
                     "description": "Timeout in seconds, defaults to 10 seconds",
                     "type": "integer"
+                },
+                "tty": {
+                    "description": "TTY mode - creates a pseudo-terminal for interactive execution",
+                    "type": "boolean"
                 }
             }
         },
@@ -3104,6 +3110,17 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "result": {
+                    "type": "string"
+                }
+            }
+        },
+        "ExecuteTTYResponse": {
+            "type": "object",
+            "required": [
+                "sessionId"
+            ],
+            "properties": {
+                "sessionId": {
                     "type": "string"
                 }
             }

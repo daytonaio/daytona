@@ -26,6 +26,7 @@ model_display_info.go
 model_display_info_response.go
 model_execute_request.go
 model_execute_response.go
+model_execute_tty_response.go
 model_file_info.go
 model_file_status.go
 model_files_download_request.go

@@ -186,6 +186,11 @@ type ExecuteResponse struct {
 	Artifacts *ExecutionArtifacts // nil when no artifacts available
 }
 
+// ExecuteTTYResponse represents a TTY execution response
+type ExecuteTTYResponse struct {
+	SessionID string
+}
+
 // ExecutionArtifacts represents execution output artifacts
 type ExecutionArtifacts struct {
 	Stdout string

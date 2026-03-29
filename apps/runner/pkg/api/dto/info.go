@@ -19,7 +19,7 @@ type RunnerServiceInfo struct {
 	ServiceName string  `json:"serviceName" validate:"required"`
 	Healthy     bool    `json:"healthy" validate:"required"`
 	ErrorReason *string `json:"errorReason,omitempty"`
-} // @name RunnerServiceInfo
+} //	@name	RunnerServiceInfo
 
 type RunnerInfoResponseDTO struct {
 	ServiceHealth []*RunnerServiceInfo `json:"serviceHealth,omitempty"`

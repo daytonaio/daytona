@@ -7,18 +7,18 @@ import "github.com/daytonaio/daemon/pkg/session"
 
 type CreateSessionRequest struct {
 	SessionId string `json:"sessionId" validate:"required"`
-} // @name CreateSessionRequest
+} //	@name	CreateSessionRequest
 
 type SessionExecuteRequest struct {
 	Command           string `json:"command" validate:"required"`
 	RunAsync          bool   `json:"runAsync" validate:"optional"`
 	Async             bool   `json:"async" validate:"optional"`
 	SuppressInputEcho bool   `json:"suppressInputEcho" validate:"optional"`
-} // @name SessionExecuteRequest
+} //	@name	SessionExecuteRequest
 
 type SessionSendInputRequest struct {
 	Data string `json:"data" validate:"required"`
-} // @name SessionSendInputRequest
+} //	@name	SessionSendInputRequest
 
 type SessionExecuteResponse struct {
 	CommandId string  `json:"cmdId" validate:"required"`
@@ -26,23 +26,23 @@ type SessionExecuteResponse struct {
 	Stdout    *string `json:"stdout" validate:"optional"`
 	Stderr    *string `json:"stderr" validate:"optional"`
 	ExitCode  *int    `json:"exitCode" validate:"optional"`
-} // @name SessionExecuteResponse
+} //	@name	SessionExecuteResponse
 
 type SessionCommandLogsResponse struct {
 	Stdout string `json:"stdout" validate:"required"`
 	Stderr string `json:"stderr" validate:"required"`
-} // @name SessionCommandLogsResponse
+} //	@name	SessionCommandLogsResponse
 
 type CommandDTO struct {
 	Id       string `json:"id" validate:"required"`
 	Command  string `json:"command" validate:"required"`
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
-} // @name Command
+} //	@name	Command
 
 type SessionDTO struct {
 	SessionId string        `json:"sessionId" validate:"required"`
 	Commands  []*CommandDTO `json:"commands" validate:"required"`
-} // @name Session
+} //	@name	Session
 
 func CommandToDTO(c *session.Command) *CommandDTO {
 	return &CommandDTO{

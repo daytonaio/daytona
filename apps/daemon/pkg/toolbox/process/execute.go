@@ -22,12 +22,13 @@ import (
 // ExecuteCommand godoc
 //
 //	@Summary		Execute a command
-//	@Description	Execute a shell command and return the output and exit code
+//	@Description	Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 //	@Tags			process
 //	@Accept			json
 //	@Produce		json
-//	@Param			request	body		ExecuteRequest	true	"Command execution request"
-//	@Success		200		{object}	ExecuteResponse
+//	@Param			request	body		ExecuteRequest		true	"Command execution request"
+//	@Success		200		{object}	ExecuteResponse		"Standard execution response"
+//	@Success		200		{object}	ExecuteTTYResponse	"TTY execution response with session ID"
 //	@Router			/process/execute [post]
 //
 //	@id				ExecuteCommand
@@ -41,6 +42,21 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 
 		if strings.TrimSpace(request.Command) == "" {
 			c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
+			return
+		}
+
+		// Handle TTY requests differently - create a PTY session
+		if request.Tty {
+			session, err := createTTYExecSession(logger, request)
+			if err != nil {
+				logger.Error("Failed to create TTY exec session", "error", err)
+				c.AbortWithError(http.StatusInternalServerError, errors.New("failed to create TTY session"))
+				return
+			}
+
+			c.JSON(http.StatusOK, ExecuteTTYResponse{
+				SessionID: session.id,
+			})
 			return
 		}
 

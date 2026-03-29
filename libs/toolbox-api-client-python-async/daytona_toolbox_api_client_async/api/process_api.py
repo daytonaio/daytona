@@ -22,7 +22,7 @@ from typing_extensions import Annotated
 from daytona_toolbox_api_client_async.models.command import Command
 from daytona_toolbox_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_toolbox_api_client_async.models.execute_request import ExecuteRequest
-from daytona_toolbox_api_client_async.models.execute_response import ExecuteResponse
+from daytona_toolbox_api_client_async.models.execute_tty_response import ExecuteTTYResponse
 from daytona_toolbox_api_client_async.models.pty_create_request import PtyCreateRequest
 from daytona_toolbox_api_client_async.models.pty_create_response import PtyCreateResponse
 from daytona_toolbox_api_client_async.models.pty_list_response import PtyListResponse
@@ -1372,10 +1372,10 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ExecuteResponse:
+    ) -> ExecuteTTYResponse:
         """Execute a command
 
-        Execute a shell command and return the output and exit code
+        Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 
         :param request: Command execution request (required)
         :type request: ExecuteRequest
@@ -1410,7 +1410,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            '200': "ExecuteTTYResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1439,10 +1439,10 @@ class ProcessApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[ExecuteResponse]:
+    ) -> ApiResponse[ExecuteTTYResponse]:
         """Execute a command
 
-        Execute a shell command and return the output and exit code
+        Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 
         :param request: Command execution request (required)
         :type request: ExecuteRequest
@@ -1477,7 +1477,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            '200': "ExecuteTTYResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1509,7 +1509,7 @@ class ProcessApi:
     ) -> RESTResponseType:
         """Execute a command
 
-        Execute a shell command and return the output and exit code
+        Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 
         :param request: Command execution request (required)
         :type request: ExecuteRequest
@@ -1544,7 +1544,7 @@ class ProcessApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            '200': "ExecuteTTYResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

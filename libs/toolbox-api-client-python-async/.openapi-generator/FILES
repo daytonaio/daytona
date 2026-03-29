@@ -28,6 +28,7 @@ daytona_toolbox_api_client_async/models/display_info.py
 daytona_toolbox_api_client_async/models/display_info_response.py
 daytona_toolbox_api_client_async/models/execute_request.py
 daytona_toolbox_api_client_async/models/execute_response.py
+daytona_toolbox_api_client_async/models/execute_tty_response.py
 daytona_toolbox_api_client_async/models/file_info.py
 daytona_toolbox_api_client_async/models/file_status.py
 daytona_toolbox_api_client_async/models/files_download_request.py

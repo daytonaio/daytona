@@ -1,0 +1,267 @@
+---
+title: Process Service
+description: Execute commands and manage interactive terminals in Daytona Sandboxes using the Go SDK
+---
+
+The Process Service provides command execution and terminal management capabilities for Daytona Sandboxes. It supports both standard command execution and interactive terminal sessions.
+
+## ExecuteCommand
+
+Execute a shell command and wait for completion:
+
+```go
+response, err := sandbox.Process.ExecuteCommand(ctx, "echo 'Hello, World!'")
+if err != nil {
+    return err
+}
+fmt.Printf("Exit code: %d\n", response.ExitCode)
+fmt.Printf("Output: %s\n", response.Result)
+```
+
+### With Options
+
+```go
+import "github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
+
+response, err := sandbox.Process.ExecuteCommand(ctx, "npm install",
+    options.WithCwd("/home/user/project"),
+    options.WithExecuteTimeout(5*time.Minute),
+)
+```
+
+## ExecuteTTY
+
+Execute a command in TTY (pseudo-terminal) mode for interactive applications:
+
+```go
+// Execute an interactive command
+response, err := sandbox.Process.ExecuteTTY(ctx, "vim /home/user/file.txt",
+    options.WithTTYCwd("/home/user"),
+    options.WithTTYSize(types.PtySize{Rows: 30, Cols: 120}),
+    options.WithTTYTimeout(10*time.Minute),
+)
+if err != nil {
+    return err
+}
+
+// Connect to the TTY session
+handle, err := sandbox.Process.ConnectTTYExec(ctx, response.SessionID)
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// Wait for connection to be established
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// Read output from the terminal
+go func() {
+    for data := range handle.DataChan() {
+        fmt.Print(string(data))
+    }
+}()
+
+// Send input to the terminal
+handle.SendInput([]byte("i"))  // Enter insert mode in vim
+handle.SendInput([]byte("Hello from TTY!\n"))
+handle.SendInput([]byte("\x1b")) // ESC key
+handle.SendInput([]byte(":wq\n")) // Save and quit
+```
+
+### ExecuteTTYAndConnect
+
+For convenience, combine TTY execution and connection in one call:
+
+```go
+handle, err := sandbox.Process.ExecuteTTYAndConnect(ctx, "bash",
+    options.WithTTYSize(types.PtySize{Rows: 24, Cols: 80}),
+)
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// Wait for connection
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// Interactive shell session
+handle.SendInput([]byte("ls -la\n"))
+handle.SendInput([]byte("pwd\n"))
+handle.SendInput([]byte("exit\n"))
+```
+
+## PTY Sessions
+
+Create and manage persistent pseudo-terminal sessions:
+
+### Create PTY Session
+
+```go
+session, err := sandbox.Process.CreatePtySession(ctx, "my-terminal",
+    options.WithPtySize(types.PtySize{Rows: 24, Cols: 80}),
+    options.WithPtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+```
+
+### Connect to PTY Session
+
+```go
+handle, err := sandbox.Process.ConnectPty(ctx, "my-terminal")
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// Wait for connection
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// Interactive terminal
+for data := range handle.DataChan() {
+    fmt.Print(string(data))
+}
+```
+
+### Create and Connect (Convenience)
+
+```go
+handle, err := sandbox.Process.CreatePty(ctx, "interactive-shell",
+    options.WithCreatePtySize(types.PtySize{Rows: 24, Cols: 80}),
+    options.WithCreatePtyEnv(map[string]string{"TERM": "xterm-256color"}),
+)
+if err != nil {
+    return err
+}
+defer handle.Disconnect()
+
+// Wait for connection
+if err := handle.WaitForConnection(ctx); err != nil {
+    return err
+}
+
+// Send commands
+handle.SendInput([]byte("ls\n"))
+handle.SendInput([]byte("exit\n"))
+```
+
+## Difference: ExecuteTTY vs PTY Sessions
+
+| Feature | ExecuteTTY | PTY Sessions |
+|---------|------------|--------------|
+| Use Case | Execute specific command interactively | Create persistent shell session |
+| Command | Specified at execution time | Shell starts, commands sent via input |
+| Session Management | Auto-managed by command lifecycle | Manual creation/deletion |
+| Best For | Interactive commands (vim, nano, etc.) | Long-running shell sessions |
+
+## Sessions
+
+Manage shell sessions for executing multiple related commands:
+
+### Create Session
+
+```go
+err := sandbox.Process.CreateSession(ctx, "my-session")
+if err != nil {
+    return err
+}
+defer sandbox.Process.DeleteSession(ctx, "my-session")
+```
+
+### Execute Commands in Session
+
+```go
+// Commands run in the same shell context
+result, err := sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "cd /home/user", false, false)
+result, err = sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "pwd", false, false)
+fmt.Println(result["stdout"]) // Should show /home/user
+```
+
+### Asynchronous Execution
+
+```go
+// Start long-running command asynchronously
+result, err := sandbox.Process.ExecuteSessionCommand(ctx, "my-session", "sleep 60", true, false)
+cmdID := result["id"].(string)
+
+// Check status later
+status, err := sandbox.Process.GetSessionCommand(ctx, "my-session", cmdID)
+if exitCode, ok := status["exitCode"]; ok {
+    fmt.Printf("Command completed with exit code: %v\n", exitCode)
+} else {
+    fmt.Println("Command still running")
+}
+```
+
+## Stream Command Logs
+
+Stream command output in real-time:
+
+```go
+stdout := make(chan string, 100)
+stderr := make(chan string, 100)
+
+go func() {
+    err := sandbox.Process.GetSessionCommandLogsStream(ctx, sessionID, cmdID, stdout, stderr)
+    if err != nil {
+        log.Printf("Stream error: %v", err)
+    }
+}()
+
+// Read streaming output
+for {
+    select {
+    case chunk, ok := <-stdout:
+        if !ok {
+            stdout = nil
+        } else {
+            fmt.Print(chunk)
+        }
+    case chunk, ok := <-stderr:
+        if !ok {
+            stderr = nil
+        } else {
+            fmt.Fprint(os.Stderr, chunk)
+        }
+    }
+    if stdout == nil && stderr == nil {
+        break
+    }
+}
+```
+
+## Options Reference
+
+### ExecuteCommand Options
+
+- `WithCwd(path)` - Set working directory
+- `WithCommandEnv(env)` - Set environment variables  
+- `WithExecuteTimeout(duration)` - Set execution timeout
+
+### ExecuteTTY Options
+
+- `WithTTYCwd(path)` - Set working directory
+- `WithTTYTimeout(duration)` - Set execution timeout
+- `WithTTYSize(ptySize)` - Set terminal dimensions
+
+### PTY Session Options
+
+- `WithPtySize(ptySize)` - Set terminal dimensions
+- `WithPtyEnv(env)` - Set environment variables
+
+## Error Handling
+
+```go
+response, err := sandbox.Process.ExecuteCommand(ctx, "invalid-command")
+if err != nil {
+    return fmt.Errorf("execution failed: %w", err)
+}
+
+if response.ExitCode != 0 {
+    return fmt.Errorf("command failed with exit code %d: %s", response.ExitCode, response.Result)
+}
+```

@@ -28,7 +28,7 @@ import type { CreateSessionRequest } from '../models';
 // @ts-ignore
 import type { ExecuteRequest } from '../models';
 // @ts-ignore
-import type { ExecuteResponse } from '../models';
+import type { ExecuteTTYResponse } from '../models';
 // @ts-ignore
 import type { PtyCreateRequest } from '../models';
 // @ts-ignore
@@ -228,7 +228,7 @@ export const ProcessApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Execute a shell command and return the output and exit code
+         * Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
          * @summary Execute a command
          * @param {ExecuteRequest} request Command execution request
          * @param {*} [options] Override http request option.
@@ -737,13 +737,13 @@ export const ProcessApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Execute a shell command and return the output and exit code
+         * Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
          * @summary Execute a command
          * @param {ExecuteRequest} request Command execution request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteResponse>> {
+        async executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteTTYResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.executeCommand(request, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProcessApi.executeCommand']?.[localVarOperationServerIndex]?.url;
@@ -957,13 +957,13 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.deleteSession(sessionId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Execute a shell command and return the output and exit code
+         * Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
          * @summary Execute a command
          * @param {ExecuteRequest} request Command execution request
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExecuteResponse> {
+        executeCommand(request: ExecuteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExecuteTTYResponse> {
             return localVarFp.executeCommand(request, options).then((request) => request(axios, basePath));
         },
         /**
@@ -1151,7 +1151,7 @@ export class ProcessApi extends BaseAPI {
     }
 
     /**
-     * Execute a shell command and return the output and exit code
+     * Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
      * @summary Execute a command
      * @param {ExecuteRequest} request Command execution request
      * @param {*} [options] Override http request option.

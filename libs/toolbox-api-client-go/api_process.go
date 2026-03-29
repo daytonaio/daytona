@@ -95,7 +95,7 @@ type ProcessAPI interface {
 	/*
 	ExecuteCommand Execute a command
 
-	Execute a shell command and return the output and exit code
+	Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ProcessAPIExecuteCommandRequest
@@ -103,8 +103,8 @@ type ProcessAPI interface {
 	ExecuteCommand(ctx context.Context) ProcessAPIExecuteCommandRequest
 
 	// ExecuteCommandExecute executes the request
-	//  @return ExecuteResponse
-	ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error)
+	//  @return ExecuteTTYResponse
+	ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteTTYResponse, *http.Response, error)
 
 	/*
 	GetEntrypointLogs Get entrypoint logs
@@ -783,14 +783,14 @@ func (r ProcessAPIExecuteCommandRequest) Request(request ExecuteRequest) Process
 	return r
 }
 
-func (r ProcessAPIExecuteCommandRequest) Execute() (*ExecuteResponse, *http.Response, error) {
+func (r ProcessAPIExecuteCommandRequest) Execute() (*ExecuteTTYResponse, *http.Response, error) {
 	return r.ApiService.ExecuteCommandExecute(r)
 }
 
 /*
 ExecuteCommand Execute a command
 
-Execute a shell command and return the output and exit code
+Execute a shell command and return the output and exit code. If TTY is true, returns a session ID for WebSocket connection.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ProcessAPIExecuteCommandRequest
@@ -803,13 +803,13 @@ func (a *ProcessAPIService) ExecuteCommand(ctx context.Context) ProcessAPIExecut
 }
 
 // Execute executes the request
-//  @return ExecuteResponse
-func (a *ProcessAPIService) ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteResponse, *http.Response, error) {
+//  @return ExecuteTTYResponse
+func (a *ProcessAPIService) ExecuteCommandExecute(r ProcessAPIExecuteCommandRequest) (*ExecuteTTYResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *ExecuteResponse
+		localVarReturnValue  *ExecuteTTYResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProcessAPIService.ExecuteCommand")

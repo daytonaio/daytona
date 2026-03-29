@@ -6,7 +6,10 @@ package daytona
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/common"
 	"github.com/daytonaio/daytona/libs/sdk-go/pkg/errors"
@@ -671,6 +674,63 @@ func flushToChannel(data []byte, dataType string, stdout, stderr chan<- string) 
 	}
 }
 
+// makeHTTPRequest performs a raw HTTP request for TTY execution
+func makeHTTPRequest(ctx context.Context, method, url string, body interface{}, headers map[string]string) (*http.Response, error) {
+	var reqBody io.Reader
+	if body != nil {
+		jsonBytes, err := json.Marshal(body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal request body: %w", err)
+		}
+		reqBody = bytes.NewReader(jsonBytes)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, url, reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set content type for JSON
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+
+	// Add provided headers
+	for key, value := range headers {
+		req.Header.Set(key, value)
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+
+	if resp.StatusCode >= 400 {
+		defer resp.Body.Close()
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	return resp, nil
+}
+
+// parseJSONResponse parses a JSON response into the provided struct
+func parseJSONResponse(resp *http.Response, target interface{}) error {
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	if err := json.Unmarshal(body, target); err != nil {
+		return fmt.Errorf("failed to parse JSON response: %w", err)
+	}
+
+	return nil
+}
+
 // CreatePtySession creates a PTY (pseudo-terminal) session.
 //
 // A PTY session provides a terminal interface for interactive applications.
@@ -904,6 +964,207 @@ func (p *ProcessService) ConnectPty(ctx context.Context, sessionID string) (*Pty
 		// Create kill handler
 		killHandler := func(ctx context.Context) error {
 			return p.KillPtySession(ctx, sessionID)
+		}
+
+		// Create and return the handle
+		handle := newPtyHandle(conn, sessionID, resizeHandler, killHandler)
+
+		return handle, nil
+	})
+}
+
+// ExecuteTTY executes a command in TTY mode by creating a PTY session.
+//
+// TTY (pseudo-terminal) mode provides an interactive terminal interface for commands
+// that require terminal interaction. This method creates a PTY session and returns
+// a session ID that can be used to connect via WebSocket.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithTTYCwd]: Set the working directory for command execution
+//   - [options.WithTTYTimeout]: Set command execution timeout
+//   - [options.WithTTYSize]: Set terminal dimensions
+//
+// Example:
+//
+//	// Execute an interactive command
+//	response, err := sandbox.Process.ExecuteTTY(ctx, "vim /home/user/file.txt",
+//	    options.WithTTYCwd("/home/user"),
+//	    options.WithTTYSize(types.PtySize{Rows: 30, Cols: 120}),
+//	)
+//	if err != nil {
+//	    return err
+//	}
+//
+//	// Connect to the session using the session ID
+//	handle, err := sandbox.Process.ConnectPty(ctx, response.SessionID)
+//	if err != nil {
+//	    return err
+//	}
+//	defer handle.Disconnect()
+//
+// Returns [types.ExecuteTTYResponse] containing the session ID, or an error.
+func (p *ProcessService) ExecuteTTY(ctx context.Context, command string, opts ...func(*options.ExecuteTTY)) (*types.ExecuteTTYResponse, error) {
+	return withInstrumentation(ctx, p.otel, "Process", "ExecuteTTY", func(ctx context.Context) (*types.ExecuteTTYResponse, error) {
+		execOpts := options.Apply(opts...)
+
+		// Build the request for TTY execution
+		req := toolbox.NewExecuteRequest(command)
+		if execOpts.Cwd != nil {
+			req.SetCwd(*execOpts.Cwd)
+		}
+		if execOpts.Timeout != nil {
+			req.SetTimeout(int32(execOpts.Timeout.Seconds()))
+		}
+
+		// Create a custom request body with TTY flag
+		// Since the generated client doesn't support TTY, we'll create a raw HTTP request
+		reqBody := map[string]interface{}{
+			"command": command,
+			"tty":     true,
+		}
+		if execOpts.Cwd != nil {
+			reqBody["cwd"] = *execOpts.Cwd
+		}
+		if execOpts.Timeout != nil {
+			reqBody["timeout"] = int32(execOpts.Timeout.Seconds())
+		}
+
+		// Use raw HTTP client to make the TTY execution request
+		endpoint := "/process/execute"
+
+		// Get base URL from toolbox client
+		cfg := p.toolboxClient.GetConfig()
+		baseURL := cfg.Servers[0].URL
+
+		response, err := makeHTTPRequest(ctx, "POST", baseURL+endpoint, reqBody, cfg.DefaultHeader)
+		if err != nil {
+			return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to execute TTY command: %v", err), 0, nil)
+		}
+
+		// Parse the TTY response
+		var ttyResp struct {
+			SessionID string `json:"sessionId"`
+		}
+		if err := parseJSONResponse(response, &ttyResp); err != nil {
+			return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to parse TTY response: %v", err), 0, nil)
+		}
+
+		return &types.ExecuteTTYResponse{
+			SessionID: ttyResp.SessionID,
+		}, nil
+	})
+}
+
+// ExecuteTTYAndConnect executes a command in TTY mode and immediately connects to it.
+//
+// This is a convenience method that combines [ProcessService.ExecuteTTY] and
+// [ProcessService.ConnectTTYExec] into a single operation.
+//
+// Optional parameters can be configured using functional options:
+//   - [options.WithTTYCwd]: Set the working directory for command execution
+//   - [options.WithTTYTimeout]: Set command execution timeout
+//   - [options.WithTTYSize]: Set terminal dimensions
+//
+// Example:
+//
+//	handle, err := sandbox.Process.ExecuteTTYAndConnect(ctx, "vim /home/user/file.txt",
+//	    options.WithTTYCwd("/home/user"),
+//	    options.WithTTYSize(types.PtySize{Rows: 30, Cols: 120}),
+//	)
+//	if err != nil {
+//	    return err
+//	}
+//	defer handle.Disconnect()
+//
+//	// Wait for connection
+//	if err := handle.WaitForConnection(ctx); err != nil {
+//	    return err
+//	}
+//
+//	// Interact with the terminal
+//	for data := range handle.DataChan() {
+//	    fmt.Print(string(data))
+//	}
+//
+// Returns a [PtyHandle] for terminal interaction, or an error.
+func (p *ProcessService) ExecuteTTYAndConnect(ctx context.Context, command string, opts ...func(*options.ExecuteTTY)) (*PtyHandle, error) {
+	return withInstrumentation(ctx, p.otel, "Process", "ExecuteTTYAndConnect", func(ctx context.Context) (*PtyHandle, error) {
+		// Execute the command in TTY mode
+		response, err := p.ExecuteTTY(ctx, command, opts...)
+		if err != nil {
+			return nil, err
+		}
+
+		// Connect to the TTY execution session
+		return p.ConnectTTYExec(ctx, response.SessionID)
+	})
+}
+
+// ConnectTTYExec establishes a WebSocket connection to a TTY execution session.
+//
+// This method connects to a TTY execution session created by [ProcessService.ExecuteTTY].
+// Unlike regular PTY sessions, TTY execution sessions execute a specific command.
+//
+// Parameters:
+//   - sessionID: The TTY execution session ID from ExecuteTTY response
+//
+// Example:
+//
+//	// First execute a command in TTY mode
+//	response, err := sandbox.Process.ExecuteTTY(ctx, "vim file.txt")
+//	if err != nil {
+//	    return err
+//	}
+//
+//	// Then connect to the session
+//	handle, err := sandbox.Process.ConnectTTYExec(ctx, response.SessionID)
+//	if err != nil {
+//	    return err
+//	}
+//	defer handle.Disconnect()
+//
+//	// Wait for connection and interact
+//	if err := handle.WaitForConnection(ctx); err != nil {
+//	    return err
+//	}
+//
+//	for data := range handle.DataChan() {
+//	    fmt.Print(string(data))
+//	}
+//
+// Returns a [PtyHandle] for terminal interaction, or an error.
+func (p *ProcessService) ConnectTTYExec(ctx context.Context, sessionID string) (*PtyHandle, error) {
+	return withInstrumentation(ctx, p.otel, "Process", "ConnectTTYExec", func(ctx context.Context) (*PtyHandle, error) {
+		// Convert HTTP URL to WebSocket URL
+		httpURL := p.toolboxClient.GetConfig().Servers[0].URL
+		wsURL := common.ConvertToWebSocketURL(httpURL)
+
+		// Get authentication headers from the toolbox client configuration
+		headers := make(map[string][]string)
+		cfg := p.toolboxClient.GetConfig()
+		for key, value := range cfg.DefaultHeader {
+			headers[key] = []string{value}
+		}
+
+		// Connect to TTY execution WebSocket endpoint
+		conn, _, err := websocket.DefaultDialer.DialContext(ctx, fmt.Sprintf("%s/process/exec/%s/connect", wsURL, sessionID), headers)
+		if err != nil {
+			return nil, errors.NewDaytonaError(fmt.Sprintf("Failed to connect to TTY execution session: %v", err), 0, nil)
+		}
+
+		// Create dummy resize and kill handlers for TTY exec sessions
+		resizeHandler := func(ctx context.Context, cols, rows int) (*types.PtySessionInfo, error) {
+			// TTY execution sessions don't support resizing in the same way as PTY sessions
+			return &types.PtySessionInfo{
+				ID:   sessionID,
+				Rows: rows,
+				Cols: cols,
+			}, nil
+		}
+
+		killHandler := func(ctx context.Context) error {
+			// For TTY execution sessions, killing is handled by the session timeout or completion
+			return nil
 		}
 
 		// Create and return the handle

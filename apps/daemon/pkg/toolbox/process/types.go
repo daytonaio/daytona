@@ -9,10 +9,17 @@ type ExecuteRequest struct {
 	Timeout *uint32 `json:"timeout,omitempty" validate:"optional"`
 	// Current working directory
 	Cwd *string `json:"cwd,omitempty" validate:"optional"`
-} // @name ExecuteRequest
+	// TTY mode - creates a pseudo-terminal for interactive execution
+	Tty bool `json:"tty,omitempty" validate:"optional"`
+} //	@name	ExecuteRequest
 
 // TODO: Set ExitCode as required once all sandboxes migrated to the new daemon
 type ExecuteResponse struct {
 	ExitCode int    `json:"exitCode"`
 	Result   string `json:"result" validate:"required"`
-} // @name ExecuteResponse
+} //	@name	ExecuteResponse
+
+// ExecuteTTYResponse is returned when TTY mode is requested
+type ExecuteTTYResponse struct {
+	SessionID string `json:"sessionId" validate:"required"`
+} //	@name	ExecuteTTYResponse

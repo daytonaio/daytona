@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -29,8 +29,9 @@ class ExecuteRequest(BaseModel):
     command: StrictStr
     cwd: Optional[StrictStr] = Field(default=None, description="Current working directory")
     timeout: Optional[StrictInt] = Field(default=None, description="Timeout in seconds, defaults to 10 seconds")
+    tty: Optional[StrictBool] = Field(default=None, description="TTY mode - creates a pseudo-terminal for interactive execution")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["command", "cwd", "timeout"]
+    __properties: ClassVar[List[str]] = ["command", "cwd", "timeout", "tty"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -92,7 +93,8 @@ class ExecuteRequest(BaseModel):
         _obj = cls.model_validate({
             "command": obj.get("command"),
             "cwd": obj.get("cwd"),
-            "timeout": obj.get("timeout")
+            "timeout": obj.get("timeout"),
+            "tty": obj.get("tty")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

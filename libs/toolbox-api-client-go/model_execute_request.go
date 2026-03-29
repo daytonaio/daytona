@@ -26,6 +26,8 @@ type ExecuteRequest struct {
 	Cwd *string `json:"cwd,omitempty"`
 	// Timeout in seconds, defaults to 10 seconds
 	Timeout *int32 `json:"timeout,omitempty"`
+	// TTY mode - creates a pseudo-terminal for interactive execution
+	Tty *bool `json:"tty,omitempty"`
 }
 
 type _ExecuteRequest ExecuteRequest
@@ -136,6 +138,38 @@ func (o *ExecuteRequest) SetTimeout(v int32) {
 	o.Timeout = &v
 }
 
+// GetTty returns the Tty field value if set, zero value otherwise.
+func (o *ExecuteRequest) GetTty() bool {
+	if o == nil || IsNil(o.Tty) {
+		var ret bool
+		return ret
+	}
+	return *o.Tty
+}
+
+// GetTtyOk returns a tuple with the Tty field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ExecuteRequest) GetTtyOk() (*bool, bool) {
+	if o == nil || IsNil(o.Tty) {
+		return nil, false
+	}
+	return o.Tty, true
+}
+
+// HasTty returns a boolean if a field has been set.
+func (o *ExecuteRequest) HasTty() bool {
+	if o != nil && !IsNil(o.Tty) {
+		return true
+	}
+
+	return false
+}
+
+// SetTty gets a reference to the given bool and assigns it to the Tty field.
+func (o *ExecuteRequest) SetTty(v bool) {
+	o.Tty = &v
+}
+
 func (o ExecuteRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -152,6 +186,9 @@ func (o ExecuteRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Timeout) {
 		toSerialize["timeout"] = o.Timeout
+	}
+	if !IsNil(o.Tty) {
+		toSerialize["tty"] = o.Tty
 	}
 	return toSerialize, nil
 }

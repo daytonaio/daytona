@@ -125,6 +125,7 @@ func returnCommandError(message, errorType string) (*mcp.CallToolResult, error) 
 
 // Helper function to quote shell commands
 func shellQuote(s string) string {
-	// Simple shell quoting - wrap in single quotes and escape existing single quotes
-	return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'"
+	// POSIX shell quoting - wrap in single quotes and escape existing single quotes using '\''
+	// This follows the standard POSIX idiom: close quote, escaped quote, open quote
+	return "'" + strings.ReplaceAll(s, "'", "'\\''") + "'"
 }

@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.models.display_info_response import DisplayInfoResponse
     from daytona_toolbox_api_client_async.models.execute_request import ExecuteRequest
     from daytona_toolbox_api_client_async.models.execute_response import ExecuteResponse
+    from daytona_toolbox_api_client_async.models.execute_tty_response import ExecuteTTYResponse
     from daytona_toolbox_api_client_async.models.file_info import FileInfo
     from daytona_toolbox_api_client_async.models.file_status import FileStatus
     from daytona_toolbox_api_client_async.models.files_download_request import FilesDownloadRequest
@@ -114,6 +115,7 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "DisplayInfoResponse": "daytona_toolbox_api_client_async.models.display_info_response",
     "ExecuteRequest": "daytona_toolbox_api_client_async.models.execute_request",
     "ExecuteResponse": "daytona_toolbox_api_client_async.models.execute_response",
+    "ExecuteTTYResponse": "daytona_toolbox_api_client_async.models.execute_tty_response",
     "FileInfo": "daytona_toolbox_api_client_async.models.file_info",
     "FileStatus": "daytona_toolbox_api_client_async.models.file_status",
     "FilesDownloadRequest": "daytona_toolbox_api_client_async.models.files_download_request",

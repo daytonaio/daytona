@@ -13,6 +13,8 @@ import (
 
 	"bytes"
 
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/options"
+	"github.com/daytonaio/daytona/libs/sdk-go/pkg/types"
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -334,4 +336,45 @@ func TestProcessWebsocketStreamNoMarkerAtStart(t *testing.T) {
 	}
 
 	assert.Equal(t, "kept data\n", stdoutBuilder.String())
+}
+
+// TestExecuteTTYOptions tests ExecuteTTY option functions
+func TestExecuteTTYOptions(t *testing.T) {
+	t.Run("WithTTYCwd", func(t *testing.T) {
+		opts := &options.ExecuteTTY{}
+		options.WithTTYCwd("/test/path")(opts)
+		assert.NotNil(t, opts.Cwd)
+		assert.Equal(t, "/test/path", *opts.Cwd)
+	})
+
+	t.Run("WithTTYTimeout", func(t *testing.T) {
+		opts := &options.ExecuteTTY{}
+		timeout := 45 * time.Second
+		options.WithTTYTimeout(timeout)(opts)
+		assert.NotNil(t, opts.Timeout)
+		assert.Equal(t, timeout, *opts.Timeout)
+	})
+
+	t.Run("WithTTYSize", func(t *testing.T) {
+		opts := &options.ExecuteTTY{}
+		ptySize := types.PtySize{Rows: 25, Cols: 100}
+		options.WithTTYSize(ptySize)(opts)
+		assert.NotNil(t, opts.PtySize)
+		assert.Equal(t, ptySize, *opts.PtySize)
+	})
+
+	t.Run("multiple options", func(t *testing.T) {
+		opts := options.Apply(
+			options.WithTTYCwd("/workspace"),
+			options.WithTTYTimeout(30*time.Second),
+			options.WithTTYSize(types.PtySize{Rows: 24, Cols: 80}),
+		)
+
+		assert.NotNil(t, opts.Cwd)
+		assert.Equal(t, "/workspace", *opts.Cwd)
+		assert.NotNil(t, opts.Timeout)
+		assert.Equal(t, 30*time.Second, *opts.Timeout)
+		assert.NotNil(t, opts.PtySize)
+		assert.Equal(t, types.PtySize{Rows: 24, Cols: 80}, *opts.PtySize)
+	})
 }

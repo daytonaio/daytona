@@ -80,7 +80,7 @@ type StdioStream struct {
 type Range struct {
 	Start LspPosition `json:"start" validate:"required"`
 	End   LspPosition `json:"end" validate:"required"`
-} // @name Range
+} //	@name	Range
 
 type TextDocumentIdentifier struct {
 	URI string `json:"uri" validate:"required"`
@@ -89,18 +89,18 @@ type TextDocumentIdentifier struct {
 type VersionedTextDocumentIdentifier struct {
 	URI     string `json:"uri" validate:"required"`
 	Version int    `json:"version" validate:"required"`
-} // @name VersionedTextDocumentIdentifier
+} //	@name	VersionedTextDocumentIdentifier
 
 type CompletionParams struct {
 	TextDocument TextDocumentIdentifier `json:"textDocument" validate:"required"`
 	Position     LspPosition            `json:"position" validate:"required"`
 	Context      *CompletionContext     `json:"context,omitempty" validate:"optional"`
-} // @name CompletionParams
+} //	@name	CompletionParams
 
 type CompletionContext struct {
 	TriggerKind      int     `json:"triggerKind" validate:"required"`
 	TriggerCharacter *string `json:"triggerCharacter,omitempty" validate:"optional"`
-} // @name CompletionContext
+} //	@name	CompletionContext
 
 type CompletionItem struct {
 	Label         string      `json:"label" validate:"required"`
@@ -110,37 +110,37 @@ type CompletionItem struct {
 	SortText      *string     `json:"sortText,omitempty" validate:"optional"`
 	FilterText    *string     `json:"filterText,omitempty" validate:"optional"`
 	InsertText    *string     `json:"insertText,omitempty" validate:"optional"`
-} // @name CompletionItem
+} //	@name	CompletionItem
 
 type CompletionList struct {
 	IsIncomplete bool             `json:"isIncomplete" validate:"required"`
 	Items        []CompletionItem `json:"items" validate:"required"`
-} // @name CompletionList
+} //	@name	CompletionList
 
 type LspSymbol struct {
 	Kind     int         `json:"kind" validate:"required"`
 	Location LspLocation `json:"location" validate:"required"`
 	Name     string      `json:"name" validate:"required"`
-} // @name LspSymbol
+} //	@name	LspSymbol
 
 type LspLocation struct {
 	Range LspRange `json:"range" validate:"required"`
 	URI   string   `json:"uri" validate:"required"`
-} // @name LspLocation
+} //	@name	LspLocation
 
 type LspRange struct {
 	End   LspPosition `json:"end" validate:"required"`
 	Start LspPosition `json:"start" validate:"required"`
-} // @name LspRange
+} //	@name	LspRange
 
 type LspPosition struct {
 	Character int `json:"character" validate:"required"`
 	Line      int `json:"line" validate:"required"`
-} // @name LspPosition
+} //	@name	LspPosition
 
 type WorkspaceSymbolParams struct {
 	Query string `json:"query" validate:"required"`
-} // @name WorkspaceSymbolParams
+} //	@name	WorkspaceSymbolParams
 
 func (s *StdioStream) Read(p []byte) (n int, err error) {
 	return s.out.Read(p)

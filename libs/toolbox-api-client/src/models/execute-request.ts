@@ -38,5 +38,11 @@ export interface ExecuteRequest {
      * @memberof ExecuteRequest
      */
     'timeout'?: number;
+    /**
+     * TTY mode - creates a pseudo-terminal for interactive execution
+     * @type {boolean}
+     * @memberof ExecuteRequest
+     */
+    'tty'?: boolean;
 }
 

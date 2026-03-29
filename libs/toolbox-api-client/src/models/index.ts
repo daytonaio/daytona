@@ -11,6 +11,7 @@ export * from './display-info';
 export * from './display-info-response';
 export * from './execute-request';
 export * from './execute-response';
+export * from './execute-ttyresponse';
 export * from './file-info';
 export * from './file-status';
 export * from './files-download-request';

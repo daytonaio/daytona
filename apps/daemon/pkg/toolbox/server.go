@@ -186,6 +186,8 @@ func (s *server) Start() error {
 	processController := r.Group("/process")
 	{
 		processController.POST("/execute", process.ExecuteCommand(processLogger))
+		// TTY exec WebSocket endpoint
+		processController.GET("/exec/:sessionId/connect", process.ConnectTTYExecSession(processLogger))
 
 		sessionController := session.NewSessionController(s.logger, s.configDir, s.sessionService)
 		sessionGroup := processController.Group("/session")

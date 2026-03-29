@@ -29,6 +29,7 @@ models/display-info-response.ts
 models/display-info.ts
 models/execute-request.ts
 models/execute-response.ts
+models/execute-ttyresponse.ts
 models/file-info.ts
 models/file-status.ts
 models/files-download-request.ts

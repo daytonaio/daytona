@@ -13,13 +13,27 @@ import (
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/toolbox"
 	"github.com/spf13/cobra"
+	"golang.org/x/term"
 )
 
 var ExecCmd = &cobra.Command{
 	Use:   "exec [SANDBOX_ID | SANDBOX_NAME] -- [COMMAND] [ARGS...]",
 	Short: "Execute a command in a sandbox",
-	Long:  "Execute a command in a running sandbox",
-	Args:  cobra.MinimumNArgs(2),
+	Long: `Execute a command in a running sandbox
+
+Examples:
+  # Execute a simple command
+  daytona sandbox exec my-sandbox -- ls -la
+
+  # Execute an interactive command with TTY
+  daytona sandbox exec my-sandbox -t -- bash
+
+  # Execute with custom working directory
+  daytona sandbox exec my-sandbox --cwd /app -- npm start
+
+  # Execute with timeout (non-TTY mode only)
+  daytona sandbox exec my-sandbox --timeout 30 -- long-running-command`,
+	Args: cobra.MinimumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -50,6 +64,38 @@ var ExecCmd = &cobra.Command{
 
 		command := strings.Join(commandArgs, " ")
 
+		// Use TTY mode if requested
+		if execTTY {
+			// Validate TTY mode requirements
+			if !term.IsTerminal(int(os.Stdin.Fd())) {
+				return fmt.Errorf("--tty flag requires an interactive terminal (stdin is not a terminal)")
+			}
+
+			// TTY mode is not compatible with timeout
+			if execTimeout > 0 {
+				return fmt.Errorf("--timeout and --tty flags cannot be used together (TTY sessions are inherently interactive)")
+			}
+
+			// Get terminal size for TTY mode
+			cols, rows := 80, 24 // Default values
+			if c, r, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
+				cols, rows = c, r
+			}
+
+			ttyRequest := toolbox.TTYExecuteRequest{
+				Command: command,
+				Cols:    cols,
+				Rows:    rows,
+			}
+			if execCwd != "" {
+				ttyRequest.Cwd = &execCwd
+			}
+
+			// Execute with TTY (WebSocket) - this handles the entire session
+			return toolboxClient.ExecuteCommandWithTTY(ctx, sandbox, ttyRequest)
+		}
+
+		// Regular execution mode (non-TTY)
 		executeRequest := toolbox.ExecuteRequest{
 			Command: command,
 		}
@@ -88,9 +134,11 @@ var ExecCmd = &cobra.Command{
 var (
 	execCwd     string
 	execTimeout int
+	execTTY     bool
 )
 
 func init() {
 	ExecCmd.Flags().StringVar(&execCwd, "cwd", "", "Working directory for command execution")
 	ExecCmd.Flags().IntVar(&execTimeout, "timeout", 0, "Command timeout in seconds (0 for no timeout)")
+	ExecCmd.Flags().BoolVarP(&execTTY, "tty", "t", false, "Allocate a pseudo-TTY for interactive command execution")
 }

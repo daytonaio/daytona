@@ -155,3 +155,49 @@ func WithCreatePtyEnv(env map[string]string) func(*CreatePty) {
 		opts.Env = env
 	}
 }
+
+// ExecuteTTY holds optional parameters for [daytona.ProcessService.ExecuteTTY].
+type ExecuteTTY struct {
+	Cwd     *string        // Working directory for command execution
+	Timeout *time.Duration // Command execution timeout
+	PtySize *types.PtySize // Terminal dimensions (rows and columns)
+}
+
+// WithTTYCwd sets the working directory for TTY command execution.
+//
+// Example:
+//
+//	sessionID, err := sandbox.Process.ExecuteTTY(ctx, "vim",
+//	    options.WithTTYCwd("/home/user/project"),
+//	)
+func WithTTYCwd(cwd string) func(*ExecuteTTY) {
+	return func(opts *ExecuteTTY) {
+		opts.Cwd = &cwd
+	}
+}
+
+// WithTTYTimeout sets the timeout for TTY command execution.
+//
+// Example:
+//
+//	sessionID, err := sandbox.Process.ExecuteTTY(ctx, "sleep 60",
+//	    options.WithTTYTimeout(30*time.Second),
+//	)
+func WithTTYTimeout(timeout time.Duration) func(*ExecuteTTY) {
+	return func(opts *ExecuteTTY) {
+		opts.Timeout = &timeout
+	}
+}
+
+// WithTTYSize sets the PTY terminal dimensions for TTY execution.
+//
+// Example:
+//
+//	sessionID, err := sandbox.Process.ExecuteTTY(ctx, "vim",
+//	    options.WithTTYSize(types.PtySize{Rows: 30, Cols: 120}),
+//	)
+func WithTTYSize(ptySize types.PtySize) func(*ExecuteTTY) {
+	return func(opts *ExecuteTTY) {
+		opts.PtySize = &ptySize
+	}
+}

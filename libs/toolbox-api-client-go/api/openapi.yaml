@@ -559,6 +559,7 @@ paths:
         in: query
         name: scale
         schema:
+          format: float64
           type: number
       responses:
         "200":
@@ -662,6 +663,7 @@ paths:
         in: query
         name: scale
         schema:
+          format: float64
           type: number
       responses:
         "200":
@@ -1470,7 +1472,8 @@ paths:
       - port
   /process/execute:
     post:
-      description: Execute a shell command and return the output and exit code
+      description: "Execute a shell command and return the output and exit code. If\
+        \ TTY is true, returns a session ID for WebSocket connection."
       operationId: ExecuteCommand
       requestBody:
         content:
@@ -1484,8 +1487,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExecuteResponse"
-          description: OK
+                $ref: "#/components/schemas/ExecuteTTYResponse"
+          description: TTY execution response with session ID
       summary: Execute a command
       tags:
       - process
@@ -2204,6 +2207,7 @@ components:
     ExecuteRequest:
       example:
         cwd: cwd
+        tty: true
         command: command
         timeout: 0
       properties:
@@ -2215,13 +2219,13 @@ components:
         timeout:
           description: "Timeout in seconds, defaults to 10 seconds"
           type: integer
+        tty:
+          description: TTY mode - creates a pseudo-terminal for interactive execution
+          type: boolean
       required:
       - command
       type: object
     ExecuteResponse:
-      example:
-        result: result
-        exitCode: 0
       properties:
         exitCode:
           type: integer
@@ -2229,6 +2233,15 @@ components:
           type: string
       required:
       - result
+      type: object
+    ExecuteTTYResponse:
+      example:
+        sessionId: sessionId
+      properties:
+        sessionId:
+          type: string
+      required:
+      - sessionId
       type: object
     FileInfo:
       example:
