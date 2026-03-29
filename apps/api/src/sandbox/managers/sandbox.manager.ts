@@ -883,7 +883,8 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             recoverable,
           }
 
-          await this.sandboxRepository.update(sandboxId, { updateData, entity: sandbox })
+          // Update sandbox to error state without safeguards
+          await this.sandboxRepository.update(sandboxId, { updateData }, true)
 
           // Break sync loop since sandbox is in error state.
           break
