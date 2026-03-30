@@ -27,14 +27,14 @@ Never include TERMINATE in a message that contains a code block.
 
 def fix_bug(broken_code: str, error_description: str = "") -> None:
     """
-    Fix broken Python code using AG2 agents with Daytona sandbox execution.
+    Fix broken code using AG2 agents with Daytona sandbox execution.
 
     The bug_fixer agent analyzes the code and proposes fixes, while the
     code_executor agent runs each attempt in an isolated Daytona sandbox.
     The loop continues until the code runs successfully or max attempts are reached.
 
     Args:
-        broken_code: The broken Python code to fix.
+        broken_code: The broken code to fix.
         error_description: Optional description of the error or expected behavior.
     """
     llm_config = LLMConfig(
