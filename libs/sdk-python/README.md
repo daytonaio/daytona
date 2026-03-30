@@ -1,81 +1,108 @@
-# Daytona SDK for Python
+# Daytona Python SDK
 
-A Python SDK for interacting with the Daytona API, providing a simple interface for Daytona Sandbox management, Git operations, file system operations, and language server protocol support.
+The official Python SDK for [Daytona](https://daytona.io), an open-source, secure and elastic infrastructure for running AI-generated code. Daytona provides full composable computers — [sandboxes](https://www.daytona.io/docs/en/sandboxes/) — that you can manage programmatically using the Daytona SDK.
+
+The SDK provides an interface for sandbox management, file system operations, Git operations, language server protocol support, process and code execution, and computer use. For more information, see the [documentation](https://www.daytona.io/docs/en/python-sdk/).
 
 ## Installation
 
-You can install the package using pip:
+Install the package using **pip**:
 
 ```bash
 pip install daytona
 ```
 
-## Quick Start
+## Get API key
 
-Here's a simple example of using the SDK:
-
-```python
-from daytona import Daytona
-
-# Initialize using environment variables
-daytona = Daytona()
-
-# Create a sandbox
-sandbox = daytona.create()
-
-# Run code in the sandbox
-response = sandbox.process.code_run('print("Hello World!")')
-print(response.result)
-
-# Clean up when done
-daytona.delete(sandbox)
-```
+Generate an API key from the [Daytona Dashboard ↗](https://app.daytona.io/dashboard/keys) to authenticate SDK requests and access Daytona services. For more information, see the [API keys](https://www.daytona.io/docs/en/api-keys/) documentation.
 
 ## Configuration
 
-The SDK can be configured using environment variables or by passing a configuration object:
+Configure the SDK using [environment variables](https://www.daytona.io/docs/en/configuration/#environment-variables) or by passing a [configuration object](https://www.daytona.io/docs/en/configuration/#configuration-in-code):
+
+- `DAYTONA_API_KEY`: Your Daytona [API key](https://www.daytona.io/docs/en/api-keys/)
+- `DAYTONA_API_URL`: The Daytona [API URL](https://www.daytona.io/docs/en/tools/api/)
+- `DAYTONA_TARGET`: Your target [region](https://www.daytona.io/docs/en/regions/) environment (e.g. `us`, `eu`)
 
 ```python
 from daytona import Daytona, DaytonaConfig
 
-# Initialize with configuration
+# Initialize with environment variables
+daytona = Daytona()
+
+# Initialize with configuration object
 config = DaytonaConfig(
-    api_key="your-api-key",
-    api_url="your-api-url",
+    api_key="YOUR_API_KEY",
+    api_url="YOUR_API_URL",
     target="us"
 )
-daytona = Daytona(config)
 ```
 
-Or using environment variables:
+## Create a sandbox
 
-- `DAYTONA_API_KEY`: Your Daytona API key
-- `DAYTONA_API_URL`: The Daytona API URL
-- `DAYTONA_TARGET`: Your target environment
-
-You can also customize sandbox creation:
+Create a sandbox to run your code securely in an isolated environment.
 
 ```python
-sandbox = daytona.create(CreateSandboxFromSnapshotParams(
-    language="python",
-    env_vars={"PYTHON_ENV": "development"},
-    auto_stop_interval=60,  # Auto-stop after 1 hour of inactivity
-    auto_archive_interval=60,  # Auto-archive after a Sandbox has been stopped for 1 hour
-    auto_delete_interval=120 # Auto-delete after a Sandbox has been stopped for 2 hours
-))
+from daytona import Daytona, DaytonaConfig
+
+config = DaytonaConfig(api_key="YOUR_API_KEY")
+daytona = Daytona(config)
+sandbox = daytona.create()
+response = sandbox.process.code_run('print("Hello World")')
 ```
 
-## Features
+## Examples and guides
 
-- **Sandbox Management**: Create, manage and remove sandboxes
-- **Git Operations**: Clone repositories, manage branches, and more
-- **File System Operations**: Upload, download, search and manipulate files
-- **Language Server Protocol**: Interact with language servers for code intelligence
-- **Process Management**: Execute code and commands in sandboxes
+Daytona provides [examples](https://www.daytona.io/docs/en/getting-started/#examples) and [guides](https://www.daytona.io/docs/en/guides/) for common sandbox operations, best practices, and a wide range of topics, from basic usage to advanced topics, showcasing various types of integrations between Daytona and other tools.
 
-## Examples
+### Create a sandbox with custom resources
+
+Create a sandbox with [custom resources](https://www.daytona.io/docs/en/sandboxes/#resources) (CPU, memory, disk).
+
+```python
+from daytona import Daytona, CreateSandboxFromImageParams, Image, Resources
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromImageParams(
+        image=Image.debian_slim("3.12"),
+        resources=Resources(cpu=2, memory=4, disk=8)
+    )
+)
+```
+
+### Create an ephemeral sandbox
+
+Create an [ephemeral sandbox](https://www.daytona.io/docs/en/sandboxes/#ephemeral-sandboxes) that is automatically deleted when stopped.
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(ephemeral=True, auto_stop_interval=5)
+)
+```
+
+### Create a sandbox from a snapshot
+
+Create a sandbox from a [snapshot](https://www.daytona.io/docs/en/snapshots/).
+
+```python
+from daytona import Daytona, CreateSandboxFromSnapshotParams
+
+daytona = Daytona()
+sandbox = daytona.create(
+    CreateSandboxFromSnapshotParams(
+        snapshot="my-snapshot-name",
+        language="python"
+    )
+)
+```
 
 ### Execute Commands
+
+Execute commands in the sandbox.
 
 ```python
 # Execute a shell command
@@ -93,6 +120,8 @@ print(response.result)
 
 ### File Operations
 
+Upload, download, and search files in the sandbox.
+
 ```python
 # Upload a file
 sandbox.fs.upload_file(b'Hello, World!', 'path/to/file.txt')
@@ -105,6 +134,8 @@ matches = sandbox.fs.find_files(root_dir, 'search_pattern')
 ```
 
 ### Git Operations
+
+Clone, list branches, and add files to the sandbox.
 
 ```python
 # Clone a repository
@@ -119,19 +150,21 @@ sandbox.git.add('path/to/repo', ['file1.txt', 'file2.txt'])
 
 ### Language Server Protocol
 
+Create and start a language server to get code completions, document symbols, and more.
+
 ```python
 # Create and start a language server
-lsp = sandbox.create_lsp_server('typescript', 'path/to/project')
+lsp = sandbox.create_lsp_server('python', 'path/to/project')
 lsp.start()
 
 # Notify the lsp for the file
-lsp.did_open('path/to/file.ts')
+lsp.did_open('path/to/file.py')
 
 # Get document symbols
-symbols = lsp.document_symbols('path/to/file.ts')
+symbols = lsp.document_symbols('path/to/file.py')
 
 # Get completions
-completions = lsp.completions('path/to/file.ts', {"line": 10, "character": 15})
+completions = lsp.completions('path/to/file.py', {"line": 10, "character": 15})
 ```
 
 ## Contributing
