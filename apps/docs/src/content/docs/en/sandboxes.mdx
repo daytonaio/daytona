@@ -45,15 +45,25 @@ The diagram below demonstrates the states and possible transitions between them.
 
 ## Multiple runtime support
 
-Daytona sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox.
-
-The `language` parameter controls which programming language runtime is used for the sandbox:
+Daytona sandboxes support Python, TypeScript, and JavaScript programming language runtimes for direct code execution inside the sandbox. The `language` parameter controls which programming language runtime is used for the sandbox:
 
 - **`python`**
 - **`typescript`**
 - **`javascript`**
 
 If omitted, the Daytona SDK will default to `python`. To override this, explicitly set the `language` value when creating the sandbox.
+
+For more information, see the [Python SDK](/docs/en/python-sdk/), [TypeScript SDK](/docs/en/typescript-sdk/), [Ruby SDK](/docs/en/ruby-sdk/), [Go SDK](/docs/en/go-sdk/), and [API](/docs/en/tools/api/#daytona/) references:
+
+> [**CreateSandboxBaseParams.language (Python SDK)**](/docs/en/python-sdk/sync/daytona#createsandboxbaseparams)
+>
+> [**CreateSandboxBaseParams.language (TypeScript SDK)**](/docs/en/typescript-sdk/daytona#createsandboxbaseparams)
+>
+> [**create (Ruby SDK)**](/docs/en/ruby-sdk/daytona#create)
+>
+> [**SandboxBaseParams.Language (Go SDK)**](/docs/en/go-sdk/types#SandboxBaseParams)
+>
+> [**create sandbox (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox)
 
 ## Create Sandboxes
 
