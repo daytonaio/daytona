@@ -260,7 +260,7 @@ def _get_open_api_exception_message(
             msg: object | None = typed_data.get("message")
             if isinstance(msg, str):
                 message = msg
-            code: object | None = typed_data.get("error") or typed_data.get("code") or typed_data.get("error_code")
+            code: object | None = typed_data.get("code") or typed_data.get("error_code") or typed_data.get("error")
             if isinstance(code, str):
                 error_code = code
     except json.JSONDecodeError:

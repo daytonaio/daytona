@@ -366,7 +366,7 @@ def with_timeout() -> Callable[[F], F]:
 
     Raises:
         DaytonaTimeoutError: When the function exceeds the specified timeout.
-        DaytonaError: If timeout is negative.
+        DaytonaValidationError: If timeout is negative.
 
     Example:
         ```python

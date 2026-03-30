@@ -422,7 +422,7 @@ class Sandbox(SandboxDto):
                 Set to 0 to disable auto-stop. Defaults to 15.
 
         Raises:
-            DaytonaError: If interval is negative
+            DaytonaValidationError: If interval is negative
 
         Example:
             ```python
