@@ -107,11 +107,12 @@ export class OrganizationInvitationService {
   }
 
   async update(
+    organizationId: string,
     invitationId: string,
     updateOrganizationInvitationDto: UpdateOrganizationInvitationDto,
   ): Promise<OrganizationInvitation> {
     const invitation = await this.organizationInvitationRepository.findOne({
-      where: { id: invitationId },
+      where: { id: invitationId, organizationId },
       relations: {
         organization: true,
         assignedRoles: true,
@@ -228,17 +229,22 @@ export class OrganizationInvitationService {
     await this.organizationInvitationRepository.save(invitation)
   }
 
-  async cancel(invitationId: string): Promise<void> {
-    const invitation = await this.prepareStatusUpdate(invitationId, OrganizationInvitationStatus.CANCELLED)
+  async cancel(organizationId: string, invitationId: string): Promise<void> {
+    const invitation = await this.prepareStatusUpdate(
+      invitationId,
+      OrganizationInvitationStatus.CANCELLED,
+      organizationId,
+    )
     await this.organizationInvitationRepository.save(invitation)
   }
 
   private async prepareStatusUpdate(
     invitationId: string,
     newStatus: OrganizationInvitationStatus,
+    organizationId?: string,
   ): Promise<OrganizationInvitation> {
     const invitation = await this.organizationInvitationRepository.findOne({
-      where: { id: invitationId },
+      where: { id: invitationId, ...(organizationId && { organizationId }) },
       relations: {
         organization: true,
         assignedRoles: true,

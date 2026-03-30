@@ -108,7 +108,11 @@ export class OrganizationInvitationController {
     @Param('invitationId') invitationId: string,
     @Body() updateOrganizationInvitationDto: UpdateOrganizationInvitationDto,
   ): Promise<OrganizationInvitationDto> {
-    const invitation = await this.organizationInvitationService.update(invitationId, updateOrganizationInvitationDto)
+    const invitation = await this.organizationInvitationService.update(
+      organizationId,
+      invitationId,
+      updateOrganizationInvitationDto,
+    )
     return OrganizationInvitationDto.fromOrganizationInvitation(invitation)
   }
 
@@ -161,6 +165,6 @@ export class OrganizationInvitationController {
     @Param('organizationId') organizationId: string,
     @Param('invitationId') invitationId: string,
   ): Promise<void> {
-    return this.organizationInvitationService.cancel(invitationId)
+    return this.organizationInvitationService.cancel(organizationId, invitationId)
   }
 }
