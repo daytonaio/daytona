@@ -43,7 +43,7 @@ const toolboxApiSpec = {
   servers: [{ url: 'https://proxy.app.daytona.io/toolbox/{sandboxId}' }],
   info: {
     ...toolboxApiSpecRaw.info,
-    description: `${toolboxApiSpecRaw.info.description || 'Daytona Daemon API'}
+    description: `${toolboxApiSpecRaw.info.description || 'Daytona Toolbox API'}
 
 To get the toolbox proxy URL for your sandbox, call the \`/api/config\` endpoint from the main Daytona API. The response includes a \`proxyToolboxUrl\` field which provides the base URL template. Replace \`{sandboxId}\` in the URL with your actual sandbox ID to get the full toolbox API endpoint for that sandbox.
 
