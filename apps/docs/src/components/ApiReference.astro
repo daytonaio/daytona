@@ -90,6 +90,17 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
       telemetry: false,
       documentDownloadType: 'yaml',
       defaultOpenFirstTag: false,
+      customCss: `
+        .scalar-api-reference {
+          --scalar-custom-header-height: 75px;
+        }
+
+        @media (max-width: 650px) {
+          .scalar-api-reference {
+            --scalar-custom-header-height: 65px;
+          }
+        }
+      `,
     }}
   />
 </div>
