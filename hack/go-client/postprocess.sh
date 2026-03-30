@@ -27,6 +27,7 @@ var _clientVersion string
 var ClientVersion = strings.TrimSpace(_clientVersion)
 EOF
 
+grep -q 'UserAgent:.*"[^"]*"' "$PROJECT_ROOT/configuration.go" || { echo "ERROR: UserAgent string not found in configuration.go" >&2; exit 1; }
 sed -i "s|UserAgent: *\"[^\"]*\"|UserAgent:        \"${CLIENT_NAME}/\" + ClientVersion|" "$PROJECT_ROOT/configuration.go"
 
 echo "Postprocessed Go client at $PROJECT_ROOT"

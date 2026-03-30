@@ -14,6 +14,7 @@
 
 import { VERSION } from './version';
 
+
 export interface ConfigurationParameters {
     apiKey?: string | Promise<string> | ((name: string) => string) | ((name: string) => Promise<string>);
     username?: string;

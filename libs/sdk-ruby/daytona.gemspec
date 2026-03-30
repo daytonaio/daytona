@@ -38,11 +38,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'opentelemetry-metrics-sdk', '~> 0.2'
   spec.add_dependency 'opentelemetry-sdk', '~> 1.4'
 
-  spec.add_dependency 'observer', '~> 0.1'
   spec.add_dependency 'aws-sdk-s3', '~> 1.0'
   spec.add_dependency 'daytona_api_client', Daytona::Sdk::VERSION
   spec.add_dependency 'daytona_toolbox_api_client', Daytona::Sdk::VERSION
   spec.add_dependency 'dotenv', '~> 2.0'
+  spec.add_dependency 'observer', '~> 0.1'
   spec.add_dependency 'toml', '~> 0.3'
   spec.add_dependency 'websocket-client-simple', '~> 0.6'
 end

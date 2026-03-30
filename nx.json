@@ -43,14 +43,8 @@
       "{workspaceRoot}/hack/python-client/openapi-templates/**/*",
       "{workspaceRoot}/hack/python-client/postprocess.sh"
     ],
-    "goApiClient": [
-      "apiClient",
-      "{workspaceRoot}/hack/go-client/postprocess.sh"
-    ],
-    "tsApiClient": [
-      "apiClient",
-      "{workspaceRoot}/hack/ts-client/postprocess.sh"
-    ]
+    "goApiClient": ["apiClient", "{workspaceRoot}/hack/go-client/postprocess.sh"],
+    "tsApiClient": ["apiClient", "{workspaceRoot}/hack/ts-client/postprocess.sh"]
   },
   "neverConnectToCloud": true,
   "plugins": [
