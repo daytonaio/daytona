@@ -20,6 +20,11 @@ func (d *DockerClient) Stop(ctx context.Context, containerId string, force bool)
 		return nil
 	}
 
+	if err == nil && (state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying) {
+		d.logger.DebugContext(ctx, "Sandbox is being destroyed or already destroyed, treating stop as successful", "containerId", containerId, "state", state)
+		return nil
+	}
+
 	if err != nil {
 		d.logger.WarnContext(ctx, "Failed to get sandbox state", "containerId", containerId, "error", err)
 		d.logger.WarnContext(ctx, "Continuing with stop operation")
