@@ -3076,6 +3076,63 @@ paths:
       summary: Get info for authenticated runner
       tags:
       - runners
+  /runners/by-sandbox/{sandboxId}:
+    get:
+      operationId: getRunnerBySandboxId
+      parameters:
+      - explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunnerFull'
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get runner by sandbox ID
+      tags:
+      - runners
+  /runners/by-snapshot-ref:
+    get:
+      operationId: getRunnersBySnapshotRef
+      parameters:
+      - description: Snapshot ref
+        explode: true
+        in: query
+        name: ref
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/RunnerSnapshotDto'
+                type: array
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get runners by snapshot ref
+      tags:
+      - runners
   /runners/{id}:
     delete:
       operationId: deleteRunner
@@ -3241,63 +3298,6 @@ paths:
         - profile
         - email
       summary: Update runner draining status
-      tags:
-      - runners
-  /runners/by-sandbox/{sandboxId}:
-    get:
-      operationId: getRunnerBySandboxId
-      parameters:
-      - explode: false
-        in: path
-        name: sandboxId
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RunnerFull'
-          description: ""
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Get runner by sandbox ID
-      tags:
-      - runners
-  /runners/by-snapshot-ref:
-    get:
-      operationId: getRunnersBySnapshotRef
-      parameters:
-      - description: Snapshot ref
-        explode: true
-        in: query
-        name: ref
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/RunnerSnapshotDto'
-                type: array
-          description: ""
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Get runners by snapshot ref
       tags:
       - runners
   /runners/healthcheck:
@@ -11330,6 +11330,28 @@ components:
       - updatedAt
       - version
       type: object
+    RunnerSnapshotDto:
+      example:
+        runnerDomain: runner.example.com
+        runnerId: 123e4567-e89b-12d3-a456-426614174000
+        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
+      properties:
+        runnerSnapshotId:
+          description: Runner snapshot ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerId:
+          description: Runner ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        runnerDomain:
+          description: Runner domain
+          example: runner.example.com
+          type: string
+      required:
+      - runnerId
+      - runnerSnapshotId
+      type: object
     Runner:
       example:
         currentStartedSandboxes: 5
@@ -11496,28 +11518,6 @@ components:
       - unschedulable
       - updatedAt
       - version
-      type: object
-    RunnerSnapshotDto:
-      example:
-        runnerDomain: runner.example.com
-        runnerId: 123e4567-e89b-12d3-a456-426614174000
-        runnerSnapshotId: 123e4567-e89b-12d3-a456-426614174000
-      properties:
-        runnerSnapshotId:
-          description: Runner snapshot ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerId:
-          description: Runner ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        runnerDomain:
-          description: Runner domain
-          example: runner.example.com
-          type: string
-      required:
-      - runnerId
-      - runnerSnapshotId
       type: object
     RunnerHealthMetrics:
       properties:
