@@ -24,6 +24,8 @@ from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
+_JSON_ADAPTER = TypeAdapter(Dict[str, Any])
+
 class MousePosition(BaseModel):
     """
     MousePosition
@@ -46,8 +48,7 @@ class MousePosition(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        json_ready = TypeAdapter(Dict[str, Any]).dump_python(self.to_dict(), mode="json")
-        return json.dumps(json_ready)
+        return _JSON_ADAPTER.dump_json(self.to_dict()).decode()
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
