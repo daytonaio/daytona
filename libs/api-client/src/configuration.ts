@@ -12,6 +12,7 @@
  * Do not edit the class manually.
  */
 
+import { VERSION } from './version';
 
 export interface ConfigurationParameters {
     apiKey?: string | Promise<string> | ((name: string) => string) | ((name: string) => Promise<string>);
@@ -92,6 +93,7 @@ export class Configuration {
         this.baseOptions = {
             ...param.baseOptions,
             headers: {
+                'User-Agent': `api-client-typescript/${VERSION}`,
                 ...param.baseOptions?.headers,
             },
         };

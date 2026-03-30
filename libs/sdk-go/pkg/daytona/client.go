@@ -79,7 +79,7 @@ const (
 	defaultAPIURL = "https://app.daytona.io/api"
 
 	// sdkSource identifies requests as originating from the Go SDK for telemetry purposes.
-	sdkSource = "go-sdk"
+	sdkSource = "sdk-go"
 
 	// defaultTimeout is the default timeout duration for API requests and sandbox operations.
 	defaultTimeout = 60 * time.Second
@@ -222,6 +222,7 @@ func NewClientWithConfig(config *types.DaytonaConfig) (*Client, error) {
 	apiCfg.HTTPClient = client.httpClient
 	apiCfg.AddDefaultHeader("X-Daytona-Source", sdkSource)
 	apiCfg.AddDefaultHeader("X-Daytona-SDK-Version", Version)
+	apiCfg.UserAgent = "sdk-go/" + Version
 
 	// Set server URL with base path
 	basePath := common.ExtractPath(client.apiURL)
@@ -325,6 +326,7 @@ func (c *Client) createToolboxClient(proxyURL string, sandboxID string) (*toolbo
 	cfg.AddDefaultHeader("Authorization", "Bearer "+token)
 	cfg.AddDefaultHeader("X-Daytona-Source", sdkSource)
 	cfg.AddDefaultHeader("X-Daytona-SDK-Version", Version)
+	cfg.UserAgent = "sdk-go/" + Version
 
 	if c.jwtToken != "" {
 		cfg.AddDefaultHeader("X-Daytona-Organization-ID", c.organizationID)
