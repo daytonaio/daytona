@@ -13,6 +13,7 @@ import websockets
 from websockets.asyncio.connection import Connection
 
 from daytona_toolbox_api_client_async import PtySessionInfo
+
 from ..common.errors import DaytonaConnectionError, DaytonaError, DaytonaTimeoutError
 from ..common.pty import PtyResult, PtySize
 

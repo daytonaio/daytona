@@ -9,6 +9,7 @@ from collections.abc import Awaitable, Callable, Mapping
 from typing import Any, NoReturn, TypeVar, Union, cast
 
 import httpx
+
 from daytona_api_client.exceptions import (
     BadRequestException,
     ConflictException,
