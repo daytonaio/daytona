@@ -213,6 +213,7 @@ export class JobStateHandlerService {
         this.logger.debug(`STOP_SANDBOX job ${job.id} completed successfully, marking sandbox ${sandboxId} as STOPPED`)
         updateData.state = SandboxState.STOPPED
         updateData.errorReason = null
+        Object.assign(updateData, Sandbox.getBackupStateUpdate(sandbox, BackupState.NONE))
       } else if (job.status === JobStatus.FAILED) {
         this.logger.error(`STOP_SANDBOX job ${job.id} failed for sandbox ${sandboxId}: ${job.errorMessage}`)
         updateData.state = SandboxState.ERROR

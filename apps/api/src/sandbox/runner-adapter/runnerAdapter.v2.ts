@@ -117,6 +117,10 @@ export class RunnerAdapterV2 implements RunnerAdapter {
   }
 
   private inferStateFromJob(job: Job, sandbox: Sandbox): SandboxState {
+    if (job.status === JobStatus.FAILED) {
+      return sandbox.state
+    }
+
     // Map job types to transitional states
     switch (job.type) {
       case JobType.CREATE_SANDBOX:
