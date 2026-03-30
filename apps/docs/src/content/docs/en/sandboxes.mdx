@@ -176,7 +176,7 @@ daytona create [flags]
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{}'
 ```
 
@@ -300,7 +300,7 @@ daytona create --cpu 2 --memory 4096 --disk 8
 curl 'https://app.daytona.io/api/sandbox' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -473,7 +473,7 @@ daytona start [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/start' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -569,7 +569,7 @@ daytona list [flags]
 
 ```bash
 curl 'https://app.daytona.io/api/sandbox' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -713,7 +713,7 @@ daytona stop [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/stop' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -796,7 +796,7 @@ daytona archive [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/archive' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -850,7 +850,7 @@ sandbox.recover
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -912,7 +912,7 @@ end
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/recover' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1009,7 +1009,7 @@ To `increase disk capacity` or `decrease CPU and memory`, the sandbox must be st
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
   --request POST \
   --header 'Content-Type: application/json' \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --header 'Authorization: Bearer YOUR_API_KEY' \
   --data '{
   "cpu": 2,
   "memory": 4,
@@ -1091,7 +1091,7 @@ daytona delete [SANDBOX_ID] | [SANDBOX_NAME] [flags]
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}' \
   --request DELETE \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 </TabItem>
 </Tabs>
@@ -1183,7 +1183,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autostop/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1287,7 +1287,7 @@ sandbox, err := client.Create(ctx, params)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autoarchive/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
@@ -1401,7 +1401,7 @@ err = sandbox.SetAutoDeleteInterval(ctx, &disableInterval)
 ```bash
 curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/autodelete/{interval}' \
   --request POST \
-  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+  --header 'Authorization: Bearer YOUR_API_KEY'
 ```
 
 </TabItem>
