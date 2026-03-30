@@ -6,6 +6,7 @@
   "targets": {
     "serve": {
       "executor": "nx:run-commands",
+      "dependsOn": ["copy-openapi", "copy-toolbox-openapi"],
       "options": {
         "cwd": "{projectRoot}",
         "command": "astro dev --host"
