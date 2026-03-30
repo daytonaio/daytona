@@ -50,7 +50,9 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
             system_message=BUG_FIXER_SYSTEM_MESSAGE,
             llm_config=llm_config,
             code_execution_config=False,
-            is_termination_msg=lambda x: ("TERMINATE" in x.get("content", "") or not x.get("content", "").strip()),
+            is_termination_msg=lambda x: (
+                "TERMINATE" in (x.get("content") or "") or not (x.get("content") or "").strip()
+            ),
         )
 
         code_executor = ConversableAgent(

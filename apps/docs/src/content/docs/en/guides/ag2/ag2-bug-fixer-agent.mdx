@@ -133,7 +133,7 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
             llm_config=llm_config,
             code_execution_config=False,
             is_termination_msg=lambda x: (
-                "TERMINATE" in x.get("content", "") or not x.get("content", "").strip()
+                "TERMINATE" in (x.get("content") or "") or not (x.get("content") or "").strip()
             ),
         )
 
@@ -364,7 +364,7 @@ def fix_bug(broken_code: str, error_description: str = "") -> None:
             llm_config=llm_config,
             code_execution_config=False,
             is_termination_msg=lambda x: (
-                "TERMINATE" in x.get("content", "") or not x.get("content", "").strip()
+                "TERMINATE" in (x.get("content") or "") or not (x.get("content") or "").strip()
             ),
         )
 
