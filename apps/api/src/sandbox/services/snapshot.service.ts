@@ -828,4 +828,30 @@ export class SnapshotService {
       this.logger.debug(`Cleaned up ${result.affected} failed snapshot runners`)
     }
   }
+
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-decommissioned-snapshot-runners' })
+  @LogExecution('cleanup-decommissioned-snapshot-runners')
+  @WithInstrumentation()
+  async cleanupDecommissionedSnapshotRunners() {
+    const cutoff = new Date()
+    cutoff.setHours(cutoff.getHours() - 1)
+
+    const snapshotRunners = await this.snapshotRunnerRepository
+      .createQueryBuilder('sr')
+      .innerJoin('runner', 'r', 'r.id::text = sr."runnerId"::text')
+      .where('r.state = :runnerState', { runnerState: RunnerState.DECOMMISSIONED })
+      .andWhere('sr."updatedAt" < :cutoff', { cutoff })
+      .select('sr.id')
+      .take(500)
+      .getMany()
+
+    if (snapshotRunners.length === 0) {
+      return
+    }
+
+    const ids = snapshotRunners.map((sr) => sr.id)
+    await this.snapshotRunnerRepository.delete(ids)
+
+    this.logger.debug(`Cleaned up ${ids.length} snapshot runners from decommissioned runners`)
+  }
 }
