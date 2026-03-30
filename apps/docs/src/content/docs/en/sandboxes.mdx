@@ -86,7 +86,7 @@ You can specify [programming language runtime](/docs/en/sandboxes#multiple-runti
 9. Select network settings (optional):
 
 - **Public HTTP preview**: allow public access to HTTP [preview URLs](/docs/en/preview)
-- **Block all network access**: block all outbound network access (default)
+- **Block all network access**: block all outbound network access
 
 10. Click the **Create** button to create a sandbox
 
@@ -940,7 +940,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to resize [sandbox resources](#resources) after creation. The resize operation can be performed on a started and running sandbox to increase CPU and memory, or on a stopped sandbox to change CPU, memory, and disk.
+Daytona provides methods to resize [sandbox resources](#resources) after creation. On a running sandbox, you can increase CPU and memory without interruption. To decrease CPU or memory, or to increase disk capacity, stop the sandbox first. Disk size can only be increased and cannot be decreased.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -953,7 +953,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     # Resize a started sandbox (CPU and memory can be increased)
     sandbox.resize(Resources(cpu=2, memory=4))
 
-    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     sandbox.stop()
     sandbox.resize(Resources(cpu=4, memory=8, disk=20))
     sandbox.start()
@@ -970,7 +970,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     // Resize a started sandbox (CPU and memory can be increased)
     await sandbox.resize({ cpu: 2, memory: 4 });
 
-    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     await sandbox.stop();
     await sandbox.resize({ cpu: 4, memory: 8, disk: 20 });
     await sandbox.start();
@@ -987,7 +987,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     # Resize a started sandbox (CPU and memory can be increased)
     sandbox.resize(Daytona::Resources.new(cpu: 2, memory: 4))
 
-    # Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    # Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     sandbox.stop
     sandbox.resize(Daytona::Resources.new(cpu: 4, memory: 8, disk: 20))
     sandbox.start
@@ -999,7 +999,7 @@ Daytona provides methods to resize [sandbox resources](#resources) after creatio
     // Resize a started sandbox (CPU and memory can be increased)
     err := sandbox.Resize(ctx, &types.Resources{CPU: 2, Memory: 4})
 
-    // Resize a stopped sandbox (CPU, memory, and disk can be changed)
+    // Resize a stopped sandbox (CPU and memory can change, disk can only increase)
     err = sandbox.Stop(ctx)
     err = sandbox.Resize(ctx, &types.Resources{CPU: 4, Memory: 8, Disk: 20})
     err = sandbox.Start(ctx)
