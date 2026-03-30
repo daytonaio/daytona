@@ -5,6 +5,9 @@ from __future__ import annotations
 
 import time
 
+from deprecated import deprecated
+from pydantic import ConfigDict, PrivateAttr
+
 from daytona_api_client import BuildInfo
 from daytona_api_client import PaginatedSandboxes as PaginatedSandboxesDto
 from daytona_api_client import PortPreviewUrl, ResizeSandbox
@@ -28,8 +31,6 @@ from daytona_toolbox_api_client import (
     LspApi,
     ProcessApi,
 )
-from deprecated import deprecated
-from pydantic import ConfigDict, PrivateAttr
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

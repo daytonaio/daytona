@@ -6,9 +6,10 @@ from __future__ import annotations
 import json
 import re
 
-from daytona_toolbox_api_client import CreateContextRequest, InterpreterApi, InterpreterContext
 from websockets.exceptions import ConnectionClosed, ConnectionClosedOK
 from websockets.sync.client import connect
+
+from daytona_toolbox_api_client import CreateContextRequest, InterpreterApi, InterpreterContext
 
 from .._utils.errors import intercept_errors
 from ..common.code_interpreter import ExecutionError, ExecutionResult, OutputMessage

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from deprecated import deprecated
+
 from daytona_toolbox_api_client_async import (
     CompletionList,
     LspApi,
@@ -12,7 +14,6 @@ from daytona_toolbox_api_client_async import (
     LspServerRequest,
     LspSymbol,
 )
-from deprecated import deprecated
 
 from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation

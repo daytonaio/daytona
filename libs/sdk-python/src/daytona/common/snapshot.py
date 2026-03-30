@@ -3,12 +3,13 @@
 
 from __future__ import annotations
 
+from pydantic import BaseModel
+
 from daytona_api_client import BuildInfo
 from daytona_api_client import PaginatedSnapshots as PaginatedSnapshotsDto
 from daytona_api_client import SnapshotDto as SyncSnapshotDto
 from daytona_api_client_async import BuildInfo as AsyncBuildInfo
 from daytona_api_client_async import SnapshotDto as AsyncSnapshotDto
-from pydantic import BaseModel
 
 from .image import Image
 from .sandbox import Resources
