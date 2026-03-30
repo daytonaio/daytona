@@ -58,6 +58,12 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
 }
 ---
 
+<style is:global>
+  html:has(#scalar-container) {
+    scroll-behavior: auto;
+  }
+</style>
+
 <div id="scalar-container">
   <ScalarComponent
     configuration={{
@@ -342,11 +348,34 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
     }
   }
 
+  function resyncScalarHashNavigation(): void {
+    const targetHash = window.location.hash
+    if (!targetHash || !/^#(daytona|daytona-toolbox)(\/|$)/.test(targetHash)) {
+      return
+    }
+
+    const baseUrl = window.location.pathname + window.location.search
+    const urlWithHash = baseUrl + targetHash
+
+    function bump(): void {
+      if (window.location.pathname + window.location.search !== baseUrl) {
+        return
+      }
+      window.history.replaceState(null, '', baseUrl)
+      window.requestAnimationFrame(() => {
+        window.history.replaceState(null, '', urlWithHash)
+      })
+    }
+
+    ;[200, 500, 1000].forEach(ms => window.setTimeout(bump, ms))
+  }
+
   function initialize(): void {
     watchForScalar()
     watchThemeChanges()
     updateScalarTheme()
     showMoreButtonStyles()
+    resyncScalarHashNavigation()
 
     setTimeout(() => {
       showMoreButtonStyles()
@@ -358,6 +387,10 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
   } else {
     initialize()
   }
+
+  document.addEventListener('astro:page-load', () => {
+    resyncScalarHashNavigation()
+  })
 
   if (window.matchMedia) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
