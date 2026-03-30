@@ -517,7 +517,7 @@ export class SandboxService {
 
       const insertedSandbox = await this.sandboxRepository.insert(sandbox)
 
-      this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox)).catch(console.error)
+      this.eventEmitter.emitAsync(SandboxEvents.CREATED, new SandboxCreatedEvent(insertedSandbox)).catch((err) => this.logger.error('Failed to emit SandboxCreatedEvent', err))
 
       return this.toSandboxDto(insertedSandbox)
     } catch (error) {
