@@ -930,7 +930,7 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox), [T
 This feature is experimental. To request access, contact [support@daytona.io](mailto:support@daytona.io).
 :::
 
-Daytona provides methods to resize sandbox resources (CPU, memory, and disk) after creation. The resize operation can be performed on a running sandbox to increase CPU and memory, or on a stopped sandbox to change CPU, memory, and disk.
+Daytona provides methods to resize [sandbox resources](#resources) after creation. The resize operation can be performed on a started and running sandbox to increase CPU and memory, or on a stopped sandbox to change CPU, memory, and disk.
 
 <Tabs syncKey="language">
   <TabItem label="Python" icon="seti:python">
@@ -1013,12 +1013,7 @@ curl 'https://app.daytona.io/api/sandbox/{sandboxIdOrName}/resize' \
   </TabItem>
 </Tabs>
 
-:::note
-- **started** sandboxes: CPU and memory can only be increased, not decreased. Disk cannot be changed.
-- **stopped** sandboxes: CPU, memory, and disk can be changed. Disk can only be increased.
-:::
-
-For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#resize), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.Resize), and [Ruby SDK](/docs/en/ruby-sdk/sandbox#resize) references:
+For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sandboxresize), [TypeScript SDK](/docs/en/typescript-sdk/sandbox#resize), [Go SDK](/docs/en/go-sdk/daytona/#Sandbox.Resize), and [Ruby SDK](/docs/en/ruby-sdk/sandbox#resize) and [API](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize) references:
 
 > [**resize (Python SDK)**](/docs/en/python-sdk/sync/sandbox#sandboxresize)
 >
@@ -1027,6 +1022,8 @@ For more information, see the [Python SDK](/docs/en/python-sdk/sync/sandbox#sand
 > [**Resize (Go SDK)**](/docs/en/go-sdk/daytona/#Sandbox.Resize)
 >
 > [**resize (Ruby SDK)**](/docs/en/ruby-sdk/sandbox#resize)
+>
+> [**resize (API)**](/docs/en/tools/api/#daytona/tag/sandbox/POST/sandbox/{sandboxIdOrName}/resize)
 
 ## Delete Sandboxes
 
