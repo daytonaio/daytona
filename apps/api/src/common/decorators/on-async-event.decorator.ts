@@ -9,6 +9,6 @@ export function OnAsyncEvent({ event, options = {} }: OnEventMetadata): MethodDe
   return OnEvent(event, {
     ...options,
     promisify: true,
-    suppressErrors: false,
+    suppressErrors: true,
   })
 }
