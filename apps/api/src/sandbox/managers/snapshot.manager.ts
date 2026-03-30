@@ -5,7 +5,8 @@
 
 import { Injectable, Logger, NotFoundException, OnApplicationShutdown } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { In, IsNull, Not, Repository } from 'typeorm'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { Snapshot } from '../entities/snapshot.entity'
@@ -87,7 +88,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshots', waitForCompletion: true })
+  @StaggeredCron(CronExpression.EVERY_5_SECONDS, { name: 'sync-runner-snapshots', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshots')
   @WithInstrumentation()
@@ -141,7 +142,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-runner-snapshot-states', waitForCompletion: true })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'sync-runner-snapshot-states', waitForCompletion: true })
   @TrackJobExecution()
   @LogExecution('sync-runner-snapshot-states')
   @WithInstrumentation()
@@ -412,7 +413,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
   }
 
   // Pulls stopped sandboxes' backup snapshots to another runner to prepare for reassignment during draining
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'migrate-draining-runner-snapshots', waitForCompletion: true })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, {
+    name: 'migrate-draining-runner-snapshots',
+    waitForCompletion: true,
+  })
   @TrackJobExecution()
   @LogExecution('migrate-draining-runner-snapshots')
   @WithInstrumentation()
@@ -538,7 +542,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-cleanup' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-cleanup' })
   @TrackJobExecution()
   @LogExecution('check-snapshot-cleanup')
   @WithInstrumentation()
@@ -582,7 +586,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-snapshot-state' })
   @TrackJobExecution()
   @LogExecution('check-snapshot-state')
   @WithInstrumentation()
@@ -1014,7 +1018,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-old-buildinfo-snapshot-runners' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'cleanup-old-buildinfo-snapshot-runners' })
   @TrackJobExecution()
   @LogExecution('cleanup-old-buildinfo-snapshot-runners')
   @WithInstrumentation()
@@ -1060,7 +1064,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-old-snapshots' })
+  @StaggeredCron(CronExpression.EVERY_10_MINUTES, { name: 'deactivate-old-snapshots' })
   @TrackJobExecution()
   @LogExecution('deactivate-old-snapshots')
   @WithInstrumentation()
@@ -1123,7 +1127,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-inactive-snapshots-from-runners' })
+  @StaggeredCron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-inactive-snapshots-from-runners' })
   @TrackJobExecution()
   @LogExecution('cleanup-inactive-snapshots-from-runners')
   @WithInstrumentation()

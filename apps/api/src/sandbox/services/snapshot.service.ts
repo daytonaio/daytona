@@ -19,7 +19,8 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
@@ -810,7 +811,7 @@ export class SnapshotService {
     )
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'cleanup-failed-snapshot-runners' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'cleanup-failed-snapshot-runners' })
   @LogExecution('cleanup-failed-snapshot-runners')
   @WithInstrumentation()
   async cleanupFailedSnapshotRunners() {

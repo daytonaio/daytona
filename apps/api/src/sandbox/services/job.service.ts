@@ -11,7 +11,8 @@ import { JobDto, JobStatus, JobType, ResourceType } from '../dto/job.dto'
 import { ResourceTypeForJobType } from '../dto/job-type-map.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { JobStateHandlerService } from './job-state-handler.service'
 import { propagation, context as otelContext } from '@opentelemetry/api'
 import { PaginatedList } from '../../common/interfaces/paginated-list.interface'
@@ -395,7 +396,7 @@ export class JobService {
    * Runs every minute to find jobs that have been IN_PROGRESS for too long
    * Different job types can have different timeout thresholds (see JOB_STALE_TIMEOUT_MINUTES)
    */
-  @Cron(CronExpression.EVERY_MINUTE)
+  @StaggeredCron(CronExpression.EVERY_MINUTE)
   async handleStaleJobs(): Promise<void> {
     try {
       // Group job types by their timeout value to minimize queries

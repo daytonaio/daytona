@@ -5,7 +5,8 @@
 
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxRepository } from '../repositories/sandbox.repository'
@@ -169,7 +170,7 @@ export class SandboxWarmPoolService {
   }
 
   //  todo: make frequency configurable or more efficient
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'warm-pool-check' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'warm-pool-check' })
   @LogExecution('warm-pool-check')
   @WithInstrumentation()
   async warmPoolCheck(): Promise<void> {

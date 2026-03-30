@@ -14,7 +14,8 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Not, Repository, UpdateResult } from 'typeorm'
 import { Runner } from '../entities/runner.entity'
 import { CreateRunnerInternalDto } from '../dto/create-runner-internal.dto'
@@ -503,7 +504,7 @@ export class RunnerService {
     this.eventEmitter.emit(RunnerEvents.STATE_UPDATED, new RunnerStateUpdatedEvent(runner, runner.state, newState))
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-runners', waitForCompletion: true })
   @LogExecution('check-runners')
   @WithInstrumentation()
   private async handleCheckRunners() {
@@ -663,7 +664,7 @@ export class RunnerService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-decommission-runners', waitForCompletion: true })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-decommission-runners', waitForCompletion: true })
   @LogExecution('check-decommission-runners')
   @WithInstrumentation()
   private async handleCheckDecommissionRunners() {

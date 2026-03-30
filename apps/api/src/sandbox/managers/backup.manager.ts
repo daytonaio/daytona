@@ -4,7 +4,8 @@
  */
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { In, IsNull, LessThan, Not, Or } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -66,7 +67,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
   }
 
   //  todo: make frequency configurable or more efficient
-  @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
+  @StaggeredCron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   @TrackJobExecution()
   @LogExecution('ad-hoc-backup-check')
   @WithInstrumentation()
@@ -132,7 +133,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states' })
   @TrackJobExecution()
   @LogExecution('check-backup-states')
   @WithInstrumentation()
@@ -236,7 +237,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states-errored-draining' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'check-backup-states-errored-draining' })
   @TrackJobExecution()
   @LogExecution('check-backup-states-errored-draining')
   @WithInstrumentation()
@@ -321,7 +322,7 @@ export class BackupManager implements TrackableJobExecutions, OnApplicationShutd
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'sync-stop-state-create-backups' })
   @TrackJobExecution()
   @LogExecution('sync-stop-state-create-backups')
   @WithInstrumentation()

@@ -5,7 +5,8 @@
 
 import { Inject, Injectable, Logger, NotFoundException, OnApplicationBootstrap, Optional } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { LessThan, Repository, IsNull, Not } from 'typeorm'
 import { CreateAuditLogInternalDto } from '../dto/create-audit-log-internal.dto'
 import { UpdateAuditLogInternalDto } from '../dto/update-audit-log-internal.dto'
@@ -114,7 +115,7 @@ export class AuditService implements OnApplicationBootstrap {
     return this.auditStorageAdapter.getOrganizationLogs(organizationId, page, limit, filters, nextToken)
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_2AM, {
+  @StaggeredCron(CronExpression.EVERY_DAY_AT_2AM, {
     name: 'cleanup-old-audit-logs',
     waitForCompletion: true,
     disabled: true,
@@ -144,7 +145,7 @@ export class AuditService implements OnApplicationBootstrap {
   }
 
   // Resolve dangling audit logs where status code is not set and created at is more than half an hour ago
-  @Cron(CronExpression.EVERY_MINUTE, {
+  @StaggeredCron(CronExpression.EVERY_MINUTE, {
     name: 'resolve-dangling-audit-logs',
     waitForCompletion: true,
   })
@@ -170,7 +171,7 @@ export class AuditService implements OnApplicationBootstrap {
     this.logger.debug(`Resolved ${danglingLogs.length} dangling audit logs`)
   }
 
-  @Cron(CronExpression.EVERY_SECOND, {
+  @StaggeredCron(CronExpression.EVERY_SECOND, {
     name: 'publish-audit-logs',
     waitForCompletion: true,
     disabled: true,

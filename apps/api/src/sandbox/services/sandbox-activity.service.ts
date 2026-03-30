@@ -8,7 +8,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { InjectDataSource } from '@nestjs/typeorm'
 import { DataSource, IsNull, Raw } from 'typeorm'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SandboxLastActivity } from '../entities/sandbox-last-activity.entity'
 import { LogExecution } from '../../common/decorators/log-execution.decorator'
@@ -72,7 +73,7 @@ export class SandboxActivityService {
    *
    * Frequency must be < 1min to prevent unintended auto-lifecycle actions.
    */
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'flush-activity-to-db' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'flush-activity-to-db' })
   @LogExecution('flush-activity-to-db')
   @WithInstrumentation()
   async flushActivityToDb(): Promise<void> {

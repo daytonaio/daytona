@@ -11,7 +11,8 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
 import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
 import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constants'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
 import { SandboxUsagePeriodArchive } from '../entities/sandbox-usage-period-archive.entity'
@@ -108,7 +109,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'close-and-reopen-usage-periods' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'close-and-reopen-usage-periods' })
   @TrackJobExecution()
   @LogExecution('close-and-reopen-usage-periods')
   @WithInstrumentation()
@@ -172,7 +173,7 @@ export class UsageService implements TrackableJobExecutions, OnApplicationShutdo
     await this.redisLockProvider.unlock('close-and-reopen-usage-periods')
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'archive-usage-periods' })
   @TrackJobExecution()
   @LogExecution('archive-usage-periods')
   @WithInstrumentation()

@@ -4,7 +4,8 @@
  */
 
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { In, IsNull, Not } from 'typeorm'
 import { randomUUID } from 'crypto'
 
@@ -83,7 +84,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-stop-check' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'auto-stop-check' })
   @TrackJobExecution()
   @WithInstrumentation()
   @LogExecution('auto-stop-check')
@@ -158,7 +159,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-archive-check' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'auto-archive-check' })
   @TrackJobExecution()
   @LogExecution('auto-archive-check')
   @WithInstrumentation()
@@ -216,7 +217,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'auto-delete-check' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'auto-delete-check' })
   @TrackJobExecution()
   @LogExecution('auto-delete-check')
   @WithInstrumentation()
@@ -281,7 +282,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'draining-runner-sandboxes-check' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'draining-runner-sandboxes-check' })
   @TrackJobExecution()
   @LogExecution('draining-runner-sandboxes-check')
   @WithInstrumentation()
@@ -660,7 +661,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   @TrackJobExecution()
   @WithInstrumentation()
   @LogExecution('sync-states')
@@ -741,7 +742,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     }
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
   @TrackJobExecution()
   @LogExecution('sync-archived-desired-states')
   @WithInstrumentation()
@@ -770,7 +771,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-completed-states' })
+  @StaggeredCron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-completed-states' })
   @TrackJobExecution()
   @LogExecution('sync-archived-completed-states')
   async syncArchivedCompletedStates(): Promise<void> {

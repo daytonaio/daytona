@@ -29,7 +29,8 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../events/organization-suspended-sandbox-stopped.event'
 import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.enum'
@@ -580,7 +581,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     return region
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'stop-suspended-organization-sandboxes' })
   @TrackJobExecution()
   @LogExecution('stop-suspended-organization-sandboxes')
   @WithInstrumentation()
@@ -634,7 +635,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'deactivate-suspended-organization-snapshots' })
   @TrackJobExecution()
   @LogExecution('deactivate-suspended-organization-snapshots')
   @WithInstrumentation()

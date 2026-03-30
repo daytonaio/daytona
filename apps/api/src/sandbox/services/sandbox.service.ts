@@ -15,7 +15,8 @@ import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from './runner.service'
 import { SandboxError } from '../../exceptions/sandbox-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { Cron, CronExpression } from '@nestjs/schedule'
+import { CronExpression } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { BackupState } from '../enums/backup-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -1784,7 +1785,7 @@ export class SandboxService {
     return await this.sandboxRepository.update(sandbox.id, { updateData, entity: sandbox })
   }
 
-  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-destroyed-sandboxes' })
+  @StaggeredCron(CronExpression.EVERY_SECOND, { name: 'cleanup-destroyed-sandboxes' })
   @LogExecution('cleanup-destroyed-sandboxes')
   @WithInstrumentation()
   async cleanupDestroyedSandboxes() {
@@ -1801,7 +1802,7 @@ export class SandboxService {
     }
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-build-failed-sandboxes' })
+  @StaggeredCron(CronExpression.EVERY_10_MINUTES, { name: 'cleanup-build-failed-sandboxes' })
   @LogExecution('cleanup-build-failed-sandboxes')
   @WithInstrumentation()
   async cleanupBuildFailedSandboxes() {
@@ -1819,7 +1820,7 @@ export class SandboxService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-build-failed-sandboxes' })
+  @StaggeredCron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-build-failed-sandboxes' })
   @LogExecution('cleanup-stale-build-failed-sandboxes')
   @WithInstrumentation()
   async cleanupStaleBuildFailedSandboxes() {
@@ -1837,7 +1838,7 @@ export class SandboxService {
     }
   }
 
-  @Cron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-error-sandboxes' })
+  @StaggeredCron(CronExpression.EVERY_SECOND, { name: 'cleanup-stale-error-sandboxes' })
   @LogExecution('cleanup-stale-error-sandboxes')
   @WithInstrumentation()
   async cleanupStaleErrorSandboxes() {
@@ -1980,7 +1981,7 @@ export class SandboxService {
     await this.createForWarmPool(event.warmPool)
   }
 
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
+  @StaggeredCron(CronExpression.EVERY_MINUTE, { name: 'handle-unschedulable-runners' })
   @LogExecution('handle-unschedulable-runners')
   @WithInstrumentation()
   private async handleUnschedulableRunners() {

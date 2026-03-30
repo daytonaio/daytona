@@ -8,7 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
-import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule'
+import { CronExpression, SchedulerRegistry } from '@nestjs/schedule'
+import { StaggeredCron } from '../../common/decorators/staggered-cron.decorator'
 import { S3Client, CreateBucketCommand, ListBucketsCommand, PutBucketTaggingCommand } from '@aws-sdk/client-s3'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
@@ -105,7 +106,11 @@ export class VolumeManager
     }
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS, { name: 'process-pending-volumes', waitForCompletion: true, disabled: true })
+  @StaggeredCron(CronExpression.EVERY_5_SECONDS, {
+    name: 'process-pending-volumes',
+    waitForCompletion: true,
+    disabled: true,
+  })
   @TrackJobExecution()
   @LogExecution('process-pending-volumes')
   @WithInstrumentation()
