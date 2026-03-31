@@ -12,7 +12,7 @@
  * Do not edit the class manually.
  */
 
-import { VERSION } from './version';
+import * as packageJson from '../package.json';
 
 
 export interface ConfigurationParameters {
@@ -94,7 +94,7 @@ export class Configuration {
         this.baseOptions = {
             ...param.baseOptions,
             headers: {
-                'User-Agent': `api-client-typescript/${VERSION}`,
+                'User-Agent': `api-client-typescript/${packageJson.version}`,
                 ...param.baseOptions?.headers,
             },
         };
