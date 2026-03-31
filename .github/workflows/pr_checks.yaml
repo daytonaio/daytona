@@ -70,7 +70,7 @@ jobs:
           cache: true
           cache-dependency-path: '**/go.sum'
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
         with:
           version: v2.6.2
           working-directory: ${{ matrix.working-directory }}
@@ -98,7 +98,7 @@ jobs:
           go fmt ./...
           git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9
         with:
           version: v2.6.2
           working-directory: libs/computer-use
@@ -170,14 +170,14 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check AGPL License Headers
-        uses: apache/skywalking-eyes/header@main
+        uses: apache/skywalking-eyes/header@8c96ee223558797cdd9eba82c0919258e1cf2dad # main
         with:
           token: ${{ github.token }}
           config: .licenserc.yaml
           mode: 'check'
 
       - name: Check Apache License Headers
-        uses: apache/skywalking-eyes/header@main
+        uses: apache/skywalking-eyes/header@8c96ee223558797cdd9eba82c0919258e1cf2dad # main
         with:
           token: ${{ github.token }}
           config: .licenserc-clients.yaml
