@@ -40,12 +40,12 @@ import { RunnerStateUpdatedEvent } from '../events/runner-state-updated.event'
 import { RunnerDeletedEvent } from '../events/runner-deleted.event'
 import { generateApiKeyValue } from '../../common/utils/api-key'
 import { RunnerFullDto } from '../dto/runner-full.dto'
-import { Snapshot } from '../entities/snapshot.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { runnerLookupCacheKeyById, RUNNER_LOOKUP_CACHE_TTL_MS } from '../utils/runner-lookup-cache.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { RunnerServiceInfo } from '../common/runner-service-info'
 
 @Injectable()
@@ -64,8 +64,7 @@ export class RunnerService {
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: TypedConfigService,
     private readonly regionService: RegionService,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @Inject(EventEmitter2)
     private eventEmitter: EventEmitter2,
     private readonly dataSource: DataSource,
