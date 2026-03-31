@@ -1,0 +1,28 @@
+{
+  "name": "toolbox-api-client-dotnet",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/toolbox-api-client-dotnet",
+  "tags": [],
+  "targets": {
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["apiClient"],
+      "outputs": ["{projectRoot}/src"],
+      "options": {
+        "commands": [
+          "rm -rf {projectRoot}/src",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i apps/daemon/pkg/toolbox/docs/swagger.json -g csharp --additional-properties=packageName=Daytona.ToolboxApiClient,targetFramework=net8.0,nullableReferenceTypes=true,library=httpclient,useOneOfDiscriminatorLookup=true -o {projectRoot}/src"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "daemon"
+        }
+      ]
+    }
+  }
+}
