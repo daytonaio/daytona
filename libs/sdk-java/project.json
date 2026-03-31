@@ -1,0 +1,39 @@
+{
+  "name": "sdk-java",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-java/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/build"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew build"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}/examples/java",
+        "commands": [
+          "./gradlew runLifecycle",
+          "./gradlew runExecCommand",
+          "./gradlew runFileOperations",
+          "./gradlew runGitOperations",
+          "./gradlew runPty"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "./gradlew clean"
+      }
+    }
+  }
+}
