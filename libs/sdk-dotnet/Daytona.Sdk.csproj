@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Daytona.Sdk</RootNamespace>
+    <AssemblyName>Daytona.Sdk</AssemblyName>
+    <Version>0.1.0</Version>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>12</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../api-client-dotnet/src/src/Daytona.ApiClient/Daytona.ApiClient.csproj" />
+    <ProjectReference Include="../toolbox-api-client-dotnet/src/src/Daytona.ToolboxApiClient/Daytona.ToolboxApiClient.csproj" />
+  </ItemGroup>
+</Project>

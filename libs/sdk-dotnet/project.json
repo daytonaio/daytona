@@ -1,0 +1,32 @@
+{
+  "name": "sdk-dotnet",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-dotnet",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "inputs": ["default"],
+      "outputs": ["{projectRoot}/bin", "{projectRoot}/obj"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "dotnet build Daytona.Sdk.csproj -c Release"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "dotnet run --project examples/dotnet -- lifecycle && dotnet run --project examples/dotnet -- exec && dotnet run --project examples/dotnet -- files && dotnet run --project examples/dotnet -- git && dotnet run --project examples/dotnet -- auto-archive && dotnet run --project examples/dotnet -- auto-delete && dotnet run --project examples/dotnet -- image && dotnet run --project examples/dotnet -- network && dotnet run --project examples/dotnet -- pagination && dotnet run --project examples/dotnet -- volumes && dotnet run --project examples/dotnet -- region"
+      },
+      "dependsOn": ["build"]
+    },
+    "clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "dotnet clean Daytona.Sdk.csproj"
+      }
+    }
+  }
+}
