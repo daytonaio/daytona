@@ -21,8 +21,11 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
+from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
+
+_JSON_ADAPTER = TypeAdapter(Dict[str, Any])
 
 class AdminCreateRunner(BaseModel):
     """
@@ -61,8 +64,7 @@ class AdminCreateRunner(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
-        return json.dumps(self.to_dict())
+        return _JSON_ADAPTER.dump_json(self.to_dict()).decode()
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:

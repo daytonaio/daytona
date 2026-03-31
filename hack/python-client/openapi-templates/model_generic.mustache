@@ -9,6 +9,7 @@ import json
 {{#vendorExtensions.x-py-model-imports}}
 {{{.}}}
 {{/vendorExtensions.x-py-model-imports}}
+from pydantic import TypeAdapter
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -23,6 +24,8 @@ if TYPE_CHECKING:
 
 {{/discriminator}}
 {{/hasChildren}}
+_JSON_ADAPTER = TypeAdapter(Dict[str, Any])
+
 class {{classname}}({{#parent}}{{{.}}}{{/parent}}{{^parent}}BaseModel{{/parent}}):
     """
     {{#description}}{{{description}}}{{/description}}{{^description}}{{{classname}}}{{/description}}
@@ -127,8 +130,7 @@ class {{classname}}({{#parent}}{{{.}}}{{/parent}}{{^parent}}BaseModel{{/parent}}
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
-        return json.dumps(self.to_dict())
+        return _JSON_ADAPTER.dump_json(self.to_dict()).decode()
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[{{^hasChildren}}Self{{/hasChildren}}{{#hasChildren}}{{#discriminator}}Union[{{#mappedModels}}{{{modelName}}}{{^-last}}, {{/-last}}{{/mappedModels}}]{{/discriminator}}{{^discriminator}}Self{{/discriminator}}{{/hasChildren}}]:
