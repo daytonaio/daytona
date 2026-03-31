@@ -1090,7 +1090,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
       }
 
       // Deactivate the snapshots
-      await Promise.allSettled(
+      const settledResults = await Promise.allSettled(
         oldSnapshots.map((snapshot) =>
           this.snapshotRepository.update(snapshot.id, {
             updateData: { state: SnapshotState.INACTIVE },
@@ -1099,8 +1099,17 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         ),
       )
 
+      const deactivatedSnapshots: Snapshot[] = []
+      for (const [i, result] of settledResults.entries()) {
+        if (result.status === 'fulfilled') {
+          deactivatedSnapshots.push(oldSnapshots[i])
+        } else {
+          this.logger.warn(`Failed to deactivate snapshot ${oldSnapshots[i].id}: ${result.reason}`)
+        }
+      }
+
       // Get internal names of deactivated snapshots
-      const refs = oldSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
+      const refs = deactivatedSnapshots.map((snapshot) => snapshot.ref).filter((name) => name) // Filter out null/undefined values
 
       if (refs.length > 0) {
         // Set associated SnapshotRunner records to REMOVING state
@@ -1110,7 +1119,7 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
         )
 
         this.logger.debug(
-          `Deactivated ${oldSnapshots.length} snapshots and marked ${result.affected} SnapshotRunners for removal`,
+          `Deactivated ${deactivatedSnapshots.length} snapshots and marked ${result.affected} SnapshotRunners for removal`,
         )
       }
     } catch (error) {
