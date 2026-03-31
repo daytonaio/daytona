@@ -142,12 +142,18 @@ export class Sandbox implements SandboxDto {
     this.processSandboxDto(sandboxDto)
 
     // Set the toolbox base URL
-    let baseUrl = DaytonaEnvReader.get('DAYTONA_TOOLBOX_PROXY_URL') || this.toolboxProxyUrl
+    const toolboxProxyUrlOverride = DaytonaEnvReader.get('DAYTONA_TOOLBOX_PROXY_URL')
+    let baseUrl = toolboxProxyUrlOverride || this.toolboxProxyUrl
     if (!baseUrl.endsWith('/')) {
       baseUrl += '/'
     }
     this.axiosInstance.defaults.baseURL = baseUrl + this.id
     this.clientConfig.basePath = this.axiosInstance.defaults.baseURL
+
+    // When routing through a proxy, tell it the real toolbox URL via a header
+    if (toolboxProxyUrlOverride) {
+      this.axiosInstance.defaults.headers.common['X-Daytona-Toolbox-Url'] = this.toolboxProxyUrl.replace(/\/$/, '')
+    }
 
     // Initialize Services
     const getPreviewToken = async () => (await this.getPreviewLink(1)).token
