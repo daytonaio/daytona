@@ -167,7 +167,7 @@ export class DockerRegistryProvider implements IDockerRegistryProvider {
     // Prevent SSRF: only follow HTTPS realm URLs (or HTTP for localhost).
     const scheme = tokenUrl.protocol
     const hostname = tokenUrl.hostname
-    if (scheme !== 'https:' && !(scheme === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1'))) {
+    if (scheme !== 'https:' && !(scheme === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === 'registry'))) {
       throw new RegistryCredentialsValidationError(
         RegistryCredentialsValidationErrorCode.UNSUPPORTED_CHALLENGE,
         `Registry Bearer realm uses disallowed scheme: ${scheme}`,

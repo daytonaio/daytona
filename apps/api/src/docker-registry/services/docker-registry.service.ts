@@ -143,7 +143,7 @@ export class DockerRegistryService {
       registry.username !== updateDto.username ||
       registry.password !== effectivePassword
 
-    if (credentialsChanged) {
+    if (credentialsChanged && registry.registryType === RegistryType.ORGANIZATION) {
       await this.validateRegistryCredentials(normalizedUrl, {
         username: updateDto.username,
         password: effectivePassword,
