@@ -9,12 +9,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daemon/pkg/common"
@@ -118,14 +118,21 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.
 }
 
 // Writes a structured error response as a multipart part.
+// Pre-marshals to a buffer so a failed encode cannot corrupt a half-written part.
 func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path string, errorResponse common.ErrorResponse) {
+	payload, err := json.Marshal(errorResponse)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", "application/json; charset=utf-8")
 	hdr.Set("Content-Disposition", multipartContentDisposition("error", path))
 
 	if part, err := mw.CreatePart(hdr); err == nil {
-		if err := json.NewEncoder(part).Encode(errorResponse); err != nil {
-			ctx.AbortWithError(http.StatusInternalServerError, err)
+		if _, err := part.Write(payload); err != nil {
+			ctx.Error(err)
 		}
 	}
 }
@@ -165,10 +172,8 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 }
 
 func multipartContentDisposition(formName string, path string) string {
-	return mime.FormatMediaType("form-data", map[string]string{
-		"name":     formName,
-		"filename": path,
-	})
+	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(path)
+	return fmt.Sprintf(`form-data; name="%s"; filename="%s"`, formName, escaped)
 }
 
 func classifyPathStatError(path string, err error) (int, string, string) {
@@ -189,44 +194,12 @@ func classifyPathStatError(path string, err error) (int, string, string) {
 }
 
 func classifyOpenFileError(ctx *gin.Context, path string, err error) common.ErrorResponse {
-	// Keep file-open failures visible and machine-readable for the SDKs.
-	if errors.Is(err, os.ErrNotExist) {
-		return newFileDownloadErrorResponse(
-			ctx,
-			path,
-			http.StatusNotFound,
-			"FILE_NOT_FOUND",
-			fmt.Sprintf("file not found: %s", path),
-		)
+	statusCode, errorCode, message := classifyPathStatError(path, err)
+	// Use a more specific fallback message for open errors.
+	if errorCode == "FILE_READ_FAILED" {
+		message = fmt.Sprintf("failed to open file: %v", err)
 	}
-
-	if errors.Is(err, os.ErrPermission) {
-		return newFileDownloadErrorResponse(
-			ctx,
-			path,
-			http.StatusForbidden,
-			"FILE_ACCESS_DENIED",
-			fmt.Sprintf("permission denied: %s", path),
-		)
-	}
-
-	if errors.Is(err, os.ErrInvalid) {
-		return newFileDownloadErrorResponse(
-			ctx,
-			path,
-			http.StatusBadRequest,
-			"INVALID_FILE_PATH",
-			fmt.Sprintf("invalid file path: %s", path),
-		)
-	}
-
-	return newFileDownloadErrorResponse(
-		ctx,
-		path,
-		http.StatusInternalServerError,
-		"FILE_READ_FAILED",
-		fmt.Sprintf("failed to open file: %v", err),
-	)
+	return newFileDownloadErrorResponse(ctx, path, statusCode, errorCode, message)
 }
 
 func newFileDownloadErrorResponse(

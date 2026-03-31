@@ -450,7 +450,7 @@ class Sandbox(SandboxDto):
                 Set to 0 for the maximum interval. Default is 7 days.
 
         Raises:
-            DaytonaError: If interval is negative
+            DaytonaValidationError: If interval is negative
 
         Example:
             ```python
