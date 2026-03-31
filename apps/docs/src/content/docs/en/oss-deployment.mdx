@@ -66,6 +66,12 @@ This configures dnsmasq with `address=/proxy.localhost/127.0.0.1`.
 - The registry is configured to allow image deletion for testing
 - Sandbox resource limits are disabled due to inability to partition cgroups in DinD environment where the sock is not mounted
 
+## Security Considerations
+
+The `INTER_SANDBOX_NETWORK_ENABLED` runner environment variable controls whether sandboxes on the same runner can communicate over the network. In the Docker Compose configuration this defaults to `false`, creating an isolated bridge network with inter-container communication disabled.
+
+If you are deploying runners outside of the provided Docker Compose setup, ensure `INTER_SANDBOX_NETWORK_ENABLED` is explicitly set to `false` unless your use case requires inter-sandbox communication.
+
 ## Additional Network Options
 
 ### HTTP Proxy
