@@ -26,8 +26,6 @@ import type { CreateSnapshot } from '../models';
 // @ts-ignore
 import type { PaginatedSnapshots } from '../models';
 // @ts-ignore
-import type { SetSnapshotGeneralStatusDto } from '../models';
-// @ts-ignore
 import type { SnapshotDto } from '../models';
 // @ts-ignore
 import type { Url } from '../models';
@@ -66,53 +64,6 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             // authentication oauth2 required
-
-
-    
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Check if an image can be cleaned up
-         * @param {string} imageName Image name with tag to check
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        canCleanupImage: async (imageName: string, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'imageName' is not null or undefined
-            assertParamExists('canCleanupImage', 'imageName', imageName)
-            const localVarPath = `/snapshots/can-cleanup-image`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication oauth2 required
-
-            if (imageName !== undefined) {
-                localVarQueryParameter['imageName'] = imageName;
-            }
 
 
     
@@ -465,56 +416,6 @@ export const SnapshotsApiAxiosParamCreator = function (configuration?: Configura
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @summary Set snapshot general status
-         * @param {string} id Snapshot ID
-         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        setSnapshotGeneralStatus: async (id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, xDaytonaOrganizationID?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('setSnapshotGeneralStatus', 'id', id)
-            // verify required parameter 'setSnapshotGeneralStatusDto' is not null or undefined
-            assertParamExists('setSnapshotGeneralStatus', 'setSnapshotGeneralStatusDto', setSnapshotGeneralStatusDto)
-            const localVarPath = `/snapshots/{id}/general`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication oauth2 required
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            if (xDaytonaOrganizationID != null) {
-                localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
-            }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(setSnapshotGeneralStatusDto, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -537,20 +438,6 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.activateSnapshot(id, xDaytonaOrganizationID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.activateSnapshot']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Check if an image can be cleaned up
-         * @param {string} imageName Image name with tag to check
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async canCleanupImage(imageName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.canCleanupImage(imageName, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.canCleanupImage']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -657,21 +544,6 @@ export const SnapshotsApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.removeSnapshot']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
-        /**
-         * 
-         * @summary Set snapshot general status
-         * @param {string} id Snapshot ID
-         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async setSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SnapshotDto>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.setSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, xDaytonaOrganizationID, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['SnapshotsApi.setSnapshotGeneralStatus']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
     }
 };
 
@@ -692,17 +564,6 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
          */
         activateSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotDto> {
             return localVarFp.activateSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Check if an image can be cleaned up
-         * @param {string} imageName Image name with tag to check
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        canCleanupImage(imageName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-            return localVarFp.canCleanupImage(imageName, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -787,18 +648,6 @@ export const SnapshotsApiFactory = function (configuration?: Configuration, base
         removeSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.removeSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
         },
-        /**
-         * 
-         * @summary Set snapshot general status
-         * @param {string} id Snapshot ID
-         * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
-         * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        setSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<SnapshotDto> {
-            return localVarFp.setSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
     };
 };
 
@@ -820,19 +669,6 @@ export class SnapshotsApi extends BaseAPI {
      */
     public activateSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).activateSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Check if an image can be cleaned up
-     * @param {string} imageName Image name with tag to check
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SnapshotsApi
-     */
-    public canCleanupImage(imageName: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return SnapshotsApiFp(this.configuration).canCleanupImage(imageName, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -930,20 +766,6 @@ export class SnapshotsApi extends BaseAPI {
      */
     public removeSnapshot(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return SnapshotsApiFp(this.configuration).removeSnapshot(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Set snapshot general status
-     * @param {string} id Snapshot ID
-     * @param {SetSnapshotGeneralStatusDto} setSnapshotGeneralStatusDto 
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SnapshotsApi
-     */
-    public setSnapshotGeneralStatus(id: string, setSnapshotGeneralStatusDto: SetSnapshotGeneralStatusDto, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
-        return SnapshotsApiFp(this.configuration).setSnapshotGeneralStatus(id, setSnapshotGeneralStatusDto, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

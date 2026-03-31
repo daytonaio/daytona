@@ -4,12 +4,12 @@
  */
 
 import { Controller, Get, Post, Body, Param, Query, UseGuards, Logger, Req, NotFoundException } from '@nestjs/common'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { Request } from 'express'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { RunnerAuthGuard } from '../../auth/runner-auth.guard'
-import { RunnerContextDecorator } from '../../common/decorators/runner-context.decorator'
-import { RunnerContext } from '../../common/interfaces/runner-context.interface'
+import { RunnerAuthContextGuard } from '../guards/runner-auth-context.guard'
+import { RunnerAuthContext } from '../../common/interfaces/runner-auth-context.interface'
+import { IsRunnerAuthContext } from '../../common/decorators/auth-context.decorator'
 import {
   JobDto,
   JobStatus,
@@ -20,12 +20,16 @@ import {
 } from '../dto/job.dto'
 import { JobService } from '../services/job.service'
 import { JobAccessGuard } from '../guards/job-access.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('jobs')
 @Controller('jobs')
-@UseGuards(CombinedAuthGuard, RunnerAuthGuard)
+@ApiTags('jobs')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy(AuthStrategyType.API_KEY)
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(RunnerAuthContextGuard)
 export class JobController {
   private readonly logger = new Logger(JobController.name)
 
@@ -63,7 +67,7 @@ export class JobController {
     type: PaginatedJobsDto,
   })
   async listJobs(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Query() query: ListJobsQueryDto,
   ): Promise<PaginatedJobsDto> {
     return await this.jobService.findJobsForRunner(runnerContext.runnerId, query.status, query.page, query.limit)
@@ -95,7 +99,7 @@ export class JobController {
   })
   async pollJobs(
     @Req() req: Request,
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Query('timeout') timeout?: number,
     @Query('limit') limit?: number,
   ): Promise<PollJobsResponseDto> {
@@ -149,7 +153,10 @@ export class JobController {
     type: JobDto,
   })
   @UseGuards(JobAccessGuard)
-  async getJob(@RunnerContextDecorator() runnerContext: RunnerContext, @Param('jobId') jobId: string): Promise<JobDto> {
+  async getJob(
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
+    @Param('jobId') jobId: string,
+  ): Promise<JobDto> {
     this.logger.log(`Runner ${runnerContext.runnerId} fetching job ${jobId}`)
 
     const job = await this.jobService.findOne(jobId)
@@ -177,7 +184,7 @@ export class JobController {
   })
   @UseGuards(JobAccessGuard)
   async updateJobStatus(
-    @RunnerContextDecorator() runnerContext: RunnerContext,
+    @IsRunnerAuthContext() runnerContext: RunnerAuthContext,
     @Param('jobId') jobId: string,
     @Body() updateJobStatusDto: UpdateJobStatusDto,
   ): Promise<JobDto> {

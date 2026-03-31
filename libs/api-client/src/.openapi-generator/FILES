@@ -28,6 +28,7 @@ git_push.sh
 index.ts
 models/account-provider.ts
 models/admin-create-runner.ts
+models/admin-get-webhook-status200-response.ts
 models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
@@ -197,7 +198,6 @@ models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
 models/webhook-app-portal-access.ts
-models/webhook-controller-get-status200-response.ts
 models/webhook-event.ts
 models/webhook-initialization-status.ts
 models/windows-response.ts

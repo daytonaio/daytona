@@ -1,5 +1,6 @@
 export * from './account-provider';
 export * from './admin-create-runner';
+export * from './admin-get-webhook-status200-response';
 export * from './announcement';
 export * from './api-key-list';
 export * from './api-key-response';
@@ -168,7 +169,6 @@ export * from './user-public-key';
 export * from './volume-dto';
 export * from './volume-state';
 export * from './webhook-app-portal-access';
-export * from './webhook-controller-get-status200-response';
 export * from './webhook-event';
 export * from './webhook-initialization-status';
 export * from './windows-response';

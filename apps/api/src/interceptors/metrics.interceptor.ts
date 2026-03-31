@@ -18,6 +18,9 @@ import { SandboxDto } from '../sandbox/dto/sandbox.dto'
 import { DockerRegistryDto } from '../docker-registry/dto/docker-registry.dto'
 import { CreateSandboxDto } from '../sandbox/dto/create-sandbox.dto'
 import { Request } from 'express'
+import { BaseAuthContext, isBaseAuthContext } from '../common/interfaces/base-auth-context.interface'
+import { isUserAuthContext } from '../common/interfaces/user-auth-context.interface'
+import { isOrganizationAuthContext } from '../common/interfaces/organization-auth-context.interface'
 import { CreateSnapshotDto } from '../sandbox/dto/create-snapshot.dto'
 import { SnapshotDto } from '../sandbox/dto/snapshot.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
@@ -36,8 +39,8 @@ import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 import { TypedConfigService } from '../config/typed-config.service'
 import { UpdateOrganizationRegionQuotaDto } from '../organization/dto/update-organization-region-quota.dto'
 import { UpdateOrganizationDefaultRegionDto } from '../organization/dto/update-organization-default-region.dto'
+import { getAuthContext } from '../common/utils/get-auth-context'
 
-type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
   organizationId?: string
   distinctId: string
@@ -83,6 +86,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     }
 
     const request = context.switchToHttp().getRequest()
+    const authContext = request.user ? getAuthContext(context, isBaseAuthContext) : undefined
+
     const startTime = Date.now()
 
     return next.handle().pipe(
@@ -90,7 +95,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         next: (response) => {
           // For DELETE requests or empty responses, pass an empty object with statusCode
           const responseObj = response || { statusCode: 204 }
-          this.recordMetrics(request, responseObj, startTime).catch((err) => this.logger.error(err))
+          this.recordMetrics(request, responseObj, startTime, undefined, authContext).catch((err) =>
+            this.logger.error(err),
+          )
         },
         error: (error) => {
           this.recordMetrics(
@@ -98,23 +105,32 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             { statusCode: error.status || 500 },
             startTime,
             error.message || JSON.stringify(error),
+            authContext,
           ).catch((err) => this.logger.error(err))
         },
       }),
     )
   }
 
-  private async recordMetrics(request: RequestWithUser, response: any, startTime: number, error?: string) {
+  private async recordMetrics(
+    request: Request,
+    response: any,
+    startTime: number,
+    error?: string,
+    authContext?: BaseAuthContext,
+  ) {
     const durationMs = Date.now() - startTime
     const statusCode = error ? response.statusCode : response.statusCode || (request.method === 'DELETE' ? 204 : 200) // Default to 204 for DELETE requests
-    const distinctId = request.user?.userId || 'anonymous'
+    const distinctId = authContext && isUserAuthContext(authContext) ? authContext.userId : 'anonymous'
+    const organizationId =
+      authContext && isOrganizationAuthContext(authContext) ? authContext.organizationId : undefined
     const userAgent = request.get('user-agent')
     const source = request.get(CustomHeaders.SOURCE.name)
     const sdkVersion = request.get(CustomHeaders.SDK_VERSION.name)
 
     const props: CommonCaptureProps = {
       distinctId,
-      organizationId: request.user?.organizationId,
+      organizationId,
       durationMs,
       statusCode,
       userAgent,

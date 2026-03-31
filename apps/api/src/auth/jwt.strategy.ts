@@ -9,8 +9,9 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { passportJwtSecret } from 'jwks-rsa'
 import { createRemoteJWKSet, JWTPayload, jwtVerify } from 'jose'
 import { UserService } from '../user/user.service'
-import { AuthContext } from '../common/interfaces/auth-context.interface'
-import { Request } from 'express'
+import { UserAuthContext } from '../common/interfaces/user-auth-context.interface'
+import { AuthStrategyType } from './enums/auth-strategy-type.enum'
+import { RequestWithAuthMetadata } from './interfaces/request-with-auth-metadata.interface'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { TypedConfigService } from '../config/typed-config.service'
 
@@ -44,56 +45,75 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       passReqToCallback: true,
     })
     this.JWKS = createRemoteJWKSet(new URL(options.jwksUri))
-    this.logger.debug('JwtStrategy initialized')
   }
 
-  async validate(request: Request, payload: any): Promise<AuthContext> {
-    // OKTA does not return the userId in access_token sub claim
-    // real userId is in the uid claim and email is in the sub claim
-    let userId = payload.sub
-    let email = payload.email
-    if (payload.cid && payload.uid) {
-      userId = payload.uid
-      email = payload.sub
-    }
-    let user = await this.userService.findOne(userId)
-
-    if (user && !user.emailVerified && payload.email_verified) {
-      await this.userService.update(user.id, {
-        emailVerified: payload.email_verified,
-      })
-    }
-
-    if (!user) {
-      user = await this.userService.create({
-        id: userId,
-        name: payload.name || payload.username || 'Unknown',
-        email: email || '',
-        emailVerified: payload.email_verified || false,
-        personalOrganizationQuota: this.configService.getOrThrow('defaultOrganizationQuota'),
-      })
-      this.logger.debug(`Created new user with ID: ${userId}`)
-    } else if (user.name === 'Unknown' || !user.email) {
-      await this.userService.update(user.id, {
-        name: payload.name || payload.username || 'Unknown',
-        email: email || '',
-      })
-      this.logger.debug(`Updated name and email address for existing user with ID: ${userId}`)
-    } else if (user.email !== email) {
-      await this.userService.update(user.id, {
-        email: email || '',
-      })
-      this.logger.debug(`Updated email address for existing user with ID: ${userId}`)
+  async validate(request: RequestWithAuthMetadata, payload: any): Promise<UserAuthContext | null> {
+    if (!request.authMetadata?.isStrategyAllowed(AuthStrategyType.JWT)) {
+      return null
     }
 
     const organizationId = request.get(CustomHeaders.ORGANIZATION_ID.name)
 
-    return {
-      userId: user.id,
-      role: user.role,
-      email: user.email,
-      organizationId,
+    let userId = payload.sub
+    let email = payload.email
+
+    /**
+     * OKTA does not return the userId in access_token sub claim
+     * real userId is in the uid claim and email is in the sub claim
+     */
+    if (payload.cid && payload.uid) {
+      userId = payload.uid
+      email = payload.sub
     }
+
+    try {
+      let existingUser = await this.userService.findOne(userId)
+
+      if (!existingUser) {
+        const newUser = await this.userService.create({
+          id: userId,
+          name: payload.name || payload.username || 'Unknown',
+          email: email || '',
+          emailVerified: payload.email_verified || false,
+          personalOrganizationQuota: this.configService.getOrThrow('defaultOrganizationQuota'),
+        })
+
+        return {
+          userId: newUser.id,
+          role: newUser.role,
+          email: newUser.email,
+          organizationId,
+        } satisfies UserAuthContext
+      }
+
+      if (!existingUser.emailVerified && payload.email_verified) {
+        existingUser = await this.userService.update(existingUser.id, {
+          emailVerified: payload.email_verified,
+        })
+      }
+
+      if (existingUser.name === 'Unknown' || !existingUser.email) {
+        existingUser = await this.userService.update(existingUser.id, {
+          name: payload.name || payload.username || 'Unknown',
+          email: email || '',
+        })
+      } else if (existingUser.email !== email) {
+        existingUser = await this.userService.update(existingUser.id, {
+          email: email || '',
+        })
+      }
+
+      return {
+        userId: existingUser.id,
+        role: existingUser.role,
+        email: existingUser.email,
+        organizationId,
+      } satisfies UserAuthContext
+    } catch (error) {
+      this.logger.error(`JWT validation failed for user ${userId}:`, error)
+    }
+
+    return null
   }
 
   async verifyToken(token: string): Promise<JWTPayload> {

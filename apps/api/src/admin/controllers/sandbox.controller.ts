@@ -4,24 +4,26 @@
  */
 
 import { Controller, HttpCode, NotFoundException, Param, Post, UseGuards } from '@nestjs/common'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Audit } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
+import { RequiredSystemRole } from '../../user/decorators/required-system-role.decorator'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
 import { SandboxService } from '../../sandbox/services/sandbox.service'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('admin')
 @Controller('admin/sandbox')
-@UseGuards(CombinedAuthGuard, SystemActionGuard)
-@RequiredApiRole([SystemRole.ADMIN])
+@ApiTags('admin')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@RequiredSystemRole(SystemRole.ADMIN)
+@UseGuards(AuthenticatedRateLimitGuard)
 export class AdminSandboxController {
   constructor(
     private readonly sandboxService: SandboxService,

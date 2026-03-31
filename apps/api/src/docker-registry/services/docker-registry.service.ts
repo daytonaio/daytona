@@ -9,7 +9,6 @@ import { EntityManager, FindOptionsWhere, IsNull, Repository } from 'typeorm'
 import { DockerRegistry } from '../entities/docker-registry.entity'
 import { CreateDockerRegistryInternalDto } from '../dto/create-docker-registry-internal.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
-import { ApiOAuth2 } from '@nestjs/swagger'
 import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import {
   DOCKER_REGISTRY_PROVIDER,
@@ -55,7 +54,6 @@ export interface ImageDetails {
 }
 
 @Injectable()
-@ApiOAuth2(['openid', 'profile', 'email'])
 export class DockerRegistryService {
   private readonly logger = new Logger(DockerRegistryService.name)
 

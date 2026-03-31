@@ -9,12 +9,10 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   UseGuards,
   HttpCode,
-  ForbiddenException,
   Logger,
   NotFoundException,
   Res,
@@ -44,19 +42,13 @@ import { PaginatedSnapshotsDto } from '../dto/paginated-snapshots.dto'
 import { SnapshotAccessGuard } from '../guards/snapshot-access.guard'
 import { SnapshotReadAccessGuard } from '../guards/snapshot-read-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
-import { SystemRole } from '../../user/enums/system-role.enum'
-import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { Snapshot } from '../entities/snapshot.entity'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
@@ -64,13 +56,17 @@ import { ListSnapshotsQueryDto } from '../dto/list-snapshots-query.dto'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { UrlDto } from '../../common/dto/url.dto'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('snapshots')
 @Controller('snapshots')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, SystemActionGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@ApiTags('snapshots')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class SnapshotController {
   private readonly logger = new Logger(SnapshotController.name)
 
@@ -104,7 +100,6 @@ export class SnapshotController {
         name: req.body?.name,
         imageName: req.body?.imageName,
         entrypoint: req.body?.entrypoint,
-        general: req.body?.general,
         cpu: req.body?.cpu,
         memory: req.body?.memory,
         disk: req.body?.disk,
@@ -114,13 +109,9 @@ export class SnapshotController {
     },
   })
   async createSnapshot(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createSnapshotDto: CreateSnapshotDto,
   ): Promise<SnapshotDto> {
-    if (createSnapshotDto.general && authContext.role !== SystemRole.ADMIN) {
-      throw new ForbiddenException('Insufficient permissions for creating general snapshots')
-    }
-
     if (createSnapshotDto.buildInfo) {
       if (createSnapshotDto.imageName) {
         throw new BadRequestError('Cannot specify an image name when using a build info entry')
@@ -139,27 +130,6 @@ export class SnapshotController {
       ? await this.snapshotService.createFromBuildInfo(authContext.organization, createSnapshotDto)
       : await this.snapshotService.createFromPull(authContext.organization, createSnapshotDto)
     return SnapshotDto.fromSnapshot(snapshot)
-  }
-
-  @Get('can-cleanup-image')
-  @ApiOperation({
-    summary: 'Check if an image can be cleaned up',
-    operationId: 'canCleanupImage',
-  })
-  @ApiQuery({
-    name: 'imageName',
-    required: true,
-    type: String,
-    description: 'Image name with tag to check',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Boolean indicating if image can be cleaned up',
-    type: Boolean,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  async canCleanupImage(@Query('imageName') imageName: string): Promise<boolean> {
-    return this.snapshotService.canCleanupImage(imageName)
   }
 
   @Get(':id')
@@ -183,7 +153,7 @@ export class SnapshotController {
   @UseGuards(SnapshotReadAccessGuard)
   async getSnapshot(
     @Param('id') snapshotIdOrName: string,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.getSnapshotWithRegions(snapshotIdOrName, authContext.organizationId)
     return SnapshotDto.fromSnapshot(snapshot)
@@ -202,8 +172,8 @@ export class SnapshotController {
     status: 200,
     description: 'Snapshot has been deleted',
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SNAPSHOTS])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.SNAPSHOT,
@@ -224,7 +194,7 @@ export class SnapshotController {
     type: PaginatedSnapshotsDto,
   })
   async getAllSnapshots(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query() queryParams: ListSnapshotsQueryDto,
   ): Promise<PaginatedSnapshotsDto> {
     const { page, limit, name, sort, order } = queryParams
@@ -243,39 +213,6 @@ export class SnapshotController {
       page: result.page,
       totalPages: result.totalPages,
     }
-  }
-
-  @Patch(':id/general')
-  @ApiOperation({
-    summary: 'Set snapshot general status',
-    operationId: 'setSnapshotGeneralStatus',
-  })
-  @ApiParam({
-    name: 'id',
-    description: 'Snapshot ID',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Snapshot general status has been set',
-    type: SnapshotDto,
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @Audit({
-    action: AuditAction.SET_GENERAL_STATUS,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      body: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => ({
-        general: req.body?.general,
-      }),
-    },
-  })
-  async setSnapshotGeneralStatus(
-    @Param('id', ParseUUIDPipe) snapshotId: string,
-    @Body() dto: SetSnapshotGeneralStatusDto,
-  ): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.setSnapshotGeneralStatus(snapshotId, dto.general)
-    return SnapshotDto.fromSnapshot(snapshot)
   }
 
   @Get(':id/build-logs')
@@ -408,8 +345,8 @@ export class SnapshotController {
     status: 404,
     description: 'Snapshot not found',
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @Audit({
     action: AuditAction.ACTIVATE,
     targetType: AuditTarget.SNAPSHOT,
@@ -417,7 +354,7 @@ export class SnapshotController {
   })
   async activateSnapshot(
     @Param('id', ParseUUIDPipe) snapshotId: string,
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId, authContext.organization)
     return SnapshotDto.fromSnapshot(snapshot)
@@ -437,8 +374,8 @@ export class SnapshotController {
     status: 204,
     description: 'The snapshot has been successfully deactivated.',
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @Audit({
     action: AuditAction.DEACTIVATE,
     targetType: AuditTarget.SNAPSHOT,

@@ -54,12 +54,8 @@ import { JobService } from './services/job.service'
 import { JobStateHandlerService } from './services/job-state-handler.service'
 import { Job } from './entities/job.entity'
 import { SandboxLookupCacheInvalidationService } from './services/sandbox-lookup-cache-invalidation.service'
-import { SandboxAccessGuard } from './guards/sandbox-access.guard'
-import { RunnerAccessGuard } from './guards/runner-access.guard'
-import { RegionRunnerAccessGuard } from './guards/region-runner-access.guard'
-import { RegionSandboxAccessGuard } from './guards/region-sandbox-access.guard'
-import { ProxyGuard } from './guards/proxy.guard'
-import { SshGatewayGuard } from './guards/ssh-gateway.guard'
+import { ProxyAuthContextGuard } from './guards/proxy-auth-context.guard'
+import { SshGatewayAuthContextGuard } from './guards/ssh-gateway-auth-context.guard'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxLastActivity } from './entities/sandbox-last-activity.entity'
 import { SandboxActivityService } from './services/sandbox-activity.service'
@@ -121,12 +117,8 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     JobService,
     JobStateHandlerService,
     SandboxActivityService,
-    SandboxAccessGuard,
-    RunnerAccessGuard,
-    RegionRunnerAccessGuard,
-    RegionSandboxAccessGuard,
-    ProxyGuard,
-    SshGatewayGuard,
+    ProxyAuthContextGuard,
+    SshGatewayAuthContextGuard,
     {
       provide: SandboxRepository,
       inject: [DataSource, EventEmitter2, SandboxLookupCacheInvalidationService],
@@ -147,6 +139,8 @@ import { SandboxActivityService } from './services/sandbox-activity.service'
     SandboxRepository,
     RunnerAdapterFactory,
     SandboxActivityService,
+    ProxyAuthContextGuard,
+    SshGatewayAuthContextGuard,
   ],
 })
 export class SandboxModule {}

@@ -27,6 +27,7 @@ daytona_api_client/exceptions.py
 daytona_api_client/models/__init__.py
 daytona_api_client/models/account_provider.py
 daytona_api_client/models/admin_create_runner.py
+daytona_api_client/models/admin_get_webhook_status200_response.py
 daytona_api_client/models/announcement.py
 daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
@@ -195,7 +196,6 @@ daytona_api_client/models/user_public_key.py
 daytona_api_client/models/volume_dto.py
 daytona_api_client/models/volume_state.py
 daytona_api_client/models/webhook_app_portal_access.py
-daytona_api_client/models/webhook_controller_get_status200_response.py
 daytona_api_client/models/webhook_event.py
 daytona_api_client/models/webhook_initialization_status.py
 daytona_api_client/models/windows_response.py

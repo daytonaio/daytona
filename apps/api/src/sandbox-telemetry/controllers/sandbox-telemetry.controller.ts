@@ -5,8 +5,7 @@
 
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import { ApiOAuth2, ApiResponse, ApiOperation, ApiParam, ApiTags, ApiHeader, ApiBearerAuth } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 import { SandboxAccessGuard } from '../../sandbox/guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -18,17 +17,23 @@ import { TraceSpanDto } from '../dto/trace-span.dto'
 import { MetricsResponseDto } from '../dto/metrics-response.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
 import { AnalyticsApiDisabledGuard } from '../guards/analytics-api-disabled.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('sandbox')
 @Controller('sandbox')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard, AnalyticsApiDisabledGuard)
+@ApiTags('sandbox')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(AnalyticsApiDisabledGuard)
+@UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
 export class SandboxTelemetryController {
   constructor(private readonly sandboxTelemetryService: SandboxTelemetryService) {}
 
   @Get(':sandboxId/telemetry/logs')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   @ApiOperation({
     summary: 'Get sandbox logs',
     operationId: 'getSandboxLogs',
@@ -44,8 +49,6 @@ export class SandboxTelemetryController {
     description: 'Paginated list of log entries',
     type: PaginatedLogsDto,
   })
-  @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   async getSandboxLogs(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: LogsQueryParamsDto,
@@ -62,6 +65,7 @@ export class SandboxTelemetryController {
   }
 
   @Get(':sandboxId/telemetry/traces')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   @ApiOperation({
     summary: 'Get sandbox traces',
     operationId: 'getSandboxTraces',
@@ -77,8 +81,6 @@ export class SandboxTelemetryController {
     description: 'Paginated list of trace summaries',
     type: PaginatedTracesDto,
   })
-  @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   async getSandboxTraces(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: TelemetryQueryParamsDto,
@@ -93,6 +95,7 @@ export class SandboxTelemetryController {
   }
 
   @Get(':sandboxId/telemetry/traces/:traceId')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   @ApiOperation({
     summary: 'Get trace spans',
     operationId: 'getSandboxTraceSpans',
@@ -113,8 +116,6 @@ export class SandboxTelemetryController {
     description: 'List of spans in the trace',
     type: [TraceSpanDto],
   })
-  @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   async getSandboxTraceSpans(
     @Param('sandboxId') sandboxId: string,
     @Param('traceId') traceId: string,
@@ -123,6 +124,7 @@ export class SandboxTelemetryController {
   }
 
   @Get(':sandboxId/telemetry/metrics')
+  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   @ApiOperation({
     summary: 'Get sandbox metrics',
     operationId: 'getSandboxMetrics',
@@ -138,8 +140,6 @@ export class SandboxTelemetryController {
     description: 'Metrics time series data',
     type: MetricsResponseDto,
   })
-  @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
   async getSandboxMetrics(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: MetricsQueryParamsDto,

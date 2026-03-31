@@ -50,27 +50,5 @@ export interface CreateDockerRegistry {
      * @memberof CreateDockerRegistry
      */
     'project'?: string;
-    /**
-     * Registry type
-     * @type {string}
-     * @memberof CreateDockerRegistry
-     */
-    'registryType': CreateDockerRegistryRegistryTypeEnum;
-    /**
-     * Set as default registry
-     * @type {boolean}
-     * @memberof CreateDockerRegistry
-     */
-    'isDefault'?: boolean;
 }
-
-export const CreateDockerRegistryRegistryTypeEnum = {
-    INTERNAL: 'internal',
-    ORGANIZATION: 'organization',
-    TRANSIENT: 'transient',
-    BACKUP: 'backup'
-} as const;
-
-export type CreateDockerRegistryRegistryTypeEnum = typeof CreateDockerRegistryRegistryTypeEnum[keyof typeof CreateDockerRegistryRegistryTypeEnum];
-
 

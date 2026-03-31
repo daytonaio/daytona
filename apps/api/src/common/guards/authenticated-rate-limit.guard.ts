@@ -11,6 +11,8 @@ import { getRedisConnectionToken } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { THROTTLER_SCOPE_KEY } from '../decorators/throttler-scope.decorator'
+import { isBaseAuthContext } from '../interfaces/base-auth-context.interface'
+import { isUserAuthContext } from '../interfaces/user-auth-context.interface'
 
 @Injectable()
 export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
@@ -53,10 +55,10 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
   async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
     const { context, throttler } = requestProps
     const request = context.switchToHttp().getRequest<Request>()
-    const isAuthenticated = request.user && this.isValidAuthContext(request.user)
+    const isAuthenticated = isBaseAuthContext(request.user)
 
     // Skip rate limiting for M2M system roles (checked AFTER auth runs)
-    if (this.isSystemRole(request.user)) {
+    if (!isUserAuthContext(request.user)) {
       return true
     }
 
@@ -138,15 +140,6 @@ export class AuthenticatedRateLimitGuard extends ThrottlerGuard {
       return super.handleRequest(requestProps)
     }
     return true
-  }
-
-  private isValidAuthContext(user: any): boolean {
-    return user && (user.userId || user.role)
-  }
-
-  private isSystemRole(user: any): boolean {
-    // Skip rate limiting for M2M system roles (proxy, runner, ssh-gateway)
-    return user?.role === 'ssh-gateway' || user?.role === 'proxy' || user?.role === 'runner'
   }
 
   private async getCachedOrganizationRateLimits(organizationId: string): Promise<{

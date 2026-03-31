@@ -42,12 +42,6 @@ export interface CreateSnapshot {
      */
     'entrypoint'?: Array<string>;
     /**
-     * Whether the snapshot is general
-     * @type {boolean}
-     * @memberof CreateSnapshot
-     */
-    'general'?: boolean;
-    /**
      * CPU cores allocated to the resulting sandbox
      * @type {number}
      * @memberof CreateSnapshot

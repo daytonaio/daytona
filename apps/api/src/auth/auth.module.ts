@@ -19,10 +19,12 @@ import { TypedConfigModule } from '../config/typed-config.module'
 import { catchError, map } from 'rxjs/operators'
 import { FailedAuthTrackerService } from './failed-auth-tracker.service'
 import { RegionModule } from '../region/region.module'
+import { AuthStrategyType } from './enums/auth-strategy-type.enum'
+
 @Module({
   imports: [
     PassportModule.register({
-      defaultStrategy: ['jwt', 'api-key'],
+      defaultStrategy: [AuthStrategyType.JWT, AuthStrategyType.API_KEY],
       property: 'user',
       session: false,
     }),

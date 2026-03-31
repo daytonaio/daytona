@@ -53,7 +53,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'HealthControllerCheck200Response'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || []
+      auth_names = opts[:debug_auth_names] || ['bearer']
 
       new_options = opts.merge(
         :operation => :"HealthApi.health_controller_check",

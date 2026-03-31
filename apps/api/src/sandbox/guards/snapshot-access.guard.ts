@@ -3,25 +3,28 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common'
 import { SnapshotService } from '../services/snapshot.service'
-import {
-  BaseAuthContext,
-  isOrganizationAuthContext,
-  OrganizationAuthContext,
-} from '../../common/interfaces/auth-context.interface'
-import { SystemRole } from '../../user/enums/system-role.enum'
+import { isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { Snapshot } from '../entities/snapshot.entity'
-import { isSshGatewayContext } from '../../common/interfaces/ssh-gateway-context.interface'
-import { isProxyContext } from '../../common/interfaces/proxy-context.interface'
-import { isRegionProxyContext, RegionProxyContext } from '../../common/interfaces/region-proxy.interface'
-import {
-  isRegionSSHGatewayContext,
-  RegionSSHGatewayContext,
-} from '../../common/interfaces/region-ssh-gateway.interface'
+import { isSshGatewayAuthContext } from '../../common/interfaces/ssh-gateway-auth-context.interface'
+import { isProxyAuthContext } from '../../common/interfaces/proxy-auth-context.interface'
+import { isRegionAuthContext } from '../../common/interfaces/region-auth-context.interface'
+import { InvalidAuthenticationContextException } from '../../common/exceptions/invalid-authentication-context.exception'
 
 @Injectable()
 export class SnapshotAccessGuard implements CanActivate {
+  private readonly logger = new Logger(SnapshotAccessGuard.name)
+
   constructor(private readonly snapshotService: SnapshotService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,8 +33,7 @@ export class SnapshotAccessGuard implements CanActivate {
 
     let snapshot: Snapshot
 
-    // TODO: initialize authContext safely
-    const authContext: BaseAuthContext = request.user
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     try {
       snapshot = await this.snapshotService.getSnapshot(snapshotId)
@@ -46,34 +48,31 @@ export class SnapshotAccessGuard implements CanActivate {
 
     try {
       switch (true) {
-        case isRegionProxyContext(authContext):
-        case isRegionSSHGatewayContext(authContext): {
-          // For region proxy/ssh gateway authentication, verify that the runner's region ID matches the region ID
-          const regionContext = authContext as RegionProxyContext | RegionSSHGatewayContext
-          const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, regionContext.regionId)
+        case isRegionAuthContext(authContext): {
+          const isAvailable = await this.snapshotService.isAvailableInRegion(snapshot.id, authContext.regionId)
           if (!isAvailable) {
-            throw new NotFoundException(`Snapshot is not available in region ${regionContext.regionId}`)
+            throw new NotFoundException(`Snapshot is not available in region ${authContext.regionId}`)
           }
           break
         }
-        case isProxyContext(authContext):
-        case isSshGatewayContext(authContext):
+        case isProxyAuthContext(authContext):
+        case isSshGatewayAuthContext(authContext):
           break
-        default: {
-          // For user/organization authentication, check organization access
-          const orgAuthContext = authContext as OrganizationAuthContext
-          if (orgAuthContext.role !== SystemRole.ADMIN && snapshot.organizationId !== orgAuthContext.organizationId) {
+        case isOrganizationAuthContext(authContext): {
+          if (snapshot.organizationId !== authContext.organizationId) {
             throw new ForbiddenException('Request organization ID does not match resource organization ID')
           }
+          break
         }
+        default:
+          throw new InvalidAuthenticationContextException()
       }
 
-      request.snapshot = snapshot
-
+      // Access granted
       return true
     } catch (error) {
       if (!(error instanceof NotFoundException)) {
-        console.error(error)
+        this.logger.error(error)
       }
       throw new NotFoundException(`Snapshot with ID or name ${snapshotId} not found`)
     }
