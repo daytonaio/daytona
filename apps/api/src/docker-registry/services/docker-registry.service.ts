@@ -88,10 +88,13 @@ export class DockerRegistryService {
     }
 
     const normalizedUrl = normalizeRegistryUrl(createDto.url)
-    await this.validateRegistryCredentials(normalizedUrl, {
-      username: createDto.username,
-      password: createDto.password,
-    })
+
+    if (createDto.registryType === RegistryType.ORGANIZATION) {
+      await this.validateRegistryCredentials(normalizedUrl, {
+        username: createDto.username,
+        password: createDto.password,
+      })
+    }
 
     const registry = repository.create({
       ...createDto,

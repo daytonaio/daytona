@@ -154,7 +154,26 @@ export class DockerRegistryProvider implements IDockerRegistryProvider {
       )
     }
 
-    const tokenUrl = new URL(realm)
+    let tokenUrl: URL
+    try {
+      tokenUrl = new URL(realm)
+    } catch {
+      throw new RegistryCredentialsValidationError(
+        RegistryCredentialsValidationErrorCode.UNSUPPORTED_CHALLENGE,
+        'Registry Bearer challenge included an invalid realm URL',
+      )
+    }
+
+    // Prevent SSRF: only follow HTTPS realm URLs (or HTTP for localhost).
+    const scheme = tokenUrl.protocol
+    const hostname = tokenUrl.hostname
+    if (scheme !== 'https:' && !(scheme === 'http:' && (hostname === 'localhost' || hostname === '127.0.0.1'))) {
+      throw new RegistryCredentialsValidationError(
+        RegistryCredentialsValidationErrorCode.UNSUPPORTED_CHALLENGE,
+        `Registry Bearer realm uses disallowed scheme: ${scheme}`,
+      )
+    }
+
     const service = challenge.params.get('service')?.[0]
     const scopes = challenge.params.get('scope') ?? []
 
