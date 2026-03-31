@@ -175,19 +175,6 @@ type OrganizationsAPI interface {
 	GetOrganizationExecute(r OrganizationsAPIGetOrganizationRequest) (*Organization, *http.Response, error)
 
 	/*
-	GetOrganizationBySandboxId Get organization by sandbox ID
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId Sandbox ID
-	@return OrganizationsAPIGetOrganizationBySandboxIdRequest
-	*/
-	GetOrganizationBySandboxId(ctx context.Context, sandboxId string) OrganizationsAPIGetOrganizationBySandboxIdRequest
-
-	// GetOrganizationBySandboxIdExecute executes the request
-	//  @return Organization
-	GetOrganizationBySandboxIdExecute(r OrganizationsAPIGetOrganizationBySandboxIdRequest) (*Organization, *http.Response, error)
-
-	/*
 	GetOrganizationInvitationsCountForAuthenticatedUser Get count of organization invitations for authenticated user
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -237,19 +224,6 @@ type OrganizationsAPI interface {
 	// GetRegionByIdExecute executes the request
 	//  @return Region
 	GetRegionByIdExecute(r OrganizationsAPIGetRegionByIdRequest) (*Region, *http.Response, error)
-
-	/*
-	GetRegionQuotaBySandboxId Get region quota by sandbox ID
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId Sandbox ID
-	@return OrganizationsAPIGetRegionQuotaBySandboxIdRequest
-	*/
-	GetRegionQuotaBySandboxId(ctx context.Context, sandboxId string) OrganizationsAPIGetRegionQuotaBySandboxIdRequest
-
-	// GetRegionQuotaBySandboxIdExecute executes the request
-	//  @return RegionQuota
-	GetRegionQuotaBySandboxIdExecute(r OrganizationsAPIGetRegionQuotaBySandboxIdRequest) (*RegionQuota, *http.Response, error)
 
 	/*
 	LeaveOrganization Leave organization
@@ -1734,107 +1708,6 @@ func (a *OrganizationsAPIService) GetOrganizationExecute(r OrganizationsAPIGetOr
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type OrganizationsAPIGetOrganizationBySandboxIdRequest struct {
-	ctx context.Context
-	ApiService OrganizationsAPI
-	sandboxId string
-}
-
-func (r OrganizationsAPIGetOrganizationBySandboxIdRequest) Execute() (*Organization, *http.Response, error) {
-	return r.ApiService.GetOrganizationBySandboxIdExecute(r)
-}
-
-/*
-GetOrganizationBySandboxId Get organization by sandbox ID
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId Sandbox ID
- @return OrganizationsAPIGetOrganizationBySandboxIdRequest
-*/
-func (a *OrganizationsAPIService) GetOrganizationBySandboxId(ctx context.Context, sandboxId string) OrganizationsAPIGetOrganizationBySandboxIdRequest {
-	return OrganizationsAPIGetOrganizationBySandboxIdRequest{
-		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-	}
-}
-
-// Execute executes the request
-//  @return Organization
-func (a *OrganizationsAPIService) GetOrganizationBySandboxIdExecute(r OrganizationsAPIGetOrganizationBySandboxIdRequest) (*Organization, *http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *Organization
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.GetOrganizationBySandboxId")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/organizations/by-sandbox-id/{sandboxId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type OrganizationsAPIGetOrganizationInvitationsCountForAuthenticatedUserRequest struct {
 	ctx context.Context
 	ApiService OrganizationsAPI
@@ -2207,107 +2080,6 @@ func (a *OrganizationsAPIService) GetRegionByIdExecute(r OrganizationsAPIGetRegi
 	}
 	if r.xDaytonaOrganizationID != nil {
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type OrganizationsAPIGetRegionQuotaBySandboxIdRequest struct {
-	ctx context.Context
-	ApiService OrganizationsAPI
-	sandboxId string
-}
-
-func (r OrganizationsAPIGetRegionQuotaBySandboxIdRequest) Execute() (*RegionQuota, *http.Response, error) {
-	return r.ApiService.GetRegionQuotaBySandboxIdExecute(r)
-}
-
-/*
-GetRegionQuotaBySandboxId Get region quota by sandbox ID
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param sandboxId Sandbox ID
- @return OrganizationsAPIGetRegionQuotaBySandboxIdRequest
-*/
-func (a *OrganizationsAPIService) GetRegionQuotaBySandboxId(ctx context.Context, sandboxId string) OrganizationsAPIGetRegionQuotaBySandboxIdRequest {
-	return OrganizationsAPIGetRegionQuotaBySandboxIdRequest{
-		ApiService: a,
-		ctx: ctx,
-		sandboxId: sandboxId,
-	}
-}
-
-// Execute executes the request
-//  @return RegionQuota
-func (a *OrganizationsAPIService) GetRegionQuotaBySandboxIdExecute(r OrganizationsAPIGetRegionQuotaBySandboxIdRequest) (*RegionQuota, *http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  *RegionQuota
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrganizationsAPIService.GetRegionQuotaBySandboxId")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/organizations/region-quota/by-sandbox-id/{sandboxId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

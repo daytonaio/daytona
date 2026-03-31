@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     # import models into model package
     from daytona_api_client_async.models.account_provider import AccountProvider
     from daytona_api_client_async.models.admin_create_runner import AdminCreateRunner
+    from daytona_api_client_async.models.admin_get_webhook_status200_response import AdminGetWebhookStatus200Response
     from daytona_api_client_async.models.announcement import Announcement
     from daytona_api_client_async.models.api_key_list import ApiKeyList
     from daytona_api_client_async.models.api_key_response import ApiKeyResponse
@@ -191,7 +192,6 @@ if TYPE_CHECKING:
     from daytona_api_client_async.models.volume_dto import VolumeDto
     from daytona_api_client_async.models.volume_state import VolumeState
     from daytona_api_client_async.models.webhook_app_portal_access import WebhookAppPortalAccess
-    from daytona_api_client_async.models.webhook_controller_get_status200_response import WebhookControllerGetStatus200Response
     from daytona_api_client_async.models.webhook_event import WebhookEvent
     from daytona_api_client_async.models.webhook_initialization_status import WebhookInitializationStatus
     from daytona_api_client_async.models.windows_response import WindowsResponse
@@ -202,6 +202,7 @@ if TYPE_CHECKING:
 _DYNAMIC_IMPORTS: dict[str, str] = {
     "AccountProvider": "daytona_api_client_async.models.account_provider",
     "AdminCreateRunner": "daytona_api_client_async.models.admin_create_runner",
+    "AdminGetWebhookStatus200Response": "daytona_api_client_async.models.admin_get_webhook_status200_response",
     "Announcement": "daytona_api_client_async.models.announcement",
     "ApiKeyList": "daytona_api_client_async.models.api_key_list",
     "ApiKeyResponse": "daytona_api_client_async.models.api_key_response",
@@ -370,7 +371,6 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "VolumeDto": "daytona_api_client_async.models.volume_dto",
     "VolumeState": "daytona_api_client_async.models.volume_state",
     "WebhookAppPortalAccess": "daytona_api_client_async.models.webhook_app_portal_access",
-    "WebhookControllerGetStatus200Response": "daytona_api_client_async.models.webhook_controller_get_status200_response",
     "WebhookEvent": "daytona_api_client_async.models.webhook_event",
     "WebhookInitializationStatus": "daytona_api_client_async.models.webhook_initialization_status",
     "WindowsResponse": "daytona_api_client_async.models.windows_response",

@@ -4,6 +4,9 @@
  */
 
 import { Module, NestModule, MiddlewareConsumer, RequestMethod, ExecutionContext } from '@nestjs/common'
+import { APP_GUARD } from '@nestjs/core'
+import { GlobalAuthGuard } from './auth/global-auth.guard'
+import { SystemActionGuard } from './user/guards/system-action.guard'
 import { VersionHeaderMiddleware } from './common/middleware/version-header.middleware'
 import { FailedAuthRateLimitMiddleware } from './common/middleware/failed-auth-rate-limit.middleware'
 import { AppService } from './app.service'
@@ -213,7 +216,11 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
     }),
   ],
   controllers: [],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: GlobalAuthGuard },
+    { provide: APP_GUARD, useClass: SystemActionGuard },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

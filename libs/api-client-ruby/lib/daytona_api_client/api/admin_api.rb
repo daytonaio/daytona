@@ -19,6 +19,68 @@ module DaytonaApiClient
     def initialize(api_client = ApiClient.default)
       @api_client = api_client
     end
+    # Check if an image can be cleaned up
+    # @param image_name [String] Image name with tag to check
+    # @param [Hash] opts the optional parameters
+    # @return [Boolean]
+    def admin_can_cleanup_image(image_name, opts = {})
+      data, _status_code, _headers = admin_can_cleanup_image_with_http_info(image_name, opts)
+      data
+    end
+
+    # Check if an image can be cleaned up
+    # @param image_name [String] Image name with tag to check
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Boolean, Integer, Hash)>] Boolean data, response status code and response headers
+    def admin_can_cleanup_image_with_http_info(image_name, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_can_cleanup_image ...'
+      end
+      # verify the required parameter 'image_name' is set
+      if @api_client.config.client_side_validation && image_name.nil?
+        fail ArgumentError, "Missing the required parameter 'image_name' when calling AdminApi.admin_can_cleanup_image"
+      end
+      # resource path
+      local_var_path = '/admin/snapshots/can-cleanup-image'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'imageName'] = image_name
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Boolean'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_can_cleanup_image",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_can_cleanup_image\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Create runner
     # @param admin_create_runner [AdminCreateRunner] 
     # @param [Hash] opts the optional parameters
@@ -85,6 +147,70 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Create user
+    # @param create_user [CreateUser] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_create_user(create_user, opts = {})
+      admin_create_user_with_http_info(create_user, opts)
+      nil
+    end
+
+    # Create user
+    # @param create_user [CreateUser] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_create_user_with_http_info(create_user, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_create_user ...'
+      end
+      # verify the required parameter 'create_user' is set
+      if @api_client.config.client_side_validation && create_user.nil?
+        fail ArgumentError, "Missing the required parameter 'create_user' when calling AdminApi.admin_create_user"
+      end
+      # resource path
+      local_var_path = '/admin/users'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(create_user)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_create_user",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_create_user\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # Delete runner
     # @param id [String] Runner ID
     # @param [Hash] opts the optional parameters
@@ -140,6 +266,155 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:DELETE, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: AdminApi#admin_delete_runner\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get all audit logs
+    # @param [Hash] opts the optional parameters
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
+    # @return [PaginatedAuditLogs]
+    def admin_get_all_audit_logs(opts = {})
+      data, _status_code, _headers = admin_get_all_audit_logs_with_http_info(opts)
+      data
+    end
+
+    # Get all audit logs
+    # @param [Hash] opts the optional parameters
+    # @option opts [Float] :page Page number of the results (default to 1)
+    # @option opts [Float] :limit Number of results per page (default to 100)
+    # @option opts [Time] :from From date (ISO 8601 format)
+    # @option opts [Time] :to To date (ISO 8601 format)
+    # @option opts [String] :next_token Token for cursor-based pagination. When provided, takes precedence over page parameter.
+    # @return [Array<(PaginatedAuditLogs, Integer, Hash)>] PaginatedAuditLogs data, response status code and response headers
+    def admin_get_all_audit_logs_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_get_all_audit_logs ...'
+      end
+      if @api_client.config.client_side_validation && !opts[:'page'].nil? && opts[:'page'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"page"]" when calling AdminApi.admin_get_all_audit_logs, must be greater than or equal to 1.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] > 200
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AdminApi.admin_get_all_audit_logs, must be smaller than or equal to 200.'
+      end
+
+      if @api_client.config.client_side_validation && !opts[:'limit'].nil? && opts[:'limit'] < 1
+        fail ArgumentError, 'invalid value for "opts[:"limit"]" when calling AdminApi.admin_get_all_audit_logs, must be greater than or equal to 1.'
+      end
+
+      # resource path
+      local_var_path = '/admin/audit'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+      query_params[:'page'] = opts[:'page'] if !opts[:'page'].nil?
+      query_params[:'limit'] = opts[:'limit'] if !opts[:'limit'].nil?
+      query_params[:'from'] = opts[:'from'] if !opts[:'from'].nil?
+      query_params[:'to'] = opts[:'to'] if !opts[:'to'].nil?
+      query_params[:'nextToken'] = opts[:'next_token'] if !opts[:'next_token'].nil?
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'PaginatedAuditLogs'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_get_all_audit_logs",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_get_all_audit_logs\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get delivery attempts for a webhook message
+    # @param organization_id [String] 
+    # @param message_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<Object>]
+    def admin_get_message_attempts(organization_id, message_id, opts = {})
+      data, _status_code, _headers = admin_get_message_attempts_with_http_info(organization_id, message_id, opts)
+      data
+    end
+
+    # Get delivery attempts for a webhook message
+    # @param organization_id [String] 
+    # @param message_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(Array<Object>, Integer, Hash)>] Array<Object> data, response status code and response headers
+    def admin_get_message_attempts_with_http_info(organization_id, message_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_get_message_attempts ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling AdminApi.admin_get_message_attempts"
+      end
+      # verify the required parameter 'message_id' is set
+      if @api_client.config.client_side_validation && message_id.nil?
+        fail ArgumentError, "Missing the required parameter 'message_id' when calling AdminApi.admin_get_message_attempts"
+      end
+      # resource path
+      local_var_path = '/admin/webhooks/organizations/{organizationId}/messages/{messageId}/attempts'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s)).sub('{' + 'messageId' + '}', CGI.escape(message_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'Array<Object>'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_get_message_attempts",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_get_message_attempts\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -205,6 +480,181 @@ module DaytonaApiClient
       return data, status_code, headers
     end
 
+    # Get user by ID
+    # @param id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [User]
+    def admin_get_user(id, opts = {})
+      data, _status_code, _headers = admin_get_user_with_http_info(id, opts)
+      data
+    end
+
+    # Get user by ID
+    # @param id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(User, Integer, Hash)>] User data, response status code and response headers
+    def admin_get_user_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_get_user ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling AdminApi.admin_get_user"
+      end
+      # resource path
+      local_var_path = '/admin/users/{id}'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'User'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_get_user",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_get_user\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Get webhook service status
+    # @param [Hash] opts the optional parameters
+    # @return [AdminGetWebhookStatus200Response]
+    def admin_get_webhook_status(opts = {})
+      data, _status_code, _headers = admin_get_webhook_status_with_http_info(opts)
+      data
+    end
+
+    # Get webhook service status
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(AdminGetWebhookStatus200Response, Integer, Hash)>] AdminGetWebhookStatus200Response data, response status code and response headers
+    def admin_get_webhook_status_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_get_webhook_status ...'
+      end
+      # resource path
+      local_var_path = '/admin/webhooks/status'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'AdminGetWebhookStatus200Response'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_get_webhook_status",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_get_webhook_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Initialize webhooks for an organization
+    # @param organization_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_initialize_webhooks(organization_id, opts = {})
+      admin_initialize_webhooks_with_http_info(organization_id, opts)
+      nil
+    end
+
+    # Initialize webhooks for an organization
+    # @param organization_id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_initialize_webhooks_with_http_info(organization_id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_initialize_webhooks ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling AdminApi.admin_initialize_webhooks"
+      end
+      # resource path
+      local_var_path = '/admin/webhooks/organizations/{organizationId}/initialize'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_initialize_webhooks",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_initialize_webhooks\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
     # List all runners
     # @param [Hash] opts the optional parameters
     # @option opts [String] :region_id Filter runners by region ID
@@ -259,6 +709,59 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: AdminApi#admin_list_runners\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # List all users
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_list_users(opts = {})
+      admin_list_users_with_http_info(opts)
+      nil
+    end
+
+    # List all users
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_list_users_with_http_info(opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_list_users ...'
+      end
+      # resource path
+      local_var_path = '/admin/users'
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_list_users",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:GET, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_list_users\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end
@@ -320,6 +823,268 @@ module DaytonaApiClient
       data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
       if @api_client.config.debugging
         @api_client.config.logger.debug "API called: AdminApi#admin_recover_sandbox\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Regenerate user key pair
+    # @param id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_regenerate_key_pair(id, opts = {})
+      admin_regenerate_key_pair_with_http_info(id, opts)
+      nil
+    end
+
+    # Regenerate user key pair
+    # @param id [String] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_regenerate_key_pair_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_regenerate_key_pair ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling AdminApi.admin_regenerate_key_pair"
+      end
+      # resource path
+      local_var_path = '/admin/users/{id}/regenerate-key-pair'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_regenerate_key_pair",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_regenerate_key_pair\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Send a webhook message to an organization
+    # @param organization_id [String] 
+    # @param send_webhook_dto [SendWebhookDto] 
+    # @param [Hash] opts the optional parameters
+    # @return [nil]
+    def admin_send_webhook(organization_id, send_webhook_dto, opts = {})
+      admin_send_webhook_with_http_info(organization_id, send_webhook_dto, opts)
+      nil
+    end
+
+    # Send a webhook message to an organization
+    # @param organization_id [String] 
+    # @param send_webhook_dto [SendWebhookDto] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(nil, Integer, Hash)>] nil, response status code and response headers
+    def admin_send_webhook_with_http_info(organization_id, send_webhook_dto, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_send_webhook ...'
+      end
+      # verify the required parameter 'organization_id' is set
+      if @api_client.config.client_side_validation && organization_id.nil?
+        fail ArgumentError, "Missing the required parameter 'organization_id' when calling AdminApi.admin_send_webhook"
+      end
+      # verify the required parameter 'send_webhook_dto' is set
+      if @api_client.config.client_side_validation && send_webhook_dto.nil?
+        fail ArgumentError, "Missing the required parameter 'send_webhook_dto' when calling AdminApi.admin_send_webhook"
+      end
+      # resource path
+      local_var_path = '/admin/webhooks/organizations/{organizationId}/send'.sub('{' + 'organizationId' + '}', CGI.escape(organization_id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(send_webhook_dto)
+
+      # return_type
+      return_type = opts[:debug_return_type]
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_send_webhook",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_send_webhook\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set default registry
+    # @param id [String] ID of the docker registry
+    # @param [Hash] opts the optional parameters
+    # @return [DockerRegistry]
+    def admin_set_default_registry(id, opts = {})
+      data, _status_code, _headers = admin_set_default_registry_with_http_info(id, opts)
+      data
+    end
+
+    # Set default registry
+    # @param id [String] ID of the docker registry
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(DockerRegistry, Integer, Hash)>] DockerRegistry data, response status code and response headers
+    def admin_set_default_registry_with_http_info(id, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_set_default_registry ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling AdminApi.admin_set_default_registry"
+      end
+      # resource path
+      local_var_path = '/admin/docker-registry/{id}/set-default'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body]
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'DockerRegistry'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_set_default_registry",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:POST, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_set_default_registry\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
+      end
+      return data, status_code, headers
+    end
+
+    # Set snapshot general status
+    # @param id [String] Snapshot ID
+    # @param set_snapshot_general_status_dto [SetSnapshotGeneralStatusDto] 
+    # @param [Hash] opts the optional parameters
+    # @return [SnapshotDto]
+    def admin_set_snapshot_general_status(id, set_snapshot_general_status_dto, opts = {})
+      data, _status_code, _headers = admin_set_snapshot_general_status_with_http_info(id, set_snapshot_general_status_dto, opts)
+      data
+    end
+
+    # Set snapshot general status
+    # @param id [String] Snapshot ID
+    # @param set_snapshot_general_status_dto [SetSnapshotGeneralStatusDto] 
+    # @param [Hash] opts the optional parameters
+    # @return [Array<(SnapshotDto, Integer, Hash)>] SnapshotDto data, response status code and response headers
+    def admin_set_snapshot_general_status_with_http_info(id, set_snapshot_general_status_dto, opts = {})
+      if @api_client.config.debugging
+        @api_client.config.logger.debug 'Calling API: AdminApi.admin_set_snapshot_general_status ...'
+      end
+      # verify the required parameter 'id' is set
+      if @api_client.config.client_side_validation && id.nil?
+        fail ArgumentError, "Missing the required parameter 'id' when calling AdminApi.admin_set_snapshot_general_status"
+      end
+      # verify the required parameter 'set_snapshot_general_status_dto' is set
+      if @api_client.config.client_side_validation && set_snapshot_general_status_dto.nil?
+        fail ArgumentError, "Missing the required parameter 'set_snapshot_general_status_dto' when calling AdminApi.admin_set_snapshot_general_status"
+      end
+      # resource path
+      local_var_path = '/admin/snapshots/{id}/general'.sub('{' + 'id' + '}', CGI.escape(id.to_s))
+
+      # query parameters
+      query_params = opts[:query_params] || {}
+
+      # header parameters
+      header_params = opts[:header_params] || {}
+      # HTTP header 'Accept' (if needed)
+      header_params['Accept'] = @api_client.select_header_accept(['application/json']) unless header_params['Accept']
+      # HTTP header 'Content-Type'
+      content_type = @api_client.select_header_content_type(['application/json'])
+      if !content_type.nil?
+          header_params['Content-Type'] = content_type
+      end
+
+      # form parameters
+      form_params = opts[:form_params] || {}
+
+      # http body (model)
+      post_body = opts[:debug_body] || @api_client.object_to_http_body(set_snapshot_general_status_dto)
+
+      # return_type
+      return_type = opts[:debug_return_type] || 'SnapshotDto'
+
+      # auth_names
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+
+      new_options = opts.merge(
+        :operation => :"AdminApi.admin_set_snapshot_general_status",
+        :header_params => header_params,
+        :query_params => query_params,
+        :form_params => form_params,
+        :body => post_body,
+        :auth_names => auth_names,
+        :return_type => return_type
+      )
+
+      data, status_code, headers = @api_client.call_api(:PATCH, local_var_path, new_options)
+      if @api_client.config.debugging
+        @api_client.config.logger.debug "API called: AdminApi#admin_set_snapshot_general_status\nData: #{data.inspect}\nStatus code: #{status_code}\nHeaders: #{headers}"
       end
       return data, status_code, headers
     end

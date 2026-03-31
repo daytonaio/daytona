@@ -52,8 +52,6 @@ import type { RegenerateApiKeyResponse } from '../models';
 // @ts-ignore
 import type { Region } from '../models';
 // @ts-ignore
-import type { RegionQuota } from '../models';
-// @ts-ignore
 import type { SnapshotManagerCredentials } from '../models';
 // @ts-ignore
 import type { UpdateOrganizationDefaultRegion } from '../models';
@@ -593,46 +591,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
         },
         /**
          * 
-         * @summary Get organization by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getOrganizationBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'sandboxId' is not null or undefined
-            assertParamExists('getOrganizationBySandboxId', 'sandboxId', sandboxId)
-            const localVarPath = `/organizations/by-sandbox-id/{sandboxId}`
-                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication oauth2 required
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
          * @summary Get count of organization invitations for authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -782,46 +740,6 @@ export const OrganizationsApiAxiosParamCreator = function (configuration?: Confi
             if (xDaytonaOrganizationID != null) {
                 localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID);
             }
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @summary Get region quota by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getRegionQuotaBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'sandboxId' is not null or undefined
-            assertParamExists('getRegionQuotaBySandboxId', 'sandboxId', sandboxId)
-            const localVarPath = `/organizations/region-quota/by-sandbox-id/{sandboxId}`
-                .replace(`{${"sandboxId"}}`, encodeURIComponent(String(sandboxId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            // authentication oauth2 required
-
-
-    
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -1926,19 +1844,6 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
-         * @summary Get organization by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Organization>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getOrganizationBySandboxId(sandboxId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getOrganizationBySandboxId']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
          * @summary Get count of organization invitations for authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1987,19 +1892,6 @@ export const OrganizationsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionById(id, xDaytonaOrganizationID, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getRegionById']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @summary Get region quota by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RegionQuota>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getRegionQuotaBySandboxId(sandboxId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['OrganizationsApi.getRegionQuotaBySandboxId']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -2430,16 +2322,6 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
         },
         /**
          * 
-         * @summary Get organization by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Organization> {
-            return localVarFp.getOrganizationBySandboxId(sandboxId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
          * @summary Get count of organization invitations for authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2477,16 +2359,6 @@ export const OrganizationsApiFactory = function (configuration?: Configuration, 
          */
         getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<Region> {
             return localVarFp.getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @summary Get region quota by sandbox ID
-         * @param {string} sandboxId Sandbox ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<RegionQuota> {
-            return localVarFp.getRegionQuotaBySandboxId(sandboxId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -2877,18 +2749,6 @@ export class OrganizationsApi extends BaseAPI {
 
     /**
      * 
-     * @summary Get organization by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof OrganizationsApi
-     */
-    public getOrganizationBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
-        return OrganizationsApiFp(this.configuration).getOrganizationBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
      * @summary Get count of organization invitations for authenticated user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -2933,18 +2793,6 @@ export class OrganizationsApi extends BaseAPI {
      */
     public getRegionById(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
         return OrganizationsApiFp(this.configuration).getRegionById(id, xDaytonaOrganizationID, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Get region quota by sandbox ID
-     * @param {string} sandboxId Sandbox ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof OrganizationsApi
-     */
-    public getRegionQuotaBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
-        return OrganizationsApiFp(this.configuration).getRegionQuotaBySandboxId(sandboxId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

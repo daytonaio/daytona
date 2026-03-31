@@ -9,27 +9,28 @@ import { CreateApiKeyDto } from './dto/create-api-key.dto'
 import { ApiHeader, ApiOAuth2, ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger'
 import { ApiKeyResponseDto } from './dto/api-key-response.dto'
 import { ApiKeyListDto } from './dto/api-key-list.dto'
-import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { AuthContext } from '../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
-import { OrganizationAuthContext } from '../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../common/interfaces/organization-auth-context.interface'
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
-import { SystemRole } from '../user/enums/system-role.enum'
+import { OrganizationAuthContextGuard } from '../organization/guards/organization-auth-context.guard'
 import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
 import { ApiKey } from './api-key.entity'
 import { AuthenticatedRateLimitGuard } from '../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('api-keys')
 @Controller('api-keys')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@ApiTags('api-keys')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@AuthStrategy(AuthStrategyType.JWT)
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
@@ -56,7 +57,7 @@ export class ApiKeyController {
     },
   })
   async createApiKey(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createApiKeyDto: CreateApiKeyDto,
   ): Promise<ApiKeyResponseDto> {
     this.validateRequestedApiKeyPermissions(authContext, createApiKeyDto.permissions)
@@ -83,10 +84,10 @@ export class ApiKeyController {
     type: [ApiKeyListDto],
   })
   @ApiResponse({ status: 500, description: 'Error fetching API keys.' })
-  async getApiKeys(@AuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
+  async getApiKeys(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
     let apiKeys: ApiKey[] = []
 
-    if (authContext.role === SystemRole.ADMIN || authContext.organizationUser?.role === OrganizationMemberRole.OWNER) {
+    if (authContext.organizationUser.role === OrganizationMemberRole.OWNER) {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId)
     } else {
       apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
@@ -105,7 +106,9 @@ export class ApiKeyController {
     description: 'API key retrieved successfully.',
     type: ApiKeyListDto,
   })
-  async getCurrentApiKey(@AuthContext() authContext: IAuthContext): Promise<ApiKeyListDto> {
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  async getCurrentApiKey(@IsOrganizationAuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto> {
+    // Should not happen due to AuthStrategy guard, but needed for type safety
     if (!authContext.apiKey) {
       throw new ForbiddenException('Authenticate with an API key to use this endpoint')
     }
@@ -124,7 +127,7 @@ export class ApiKeyController {
     type: ApiKeyListDto,
   })
   async getApiKey(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('name') name: string,
   ): Promise<ApiKeyListDto> {
     const apiKey = await this.apiKeyService.getApiKeyByName(authContext.organizationId, authContext.userId, name)
@@ -143,7 +146,7 @@ export class ApiKeyController {
     targetType: AuditTarget.API_KEY,
     targetIdFromRequest: (req) => req.params.name,
   })
-  async deleteApiKey(@AuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
+  async deleteApiKey(@IsOrganizationAuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, authContext.userId, name)
   }
 
@@ -165,15 +168,11 @@ export class ApiKeyController {
     },
   })
   async deleteApiKeyForUser(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('userId') userId: string,
     @Param('name') name: string,
   ) {
-    if (
-      userId !== authContext.userId &&
-      authContext.role !== SystemRole.ADMIN &&
-      authContext.organizationUser?.role !== OrganizationMemberRole.OWNER
-    ) {
+    if (userId !== authContext.userId && authContext.organizationUser.role !== OrganizationMemberRole.OWNER) {
       throw new ForbiddenException('Incorrect user ID provided')
     }
 
@@ -184,14 +183,6 @@ export class ApiKeyController {
     authContext: OrganizationAuthContext,
     requestedPermissions: OrganizationResourcePermission[],
   ): void {
-    if (authContext.role === SystemRole.ADMIN) {
-      return
-    }
-
-    if (!authContext.organizationUser) {
-      throw new ForbiddenException(`Insufficient permissions for assigning: ${requestedPermissions.join(', ')}`)
-    }
-
     if (authContext.organizationUser.role === OrganizationMemberRole.OWNER) {
       return
     }

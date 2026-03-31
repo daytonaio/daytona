@@ -616,62 +616,6 @@ paths:
       summary: Unsuspend organization
       tags:
       - organizations
-  /organizations/by-sandbox-id/{sandboxId}:
-    get:
-      operationId: getOrganizationBySandboxId
-      parameters:
-      - description: Sandbox ID
-        explode: false
-        in: path
-        name: sandboxId
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Organization'
-          description: Organization
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Get organization by sandbox ID
-      tags:
-      - organizations
-  /organizations/region-quota/by-sandbox-id/{sandboxId}:
-    get:
-      operationId: getRegionQuotaBySandboxId
-      parameters:
-      - description: Sandbox ID
-        explode: false
-        in: path
-        name: sandboxId
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RegionQuota'
-          description: Region quota
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Get region quota by sandbox ID
-      tags:
-      - organizations
   /organizations/otel-config/by-sandbox-auth-token/{authToken}:
     get:
       operationId: getOrganizationOtelConfigBySandboxAuthToken
@@ -1440,66 +1384,6 @@ paths:
       summary: Get authenticated user
       tags:
       - users
-  /users:
-    get:
-      operationId: listUsers
-      parameters: []
-      responses:
-        "200":
-          description: ""
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: List all users
-      tags:
-      - users
-    post:
-      operationId: createUser
-      parameters: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUser'
-        required: true
-      responses:
-        "201":
-          description: ""
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Create user
-      tags:
-      - users
-  /users/{id}/regenerate-key-pair:
-    post:
-      operationId: regenerateKeyPair
-      parameters:
-      - explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "201":
-          description: ""
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Regenerate user key pair
-      tags:
-      - users
   /users/account-providers:
     get:
       operationId: getAvailableAccountProviders
@@ -1594,33 +1478,6 @@ paths:
       summary: Enroll in SMS MFA
       tags:
       - users
-  /users/{id}:
-    get:
-      operationId: getUser
-      parameters:
-      - explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: User details
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Get user by ID
-      tags:
-      - users
   /shared-regions:
     get:
       operationId: listSharedRegions
@@ -1634,12 +1491,6 @@ paths:
                   $ref: '#/components/schemas/Region'
                 type: array
           description: List of all shared regions
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
       summary: List all shared regions
       tags:
       - regions
@@ -2991,6 +2842,78 @@ paths:
         - profile
         - email
       summary: Get toolbox proxy URL for a sandbox
+      tags:
+      - sandbox
+  /sandbox/{sandboxId}/organization:
+    get:
+      operationId: getOrganizationBySandboxId
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID of the sandbox
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get organization by sandbox ID
+      tags:
+      - sandbox
+  /sandbox/{sandboxId}/region-quota:
+    get:
+      operationId: getRegionQuotaBySandboxId
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: ID of the sandbox
+        explode: false
+        in: path
+        name: sandboxId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionQuota'
+          description: Region quota
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get region quota by sandbox ID
       tags:
       - sandbox
   /runners:
@@ -6479,42 +6402,6 @@ paths:
       summary: Create a new snapshot
       tags:
       - snapshots
-  /snapshots/can-cleanup-image:
-    get:
-      operationId: canCleanupImage
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: Image name with tag to check
-        explode: true
-        in: query
-        name: imageName
-        required: true
-        schema:
-          type: string
-        style: form
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                type: boolean
-          description: Boolean indicating if image can be cleaned up
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Check if an image can be cleaned up
-      tags:
-      - snapshots
   /snapshots/{id}:
     delete:
       operationId: removeSnapshot
@@ -6582,48 +6469,6 @@ paths:
         - profile
         - email
       summary: Get snapshot by ID or name
-      tags:
-      - snapshots
-  /snapshots/{id}/general:
-    patch:
-      operationId: setSnapshotGeneralStatus
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: Snapshot ID
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SetSnapshotGeneralStatusDto'
-        required: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SnapshotDto'
-          description: Snapshot general status has been set
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Set snapshot general status
       tags:
       - snapshots
   /snapshots/{id}/build-logs:
@@ -7350,6 +7195,12 @@ paths:
               schema:
                 type: boolean
           description: Public status of the sandbox
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Check if sandbox is public
       tags:
       - preview
@@ -7380,6 +7231,12 @@ paths:
               schema:
                 type: boolean
           description: Sandbox auth token validation status
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Check if sandbox auth token is valid
       tags:
       - preview
@@ -7437,6 +7294,12 @@ paths:
               schema:
                 type: string
           description: Sandbox ID from signed preview URL token
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Get sandbox ID from signed preview URL token
       tags:
       - preview
@@ -7983,42 +7846,6 @@ paths:
       summary: Update registry
       tags:
       - docker-registry
-  /docker-registry/{id}/set-default:
-    post:
-      operationId: setDefaultRegistry
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - description: ID of the docker registry
-        explode: false
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockerRegistry'
-          description: The docker registry has been set as default.
-      security:
-      - bearer: []
-      - oauth2:
-        - openid
-        - profile
-        - email
-      summary: Set default registry
-      tags:
-      - docker-registry
   /admin/runners:
     get:
       operationId: adminListRunners
@@ -8176,21 +8003,73 @@ paths:
       summary: Recover sandbox from error state as an admin
       tags:
       - admin
-  /webhooks/organizations/{organizationId}/app-portal-access:
+  /admin/users:
+    get:
+      operationId: adminListUsers
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: List all users
+      tags:
+      - admin
     post:
-      operationId: WebhookController_getAppPortalAccess
+      operationId: adminCreateUser
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+        required: true
+      responses:
+        "201":
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Create user
+      tags:
+      - admin
+  /admin/users/{id}/regenerate-key-pair:
+    post:
+      operationId: adminRegenerateKeyPair
       parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
+      - explode: false
+        in: path
+        name: id
+        required: true
         schema:
           type: string
         style: simple
+      responses:
+        "201":
+          description: ""
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Regenerate user key pair
+      tags:
+      - admin
+  /admin/users/{id}:
+    get:
+      operationId: adminGetUser
+      parameters:
       - explode: false
         in: path
-        name: organizationId
+        name: id
         required: true
         schema:
           type: string
@@ -8200,25 +8079,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookAppPortalAccess'
-          description: App Portal access generated successfully
+                $ref: '#/components/schemas/User'
+          description: User details
       security:
       - bearer: []
-      summary: Get Svix Consumer App Portal access for an organization
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get user by ID
       tags:
-      - webhooks
-  /webhooks/organizations/{organizationId}/send:
+      - admin
+  /admin/webhooks/organizations/{organizationId}/send:
     post:
-      operationId: WebhookController_sendWebhook
+      operationId: adminSendWebhook
       parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - explode: false
         in: path
         name: organizationId
@@ -8237,21 +8112,17 @@ paths:
           description: Webhook message sent successfully
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Send a webhook message to an organization
       tags:
-      - webhooks
-  /webhooks/organizations/{organizationId}/messages/{messageId}/attempts:
+      - admin
+  /admin/webhooks/organizations/{organizationId}/messages/{messageId}/attempts:
     get:
-      operationId: WebhookController_getMessageAttempts
+      operationId: adminGetMessageAttempts
       parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - explode: false
         in: path
         name: organizationId
@@ -8277,78 +8148,37 @@ paths:
           description: List of delivery attempts
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Get delivery attempts for a webhook message
       tags:
-      - webhooks
-  /webhooks/status:
+      - admin
+  /admin/webhooks/status:
     get:
-      operationId: WebhookController_getStatus
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
+      operationId: adminGetWebhookStatus
+      parameters: []
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebhookController_getStatus_200_response'
+                $ref: '#/components/schemas/adminGetWebhookStatus_200_response'
           description: Webhook service status
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Get webhook service status
       tags:
-      - webhooks
-  /webhooks/organizations/{organizationId}/initialization-status:
-    get:
-      operationId: WebhookController_getInitializationStatus
-      parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
-      - explode: false
-        in: path
-        name: organizationId
-        required: true
-        schema:
-          type: string
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WebhookInitializationStatus'
-          description: Webhook initialization status
-        "404":
-          description: Webhook initialization status not found
-      security:
-      - bearer: []
-      summary: Get webhook initialization status for an organization
-      tags:
-      - webhooks
-  /webhooks/organizations/{organizationId}/initialize:
+      - admin
+  /admin/webhooks/organizations/{organizationId}/initialize:
     post:
-      operationId: WebhookController_initializeWebhooks
+      operationId: adminInitializeWebhooks
       parameters:
-      - description: Use with JWT to specify the organization ID
-        explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
-        schema:
-          type: string
-        style: simple
       - explode: false
         in: path
         name: organizationId
@@ -8359,24 +8189,26 @@ paths:
       responses:
         "201":
           description: Webhooks initialized successfully
-        "403":
-          description: User does not have access to this organization
         "404":
           description: Organization not found
       security:
       - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
       summary: Initialize webhooks for an organization
       tags:
-      - webhooks
-  /object-storage/push-access:
-    get:
-      operationId: getPushAccess
+      - admin
+  /admin/docker-registry/{id}/set-default:
+    post:
+      operationId: adminSetDefaultRegistry
       parameters:
-      - description: Use with JWT to specify the organization ID
+      - description: ID of the docker registry
         explode: false
-        in: header
-        name: X-Daytona-Organization-ID
-        required: false
+        in: path
+        name: id
+        required: true
         schema:
           type: string
         style: simple
@@ -8385,20 +8217,82 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StorageAccessDto'
-          description: Temporary storage access has been generated
+                $ref: '#/components/schemas/DockerRegistry'
+          description: The docker registry has been set as default.
       security:
       - bearer: []
       - oauth2:
         - openid
         - profile
         - email
-      summary: Get temporary storage access for pushing objects
+      summary: Set default registry
       tags:
-      - object-storage
-  /audit:
+      - admin
+  /admin/snapshots/can-cleanup-image:
     get:
-      operationId: getAllAuditLogs
+      operationId: adminCanCleanupImage
+      parameters:
+      - description: Image name with tag to check
+        explode: true
+        in: query
+        name: imageName
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Boolean indicating if image can be cleaned up
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Check if an image can be cleaned up
+      tags:
+      - admin
+  /admin/snapshots/{id}/general:
+    patch:
+      operationId: adminSetSnapshotGeneralStatus
+      parameters:
+      - description: Snapshot ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSnapshotGeneralStatusDto'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotDto'
+          description: Snapshot general status has been set
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Set snapshot general status
+      tags:
+      - admin
+  /admin/audit:
+    get:
+      operationId: adminGetAllAuditLogs
       parameters:
       - description: Page number of the results
         explode: true
@@ -8463,7 +8357,79 @@ paths:
         - email
       summary: Get all audit logs
       tags:
-      - audit
+      - admin
+  /webhooks/organizations/{organizationId}/app-portal-access:
+    post:
+      operationId: WebhookController_getAppPortalAccess
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookAppPortalAccess'
+          description: App Portal access generated successfully
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get Svix Consumer App Portal access for an organization
+      tags:
+      - webhooks
+  /webhooks/organizations/{organizationId}/initialization-status:
+    get:
+      operationId: WebhookController_getInitializationStatus
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: organizationId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookInitializationStatus'
+          description: Webhook initialization status
+        "404":
+          description: Webhook initialization status not found
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get webhook initialization status for an organization
+      tags:
+      - webhooks
   /audit/organizations/{organizationId}:
     get:
       operationId: getOrganizationAuditLogs
@@ -8540,6 +8506,34 @@ paths:
       summary: Get audit logs for organization
       tags:
       - audit
+  /object-storage/push-access:
+    get:
+      operationId: getPushAccess
+      parameters:
+      - description: Use with JWT to specify the organization ID
+        explode: false
+        in: header
+        name: X-Daytona-Organization-ID
+        required: false
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageAccessDto'
+          description: Temporary storage access has been generated
+      security:
+      - bearer: []
+      - oauth2:
+        - openid
+        - profile
+        - email
+      summary: Get temporary storage access for pushing objects
+      tags:
+      - object-storage
   /health:
     get:
       operationId: HealthController_live
@@ -8566,6 +8560,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthController_check_503_response'
           description: The Health Check is not successful
+      security:
+      - bearer: []
       tags:
       - Health
   /sandbox/{sandboxId}/telemetry/logs:
@@ -9712,31 +9708,6 @@ components:
       - reason
       - until
       type: object
-    RegionQuota:
-      example:
-        organizationId: organizationId
-        totalCpuQuota: 0.8008281904610115
-        regionId: regionId
-        totalMemoryQuota: 6.027456183070403
-        totalDiskQuota: 1.4658129805029452
-      properties:
-        organizationId:
-          type: string
-        regionId:
-          type: string
-        totalCpuQuota:
-          type: number
-        totalMemoryQuota:
-          type: number
-        totalDiskQuota:
-          type: number
-      required:
-      - organizationId
-      - regionId
-      - totalCpuQuota
-      - totalDiskQuota
-      - totalMemoryQuota
-      type: object
     OtelConfig:
       example:
         headers:
@@ -10241,77 +10212,6 @@ components:
       - id
       - name
       - publicKeys
-      type: object
-    CreateOrganizationQuota:
-      example:
-        snapshotQuota: 7.061401241503109
-        totalCpuQuota: 0.8008281904610115
-        maxCpuPerSandbox: 5.962133916683182
-        maxDiskPerSandbox: 2.3021358869347655
-        maxMemoryPerSandbox: 5.637376656633329
-        volumeQuota: 3.616076749251911
-        totalMemoryQuota: 6.027456183070403
-        maxSnapshotSize: 9.301444243932576
-        totalDiskQuota: 1.4658129805029452
-      properties:
-        totalCpuQuota:
-          type: number
-        totalMemoryQuota:
-          type: number
-        totalDiskQuota:
-          type: number
-        maxCpuPerSandbox:
-          type: number
-        maxMemoryPerSandbox:
-          type: number
-        maxDiskPerSandbox:
-          type: number
-        snapshotQuota:
-          type: number
-        maxSnapshotSize:
-          type: number
-        volumeQuota:
-          type: number
-      type: object
-    CreateUser:
-      example:
-        emailVerified: true
-        role: admin
-        name: name
-        personalOrganizationDefaultRegionId: personalOrganizationDefaultRegionId
-        id: id
-        personalOrganizationQuota:
-          snapshotQuota: 7.061401241503109
-          totalCpuQuota: 0.8008281904610115
-          maxCpuPerSandbox: 5.962133916683182
-          maxDiskPerSandbox: 2.3021358869347655
-          maxMemoryPerSandbox: 5.637376656633329
-          volumeQuota: 3.616076749251911
-          totalMemoryQuota: 6.027456183070403
-          maxSnapshotSize: 9.301444243932576
-          totalDiskQuota: 1.4658129805029452
-        email: email
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
-        personalOrganizationQuota:
-          $ref: '#/components/schemas/CreateOrganizationQuota'
-        personalOrganizationDefaultRegionId:
-          type: string
-        role:
-          enum:
-          - admin
-          - user
-          type: string
-        emailVerified:
-          type: boolean
-      required:
-      - id
-      - name
       type: object
     AccountProvider:
       example:
@@ -11104,6 +11004,31 @@ components:
           type: string
       required:
       - url
+      type: object
+    RegionQuota:
+      example:
+        organizationId: organizationId
+        totalCpuQuota: 0.8008281904610115
+        regionId: regionId
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+      properties:
+        organizationId:
+          type: string
+        regionId:
+          type: string
+        totalCpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+      required:
+      - organizationId
+      - regionId
+      - totalCpuQuota
+      - totalDiskQuota
+      - totalMemoryQuota
       type: object
     CreateRunner:
       example:
@@ -13084,7 +13009,6 @@ components:
       type: object
     CreateSnapshot:
       example:
-        general: true
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
@@ -13109,9 +13033,6 @@ components:
           items:
             type: string
           type: array
-        general:
-          description: Whether the snapshot is general
-          type: boolean
         cpu:
           description: CPU cores allocated to the resulting sandbox
           example: 1
@@ -13322,17 +13243,6 @@ components:
       - page
       - total
       - totalPages
-      type: object
-    SetSnapshotGeneralStatusDto:
-      example:
-        general: true
-      properties:
-        general:
-          description: Whether the snapshot is general
-          example: true
-          type: boolean
-      required:
-      - general
       type: object
     SandboxInfo:
       properties:
@@ -13980,9 +13890,7 @@ components:
       type: object
     CreateDockerRegistry:
       example:
-        registryType: organization
         password: password
-        isDefault: true
         name: name
         project: project
         url: url
@@ -14003,22 +13911,9 @@ components:
         project:
           description: Registry project
           type: string
-        registryType:
-          default: organization
-          description: Registry type
-          enum:
-          - internal
-          - organization
-          - transient
-          - backup
-          type: string
-        isDefault:
-          description: Set as default registry
-          type: boolean
       required:
       - name
       - password
-      - registryType
       - url
       - username
       type: object
@@ -14205,22 +14100,76 @@ components:
       - name
       - regionId
       type: object
-    WebhookAppPortalAccess:
+    CreateOrganizationQuota:
       example:
-        url: https://app.svix.com/app_1234567890
-        token: appsk_...
+        snapshotQuota: 7.061401241503109
+        totalCpuQuota: 0.8008281904610115
+        maxCpuPerSandbox: 5.962133916683182
+        maxDiskPerSandbox: 2.3021358869347655
+        maxMemoryPerSandbox: 5.637376656633329
+        volumeQuota: 3.616076749251911
+        totalMemoryQuota: 6.027456183070403
+        maxSnapshotSize: 9.301444243932576
+        totalDiskQuota: 1.4658129805029452
       properties:
-        token:
-          description: The authentication token for the Svix consumer app portal
-          example: appsk_...
+        totalCpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+        maxCpuPerSandbox:
+          type: number
+        maxMemoryPerSandbox:
+          type: number
+        maxDiskPerSandbox:
+          type: number
+        snapshotQuota:
+          type: number
+        maxSnapshotSize:
+          type: number
+        volumeQuota:
+          type: number
+      type: object
+    CreateUser:
+      example:
+        emailVerified: true
+        role: admin
+        name: name
+        personalOrganizationDefaultRegionId: personalOrganizationDefaultRegionId
+        id: id
+        personalOrganizationQuota:
+          snapshotQuota: 7.061401241503109
+          totalCpuQuota: 0.8008281904610115
+          maxCpuPerSandbox: 5.962133916683182
+          maxDiskPerSandbox: 2.3021358869347655
+          maxMemoryPerSandbox: 5.637376656633329
+          volumeQuota: 3.616076749251911
+          totalMemoryQuota: 6.027456183070403
+          maxSnapshotSize: 9.301444243932576
+          totalDiskQuota: 1.4658129805029452
+        email: email
+      properties:
+        id:
           type: string
-        url:
-          description: The URL to the webhook app portal
-          example: https://app.svix.com/app_1234567890
+        name:
           type: string
+        email:
+          type: string
+        personalOrganizationQuota:
+          $ref: '#/components/schemas/CreateOrganizationQuota'
+        personalOrganizationDefaultRegionId:
+          type: string
+        role:
+          enum:
+          - admin
+          - user
+          type: string
+        emailVerified:
+          type: boolean
       required:
-      - token
-      - url
+      - id
+      - name
       type: object
     WebhookEvent:
       description: The type of event being sent
@@ -14260,89 +14209,16 @@ components:
       - eventType
       - payload
       type: object
-    WebhookInitializationStatus:
+    SetSnapshotGeneralStatusDto:
       example:
-        organizationId: 123e4567-e89b-12d3-a456-426614174000
-        createdAt: 2023-01-01T00:00:00.000Z
-        lastError: Failed to create Svix application
-        retryCount: 3
-        svixApplicationId: app_1234567890
-        updatedAt: 2023-01-01T00:00:00.000Z
+        general: true
       properties:
-        organizationId:
-          description: Organization ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        svixApplicationId:
-          description: The ID of the Svix application
-          example: app_1234567890
-          nullable: true
-          type: string
-        lastError:
-          description: The error reason for the last initialization attempt
-          example: Failed to create Svix application
-          nullable: true
-          type: string
-        retryCount:
-          description: The number of times the initialization has been attempted
-          example: 3
-          type: number
-        createdAt:
-          description: When the webhook initialization was created
-          example: 2023-01-01T00:00:00.000Z
-          type: string
-        updatedAt:
-          description: When the webhook initialization was last updated
-          example: 2023-01-01T00:00:00.000Z
-          type: string
+        general:
+          description: Whether the snapshot is general
+          example: true
+          type: boolean
       required:
-      - createdAt
-      - lastError
-      - organizationId
-      - retryCount
-      - svixApplicationId
-      - updatedAt
-      type: object
-    StorageAccessDto:
-      example:
-        organizationId: 123e4567-e89b-12d3-a456-426614174000
-        bucket: daytona
-        accessKey: temp-user-123
-        sessionToken: eyJhbGciOiJIUzI1NiIs...
-        secret: abchbGciOiJIUzI1NiIs...
-        storageUrl: storage.example.com
-      properties:
-        accessKey:
-          description: Access key for storage authentication
-          example: temp-user-123
-          type: string
-        secret:
-          description: Secret key for storage authentication
-          example: abchbGciOiJIUzI1NiIs...
-          type: string
-        sessionToken:
-          description: Session token for storage authentication
-          example: eyJhbGciOiJIUzI1NiIs...
-          type: string
-        storageUrl:
-          description: Storage URL
-          example: storage.example.com
-          type: string
-        organizationId:
-          description: Organization ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
-        bucket:
-          description: S3 bucket name
-          example: daytona
-          type: string
-      required:
-      - accessKey
-      - bucket
-      - organizationId
-      - secret
-      - sessionToken
-      - storageUrl
+      - general
       type: object
     AuditLog:
       example:
@@ -14465,6 +14341,107 @@ components:
       - page
       - total
       - totalPages
+      type: object
+    WebhookAppPortalAccess:
+      example:
+        url: https://app.svix.com/app_1234567890
+        token: appsk_...
+      properties:
+        token:
+          description: The authentication token for the Svix consumer app portal
+          example: appsk_...
+          type: string
+        url:
+          description: The URL to the webhook app portal
+          example: https://app.svix.com/app_1234567890
+          type: string
+      required:
+      - token
+      - url
+      type: object
+    WebhookInitializationStatus:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        lastError: Failed to create Svix application
+        retryCount: 3
+        svixApplicationId: app_1234567890
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        svixApplicationId:
+          description: The ID of the Svix application
+          example: app_1234567890
+          nullable: true
+          type: string
+        lastError:
+          description: The error reason for the last initialization attempt
+          example: Failed to create Svix application
+          nullable: true
+          type: string
+        retryCount:
+          description: The number of times the initialization has been attempted
+          example: 3
+          type: number
+        createdAt:
+          description: When the webhook initialization was created
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: When the webhook initialization was last updated
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+      - createdAt
+      - lastError
+      - organizationId
+      - retryCount
+      - svixApplicationId
+      - updatedAt
+      type: object
+    StorageAccessDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        bucket: daytona
+        accessKey: temp-user-123
+        sessionToken: eyJhbGciOiJIUzI1NiIs...
+        secret: abchbGciOiJIUzI1NiIs...
+        storageUrl: storage.example.com
+      properties:
+        accessKey:
+          description: Access key for storage authentication
+          example: temp-user-123
+          type: string
+        secret:
+          description: Secret key for storage authentication
+          example: abchbGciOiJIUzI1NiIs...
+          type: string
+        sessionToken:
+          description: Session token for storage authentication
+          example: eyJhbGciOiJIUzI1NiIs...
+          type: string
+        storageUrl:
+          description: Storage URL
+          example: storage.example.com
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        bucket:
+          description: S3 bucket name
+          example: daytona
+          type: string
+      required:
+      - accessKey
+      - bucket
+      - organizationId
+      - secret
+      - sessionToken
+      - storageUrl
       type: object
     LogEntry:
       example:
@@ -14764,7 +14741,7 @@ components:
           format: binary
           type: string
       type: object
-    WebhookController_getStatus_200_response:
+    adminGetWebhookStatus_200_response:
       example:
         enabled: true
       properties:

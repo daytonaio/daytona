@@ -4,26 +4,29 @@
  */
 
 import { Body, Controller, Delete, ForbiddenException, Get, Param, Post, UseGuards } from '@nestjs/common'
-import { AuthGuard } from '@nestjs/passport'
-import { ApiOAuth2, ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOAuth2, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 import { RequiredOrganizationMemberRole } from '../decorators/required-organization-member-role.decorator'
 import { UpdateOrganizationMemberAccessDto } from '../dto/update-organization-member-access.dto'
 import { OrganizationUserDto } from '../dto/organization-user.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
-import { OrganizationActionGuard } from '../guards/organization-action.guard'
+import { OrganizationAuthContextGuard } from '../guards/organization-auth-context.guard'
 import { OrganizationUserService } from '../services/organization-user.service'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
 
-@ApiTags('organizations')
 @Controller('organizations/:organizationId/users')
-@UseGuards(AuthGuard('jwt'), AuthenticatedRateLimitGuard, OrganizationActionGuard)
+@ApiTags('organizations')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@AuthStrategy(AuthStrategyType.JWT)
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class OrganizationUserController {
   constructor(private readonly organizationUserService: OrganizationUserService) {}
 
@@ -32,15 +35,15 @@ export class OrganizationUserController {
     summary: 'List organization members',
     operationId: 'listOrganizationMembers',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of organization members',
-    type: [OrganizationUserDto],
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of organization members',
+    type: [OrganizationUserDto],
   })
   async findAll(@Param('organizationId') organizationId: string): Promise<OrganizationUserDto[]> {
     return this.organizationUserService.findAll(organizationId)
@@ -51,11 +54,6 @@ export class OrganizationUserController {
     summary: 'Update access for organization member',
     operationId: 'updateAccessForOrganizationMember',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Access updated successfully',
-    type: OrganizationUserDto,
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
@@ -65,6 +63,11 @@ export class OrganizationUserController {
     name: 'userId',
     description: 'User ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Access updated successfully',
+    type: OrganizationUserDto,
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
@@ -79,7 +82,7 @@ export class OrganizationUserController {
     },
   })
   async updateAccess(
-    @AuthContext() authContext: IAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
     @Body() dto: UpdateOrganizationMemberAccessDto,
@@ -96,10 +99,6 @@ export class OrganizationUserController {
     summary: 'Delete organization member',
     operationId: 'deleteOrganizationMember',
   })
-  @ApiResponse({
-    status: 204,
-    description: 'User removed from organization successfully',
-  })
   @ApiParam({
     name: 'organizationId',
     description: 'Organization ID',
@@ -109,6 +108,10 @@ export class OrganizationUserController {
     name: 'userId',
     description: 'User ID',
     type: 'string',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'User removed from organization successfully',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @Audit({
