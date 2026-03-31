@@ -708,7 +708,9 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             }
 
             // Process sandbox asynchronously but track the promise
-            const processPromise = this.syncInstanceState(row.sandbox_id)
+            const processPromise = this.syncInstanceState(row.sandbox_id).catch((err) => {
+              this.logger.error(`Error syncing sandbox state for ${row.sandbox_id}`, err)
+            })
             pendingProcesses.push(processPromise)
             processedCount++
 
@@ -722,7 +724,7 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
           })
 
           stream.on('end', () => {
-            Promise.all(pendingProcesses)
+            Promise.allSettled(pendingProcesses)
               .then(() => {
                 resolve()
               })
