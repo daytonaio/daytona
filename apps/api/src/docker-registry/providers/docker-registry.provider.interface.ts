@@ -5,7 +5,27 @@
 
 export const DOCKER_REGISTRY_PROVIDER = 'DOCKER_REGISTRY_PROVIDER'
 
+export const enum RegistryCredentialsValidationErrorCode {
+  INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
+  UNREACHABLE = 'UNREACHABLE',
+  UNSUPPORTED_CHALLENGE = 'UNSUPPORTED_CHALLENGE',
+  UNVERIFIED_CREDENTIALS = 'UNVERIFIED_CREDENTIALS',
+}
+
+export class RegistryCredentialsValidationError extends Error {
+  constructor(
+    public readonly code: RegistryCredentialsValidationErrorCode,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'RegistryCredentialsValidationError'
+    Object.setPrototypeOf(this, new.target.prototype)
+  }
+}
+
 export interface IDockerRegistryProvider {
+  validateCredentials(baseUrl: string, auth: { username: string; password: string }): Promise<void>
+
   createRobotAccount(
     url: string,
     auth: { username: string; password: string },
