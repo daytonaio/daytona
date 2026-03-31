@@ -43,7 +43,7 @@ const toolboxApiSpec = {
   servers: [{ url: 'https://proxy.app.daytona.io/toolbox/{sandboxId}' }],
   info: {
     ...toolboxApiSpecRaw.info,
-    description: `${toolboxApiSpecRaw.info.description || 'Daytona Daemon API'}
+    description: `${toolboxApiSpecRaw.info.description || 'Daytona Toolbox API'}
 
 To get the toolbox proxy URL for your sandbox, call the \`/api/config\` endpoint from the main Daytona API. The response includes a \`proxyToolboxUrl\` field which provides the base URL template. Replace \`{sandboxId}\` in the URL with your actual sandbox ID to get the full toolbox API endpoint for that sandbox.
 
@@ -57,6 +57,12 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
   },
 }
 ---
+
+<style is:global>
+  html:has(#scalar-container) {
+    scroll-behavior: auto;
+  }
+</style>
 
 <div id="scalar-container">
   <ScalarComponent
@@ -82,6 +88,33 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
       searchHotKey: 'l',
       hideDarkModeToggle: true,
       telemetry: false,
+      documentDownloadType: 'yaml',
+      defaultOpenFirstTag: false,
+      customCss: `
+        .scalar-api-reference {
+          --scalar-custom-header-height: 75px;
+        }
+
+        @media (max-width: 650px) {
+          .scalar-api-reference {
+            --scalar-custom-header-height: 65px;
+          }
+        }
+      `,
+      metaData: {
+        title: 'Daytona API Reference',
+        ogTitle: 'Daytona API Reference',
+        description:
+          'A reference of supported operations using the Daytona API.',
+        ogDescription:
+          'A reference of supported operations using the Daytona API.',
+        image: 'https://daytona.io/docs/daytona.png',
+        ogImage: 'https://daytona.io/docs/daytona.png',
+        ogImageWidth: 1248,
+        ogImageHeight: 628,
+        ogImageAlt: 'Daytona API Reference',
+        twitterCard: 'summary_large_image',
+      },
     }}
   />
 </div>
@@ -340,11 +373,34 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
     }
   }
 
+  function resyncScalarHashNavigation(): void {
+    const targetHash = window.location.hash
+    if (!targetHash || !/^#(daytona|daytona-toolbox)(\/|$)/.test(targetHash)) {
+      return
+    }
+
+    const baseUrl = window.location.pathname + window.location.search
+    const urlWithHash = baseUrl + targetHash
+
+    function bump(): void {
+      if (window.location.pathname + window.location.search !== baseUrl) {
+        return
+      }
+      window.history.replaceState(null, '', baseUrl)
+      window.requestAnimationFrame(() => {
+        window.history.replaceState(null, '', urlWithHash)
+      })
+    }
+
+    ;[200, 500, 1000].forEach(ms => window.setTimeout(bump, ms))
+  }
+
   function initialize(): void {
     watchForScalar()
     watchThemeChanges()
     updateScalarTheme()
     showMoreButtonStyles()
+    resyncScalarHashNavigation()
 
     setTimeout(() => {
       showMoreButtonStyles()
@@ -356,6 +412,10 @@ Then use it as: \`https://proxy.app.daytona.io/toolbox/YOUR_SANDBOX_ID\``,
   } else {
     initialize()
   }
+
+  document.addEventListener('astro:page-load', () => {
+    resyncScalarHashNavigation()
+  })
 
   if (window.matchMedia) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
