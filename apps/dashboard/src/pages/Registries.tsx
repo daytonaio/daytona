@@ -98,6 +98,7 @@ const Registries: React.FC = () => {
 
         <UpsertRegistrySheet
           mode="edit"
+          trigger={null}
           open={showEditSheet}
           onOpenChange={(isOpen) => {
             setShowEditSheet(isOpen)

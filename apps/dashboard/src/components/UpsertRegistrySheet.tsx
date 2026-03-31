@@ -14,8 +14,8 @@ import {
   SheetDescription,
   SheetFooter,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
+  SheetTitle,
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { useCreateRegistryMutation } from '@/hooks/mutations/useCreateRegistryMutation'
@@ -25,7 +25,7 @@ import { handleApiError } from '@/lib/error-handling'
 import { DockerRegistry, DockerRegistryRegistryTypeEnum } from '@daytonaio/api-client'
 import { useForm } from '@tanstack/react-form'
 import { EyeIcon, EyeOffIcon, Plus } from 'lucide-react'
-import { Ref, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { Ref, type ReactNode, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
@@ -59,6 +59,7 @@ type UpsertRegistrySheetMode = 'create' | 'edit'
 interface UpsertRegistrySheetProps {
   className?: string
   disabled?: boolean
+  trigger?: ReactNode | null
   ref?: Ref<{ open: () => void }>
   mode?: UpsertRegistrySheetMode
   open?: boolean
@@ -69,6 +70,7 @@ interface UpsertRegistrySheetProps {
 export const UpsertRegistrySheet = ({
   className,
   disabled,
+  trigger,
   ref,
   mode = 'create',
   open,
@@ -193,13 +195,21 @@ export const UpsertRegistrySheet = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={handleOpenChange}>
-      {!isEditMode && (
+      {trigger === undefined ? (
         <SheetTrigger asChild>
-          <Button variant="default" size="sm" disabled={disabled} className={className} title="Add Registry">
-            <Plus className="w-4 h-4" />
-            Add Registry
+          <Button
+            variant="default"
+            size="sm"
+            disabled={disabled}
+            className={className}
+            title={isEditMode ? 'Edit Registry' : 'Add Registry'}
+          >
+            {!isEditMode && <Plus className="w-4 h-4" />}
+            {isEditMode ? 'Edit Registry' : 'Add Registry'}
           </Button>
         </SheetTrigger>
+      ) : (
+        trigger
       )}
       <SheetContent className="w-dvw sm:w-[460px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
