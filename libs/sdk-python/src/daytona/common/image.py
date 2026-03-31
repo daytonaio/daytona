@@ -111,8 +111,11 @@ class Image(BaseModel):
             ```
         """
         requirements_txt = os.path.expanduser(requirements_txt)
-        if not Path(requirements_txt).is_file():
+        req_path = Path(requirements_txt)
+        if not req_path.exists():
             raise DaytonaNotFoundError(f"Requirements file {requirements_txt} does not exist")
+        if not req_path.is_file():
+            raise DaytonaValidationError(f"Requirements path {requirements_txt} exists but is not a file")
 
         extra_args = self.__format_pip_install_args(find_links, index_url, extra_index_urls, pre, extra_options)
 
@@ -155,8 +158,11 @@ class Image(BaseModel):
             ```
         """
         pyproject_toml = os.path.expanduser(pyproject_toml)
-        if not Path(pyproject_toml).is_file():
+        pyproject_path = Path(pyproject_toml)
+        if not pyproject_path.exists():
             raise DaytonaNotFoundError(f"pyproject.toml file {pyproject_toml} does not exist")
+        if not pyproject_path.is_file():
+            raise DaytonaValidationError(f"pyproject.toml path {pyproject_toml} exists but is not a file")
 
         try:
             toml_data: dict[str, object] = toml.load(pyproject_toml)
@@ -226,8 +232,11 @@ class Image(BaseModel):
             remote_path = remote_path + Path(local_path).name
 
         local_path = os.path.expanduser(local_path)
-        if not Path(local_path).is_file():
+        lp = Path(local_path)
+        if not lp.exists():
             raise DaytonaNotFoundError(f"Local file {local_path} does not exist")
+        if not lp.is_file():
+            raise DaytonaValidationError(f"Local path {local_path} exists but is not a file")
 
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
@@ -251,8 +260,11 @@ class Image(BaseModel):
             ```
         """
         local_path = os.path.expanduser(local_path)
-        if not Path(local_path).is_dir():
+        lp = Path(local_path)
+        if not lp.exists():
             raise DaytonaNotFoundError(f"Local directory {local_path} does not exist")
+        if not lp.is_dir():
+            raise DaytonaValidationError(f"Local path {local_path} exists but is not a directory")
 
         archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
@@ -385,8 +397,10 @@ class Image(BaseModel):
         """
         if context_dir:
             context_dir = os.path.expanduser(context_dir)
-            if not os.path.isdir(context_dir):
+            if not os.path.exists(context_dir):
                 raise DaytonaNotFoundError(f"Context directory {context_dir} does not exist")
+            if not os.path.isdir(context_dir):
+                raise DaytonaValidationError(f"Context path {context_dir} exists but is not a directory")
 
         for context_path, original_path in Image.__extract_copy_sources(
             "\n".join(dockerfile_commands), context_dir or ""
@@ -416,8 +430,10 @@ class Image(BaseModel):
             ```
         """
         path = Path(os.path.expanduser(path))
-        if not path.is_file():
+        if not path.exists():
             raise DaytonaNotFoundError(f"Dockerfile {path} does not exist")
+        if not path.is_file():
+            raise DaytonaValidationError(f"Dockerfile path {path} exists but is not a file")
 
         dockerfile = path.read_text()
         img = Image()

@@ -116,8 +116,11 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = expandTilde(requirementsTxt)
-    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+    if (!fs.existsSync(expandedPath)) {
       throw new DaytonaNotFoundError(`Requirements file ${requirementsTxt} does not exist`)
+    }
+    if (!fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaValidationError(`Requirements path ${requirementsTxt} exists but is not a file`)
     }
 
     const extraArgs = this.formatPipInstallArgs(options)
@@ -147,8 +150,11 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
     const expandedPath = expandTilde(pyprojectToml)
 
-    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+    if (!fs.existsSync(expandedPath)) {
       throw new DaytonaNotFoundError(`pyproject.toml file ${pyprojectToml} does not exist`)
+    }
+    if (!fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaValidationError(`pyproject.toml path ${pyprojectToml} exists but is not a file`)
     }
 
     let tomlData: any
@@ -211,8 +217,11 @@ export class Image {
     }
 
     const expandedPath = expandTilde(localPath)
-    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+    if (!fs.existsSync(expandedPath)) {
       throw new DaytonaNotFoundError(`Local file ${localPath} does not exist`)
+    }
+    if (!fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaValidationError(`Local path ${localPath} exists but is not a file`)
     }
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
@@ -239,8 +248,11 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = expandTilde(localPath)
-    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
+    if (!fs.existsSync(expandedPath)) {
       throw new DaytonaNotFoundError(`Local directory ${localPath} does not exist`)
+    }
+    if (!fs.statSync(expandedPath).isDirectory()) {
+      throw new DaytonaValidationError(`Local path ${localPath} exists but is not a directory`)
     }
 
     this._contextList.push({ sourcePath: expandedPath, archivePath: expandedPath })
@@ -381,8 +393,11 @@ export class Image {
       const fs = dynamicRequire('fs', importErrorPrefix)
 
       const expandedPath = expandTilde(contextDir)
-      if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
+      if (!fs.existsSync(expandedPath)) {
         throw new DaytonaNotFoundError(`Context directory ${contextDir} does not exist`)
+      }
+      if (!fs.statSync(expandedPath).isDirectory()) {
+        throw new DaytonaValidationError(`Context path ${contextDir} exists but is not a directory`)
       }
     }
 
@@ -419,8 +434,11 @@ export class Image {
     const fs = dynamicRequire('fs', importErrorPrefix)
 
     const expandedPath = pathe.resolve(expandTilde(path))
-    if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isFile()) {
+    if (!fs.existsSync(expandedPath)) {
       throw new DaytonaNotFoundError(`Dockerfile ${path} does not exist`)
+    }
+    if (!fs.statSync(expandedPath).isFile()) {
+      throw new DaytonaValidationError(`Dockerfile path ${path} exists but is not a file`)
     }
 
     const dockerfileContent = fs.readFileSync(expandedPath, 'utf-8')
