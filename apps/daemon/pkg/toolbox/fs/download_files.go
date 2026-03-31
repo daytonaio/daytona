@@ -131,10 +131,13 @@ func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path string, errorRe
 	hdr.Set("Content-Type", "application/json; charset=utf-8")
 	hdr.Set("Content-Disposition", multipartContentDisposition("error", path))
 
-	if part, err := mw.CreatePart(hdr); err == nil {
-		if _, err := part.Write(payload); err != nil {
-			ctx.Error(err)
-		}
+	part, err := mw.CreatePart(hdr)
+	if err != nil {
+		ctx.Error(err)
+		return
+	}
+	if _, err := part.Write(payload); err != nil {
+		ctx.Error(err)
 	}
 }
 
@@ -173,7 +176,7 @@ func classifyDownloadPathError(ctx *gin.Context, path string) *common.ErrorRespo
 }
 
 func multipartContentDisposition(formName string, path string) string {
-	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(path)
+	escaped := strings.NewReplacer(`\`, `\\`, `"`, `\"`, "\r", "", "\n", "").Replace(path)
 	return fmt.Sprintf(`form-data; name="%s"; filename="%s"`, formName, escaped)
 }
 
