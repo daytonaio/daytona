@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import { getSidebarConfig, NavigationCategory } from '../content/config'
+import { getSidebarConfig, NavigationCategory } from '../sidebar-config'
 import type { NavigationGroup, NavigationLink } from '../utils/navigation'
 
 interface Props {
@@ -57,7 +57,7 @@ const guides: GuideItem[] = navLinks.map(link => {
 
   // Find matching doc
   const doc = allDocs.find(
-    d => d.slug === slug || d.slug === slug.replace(/\/$/, '')
+    d => d.id === slug || d.id === slug.replace(/\/$/, '')
   )
 
   return {

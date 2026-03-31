@@ -28,9 +28,13 @@ export default defineConfig({
     starlight({
       favicon: '/favicon.ico',
       title: 'Daytona',
-      social: {
-        github: 'https://github.com/daytonaio',
-      },
+      social: [
+        {
+          icon: 'github',
+          label: 'GitHub',
+          href: 'https://github.com/daytonaio',
+        },
+      ],
       editLink: {
         baseUrl: 'https://github.com/daytonaio/daytona/blob/main/apps/docs/',
       },

@@ -6,11 +6,9 @@ import { PAGE_TITLE_ID } from './TableOfContent/constants'
 
 const { origin, pathname } = Astro.url
 const normalizedPath = pathname.replace(/\/$/, '')
-const defaultMarkdownUrl = `${origin}${normalizedPath || '/docs/en'}.md`
-const llmUrl = Astro.props.entry.data.llmUrl
-const toolboxLlmUrl = Astro.props.entry.data.toolboxLlmUrl
-const markdownUrl = llmUrl || defaultMarkdownUrl
-const markdownRaw = llmUrl ? null : Astro.props.entry.body
+const markdownUrl = `${origin}${normalizedPath || '/docs/en'}.md`
+
+const markdownRaw = Astro.props.entry.body
 ---
 
 {
@@ -61,24 +59,24 @@ const markdownRaw = llmUrl ? null : Astro.props.entry.body
   }
   <OpenPageDropdown
     client:load
-    locale={Astro.props.locale}
+    locale={pageLocale}
     url={markdownUrl}
     className="right"
   />
 
   {
-    (Astro.props.entry.data.licence || Astro.props.entry.data.distribution) && (
+    (entry.data.licence || entry.data.distribution) && (
       <dl class="tiers-distribution-list">
         <div>
           <>
             <dt>Licence:</dt>
-            <dd>{Astro.props.entry.data.licence}</dd>
+            <dd>{entry.data.licence}</dd>
           </>
         </div>
         <div>
           <>
             <dt>Distribution:</dt>
-            <dd>{Astro.props.entry.data.distribution}</dd>
+            <dd>{entry.data.distribution}</dd>
           </>
         </div>
       </dl>

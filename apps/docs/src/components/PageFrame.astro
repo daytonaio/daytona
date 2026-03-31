@@ -1,9 +1,9 @@
 ---
 import MobileMenuToggle from './MobileMenuToggle.astro'
 
-const { hasSidebar: originalHasSidebar } = Astro.props
+const routeHasSidebar = Astro.locals.starlightRoute.hasSidebar
 const isApiPage = Astro.url.pathname.includes('/tools/api')
-const hasSidebar = originalHasSidebar && !isApiPage
+const hasSidebar = routeHasSidebar && !isApiPage
 ---
 
 <div class={`page sl-flex ${!hasSidebar ? 'no-sidebar' : ''}`}>

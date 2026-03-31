@@ -15,11 +15,13 @@ const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
 ).replace(/\/$/, '')
 
+const lang = Astro.props.lang ?? Astro.locals.starlightRoute.lang
+
 // Disable search for translations (for now)
 const algoliaEnabled =
   import.meta.env.PUBLIC_ALGOLIA_APP_ID &&
   import.meta.env.PUBLIC_ALGOLIA_API_KEY &&
-  Astro.props.lang === gtconfig.defaultLocale
+  lang === gtconfig.defaultLocale
 
 // Show search in production when enabled, or always in dev mode
 const showSearch = algoliaEnabled || import.meta.env.DEV
@@ -140,7 +142,7 @@ const {
           </button>
         )
       }
-      <SideNavLinks client:load locale={Astro.props.lang} />
+      <SideNavLinks client:load locale={lang} />
     </div>
   </nav>
   <nav class="mobile-navigation">
@@ -165,7 +167,7 @@ const {
 
 {
   // Skip search for translations (for now)
-  showSearch && <Search client:load locale={Astro.props.lang} />
+  showSearch && <Search client:load locale={lang} />
 }
 
 <style>
