@@ -143,7 +143,7 @@ export class PreviewController {
     const sandbox = await this.sandboxService.findOne(sandboxId)
     const hasAccess = await this.organizationUserService.exists(sandbox.organizationId, userId)
     if (!hasAccess) {
-      await this.redis.setex(`preview:token:${sandboxId}:${userId}`, 3, '0')
+      await this.redis.setex(`preview:access:${sandboxId}:${userId}`, 3, '0')
       throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
     }
     //  if user has access, keep it in cache longer
