@@ -1,5 +1,9 @@
 ---
-import type { TocItem } from '@astrojs/starlight/utils/generateToC'
+import type { MarkdownHeading } from 'astro'
+
+interface TocItem extends MarkdownHeading {
+  children: TocItem[]
+}
 
 interface Props {
   toc: TocItem[]

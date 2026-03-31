@@ -3,7 +3,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import { NavigationCategory } from '../content/config'
+import { NavigationCategory } from '../sidebar-config'
 
 export interface NavigationItem {
   type: 'link' | 'group'

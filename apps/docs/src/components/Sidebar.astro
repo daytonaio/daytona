@@ -1,5 +1,5 @@
 ---
-import { getSidebarConfig } from '../content/config'
+import { getSidebarConfig } from '../sidebar-config'
 import { getSidebar, getHeaderActiveState } from '../utils/navigation'
 import SidebarSublist from './SidebarSublist.astro'
 import { SideNavLinks } from './menu/SideNavLinks'
@@ -10,6 +10,8 @@ import terminalIcon from '@assets/sidebar/terminal.svg?raw'
 const PUBLIC_WEB_URL = (
   import.meta.env.PUBLIC_WEB_URL || 'https://daytona.io'
 ).replace(/\/$/, '')
+
+const lang = Astro.props.lang ?? Astro.locals.starlightRoute.lang
 
 const {
   isTypescriptSdkActive,
@@ -24,7 +26,7 @@ const {
 
 <SidebarSublist
   sublist={getSidebar(
-    getSidebarConfig(Astro.props.lang, (key: string) => {
+    getSidebarConfig(lang, (key: string) => {
       try {
         return Astro.locals?.t?.(key as any) || key
       } catch {
@@ -97,7 +99,7 @@ const {
   >
 </div>
 <div class="mobile-nav-btn nav__items_side_menu">
-  <SideNavLinks client:load locale={Astro.props.lang} />
+  <SideNavLinks client:load locale={lang} />
 </div>
 
 <style>

@@ -1,13 +1,13 @@
 ---
-import TableOfContents from 'virtual:starlight/components/TableOfContents'
+import TableOfContents from './TableOfContents.astro'
 ---
 
 {
-  Astro.props.toc && (
+  Astro.locals.starlightRoute.toc && (
     <>
       <div class="right-sidebar-panel">
         <div class="sl-container">
-          <TableOfContents {...Astro.props} />
+          <TableOfContents />
         </div>
       </div>
     </>
