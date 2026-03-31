@@ -12,6 +12,11 @@ export default [
             'Decorator[expression.callee.name="InjectRepository"] > CallExpression > Identifier[name="Sandbox"]',
           message: 'Do not use @InjectRepository(Sandbox). Use the custom SandboxRepository instead.',
         },
+        {
+          selector:
+            'Decorator[expression.callee.name="InjectRepository"] > CallExpression > Identifier[name="Snapshot"]',
+          message: 'Do not use @InjectRepository(Snapshot). Use the custom SnapshotRepository instead.',
+        },
       ],
     },
   },
