@@ -9,6 +9,7 @@ import { In, IsNull, Not } from 'typeorm'
 import { randomUUID } from 'crypto'
 
 import { SandboxConflictError } from '../errors/sandbox-conflict.error'
+import { JobConflictError } from '../errors/job-conflict.error'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
@@ -872,6 +873,11 @@ export class SandboxManager implements TrackableJobExecutions, OnApplicationShut
             this.logger.warn(
               `Sandbox ${sandboxId} was modified by another operation during sync, skipping error transition`,
             )
+            break
+          }
+
+          if (error instanceof JobConflictError) {
+            this.logger.debug(`Job already in progress for sandbox ${sandboxId}, skipping`)
             break
           }
 
