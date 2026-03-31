@@ -186,7 +186,7 @@ class Daytona:
         configuration = Configuration(host=self._api_url)
         self._api_client: ApiClient = ApiClient(configuration)
         self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
-        self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
+        self._api_client.default_headers["X-Daytona-Source"] = "sdk-python"
 
         # Get SDK version dynamically
         try:
@@ -205,6 +205,7 @@ class Daytona:
             # Fallback version if neither package metadata is available
             sdk_version = "unknown"
         self._api_client.default_headers["X-Daytona-SDK-Version"] = sdk_version
+        self._api_client.user_agent = f"sdk-python/{sdk_version}"
 
         if not self._api_key:
             if not self._organization_id:

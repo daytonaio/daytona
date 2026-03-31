@@ -290,8 +290,9 @@ export class Daytona implements AsyncDisposable {
       baseOptions: {
         headers: {
           Authorization: `Bearer ${this.apiKey || this.jwtToken}`,
-          'X-Daytona-Source': 'typescript-sdk',
+          'X-Daytona-Source': 'sdk-typescript',
           'X-Daytona-SDK-Version': packageJson.version,
+          'User-Agent': `sdk-typescript/${packageJson.version}`,
           ...orgHeader,
         },
       },

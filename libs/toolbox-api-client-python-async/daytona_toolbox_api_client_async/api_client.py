@@ -27,6 +27,7 @@ from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
 from daytona_toolbox_api_client_async.configuration import Configuration
+from . import __version__ as _pkg_version
 from daytona_toolbox_api_client_async.api_response import ApiResponse, T as ApiResponseT
 import daytona_toolbox_api_client_async.models
 from daytona_toolbox_api_client_async import rest
@@ -90,7 +91,7 @@ class ApiClient:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'OpenAPI-Generator/0.0.0-dev/python'
+        self.user_agent = f'toolbox-api-client-python-async/{_pkg_version}'
         self.client_side_validation = configuration.client_side_validation
 
     async def __aenter__(self):

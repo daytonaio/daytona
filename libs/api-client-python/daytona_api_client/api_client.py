@@ -28,6 +28,7 @@ from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
 from daytona_api_client.configuration import Configuration
+from . import __version__ as _pkg_version
 from daytona_api_client.api_response import ApiResponse, T as ApiResponseT
 import daytona_api_client.models
 from daytona_api_client import rest
@@ -91,7 +92,7 @@ class ApiClient:
             self.default_headers[header_name] = header_value
         self.cookie = cookie
         # Set default User-Agent.
-        self.user_agent = 'OpenAPI-Generator/0.0.0-dev/python'
+        self.user_agent = f'api-client-python/{_pkg_version}'
         self.client_side_validation = configuration.client_side_validation
 
     def __enter__(self):

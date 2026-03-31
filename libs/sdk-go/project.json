@@ -118,7 +118,8 @@
         "cwd": "{projectRoot}",
         "commands": [
           "git add pkg/daytona/VERSION",
-          "git add go.mod ../../apps/cli/go.mod",
+          "git add ../../libs/api-client-go/VERSION ../../libs/toolbox-api-client-go/VERSION",
+          "git add go.mod ../../apps/cli/go.mod ../../apps/otel-collector/exporter/go.mod",
           "git commit -s -m \"chore(sdk-go): bump to ${VERSION:-v0.0.0-dev}\" || true"
         ],
         "parallel": false
