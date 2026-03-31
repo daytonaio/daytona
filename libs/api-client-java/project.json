@@ -1,0 +1,28 @@
+{
+  "name": "api-client-java",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/api-client-java",
+  "tags": [],
+  "targets": {
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["apiClient"],
+      "outputs": ["{projectRoot}/src"],
+      "options": {
+        "commands": [
+          "rm -rf {projectRoot}/src",
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g java --additional-properties=groupId=io.daytona,artifactId=daytona-api-client,apiPackage=io.daytona.api.client.api,modelPackage=io.daytona.api.client.model,invokerPackage=io.daytona.api.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true -o {projectRoot}/src"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "api"
+        }
+      ]
+    }
+  }
+}
