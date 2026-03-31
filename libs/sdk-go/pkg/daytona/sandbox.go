@@ -538,6 +538,64 @@ func (s *Sandbox) GetPreviewLink(ctx context.Context, port int) (*types.PreviewL
 	})
 }
 
+// GetSignedPreviewLink retrieves a signed preview URL for the sandbox at the
+// specified port, valid for up to expiresInSeconds seconds.
+//
+// Example:
+//
+//	preview, err := sandbox.GetSignedPreviewLink(ctx, 3000, 3600)
+//	if err != nil {
+//	    return err
+//	}
+//	fmt.Printf("Sandbox ID: %s\nPort: %d\nURL: %s\nToken: %s\n", preview.SandboxID, preview.Port, preview.URL, preview.Token)
+func (s *Sandbox) GetSignedPreviewLink(ctx context.Context, port int, expiresInSeconds int) (*types.SignedPreviewLink, error) {
+	return withInstrumentation(ctx, s.otel, "Sandbox", "GetSignedPreviewLink", func(ctx context.Context) (*types.SignedPreviewLink, error) {
+		result, httpResp, err := s.client.apiClient.SandboxAPI.GetSignedPortPreviewUrl(
+			s.client.getAuthContext(ctx),
+			s.ID,
+			int32(port),
+		).ExpiresInSeconds(int32(expiresInSeconds)).Execute()
+
+		if err != nil {
+			return nil, s.client.handleAPIError(err, httpResp)
+		}
+
+		return &types.SignedPreviewLink{
+			SandboxID: result.GetSandboxId(),
+			Port:      int(result.GetPort()),
+			Token:     result.GetToken(),
+			URL:       result.GetUrl(),
+		}, nil
+	})
+}
+
+// ExpireSignedPreviewLink expires a previously generated signed preview link.
+//
+// This invalidates the signed preview link token, preventing any further access.
+//
+// Example:
+//
+//	err := sandbox.ExpireSignedPreviewLink(ctx, 3000, "preview-token-to-expire")
+//	if err != nil {
+//	    return err
+//	}
+func (s *Sandbox) ExpireSignedPreviewLink(ctx context.Context, port int, token string) error {
+	return withInstrumentationVoid(ctx, s.otel, "Sandbox", "ExpireSignedPreviewLink", func(ctx context.Context) error {
+		httpResp, err := s.client.apiClient.SandboxAPI.ExpireSignedPortPreviewUrl(
+			s.client.getAuthContext(ctx),
+			s.ID,
+			int32(port),
+			token,
+		).Execute()
+
+		if err != nil {
+			return s.client.handleAPIError(err, httpResp)
+		}
+
+		return nil
+	})
+}
+
 // SetAutoArchiveInterval sets the auto-archive interval in minutes.
 //
 // The sandbox will be automatically archived after being stopped for this
