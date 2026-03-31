@@ -1,10 +1,11 @@
 ---
 import { getExploreMoreData } from '../utils/navigation'
-import { getSidebarConfig } from '../content/config'
+import { getSidebarConfig } from '../sidebar-config'
 
 const { expanded } = Astro.props
+const lang = Astro.props.lang ?? Astro.locals.starlightRoute.lang
 const exploreMoreData = getExploreMoreData(
-  getSidebarConfig(Astro.props.lang, (key: string) => {
+  getSidebarConfig(lang, (key: string) => {
     try {
       return Astro.locals?.t?.(key as any) || key
     } catch {

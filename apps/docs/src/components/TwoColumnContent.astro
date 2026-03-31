@@ -1,6 +1,6 @@
 ---
 const isApiPage = Astro.url.pathname.includes('/tools/api')
-const hasToc = Astro.props.toc && !isApiPage
+const hasToc = Boolean(Astro.locals.starlightRoute.toc) && !isApiPage
 ---
 
 <div class={`main-pane-wrapper ${isApiPage ? 'no-toc' : ''}`}>
