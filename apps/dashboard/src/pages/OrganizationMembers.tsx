@@ -8,60 +8,76 @@ import { OrganizationInvitationTable } from '@/components/OrganizationMembers/Or
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { useApi } from '@/hooks/useApi'
+import { mutationKeys } from '@/hooks/mutations/mutationKeys'
+import { useCancelOrganizationInvitationMutation } from '@/hooks/mutations/useCancelOrganizationInvitationMutation'
+import { useCreateOrganizationInvitationMutation } from '@/hooks/mutations/useCreateOrganizationInvitationMutation'
+import { useDeleteOrganizationMemberMutation } from '@/hooks/mutations/useDeleteOrganizationMemberMutation'
+import { useUpdateOrganizationInvitationMutation } from '@/hooks/mutations/useUpdateOrganizationInvitationMutation'
+import { useUpdateOrganizationMemberAccessMutation } from '@/hooks/mutations/useUpdateOrganizationMemberAccessMutation'
+import { useOrganizationInvitationsQuery } from '@/hooks/queries/useOrganizationInvitationsQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
+import { usePendingActionMap } from '@/hooks/usePendingActionIds'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import {
   CreateOrganizationInvitationRoleEnum,
-  OrganizationInvitation,
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
+function usePendingMemberIds() {
+  const { pendingIds: pendingMemberIds, loadingAction: loadingMemberAction } = usePendingActionMap([
+    {
+      mutationKey: mutationKeys.organization.members.all,
+      getId: (variables) => (variables as { userId?: string } | undefined)?.userId,
+    },
+  ])
+
+  return {
+    pendingMemberIds,
+    loadingMemberAction,
+  }
+}
+
+function usePendingInvitationIds() {
+  const { pendingIds: pendingInvitationIds, loadingAction: loadingInvitationAction } = usePendingActionMap([
+    {
+      mutationKey: mutationKeys.organization.invitations.all,
+      getId: (variables) => (variables as { invitationId?: string } | undefined)?.invitationId,
+    },
+  ])
+
+  return {
+    pendingInvitationIds,
+    loadingInvitationAction,
+  }
+}
+
 const OrganizationMembers: React.FC = () => {
   const { user } = useAuth()
-  const { organizationsApi } = useApi()
 
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, organizationMembers, refreshOrganizationMembers, authenticatedUserOrganizationMember } =
     useSelectedOrganization()
 
-  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([])
-  const [loadingInvitations, setLoadingInvitations] = useState(true)
+  const { data: invitations = [], isLoading: loadingInvitations } = useOrganizationInvitationsQuery()
+  const updateMemberAccessMutation = useUpdateOrganizationMemberAccessMutation()
+  const removeMemberMutation = useDeleteOrganizationMemberMutation()
+  const createInvitationMutation = useCreateOrganizationInvitationMutation()
+  const updateInvitationMutation = useUpdateOrganizationInvitationMutation()
+  const cancelInvitationMutation = useCancelOrganizationInvitationMutation()
   const createInvitationSheetRef = useRef<{ open: () => void }>(null)
 
-  const [loadingMemberAction, setLoadingMemberAction] = useState<Record<string, boolean>>({})
-  const [loadingInvitationAction, setLoadingInvitationAction] = useState<Record<string, boolean>>({})
-
-  const fetchInvitations = useCallback(
-    async (showTableLoadingState = true) => {
-      if (!selectedOrganization) {
-        return
-      }
-      if (showTableLoadingState) {
-        setLoadingInvitations(true)
-      }
-      try {
-        const response = await organizationsApi.listOrganizationInvitations(selectedOrganization.id)
-        setInvitations(response.data)
-      } catch (error) {
-        handleApiError(error, 'Failed to fetch invitations')
-      } finally {
-        setLoadingInvitations(false)
-      }
-    },
-    [organizationsApi, selectedOrganization],
-  )
+  const { loadingMemberAction } = usePendingMemberIds()
+  const { loadingInvitationAction } = usePendingInvitationIds()
 
   useEffect(() => {
     refreshOrganizationMembers()
-    fetchInvitations()
-  }, [fetchInvitations, refreshOrganizationMembers])
+  }, [refreshOrganizationMembers])
 
   const handleUpdateMemberAccess = async (
     userId: string,
@@ -71,11 +87,11 @@ const OrganizationMembers: React.FC = () => {
     if (!selectedOrganization) {
       return false
     }
-    setLoadingMemberAction((prev) => ({ ...prev, [userId]: true }))
     try {
-      await organizationsApi.updateAccessForOrganizationMember(selectedOrganization.id, userId, {
-        role,
-        assignedRoleIds,
+      await updateMemberAccessMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        userId,
+        access: { role, assignedRoleIds },
       })
       toast.success('Access updated successfully')
       await refreshOrganizationMembers()
@@ -83,8 +99,6 @@ const OrganizationMembers: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to update access')
       return false
-    } finally {
-      setLoadingMemberAction((prev) => ({ ...prev, [userId]: false }))
     }
   }
 
@@ -92,9 +106,11 @@ const OrganizationMembers: React.FC = () => {
     if (!selectedOrganization) {
       return false
     }
-    setLoadingMemberAction((prev) => ({ ...prev, [userId]: true }))
     try {
-      await organizationsApi.deleteOrganizationMember(selectedOrganization.id, userId)
+      await removeMemberMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        userId,
+      })
       toast.success('Member removed successfully')
       if (userId === user?.profile.sub) {
         await refreshOrganizations()
@@ -105,8 +121,6 @@ const OrganizationMembers: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to remove member')
       return false
-    } finally {
-      setLoadingMemberAction((prev) => ({ ...prev, [userId]: false }))
     }
   }
 
@@ -119,9 +133,11 @@ const OrganizationMembers: React.FC = () => {
       return false
     }
     try {
-      await organizationsApi.createOrganizationInvitation(selectedOrganization.id, { email, role, assignedRoleIds })
+      await createInvitationMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        invitation: { email, role, assignedRoleIds },
+      })
       toast.success('Invitation created successfully')
-      await fetchInvitations(false)
       return true
     } catch (error) {
       handleApiError(error, 'Failed to create invitation')
@@ -137,20 +153,17 @@ const OrganizationMembers: React.FC = () => {
     if (!selectedOrganization) {
       return false
     }
-    setLoadingInvitationAction((prev) => ({ ...prev, [invitationId]: true }))
     try {
-      await organizationsApi.updateOrganizationInvitation(selectedOrganization.id, invitationId, {
-        role,
-        assignedRoleIds,
+      await updateInvitationMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        invitationId,
+        invitation: { role, assignedRoleIds },
       })
       toast.success('Invitation updated successfully')
-      await fetchInvitations(false)
       return true
     } catch (error) {
       handleApiError(error, 'Failed to update invitation')
       return false
-    } finally {
-      setLoadingInvitationAction((prev) => ({ ...prev, [invitationId]: false }))
     }
   }
 
@@ -158,23 +171,20 @@ const OrganizationMembers: React.FC = () => {
     if (!selectedOrganization) {
       return false
     }
-    setLoadingInvitationAction((prev) => ({ ...prev, [invitationId]: true }))
     try {
-      await organizationsApi.cancelOrganizationInvitation(selectedOrganization.id, invitationId)
+      await cancelInvitationMutation.mutateAsync({
+        organizationId: selectedOrganization.id,
+        invitationId,
+      })
       toast.success('Invitation cancelled successfully')
-      await fetchInvitations(false)
       return true
     } catch (error) {
       handleApiError(error, 'Failed to cancel invitation')
       return false
-    } finally {
-      setLoadingInvitationAction((prev) => ({ ...prev, [invitationId]: false }))
     }
   }
 
-  const authenticatedUserIsOwner = useMemo(() => {
-    return authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-  }, [authenticatedUserOrganizationMember])
+  const authenticatedUserIsOwner = authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
 
   const rootCommands: CommandConfig[] = useMemo(() => {
     if (!authenticatedUserIsOwner) {
