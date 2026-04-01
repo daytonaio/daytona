@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { SshAccessDto } from '@daytonaio/api-client'
 import { useForm } from '@tanstack/react-form'
 import { CheckIcon, CopyIcon, InfoIcon } from 'lucide-react'
@@ -20,21 +20,13 @@ import {
 } from '@/components/ui/input-group'
 import { Spinner } from '@/components/ui/spinner'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
 import { useCreateSshAccessMutation } from '@/hooks/mutations/useCreateSshAccessMutation'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { handleApiError } from '@/lib/error-handling'
 
-interface CreateSshAccessDialogProps {
+interface CreateSshAccessSheetProps {
   sandboxId: string
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -60,14 +52,24 @@ const defaultValues: FormValues = {
   expiryMinutes: 60,
 }
 
-export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateSshAccessDialogProps) {
+export function CreateSshAccessSheet({ sandboxId, open, onOpenChange }: CreateSshAccessSheetProps) {
   const [sshAccess, setSshAccess] = useState<SshAccessDto | null>(null)
   const { reset: resetMutation, ...createMutation } = useCreateSshAccessMutation()
+  const formRef = useRef<HTMLFormElement>(null)
 
   const form = useForm({
     defaultValues,
     validators: {
       onSubmit: formSchema,
+    },
+    onSubmitInvalid: () => {
+      const formEl = formRef.current
+      if (!formEl) return
+      const invalidInput = formEl.querySelector('[aria-invalid="true"]') as HTMLElement | null
+      if (invalidInput) {
+        invalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        invalidInput.focus()
+      }
     },
     onSubmit: async ({ value }) => {
       try {
@@ -81,12 +83,13 @@ export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateS
       }
     },
   })
+  const { reset: resetForm } = form
 
   const resetState = useCallback(() => {
-    form.reset(defaultValues)
+    resetForm(defaultValues)
     resetMutation()
     setSshAccess(null)
-  }, [form, resetMutation])
+  }, [resetForm, resetMutation])
 
   useEffect(() => {
     if (open) {
@@ -95,61 +98,67 @@ export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateS
   }, [open, resetState])
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{sshAccess ? 'SSH Access Created' : 'Create SSH Access'}</DialogTitle>
-          <DialogDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="w-dvw sm:w-[400px] p-0 flex flex-col gap-0">
+        <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
+          <SheetTitle className="text-2xl">{sshAccess ? 'SSH Access Created' : 'Create SSH Access'}</SheetTitle>
+          <SheetDescription className="sr-only">
             {sshAccess ? 'Your SSH access has been created successfully.' : 'Set the expiration time for SSH access.'}
-          </DialogDescription>
-        </DialogHeader>
-        {sshAccess ? (
-          <SshAccessCreated sshAccess={sshAccess} />
-        ) : (
-          <form
-            id="create-ssh-form"
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
-            }}
-          >
-            <form.Field name="expiryMinutes">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Expiry</FieldLabel>
-                    <InputGroup>
-                      <NumericFormat
-                        customInput={InputGroupInput}
-                        aria-invalid={isInvalid}
-                        id={field.name}
-                        name={field.name}
-                        inputMode="numeric"
-                        allowNegative={false}
-                        decimalScale={0}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onValueChange={({ floatValue }) => field.handleChange(floatValue ?? 0)}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupText>min</InputGroupText>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto">
+          {sshAccess ? (
+            <div className="p-5">
+              <SshAccessCreated sshAccess={sshAccess} />
+            </div>
+          ) : (
+            <form
+              ref={formRef}
+              id="create-ssh-form"
+              className="p-5"
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
               }}
-            </form.Field>
-          </form>
-        )}
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="secondary">Close</Button>
-          </DialogClose>
+            >
+              <form.Field name="expiryMinutes">
+                {(field) => {
+                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Expiry</FieldLabel>
+                      <InputGroup>
+                        <NumericFormat
+                          customInput={InputGroupInput}
+                          aria-invalid={isInvalid}
+                          id={field.name}
+                          name={field.name}
+                          inputMode="numeric"
+                          allowNegative={false}
+                          decimalScale={0}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onValueChange={({ floatValue }) => field.handleChange(floatValue ?? 0)}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupText>min</InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  )
+                }}
+              </form.Field>
+            </form>
+          )}
+        </div>
+        <SheetFooter className="mt-auto border-t border-border p-4 px-5">
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
           {!sshAccess && (
             <form.Subscribe
               selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -161,9 +170,9 @@ export function CreateSshAccessDialog({ sandboxId, open, onOpenChange }: CreateS
               )}
             />
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -180,7 +189,12 @@ function SshAccessCreated({ sshAccess }: { sshAccess: SshAccessDto }) {
         <FieldLabel htmlFor="ssh-command">SSH Command</FieldLabel>
         <InputGroup className="pr-1">
           <InputGroupInput id="ssh-command" value={sshAccess.sshCommand} readOnly />
-          <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyCommand(sshAccess.sshCommand)}>
+          <InputGroupButton
+            variant="ghost"
+            size="icon-xs"
+            aria-label="Copy SSH command"
+            onClick={() => copyCommand(sshAccess.sshCommand)}
+          >
             <AnimatePresence initial={false} mode="wait">
               {copiedCommand ? (
                 <MotionCheckIcon className="size-4" key="copied" {...iconProps} />

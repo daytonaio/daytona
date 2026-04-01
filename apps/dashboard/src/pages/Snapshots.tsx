@@ -4,7 +4,7 @@
  */
 
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
-import { CreateSnapshotDialog } from '@/components/snapshots/CreateSnapshotDialog'
+import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
 import {
@@ -330,7 +330,7 @@ const Snapshots: React.FC = () => {
     <PageLayout>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
-        {writePermitted && <CreateSnapshotDialog className="ml-auto" ref={dialogRef} />}
+        {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
       <PageContent size="full">

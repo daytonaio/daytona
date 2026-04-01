@@ -6,15 +6,15 @@
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckIcon, CopyIcon, EyeIcon, EyeOffIcon, InfoIcon } from 'lucide-react'
@@ -31,18 +31,19 @@ import { getMaskedToken } from '@/lib/utils'
 import { ApiKeyResponse, CreateApiKeyPermissionsEnum } from '@daytonaio/api-client'
 import { useForm } from '@tanstack/react-form'
 import { Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group'
 
-interface CreateApiKeyDialogProps {
+interface CreateApiKeySheetProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
   apiUrl: string
   className?: string
   organizationId?: string
+  ref?: Ref<{ open: () => void }>
 }
 
 const isReadPermission = (permission: CreateApiKeyPermissionsEnum) => permission.startsWith('read:')
@@ -59,13 +60,19 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
+export const CreateApiKeySheet: React.FC<CreateApiKeySheetProps> = ({
   availablePermissions,
   apiUrl,
   className,
   organizationId,
+  ref,
 }) => {
   const [open, setOpen] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
+
+  useImperativeHandle(ref, () => ({
+    open: () => setOpen(true),
+  }))
 
   const { reset: resetCreateApiKeyMutation, ...createApiKeyMutation } = useCreateApiKeyMutation()
 
@@ -84,6 +91,15 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
     } as FormValues,
     validators: {
       onSubmit: formSchema,
+    },
+    onSubmitInvalid: () => {
+      const formEl = formRef.current
+      if (!formEl) return
+      const invalidInput = formEl.querySelector('[aria-invalid="true"]') as HTMLElement | null
+      if (invalidInput) {
+        invalidInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        invalidInput.focus()
+      }
     },
     onSubmit: async ({ value }) => {
       if (!organizationId) {
@@ -105,15 +121,16 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
       }
     },
   })
+  const { reset: resetForm } = form
 
   const resetState = useCallback(() => {
-    form.reset({
+    resetForm({
       name: '',
       expiresAt: undefined,
       permissions: availablePermissions,
     })
     resetCreateApiKeyMutation()
-  }, [resetCreateApiKeyMutation, form, availablePermissions])
+  }, [resetForm, resetCreateApiKeyMutation, availablePermissions])
 
   useEffect(() => {
     if (open) {
@@ -124,35 +141,33 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
   const createdKey = createApiKeyMutation.data
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        setOpen(isOpen)
-      }}
-    >
-      <DialogTrigger asChild>
-        <Button variant="default" size="sm" title="Create Key" className={className}>
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="default" size="sm" className={className}>
           <Plus className="w-4 h-4" />
           Create Key
         </Button>
-      </DialogTrigger>
+      </SheetTrigger>
 
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{createdKey ? 'API Key Created' : 'Create New API Key'}</DialogTitle>
-          <DialogDescription>
+      <SheetContent className="w-dvw sm:w-[500px] p-0 flex flex-col gap-0">
+        <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
+          <SheetTitle className="text-2xl">{createdKey ? 'API Key Created' : 'Create New API Key'}</SheetTitle>
+          <SheetDescription className="sr-only">
             {createdKey
               ? 'Your API key has been created successfully.'
               : 'Choose which actions this API key will be authorized to perform.'}
-          </DialogDescription>
-        </DialogHeader>
-        {createdKey ? (
-          <CreatedKeyDisplay createdKey={createdKey} apiUrl={apiUrl} key={createdKey.value} />
-        ) : (
-          <div className="overflow-y-auto px-1">
+          </SheetDescription>
+        </SheetHeader>
+        <ScrollArea fade="mask" className="flex-1 min-h-0">
+          {createdKey ? (
+            <div className="p-5">
+              <CreatedKeyDisplay createdKey={createdKey} apiUrl={apiUrl} key={createdKey.value} />
+            </div>
+          ) : (
             <form
+              ref={formRef}
               id="create-api-key-form"
-              className="space-y-6"
+              className="space-y-6 p-5"
               onSubmit={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
@@ -331,14 +346,12 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
                 </TabsContent>
               </Tabs>
             </form>
-          </div>
-        )}
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="secondary">
-              Close
-            </Button>
-          </DialogClose>
+          )}
+        </ScrollArea>
+        <SheetFooter className="border-t border-border p-4 px-5">
+          <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
+            Close
+          </Button>
           {!createdKey && (
             <form.Subscribe
               selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -355,9 +368,9 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({
               )}
             />
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -393,10 +406,21 @@ function CreatedKeyDisplay({ createdKey, apiUrl }: { createdKey: ApiKeyResponse;
               value={apiKeyRevealed ? createdKey.value : getMaskedToken(createdKey.value)}
               readOnly
             />
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => setApiKeyRevealed(!apiKeyRevealed)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label={apiKeyRevealed ? 'Hide API key' : 'Show API key'}
+              aria-pressed={apiKeyRevealed}
+              onClick={() => setApiKeyRevealed(!apiKeyRevealed)}
+            >
               {apiKeyRevealed ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
             </InputGroupButton>
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyApiKey(createdKey.value)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Copy API key"
+              onClick={() => copyApiKey(createdKey.value)}
+            >
               <AnimatePresence initial={false} mode="wait">
                 {copiedApiKey ? (
                   <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />
@@ -413,7 +437,12 @@ function CreatedKeyDisplay({ createdKey, apiUrl }: { createdKey: ApiKeyResponse;
 
           <InputGroup className="pr-1 flex-1">
             <InputGroupInput id="api-url" value={apiUrl} readOnly />
-            <InputGroupButton variant="ghost" size="icon-xs" onClick={() => copyApiUrl(apiUrl)}>
+            <InputGroupButton
+              variant="ghost"
+              size="icon-xs"
+              aria-label="Copy API URL"
+              onClick={() => copyApiUrl(apiUrl)}
+            >
               <AnimatePresence initial={false} mode="wait">
                 {copiedApiUrl ? (
                   <MotionCheckIcon className="h-4 w-4" key="copied" {...iconProps} />
