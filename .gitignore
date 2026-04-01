@@ -84,3 +84,9 @@ examples/**/*.png
 go.work.sum
 
 .claude/worktrees
+
+# Nix / direnv
+.direnv/
+result
+result-*
+.envrc.local
