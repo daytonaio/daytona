@@ -234,6 +234,8 @@ func run() int {
 		return 2
 	}
 
+	var executorService *executor.Executor
+
 	if cfg.ApiVersion == 2 {
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
 			Interval:   cfg.HealthcheckInterval,
@@ -256,7 +258,7 @@ func run() int {
 			healthcheckService.Start(ctx)
 		}()
 
-		executorService, err := executor.NewExecutor(&executor.ExecutorConfig{
+		executorService, err = executor.NewExecutor(&executor.ExecutorConfig{
 			Logger:    logger,
 			Docker:    dockerClient,
 			Collector: metricsCollector,
@@ -309,6 +311,13 @@ func run() int {
 		return 1
 	case <-interruptChannel:
 		logger.Info("Signal received, shutting down")
+		// Cancel context to stop the poller and other background services
+		cancel()
+		if executorService != nil {
+			logger.Info("Waiting for in-flight jobs to complete")
+			executorService.Wait()
+			logger.Info("All jobs completed")
+		}
 		apiServer.Stop()
 		logger.Info("Shutdown complete")
 		return 143 // SIGTERM

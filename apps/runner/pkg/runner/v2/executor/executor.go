@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sync"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -37,6 +38,7 @@ type Executor struct {
 	client    *apiclient.APIClient
 	docker    *docker.DockerClient
 	collector *metrics.Collector
+	wg        sync.WaitGroup
 }
 
 // NewExecutor creates a new job executor
@@ -54,8 +56,20 @@ func NewExecutor(cfg *ExecutorConfig) (*Executor, error) {
 	}, nil
 }
 
+// Wait blocks until all in-flight jobs have completed.
+func (e *Executor) Wait() {
+	e.wg.Wait()
+}
+
 // Execute processes a job and updates its status
 func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
+	e.wg.Add(1)
+	defer e.wg.Done()
+
+	// Detach from the parent context so that cancellation (e.g. SIGTERM)
+	// does not abort running jobs.
+	ctx = context.WithoutCancel(ctx)
+
 	// Extract trace context from job to continue distributed trace
 	ctx = e.extractTraceContext(ctx, job)
 
