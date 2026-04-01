@@ -10,16 +10,21 @@ import (
 	"io"
 	"log/slog"
 	"net"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/daytonaio/runner/pkg/docker"
 	"golang.org/x/crypto/ssh"
+	"golang.org/x/sys/unix"
 )
 
 type Service struct {
 	log          *slog.Logger
 	dockerClient *docker.DockerClient
 	port         int
+	listener     net.Listener
+	mu           sync.Mutex
 }
 
 func NewService(logger *slog.Logger, dockerClient *docker.DockerClient) *Service {
@@ -81,27 +86,52 @@ func (s *Service) Start(ctx context.Context) error {
 
 	serverConfig.AddHostKey(hostKey)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+	lc := net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) error {
+			return c.Control(func(fd uintptr) {
+				unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			})
+		},
+	}
+
+	listener, err := lc.Listen(ctx, "tcp", fmt.Sprintf(":%d", s.port))
 	if err != nil {
 		return fmt.Errorf("failed to listen on port %d: %w", s.port, err)
 	}
+
+	s.mu.Lock()
+	s.listener = listener
+	s.mu.Unlock()
+
 	defer listener.Close()
 
 	s.log.InfoContext(ctx, "SSH Gateway listening on port", "port", s.port)
 
 	for {
-		select {
-		case <-ctx.Done():
-			return nil
-		default:
-			conn, err := listener.Accept()
-			if err != nil {
-				s.log.WarnContext(ctx, "Failed to accept incoming connection", "error", err)
-				continue
+		conn, err := listener.Accept()
+		if err != nil {
+			// Check if the listener was closed via Stop()
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
 			}
-
-			go s.handleConnection(conn, serverConfig)
+			s.log.WarnContext(ctx, "Failed to accept incoming connection", "error", err)
+			return nil
 		}
+
+		go s.handleConnection(conn, serverConfig)
+	}
+}
+
+// Stop closes the listener so the port is released immediately,
+// allowing a new runner instance to bind during zero-downtime deploy.
+func (s *Service) Stop() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.listener != nil {
+		s.listener.Close()
+		s.listener = nil
 	}
 }
 
