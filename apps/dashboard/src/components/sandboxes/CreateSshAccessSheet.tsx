@@ -106,54 +106,56 @@ export function CreateSshAccessSheet({ sandboxId, open, onOpenChange }: CreateSs
             {sshAccess ? 'Your SSH access has been created successfully.' : 'Set the expiration time for SSH access.'}
           </SheetDescription>
         </SheetHeader>
-        {sshAccess ? (
-          <div className="p-5">
-            <SshAccessCreated sshAccess={sshAccess} />
-          </div>
-        ) : (
-          <form
-            ref={formRef}
-            id="create-ssh-form"
-            className="p-5"
-            onSubmit={(e) => {
-              e.preventDefault()
-              e.stopPropagation()
-              form.handleSubmit()
-            }}
-          >
-            <form.Field name="expiryMinutes">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Expiry</FieldLabel>
-                    <InputGroup>
-                      <NumericFormat
-                        customInput={InputGroupInput}
-                        aria-invalid={isInvalid}
-                        id={field.name}
-                        name={field.name}
-                        inputMode="numeric"
-                        allowNegative={false}
-                        decimalScale={0}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onValueChange={({ floatValue }) => field.handleChange(floatValue ?? 0)}
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <InputGroupText>min</InputGroupText>
-                      </InputGroupAddon>
-                    </InputGroup>
-                    {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                )
+        <div className="flex-1 overflow-y-auto">
+          {sshAccess ? (
+            <div className="p-5">
+              <SshAccessCreated sshAccess={sshAccess} />
+            </div>
+          ) : (
+            <form
+              ref={formRef}
+              id="create-ssh-form"
+              className="p-5"
+              onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                form.handleSubmit()
               }}
-            </form.Field>
-          </form>
-        )}
-        <SheetFooter className="border-t border-border p-4 px-5">
+            >
+              <form.Field name="expiryMinutes">
+                {(field) => {
+                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>Expiry</FieldLabel>
+                      <InputGroup>
+                        <NumericFormat
+                          customInput={InputGroupInput}
+                          aria-invalid={isInvalid}
+                          id={field.name}
+                          name={field.name}
+                          inputMode="numeric"
+                          allowNegative={false}
+                          decimalScale={0}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onValueChange={({ floatValue }) => field.handleChange(floatValue ?? 0)}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <InputGroupText>min</InputGroupText>
+                        </InputGroupAddon>
+                      </InputGroup>
+                      {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  )
+                }}
+              </form.Field>
+            </form>
+          )}
+        </div>
+        <SheetFooter className="mt-auto border-t border-border p-4 px-5">
           <Button variant="secondary" onClick={() => onOpenChange(false)}>
             Close
           </Button>
