@@ -184,7 +184,9 @@ export function getColumns({ onViewInvoice, onVoidInvoice, onPayInvoice }: GetCo
       cell: ({ row }) => {
         const isViewable = Boolean(row.original.fileUrl)
         const isVoidable =
-          row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
+          row.original.status === 'finalized' &&
+          ['pending', 'failed'].includes(row.original.paymentStatus) &&
+          row.original.type === 'one_off'
         const isPayable =
           row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
 
