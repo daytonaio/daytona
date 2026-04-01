@@ -20,7 +20,10 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"syscall"
 	"time"
+
+	"golang.org/x/sys/unix"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/internal"
@@ -81,11 +84,6 @@ func (a *ApiServer) Start(ctx context.Context) error {
 	docs.SwaggerInfo.Title = "Daytona Runner API"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Version = internal.Version
-
-	_, err := net.Dial("tcp", fmt.Sprintf(":%d", a.apiPort))
-	if err == nil {
-		return fmt.Errorf("cannot start API server, port %d is already in use", a.apiPort)
-	}
 
 	binding.Validator = new(DefaultValidator)
 
@@ -164,7 +162,14 @@ func (a *ApiServer) Start(ctx context.Context) error {
 		Handler: a.router,
 	}
 
-	listener, err := net.Listen("tcp", a.httpServer.Addr)
+	lc := net.ListenConfig{
+		Control: func(network, address string, c syscall.RawConn) error {
+			return c.Control(func(fd uintptr) {
+				unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			})
+		},
+	}
+	listener, err := lc.Listen(ctx, "tcp", a.httpServer.Addr)
 	if err != nil {
 		return err
 	}

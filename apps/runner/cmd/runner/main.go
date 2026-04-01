@@ -311,14 +311,30 @@ func run() int {
 		return 1
 	case <-interruptChannel:
 		logger.Info("Signal received, shutting down")
+		// Stop accepting HTTP requests and release the ports so a new
+		// runner instance can bind immediately (zero-downtime deploy).
+		apiServer.Stop()
+		if sshGatewayService != nil {
+			sshGatewayService.Stop()
+		}
 		// Cancel context to stop the poller and other background services
 		cancel()
 		if executorService != nil {
 			logger.Info("Waiting for in-flight jobs to complete")
-			executorService.Wait()
-			logger.Info("All jobs completed")
+			// A second signal during drain forces immediate exit.
+			done := make(chan struct{})
+			go func() {
+				executorService.Wait()
+				close(done)
+			}()
+			select {
+			case <-done:
+				logger.Info("All jobs completed")
+			case <-interruptChannel:
+				logger.Info("Second signal received, forcing shutdown")
+				return 143
+			}
 		}
-		apiServer.Stop()
 		logger.Info("Shutdown complete")
 		return 143 // SIGTERM
 	case err := <-monitorErrChan:
