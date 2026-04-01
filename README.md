@@ -146,6 +146,42 @@ func main() {
 
 ---
 
+## Development
+
+### Devcontainer (full environment)
+
+Open this repository in a [devcontainer](https://containers.dev/)-compatible editor (VS Code, GitHub Codespaces) for a batteries-included setup with all languages, tools, and supporting services.
+
+### Nix (lightweight, agent-friendly)
+
+If you prefer working outside the devcontainer — or are an AI agent executing build commands — use the Nix dev shells:
+
+```bash
+# Enter the full dev shell (Go + Node + Python + Ruby)
+nix develop
+
+# Or pick a language-specific shell
+nix develop .#go       # Go services & libs
+nix develop .#node     # TypeScript / Node.js apps & libs
+nix develop .#python   # Python SDKs & libs
+nix develop .#ruby     # Ruby SDKs & libs
+```
+
+**Prerequisites:** [Nix](https://nixos.org/download/) with flakes enabled (`experimental-features = nix-command flakes` in `~/.config/nix/nix.conf`).
+
+For non-interactive / CI usage:
+```bash
+nix develop .#go --command bash -c "go build ./..."
+```
+
+Optional: Install [direnv](https://direnv.net/) + [nix-direnv](https://github.com/nix-community/nix-direnv) for automatic shell activation when you `cd` into the project.
+
+See [`AGENTS.md`](AGENTS.md) for the full shell reference, project-to-shell mapping, and common commands.
+
+> **Note:** Supporting services (PostgreSQL, Redis, etc.) are still managed via `docker compose -f .devcontainer/docker-compose.yaml up`.
+
+---
+
 ## Contributing
 
 Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.

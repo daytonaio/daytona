@@ -97,3 +97,9 @@ go.work.sum
 **/bin/Debug/
 **/bin/Release/
 **/obj/
+
+# Nix / direnv
+.direnv/
+result
+result-*
+.envrc.local
