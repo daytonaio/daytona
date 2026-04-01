@@ -555,7 +555,7 @@ module Daytona
     # @raise [Daytona::Sdk::Error]
     def wait_for_states(operation:, target_states:)
       interval = INITIAL_POLL_INTERVAL
-      start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      start_time = ::Process.clock_gettime(::Process::CLOCK_MONOTONIC)
       loop do
         case state
         when *target_states then return
@@ -564,7 +564,7 @@ module Daytona
         end
 
         sleep(interval)
-        if Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time > 5
+        if ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) - start_time > 5
           interval = [interval * BACKOFF_MULTIPLIER, MAX_POLL_INTERVAL].min
         end
         refresh
