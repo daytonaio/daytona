@@ -187,22 +187,20 @@ const Wallet = () => {
         return
       }
 
-      if (invoice.paymentStatus === 'pending' && invoice.totalDueAmountCents > 0) {
-        const newWindow = window.open('', '_blank')
-        try {
-          const result = await createInvoicePaymentUrlMutation.mutateAsync({
-            organizationId: selectedOrganization.id,
-            invoiceId: invoice.id,
-          })
-          if (newWindow) {
-            newWindow.location.href = result.url
-          }
-        } catch (error) {
-          newWindow?.close()
-          toast.error('Failed to open invoice', {
-            description: String(error),
-          })
+      const newWindow = window.open('', '_blank')
+      try {
+        const result = await createInvoicePaymentUrlMutation.mutateAsync({
+          organizationId: selectedOrganization.id,
+          invoiceId: invoice.id,
+        })
+        if (newWindow) {
+          newWindow.location.href = result.url
         }
+      } catch (error) {
+        newWindow?.close()
+        toast.error('Failed to open invoice', {
+          description: String(error),
+        })
       }
     },
     [selectedOrganization, createInvoicePaymentUrlMutation],
