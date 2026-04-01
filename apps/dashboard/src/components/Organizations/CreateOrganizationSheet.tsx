@@ -3,37 +3,30 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { CheckIcon, CopyIcon, InfoIcon, TriangleAlertIcon } from 'lucide-react'
-import { Organization, Region } from '@daytonaio/api-client'
-import { useForm } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-import { z } from 'zod'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { Link } from 'react-router-dom'
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Spinner } from '@/components/ui/spinner'
-import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
-import { RoutePath } from '@/enums/RoutePath'
+import { Organization, Region } from '@daytonaio/api-client'
+import { useForm } from '@tanstack/react-form'
+import { TriangleAlertIcon } from 'lucide-react'
+import { useCallback, useEffect, useRef } from 'react'
+import { z } from 'zod'
 
 interface CreateOrganizationSheetProps {
   open: boolean
-  billingApiUrl?: string
   regions: Region[]
   loadingRegions: boolean
-  getRegionName: (regionId: string) => string | undefined
   onOpenChange: (open: boolean) => void
   onCreateOrganization: (name: string, defaultRegionId: string) => Promise<Organization | null>
 }
 
 const formSchema = z.object({
-  name: z.string().min(1, 'Organization name is required'),
+  name: z.string().trim().min(1, 'Organization name is required'),
   defaultRegionId: z.string().min(1, 'Region is required'),
 })
 
@@ -46,23 +39,13 @@ const defaultValues: FormValues = {
 
 export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = ({
   open,
-  billingApiUrl,
   regions,
   loadingRegions,
-  getRegionName,
   onOpenChange,
   onCreateOrganization,
 }) => {
-  const [createdOrg, setCreatedOrg] = useState<Organization | null>(null)
-  const [copiedText, copyToClipboard] = useCopyToClipboard()
   const formRef = useRef<HTMLFormElement>(null)
   const defaultRegionIdRef = useRef<string>(regions[0]?.id ?? '')
-
-  const createOrganizationMutation = useMutation({
-    mutationFn: async (value: FormValues) => {
-      return onCreateOrganization(value.name.trim(), value.defaultRegionId)
-    },
-  })
 
   const form = useForm({
     defaultValues,
@@ -79,13 +62,7 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
       }
     },
     onSubmit: async ({ value }) => {
-      const organization = await createOrganizationMutation.mutateAsync(value)
-      if (!organization) {
-        return
-      }
-
-      setCreatedOrg(organization)
-      resetForm(defaultValues)
+      await onCreateOrganization(value.name.trim(), value.defaultRegionId)
     },
   })
   const { reset: resetForm } = form
@@ -100,20 +77,16 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
     }
   }, [form, open, regions])
 
-  const { reset: resetMutation } = createOrganizationMutation
-
   useEffect(() => {
     defaultRegionIdRef.current = regions[0]?.id ?? ''
   }, [regions])
 
   const resetState = useCallback(() => {
-    setCreatedOrg(null)
     resetForm({
       ...defaultValues,
       defaultRegionId: defaultRegionIdRef.current,
     })
-    resetMutation()
-  }, [resetForm, resetMutation])
+  }, [resetForm])
 
   useEffect(() => {
     if (open) {
@@ -133,69 +106,15 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
     >
       <SheetContent className="w-dvw sm:w-[560px] p-0 flex flex-col gap-0">
         <SheetHeader className="border-b border-border p-4 px-5 items-center flex text-left flex-row">
-          <SheetTitle className="text-2xl">{createdOrg ? 'New Organization' : 'Create New Organization'}</SheetTitle>
+          <SheetTitle className="text-2xl">Create New Organization</SheetTitle>
           <SheetDescription className="sr-only">
-            {createdOrg
-              ? 'You can switch between organizations in the top left corner of the sidebar.'
-              : 'Create a new organization to share resources and collaborate with others.'}
+            Create a new organization to share resources and collaborate with others.
           </SheetDescription>
         </SheetHeader>
 
         <ScrollArea fade="mask" className="flex-1 min-h-0">
           <div className="p-5">
-            {createdOrg ? (
-              <div className="space-y-6">
-                <div className="space-y-3">
-                  <FieldLabel htmlFor="organization-id">Organization ID</FieldLabel>
-                  <InputGroup className="pr-1 flex-1">
-                    <InputGroupInput id="organization-id" value={createdOrg.id} readOnly />
-                    <InputGroupButton
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label="Copy organization ID"
-                      onClick={() => copyToClipboard(createdOrg.id)}
-                    >
-                      {copiedText === createdOrg.id ? (
-                        <CheckIcon className="h-4 w-4" />
-                      ) : (
-                        <CopyIcon className="h-4 w-4" />
-                      )}
-                    </InputGroupButton>
-                  </InputGroup>
-                </div>
-
-                {createdOrg.defaultRegionId && (
-                  <div className="space-y-3">
-                    <FieldLabel htmlFor="organization-default-region">Default Region</FieldLabel>
-                    <Input
-                      id="organization-default-region"
-                      value={getRegionName(createdOrg.defaultRegionId) ?? createdOrg.defaultRegionId}
-                      readOnly
-                    />
-                  </div>
-                )}
-
-                <Alert variant="info">
-                  <InfoIcon />
-                  <AlertTitle>Your organization is created.</AlertTitle>
-                  {billingApiUrl ? (
-                    <AlertDescription>
-                      To get started, add a payment method on the{' '}
-                      <Link
-                        to={RoutePath.BILLING_WALLET}
-                        className="text-blue-500 hover:underline"
-                        onClick={() => {
-                          onOpenChange(false)
-                        }}
-                      >
-                        wallet page
-                      </Link>
-                      .
-                    </AlertDescription>
-                  ) : null}
-                </Alert>
-              </div>
-            ) : !loadingRegions && regions.length === 0 ? (
+            {!loadingRegions && regions.length === 0 ? (
               <Alert variant="destructive">
                 <TriangleAlertIcon />
                 <AlertTitle>No regions available</AlertTitle>
@@ -276,30 +195,23 @@ export const CreateOrganizationSheet: React.FC<CreateOrganizationSheetProps> = (
         </ScrollArea>
 
         <SheetFooter className="border-t border-border p-4 px-5">
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={createOrganizationMutation.isPending}
-            onClick={() => onOpenChange(false)}
-          >
-            {createdOrg ? 'Close' : 'Cancel'}
+          <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+            Cancel
           </Button>
-          {!createdOrg && (
-            <form.Subscribe
-              selector={(state) => [state.canSubmit, state.isSubmitting]}
-              children={([canSubmit, isSubmitting]) => (
-                <Button
-                  type="submit"
-                  form="create-organization-form"
-                  variant="default"
-                  disabled={!canSubmit || isSubmitting || regions.length === 0}
-                >
-                  {isSubmitting && <Spinner />}
-                  Create
-                </Button>
-              )}
-            />
-          )}
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                form="create-organization-form"
+                variant="default"
+                disabled={!canSubmit || isSubmitting || regions.length === 0}
+              >
+                {isSubmitting && <Spinner />}
+                Create
+              </Button>
+            )}
+          />
         </SheetFooter>
       </SheetContent>
     </Sheet>

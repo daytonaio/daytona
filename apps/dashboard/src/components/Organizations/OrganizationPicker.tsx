@@ -71,7 +71,7 @@ export const OrganizationPicker: React.FC = () => {
 
   const { organizations, refreshOrganizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization } = useSelectedOrganization()
-  const { sharedRegions: regions, loadingSharedRegions: loadingRegions, getRegionName } = useRegions()
+  const { sharedRegions: regions, loadingSharedRegions: loadingRegions } = useRegions()
 
   const [optimisticSelectedOrganization, setOptimisticSelectedOrganization] = useState(selectedOrganization)
   const [loadingSelectOrganization, setLoadingSelectOrganization] = useState(false)
@@ -187,7 +187,6 @@ export const OrganizationPicker: React.FC = () => {
         onOpenChange={setShowCreateOrganizationSheet}
         regions={regions}
         loadingRegions={loadingRegions}
-        getRegionName={getRegionName}
         onCreateOrganization={handleCreateOrganization}
       />
     </SidebarMenuItem>
