@@ -65,6 +65,13 @@
     "ghcr.io/devcontainers/features/ruby:1": {
       "version": "3.4.5"
     },
+    "ghcr.io/devcontainers/features/java:1.8.0": {
+      "jdkDistro": "tem",
+      "version": "21.0.10",
+      "installMaven": true,
+      "installGradle": true,
+      "installAnt": true
+    },
     "./tools-feature": {
       "pipPackages": [
         "poetry==2.1.3"
