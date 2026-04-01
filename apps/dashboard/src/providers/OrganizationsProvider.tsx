@@ -51,7 +51,6 @@ export function OrganizationsProvider(props: Props) {
       }
       setTimeout(() => {
         window.location.reload()
-        console.log('resolve')
         resolve()
       }, 500)
     })
