@@ -12,6 +12,19 @@
         "command": "npm run docs"
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npx jest --config jest.config.js --passWithNoTests"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": ["api-client", "toolbox-api-client"]
+        }
+      ]
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "options": {

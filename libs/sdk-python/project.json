@@ -12,6 +12,13 @@
         "command": "npm run docs"
       }
     },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "poetry run python -m pytest libs/sdk-python/tests/ -v --tb=short"
+      }
+    },
     "add-api-clients": {
       "executor": "nx:run-commands",
       "options": {
@@ -31,10 +38,7 @@
       ]
     },
     "deps-check": {
-      "inputs": [
-        "pythonLib",
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
-      ],
+      "inputs": ["pythonLib", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "dependsOn": ["add-api-clients"]
     },
     "build": {
@@ -50,10 +54,7 @@
     "build:_publish": {
       "executor": "nx:run-commands",
       "cache": true,
-      "inputs": [
-        "pythonLib",
-        { "dependentTasksOutputFiles": "**/*", "transitive": true }
-      ],
+      "inputs": ["pythonLib", { "dependentTasksOutputFiles": "**/*", "transitive": true }],
       "outputs": ["{projectRoot}/dist/**"],
       "options": {
         "command": "yarn nx run sdk-python:build"
