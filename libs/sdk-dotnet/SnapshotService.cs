@@ -20,7 +20,7 @@ public class SnapshotService
     {
         var createSnapshot = new CreateSnapshotModel(
             name,
-            imageName: image,
+            imageName: image!,
             cpu: resources?.Cpu ?? default,
             gpu: resources?.Gpu ?? default,
             memory: resources?.Memory ?? default,

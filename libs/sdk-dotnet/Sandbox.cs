@@ -16,19 +16,19 @@ public class Sandbox
     private readonly InfoApi _infoApi;
     private readonly string _apiKey;
 
-    public string Id { get; private set; }
-    public string Name { get; private set; }
-    public string State { get; private set; }
+    public string Id { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
+    public string State { get; private set; } = string.Empty;
     public string? User { get; private set; }
     public string? Target { get; private set; }
     public int? Cpu { get; private set; }
     public int? Gpu { get; private set; }
     public int? Memory { get; private set; }
     public int? Disk { get; private set; }
-    public Dictionary<string, string> Env { get; private set; }
-    public Dictionary<string, string> Labels { get; private set; }
+    public Dictionary<string, string> Env { get; private set; } = new();
+    public Dictionary<string, string> Labels { get; private set; } = new();
     public bool Public { get; private set; }
-    public string ToolboxProxyUrl { get; private set; }
+    public string ToolboxProxyUrl { get; private set; } = string.Empty;
     public int? AutoStopInterval { get; private set; }
     public int? AutoArchiveInterval { get; private set; }
     public int? AutoDeleteInterval { get; private set; }

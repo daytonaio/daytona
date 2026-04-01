@@ -36,7 +36,7 @@ public class SandboxProcess
     {
         var effectiveCommand = MergeEnvironmentWithCommand(command, env);
         var response = await GeneratedClientSupport.ExecuteToolboxAsync(
-            () => _api.ExecuteCommandAsync(new ExecuteRequestModel(effectiveCommand, cwd, timeout ?? 10), ct),
+            () => _api.ExecuteCommandAsync(new ExecuteRequestModel(effectiveCommand, cwd!, timeout ?? 10), ct),
             ct
         );
 

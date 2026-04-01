@@ -66,19 +66,19 @@ public class DaytonaClient : IDisposable
 
         var createSandbox = new CreateSandboxModel
         {
-            Name = p?.Name,
-            Snapshot = p?.Snapshot,
-            User = p?.User,
-            Env = p?.Env,
+            Name = p?.Name!,
+            Snapshot = p?.Snapshot!,
+            User = p?.User!,
+            Env = p?.Env!,
             Labels = labels,
-            Target = _config.Target,
+            Target = _config.Target!,
             Public = p?.Public ?? default,
             AutoStopInterval = p?.AutoStopInterval ?? default,
             AutoArchiveInterval = p?.AutoArchiveInterval ?? default,
             AutoDeleteInterval = p?.AutoDeleteInterval ?? default,
-            Volumes = p?.Volumes?.Select(volume => new SandboxVolumeModel(volume.VolumeId, volume.MountPath, volume.SubPath)).ToList(),
+            Volumes = p?.Volumes?.Select(volume => new SandboxVolumeModel(volume.VolumeId, volume.MountPath, volume.SubPath!)).ToList()!,
             NetworkBlockAll = p?.NetworkBlockAll ?? default,
-            NetworkAllowList = p?.NetworkAllowList
+            NetworkAllowList = p?.NetworkAllowList!
         };
 
         return CreateInternalAsync(createSandbox, timeoutSecs, ct);
@@ -94,18 +94,18 @@ public class DaytonaClient : IDisposable
 
         var createSandbox = new CreateSandboxModel
         {
-            Name = p.Name,
-            User = p.User,
-            Env = p.Env,
+            Name = p.Name!,
+            User = p.User!,
+            Env = p.Env!,
             Labels = labels,
-            Target = _config.Target,
+            Target = _config.Target!,
             Public = p.Public ?? default,
             AutoStopInterval = p.AutoStopInterval ?? default,
             AutoArchiveInterval = p.AutoArchiveInterval ?? default,
             AutoDeleteInterval = p.AutoDeleteInterval ?? default,
-            Volumes = p.Volumes?.Select(volume => new SandboxVolumeModel(volume.VolumeId, volume.MountPath, volume.SubPath)).ToList(),
+            Volumes = p.Volumes?.Select(volume => new SandboxVolumeModel(volume.VolumeId, volume.MountPath, volume.SubPath!)).ToList()!,
             NetworkBlockAll = p.NetworkBlockAll ?? default,
-            NetworkAllowList = p.NetworkAllowList
+            NetworkAllowList = p.NetworkAllowList!
         };
 
         if (p.Resources is not null)
@@ -122,7 +122,7 @@ public class DaytonaClient : IDisposable
         }
         else
         {
-            createSandbox.Snapshot = p.Image.ToString();
+            createSandbox.Snapshot = p.Image.ToString()!;
         }
 
         return CreateInternalAsync(createSandbox, timeoutSecs, ct);

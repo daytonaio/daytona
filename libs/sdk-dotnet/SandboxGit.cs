@@ -28,7 +28,7 @@ public class SandboxGit
         string? password = null,
         CancellationToken ct = default)
         => GeneratedClientSupport.ExecuteToolboxAsync(
-            () => _api.CloneRepositoryAsync(new GitCloneRequestModel(branch, commitId, password, path, url, username), ct),
+            () => _api.CloneRepositoryAsync(new GitCloneRequestModel(branch!, commitId!, password!, path, url, username!), ct),
             ct
         );
 

@@ -17,7 +17,29 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{workspaceRoot}",
-        "command": "dotnet run --project examples/dotnet -- lifecycle && dotnet run --project examples/dotnet -- exec && dotnet run --project examples/dotnet -- files && dotnet run --project examples/dotnet -- git && dotnet run --project examples/dotnet -- auto-archive && dotnet run --project examples/dotnet -- auto-delete && dotnet run --project examples/dotnet -- image && dotnet run --project examples/dotnet -- network && dotnet run --project examples/dotnet -- pagination && dotnet run --project examples/dotnet -- volumes && dotnet run --project examples/dotnet -- region"
+        "commands": [
+          "dotnet run --project examples/dotnet/lifecycle",
+          "dotnet run --project examples/dotnet/exec-command",
+          "dotnet run --project examples/dotnet/file-operations",
+          "dotnet run --project examples/dotnet/git",
+          "dotnet run --project examples/dotnet/auto-archive",
+          "dotnet run --project examples/dotnet/auto-delete",
+          "dotnet run --project examples/dotnet/declarative-image",
+          "dotnet run --project examples/dotnet/network-settings",
+          "dotnet run --project examples/dotnet/pagination",
+          "dotnet run --project examples/dotnet/volumes",
+          "dotnet run --project examples/dotnet/region",
+          "dotnet run --project examples/dotnet/pty"
+        ],
+        "parallel": false
+      },
+      "dependsOn": ["build"]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "dotnet build Daytona.Sdk.csproj -c Release"
       },
       "dependsOn": ["build"]
     },
