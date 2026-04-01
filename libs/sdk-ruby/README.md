@@ -164,11 +164,11 @@ Create and start a language server to get code completions, document symbols, an
 
 ```ruby
 # Create a language server
-lsp = sandbox.create_lsp_server(
+lsp_server = sandbox.create_lsp_server(
   language_id: Daytona::LspServer::Language::PYTHON,
   path_to_project: 'workspace/project'
 )
-lsp.start
+lsp_server.start
 
 # Notify server that a file is open
 lsp_server.did_open('workspace/project/main.py')
@@ -185,4 +185,4 @@ completions = lsp_server.completions(
 
 ## Contributing
 
-Daytona is Open Source under the [Apache License 2.0](/libs/sdk-ruby//LICENSE), and is the [copyright of its contributors](/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [Apache License 2.0](/libs/sdk-ruby/LICENSE), and is the [copyright of its contributors](/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
