@@ -109,7 +109,7 @@ func main() {
 
 	log.Printf("Host key loaded from SSH_HOST_KEY environment variable (base64 decoded)")
 	log.Printf("Private key loaded from SSH_PRIVATE_KEY environment variable (base64 decoded)")
-	log.Printf("Public key generated: %s", string(ssh.MarshalAuthorizedKey(publicKey)))
+	log.Printf("Public key generated successfully")
 
 	log.Printf("Starting SSH Gateway on port %d", port)
 	if err := gateway.Start(); err != nil {
@@ -174,8 +174,6 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 		return
 	}
 
-	log.Printf("Validating token: %s", token)
-
 	// Validate the token using the API
 	validation, _, err := g.apiClient.SandboxAPI.ValidateSshAccess(context.Background()).Token(token).Execute()
 	if err != nil {
@@ -185,7 +183,7 @@ func (g *SSHGateway) handleConnection(conn net.Conn, serverConfig *ssh.ServerCon
 	}
 
 	if !validation.Valid {
-		log.Printf("Invalid token: %s", token)
+		log.Printf("Invalid token provided")
 		conn.Close()
 		return
 	}
