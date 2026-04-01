@@ -61,9 +61,15 @@ func (e *Executor) Wait() {
 	e.wg.Wait()
 }
 
-// Execute processes a job and updates its status
+// Execute spawns a goroutine to process a job. The WaitGroup counter is
+// incremented synchronously so that Wait cannot return before the job
+// goroutine is scheduled.
 func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 	e.wg.Add(1)
+	go e.execute(ctx, job)
+}
+
+func (e *Executor) execute(ctx context.Context, job *apiclient.Job) {
 	defer e.wg.Done()
 
 	// Detach from the parent context so that cancellation (e.g. SIGTERM)
