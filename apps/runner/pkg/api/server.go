@@ -164,9 +164,14 @@ func (a *ApiServer) Start(ctx context.Context) error {
 
 	lc := net.ListenConfig{
 		Control: func(network, address string, c syscall.RawConn) error {
-			return c.Control(func(fd uintptr) {
-				unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			var setsockoptErr error
+			err := c.Control(func(fd uintptr) {
+				setsockoptErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
 			})
+			if err != nil {
+				return err
+			}
+			return setsockoptErr
 		},
 	}
 	listener, err := lc.Listen(ctx, "tcp", a.httpServer.Addr)

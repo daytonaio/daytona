@@ -88,9 +88,14 @@ func (s *Service) Start(ctx context.Context) error {
 
 	lc := net.ListenConfig{
 		Control: func(network, address string, c syscall.RawConn) error {
-			return c.Control(func(fd uintptr) {
-				unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			var setsockoptErr error
+			err := c.Control(func(fd uintptr) {
+				setsockoptErr = unix.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
 			})
+			if err != nil {
+				return err
+			}
+			return setsockoptErr
 		},
 	}
 
@@ -110,14 +115,24 @@ func (s *Service) Start(ctx context.Context) error {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			// Check if the listener was closed via Stop()
+			// Listener was closed via Stop() or context cancelled — clean exit.
 			select {
 			case <-ctx.Done():
 				return nil
 			default:
 			}
+
+			s.mu.Lock()
+			stopped := s.listener == nil
+			s.mu.Unlock()
+			if stopped {
+				return nil
+			}
+
+			// Transient error (e.g. EMFILE) — log and retry.
 			s.log.WarnContext(ctx, "Failed to accept incoming connection", "error", err)
-			return nil
+			time.Sleep(100 * time.Millisecond)
+			continue
 		}
 
 		go s.handleConnection(conn, serverConfig)
