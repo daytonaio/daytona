@@ -45,13 +45,12 @@ export function OrganizationsProvider(props: Props) {
 
   // After creating a new org, the selected org was updated unnecessarily so we reload the page just in case
   const refreshOrganizations = useCallback(async (selectedOrganizationId?: string) => {
-    return new Promise<void>((resolve) => {
+    return new Promise<void>(() => {
       if (selectedOrganizationId) {
         localStorage.setItem(LocalStorageKey.SelectedOrganizationId, selectedOrganizationId)
       }
       setTimeout(() => {
         window.location.reload()
-        resolve()
       }, 500)
     })
   }, [])
