@@ -17,7 +17,18 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'ax
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
-import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
+import {
+  DaytonaAuthenticationError,
+  DaytonaBadRequestError,
+  DaytonaConflictError,
+  DaytonaConnectionError,
+  DaytonaError,
+  DaytonaForbiddenError,
+  DaytonaNotFoundError,
+  DaytonaRateLimitError,
+  DaytonaServerError,
+  DaytonaValidationError,
+} from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
 import { SnapshotService } from './Snapshot'
@@ -776,12 +787,29 @@ export class Daytona implements AsyncDisposable {
         const statusCode = error.response?.status
         const headers = error.response?.headers
 
+        if (!statusCode) {
+          throw new DaytonaConnectionError(errorMessage, statusCode, headers)
+        }
+
         switch (statusCode) {
+          case 400:
+            throw new DaytonaBadRequestError(errorMessage, statusCode, headers)
+          case 401:
+            throw new DaytonaAuthenticationError(errorMessage, statusCode, headers)
+          case 403:
+            throw new DaytonaForbiddenError(errorMessage, statusCode, headers)
           case 404:
             throw new DaytonaNotFoundError(errorMessage, statusCode, headers)
+          case 409:
+            throw new DaytonaConflictError(errorMessage, statusCode, headers)
+          case 422:
+            throw new DaytonaValidationError(errorMessage, statusCode, headers)
           case 429:
             throw new DaytonaRateLimitError(errorMessage, statusCode, headers)
           default:
+            if (statusCode >= 500) {
+              throw new DaytonaServerError(errorMessage, statusCode, headers)
+            }
             throw new DaytonaError(errorMessage, statusCode, headers)
         }
       },

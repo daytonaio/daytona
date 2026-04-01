@@ -34,7 +34,19 @@ if TYPE_CHECKING:
         CreateSandboxFromSnapshotParams,
         DaytonaConfig,
     )
-    from .common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError
+    from .common.errors import (
+        DaytonaAuthenticationError,
+        DaytonaBadRequestError,
+        DaytonaConflictError,
+        DaytonaConnectionError,
+        DaytonaError,
+        DaytonaForbiddenError,
+        DaytonaNotFoundError,
+        DaytonaRateLimitError,
+        DaytonaServerError,
+        DaytonaTimeoutError,
+        DaytonaValidationError,
+    )
     from .common.filesystem import FileDownloadRequest, FileDownloadResponse, FileUpload
     from .common.image import Image
     from .common.lsp_server import LspCompletionPosition, LspLanguageId
@@ -51,8 +63,15 @@ __all__ = [
     "SessionExecuteRequest",
     "SessionExecuteResponse",
     "DaytonaError",
+    "DaytonaBadRequestError",
+    "DaytonaAuthenticationError",
+    "DaytonaForbiddenError",
     "DaytonaNotFoundError",
+    "DaytonaConflictError",
+    "DaytonaValidationError",
     "DaytonaRateLimitError",
+    "DaytonaServerError",
+    "DaytonaConnectionError",
     "LspLanguageId",
     "CodeRunParams",
     "Sandbox",
@@ -140,9 +159,16 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "DaytonaConfig": "common.daytona",
     # common.errors
     "DaytonaError": "common.errors",
+    "DaytonaBadRequestError": "common.errors",
+    "DaytonaAuthenticationError": "common.errors",
+    "DaytonaForbiddenError": "common.errors",
     "DaytonaNotFoundError": "common.errors",
+    "DaytonaConflictError": "common.errors",
+    "DaytonaValidationError": "common.errors",
     "DaytonaRateLimitError": "common.errors",
+    "DaytonaServerError": "common.errors",
     "DaytonaTimeoutError": "common.errors",
+    "DaytonaConnectionError": "common.errors",
     # common.filesystem
     "FileDownloadRequest": "common.filesystem",
     "FileDownloadResponse": "common.filesystem",

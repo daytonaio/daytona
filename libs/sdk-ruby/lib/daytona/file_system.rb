@@ -42,6 +42,8 @@ module Daytona
     def create_folder(path, mode)
       Sdk.logger.debug("Creating folder #{path} with mode #{mode}")
       toolbox_api.create_folder(path, mode)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to create folder: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to create folder: #{e.message}"
     end
@@ -61,6 +63,8 @@ module Daytona
     #   sandbox.fs.delete_file("workspace/old_dir", recursive: true)
     def delete_file(path, recursive: false)
       toolbox_api.delete_file(path, { recursive: })
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to delete file: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to delete file: #{e.message}"
     end
@@ -85,6 +89,8 @@ module Daytona
     #   puts "Path is a directory" if info.is_dir
     def get_file_info(path)
       toolbox_api.get_file_info(path)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to get file info: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to get file info: #{e.message}"
     end
@@ -110,6 +116,8 @@ module Daytona
     #   puts "Subdirectories: #{dirs.map(&:name).join(', ')}"
     def list_files(path)
       toolbox_api.list_files({ path: })
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to list files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to list files: #{e.message}"
     end
@@ -146,6 +154,8 @@ module Daytona
       else
         file
       end
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to download file: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to download file: #{e.message}"
     end
@@ -186,6 +196,8 @@ module Daytona
           toolbox_api.upload_file(remote_path, file)
         end
       end
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to upload file: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to upload file: #{e.message}"
     end
@@ -207,6 +219,8 @@ module Daytona
     #   sandbox.fs.upload_files(files)
     def upload_files(files)
       files.each { |file_upload| upload_file(file_upload.source, file_upload.destination) }
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to upload files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to upload files: #{e.message}"
     end
@@ -228,6 +242,8 @@ module Daytona
     #   end
     def find_files(path, pattern)
       toolbox_api.find_in_files(path, pattern)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to find files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to find files: #{e.message}"
     end
@@ -252,6 +268,8 @@ module Daytona
     #   puts "Found #{result.files.length} test files"
     def search_files(path, pattern)
       toolbox_api.search_files(path, pattern)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to search files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to search files: #{e.message}"
     end
@@ -285,6 +303,8 @@ module Daytona
     #   )
     def move_files(source, destination)
       toolbox_api.move_file(source, destination)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to move files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to move files: #{e.message}"
     end
@@ -321,6 +341,8 @@ module Daytona
         new_value: new_value
       )
       toolbox_api.replace_in_files(replace_request)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to replace in files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to replace in files: #{e.message}"
     end
@@ -356,6 +378,8 @@ module Daytona
       opts[:group] = group if group
 
       toolbox_api.set_file_permissions(path, opts)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to set file permissions: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to set file permissions: #{e.message}"
     end

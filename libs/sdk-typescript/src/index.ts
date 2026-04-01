@@ -18,7 +18,19 @@ export { LspLanguageId } from './LspServer'
 export { Process } from './Process'
 // export { LspServer } from './LspServer'
 // export type { LspLanguageId, Position } from './LspServer'
-export { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError, DaytonaTimeoutError } from './errors/DaytonaError'
+export {
+  DaytonaError,
+  DaytonaBadRequestError,
+  DaytonaAuthenticationError,
+  DaytonaForbiddenError,
+  DaytonaNotFoundError,
+  DaytonaConflictError,
+  DaytonaValidationError,
+  DaytonaRateLimitError,
+  DaytonaServerError,
+  DaytonaTimeoutError,
+  DaytonaConnectionError,
+} from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { SandboxCodeToolbox } from './Sandbox'

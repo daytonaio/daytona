@@ -31,9 +31,9 @@ module Daytona
     #   response = daytona.snapshot.list(page: 1, limit: 10)
     #   snapshots.items.each { |snapshot| puts "#{snapshot.name} (#{snapshot.image_name})" }
     def list(page: nil, limit: nil)
-      raise Sdk::Error, 'page must be positive integer' if page && page < 1
+      raise Sdk::BadRequestError, 'page must be positive integer' if page && page < 1
 
-      raise Sdk::Error, 'limit must be positive integer' if limit && limit < 1
+      raise Sdk::BadRequestError, 'limit must be positive integer' if limit && limit < 1
 
       response = snapshots_api.get_all_snapshots(page:, limit:)
       PaginatedResource.new(

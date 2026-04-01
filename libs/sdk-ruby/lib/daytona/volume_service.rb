@@ -33,7 +33,7 @@ module Daytona
     def get(name, create: false)
       Volume.new(volumes_api.get_volume_by_name(name))
     rescue DaytonaApiClient::ApiError => e
-      raise unless create && e.code == 404 && e.message.include?("Volume with name #{name} not found")
+      raise Sdk.map_api_error(e) unless create && e.code == 404
 
       create(name)
     end

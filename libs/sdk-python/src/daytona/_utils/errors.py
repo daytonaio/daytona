@@ -16,7 +16,18 @@ from daytona_toolbox_api_client.exceptions import OpenApiException as OpenApiExc
 from daytona_toolbox_api_client_async.exceptions import NotFoundException as NotFoundExceptionToolboxAsync
 from daytona_toolbox_api_client_async.exceptions import OpenApiException as OpenApiExceptionToolboxAsync
 
-from ..common.errors import DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError
+from ..common.errors import (
+    DaytonaAuthenticationError,
+    DaytonaBadRequestError,
+    DaytonaConflictError,
+    DaytonaConnectionError,
+    DaytonaError,
+    DaytonaForbiddenError,
+    DaytonaNotFoundError,
+    DaytonaRateLimitError,
+    DaytonaServerError,
+    DaytonaValidationError,
+)
 from .types import has_body
 
 SESSION_IS_CLOSED_ERROR_MESSAGE = "Session is closed"
@@ -59,12 +70,8 @@ def intercept_errors(
                     raise DaytonaNotFoundError(
                         f"{message_prefix}{msg}", status_code=status_code, headers=headers
                     ) from None
-                # Check for rate limit (429) errors
-                if status_code == 429:
-                    raise DaytonaRateLimitError(
-                        f"{message_prefix}{msg}", status_code=status_code, headers=headers
-                    ) from None
-                raise DaytonaError(f"{message_prefix}{msg}", status_code=status_code, headers=headers) from None
+
+                raise _map_status_code(status_code, f"{message_prefix}{msg}", headers=headers) from None
 
             if isinstance(e, RuntimeError) and SESSION_IS_CLOSED_ERROR_MESSAGE in str(e):
                 raise DaytonaError(
@@ -102,6 +109,42 @@ def intercept_errors(
         return cast(F, sync_wrapper)
 
     return decorator
+
+
+def _map_status_code(
+    status_code: int | None,
+    message: str,
+    headers: Mapping[str, Any] | None = None,
+) -> DaytonaError:
+    """Map an HTTP status code to the appropriate DaytonaError subclass.
+
+    Args:
+        status_code: HTTP status code, or None / 0 for network-level errors.
+        message: Error message.
+        headers: Response headers if available.
+
+    Returns:
+        The most specific DaytonaError subclass for the given status code.
+    """
+    if status_code == 400:
+        return DaytonaBadRequestError(message, status_code=status_code, headers=headers)
+    if status_code == 401:
+        return DaytonaAuthenticationError(message, status_code=status_code, headers=headers)
+    if status_code == 403:
+        return DaytonaForbiddenError(message, status_code=status_code, headers=headers)
+    if status_code == 404:
+        return DaytonaNotFoundError(message, status_code=status_code, headers=headers)
+    if status_code == 409:
+        return DaytonaConflictError(message, status_code=status_code, headers=headers)
+    if status_code == 422:
+        return DaytonaValidationError(message, status_code=status_code, headers=headers)
+    if status_code == 429:
+        return DaytonaRateLimitError(message, status_code=status_code, headers=headers)
+    if status_code is not None and status_code >= 500:
+        return DaytonaServerError(message, status_code=status_code, headers=headers)
+    if not status_code:
+        return DaytonaConnectionError(message, status_code=None, headers=headers)
+    return DaytonaError(message, status_code=status_code, headers=headers)
 
 
 def _get_open_api_exception_message(

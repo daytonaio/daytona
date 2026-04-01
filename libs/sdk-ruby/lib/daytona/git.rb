@@ -42,6 +42,8 @@ module Daytona
     #   ])
     def add(path, files)
       toolbox_api.add_files(DaytonaToolboxApiClient::GitAddRequest.new(path:, files:))
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to add files: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to add files: #{e.message}"
     end
@@ -58,6 +60,8 @@ module Daytona
     #   puts "Branches: #{response.branches}"
     def branches(path)
       toolbox_api.list_branches(path)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to list branches: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to list branches: #{e.message}"
     end
@@ -111,6 +115,8 @@ module Daytona
           commit_id: commit_id
         )
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to clone repository: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to clone repository: #{e.message}"
     end
@@ -143,6 +149,8 @@ module Daytona
         DaytonaToolboxApiClient::GitCommitRequest.new(path:, message:, author:, email:, allow_empty:)
       )
       GitCommitResponse.new(sha: response.hash)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to commit changes: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to commit changes: #{e.message}"
     end
@@ -172,6 +180,8 @@ module Daytona
       toolbox_api.push_changes(
         DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to push changes: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to push changes: #{e.message}"
     end
@@ -201,6 +211,8 @@ module Daytona
       toolbox_api.pull_changes(
         DaytonaToolboxApiClient::GitRepoRequest.new(path:, username:, password:)
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to pull changes: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to pull changes: #{e.message}"
     end
@@ -219,6 +231,8 @@ module Daytona
     #   puts "Commits behind: #{status.behind}"
     def status(path)
       toolbox_api.get_status(path)
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to get status: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to get status: #{e.message}"
     end
@@ -238,6 +252,8 @@ module Daytona
       toolbox_api.checkout_branch(
         DaytonaToolboxApiClient::GitCheckoutRequest.new(path:, branch:)
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to checkout branch: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to checkout branch: #{e.message}"
     end
@@ -258,6 +274,8 @@ module Daytona
       toolbox_api.create_branch(
         DaytonaToolboxApiClient::GitBranchRequest.new(path:, name:)
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to create branch: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to create branch: #{e.message}"
     end
@@ -277,6 +295,8 @@ module Daytona
       toolbox_api.delete_branch(
         DaytonaToolboxApiClient::GitDeleteBranchRequest.new(path:, name:)
       )
+    rescue DaytonaToolboxApiClient::ApiError => e
+      raise Sdk.map_api_error(e, message_prefix: 'Failed to delete branch: ')
     rescue StandardError => e
       raise Sdk::Error, "Failed to delete branch: #{e.message}"
     end
