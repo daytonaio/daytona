@@ -3,9 +3,18 @@
 
 package io.daytona.sdk;
 
+import io.daytona.sdk.exception.DaytonaAuthenticationException;
+import io.daytona.sdk.exception.DaytonaBadRequestException;
+import io.daytona.sdk.exception.DaytonaConflictException;
 import io.daytona.sdk.exception.DaytonaException;
+import io.daytona.sdk.exception.DaytonaForbiddenException;
 import io.daytona.sdk.exception.DaytonaNotFoundException;
 import io.daytona.sdk.exception.DaytonaRateLimitException;
+import io.daytona.sdk.exception.DaytonaServerException;
+import io.daytona.sdk.exception.DaytonaValidationException;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 final class ExceptionMapper {
     private ExceptionMapper() {
@@ -44,16 +53,51 @@ final class ExceptionMapper {
     }
 
     private static DaytonaException map(int statusCode, String responseBody) {
-        String message = responseBody == null || responseBody.isEmpty()
-                ? "Request failed with status " + statusCode
-                : responseBody;
-        if (statusCode == 404) {
-            return new DaytonaNotFoundException(message);
+        String message = extractMessage(responseBody, statusCode);
+        switch (statusCode) {
+            case 400:
+                return new DaytonaBadRequestException(message);
+            case 401:
+                return new DaytonaAuthenticationException(message);
+            case 403:
+                return new DaytonaForbiddenException(message);
+            case 404:
+                return new DaytonaNotFoundException(message);
+            case 409:
+                return new DaytonaConflictException(message);
+            case 422:
+                return new DaytonaValidationException(message);
+            case 429:
+                return new DaytonaRateLimitException(message);
+            default:
+                if (statusCode >= 500) {
+                    return new DaytonaServerException(statusCode, message);
+                }
+                return new DaytonaException(statusCode, message);
         }
-        if (statusCode == 429) {
-            return new DaytonaRateLimitException(message);
+    }
+
+    /**
+     * Extracts a human-readable message from a raw JSON response body.
+     * Looks for a "message" or "error" field; falls back to the raw body or a generic message.
+     */
+    private static String extractMessage(String responseBody, int statusCode) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            return "Request failed with status " + statusCode;
         }
-        return new DaytonaException(statusCode, message);
+        // Try to extract "message" field from JSON
+        Matcher messageMatcher = Pattern.compile("\"message\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+                .matcher(responseBody);
+        if (messageMatcher.find()) {
+            return messageMatcher.group(1);
+        }
+        // Try to extract "error" field from JSON
+        Matcher errorMatcher = Pattern.compile("\"error\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+                .matcher(responseBody);
+        if (errorMatcher.find()) {
+            return errorMatcher.group(1);
+        }
+        return responseBody;
     }
 
     @FunctionalInterface
