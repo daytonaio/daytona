@@ -26,6 +26,13 @@ jobs:
     runs-on: [self-hosted, Linux, X64, github-actions-runner-amd64]
 
     steps:
+      - name: Validate version format
+        run: |
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected vX.Y.Z or vX.Y.Z-suffix)"
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -46,10 +53,10 @@ jobs:
 
       - name: Tag Go modules
         run: |
-          git tag libs/api-client-go/${{ inputs.version }}
-          git tag libs/toolbox-api-client-go/${{ inputs.version }}
-          git tag libs/sdk-go/${{ inputs.version }}
-          git push origin libs/api-client-go/${{ inputs.version }} libs/toolbox-api-client-go/${{ inputs.version }} libs/sdk-go/${{ inputs.version }}
+          git tag "libs/api-client-go/$VERSION"
+          git tag "libs/toolbox-api-client-go/$VERSION"
+          git tag "libs/sdk-go/$VERSION"
+          git push origin "libs/api-client-go/$VERSION" "libs/toolbox-api-client-go/$VERSION" "libs/sdk-go/$VERSION"
 
       - name: Go work sync
         run: |
@@ -82,7 +89,7 @@ jobs:
           }' > apps/runner/package.json
 
       - name: Create release
-        run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
+        run: yarn nx release "$VERSION" --skip-publish --verbose
 
   build_projects:
     needs: publish
@@ -129,25 +136,25 @@ jobs:
 
       - name: Upload runner to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/runner-amd64#daytona-runner-${{ inputs.version }}-amd64 --clobber
+          gh release upload "$VERSION" "dist/apps/runner-amd64#daytona-runner-${VERSION}-amd64" --clobber
 
       - name: Upload runner .deb to release assets
         run: |
           DEB_VERSION="${VERSION#v}"
-          gh release upload ${{ inputs.version }} "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
+          gh release upload "$VERSION" "dist/apps/runner-deb/daytona-runner_${DEB_VERSION}_amd64.deb#daytona-runner-${DEB_VERSION}-amd64.deb" --clobber
 
       - name: Upload daemon to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/daemon-amd64#daytona-daemon-${{ inputs.version }}-amd64 --clobber
+          gh release upload "$VERSION" "dist/apps/daemon-amd64#daytona-daemon-${VERSION}-amd64" --clobber
 
       - name: Upload CLI to release assets
         run: |
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-amd64#daytona-cli-${{ inputs.version }}-linux-amd64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-linux-arm64#daytona-cli-${{ inputs.version }}-linux-arm64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-amd64#daytona-cli-${{ inputs.version }}-darwin-amd64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-darwin-arm64#daytona-cli-${{ inputs.version }}-darwin-arm64 --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${{ inputs.version }}-windows-amd64.exe --clobber
-          gh release upload ${{ inputs.version }} dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${{ inputs.version }}-windows-arm64.exe --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-amd64#daytona-cli-${VERSION}-linux-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-linux-arm64#daytona-cli-${VERSION}-linux-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-amd64#daytona-cli-${VERSION}-darwin-amd64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-darwin-arm64#daytona-cli-${VERSION}-darwin-arm64" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-amd64.exe#daytona-cli-${VERSION}-windows-amd64.exe" --clobber
+          gh release upload "$VERSION" "dist/apps/cli/daytona-windows-arm64.exe#daytona-cli-${VERSION}-windows-arm64.exe" --clobber
 
       - name: Upload computer-use artifact
         uses: actions/upload-artifact@v4
@@ -234,8 +241,10 @@ jobs:
       - run: yarn install --immutable
 
       - name: Publish docker images
+        env:
+          ARCH: -${{ matrix.arch }}
         run: |
-          VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
+          yarn docker:production
 
   # Push combined manifest
   docker_push_manifest:
@@ -266,7 +275,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Push manifest
         run: |
-          VERSION=${{ inputs.version }} yarn push-manifest
+          yarn push-manifest
 
   sync_gosum:
     needs: build_projects
@@ -306,19 +315,19 @@ jobs:
 
       - name: Sync go.sum and create PR
         run: |
-          git checkout -b sync-gosum-${{ inputs.version }}
+          git checkout -b "sync-gosum-$VERSION"
           GONOSUMDB=github.com/daytonaio/daytona go work sync
           if git diff --quiet -- **/go.sum; then
             echo "No go.sum changes detected; skipping commit and PR creation."
           else
             git add **/go.sum
-            git commit -s -m "chore: sync go.sum for ${{ inputs.version }}"
-            git push origin sync-gosum-${{ inputs.version }}
+            git commit -s -m "chore: sync go.sum for $VERSION"
+            git push origin "sync-gosum-$VERSION"
             gh pr create \
-              --title "chore: sync go.sum for ${{ inputs.version }}" \
-              --body "Automated PR to sync go.sum after release ${{ inputs.version }}" \
+              --title "chore: sync go.sum for $VERSION" \
+              --body "Automated PR to sync go.sum after release $VERSION" \
               --base main \
-              --head sync-gosum-${{ inputs.version }}
+              --head "sync-gosum-$VERSION"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

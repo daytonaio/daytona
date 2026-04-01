@@ -31,10 +31,18 @@ jobs:
     runs-on: ${{ matrix.runner }}
 
     steps:
-      - name: Prepare
+      - name: Validate version format
         run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected X.Y.Z or X.Y.Z-suffix)"
+            exit 1
+          fi
+
+      - name: Prepare
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          echo "PLATFORM_PAIR=${PLATFORM//\//-}" >> $GITHUB_ENV
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -132,25 +140,29 @@ jobs:
 
       - name: Create and push sandbox manifest
         working-directory: ${{ runner.temp }}/digests/sandbox
+        env:
+          PUSH_LATEST: ${{ inputs.push_latest }}
         run: |
-          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}"
-          if [ "${{ inputs.push_latest }}" = "true" ]; then
-            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest"
+          TAGS="-t ${REGISTRY_IMAGE}:${VERSION}"
+          if [ "$PUSH_LATEST" = "true" ]; then
+            TAGS="$TAGS -t ${REGISTRY_IMAGE}:latest"
           fi
           docker buildx imagetools create $TAGS \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
       - name: Create and push sandbox-slim manifest
         working-directory: ${{ runner.temp }}/digests/sandbox-slim
+        env:
+          PUSH_LATEST: ${{ inputs.push_latest }}
         run: |
-          TAGS="-t ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim"
-          if [ "${{ inputs.push_latest }}" = "true" ]; then
-            TAGS="$TAGS -t ${{ env.REGISTRY_IMAGE }}:latest-slim"
+          TAGS="-t ${REGISTRY_IMAGE}:${VERSION}-slim"
+          if [ "$PUSH_LATEST" = "true" ]; then
+            TAGS="$TAGS -t ${REGISTRY_IMAGE}:latest-slim"
           fi
           docker buildx imagetools create $TAGS \
-            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+            $(printf "${REGISTRY_IMAGE}@sha256:%s " *)
 
       - name: Inspect images
         run: |
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}
-          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ env.VERSION }}-slim
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}"
+          docker buildx imagetools inspect "${REGISTRY_IMAGE}:${VERSION}-slim"
