@@ -22,6 +22,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -33,7 +34,7 @@ interface DataTableProps {
     role: UpdateOrganizationInvitationRoleEnum,
     assignedRoleIds: string[],
   ) => Promise<boolean>
-  loadingInvitationAction: Record<string, boolean>
+  pendingInvitationIds: Set<string>
 }
 
 export function OrganizationInvitationTable({
@@ -41,7 +42,7 @@ export function OrganizationInvitationTable({
   loadingData,
   onCancelInvitation,
   onUpdateInvitation,
-  loadingInvitationAction,
+  pendingInvitationIds,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [invitationToCancel, setInvitationToCancel] = useState<string | null>(null)
@@ -144,7 +145,9 @@ export function OrganizationInvitationTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`h-14 ${loadingInvitationAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={cn('h-14', {
+                      'opacity-50 pointer-events-none': pendingInvitationIds.has(row.original.id),
+                    })}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -189,7 +192,7 @@ export function OrganizationInvitationTable({
             }
           }}
           onCancelInvitation={handleConfirmCancel}
-          loading={loadingInvitationAction[invitationToCancel]}
+          loading={invitationToCancel ? pendingInvitationIds.has(invitationToCancel) : false}
         />
       )}
     </>

@@ -18,7 +18,7 @@ import { useUpdateOrganizationInvitationMutation } from '@/hooks/mutations/useUp
 import { useUpdateOrganizationMemberAccessMutation } from '@/hooks/mutations/useUpdateOrganizationMemberAccessMutation'
 import { useOrganizationInvitationsQuery } from '@/hooks/queries/useOrganizationInvitationsQuery'
 import { useOrganizations } from '@/hooks/useOrganizations'
-import { usePendingActionMap } from '@/hooks/usePendingActionIds'
+import { usePendingMutationKeys } from '@/hooks/usePendingMutationKeys'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import {
@@ -32,31 +32,21 @@ import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
 function usePendingMemberIds() {
-  const { pendingIds: pendingMemberIds, loadingAction: loadingMemberAction } = usePendingActionMap([
+  return usePendingMutationKeys<string, { userId?: string }>([
     {
       mutationKey: mutationKeys.organization.members.all,
-      getId: (variables) => (variables as { userId?: string } | undefined)?.userId,
+      getKey: (variables) => variables?.userId,
     },
   ])
-
-  return {
-    pendingMemberIds,
-    loadingMemberAction,
-  }
 }
 
 function usePendingInvitationIds() {
-  const { pendingIds: pendingInvitationIds, loadingAction: loadingInvitationAction } = usePendingActionMap([
+  return usePendingMutationKeys<string, { invitationId?: string }>([
     {
       mutationKey: mutationKeys.organization.invitations.all,
-      getId: (variables) => (variables as { invitationId?: string } | undefined)?.invitationId,
+      getKey: (variables) => variables?.invitationId,
     },
   ])
-
-  return {
-    pendingInvitationIds,
-    loadingInvitationAction,
-  }
 }
 
 const OrganizationMembers: React.FC = () => {
@@ -78,8 +68,8 @@ const OrganizationMembers: React.FC = () => {
   const cancelInvitationMutation = useCancelOrganizationInvitationMutation()
   const createInvitationSheetRef = useRef<{ open: () => void }>(null)
 
-  const { loadingMemberAction } = usePendingMemberIds()
-  const { loadingInvitationAction } = usePendingInvitationIds()
+  const pendingMemberIds = usePendingMemberIds()
+  const pendingInvitationIds = usePendingInvitationIds()
 
   const handleUpdateMemberAccess = async (
     userId: string,
@@ -222,7 +212,7 @@ const OrganizationMembers: React.FC = () => {
           loadingData={false}
           onUpdateMemberAccess={handleUpdateMemberAccess}
           onRemoveMember={handleRemoveMember}
-          loadingMemberAction={loadingMemberAction}
+          pendingMemberIds={pendingMemberIds}
           ownerMode={authenticatedUserIsOwner}
           currentUserId={user?.profile.sub}
         />
@@ -257,7 +247,7 @@ const OrganizationMembers: React.FC = () => {
                 loadingData={loadingInvitations}
                 onCancelInvitation={handleCancelInvitation}
                 onUpdateInvitation={handleUpdateInvitation}
-                loadingInvitationAction={loadingInvitationAction}
+                pendingInvitationIds={pendingInvitationIds}
               />
             )}
           </>
