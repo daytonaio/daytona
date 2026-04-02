@@ -8,17 +8,43 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 var proxyTransport = &http.Transport{
 	MaxIdleConns:        100,
 	MaxIdleConnsPerHost: 100,
+	TLSHandshakeTimeout: 10 * time.Second,
 	DialContext: (&net.Dialer{
+		Timeout:   30 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}).DialContext,
+}
+
+var proxyBufPool = &bufferPool{
+	pool: sync.Pool{
+		New: func() interface{} {
+			b := make([]byte, 32*1024)
+			return &b
+		},
+	},
+}
+
+type bufferPool struct {
+	pool sync.Pool
+}
+
+func (bp *bufferPool) Get() []byte {
+	buf := bp.pool.Get().(*[]byte)
+	return *buf
+}
+
+func (bp *bufferPool) Put(b []byte) {
+	bp.pool.Put(&b)
 }
 
 // ProxyRequest handles proxying requests to a sandbox's container
@@ -64,7 +90,14 @@ func NewProxyRequestHandler(getProxyTarget func(*gin.Context) (targetUrl *url.UR
 				}
 			},
 			Transport:      proxyTransport,
+			BufferPool:     proxyBufPool,
 			ModifyResponse: modifyResponse,
+			ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+				log.Warnf("proxy error for %s%s: %v", r.Host, r.URL.Path, err)
+				if !ctx.IsAborted() {
+					ctx.AbortWithStatus(http.StatusBadGateway)
+				}
+			},
 		}
 
 		reverseProxy.ServeHTTP(ctx.Writer, ctx.Request)

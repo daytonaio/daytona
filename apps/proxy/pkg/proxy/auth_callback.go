@@ -217,6 +217,7 @@ func (p *Proxy) getUserApiClient(ctx context.Context, authToken string) *apiclie
 			URL: p.config.DaytonaApiUrl,
 		},
 	}
+	clientConfig.HTTPClient = p.userAPIHTTPClient
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
 	if ginCtx, ok := ctx.(*gin.Context); ok {
 		clientConfig.AddDefaultHeader("X-Forwarded-For", ginCtx.ClientIP())
