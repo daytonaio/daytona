@@ -329,6 +329,11 @@ const configuration = {
   },
   failedSnapshotRunnerRetentionHours: parseInt(process.env.FAILED_SNAPSHOT_RUNNER_RETENTION_HOURS || '3', 10),
   buildInfoSnapshotRunnerStalenessDays: parseInt(process.env.BUILDINFO_SNAPSHOT_RUNNER_STALENESS_DAYS || '7', 10),
+  syncStates: {
+    lockTtlSeconds: parseInt(process.env.SYNC_STATES_LOCK_TTL_SECONDS || '60', 10),
+    limitPerRunner: parseInt(process.env.SYNC_STATES_LIMIT_PER_RUNNER || '50', 10),
+    limitUnassigned: parseInt(process.env.SYNC_STATES_LIMIT_UNASSIGNED || '250', 10),
+  },
 }
 
 export { configuration }
