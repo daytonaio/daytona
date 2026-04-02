@@ -30,7 +30,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "if [ -n \"$MAVEN_PKG_VERSION\" ]; then sed -i \"s/^version = .*/version = '$MAVEN_PKG_VERSION'/\" build.gradle && find src -name ApiClient.java -path '*/client/ApiClient.java' -exec sed -i \"s|setUserAgent(\\\"toolbox-api-client-java/[^\\\"]*\\\")|setUserAgent(\\\"toolbox-api-client-java/$MAVEN_PKG_VERSION\\\")|\" {} + && find src -name Configuration.java -path '*/client/Configuration.java' -exec sed -i \"s|VERSION = \\\"[^\\\"]*\\\"|VERSION = \\\"$MAVEN_PKG_VERSION\\\"|\" {} + && echo \"Changed toolbox-api-client-java version to $MAVEN_PKG_VERSION\"; else echo \"Using version from build.gradle\"; fi"
+        "command": "V=${MAVEN_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; if [ -n \"$V\" ]; then sed -i \"s/^version = .*/version = '$V'/\" build.gradle && find src -name ApiClient.java -path '*/client/ApiClient.java' -exec sed -i \"s|setUserAgent(\\\"toolbox-api-client-java/[^\\\"]*\\\")|setUserAgent(\\\"toolbox-api-client-java/$V\\\")|\" {} + && find src -name Configuration.java -path '*/client/Configuration.java' -exec sed -i \"s|VERSION = \\\"[^\\\"]*\\\"|VERSION = \\\"$V\\\"|\" {} + && echo \"toolbox-api-client-java version: $V\"; else echo \"toolbox-api-client-java version: unchanged\"; fi"
       },
       "cache": true,
       "inputs": [{ "env": "MAVEN_PKG_VERSION" }],
@@ -40,7 +40,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "chmod +x gradlew && ./gradlew clean build -x test"
+        "command": "chmod +x gradlew && ./gradlew build -x test"
       },
       "dependsOn": ["set-version"],
       "outputs": ["{projectRoot}/build/libs"]
@@ -49,7 +49,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "chmod +x gradlew && rm -rf build/staging-deploy && ./gradlew publishToMavenLocal && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
+        "command": "chmod +x gradlew && test -n \"$MAVEN_PKG_VERSION\" || { echo 'ERROR: MAVEN_PKG_VERSION is required for publish'; exit 1; } && rm -rf build/staging-deploy && ./gradlew publishToMavenLocal && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
       },
       "dependsOn": ["build"]
     }

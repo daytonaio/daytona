@@ -16,7 +16,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "if [ -n \"$MAVEN_PKG_VERSION\" ]; then sed -i \"s/^version = .*/version = \\\"$MAVEN_PKG_VERSION\\\"/\" build.gradle.kts && echo \"Changed sdk-java version to $MAVEN_PKG_VERSION\"; else echo \"Using version from build.gradle.kts\"; fi"
+        "command": "V=${MAVEN_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; if [ -n \"$V\" ]; then sed -i \"s/^version = .*/version = \\\"$V\\\"/\" build.gradle.kts && echo \"sdk-java version: $V\"; else echo \"sdk-java version: unchanged\"; fi"
       }
     },
     "build": {
@@ -33,7 +33,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
+        "command": "test -n \"$MAVEN_PKG_VERSION\" || { echo 'ERROR: MAVEN_PKG_VERSION is required for publish'; exit 1; } && rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
       },
       "dependsOn": [
         "build",
