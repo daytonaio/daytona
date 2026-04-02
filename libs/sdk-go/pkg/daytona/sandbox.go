@@ -405,14 +405,16 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 		defer cancel()
 	}
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
+	interval := 100 * time.Millisecond
+	timer := time.NewTimer(interval)
+	defer timer.Stop()
+	startTime := time.Now()
 
 	for {
 		select {
 		case <-ctx.Done():
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not start within %s", timeout))
-		case <-ticker.C:
+		case <-timer.C:
 			if err := s.RefreshData(ctx); err != nil {
 				return err
 			}
@@ -423,6 +425,14 @@ func (s *Sandbox) doWaitForStart(ctx context.Context, timeout time.Duration) err
 			if s.State == apiclient.SANDBOXSTATE_ERROR || s.State == apiclient.SANDBOXSTATE_BUILD_FAILED {
 				return errors.NewDaytonaError("Sandbox failed to start", 0, nil)
 			}
+
+			if time.Since(startTime) > 5*time.Second {
+				interval = time.Duration(float64(interval) * 1.1)
+				if interval > time.Second {
+					interval = time.Second
+				}
+			}
+			timer.Reset(interval)
 		}
 	}
 }
@@ -452,14 +462,16 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 		defer cancel()
 	}
 
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
+	interval := 100 * time.Millisecond
+	timer := time.NewTimer(interval)
+	defer timer.Stop()
+	startTime := time.Now()
 
 	for {
 		select {
 		case <-ctx.Done():
 			return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox did not stop within %s", timeout))
-		case <-ticker.C:
+		case <-timer.C:
 			if err := s.RefreshData(ctx); err != nil {
 				return err
 			}
@@ -467,6 +479,14 @@ func (s *Sandbox) doWaitForStop(ctx context.Context, timeout time.Duration) erro
 			if s.State == apiclient.SANDBOXSTATE_STOPPED {
 				return nil
 			}
+
+			if time.Since(startTime) > 5*time.Second {
+				interval = time.Duration(float64(interval) * 1.1)
+				if interval > time.Second {
+					interval = time.Second
+				}
+			}
+			timer.Reset(interval)
 		}
 	}
 }
@@ -791,14 +811,16 @@ func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) erro
 			defer cancel()
 		}
 
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
+		interval := 100 * time.Millisecond
+		timer := time.NewTimer(interval)
+		defer timer.Stop()
+		startTime := time.Now()
 
 		for {
 			select {
 			case <-ctx.Done():
 				return errors.NewDaytonaTimeoutError(fmt.Sprintf("Sandbox resize did not complete within %s", timeout))
-			case <-ticker.C:
+			case <-timer.C:
 				if err := s.RefreshData(ctx); err != nil {
 					return err
 				}
@@ -809,6 +831,14 @@ func (s *Sandbox) WaitForResize(ctx context.Context, timeout time.Duration) erro
 				if s.State != apiclient.SANDBOXSTATE_RESIZING {
 					return nil
 				}
+
+				if time.Since(startTime) > 5*time.Second {
+					interval = time.Duration(float64(interval) * 1.1)
+					if interval > time.Second {
+						interval = time.Second
+					}
+				}
+				timer.Reset(interval)
 			}
 		}
 	})

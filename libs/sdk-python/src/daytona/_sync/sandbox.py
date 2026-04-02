@@ -360,6 +360,9 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative; If Sandbox fails to start or times out
         """
+        check_interval = 0.1
+        start_time = time.monotonic()
+
         while self.state != "started":
             self.refresh_data()
 
@@ -372,7 +375,9 @@ class Sandbox(SandboxDto):
                 )
                 raise DaytonaError(err_msg)
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            time.sleep(check_interval)
+            if time.monotonic() - start_time > 5:
+                check_interval = min(check_interval * 1.1, 1.0)
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout()
@@ -392,6 +397,9 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
+        check_interval = 0.1
+        start_time = time.monotonic()
+
         while self.state not in ["stopped", "destroyed"]:
             try:
                 self.__refresh_data_safe()
@@ -406,7 +414,9 @@ class Sandbox(SandboxDto):
                 if "validation error" not in str(e):
                     raise e
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            time.sleep(check_interval)
+            if time.monotonic() - start_time > 5:
+                check_interval = min(check_interval * 1.1, 1.0)
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     @with_instrumentation()
@@ -609,6 +619,9 @@ class Sandbox(SandboxDto):
         Raises:
             DaytonaError: If timeout is negative. If resize operation times out.
         """
+        check_interval = 0.1
+        start_time = time.monotonic()
+
         while self.state == "resizing":
             self.refresh_data()
 
@@ -619,7 +632,9 @@ class Sandbox(SandboxDto):
                 err_msg = f"Sandbox {self.id} resize failed with state: {self.state}, error reason: {self.error_reason}"
                 raise DaytonaError(err_msg)
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            time.sleep(check_interval)
+            if time.monotonic() - start_time > 5:
+                check_interval = min(check_interval * 1.1, 1.0)
 
     @intercept_errors(message_prefix="Failed to create SSH access: ")
     @with_instrumentation()
