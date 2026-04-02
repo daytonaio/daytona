@@ -26,6 +26,7 @@ export const queryKeys = {
 
     list: () => [...queryKeys.organization.all, 'list'] as const,
     detail: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'detail'] as const,
+    members: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'members'] as const,
     roles: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'roles'] as const,
     invitations: (organizationId: string) => [...queryKeys.organization.all, organizationId, 'invitations'] as const,
 
