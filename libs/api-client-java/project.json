@@ -33,7 +33,7 @@
         "command": "V=${MAVEN_PKG_VERSION:-$DEFAULT_PACKAGE_VERSION}; if [ -n \"$V\" ]; then sed -i \"s/^version = .*/version = '$V'/\" build.gradle && find src -name ApiClient.java -path '*/client/ApiClient.java' -exec sed -i \"s|setUserAgent(\\\"api-client-java/[^\\\"]*\\\")|setUserAgent(\\\"api-client-java/$V\\\")|\" {} + && find src -name Configuration.java -path '*/client/Configuration.java' -exec sed -i \"s|VERSION = \\\"[^\\\"]*\\\"|VERSION = \\\"$V\\\"|\" {} + && echo \"api-client-java version: $V\"; else echo \"api-client-java version: unchanged\"; fi"
       },
       "cache": true,
-      "inputs": [{ "env": "MAVEN_PKG_VERSION" }],
+      "inputs": [{ "env": "MAVEN_PKG_VERSION" }, { "env": "DEFAULT_PACKAGE_VERSION" }],
       "outputs": ["{projectRoot}/build.gradle"]
     },
     "build": {

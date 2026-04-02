@@ -553,15 +553,16 @@ function parseInnerClass(parentSource, parentClassName, innerClassName) {
   const parent = findClassBlock(parentSource, parentClassName)
   if (!parent) return null
 
-  const rx = new RegExp(
-    `((?:\\s*\/\\*\\*[\\s\\S]*?\\*\\/\\s*)?)\\s*public\\s+(?:static\\s+)?class\\s+${innerClassName}\\b[^\\{]*\\{`,
-    'm',
-  )
-  const match = rx.exec(parent.body)
-  if (!match) return null
+  const classRx = new RegExp(`public\\s+(?:static\\s+)?class\\s+${innerClassName}\\b[^\\{]*\\{`, 'm')
+  const classMatch = classRx.exec(parent.body)
+  if (!classMatch) return null
 
-  const relativeStart = match.index
-  const declaration = match[0]
+  const textBefore = parent.body.slice(0, classMatch.index)
+  const javadocRx = /\/\*\*(?:(?!\/\*\*)[\s\S])*?\*\/\s*$/
+  const javadocMatch = textBefore.match(javadocRx)
+
+  const relativeStart = classMatch.index
+  const declaration = classMatch[0]
   const openBrace = parent.bodyStart + relativeStart + declaration.lastIndexOf('{')
   const closeBrace = findMatchingBrace(parentSource, openBrace)
   if (closeBrace < 0) return null
@@ -572,7 +573,7 @@ function parseInnerClass(parentSource, parentClassName, innerClassName) {
 
   return {
     className: `${parentClassName}.${innerClassName}`,
-    javadoc: parseJavadoc(match[1] || ''),
+    javadoc: parseJavadoc(javadocMatch ? javadocMatch[0] : ''),
     fields: members.fields,
     constructors: members.constructors,
     methods: members.methods,
