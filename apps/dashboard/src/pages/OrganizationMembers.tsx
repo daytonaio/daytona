@@ -8,6 +8,8 @@ import { OrganizationInvitationTable } from '@/components/OrganizationMembers/Or
 import { OrganizationMemberTable } from '@/components/OrganizationMembers/OrganizationMemberTable'
 import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
 import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { Button } from '@/components/ui/button'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { mutationKeys } from '@/hooks/mutations/mutationKeys'
 import { useCancelOrganizationInvitationMutation } from '@/hooks/mutations/useCancelOrganizationInvitationMutation'
 import { useCreateOrganizationInvitationMutation } from '@/hooks/mutations/useCreateOrganizationInvitationMutation'
@@ -24,7 +26,7 @@ import {
   OrganizationUserRoleEnum,
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytona/api-client'
-import { PlusIcon } from 'lucide-react'
+import { AlertCircle, PlusIcon, RefreshCw } from 'lucide-react'
 import React, { useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
@@ -63,7 +65,12 @@ const OrganizationMembers: React.FC = () => {
   const { refreshOrganizations } = useOrganizations()
   const { selectedOrganization, organizationMembers, authenticatedUserOrganizationMember } = useSelectedOrganization()
 
-  const { data: invitations = [], isLoading: loadingInvitations } = useOrganizationInvitationsQuery()
+  const {
+    data: invitations = [],
+    isLoading: loadingInvitations,
+    isError: invitationsError,
+    refetch: refetchInvitations,
+  } = useOrganizationInvitationsQuery()
   const updateMemberAccessMutation = useUpdateOrganizationMemberAccessMutation()
   const removeMemberMutation = useDeleteOrganizationMemberMutation()
   const createInvitationMutation = useCreateOrganizationInvitationMutation()
@@ -226,13 +233,33 @@ const OrganizationMembers: React.FC = () => {
               <h1 className="text-2xl font-medium">Invitations</h1>
             </div>
 
-            <OrganizationInvitationTable
-              data={invitations}
-              loadingData={loadingInvitations}
-              onCancelInvitation={handleCancelInvitation}
-              onUpdateInvitation={handleUpdateInvitation}
-              loadingInvitationAction={loadingInvitationAction}
-            />
+            {invitationsError ? (
+              <Empty className="py-12 rounded-md border">
+                <EmptyHeader>
+                  <EmptyMedia variant="icon" className="bg-destructive-background text-destructive">
+                    <AlertCircle />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-destructive">Failed to load invitations</EmptyTitle>
+                  <EmptyDescription>
+                    Something went wrong while fetching organization invitations. Please try again.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button variant="secondary" size="sm" onClick={() => refetchInvitations()}>
+                    <RefreshCw />
+                    Retry
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              <OrganizationInvitationTable
+                data={invitations}
+                loadingData={loadingInvitations}
+                onCancelInvitation={handleCancelInvitation}
+                onUpdateInvitation={handleUpdateInvitation}
+                loadingInvitationAction={loadingInvitationAction}
+              />
+            )}
           </>
         )}
       </PageContent>
