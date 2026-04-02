@@ -22,6 +22,7 @@ import {
   RawBodyRequest,
   Next,
   ParseBoolPipe,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
@@ -208,7 +209,7 @@ export class SnapshotController {
     targetType: AuditTarget.SNAPSHOT,
     targetIdFromRequest: (req) => req.params.id,
   })
-  async removeSnapshot(@Param('id') snapshotId: string): Promise<void> {
+  async removeSnapshot(@Param('id', ParseUUIDPipe) snapshotId: string): Promise<void> {
     await this.snapshotService.removeSnapshot(snapshotId)
   }
 
@@ -270,7 +271,7 @@ export class SnapshotController {
     },
   })
   async setSnapshotGeneralStatus(
-    @Param('id') snapshotId: string,
+    @Param('id', ParseUUIDPipe) snapshotId: string,
     @Body() dto: SetSnapshotGeneralStatusDto,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.setSnapshotGeneralStatus(snapshotId, dto.general)
@@ -415,7 +416,7 @@ export class SnapshotController {
     targetIdFromRequest: (req) => req.params.id,
   })
   async activateSnapshot(
-    @Param('id') snapshotId: string,
+    @Param('id', ParseUUIDPipe) snapshotId: string,
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.activateSnapshot(snapshotId, authContext.organization)
@@ -443,7 +444,7 @@ export class SnapshotController {
     targetType: AuditTarget.SNAPSHOT,
     targetIdFromRequest: (req) => req.params.id,
   })
-  async deactivateSnapshot(@Param('id') snapshotId: string) {
+  async deactivateSnapshot(@Param('id', ParseUUIDPipe) snapshotId: string) {
     await this.snapshotService.deactivateSnapshot(snapshotId)
   }
 }
