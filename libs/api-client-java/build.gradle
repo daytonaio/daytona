@@ -139,9 +139,9 @@ if(hasProperty('target') && target == 'android') {
     }
 
     signing {
-        def rawKey = System.getenv('GPG_SIGNING_KEY')
+        def rawKey = System.getenv('MAVEN_GPG_SIGNING_KEY')
         def signingKey = rawKey != null ? rawKey.replace('\\n', '\n') : null
-        def signingPassword = System.getenv('GPG_SIGNING_PASSWORD')
+        def signingPassword = System.getenv('MAVEN_GPG_SIGNING_PASSWORD')
         if (signingKey != null && !signingKey.isBlank()) {
             useInMemoryPgpKeys(signingKey, signingPassword ?: '')
             sign publishing.publications.maven
