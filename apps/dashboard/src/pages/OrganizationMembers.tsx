@@ -25,7 +25,7 @@ import {
   UpdateOrganizationInvitationRoleEnum,
 } from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { toast } from 'sonner'
 
@@ -61,8 +61,7 @@ const OrganizationMembers: React.FC = () => {
   const { user } = useAuth()
 
   const { refreshOrganizations } = useOrganizations()
-  const { selectedOrganization, organizationMembers, refreshOrganizationMembers, authenticatedUserOrganizationMember } =
-    useSelectedOrganization()
+  const { selectedOrganization, organizationMembers, authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   const { data: invitations = [], isLoading: loadingInvitations } = useOrganizationInvitationsQuery()
   const updateMemberAccessMutation = useUpdateOrganizationMemberAccessMutation()
@@ -74,10 +73,6 @@ const OrganizationMembers: React.FC = () => {
 
   const { loadingMemberAction } = usePendingMemberIds()
   const { loadingInvitationAction } = usePendingInvitationIds()
-
-  useEffect(() => {
-    refreshOrganizationMembers()
-  }, [refreshOrganizationMembers])
 
   const handleUpdateMemberAccess = async (
     userId: string,
@@ -94,7 +89,6 @@ const OrganizationMembers: React.FC = () => {
         access: { role, assignedRoleIds },
       })
       toast.success('Access updated successfully')
-      await refreshOrganizationMembers()
       return true
     } catch (error) {
       handleApiError(error, 'Failed to update access')
@@ -114,8 +108,6 @@ const OrganizationMembers: React.FC = () => {
       toast.success('Member removed successfully')
       if (userId === user?.profile.sub) {
         await refreshOrganizations()
-      } else {
-        await refreshOrganizationMembers()
       }
       return true
     } catch (error) {
