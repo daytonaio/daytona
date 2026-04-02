@@ -179,10 +179,10 @@ symbols = lsp_server.document_symbols('workspace/project/main.py')
 # Get completions
 completions = lsp_server.completions(
   path: 'workspace/project/main.py',
-  position: { line: 10, character: 15 }
+  position: Daytona::LspServer::Position.new(line: 10, character: 15)
 )
 ```
 
 ## Contributing
 
-Daytona is Open Source under the [Apache License 2.0](/libs/sdk-ruby/LICENSE), and is the [copyright of its contributors](/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [Apache License 2.0](https://github.com/daytonaio/daytona/blob/main/LICENSE), and is the [copyright of its contributors](https://github.com/daytonaio/daytona/blob/main/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
