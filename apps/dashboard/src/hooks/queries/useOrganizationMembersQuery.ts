@@ -34,7 +34,10 @@ export const getOrganizationMembersQueryOptions = (
 export function useOrganizationMembersQuery(organizationId?: string | null) {
   const { organizationsApi } = useApi()
 
-  return useQuery<OrganizationUser[]>(getOrganizationMembersQueryOptions(organizationsApi, organizationId))
+  return useQuery<OrganizationUser[]>({
+    ...getOrganizationMembersQueryOptions(organizationsApi, organizationId),
+    enabled: !!organizationId,
+  })
 }
 
 export function useOrganizationMembersSuspenseQuery(organizationId?: string | null) {
