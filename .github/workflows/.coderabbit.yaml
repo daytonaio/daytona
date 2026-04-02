@@ -1,0 +1,31 @@
+# .coderabbit.yaml
+# Sandbox Security Configuration - Simple Format
+
+reviews:
+  profile: assertive
+  request_changes: auto
+  high_level_summary: true
+
+path_instructions:
+  - path: "apps/api/src/sandbox/managers/sandbox.manager.ts"
+    instructions: "CRITICAL: Focus on autoDeleteCheck() MoreThanOrEqual(0) excluding autoDeleteInterval = -1, and autostopCheck() Not(0) excluding autoStopInterval = 0. Verify no disabled values trigger automated actions. Check cron job race conditions."
+    
+  - path: "apps/api/src/sandbox/services/sandbox.service.ts"
+    instructions: "CRITICAL: Focus on setAutoDeleteInterval() accepting -1 (disabled), setAutostopInterval() accepting 0 (disabled), resolveAutoStopInterval() validation, and stop() method autoDeleteInterval === 0 logic. Ensure validation preserves disabled values."
+    
+  - path: "apps/api/src/sandbox/entities/sandbox.entity.ts"
+    instructions: "CRITICAL: Focus on autoDeleteInterval default -1, autoStopInterval default 15, no validation decorators rejecting disabled values, and lastActivityAt updates for timing calculations."
+    
+  - path: "apps/api/src/sandbox/controllers/sandbox.controller.ts"
+    instructions: "CRITICAL: Focus on setAutoDeleteInterval() accepting negative values, setAutostopInterval() accepting 0, parameter parsing preserving disabled values, and DTO validation not rejecting -1 or 0."
+
+chat:
+  auto_reply: true
+
+ignore:
+  - "**/*.md"
+  - "**/*.json"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/*.spec.ts"
+  - "**/*.test.ts"
