@@ -85,7 +85,7 @@ public class Image {
             return this;
         }
         for (Map.Entry<String, String> e : envVars.entrySet()) {
-            dockerfile.append("ENV ").append(e.getKey()).append("=").append(e.getValue()).append("\n");
+            dockerfile.append("ENV ").append(e.getKey()).append("=\"").append(e.getValue().replace("\"", "\\\"")).append("\"\n");
         }
         return this;
     }

@@ -144,8 +144,8 @@ if(hasProperty('target') && target == 'android') {
         def signingPassword = System.getenv('GPG_SIGNING_PASSWORD')
         if (signingKey != null && !signingKey.isBlank()) {
             useInMemoryPgpKeys(signingKey, signingPassword ?: '')
+            sign publishing.publications.maven
         }
-        sign publishing.publications.maven
     }
 
     tasks.withType(Javadoc) {

@@ -33,7 +33,6 @@
         "shopify.ruby-lsp",
         "castwide.solargraph",
         "redhat.java",
-        "vscjava.vscode-java-debug",
         "vscjava.vscode-gradle"
       ],
       "settings": {
@@ -43,7 +42,9 @@
         "python.terminal.activateEnvInCurrentTerminal": true,
         "java.import.projectSelection": "gradle",
         "java.import.gradle.enabled": true,
-        "java.import.maven.enabled": false
+        "java.import.maven.enabled": false,
+        "java.autobuild.enabled": false,
+        "java.project.importHint": false
       }
     }
   },
@@ -92,7 +93,7 @@
     "env": "test -f .env.local || touch .env.local",
     "sysctl": "sudo sysctl -w fs.inotify.max_user_watches=524288 && sudo sysctl -w fs.inotify.max_user_instances=1024"
   },
-  "postStartCommand": "yarn && poetry lock && poetry install && bundle install && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use",
+  "postStartCommand": "yarn && poetry lock && poetry install && bundle install && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use && chmod +x libs/api-client-java/gradlew libs/toolbox-api-client-java/gradlew libs/sdk-java/gradlew && libs/api-client-java/gradlew -p libs/api-client-java publishToMavenLocal -q && libs/toolbox-api-client-java/gradlew -p libs/toolbox-api-client-java publishToMavenLocal -q && libs/sdk-java/gradlew -p libs/sdk-java publishToMavenLocal -q",
   "postAttachCommand": "",
   "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001", "jaeger:16686"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

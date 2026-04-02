@@ -72,7 +72,7 @@ public class Daytona implements AutoCloseable {
         this.config = config;
         this.apiClient = createMainApiClient(config);
         this.sandboxApi = new SandboxApi(apiClient);
-        this.snapshot = new SnapshotService(new io.daytona.api.client.api.SnapshotsApi(apiClient));
+        this.snapshot = new SnapshotService(new io.daytona.api.client.api.SnapshotsApi(apiClient), apiClient.getHttpClient(), config.getApiKey());
         this.volume = new VolumeService(new io.daytona.api.client.api.VolumesApi(apiClient));
     }
 
@@ -136,6 +136,19 @@ public class Daytona implements AutoCloseable {
      * @throws DaytonaException if creation fails or the Sandbox does not start in time
      */
     public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds) {
+        return create(params, timeoutSeconds, null);
+    }
+
+    /**
+     * Creates a new Sandbox from a declarative image with build log streaming.
+     *
+     * @param params creation parameters including the image definition
+     * @param timeoutSeconds maximum seconds to wait for the Sandbox to reach {@code started}
+     * @param onSnapshotCreateLogs callback for build log lines; {@code null} to skip streaming
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation fails or the Sandbox does not start in time
+     */
+    public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds, java.util.function.Consumer<String> onSnapshotCreateLogs) {
         CreateSandbox body = baseSandboxBody(params);
         if (params != null) {
             Object image = params.getImage();
@@ -153,9 +166,20 @@ public class Daytona implements AutoCloseable {
             }
         }
 
+        long startTime = System.currentTimeMillis();
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.createSandbox(body, null));
-        Sandbox sandbox = new Sandbox(sandboxApi, config, response);
-        sandbox.waitUntilStarted(timeoutSeconds);
+
+        String initialState = response.getState() != null ? response.getState().getValue() : "";
+        if (onSnapshotCreateLogs != null && "pending_build".equals(initialState)) {
+            waitForBuildState(response.getId(), timeoutSeconds, startTime);
+            streamSandboxBuildLogs(response.getId(), onSnapshotCreateLogs, timeoutSeconds, startTime);
+        }
+
+        Sandbox sandbox = new Sandbox(sandboxApi, config,
+                ExceptionMapper.callMain(() -> sandboxApi.getSandbox(response.getId(), null, null)));
+        long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+        long remaining = timeoutSeconds > 0 ? Math.max(1, timeoutSeconds - elapsed) : timeoutSeconds;
+        sandbox.waitUntilStarted(remaining);
         return sandbox;
     }
 
@@ -414,5 +438,30 @@ public class Daytona implements AutoCloseable {
         } catch (JsonProcessingException e) {
             throw new DaytonaException("Failed to serialize JSON", e);
         }
+    }
+
+    private void waitForBuildState(String sandboxId, long timeoutSeconds, long startTime) {
+        while (true) {
+            if (timeoutSeconds > 0) {
+                long elapsed = (System.currentTimeMillis() - startTime) / 1000;
+                if (elapsed > timeoutSeconds) {
+                    throw new DaytonaException("Sandbox build pending for more than " + timeoutSeconds + " seconds");
+                }
+            }
+            io.daytona.api.client.model.Sandbox s = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(sandboxId, null, null));
+            String state = s.getState() != null ? s.getState().getValue() : "";
+            if (!"pending_build".equals(state)) return;
+            try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); return; }
+        }
+    }
+
+    private void streamSandboxBuildLogs(String sandboxId, java.util.function.Consumer<String> onLog, long timeoutSeconds, long startTime) {
+        io.daytona.api.client.model.Url logsUrl = ExceptionMapper.callMain(() -> sandboxApi.getBuildLogsUrl(sandboxId, null));
+        BuildLogStreamer streamer = new BuildLogStreamer(apiClient.getHttpClient(), config.getApiKey());
+        streamer.streamLogs(logsUrl.getUrl(), onLog, () -> {
+            io.daytona.api.client.model.Sandbox s = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(sandboxId, null, null));
+            String state = s.getState() != null ? s.getState().getValue() : "";
+            return "started".equals(state) || "starting".equals(state) || "error".equals(state) || "build_failed".equals(state);
+        });
     }
 }

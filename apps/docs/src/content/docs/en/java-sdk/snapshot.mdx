@@ -31,6 +31,49 @@ Creates a snapshot from an existing image reference.
 
 - `io.daytona.sdk.exception.DaytonaException` - if the API request fails
 
+#### create()
+```java
+public Snapshot create(String name, Image image, Consumer<String> onLogs)
+```
+
+Creates a snapshot from a declarative `Image` with optional build log streaming.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `image` _Image_ - declarative image definition
+- `onLogs` _Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Snapshot` - created `Snapshot` in active or error state
+
+**Throws**:
+
+- `DaytonaException` - if the API request fails or the build fails
+
+#### create()
+```java
+public Snapshot create(String name, Image image, io.daytona.sdk.model.Resources resources, Consumer<String> onLogs)
+```
+
+Creates a snapshot from a declarative `Image` with resources and optional build log streaming.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `image` _Image_ - declarative image definition
+- `resources` _io.daytona.sdk.model.Resources_ - CPU/GPU/memory/disk resources; `null` for defaults
+- `onLogs` _Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Snapshot` - created `Snapshot` in active or error state
+
+**Throws**:
+
+- `DaytonaException` - if the API request fails or the build fails
+
 #### list()
 ```java
 public PaginatedSnapshots list(Integer page, Integer limit)

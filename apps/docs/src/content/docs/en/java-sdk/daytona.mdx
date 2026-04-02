@@ -137,6 +137,27 @@ Creates a Sandbox from image parameters.
 
 - `DaytonaException` - if creation fails or the Sandbox does not start in time
 
+#### create()
+```java
+public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds, java.util.function.Consumer<String> onSnapshotCreateLogs)
+```
+
+Creates a new Sandbox from a declarative image with build log streaming.
+
+**Parameters**:
+
+- `params` _CreateSandboxFromImageParams_ - creation parameters including the image definition
+- `timeoutSeconds` _long_ - maximum seconds to wait for the Sandbox to reach `started`
+- `onSnapshotCreateLogs` _java.util.function.Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Sandbox` - created and started `Sandbox`
+
+**Throws**:
+
+- `DaytonaException` - if creation fails or the Sandbox does not start in time
+
 #### get()
 ```java
 public Sandbox get(String sandboxIdOrName)
