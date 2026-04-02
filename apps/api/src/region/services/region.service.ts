@@ -31,7 +31,7 @@ import {
   RegionSnapshotManagerUpdatedEvent,
 } from '../events/region-snapshot-manager-creds.event'
 import { UpdateRegionDto } from '../dto/update-region.dto'
-import { Snapshot } from '../../sandbox/entities/snapshot.entity'
+import { SnapshotRepository } from '../../sandbox/repositories/snapshot.repository'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { toolboxProxyUrlCacheKey } from '../../sandbox/utils/sandbox-lookup-cache.util'
@@ -47,8 +47,7 @@ export class RegionService {
     private readonly runnerRepository: Repository<Runner>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @InjectRedis() private readonly redis: Redis,
   ) {}
 

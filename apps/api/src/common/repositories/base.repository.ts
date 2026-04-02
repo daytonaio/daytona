@@ -6,6 +6,7 @@
 import {
   Repository,
   DataSource,
+  DeepPartial,
   FindOptionsWhere,
   FindOneOptions,
   FindManyOptions,
@@ -30,6 +31,13 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
     protected readonly entityClass: EntityTarget<TEntity>,
   ) {
     this.repository = this.dataSource.getRepository(entityClass)
+  }
+
+  /**
+   * See reference for {@link Repository.create}
+   */
+  create(entityLike: DeepPartial<TEntity>): TEntity {
+    return this.repository.create(entityLike)
   }
 
   /**
@@ -82,6 +90,13 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
   }
 
   /**
+   * See reference for {@link Repository.exists}
+   */
+  async exists(options?: FindManyOptions<TEntity>): Promise<boolean> {
+    return this.repository.exists(options)
+  }
+
+  /**
    * Returns the entity manager for the repository. Use this only when you need to perform raw SQL queries.
    *
    * See reference for {@link Repository.manager}
@@ -102,6 +117,19 @@ export abstract class BaseRepository<TEntity extends ObjectLiteral> {
    */
   async delete(criteria: FindOptionsWhere<TEntity> | FindOptionsWhere<TEntity>[]): Promise<DeleteResult> {
     return this.repository.delete(criteria)
+  }
+
+  /**
+   * Removes an entity from the database.
+   *
+   * Uses {@link Repository.remove} to remove the entity from the database.
+   *
+   * @param entity - The entity to remove.
+   *
+   * @returns The removed entity.
+   */
+  async remove(entity: TEntity): Promise<TEntity> {
+    return this.repository.remove(entity)
   }
 
   /**

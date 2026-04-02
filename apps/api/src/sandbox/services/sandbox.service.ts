@@ -68,6 +68,7 @@ import { customAlphabet as customNanoid, nanoid, urlAlphabet } from 'nanoid'
 import { WithInstrumentation } from '../../common/decorators/otel.decorator'
 import { validateMountPaths, validateSubpaths } from '../utils/volume-mount-path-validation.util'
 import { SandboxRepository } from '../repositories/sandbox.repository'
+import { SnapshotRepository } from '../repositories/snapshot.repository'
 import { PortPreviewUrlDto, SignedPortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { RegionService } from '../../region/services/region.service'
 import { DefaultRegionRequiredException } from '../../organization/exceptions/DefaultRegionRequiredException'
@@ -101,8 +102,7 @@ export class SandboxService {
 
   constructor(
     private readonly sandboxRepository: SandboxRepository,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: SnapshotRepository,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     @InjectRepository(BuildInfo)

@@ -19,7 +19,7 @@ import { OrganizationUserService } from './services/organization-user.service'
 import { OrganizationInvitationService } from './services/organization-invitation.service'
 import { UserModule } from '../user/user.module'
 import { Sandbox } from '../sandbox/entities/sandbox.entity'
-import { Snapshot } from '../sandbox/entities/snapshot.entity'
+import { SnapshotRepository } from '../sandbox/repositories/snapshot.repository'
 import { Volume } from '../sandbox/entities/volume.entity'
 import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 import { SnapshotRunner } from '../sandbox/entities/snapshot-runner.entity'
@@ -44,7 +44,6 @@ import { EncryptionModule } from '../encryption/encryption.module'
       OrganizationUser,
       OrganizationInvitation,
       Sandbox,
-      Snapshot,
       Volume,
       SnapshotRunner,
       RegionQuota,
@@ -75,6 +74,12 @@ import { EncryptionModule } from '../encryption/encryption.module'
         eventEmitter: EventEmitter2,
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
       ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
+    },
+    {
+      provide: SnapshotRepository,
+      inject: [DataSource, EventEmitter2],
+      useFactory: (dataSource: DataSource, eventEmitter: EventEmitter2) =>
+        new SnapshotRepository(dataSource, eventEmitter),
     },
   ],
   exports: [
