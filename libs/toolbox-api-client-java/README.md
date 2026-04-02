@@ -24,4 +24,4 @@ Do not edit the generated source files manually — changes will be overwritten 
 
 ## License
 
-Apache License 2.0 — see [LICENSE](https://github.com/daytonaio/daytona/blob/main/LICENSE) for details.
+Apache License 2.0 — see [LICENSE](https://github.com/daytonaio/daytona/blob/main/libs/sdk-java/LICENSE) for details.

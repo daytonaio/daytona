@@ -20,10 +20,9 @@ public class Region {
         try (Daytona daytona = new Daytona(config)) {
             System.out.println("Creating sandbox with target: us");
             Sandbox sandbox = daytona.create();
-            System.out.println("Sandbox created: " + sandbox.getId());
-            System.out.println("target: " + sandbox.getTarget());
-
             try {
+                System.out.println("Sandbox created: " + sandbox.getId());
+                System.out.println("target: " + sandbox.getTarget());
             } finally {
                 System.out.println("Deleting sandbox");
                 sandbox.delete();

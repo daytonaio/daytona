@@ -1,7 +1,7 @@
 ---
 title: Java SDK Reference
 description: Interact with Daytona Sandboxes using the Java SDK
-next: /docs/java-sdk/daytona
+next: /docs/en/java-sdk/daytona
 ---
 
 The Daytona Java SDK provides a robust interface for programmatically interacting with Daytona Sandboxes. It targets Java 11+ and uses OkHttp and Jackson.
@@ -64,16 +64,15 @@ public class Main {
 The Daytona SDK can be configured using environment variables or by passing a configuration object:
 
 ```java
-import io.daytona.sdk.Daytona;
-import io.daytona.sdk.DaytonaConfig;
-
 // Using environment variables (DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET)
 Daytona daytona = new Daytona();
+```
 
+```java
 // Using explicit configuration
 DaytonaConfig config = new DaytonaConfig.Builder()
     .apiKey("YOUR_API_KEY")
-    .apiUrl("https://app.daytona.io/api")
+    .apiUrl("YOUR_API_URL")
     .target("us")
     .build();
 Daytona daytona = new Daytona(config);

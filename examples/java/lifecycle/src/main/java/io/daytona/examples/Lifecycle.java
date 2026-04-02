@@ -17,29 +17,31 @@ public class Lifecycle {
             Sandbox sandbox = daytona.create();
             System.out.println("Sandbox created: " + sandbox.getId() + " (state: " + sandbox.getState() + ")");
 
-            Map<String, String> labels = new HashMap<>();
-            labels.put("test", "lifecycle");
-            sandbox.setLabels(labels);
-            System.out.println("Labels set: test=lifecycle");
+            try {
+                Map<String, String> labels = new HashMap<>();
+                labels.put("test", "lifecycle");
+                sandbox.setLabels(labels);
+                System.out.println("Labels set: test=lifecycle");
 
-            System.out.println("Stopping sandbox");
-            sandbox.stop();
-            System.out.println("Sandbox stopped");
+                System.out.println("Stopping sandbox");
+                sandbox.stop();
+                System.out.println("Sandbox stopped");
 
-            System.out.println("Starting sandbox");
-            sandbox.start();
-            System.out.println("Sandbox started");
+                System.out.println("Starting sandbox");
+                sandbox.start();
+                System.out.println("Sandbox started");
 
-            System.out.println("Getting existing sandbox");
-            Sandbox fetched = daytona.get(sandbox.getId());
-            System.out.println("Got sandbox: " + fetched.getId() + " (state: " + fetched.getState() + ")");
+                System.out.println("Getting existing sandbox");
+                Sandbox fetched = daytona.get(sandbox.getId());
+                System.out.println("Got sandbox: " + fetched.getId() + " (state: " + fetched.getState() + ")");
 
-            PaginatedSandboxes sandboxes = daytona.list();
-            System.out.println("Total sandboxes: " + sandboxes.getTotal());
-
-            System.out.println("Deleting sandbox");
-            sandbox.delete();
-            System.out.println("Sandbox deleted");
+                PaginatedSandboxes sandboxes = daytona.list();
+                System.out.println("Total sandboxes: " + sandboxes.getTotal());
+            } finally {
+                System.out.println("Deleting sandbox");
+                sandbox.delete();
+                System.out.println("Sandbox deleted");
+            }
         }
     }
 }
