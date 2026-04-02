@@ -8695,6 +8695,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openfeature/web-sdk@npm:^1.7.3":
+  version: 1.7.3
+  resolution: "@openfeature/web-sdk@npm:1.7.3"
+  peerDependencies:
+    "@openfeature/core": ^1.9.2
+  checksum: 10c0/e3e409f7cff6ff83fcc9a6251dbc7ed22b1d9caab82b60675c8764e34ac61a50877d404d4f13136993fc4a456702b8aea8eb1a0789e6e5df586fc1ad4482f0d7
+  languageName: node
+  linkType: hard
+
 "@opensearch-project/opensearch@npm:^3.5.1":
   version: 3.5.1
   resolution: "@opensearch-project/opensearch@npm:3.5.1"
@@ -19780,6 +19789,7 @@ __metadata:
     "@openfeature/nestjs-sdk": "npm:^0.2.5"
     "@openfeature/react-sdk": "npm:^1.0.1"
     "@openfeature/server-sdk": "npm:^1.19.0"
+    "@openfeature/web-sdk": "npm:^1.7.3"
     "@opensearch-project/opensearch": "npm:^3.5.1"
     "@opentelemetry/api": "npm:^1.9.0"
     "@opentelemetry/exporter-logs-otlp-http": "npm:^0.207.0"

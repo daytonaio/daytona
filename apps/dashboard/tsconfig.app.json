@@ -10,6 +10,7 @@
     "paths": {
       "@/*": ["src/*"],
       "@daytonaio/*": ["../../libs/*"],
+      "@daytonaio/feature-flags": ["../../libs/shared/feature-flags/src/index.ts"],
       "@daytonaio/sdk": ["../../dist/libs/sdk-typescript/src/index.d.ts"]
     }
   },

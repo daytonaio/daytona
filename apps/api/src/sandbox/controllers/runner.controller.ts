@@ -60,7 +60,7 @@ import { RunnerFullDto } from '../dto/runner-full.dto'
 import { RegionType } from '../../region/enums/region-type.enum'
 import { RegionService } from '../../region/services/region.service'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
-import { FeatureFlags } from '../../common/constants/feature-flags'
+import { FeatureFlagConfig } from '@daytonaio/feature-flags'
 import { RunnerHealthcheckDto } from '../dto/runner-health.dto'
 
 @ApiTags('runners')
@@ -98,7 +98,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_INFRASTRUCTURE] })
   async create(
     @Body() createRunnerDto: CreateRunnerDto,
     @AuthContext() authContext: OrganizationAuthContext,
@@ -241,7 +241,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_INFRASTRUCTURE] })
   async findAll(@AuthContext() authContext: OrganizationAuthContext): Promise<RunnerDto[]> {
     return this.runnerService.findAllByOrganization(authContext.organizationId, RegionType.CUSTOM)
   }
@@ -274,7 +274,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_INFRASTRUCTURE] })
   async updateSchedulingStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('unschedulable') unschedulable: boolean,
@@ -311,7 +311,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_INFRASTRUCTURE] })
   async updateDrainingStatus(
     @Param('id', ParseUUIDPipe) id: string,
     @Body('draining') draining: boolean,
@@ -342,7 +342,7 @@ export class RunnerController {
   @ApiHeader(CustomHeaders.ORGANIZATION_ID)
   @UseGuards(OrganizationResourceActionGuard, RunnerAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_RUNNERS])
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.ORGANIZATION_INFRASTRUCTURE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_INFRASTRUCTURE] })
   async delete(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.runnerService.remove(id)
   }

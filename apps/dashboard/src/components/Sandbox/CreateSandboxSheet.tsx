@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/sheet'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FeatureFlags } from '@/enums/FeatureFlags'
+import { FeatureFlags } from '@daytonaio/feature-flags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useCreateSandboxMutation } from '@/hooks/mutations/useCreateSandboxMutation'
 import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
@@ -35,7 +35,7 @@ import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import { Sandbox } from '@daytonaio/sdk'
 import { useForm } from '@tanstack/react-form'
 import { Info, Minus, Plus, Upload } from 'lucide-react'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
+import { useBooleanFlagValue } from '@openfeature/react-sdk'
 import { ComponentProps, Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { NumericFormat } from 'react-number-format'
 import { createSearchParams, generatePath, useNavigate } from 'react-router-dom'
@@ -147,7 +147,7 @@ const InfoTooltipButton = ({ className, ...props }: ComponentProps<'button'>) =>
 
 export const CreateSandboxSheet = ({ className, ref }: { className?: string; ref?: Ref<{ open: () => void }> }) => {
   const navigate = useNavigate()
-  const createSandboxEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_CREATE_SANDBOX)
+  const createSandboxEnabled = useBooleanFlagValue(FeatureFlags.DASHBOARD_CREATE_SANDBOX, false)
   const [open, setOpen] = useState(false)
 
   const config = useConfig()
