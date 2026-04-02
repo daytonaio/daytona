@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CreateApiKeySheet } from '@/components/CreateApiKeySheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { CreateApiKeySheet } from '@/components/CreateApiKeySheet'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useRevokeApiKeyMutation } from '@/hooks/mutations/useRevokeApiKeyMutation'
 import { useApiKeysQuery } from '@/hooks/queries/useApiKeysQuery'
 import { useConfig } from '@/hooks/useConfig'
@@ -86,7 +86,7 @@ const Keys: React.FC = () => {
   useRegisterCommands(rootCommands, { groupId: 'api-key-actions', groupLabel: 'API key actions', groupOrder: 0 })
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>API Keys</PageTitle>
         <CreateApiKeySheet
@@ -98,14 +98,15 @@ const Keys: React.FC = () => {
         />
       </PageHeader>
 
-      <PageContent>
+      <PageContent size="full" className="overflow-hidden">
         <ApiKeyTable
           data={apiKeysQuery.data ?? []}
-          loading={apiKeysQuery.isLoading || apiKeysQuery.isRefetching}
+          loading={apiKeysQuery.isLoading}
           isLoadingKey={isLoadingKey}
           onRevoke={handleRevoke}
         />
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

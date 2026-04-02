@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, MailPlus, X } from 'lucide-react'
 import {
   ColumnDef,
   flexRender,
@@ -16,10 +16,13 @@ import {
 } from '@tanstack/react-table'
 import { OrganizationInvitation } from '@daytonaio/api-client'
 import { Pagination } from '@/components/Pagination'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table, TableContainer } from '@/components/ui/table'
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -74,54 +77,90 @@ export function UserOrganizationInvitationTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loadingData && table.getRowModel().rows.length === 0
+
   return (
-    <>
-      <div>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && 'selected'}
-                    className={`h-14 ${loadingInvitationAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}`}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+    <div className="flex min-h-0 flex-1 flex-col pt-2">
+      <TableContainer
+        className={isEmpty ? 'min-h-64' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No Invitations found."
+              icon={<MailPlus className="h-5 w-5" />}
+              description="You have no pending organization invitations."
+            />
+          ) : undefined
+        }
+      >
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={cn(header.column.id === 'actions' && 'sticky right-0 z-[2]')}
+                      sticky={header.column.id === 'actions' ? 'right' : undefined}
+                    >
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  )
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {loadingData ? (
+              <>
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <TableRow key={i} className="h-14">
+                    {columns.map((column, colIndex) => (
+                      <TableCell
+                        key={colIndex}
+                        className={cn(column.id === 'actions' && 'sticky right-0 z-[1]')}
+                        sticky={column.id === 'actions' ? 'right' : undefined}
+                      >
+                        <Skeleton className="h-4 w-3/4" />
+                      </TableCell>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Invitations" />
-      </div>
+                ))}
+              </>
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={`h-14 ${loadingInvitationAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}`}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
+                      sticky={cell.column.id === 'actions' ? 'right' : undefined}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : null}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Invitations" />
+      </PageFooterPortal>
 
       {invitationToDecline && (
         <DeclineOrganizationInvitationDialog
@@ -136,7 +175,7 @@ export function UserOrganizationInvitationTable({
           loading={loadingInvitationAction[invitationToDecline.id]}
         />
       )}
-    </>
+    </div>
   )
 }
 
@@ -165,6 +204,9 @@ const getColumns = ({
     },
     {
       id: 'actions',
+      size: 80,
+      minSize: 80,
+      maxSize: 80,
       cell: ({ row }) => {
         return (
           <div className="flex justify-end gap-2">

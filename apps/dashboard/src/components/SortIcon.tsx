@@ -37,6 +37,7 @@ export const SortOrderIcon = ({ hideDefaultState = false, sort, className }: Pro
       <motion.span
         key={sort || 'none'}
         {...motionProps}
+        data-sort={sort}
         className={cn(
           'flex items-center justify-center text-muted-foreground/60 transition-colors duration-150',
           'group-hover/sort-header:text-current group-focus-visible/sort-header:text-current',

@@ -179,7 +179,10 @@ export function getColumns({ onViewInvoice, onVoidInvoice, onPayInvoice }: GetCo
     },
     {
       id: 'actions',
-      size: 100,
+      header: () => null,
+      size: 48,
+      minSize: 48,
+      maxSize: 48,
       enableHiding: false,
       cell: ({ row }) => {
         const isViewable = Boolean(row.original.fileUrl)
@@ -191,7 +194,7 @@ export function getColumns({ onViewInvoice, onVoidInvoice, onPayInvoice }: GetCo
           row.original.status === 'finalized' && ['pending', 'failed'].includes(row.original.paymentStatus)
 
         return (
-          <div>
+          <div className="flex justify-center">
             <InvoicesTableActions
               invoice={row.original}
               onView={isViewable ? onViewInvoice : undefined}

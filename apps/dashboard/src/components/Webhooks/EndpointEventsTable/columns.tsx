@@ -117,7 +117,9 @@ const columns: ColumnDef<EndpointMessageOut>[] = [
   },
   {
     id: 'actions',
-    maxSize: 44,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     enableHiding: false,
     cell: ({ row, table }) => {
       const { onReplay } = getMeta(table)

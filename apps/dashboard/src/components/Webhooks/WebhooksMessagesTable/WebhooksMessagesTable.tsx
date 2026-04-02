@@ -4,11 +4,13 @@
  */
 
 import { DebouncedInput } from '@/components/DebouncedInput'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
+import { Button } from '@/components/ui/button'
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import {
   ColumnFiltersState,
@@ -24,7 +26,6 @@ import {
 } from '@tanstack/react-table'
 import { Mail, RefreshCcw } from 'lucide-react'
 import { useCallback, useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { useMessages } from 'svix-react'
 import { columns, eventTypeOptions } from './columns'
 import { MessageDetailsSheet } from './MessageDetailsSheet'
@@ -72,6 +73,8 @@ export function WebhooksMessagesTable() {
     },
   })
 
+  const isEmpty = !messages.loading && table.getRowModel().rows.length === 0
+
   const handleRowClick = useCallback((index: number) => {
     setSelectedMessageIndex(index)
     setSheetOpen(true)
@@ -92,8 +95,8 @@ export function WebhooksMessagesTable() {
   )
 
   return (
-    <div>
-      <div className="flex items-center mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-4">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
@@ -113,13 +116,35 @@ export function WebhooksMessagesTable() {
           <RefreshCcw className="h-4 w-4" />
         </Button>
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No messages found."
+              icon={<Mail className="size-8" />}
+              description={
+                <div className="space-y-2">
+                  <p>Messages will appear here when webhook events are triggered.</p>
+                </div>
+              }
+            />
+          ) : undefined
+        }
+        style={isEmpty ? undefined : { tableLayout: 'fixed', width: '100%' }}
+      >
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead className="px-2" key={header.id} style={{ width: `${header.column.getSize()}px` }}>
+                  <TableHead
+                    className="px-2"
+                    key={header.id}
+                    style={isEmpty ? undefined : { width: `${header.column.getSize()}px` }}
+                  >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
@@ -129,7 +154,7 @@ export function WebhooksMessagesTable() {
           <TableBody>
             {messages.loading ? (
               <>
-                {Array.from(new Array(5)).map((_, i) => (
+                {Array.from({ length: 25 }).map((_, i) => (
                   <TableRow key={i}>
                     {table.getVisibleLeafColumns().map((column) => (
                       <TableCell key={column.id} className="px-2">
@@ -162,22 +187,13 @@ export function WebhooksMessagesTable() {
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No messages found."
-                icon={<Mail className="size-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Messages will appear here when webhook events are triggered.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Messages" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Messages" />
+      </PageFooterPortal>
       <MessageDetailsSheet
         message={
           selectedMessageIndex !== null ? (table.getRowModel().rows[selectedMessageIndex]?.original ?? null) : null

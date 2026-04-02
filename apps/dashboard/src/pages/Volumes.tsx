@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateVolumeSheet } from '@/components/CreateVolumeSheet'
 import { Button } from '@/components/ui/button'
 import {
@@ -153,7 +153,7 @@ const Volumes: React.FC = () => {
   )
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Volumes</PageTitle>
         {writePermitted && (
@@ -161,7 +161,7 @@ const Volumes: React.FC = () => {
         )}
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="overflow-hidden">
         <VolumeTable
           data={volumes}
           loading={loadingVolumes}
@@ -215,6 +215,7 @@ const Volumes: React.FC = () => {
           </Dialog>
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

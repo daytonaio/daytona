@@ -6,14 +6,17 @@
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
+import { DebouncedInput } from './DebouncedInput'
+import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table, TableContainer } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
 import { MoreHorizontal, Package } from 'lucide-react'
@@ -25,9 +28,20 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Pagination } from './Pagination'
+import { PageFooterPortal } from './PageLayout'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { cn } from '@/lib/utils'
+import {
+  getColumnPinningBorderClasses,
+  getColumnPinningClasses,
+  getColumnPinningStyles,
+  getExplicitColumnSize,
+} from '@/lib/utils/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { Skeleton } from './ui/skeleton'
 import { TableEmptyState } from './TableEmptyState'
+
+const FIXED_COLUMN_IDS = ['actions']
 
 interface DataTableProps {
   data: DockerRegistry[]
@@ -50,34 +64,95 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
   )
 
   const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const columns = getColumns({ onDelete, onEdit, loading, writePermitted, deletePermitted })
   const table = useReactTable({
     data,
     columns,
+    defaultColumn: {
+      minSize: 0,
+    },
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+      columnFilters,
     },
     initialState: {
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = table.getState().columnFilters.length > 0
+  const leftPinnedCount = table.getLeftLeafColumns().length
+
   return (
-    <div>
-      <div className="rounded-md border">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-4">
+        <DebouncedInput
+          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+          onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
+          placeholder="Search..."
+          className="max-w-sm"
+        />
+      </div>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching registries found.' : 'No Container registries found.'}
+              icon={<Package className="h-4 w-4" />}
+              description={
+                hasFilters
+                  ? undefined
+                  : 'Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your Sandboxes.'
+              }
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={() => table.resetColumnFilters()}>
+                    Clear filters
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : undefined
+        }
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, headerIndex) => {
                   return (
-                    <TableHead key={header.id} className="px-2">
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        'px-2',
+                        !isEmpty && getColumnPinningBorderClasses(header.column, leftPinnedCount, headerIndex),
+                        !isEmpty && getColumnPinningClasses(header.column, true),
+                      )}
+                      style={
+                        isEmpty
+                          ? undefined
+                          : {
+                              ...getExplicitColumnSize(header),
+                              ...getColumnPinningStyles(header.column, FIXED_COLUMN_IDS),
+                            }
+                      }
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -87,33 +162,50 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column, colIndex) => (
+                      <TableCell
+                        key={column.id}
+                        className={cn(
+                          'px-2',
+                          getColumnPinningBorderClasses(column, leftPinnedCount, colIndex),
+                          getColumnPinningClasses(column),
+                        )}
+                        style={getColumnPinningStyles(column, FIXED_COLUMN_IDS)}
+                      >
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-2" key={cell.id}>
+                  {row.getVisibleCells().map((cell, cellIndex) => (
+                    <TableCell
+                      className={cn(
+                        'px-2',
+                        getColumnPinningBorderClasses(cell.column, leftPinnedCount, cellIndex),
+                        getColumnPinningClasses(cell.column),
+                      )}
+                      key={cell.id}
+                      style={getColumnPinningStyles(cell.column, FIXED_COLUMN_IDS)}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No Container registries found."
-                icon={<Package className="w-8 h-8" />}
-                description="Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your Sandboxes."
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Registries" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Registries" />
+      </PageFooterPortal>
     </div>
   )
 }
@@ -135,6 +227,17 @@ const getColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
+      filterFn: (row, _id, filterValue) => {
+        const searchValue = String(filterValue).toLowerCase()
+        const registry = row.original
+
+        return (
+          registry.name.toLowerCase().includes(searchValue) ||
+          registry.url.toLowerCase().includes(searchValue) ||
+          (registry.project?.toLowerCase().includes(searchValue) ?? false) ||
+          registry.username.toLowerCase().includes(searchValue)
+        )
+      },
     },
     {
       accessorKey: 'url',
@@ -153,6 +256,10 @@ const getColumns = ({
     },
     {
       id: 'actions',
+      header: () => null,
+      size: 48,
+      minSize: 48,
+      maxSize: 48,
       cell: ({ row }) => {
         if (!writePermitted && !deletePermitted) {
           return null

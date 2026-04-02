@@ -4,7 +4,7 @@
  */
 
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString } from '@/lib/utils'
 import { Region, RegionType } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -20,11 +20,13 @@ import { Copy, MapPinned, MoreHorizontal } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { DebouncedInput } from './DebouncedInput'
+import { PageFooterPortal } from './PageLayout'
 import { Pagination } from './Pagination'
 import { TableEmptyState } from './TableEmptyState'
 import { Button } from './ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Skeleton } from './ui/skeleton'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from './ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 interface DataTableProps {
@@ -89,12 +91,17 @@ export function RegionTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+
   return (
-    <div>
-      <div className="flex items-center mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-4">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
@@ -102,19 +109,35 @@ export function RegionTable({
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No custom regions found."
+              icon={<MapPinned className="w-8 h-8" />}
+              description={
+                <div className="space-y-2">
+                  <p>Create regions for grouping runners and sandboxes.</p>
+                </div>
+              }
+            />
+          ) : undefined
+        }
+      >
+        <Table style={isEmpty ? undefined : { tableLayout: 'fixed', width: '100%' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="px-2"
+                      className={cn('px-2', header.column.id === 'actions' && 'sticky right-0 z-[2]')}
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={isEmpty ? undefined : { width: `${header.column.getSize()}px` }}
+                      sticky={header.column.id === 'actions' ? 'right' : undefined}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -125,11 +148,24 @@ export function RegionTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from({ length: 25 }).map((_, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {columns.map((column, columnIndex) => (
+                      <TableCell
+                        key={`${rowIndex}-${column.id ?? columnIndex}`}
+                        className={cn('px-2', column.id === 'actions' && 'sticky right-0 z-[1]')}
+                        style={{
+                          width: `${column.size ?? 160}px`,
+                        }}
+                        sticky={column.id === 'actions' ? 'right' : undefined}
+                      >
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => {
                 const isCustom = row.original.regionType === RegionType.CUSTOM
@@ -147,11 +183,12 @@ export function RegionTable({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className="px-2"
+                        className={cn('px-2', cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
                         key={cell.id}
                         style={{
                           width: `${cell.column.getSize()}px`,
                         }}
+                        sticky={cell.column.id === 'actions' ? 'right' : undefined}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
@@ -159,22 +196,13 @@ export function RegionTable({
                   </TableRow>
                 )
               })
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No custom regions found."
-                icon={<MapPinned className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Create regions for grouping runners and sandboxes.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Regions" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Regions" />
+      </PageFooterPortal>
     </div>
   )
 }
@@ -262,7 +290,10 @@ const getColumns = ({
   ]
 
   columns.push({
-    id: 'options',
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     header: () => {
       return null
     },

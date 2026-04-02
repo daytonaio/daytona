@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSnapshotSheet } from '@/components/snapshots/CreateSnapshotSheet'
 import { SnapshotTable } from '@/components/snapshots/SnapshotTable'
 import { Button } from '@/components/ui/button'
@@ -58,6 +58,7 @@ const Snapshots: React.FC = () => {
   })
 
   const [sorting, setSorting] = useState<SnapshotSorting>(DEFAULT_SNAPSHOT_SORTING)
+  const [stateFilter, setStateFilter] = useState<Set<string>>(new Set())
 
   const queryParams = useMemo<SnapshotQueryParams>(
     () => ({
@@ -83,6 +84,12 @@ const Snapshots: React.FC = () => {
     isLoading: snapshotsDataIsLoading,
     error: snapshotsDataError,
   } = useSnapshotsQuery(queryParams)
+
+  const filteredItems = useMemo(() => {
+    const items = snapshotsData?.items ?? []
+    if (stateFilter.size === 0) return items
+    return items.filter((snapshot) => stateFilter.has(snapshot.state))
+  }, [snapshotsData?.items, stateFilter])
 
   useEffect(() => {
     if (snapshotsDataError) {
@@ -327,15 +334,15 @@ const Snapshots: React.FC = () => {
   }
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Snapshots</PageTitle>
         {writePermitted && <CreateSnapshotSheet className="ml-auto" ref={dialogRef} />}
       </PageHeader>
 
-      <PageContent size="full">
+      <PageContent size="full" className="flex-1 overflow-hidden">
         <SnapshotTable
-          data={snapshotsData?.items ?? []}
+          data={filteredItems}
           loading={snapshotsDataIsLoading}
           loadingSnapshots={loadingSnapshots}
           getRegionName={getRegionName}
@@ -358,6 +365,8 @@ const Snapshots: React.FC = () => {
           }}
           sorting={sorting}
           onSortingChange={handleSortingChange}
+          stateFilter={stateFilter}
+          onStateFilterChange={setStateFilter}
         />
 
         {snapshotToDelete && (
@@ -395,6 +404,7 @@ const Snapshots: React.FC = () => {
           </Dialog>
         )}
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

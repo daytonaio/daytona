@@ -6,7 +6,7 @@
 import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { CreateSandboxSheet } from '@/components/Sandbox/CreateSandboxSheet'
 import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { SandboxTable } from '@/components/SandboxTable'
@@ -305,7 +305,7 @@ const Sandboxes: React.FC = () => {
   // Subscribe to Sandbox Events
 
   useEffect(() => {
-    const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
+    const handleSandboxCreatedEvent = (_sandbox: Sandbox) => {
       const isFirstPage = paginationParams.pageIndex === 0
       const isDefaultFilters = Object.keys(filters).length === 0
       const isDefaultSorting =
@@ -890,14 +890,14 @@ const Sandboxes: React.FC = () => {
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Sandboxes</PageTitle>
         <div className="flex items-center gap-2 ml-auto">
           {canCreateSandbox && <CreateSandboxSheet ref={createSandboxSheetRef} />}
         </div>
       </PageHeader>
-      <PageContent size="full" className="flex-1 max-h-[calc(100vh-65px)]">
+      <PageContent size="full" className="gap-3 overflow-hidden">
         <SandboxTable
           sandboxIsLoading={sandboxIsLoading}
           sandboxStateIsTransitioning={sandboxStateIsTransitioning}
@@ -1019,6 +1019,7 @@ const Sandboxes: React.FC = () => {
           getRegionName={getRegionName}
         />
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

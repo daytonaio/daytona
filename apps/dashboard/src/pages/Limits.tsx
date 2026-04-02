@@ -230,7 +230,7 @@ export default function Limits() {
                       <TierComparisonTableSkeleton />
                     ) : (
                       <TierComparisonTable
-                        className="border-l-0 border-r-0 rounded-none only:mb-4"
+                        className="only:mb-4 border-l-0 border-r-0"
                         tiers={tiers || []}
                         currentTier={organizationTier}
                       />

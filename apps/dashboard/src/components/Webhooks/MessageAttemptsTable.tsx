@@ -4,6 +4,7 @@
  */
 
 import { CopyButton } from '@/components/CopyButton'
+import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty'
 import { TimestampTooltip } from '@/components/TimestampTooltip'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -79,7 +80,7 @@ function AttemptExpandedRow({ attempt }: { attempt: MessageAttemptOut }) {
           <span className="text-sm text-muted-foreground">Response Body</span>
           <CopyButton value={attempt.response || ''} size="icon-xs" tooltipText="Copy Response" />
         </div>
-        <pre className="text-xs font-mono bg-muted/80 p-2.5 rounded-md overflow-auto whitespace-pre-wrap break-all max-h-[200px]">
+        <pre className="scrollbar-sm text-xs font-mono bg-muted/80 p-2.5 rounded-md overflow-auto whitespace-pre-wrap break-all max-h-[200px]">
           {responseBody}
         </pre>
       </div>
@@ -185,7 +186,11 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
     return (
       <div>
         {header}
-        <div className="text-sm text-muted-foreground">No delivery attempts yet.</div>
+        <Empty className="border-none py-8">
+          <EmptyHeader>
+            <EmptyTitle>No delivery attempts yet.</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       </div>
     )
   }
@@ -193,61 +198,57 @@ export function MessageAttemptsTable({ messageId, reloadKey }: { messageId: stri
   return (
     <div>
       {header}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="px-3 w-[28px]" />
-              <TableHead className="px-3">Status</TableHead>
-              <TableHead className="px-3">URL</TableHead>
-              <TableHead className="px-3">Timestamp</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((attempt: MessageAttemptOut) => {
-              const { relativeTimeString } = getRelativeTimeString(attempt.timestamp)
-              const isExpanded = expandedRows.has(attempt.id)
-              return (
-                <Fragment key={attempt.id}>
-                  <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRow(attempt.id)}>
-                    <TableCell className="px-3 w-[28px]">
-                      {isExpanded ? (
-                        <ChevronDown className="size-3.5 text-muted-foreground" />
-                      ) : (
-                        <ChevronRight className="size-3.5 text-muted-foreground" />
-                      )}
-                    </TableCell>
-                    <TableCell className="px-3">
-                      <AttemptStatusBadge status={attempt.status} />
-                    </TableCell>
-                    <TableCell className="px-3">
-                      <span className="text-sm font-mono truncate block max-w-[200px]">{attempt.url}</span>
-                    </TableCell>
-                    <TableCell className="px-3">
-                      <TimestampTooltip
-                        timestamp={
-                          attempt.timestamp instanceof Date
-                            ? attempt.timestamp.toISOString()
-                            : String(attempt.timestamp)
-                        }
-                      >
-                        <span className="text-sm cursor-default">{relativeTimeString}</span>
-                      </TimestampTooltip>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="px-3 w-[28px]" />
+            <TableHead className="px-3">Status</TableHead>
+            <TableHead className="px-3">URL</TableHead>
+            <TableHead className="px-3">Timestamp</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((attempt: MessageAttemptOut) => {
+            const { relativeTimeString } = getRelativeTimeString(attempt.timestamp)
+            const isExpanded = expandedRows.has(attempt.id)
+            return (
+              <Fragment key={attempt.id}>
+                <TableRow className="cursor-pointer hover:bg-muted/50" onClick={() => toggleRow(attempt.id)}>
+                  <TableCell className="px-3 w-[28px]">
+                    {isExpanded ? (
+                      <ChevronDown className="size-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="size-3.5 text-muted-foreground" />
+                    )}
+                  </TableCell>
+                  <TableCell className="px-3">
+                    <AttemptStatusBadge status={attempt.status} />
+                  </TableCell>
+                  <TableCell className="px-3">
+                    <span className="text-sm font-mono truncate block max-w-[200px]">{attempt.url}</span>
+                  </TableCell>
+                  <TableCell className="px-3">
+                    <TimestampTooltip
+                      timestamp={
+                        attempt.timestamp instanceof Date ? attempt.timestamp.toISOString() : String(attempt.timestamp)
+                      }
+                    >
+                      <span className="text-sm cursor-default">{relativeTimeString}</span>
+                    </TimestampTooltip>
+                  </TableCell>
+                </TableRow>
+                {isExpanded && (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={4} className="p-0 border-b">
+                      <AttemptExpandedRow attempt={attempt} />
                     </TableCell>
                   </TableRow>
-                  {isExpanded && (
-                    <TableRow className="hover:bg-transparent">
-                      <TableCell colSpan={4} className="p-0 border-b">
-                        <AttemptExpandedRow attempt={attempt} />
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </Fragment>
-              )
-            })}
-          </TableBody>
-        </Table>
-      </div>
+                )}
+              </Fragment>
+            )
+          })}
+        </TableBody>
+      </Table>
     </div>
   )
 }

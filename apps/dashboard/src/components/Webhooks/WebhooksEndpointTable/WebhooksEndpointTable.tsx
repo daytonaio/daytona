@@ -4,6 +4,7 @@
  */
 
 import { DebouncedInput } from '@/components/DebouncedInput'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
 import {
@@ -17,9 +18,10 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { RoutePath } from '@/enums/RoutePath'
+import { cn } from '@/lib/utils'
 import {
   flexRender,
   getCoreRowModel,
@@ -96,6 +98,9 @@ export function WebhooksEndpointTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
     meta: {
       webhookEndpoints: {
@@ -106,13 +111,15 @@ export function WebhooksEndpointTable({
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+
   const handleRowClick = (endpoint: EndpointOut) => {
     navigate(RoutePath.WEBHOOK_ENDPOINT_DETAILS.replace(':endpointId', endpoint.id))
   }
 
   return (
-    <div>
-      <div className="flex items-center mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-4">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
@@ -120,19 +127,47 @@ export function WebhooksEndpointTable({
           className="max-w-sm"
         />
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No webhook endpoints found."
+              icon={<Mail className="size-8" />}
+              description={
+                <div className="space-y-2">
+                  <p>Create an endpoint to start receiving webhook events.</p>
+                  <p>
+                    <a
+                      href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      Check out the Docs
+                    </a>{' '}
+                    to learn more.
+                  </p>
+                </div>
+              }
+            />
+          ) : undefined
+        }
+        style={isEmpty ? undefined : { tableLayout: 'fixed', width: '100%' }}
+      >
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="px-2"
+                      className={cn('px-2', header.column.id === 'actions' && 'sticky right-0 z-[2]')}
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={isEmpty ? undefined : { width: `${header.column.getSize()}px` }}
+                      sticky={header.column.id === 'actions' ? 'right' : undefined}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -144,7 +179,7 @@ export function WebhooksEndpointTable({
           <TableBody>
             {loading ? (
               <>
-                {Array.from(new Array(5)).map((_, i) => (
+                {Array.from({ length: 25 }).map((_, i) => (
                   <TableRow key={i}>
                     {table.getVisibleLeafColumns().map((column, colIndex, arr) =>
                       colIndex === arr.length - 1 ? null : (
@@ -180,11 +215,12 @@ export function WebhooksEndpointTable({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
-                        className="px-2"
+                        className={cn('px-2', cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
                         key={cell.id}
                         style={{
                           width: `${cell.column.getSize()}px`,
                         }}
+                        sticky={cell.column.id === 'actions' ? 'right' : undefined}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
@@ -192,33 +228,13 @@ export function WebhooksEndpointTable({
                   </TableRow>
                 )
               })
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No webhook endpoints found."
-                icon={<Mail className="size-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Create an endpoint to start receiving webhook events.</p>
-                    <p>
-                      <a
-                        href="https://www.daytona.io/docs/en/tools/api/#daytona/webhook/undefined/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
-                      >
-                        Check out the Docs
-                      </a>{' '}
-                      to learn more.
-                    </p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Endpoints" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Endpoints" />
+      </PageFooterPortal>
 
       <AlertDialog open={!!deleteEndpoint} onOpenChange={(open) => !open && setDeleteEndpoint(null)}>
         <AlertDialogContent>

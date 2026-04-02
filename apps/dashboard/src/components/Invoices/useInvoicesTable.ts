@@ -78,6 +78,9 @@ export function useInvoicesTable({
     state: {
       sorting,
       columnFilters,
+      columnPinning: {
+        right: ['actions'],
+      },
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,

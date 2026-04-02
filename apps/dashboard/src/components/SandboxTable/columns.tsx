@@ -83,34 +83,36 @@ export function getColumns({
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
-      size: 30,
+      size: 44,
+      minSize: 44,
+      maxSize: 44,
       header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
-          }
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
+        <div className="flex justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
             }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
+            onCheckedChange={(value) => {
+              for (const row of table.getRowModel().rows) {
+                if (sandboxIsLoading[row.original.id] || row.original.state === SandboxState.DESTROYED) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(!!value)
+                }
+              }
+            }}
+            aria-label="Select all"
+          />
+        </div>
       ),
       cell: ({ row }) => {
         return (
-          <div>
+          <div className="flex justify-center">
             <Checkbox
               checked={row.getIsSelected()}
               onCheckedChange={(value) => row.toggleSelected(!!value)}
               aria-label="Select row"
               onClick={(e) => e.stopPropagation()}
-              className="translate-y-[1px]"
             />
           </div>
         )
@@ -309,7 +311,9 @@ export function getColumns({
     },
     {
       id: 'actions',
-      size: 100,
+      size: 124,
+      minSize: 124,
+      maxSize: 124,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="w-full flex justify-end">

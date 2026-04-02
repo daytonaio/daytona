@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Runner, RunnerState, Region } from '@daytonaio/api-client'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { cn } from '@/lib/utils'
+import { Region, Runner, RunnerState } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -14,18 +16,18 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
-import { Button } from './ui/button'
-import { Switch } from './ui/switch'
+import { AlertTriangle, CheckCircle, Copy, MoreHorizontal, Pause, Server, Timer } from 'lucide-react'
 import { useState } from 'react'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Pagination } from './Pagination'
-import { Server, MoreHorizontal, Copy, AlertTriangle, CheckCircle, Timer, Pause } from 'lucide-react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { TableEmptyState } from './TableEmptyState'
 import { toast } from 'sonner'
 import { DebouncedInput } from './DebouncedInput'
-import { cn } from '@/lib/utils'
+import { PageFooterPortal } from './PageLayout'
+import { Pagination } from './Pagination'
+import { TableEmptyState } from './TableEmptyState'
+import { Button } from './ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Skeleton } from './ui/skeleton'
+import { Switch } from './ui/switch'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from './ui/table'
 
 interface RunnerTableProps {
   data: Runner[]
@@ -106,12 +108,17 @@ export function RunnerTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+
   return (
-    <div>
-      <div className="flex items-center flex-wrap gap-4 mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center flex-wrap gap-4">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
@@ -125,19 +132,39 @@ export function RunnerTable({
           </div>
         )}
       </div>
-      <div className="rounded-md border">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No runners found."
+              icon={<Server className="w-8 h-8" />}
+              description={
+                <div className="space-y-2">
+                  <p>Runners are the machines that run your sandboxes.</p>
+                  {regions.length === 0 && (
+                    <p>There must be at least one region in your organization before runners can be created.</p>
+                  )}
+                </div>
+              }
+            />
+          ) : undefined
+        }
+      >
+        <Table style={isEmpty ? undefined : { tableLayout: 'fixed', width: '100%' }}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="px-2"
+                      className={cn('px-2', header.column.id === 'actions' && 'sticky right-0 z-[2]')}
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={isEmpty ? undefined : { width: `${header.column.getSize()}px` }}
+                      sticky={header.column.id === 'actions' ? 'right' : undefined}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -148,11 +175,24 @@ export function RunnerTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from({ length: 25 }).map((_, rowIndex) => (
+                  <TableRow key={rowIndex}>
+                    {columns.map((column, columnIndex) => (
+                      <TableCell
+                        className={cn('px-2', column.id === 'actions' && 'sticky right-0 z-[1]')}
+                        key={`${rowIndex}-${column.id ?? columnIndex}`}
+                        style={{
+                          width: `${column.size ?? 160}px`,
+                        }}
+                        sticky={column.id === 'actions' ? 'right' : undefined}
+                      >
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -166,36 +206,26 @@ export function RunnerTable({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className="px-2"
+                      className={cn('px-2', cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
                       key={cell.id}
                       style={{
                         width: `${cell.column.getSize()}px`,
                       }}
+                      sticky={cell.column.id === 'actions' ? 'right' : undefined}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No runners found."
-                icon={<Server className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Runners are the machines that run your sandboxes.</p>
-                    {regions.length === 0 && (
-                      <p>There must be at least one region in your organization before runners can be created.</p>
-                    )}
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Runners" />
+      </TableContainer>
+
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Runners" />
+      </PageFooterPortal>
     </div>
   )
 }
@@ -369,7 +399,10 @@ const getColumns = ({
   ]
 
   columns.push({
-    id: 'options',
+    id: 'actions',
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     header: () => {
       return null
     },
