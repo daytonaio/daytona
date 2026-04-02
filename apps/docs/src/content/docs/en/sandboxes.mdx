@@ -1209,13 +1209,13 @@ The inactivity timer resets only for specific external interactions:
 - Updates to [sandbox lifecycle states](#sandbox-lifecycle)
 - Network requests through [sandbox previews](/docs/en/preview)
 - Active [SSH connections](/docs/en/ssh-access)
-- API calls to the [Daytona Toolbox SDK](/docs/en/tools/api/#daytona-toolbox)
+- API requests to the [Daytona Toolbox SDK](/docs/en/tools/api/#daytona-toolbox)
 
 #### What does not reset the timer
 
 The following do not reset the timer:
 
-- SDK calls that are not toolbox actions
+- SDK requests that are not toolbox actions
 - Background scripts (e.g., `npm run dev` run as a fire-and-forget command)
 - Long-running tasks without external interaction
 - Processes that don't involve active monitoring
