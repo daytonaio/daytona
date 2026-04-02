@@ -248,7 +248,7 @@ export const listFiles = createTool({
   execute: async ({ sandboxId, path }, context) => {
     try {
       const sandbox = await getSandboxById(sandboxId)
-      const normalizedPath = normalizeSandboxPath(path)
+      const normalizedPath = normalizeSandboxPath(path ?? '/')
 
       const fileList = await sandbox.fs.listFiles(normalizedPath)
 
