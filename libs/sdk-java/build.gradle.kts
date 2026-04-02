@@ -7,6 +7,8 @@ plugins {
 group = "io.daytona"
 version = "0.0.0-dev"
 
+val depVersion = version.toString()
+
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
@@ -86,6 +88,12 @@ signing {
         useInMemoryPgpKeys(signingKey, signingPassword ?: "")
     }
     sign(publishing.publications["mavenJava"])
+}
+
+tasks.withType<Jar> {
+    manifest {
+        attributes("Implementation-Version" to project.version)
+    }
 }
 
 tasks.withType<Javadoc> {

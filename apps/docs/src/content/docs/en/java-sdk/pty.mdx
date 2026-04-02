@@ -25,7 +25,7 @@ Creates PTY options with explicit values.
 
 **Parameters**:
 
-- `id` _String_ - custom PTY session identifier; if {@code null}, the server generates one
+- `id` _String_ - custom PTY session identifier; if `null`, the server generates one
 - `cols` _int_ - terminal width in columns
 - `rows` _int_ - terminal height in rows
 - `onData` _Consumer\<byte[]\>_ - callback invoked for each PTY output chunk
@@ -41,7 +41,7 @@ Returns the PTY session identifier to request.
 
 **Returns**:
 
-- `String` - requested PTY session identifier, or {@code null} to auto-generate
+- `String` - requested PTY session identifier, or `null` to auto-generate
 
 #### setId()
 ```java
@@ -119,7 +119,7 @@ Returns callback used for streaming PTY output.
 
 **Returns**:
 
-- `Consumer\<byte[]\>` - PTY output callback, or {@code null} when not configured
+- `Consumer\<byte[]\>` - PTY output callback, or `null` when not configured
 
 #### setOnData()
 ```java
@@ -178,4 +178,4 @@ Returns the PTY error or exit reason when available.
 
 **Returns**:
 
-- `String` - error message, or {@code null} when the session ended successfully
+- `String` - error message, or `null` when the session ended successfully

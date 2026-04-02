@@ -37,7 +37,7 @@ This must be called before document notifications or code intelligence requests.
 
 **Parameters**:
 
-- `languageId` _String_ - language identifier (for example {@code "python"}, {@code "typescript"})
+- `languageId` _String_ - language identifier (for example `"python"`, `"typescript"`)
 - `pathToProject` _String_ - absolute or relative project root path inside the sandbox
 
 #### stop()
@@ -66,7 +66,7 @@ server tracks it.
 
 - `languageId` _String_ - language identifier
 - `pathToProject` _String_ - absolute or relative project root path inside the sandbox
-- `uri` _String_ - document URI (typically {@code file://...})
+- `uri` _String_ - document URI (typically `file://...`)
 
 #### didClose()
 ```java
@@ -79,7 +79,7 @@ Notifies the language server that a document has been closed.
 
 - `languageId` _String_ - language identifier
 - `pathToProject` _String_ - absolute or relative project root path inside the sandbox
-- `uri` _String_ - document URI (typically {@code file://...})
+- `uri` _String_ - document URI (typically `file://...`)
 
 #### completions()
 ```java
@@ -92,7 +92,7 @@ Retrieves completion candidates at a zero-based position in a document.
 
 - `languageId` _String_ - language identifier
 - `pathToProject` _String_ - absolute or relative project root path inside the sandbox
-- `uri` _String_ - document URI (typically {@code file://...})
+- `uri` _String_ - document URI (typically `file://...`)
 - `line` _int_ - zero-based line number
 - `character` _int_ - zero-based character offset on the line
 
@@ -111,7 +111,7 @@ Returns all symbols defined in the specified document.
 
 - `languageId` _String_ - language identifier
 - `pathToProject` _String_ - absolute or relative project root path inside the sandbox
-- `uri` _String_ - document URI (typically {@code file://...})
+- `uri` _String_ - document URI (typically `file://...`)
 
 **Returns**:
 

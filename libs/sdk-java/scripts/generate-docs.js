@@ -140,6 +140,14 @@ function splitTopLevel(value, separator) {
   return parts
 }
 
+function cleanJavadocInline(text) {
+  return String(text || '')
+    .replace(/\{@code\s+([^}]*)\}/g, '`$1`')
+    .replace(/\{@link\s+([^}]*)\}/g, '`$1`')
+    .replace(/<\/?code>/g, '`')
+    .trim()
+}
+
 function parseJavadoc(raw) {
   if (!raw) return { description: '', params: {}, returns: '', throws: [] }
 
@@ -233,11 +241,11 @@ function parseJavadoc(raw) {
 
   return {
     description,
-    params,
-    returns: returns.trim(),
+    params: Object.fromEntries(Object.entries(params).map(([k, v]) => [k, cleanJavadocInline(v)])),
+    returns: cleanJavadocInline(returns),
     throws: throws.map((item) => ({
       type: String(item.type || '').trim(),
-      description: String(item.description || '').trim(),
+      description: cleanJavadocInline(item.description || ''),
     })),
   }
 }

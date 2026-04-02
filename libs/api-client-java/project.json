@@ -13,7 +13,8 @@
       "options": {
         "commands": [
           "rm -rf {projectRoot}/src {projectRoot}/docs {projectRoot}/api",
-          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g java --additional-properties=groupId=io.daytona,artifactId=api-client,artifactVersion=$DEFAULT_PACKAGE_VERSION,apiPackage=io.daytona.api.client.api,modelPackage=io.daytona.api.client.model,invokerPackage=io.daytona.api.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true -o {projectRoot}"
+          "yarn run openapi-generator-cli generate --git-repo-id=daytona --git-user-id=daytonaio -i dist/apps/api/openapi.json -g java --additional-properties=groupId=io.daytona,artifactId=api-client,artifactVersion=$DEFAULT_PACKAGE_VERSION,apiPackage=io.daytona.api.client.api,modelPackage=io.daytona.api.client.model,invokerPackage=io.daytona.api.client,library=okhttp-gson,java8=true,hideGenerationTimestamp=true,useRuntimeException=true -o {projectRoot}",
+          "bash hack/java-client/postprocess.sh {projectRoot} api-client-java"
         ],
         "parallel": false
       },
@@ -28,7 +29,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "if [ -n \"$MAVEN_PKG_VERSION\" ]; then sed -i \"s/^version = .*/version = '$MAVEN_PKG_VERSION'/\" build.gradle && echo \"Changed api-client-java version to $MAVEN_PKG_VERSION\"; else echo \"Using version from build.gradle\"; fi"
+        "command": "if [ -n \"$MAVEN_PKG_VERSION\" ]; then sed -i \"s/^version = .*/version = '$MAVEN_PKG_VERSION'/\" build.gradle && find src -name ApiClient.java -path '*/client/ApiClient.java' -exec sed -i \"s|setUserAgent(\\\"api-client-java/[^\\\"]*\\\")|setUserAgent(\\\"api-client-java/$MAVEN_PKG_VERSION\\\")|\" {} + && find src -name Configuration.java -path '*/client/Configuration.java' -exec sed -i \"s|VERSION = \\\"[^\\\"]*\\\"|VERSION = \\\"$MAVEN_PKG_VERSION\\\"|\" {} + && echo \"Changed api-client-java version to $MAVEN_PKG_VERSION\"; else echo \"Using version from build.gradle\"; fi"
       },
       "cache": true,
       "inputs": [{ "env": "MAVEN_PKG_VERSION" }],

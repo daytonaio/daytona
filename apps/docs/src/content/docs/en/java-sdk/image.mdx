@@ -21,11 +21,11 @@ Creates an image definition from an existing base image.
 
 **Parameters**:
 
-- `baseImage` _String_ - base image reference (for example {@code python:3.12-slim-bookworm})
+- `baseImage` _String_ - base image reference (for example `python:3.12-slim-bookworm`)
 
 **Returns**:
 
-- `Image` - new {@link Image} initialized with a {@code FROM} instruction
+- `Image` - new `Image` initialized with a `FROM` instruction
 
 #### debianSlim()
 ```java
@@ -36,11 +36,11 @@ Creates a Python Debian slim image.
 
 **Parameters**:
 
-- `pythonVersion` _String_ - Python version to use; defaults to {@code 3.11} when {@code null} or empty
+- `pythonVersion` _String_ - Python version to use; defaults to `3.11` when `null` or empty
 
 **Returns**:
 
-- `Image` - new {@link Image} using a Python slim base image
+- `Image` - new `Image` using a Python slim base image
 
 #### pipInstall()
 ```java
@@ -55,7 +55,7 @@ Adds a `pip install` instruction for one or more packages.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### runCommands()
 ```java
@@ -70,7 +70,7 @@ Adds one or more `RUN` instructions.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### env()
 ```java
@@ -85,7 +85,7 @@ Adds environment variables using `ENV` instructions.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### workdir()
 ```java
@@ -100,7 +100,7 @@ Sets the default working directory using a `WORKDIR` instruction.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### entrypoint()
 ```java
@@ -115,7 +115,7 @@ Sets the container entrypoint.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### cmd()
 ```java
@@ -130,7 +130,7 @@ Sets the default container command.
 
 **Returns**:
 
-- `Image` - this {@link Image} for method chaining
+- `Image` - this `Image` for method chaining
 
 #### getDockerfile()
 ```java

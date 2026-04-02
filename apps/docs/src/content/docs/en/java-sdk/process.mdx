@@ -41,7 +41,7 @@ Executes a shell command.
 **Parameters**:
 
 - `command` _String_ - command to execute
-- `cwd` _String_ - working directory, or {@code null} to use sandbox default
+- `cwd` _String_ - working directory, or `null` to use sandbox default
 - `env` _Map\<String, String\>_ - environment variables to set for the command
 - `timeout` _Integer_ - timeout in seconds
 
@@ -79,8 +79,9 @@ public ExecuteResponse codeRun(String code, Map<String, String> env, Integer tim
 
 Executes source code using Sandbox language tooling.
 
-Uploads code to a temporary file in the Sandbox and executes it with the language runtime
-selected by the `code-toolbox-language` label.
+Base64-encodes the code and pipes it to the language runtime selected by
+the `code-toolbox-language` label. Uses `io.daytona.sdk.codetoolbox.CodeToolbox`
+implementations for language-specific command generation.
 
 **Parameters**:
 
@@ -94,7 +95,7 @@ selected by the `code-toolbox-language` label.
 
 **Throws**:
 
-- `DaytonaException` - if upload or execution fails
+- `DaytonaException` - if execution fails
 
 #### createSession()
 ```java
@@ -292,7 +293,7 @@ Creates a PTY terminal session.
 
 **Parameters**:
 
-- `options` _PtyCreateOptions_ - PTY options, or {@code null} to use defaults
+- `options` _PtyCreateOptions_ - PTY options, or `null` to use defaults
 
 **Returns**:
 

@@ -65,9 +65,12 @@ public class Sandbox {
         String toolboxBase = trimTrailingSlash(proxyBase) + "/" + this.id;
         this.toolboxApiClient = new io.daytona.toolbox.client.ApiClient();
         this.toolboxApiClient.setBasePath(toolboxBase);
+        String sdkVersion = Daytona.class.getPackage().getImplementationVersion();
+        if (sdkVersion == null) sdkVersion = "dev";
         this.toolboxApiClient.addDefaultHeader("Authorization", "Bearer " + config.getApiKey());
         this.toolboxApiClient.addDefaultHeader("X-Daytona-Source", "sdk-java");
-        this.toolboxApiClient.setUserAgent("sdk-java/0.1.0");
+        this.toolboxApiClient.addDefaultHeader("X-Daytona-SDK-Version", sdkVersion);
+        this.toolboxApiClient.setUserAgent("sdk-java/" + sdkVersion);
 
         this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
         this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);

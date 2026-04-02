@@ -87,7 +87,7 @@ public class Process {
                 String encodedValue = Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
                 exportsBuilder.append("export ")
                         .append(key)
-                        .append("=\"$(echo '")
+                        .append("=\"$(printf '%s' '")
                         .append(encodedValue)
                         .append("' | base64 -d)\"")
                         .append("; ");

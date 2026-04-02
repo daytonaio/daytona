@@ -307,8 +307,11 @@ public class Daytona implements AutoCloseable {
         io.daytona.api.client.ApiClient client = new io.daytona.api.client.ApiClient();
         client.setBasePath(trimTrailingSlash(cfg.getApiUrl()));
         client.setBearerToken(cfg.getApiKey());
+        String sdkVersion = Daytona.class.getPackage().getImplementationVersion();
+        if (sdkVersion == null) sdkVersion = "dev";
         client.addDefaultHeader("X-Daytona-Source", "sdk-java");
-        client.setUserAgent("sdk-java/0.1.0");
+        client.addDefaultHeader("X-Daytona-SDK-Version", sdkVersion);
+        client.setUserAgent("sdk-java/" + sdkVersion);
         ensureOauth2AuthEntry(client);
         return client;
     }
