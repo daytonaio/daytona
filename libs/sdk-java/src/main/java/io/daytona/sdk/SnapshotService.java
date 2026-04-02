@@ -12,6 +12,11 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Service for managing Daytona Snapshots.
+ *
+ * <p>Provides operations to create, list, retrieve, and delete snapshots.
+ */
 public class SnapshotService {
     private final SnapshotsApi snapshotsApi;
 
@@ -19,6 +24,14 @@ public class SnapshotService {
         this.snapshotsApi = snapshotsApi;
     }
 
+    /**
+     * Creates a snapshot from an existing image reference.
+     *
+     * @param name snapshot name
+     * @param imageName source image name or tag
+     * @return created {@link Snapshot}
+     * @throws io.daytona.sdk.exception.DaytonaException if the API request fails
+     */
     public Snapshot create(String name, String imageName) {
         io.daytona.api.client.model.SnapshotDto snapshotDto = ExceptionMapper.callMain(
                 () -> snapshotsApi.createSnapshot(new CreateSnapshot().name(name).imageName(imageName), null)
@@ -26,6 +39,14 @@ public class SnapshotService {
         return toSnapshot(snapshotDto);
     }
 
+    /**
+     * Lists snapshots with pagination.
+     *
+     * @param page page number starting from 1; defaults to 1 when {@code null}
+     * @param limit maximum number of items per page; defaults to 10 when {@code null}
+     * @return paginated snapshot result
+     * @throws io.daytona.sdk.exception.DaytonaException if the API request fails
+     */
     public PaginatedSnapshots list(Integer page, Integer limit) {
         int p = page == null ? 1 : page;
         int l = limit == null ? 10 : limit;
@@ -47,11 +68,24 @@ public class SnapshotService {
         return output;
     }
 
+    /**
+     * Retrieves a snapshot by name or ID.
+     *
+     * @param nameOrId snapshot name or identifier
+     * @return matching {@link Snapshot}
+     * @throws io.daytona.sdk.exception.DaytonaException if no snapshot is found or request fails
+     */
     public Snapshot get(String nameOrId) {
         io.daytona.api.client.model.SnapshotDto snapshotDto = ExceptionMapper.callMain(() -> snapshotsApi.getSnapshot(nameOrId, null));
         return toSnapshot(snapshotDto);
     }
 
+    /**
+     * Deletes a snapshot by ID.
+     *
+     * @param id snapshot identifier
+     * @throws io.daytona.sdk.exception.DaytonaException if deletion fails
+     */
     public void delete(String id) {
         ExceptionMapper.runMain(() -> snapshotsApi.removeSnapshot(id, null));
     }

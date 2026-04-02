@@ -18,6 +18,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * Handle for interacting with an active PTY session.
+ *
+ * <p>Supports bidirectional I/O, resize, kill, and waiting for connection/exit events.
+ */
 public class PtyHandle {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -49,6 +54,12 @@ public class PtyHandle {
         this.ws = client.newWebSocket(request, new PtyWebSocketListener());
     }
 
+    /**
+     * Waits for PTY websocket connection to be fully established.
+     *
+     * @param timeoutSeconds maximum seconds to wait
+     * @throws DaytonaException if connection fails or times out
+     */
     public void waitForConnection(long timeoutSeconds) {
         if (connectionEstablished) {
             return;
@@ -71,18 +82,36 @@ public class PtyHandle {
         }
     }
 
+    /**
+     * Sends text input to PTY.
+     *
+     * @param data UTF-8 text to send
+     * @throws DaytonaException if sending fails
+     */
     public void sendInput(String data) {
         if (!ws.send(data)) {
             throw new DaytonaException("Failed to send PTY input");
         }
     }
 
+    /**
+     * Sends binary input to PTY.
+     *
+     * @param data binary payload
+     * @throws DaytonaException if sending fails
+     */
     public void sendInput(byte[] data) {
         if (!ws.send(ByteString.of(data))) {
             throw new DaytonaException("Failed to send PTY binary input");
         }
     }
 
+    /**
+     * Waits until the PTY session exits.
+     *
+     * @return final PTY result
+     * @throws DaytonaException if interrupted while waiting
+     */
     public PtyResult waitForExit() {
         try {
             exitLatch.await();
@@ -93,6 +122,13 @@ public class PtyHandle {
         }
     }
 
+    /**
+     * Waits for PTY exit with timeout.
+     *
+     * @param timeoutSeconds maximum seconds to wait
+     * @return final PTY result, or timeout result when exit does not occur in time
+     * @throws DaytonaException if interrupted while waiting
+     */
     public PtyResult waitForExit(long timeoutSeconds) {
         try {
             boolean finished = exitLatch.await(timeoutSeconds, TimeUnit.SECONDS);
@@ -106,30 +142,62 @@ public class PtyHandle {
         }
     }
 
+    /**
+     * Resizes terminal dimensions.
+     *
+     * @param cols terminal width in columns
+     * @param rows terminal height in rows
+     */
     public void resize(int cols, int rows) {
         resizeCallback.resize(sessionId, cols, rows);
     }
 
+    /**
+     * Terminates PTY session.
+     */
     public void kill() {
         killCallback.kill(sessionId);
     }
 
+    /**
+     * Disconnects the PTY websocket.
+     */
     public void disconnect() {
         ws.close(1000, "client disconnect");
     }
 
+    /**
+     * Returns PTY session identifier.
+     *
+     * @return session ID
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Returns PTY exit code when available.
+     *
+     * @return exit code, or {@code null} if not known yet
+     */
     public Integer getExitCode() {
         return exitCode;
     }
 
+    /**
+     * Returns PTY error or exit reason.
+     *
+     * @return error message, or {@code null} when none
+     */
     public String getError() {
         return error;
     }
 
+    /**
+     * Returns websocket connectivity status.
+     *
+     * @return {@code true} when socket is currently connected
+     */
     public boolean isConnected() {
         return connected;
     }

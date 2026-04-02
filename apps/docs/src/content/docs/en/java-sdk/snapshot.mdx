@@ -1,0 +1,86 @@
+---
+title: "SnapshotService"
+hideTitleOnPage: true
+---
+
+## SnapshotService
+
+Service for managing Daytona Snapshots.
+
+Provides operations to create, list, retrieve, and delete snapshots.
+
+### Methods
+
+#### create()
+```java
+public Snapshot create(String name, String imageName)
+```
+
+Creates a snapshot from an existing image reference.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `imageName` _String_ - source image name or tag
+
+**Returns**:
+
+- `Snapshot` - created {@link Snapshot}
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the API request fails
+
+#### list()
+```java
+public PaginatedSnapshots list(Integer page, Integer limit)
+```
+
+Lists snapshots with pagination.
+
+**Parameters**:
+
+- `page` _Integer_ - page number starting from 1; defaults to 1 when {@code null}
+- `limit` _Integer_ - maximum number of items per page; defaults to 10 when {@code null}
+
+**Returns**:
+
+- `PaginatedSnapshots` - paginated snapshot result
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the API request fails
+
+#### get()
+```java
+public Snapshot get(String nameOrId)
+```
+
+Retrieves a snapshot by name or ID.
+
+**Parameters**:
+
+- `nameOrId` _String_ - snapshot name or identifier
+
+**Returns**:
+
+- `Snapshot` - matching {@link Snapshot}
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if no snapshot is found or request fails
+
+#### delete()
+```java
+public void delete(String id)
+```
+
+Deletes a snapshot by ID.
+
+**Parameters**:
+
+- `id` _String_ - snapshot identifier
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if deletion fails

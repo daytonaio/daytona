@@ -18,6 +18,11 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaValidationException extends DaytonaException {
+    /**
+     * Creates a validation exception.
+     *
+     * @param message error description from the API
+     */
     public DaytonaValidationException(String message) {
         super(422, message);
     }

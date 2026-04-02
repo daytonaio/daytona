@@ -18,10 +18,21 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaConnectionException extends DaytonaException {
+    /**
+     * Creates a connection exception.
+     *
+     * @param message connection failure description
+     */
     public DaytonaConnectionException(String message) {
         super(message);
     }
 
+    /**
+     * Creates a connection exception with a cause.
+     *
+     * @param message connection failure description
+     * @param cause root cause
+     */
     public DaytonaConnectionException(String message, Throwable cause) {
         super(message, cause);
     }

@@ -17,6 +17,12 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaServerException extends DaytonaException {
+    /**
+     * Creates a server exception.
+     *
+     * @param statusCode HTTP status code (typically 5xx)
+     * @param message error description from the API
+     */
     public DaytonaServerException(int statusCode, String message) {
         super(statusCode, message);
     }

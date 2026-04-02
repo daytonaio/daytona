@@ -15,6 +15,11 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaBadRequestException extends DaytonaException {
+    /**
+     * Creates a bad-request exception.
+     *
+     * @param message error description from the API
+     */
     public DaytonaBadRequestException(String message) {
         super(400, message);
     }

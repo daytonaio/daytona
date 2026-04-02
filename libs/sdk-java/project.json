@@ -4,34 +4,42 @@
   "projectType": "library",
   "sourceRoot": "libs/sdk-java/src",
   "targets": {
+    "docs": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/apps/docs/src/content/docs/en/java-sdk/**/*"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "bash -O extglob -c 'rm -rf ../../apps/docs/src/content/docs/en/java-sdk/!(index.mdx)' && node scripts/generate-docs.js"
+      }
+    },
+    "set-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "if [ -n \"$MAVEN_PKG_VERSION\" ]; then sed -i \"s/^version = .*/version = \\\"$MAVEN_PKG_VERSION\\\"/\" build.gradle.kts && echo \"Changed sdk-java version to $MAVEN_PKG_VERSION\"; else echo \"Using version from build.gradle.kts\"; fi"
+      }
+    },
     "build": {
       "executor": "nx:run-commands",
       "inputs": ["default"],
       "outputs": ["{projectRoot}/build"],
       "options": {
         "cwd": "{projectRoot}",
-        "command": "./gradlew build"
-      }
+        "command": "./gradlew build -x test"
+      },
+      "dependsOn": [
+        {
+          "target": "publish",
+          "projects": ["api-client-java", "toolbox-api-client-java"]
+        },
+        "set-version"
+      ]
     },
-    "test": {
+    "publish": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "{workspaceRoot}",
-        "commands": [
-          "examples/java/gradlew -p examples/java/lifecycle run",
-          "examples/java/gradlew -p examples/java/exec-command run",
-          "examples/java/gradlew -p examples/java/file-operations run",
-          "examples/java/gradlew -p examples/java/git run",
-          "examples/java/gradlew -p examples/java/auto-archive run",
-          "examples/java/gradlew -p examples/java/auto-delete run",
-          "examples/java/gradlew -p examples/java/declarative-image run",
-          "examples/java/gradlew -p examples/java/network-settings run",
-          "examples/java/gradlew -p examples/java/pagination run",
-          "examples/java/gradlew -p examples/java/volumes run",
-          "examples/java/gradlew -p examples/java/region run",
-          "examples/java/gradlew -p examples/java/pty run"
-        ],
-        "parallel": false
+        "cwd": "{projectRoot}",
+        "command": "rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
       },
       "dependsOn": ["build"]
     },

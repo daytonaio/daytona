@@ -18,6 +18,11 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaConflictException extends DaytonaException {
+    /**
+     * Creates a conflict exception.
+     *
+     * @param message error description from the API
+     */
     public DaytonaConflictException(String message) {
         super(409, message);
     }

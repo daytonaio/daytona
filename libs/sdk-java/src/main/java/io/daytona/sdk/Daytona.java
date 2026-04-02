@@ -25,6 +25,17 @@ import java.util.List;
 import java.util.Map;
 import java.lang.reflect.Field;
 
+/**
+ * Main class for interacting with the Daytona API.
+ *
+ * <p>Provides methods to create, retrieve, and list Sandboxes, and exposes service accessors for
+ * Snapshots and Volumes.
+ *
+ * <p>Implements {@link AutoCloseable} for deterministic HTTP resource cleanup.
+ *
+ * @see DaytonaConfig
+ * @see Sandbox
+ */
 public class Daytona implements AutoCloseable {
     private final DaytonaConfig config;
     private final io.daytona.api.client.ApiClient apiClient;
@@ -33,6 +44,13 @@ public class Daytona implements AutoCloseable {
     private final VolumeService volume;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Creates a client using environment variables.
+     *
+     * <p>Reads {@code DAYTONA_API_KEY}, {@code DAYTONA_API_URL}, and {@code DAYTONA_TARGET}.
+     *
+     * @throws DaytonaException if required authentication is missing
+     */
     public Daytona() {
         this(new DaytonaConfig.Builder()
                 .apiKey(System.getenv("DAYTONA_API_KEY"))
@@ -41,6 +59,12 @@ public class Daytona implements AutoCloseable {
                 .build());
     }
 
+    /**
+     * Creates a client with explicit configuration.
+     *
+     * @param config SDK configuration containing API key and endpoint settings
+     * @throws DaytonaException if configuration is invalid or missing credentials
+     */
     public Daytona(DaytonaConfig config) {
         if (config == null || config.getApiKey() == null || config.getApiKey().isEmpty()) {
             throw new DaytonaException("DAYTONA_API_KEY is required");
@@ -52,18 +76,46 @@ public class Daytona implements AutoCloseable {
         this.volume = new VolumeService(new io.daytona.api.client.api.VolumesApi(apiClient));
     }
 
+    /**
+     * Creates a Sandbox with default parameters and timeout.
+     *
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation or startup fails
+     */
     public Sandbox create() {
         return create(new CreateSandboxFromSnapshotParams(), 60);
     }
 
+    /**
+     * Creates a Sandbox from snapshot-oriented parameters using default timeout.
+     *
+     * @param params snapshot creation parameters
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation or startup fails
+     */
     public Sandbox create(CreateSandboxFromSnapshotParams params) {
         return create(params, 60);
     }
 
+    /**
+     * Creates a Sandbox from image-oriented parameters using default timeout.
+     *
+     * @param params image creation parameters
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation or startup fails
+     */
     public Sandbox create(CreateSandboxFromImageParams params) {
         return create(params, 60);
     }
 
+    /**
+     * Creates a Sandbox from snapshot parameters.
+     *
+     * @param params snapshot creation parameters including env vars, labels, and lifecycle options
+     * @param timeoutSeconds maximum seconds to wait for the Sandbox to reach {@code started}
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation fails or the Sandbox does not start in time
+     */
     public Sandbox create(CreateSandboxFromSnapshotParams params, long timeoutSeconds) {
         CreateSandbox body = baseSandboxBody(params);
         if (params != null && params.getSnapshot() != null && !params.getSnapshot().isEmpty()) {
@@ -75,6 +127,14 @@ public class Daytona implements AutoCloseable {
         return sandbox;
     }
 
+    /**
+     * Creates a Sandbox from image parameters.
+     *
+     * @param params image creation parameters including image source and optional resources
+     * @param timeoutSeconds maximum seconds to wait for the Sandbox to reach {@code started}
+     * @return created and started {@link Sandbox}
+     * @throws DaytonaException if creation fails or the Sandbox does not start in time
+     */
     public Sandbox create(CreateSandboxFromImageParams params, long timeoutSeconds) {
         CreateSandbox body = baseSandboxBody(params);
         if (params != null) {
@@ -99,15 +159,37 @@ public class Daytona implements AutoCloseable {
         return sandbox;
     }
 
+    /**
+     * Retrieves a Sandbox by ID or name.
+     *
+     * @param sandboxIdOrName Sandbox identifier or name
+     * @return resolved {@link Sandbox}
+     * @throws DaytonaException if the Sandbox is not found or request fails
+     */
     public Sandbox get(String sandboxIdOrName) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(sandboxIdOrName, null, null));
         return new Sandbox(sandboxApi, config, response);
     }
 
+    /**
+     * Lists Sandboxes using default pagination.
+     *
+     * @return first page of Sandboxes with default page size
+     * @throws DaytonaException if listing fails
+     */
     public PaginatedSandboxes list() {
         return list(null, 1, 10);
     }
 
+    /**
+     * Lists Sandboxes with optional label filtering and pagination.
+     *
+     * @param labels label filter map; only Sandboxes with matching labels are returned
+     * @param page page number starting from 1
+     * @param limit maximum items per page
+     * @return paginated Sandbox list
+     * @throws DaytonaException if listing fails
+     */
     public PaginatedSandboxes list(Map<String, String> labels, Integer page, Integer limit) {
         int p = page == null ? 1 : page;
         int l = limit == null ? 10 : limit;
@@ -153,14 +235,27 @@ public class Daytona implements AutoCloseable {
         return paginated;
     }
 
+    /**
+     * Returns Snapshot management service.
+     *
+     * @return snapshot service instance
+     */
     public SnapshotService snapshot() {
         return snapshot;
     }
 
+    /**
+     * Returns Volume management service.
+     *
+     * @return volume service instance
+     */
     public VolumeService volume() {
         return volume;
     }
 
+    /**
+     * Closes this client and releases underlying HTTP resources.
+     */
     @Override
     public void close() {
         shutdownHttpClient(apiClient.getHttpClient());

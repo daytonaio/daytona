@@ -1,0 +1,353 @@
+---
+title: "Errors"
+hideTitleOnPage: true
+---
+
+## DaytonaException
+
+Base exception for all Daytona SDK errors.
+
+Subclasses map to specific HTTP status codes and allow callers to catch
+precise failure conditions without string-parsing error messages:
+```java
+try {
+Sandbox sandbox = daytona.sandbox().get("nonexistent-id");
+} catch (DaytonaNotFoundException e) {
+// sandbox does not exist
+} catch (DaytonaAuthenticationException e) {
+// invalid API key
+} catch (DaytonaException e) {
+// other SDK error
+}
+```
+
+### Constructors
+
+#### new DaytonaException()
+```java
+public DaytonaException(String message)
+```
+
+Creates a generic Daytona exception.
+
+**Parameters**:
+
+- `message` _String_ - error description
+
+#### new DaytonaException()
+```java
+public DaytonaException(String message, Throwable cause)
+```
+
+Creates a generic Daytona exception with a cause.
+
+**Parameters**:
+
+- `message` _String_ - error description
+- `cause` _Throwable_ - root cause
+
+#### new DaytonaException()
+```java
+public DaytonaException(int statusCode, String message)
+```
+
+Creates a Daytona exception with explicit HTTP status code.
+
+**Parameters**:
+
+- `statusCode` _int_ - HTTP status code
+- `message` _String_ - error description
+
+#### new DaytonaException()
+```java
+public DaytonaException(int statusCode, String message, Map<String, String> headers)
+```
+
+Creates a Daytona exception with HTTP status code and headers.
+
+**Parameters**:
+
+- `statusCode` _int_ - HTTP status code
+- `message` _String_ - error description
+- `headers` _Map\<String, String\>_ - response headers
+
+### Methods
+
+#### getStatusCode()
+```java
+public int getStatusCode()
+```
+
+Returns the HTTP status code, or 0 if not applicable.
+
+**Returns**:
+
+- `int` -
+
+#### getHeaders()
+```java
+public Map<String, String> getHeaders()
+```
+
+Returns the HTTP response headers, or an empty map if not available.
+
+**Returns**:
+
+- `Map\<String, String\>` -
+
+## DaytonaAuthenticationException
+
+Raised when API credentials are missing or invalid (HTTP 401).
+```java
+try {
+daytona.sandbox().create();
+} catch (DaytonaAuthenticationException e) {
+System.err.println("Invalid or missing API key");
+}
+```
+
+### Constructors
+
+#### new DaytonaAuthenticationException()
+```java
+public DaytonaAuthenticationException(String message)
+```
+
+Creates an authentication exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaBadRequestException
+
+Raised when the request is malformed or contains invalid parameters (HTTP 400).
+```java
+try {
+daytona.sandbox().create(params);
+} catch (DaytonaBadRequestException e) {
+System.err.println("Invalid request parameters: " + e.getMessage());
+}
+```
+
+### Constructors
+
+#### new DaytonaBadRequestException()
+```java
+public DaytonaBadRequestException(String message)
+```
+
+Creates a bad-request exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaConflictException
+
+Raised when an operation conflicts with the current state (HTTP 409).
+
+Common causes: creating a resource with a name that already exists,
+or performing an operation incompatible with the resource's current state.
+```java
+try {
+daytona.snapshot().create(params);
+} catch (DaytonaConflictException e) {
+System.err.println("A snapshot with this name already exists");
+}
+```
+
+### Constructors
+
+#### new DaytonaConflictException()
+```java
+public DaytonaConflictException(String message)
+```
+
+Creates a conflict exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaConnectionException
+
+Raised for network-level connection failures (no HTTP response received).
+
+Raised when the SDK cannot reach the Daytona API due to network issues
+such as DNS failure, connection refused, or TLS errors.
+```java
+try {
+daytona.sandbox().create();
+} catch (DaytonaConnectionException e) {
+System.err.println("Cannot reach Daytona API: " + e.getMessage());
+}
+```
+
+### Constructors
+
+#### new DaytonaConnectionException()
+```java
+public DaytonaConnectionException(String message)
+```
+
+Creates a connection exception.
+
+**Parameters**:
+
+- `message` _String_ - connection failure description
+
+#### new DaytonaConnectionException()
+```java
+public DaytonaConnectionException(String message, Throwable cause)
+```
+
+Creates a connection exception with a cause.
+
+**Parameters**:
+
+- `message` _String_ - connection failure description
+- `cause` _Throwable_ - root cause
+
+## DaytonaForbiddenException
+
+Raised when the authenticated user lacks permission to perform an operation (HTTP 403).
+```java
+try {
+daytona.sandbox().delete(sandboxId);
+} catch (DaytonaForbiddenException e) {
+System.err.println("Not authorized to delete this sandbox");
+}
+```
+
+### Constructors
+
+#### new DaytonaForbiddenException()
+```java
+public DaytonaForbiddenException(String message)
+```
+
+Creates a forbidden exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaNotFoundException
+
+Raised when a requested resource does not exist (HTTP 404).
+
+### Constructors
+
+#### new DaytonaNotFoundException()
+```java
+public DaytonaNotFoundException(String message)
+```
+
+Creates a not-found exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaRateLimitException
+
+Raised when API rate limits are exceeded (HTTP 429).
+
+### Constructors
+
+#### new DaytonaRateLimitException()
+```java
+public DaytonaRateLimitException(String message)
+```
+
+Creates a rate-limit exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API
+
+## DaytonaServerException
+
+Raised for unexpected server-side failures (HTTP 5xx).
+
+These are typically transient and safe to retry with exponential backoff.
+```java
+try {
+daytona.sandbox().create();
+} catch (DaytonaServerException e) {
+System.err.println("Server error (status " + e.getStatusCode() + "), retry later");
+}
+```
+
+### Constructors
+
+#### new DaytonaServerException()
+```java
+public DaytonaServerException(int statusCode, String message)
+```
+
+Creates a server exception.
+
+**Parameters**:
+
+- `statusCode` _int_ - HTTP status code (typically 5xx)
+- `message` _String_ - error description from the API
+
+## DaytonaTimeoutException
+
+Raised when an SDK operation times out.
+
+This exception is generated client-side and is not tied to a single HTTP status code.
+
+### Constructors
+
+#### new DaytonaTimeoutException()
+```java
+public DaytonaTimeoutException(String message, Throwable cause)
+```
+
+Creates a timeout exception with a cause.
+
+**Parameters**:
+
+- `message` _String_ - timeout description
+- `cause` _Throwable_ - root cause
+
+#### new DaytonaTimeoutException()
+```java
+public DaytonaTimeoutException(String message)
+```
+
+Creates a timeout exception.
+
+**Parameters**:
+
+- `message` _String_ - timeout description
+
+## DaytonaValidationException
+
+Raised for semantic validation failures (HTTP 422).
+
+Raised when the request is well-formed but the values fail business logic
+validation (e.g., unsupported resource class, invalid configuration).
+```java
+try {
+daytona.sandbox().create(params);
+} catch (DaytonaValidationException e) {
+System.err.println("Validation failed: " + e.getMessage());
+}
+```
+
+### Constructors
+
+#### new DaytonaValidationException()
+```java
+public DaytonaValidationException(String message)
+```
+
+Creates a validation exception.
+
+**Parameters**:
+
+- `message` _String_ - error description from the API

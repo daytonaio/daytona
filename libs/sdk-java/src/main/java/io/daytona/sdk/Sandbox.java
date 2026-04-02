@@ -12,6 +12,12 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a Daytona Sandbox instance.
+ *
+ * <p>Exposes lifecycle controls and operation facades for process execution, file-system access,
+ * and Git.
+ */
 public class Sandbox {
     private final SandboxApi sandboxApi;
     private final io.daytona.toolbox.client.ApiClient toolboxApiClient;
@@ -34,9 +40,16 @@ public class Sandbox {
     private Integer autoArchiveInterval;
     private Integer autoDeleteInterval;
 
-    public final SandboxProcess process;
-    public final SandboxFileSystem fs;
-    public final SandboxGit git;
+    /** Process execution interface for this Sandbox. */
+    public final Process process;
+    /** File-system operations interface for this Sandbox. */
+    public final FileSystem fs;
+    /** Git operations interface for this Sandbox. */
+    public final Git git;
+    /** Computer use (desktop automation) interface for this Sandbox. */
+    public final ComputerUse computerUse;
+    /** Stateful code interpreter for this Sandbox (Python). */
+    public final CodeInterpreter codeInterpreter;
 
     Sandbox(SandboxApi sandboxApi, DaytonaConfig config, io.daytona.api.client.model.Sandbox data) {
         this.sandboxApi = sandboxApi;
@@ -57,15 +70,52 @@ public class Sandbox {
         this.toolboxApiClient.setUserAgent("sdk-java/0.1.0");
 
         this.infoApi = new io.daytona.toolbox.client.api.InfoApi(toolboxApiClient);
-        this.process = new SandboxProcess(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
-        this.fs = new SandboxFileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
-        this.git = new SandboxGit(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
+        this.process = new Process(new io.daytona.toolbox.client.api.ProcessApi(toolboxApiClient), this);
+        this.fs = new FileSystem(new io.daytona.toolbox.client.api.FileSystemApi(toolboxApiClient));
+        this.git = new Git(new io.daytona.toolbox.client.api.GitApi(toolboxApiClient));
+        this.computerUse = new ComputerUse(new io.daytona.toolbox.client.api.ComputerUseApi(toolboxApiClient));
+        this.codeInterpreter = new CodeInterpreter(new io.daytona.toolbox.client.api.InterpreterApi(toolboxApiClient), this);
     }
 
+    /**
+     * Creates an LSP server instance for the specified language and project.
+     *
+     * @param languageId language server to start (e.g. "typescript", "python", "go")
+     * @param pathToProject absolute path to the project root inside the sandbox
+     * @return a new {@link LspServer} configured for the given language
+     */
+    public LspServer createLspServer(String languageId, String pathToProject) {
+        return new LspServer(new io.daytona.toolbox.client.api.LspApi(toolboxApiClient));
+    }
+
+    io.daytona.sdk.codetoolbox.CodeToolbox getCodeToolbox() {
+        String lang = "python";
+        if (labels != null && labels.containsKey("code-toolbox-language")) {
+            lang = labels.get("code-toolbox-language");
+        }
+        if ("typescript".equalsIgnoreCase(lang)) {
+            return new io.daytona.sdk.codetoolbox.TypeScriptCodeToolbox();
+        } else if ("javascript".equalsIgnoreCase(lang)) {
+            return new io.daytona.sdk.codetoolbox.JavaScriptCodeToolbox();
+        }
+        return new io.daytona.sdk.codetoolbox.PythonCodeToolbox();
+    }
+
+    /**
+     * Starts this Sandbox with default timeout.
+     *
+     * @throws DaytonaException if the Sandbox fails to start
+     */
     public void start() {
         start(60);
     }
 
+    /**
+     * Starts this Sandbox and waits for readiness.
+     *
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if start fails or times out
+     */
     public void start(long timeoutSeconds) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.startSandbox(id, null));
         if (response != null) {
@@ -74,16 +124,33 @@ public class Sandbox {
         waitUntilStarted(timeoutSeconds);
     }
 
+    /**
+     * Stops this Sandbox with default timeout.
+     *
+     * @throws DaytonaException if the Sandbox fails to stop
+     */
     public void stop() {
         stop(60);
     }
 
+    /**
+     * Stops this Sandbox and waits until fully stopped.
+     *
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if stop fails or times out
+     */
     public void stop(long timeoutSeconds) {
         ExceptionMapper.callMain(() -> sandboxApi.stopSandbox(id, null, null));
         refreshData();
         waitUntilStopped(timeoutSeconds);
     }
 
+    /**
+     * Waits until Sandbox reaches {@code stopped} (or {@code destroyed}) state.
+     *
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if timeout is invalid, state becomes error, or timeout expires
+     */
     public void waitUntilStopped(long timeoutSeconds) {
         if (timeoutSeconds < 0) {
             throw new DaytonaException("Timeout must be non-negative");
@@ -109,14 +176,32 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Deletes this Sandbox with default timeout behavior.
+     *
+     * @throws DaytonaException if deletion fails
+     */
     public void delete() {
         delete(60);
     }
 
+    /**
+     * Deletes this Sandbox.
+     *
+     * @param timeoutSeconds reserved timeout parameter for parity with other SDKs
+     * @throws DaytonaException if deletion fails
+     */
     public void delete(long timeoutSeconds) {
         ExceptionMapper.callMain(() -> sandboxApi.deleteSandbox(id, null));
     }
 
+    /**
+     * Replaces Sandbox labels.
+     *
+     * @param labels label map to apply
+     * @return updated labels
+     * @throws DaytonaException if label update fails
+     */
     public Map<String, String> setLabels(Map<String, String> labels) {
         ExceptionMapper.callMain(() -> {
             okhttp3.Call call = sandboxApi.replaceLabelsCall(id, new SandboxLabels().labels(labels), null, null);
@@ -127,6 +212,12 @@ public class Sandbox {
         return this.labels;
     }
 
+    /**
+     * Sets Sandbox auto-stop interval.
+     *
+     * @param minutes idle minutes before automatic stop
+     * @throws DaytonaException if the update fails
+     */
     public void setAutostopInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutostopInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
@@ -134,6 +225,12 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Sets Sandbox auto-archive interval.
+     *
+     * @param minutes minutes in stopped state before automatic archive
+     * @throws DaytonaException if the update fails
+     */
     public void setAutoArchiveInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoArchiveInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
@@ -141,6 +238,12 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Sets Sandbox auto-delete interval.
+     *
+     * @param minutes minutes before automatic deletion after stop
+     * @throws DaytonaException if the update fails
+     */
     public void setAutoDeleteInterval(int minutes) {
         io.daytona.api.client.model.Sandbox response = ExceptionMapper.callMain(() -> sandboxApi.setAutoDeleteInterval(id, BigDecimal.valueOf(minutes), null));
         if (response != null) {
@@ -148,16 +251,34 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Returns home directory path for Sandbox user.
+     *
+     * @return absolute home directory path
+     * @throws DaytonaException if the request fails
+     */
     public String getUserHomeDir() {
         io.daytona.toolbox.client.model.UserHomeDirResponse value = ExceptionMapper.callToolbox(() -> infoApi.getUserHomeDir());
         return value == null ? "" : asString(value.getDir());
     }
 
+    /**
+     * Returns current working directory path.
+     *
+     * @return absolute working directory path
+     * @throws DaytonaException if the request fails
+     */
     public String getWorkDir() {
         io.daytona.toolbox.client.model.WorkDirResponse value = ExceptionMapper.callToolbox(() -> infoApi.getWorkDir());
         return value == null ? "" : asString(value.getDir());
     }
 
+    /**
+     * Waits until Sandbox reaches {@code started} state.
+     *
+     * @param timeoutSeconds maximum seconds to wait; {@code 0} disables timeout
+     * @throws DaytonaException if timeout is invalid, state becomes failure, or timeout expires
+     */
     public void waitUntilStarted(long timeoutSeconds) {
         if (timeoutSeconds < 0) {
             throw new DaytonaException("Timeout must be non-negative");
@@ -184,6 +305,11 @@ public class Sandbox {
         }
     }
 
+    /**
+     * Refreshes local Sandbox fields from latest API state.
+     *
+     * @throws DaytonaException if refresh fails
+     */
     public void refreshData() {
         io.daytona.api.client.model.Sandbox data = ExceptionMapper.callMain(() -> sandboxApi.getSandbox(id, null, null));
         if (data != null) {
@@ -227,25 +353,115 @@ public class Sandbox {
         return output;
     }
 
+    /**
+     * Returns Sandbox ID.
+     *
+     * @return Sandbox ID
+     */
     public String getId() { return id; }
+    /**
+     * Returns Sandbox name.
+     *
+     * @return Sandbox name
+     */
     public String getName() { return name; }
+    /**
+     * Returns Sandbox state.
+     *
+     * @return lifecycle state
+     */
     public String getState() { return state; }
+    /**
+     * Returns target region.
+     *
+     * @return target identifier
+     */
     public String getTarget() { return target; }
+    /**
+     * Returns Sandbox OS user.
+     *
+     * @return OS user
+     */
     public String getUser() { return user; }
+    /**
+     * Returns toolbox proxy URL.
+     *
+     * @return proxy URL
+     */
     public String getToolboxProxyUrl() { return toolboxProxyUrl; }
+    /**
+     * Returns allocated CPU cores.
+     *
+     * @return CPU cores
+     */
     public int getCpu() { return cpu; }
+    /**
+     * Returns allocated GPU units.
+     *
+     * @return GPU units
+     */
     public int getGpu() { return gpu; }
+    /**
+     * Returns allocated memory in GiB.
+     *
+     * @return memory in GiB
+     */
     public int getMemory() { return memory; }
+    /**
+     * Returns allocated disk in GiB.
+     *
+     * @return disk in GiB
+     */
     public int getDisk() { return disk; }
+    /**
+     * Returns Sandbox environment variables.
+     *
+     * @return environment map
+     */
     public Map<String, String> getEnv() { return env; }
+    /**
+     * Returns Sandbox labels.
+     *
+     * @return labels map
+     */
     public Map<String, String> getLabels() { return labels; }
+    /**
+     * Returns auto-stop interval in minutes.
+     *
+     * @return auto-stop interval
+     */
     public Integer getAutoStopInterval() { return autoStopInterval; }
+    /**
+     * Returns auto-archive interval in minutes.
+     *
+     * @return auto-archive interval
+     */
     public Integer getAutoArchiveInterval() { return autoArchiveInterval; }
+    /**
+     * Returns auto-delete interval in minutes.
+     *
+     * @return auto-delete interval
+     */
     public Integer getAutoDeleteInterval() { return autoDeleteInterval; }
 
-    public SandboxProcess getProcess() { return process; }
-    public SandboxFileSystem getFs() { return fs; }
-    public SandboxGit getGit() { return git; }
+    /**
+     * Returns process operations facade.
+     *
+     * @return process interface
+     */
+    public Process getProcess() { return process; }
+    /**
+     * Returns file-system operations facade.
+     *
+     * @return file-system interface
+     */
+    public FileSystem getFs() { return fs; }
+    /**
+     * Returns Git operations facade.
+     *
+     * @return Git interface
+     */
+    public Git getGit() { return git; }
     io.daytona.toolbox.client.ApiClient getToolboxApiClient() { return toolboxApiClient; }
     String getApiKey() { return apiKey; }
 }

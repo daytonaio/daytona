@@ -15,6 +15,11 @@ package io.daytona.sdk.exception;
  * }</pre>
  */
 public class DaytonaAuthenticationException extends DaytonaException {
+    /**
+     * Creates an authentication exception.
+     *
+     * @param message error description from the API
+     */
     public DaytonaAuthenticationException(String message) {
         super(401, message);
     }
