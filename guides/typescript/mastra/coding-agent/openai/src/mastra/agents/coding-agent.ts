@@ -216,7 +216,7 @@ Remember: You are not just a code executor, but a complete development environme
       workingMemory: { enabled: true },
     },
     embedder: fastembed,
-    vector: new LibSQLVector({ id: 'coding-agent-vector', connectionUrl: 'file:../../mastra.db' }),
+    vector: new LibSQLVector({ id: 'coding-agent-vector', url: 'file:../../mastra.db' }),
   }),
   defaultOptions: { maxSteps: 20 },
 })
