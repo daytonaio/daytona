@@ -10,7 +10,6 @@ on:
 
 env:
   VERSION: ${{ inputs.version }}
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   prepare:
@@ -48,6 +47,8 @@ jobs:
           yarn prepare-release
 
       - name: Push branch and create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git push origin "prepare-release-$VERSION"
           gh pr create \
