@@ -50,6 +50,7 @@ import { UpdateOrganizationRegionQuotaDto } from '../dto/update-organization-reg
 import { UpdateOrganizationDefaultRegionDto } from '../dto/update-organization-default-region.dto'
 import { RegionQuotaDto } from '../dto/region-quota.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { FeatureFlagConfig } from '@daytonaio/feature-flags'
 import { OrGuard } from '../../auth/or.guard'
 import { OtelCollectorGuard } from '../../auth/otel-collector.guard'
 import { OtelConfigDto } from '../dto/otel-config.dto'
@@ -652,7 +653,7 @@ export class OrganizationController {
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_EXPERIMENTS] })
   async updateExperimentalConfig(
     @Param('organizationId') organizationId: string,
     @Body() experimentalConfig: Record<string, any> | null,

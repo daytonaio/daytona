@@ -18,8 +18,8 @@ import { SandboxState as SandboxStateComponent } from './SandboxTable/SandboxSta
 import { TimestampTooltip } from './TimestampTooltip'
 import { LogsTab, TracesTab, MetricsTab } from './telemetry'
 import { SandboxSpendingTab } from './spending'
-import { useFeatureFlagEnabled } from 'posthog-js/react'
-import { FeatureFlags } from '@/enums/FeatureFlags'
+import { useBooleanFlagValue } from '@openfeature/react-sdk'
+import { FeatureFlags } from '@daytonaio/feature-flags'
 import { useConfig } from '@/hooks/useConfig'
 
 interface SandboxDetailsSheetProps {
@@ -54,8 +54,8 @@ const SandboxDetailsSheet: React.FC<SandboxDetailsSheetProps> = ({
   handleRecover,
 }) => {
   const [terminalUrl, setTerminalUrl] = useState<string | null>(null)
-  const experimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
-  const spendingEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_SPENDING)
+  const experimentsEnabled = useBooleanFlagValue(FeatureFlags.ORGANIZATION_EXPERIMENTS, false)
+  const spendingEnabled = useBooleanFlagValue(FeatureFlags.SANDBOX_SPENDING, false)
   const config = useConfig()
   const spendingTabAvailable = spendingEnabled && !!config.analyticsApiUrl
 

@@ -8657,10 +8657,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openfeature/core@npm:^1.9.0":
-  version: 1.9.0
-  resolution: "@openfeature/core@npm:1.9.0"
-  checksum: 10c0/957ee82fff323850e5255e46eb91222b2ec364fce7e8dd8f1277e0b24c0f9464714f9793a9492ede5b5c4f1457f3bfec885a86122d3ee01bfe678ba6b6ddbc08
+"@openfeature/core@npm:^1.9.2":
+  version: 1.9.2
+  resolution: "@openfeature/core@npm:1.9.2"
+  checksum: 10c0/a0600c16f9c9e8721964643d2b0ccf5501767eee34908eec1a2a4d8fdb47c5f8224bdc254067a18d069bf7d57d9bdbc7b9cdf50cb1cb8d253778c43c11ed760b
   languageName: node
   linkType: hard
 
@@ -8676,22 +8676,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openfeature/react-sdk@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "@openfeature/react-sdk@npm:1.0.1"
+"@openfeature/react-sdk@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@openfeature/react-sdk@npm:1.2.1"
   peerDependencies:
     "@openfeature/web-sdk": ^1.5.0
     react: ">=16.8.0"
-  checksum: 10c0/204033d57736d2c443df9718791eab305a8e3671c314e2a83a1e2e0eae03d16dffc488330c4de50531742356a79522f1d4ee5ad1f51b431b930b9470ccfb0894
+  checksum: 10c0/6a0de5240bc3dd4140cfe8dd8b96a4f34ea11dde0b4eed8d85c921ff5461b6c7c54048740e791f001453a1b19c608aa2ea4540abbfd4cffd2f80975f1b3d06eb
   languageName: node
   linkType: hard
 
-"@openfeature/server-sdk@npm:^1.19.0":
-  version: 1.19.0
-  resolution: "@openfeature/server-sdk@npm:1.19.0"
+"@openfeature/server-sdk@npm:^1.20.2":
+  version: 1.20.2
+  resolution: "@openfeature/server-sdk@npm:1.20.2"
   peerDependencies:
-    "@openfeature/core": ^1.9.0
-  checksum: 10c0/3b0f2b63123323403d6b93326799c20a2f4ce80f8f39e834857b0685a3beb7a084f1ff316a469cbe006f69b9a4ff75deddf9fabd7ea8e25517c99081d0bfba8c
+    "@openfeature/core": ^1.9.2
+  checksum: 10c0/e3799aeedace46db60312223b352daaf6c122d66f8013d24552c04d05d2850c2e9508b0cd5b3d107c9ee782615902445175114a8617ea55be3153c2b44a9dfa9
+  languageName: node
+  linkType: hard
+
+"@openfeature/web-sdk@npm:^1.7.3":
+  version: 1.7.3
+  resolution: "@openfeature/web-sdk@npm:1.7.3"
+  peerDependencies:
+    "@openfeature/core": ^1.9.2
+  checksum: 10c0/e3e409f7cff6ff83fcc9a6251dbc7ed22b1d9caab82b60675c8764e34ac61a50877d404d4f13136993fc4a456702b8aea8eb1a0789e6e5df586fc1ad4482f0d7
   languageName: node
   linkType: hard
 
@@ -19776,10 +19785,11 @@ __metadata:
     "@nx/workspace": "npm:21.4.1"
     "@openapitools/openapi-generator-cli": "npm:^2.16.3"
     "@opencode-ai/plugin": "npm:^1.1.42"
-    "@openfeature/core": "npm:^1.9.0"
+    "@openfeature/core": "npm:^1.9.2"
     "@openfeature/nestjs-sdk": "npm:^0.2.5"
-    "@openfeature/react-sdk": "npm:^1.0.1"
-    "@openfeature/server-sdk": "npm:^1.19.0"
+    "@openfeature/react-sdk": "npm:^1.2.1"
+    "@openfeature/server-sdk": "npm:^1.20.2"
+    "@openfeature/web-sdk": "npm:^1.7.3"
     "@opensearch-project/opensearch": "npm:^3.5.1"
     "@opentelemetry/api": "npm:^1.9.0"
     "@opentelemetry/exporter-logs-otlp-http": "npm:^0.207.0"

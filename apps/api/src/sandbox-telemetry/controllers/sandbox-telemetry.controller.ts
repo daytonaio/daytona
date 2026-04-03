@@ -17,6 +17,7 @@ import { PaginatedTracesDto } from '../dto/paginated-traces.dto'
 import { TraceSpanDto } from '../dto/trace-span.dto'
 import { MetricsResponseDto } from '../dto/metrics-response.dto'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
+import { FeatureFlagConfig } from '@daytonaio/feature-flags'
 import { AnalyticsApiDisabledGuard } from '../guards/analytics-api-disabled.guard'
 
 @ApiTags('sandbox')
@@ -45,7 +46,7 @@ export class SandboxTelemetryController {
     type: PaginatedLogsDto,
   })
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_EXPERIMENTS] })
   async getSandboxLogs(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: LogsQueryParamsDto,
@@ -78,7 +79,7 @@ export class SandboxTelemetryController {
     type: PaginatedTracesDto,
   })
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_EXPERIMENTS] })
   async getSandboxTraces(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: TelemetryQueryParamsDto,
@@ -114,7 +115,7 @@ export class SandboxTelemetryController {
     type: [TraceSpanDto],
   })
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_EXPERIMENTS] })
   async getSandboxTraceSpans(
     @Param('sandboxId') sandboxId: string,
     @Param('traceId') traceId: string,
@@ -139,7 +140,7 @@ export class SandboxTelemetryController {
     type: MetricsResponseDto,
   })
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: 'organization_experiments', defaultValue: true }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.ORGANIZATION_EXPERIMENTS] })
   async getSandboxMetrics(
     @Param('sandboxId') sandboxId: string,
     @Query() queryParams: MetricsQueryParamsDto,

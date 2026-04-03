@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/sidebar'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 import { useTheme } from '@/contexts/ThemeContext'
-import { FeatureFlags } from '@/enums/FeatureFlags'
+import { FeatureFlags } from '@daytonaio/feature-flags'
 import { RoutePath } from '@/enums/RoutePath'
 import { useWebhookAppPortalAccessQuery } from '@/hooks/queries/useWebhookAppPortalAccessQuery'
 import { useConfig } from '@/hooks/useConfig'
@@ -61,7 +61,8 @@ import {
   TextSearch,
   Users,
 } from 'lucide-react'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { useBooleanFlagValue } from '@openfeature/react-sdk'
+import { usePostHog } from 'posthog-js/react'
 import React, { useMemo } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -121,10 +122,10 @@ export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarPro
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
   const { isInitialized: webhooksInitialized } = useWebhooks()
   const webhooksAccess = useWebhookAppPortalAccessQuery(selectedOrganization?.id)
-  const orgInfraEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_INFRASTRUCTURE)
-  const organizationExperimentsEnabled = useFeatureFlagEnabled(FeatureFlags.ORGANIZATION_EXPERIMENTS)
-  const playgroundEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_PLAYGROUND)
-  const webhooksEnabled = useFeatureFlagEnabled(FeatureFlags.DASHBOARD_WEBHOOKS)
+  const orgInfraEnabled = useBooleanFlagValue(FeatureFlags.ORGANIZATION_INFRASTRUCTURE, false)
+  const organizationExperimentsEnabled = useBooleanFlagValue(FeatureFlags.ORGANIZATION_EXPERIMENTS, false)
+  const playgroundEnabled = useBooleanFlagValue(FeatureFlags.DASHBOARD_PLAYGROUND, false)
+  const webhooksEnabled = useBooleanFlagValue(FeatureFlags.DASHBOARD_WEBHOOKS, false)
 
   const sidebarItems = useMemo(() => {
     const arr: SidebarItem[] = [

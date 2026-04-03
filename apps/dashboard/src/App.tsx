@@ -14,7 +14,8 @@ import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationPr
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
 import { initPylon } from '@/vendor/pylon'
 import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { useFeatureFlagEnabled, usePostHog } from 'posthog-js/react'
+import { useBooleanFlagValue } from '@openfeature/react-sdk'
+import { usePostHog } from 'posthog-js/react'
 import React, { Suspense, useEffect } from 'react'
 import { useAuth } from 'react-oidc-context'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
@@ -31,7 +32,7 @@ import {
   DialogTitle,
 } from './components/ui/dialog'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
-import { FeatureFlags } from './enums/FeatureFlags'
+import { FeatureFlags } from '@daytonaio/feature-flags'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { useConfig } from './hooks/useConfig'
 import AccountSettings from './pages/AccountSettings'
@@ -330,7 +331,7 @@ function RequiredPermissionsOrganizationPageWrapper({
 }
 
 function RequiredFeatureFlagWrapper({ children, flagKey }: { children: React.ReactNode; flagKey: FeatureFlags }) {
-  const flagEnabled = useFeatureFlagEnabled(flagKey)
+  const flagEnabled = useBooleanFlagValue(flagKey, false)
 
   if (!flagEnabled) {
     return <Navigate to={RoutePath.DASHBOARD} replace />

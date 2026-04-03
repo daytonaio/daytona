@@ -78,7 +78,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SANDBOX_EVENT_CHANNEL } from '../../common/constants/constants'
 import { RequireFlagsEnabled } from '@openfeature/nestjs-sdk'
-import { FeatureFlags } from '../../common/constants/feature-flags'
+import { FeatureFlagConfig } from '@daytonaio/feature-flags'
 import { RegionSandboxAccessGuard } from '../guards/region-sandbox-access.guard'
 
 @ApiTags('sandbox')
@@ -557,7 +557,7 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
-  @RequireFlagsEnabled({ flags: [{ flagKey: FeatureFlags.SANDBOX_RESIZE, defaultValue: false }] })
+  @RequireFlagsEnabled({ flags: [FeatureFlagConfig.SANDBOX_RESIZE] })
   @Audit({
     action: AuditAction.RESIZE,
     targetType: AuditTarget.SANDBOX,

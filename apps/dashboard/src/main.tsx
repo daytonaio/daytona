@@ -15,6 +15,7 @@ import { PostHogProviderWrapper } from './components/PostHogProviderWrapper'
 import { ThemeProvider } from './contexts/ThemeContext'
 import './index.css'
 import { ConfigProvider } from './providers/ConfigProvider'
+import { OpenFeatureProviderWrapper } from './providers/OpenFeatureProviderWrapper'
 import { QueryProvider } from './providers/QueryProvider'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
@@ -38,9 +39,11 @@ enableMocking().then(() =>
               <ConfigProvider>
                 <BrowserRouter>
                   <PostHogProviderWrapper>
-                    <NuqsAdapter>
-                      <App />
-                    </NuqsAdapter>
+                    <OpenFeatureProviderWrapper>
+                      <NuqsAdapter>
+                        <App />
+                      </NuqsAdapter>
+                    </OpenFeatureProviderWrapper>
                   </PostHogProviderWrapper>
                 </BrowserRouter>
               </ConfigProvider>

@@ -33,7 +33,9 @@ import { MaintenanceMiddleware } from './common/middleware/maintenance.middlewar
 import { AuditModule } from './audit/audit.module'
 import { HealthModule } from './health/health.module'
 import { OpenFeatureModule } from '@openfeature/nestjs-sdk'
+import { InMemoryProvider } from '@openfeature/server-sdk'
 import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posthog.provider'
+import { buildInMemoryFlagConfig } from '@daytonaio/feature-flags'
 import { LoggerModule } from 'nestjs-pino'
 import { getPinoTransport, swapMessageAndObject } from './common/utils/pino.util'
 import { Redis } from 'ioredis'
@@ -204,12 +206,16 @@ import { SandboxTelemetryModule } from './sandbox-telemetry/sandbox-telemetry.mo
           organizationId: req.user?.organizationId,
         }
       },
-      defaultProvider: new OpenFeaturePostHogProvider({
-        clientOptions: {
-          host: process.env.POSTHOG_HOST,
-        },
-        apiKey: process.env.POSTHOG_API_KEY,
-      }),
+      defaultProvider: process.env.POSTHOG_API_KEY
+        ? new OpenFeaturePostHogProvider({
+            clientOptions: {
+              host: process.env.POSTHOG_HOST,
+            },
+            apiKey: process.env.POSTHOG_API_KEY,
+          })
+        : process.env.NODE_ENV !== 'production'
+          ? new InMemoryProvider(buildInMemoryFlagConfig())
+          : new InMemoryProvider({}),
     }),
   ],
   controllers: [],
