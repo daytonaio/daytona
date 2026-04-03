@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, UnauthorizedException } from '@nestjs/common'
+import { Injectable, HttpException, Logger, UnauthorizedException } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 
 /**
@@ -20,6 +20,10 @@ export class CombinedAuthGuard extends AuthGuard(['api-key', 'jwt']) {
   private readonly logger = new Logger(CombinedAuthGuard.name)
 
   handleRequest(err: any, user: any) {
+    if (err instanceof HttpException && err.getStatus() >= 500) {
+      throw err
+    }
+
     if (err || !user) {
       this.logger.debug('Authentication failed', { err, user })
       throw new UnauthorizedException('Invalid credentials')
