@@ -104,7 +104,9 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 		if execOpts.Timeout != nil {
 			req.SetTimeout(int32(execOpts.Timeout.Seconds()))
 		}
-		// Note: env parameter not supported in current toolbox API
+		if execOpts.Env != nil {
+			req.SetEnvs(execOpts.Env)
+		}
 
 		resp, httpResp, err := p.toolboxClient.ProcessAPI.ExecuteCommand(ctx).Request(*req).Execute()
 		if err != nil {
@@ -123,19 +125,100 @@ func (p *ProcessService) ExecuteCommand(ctx context.Context, command string, opt
 	})
 }
 
-// CodeRun executes code in a language-specific way.
+// CodeRun executes code in a language-specific runtime and returns the result.
 //
-// NOTE: This method is currently unavailable as the toolbox-api-client-go does not expose
-// a CodeRun endpoint. For code execution, use [ProcessService.ExecuteCommand] or
-// [CodeInterpreterService].
+// The code is executed directly by the daemon's code-run endpoint using the
+// specified language runtime (Python, JavaScript, or TypeScript). This is
+// different from [ProcessService.ExecuteCommand] which runs shell commands.
+//
+// Parameters:
+//   - code: The source code to execute
+//   - language: The language runtime to use (e.g. [types.CodeLanguagePython])
 //
 // Optional parameters can be configured using functional options:
-//   - [options.WithCodeRunParams]: Set code execution parameters
+//   - [options.WithCodeRunParams]: Set argv and environment variables
 //   - [options.WithCodeRunTimeout]: Set execution timeout
-func (p *ProcessService) CodeRun(ctx context.Context, code string, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error) {
+//
+// Example:
+//
+//	// Run Python code
+//	result, err := sandbox.Process.CodeRun(ctx, "print('Hello')", types.CodeLanguagePython)
+//	fmt.Println(result.Result)
+//
+//	// Run with options
+//	result, err := sandbox.Process.CodeRun(ctx, code, types.CodeLanguagePython,
+//	    options.WithCodeRunParams(types.CodeRunParams{
+//	        Argv: []string{"--verbose"},
+//	        Env:  map[string]string{"DEBUG": "1"},
+//	    }),
+//	    options.WithCodeRunTimeout(30*time.Second),
+//	)
+//
+// Returns [types.ExecuteResponse] containing the output, exit code, and any
+// artifacts (such as charts), or an error.
+func (p *ProcessService) CodeRun(ctx context.Context, code string, language types.CodeLanguage, opts ...func(*options.CodeRun)) (*types.ExecuteResponse, error) {
 	return withInstrumentation(ctx, p.otel, "Process", "CodeRun", func(ctx context.Context) (*types.ExecuteResponse, error) {
-		return nil, errors.NewDaytonaError("CodeRun is not supported by the current toolbox API. Use ExecuteCommand() or CodeInterpreter service instead.", 0, nil)
+		codeRunOpts := options.Apply(opts...)
+
+		req := toolbox.NewCodeRunRequest(code, string(language))
+		if codeRunOpts.Params != nil {
+			if len(codeRunOpts.Params.Argv) > 0 {
+				req.SetArgv(codeRunOpts.Params.Argv)
+			}
+			if len(codeRunOpts.Params.Env) > 0 {
+				req.SetEnvs(codeRunOpts.Params.Env)
+			}
+		}
+		if codeRunOpts.Timeout != nil {
+			req.SetTimeout(int32(codeRunOpts.Timeout.Seconds()))
+		}
+
+		resp, httpResp, err := p.toolboxClient.ProcessAPI.CodeRun(ctx).Request(*req).Execute()
+		if err != nil {
+			return nil, errors.ConvertToolboxError(err, httpResp)
+		}
+
+		exitCode := 0
+		if resp.ExitCode != nil {
+			exitCode = int(*resp.ExitCode)
+		}
+
+		result := &types.ExecuteResponse{
+			ExitCode: exitCode,
+			Result:   resp.GetResult(),
+		}
+
+		if resp.HasArtifacts() {
+			artifacts := resp.GetArtifacts()
+			result.Artifacts = &types.ExecutionArtifacts{}
+			if artifacts.HasCharts() {
+				result.Artifacts.Charts = convertCodeRunCharts(artifacts.GetCharts())
+			}
+		}
+
+		return result, nil
 	})
+}
+
+func convertCodeRunCharts(raw []map[string]interface{}) []types.Chart {
+	charts := make([]types.Chart, 0, len(raw))
+	for _, m := range raw {
+		c := types.Chart{
+			Type:     types.ChartTypeUnknown,
+			Elements: m["elements"],
+		}
+		if t, ok := m["type"].(string); ok {
+			c.Type = types.ChartType(t)
+		}
+		if title, ok := m["title"].(string); ok {
+			c.Title = title
+		}
+		if png, ok := m["png"].(string); ok {
+			c.PNG = &png
+		}
+		charts = append(charts, c)
+	}
+	return charts
 }
 
 // CreateSession creates a named session for executing multiple commands.

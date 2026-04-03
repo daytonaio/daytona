@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
-require 'base64'
-require 'json'
 require 'uri'
 
 module Daytona
   class Process # rubocop:disable Metrics/ClassLength
     include Instrumentation
-
-    # @return [Daytona::SandboxPythonCodeToolbox,
-    attr_reader :code_toolbox
 
     # @return [String] The ID of the Sandbox
     attr_reader :sandbox_id
@@ -20,18 +15,21 @@ module Daytona
     # @return [Proc] Function to get preview link for a port
     attr_reader :get_preview_link
 
+    # @return [String] The language for code execution (e.g. 'python', 'typescript', 'javascript')
+    attr_reader :language
+
     # Initialize a new Process instance
     #
-    # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @param sandbox_id [String] The ID of the Sandbox
     # @param toolbox_api [DaytonaToolboxApiClient::ProcessApi] API client for Sandbox operations
     # @param get_preview_link [Proc] Function to get preview link for a port
+    # @param language [String] The language for code execution
     # @param otel_state [Daytona::OtelState, nil]
-    def initialize(code_toolbox:, sandbox_id:, toolbox_api:, get_preview_link:, otel_state: nil)
-      @code_toolbox = code_toolbox
+    def initialize(sandbox_id:, toolbox_api:, get_preview_link:, language: 'python', otel_state: nil)
       @sandbox_id = sandbox_id
       @toolbox_api = toolbox_api
       @get_preview_link = get_preview_link
+      @language = language
       @otel_state = otel_state
     end
 
@@ -54,7 +52,8 @@ module Daytona
     #
     #   # Command with timeout
     #   result = sandbox.process.exec("sleep 10", timeout: 5)
-    def exec(command:, cwd: nil, env: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
+    def exec(command:, cwd: nil, env: nil, timeout: nil)
+      envs = nil
       if env && !env.empty?
         env.each_key do |key|
           unless key.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/)
@@ -62,21 +61,16 @@ module Daytona
                   "Invalid environment variable name: '#{key}'"
           end
         end
-        safe_env_exports = env.map do |key, value|
-          "export #{key}=\"$(printf '%s' '#{Base64.strict_encode64(value)}' | base64 -d)\""
-        end.join('; ')
-        command = "#{safe_env_exports}; #{command}"
+        envs = env
       end
 
-      response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, timeout:))
-      # Post-process the output to extract ExecutionArtifacts
-      artifacts = parse_output(response.result.split("\n", -1))
-
-      # Create new response with processed output and charts
+      response = toolbox_api.execute_command(DaytonaToolboxApiClient::ExecuteRequest.new(command:, cwd:, envs:,
+                                                                                         timeout:))
+      result = response.result || ''
       ExecuteResponse.new(
         exit_code: response.exit_code,
-        result: artifacts.stdout,
-        artifacts: artifacts
+        result:,
+        artifacts: ExecutionArtifacts.new(result, [])
       )
     end
 
@@ -95,8 +89,22 @@ module Daytona
     #     print(f"Sum: {x + y}")
     #   CODE
     #   puts response.artifacts.stdout  # Prints: Sum: 30
-    def code_run(code:, params: nil, timeout: nil)
-      exec(command: code_toolbox.get_run_command(code, params), env: params&.env, timeout:)
+    def code_run(code:, params: nil, timeout: nil) # rubocop:disable Metrics/MethodLength
+      response = toolbox_api.code_run(
+        DaytonaToolboxApiClient::CodeRunRequest.new(
+          code:, language:, argv: params&.argv, envs: params&.env, timeout:
+        )
+      )
+
+      charts = (response.artifacts&.charts || []).map do |chart_data|
+        Charts.parse(chart_data.transform_keys(&:to_sym))
+      end
+
+      ExecuteResponse.new(
+        exit_code: response.exit_code,
+        result: response.result,
+        artifacts: ExecutionArtifacts.new(response.result, charts)
+      )
     end
 
     # Creates a new long-running background session in the Sandbox
@@ -186,7 +194,12 @@ module Daytona
                                                            suppress_input_echo: req.suppress_input_echo)
       )
 
-      stdout, stderr = Util.demux(response.output || '')
+      if response.stdout || response.stderr
+        stdout = response.stdout || ''
+        stderr = response.stderr || ''
+      else
+        stdout, stderr = Util.demux(response.output || '')
+      end
 
       SessionExecuteResponse.new(
         cmd_id: response.cmd_id,
@@ -194,7 +207,6 @@ module Daytona
         stdout:,
         stderr:,
         exit_code: response.exit_code,
-        # TODO: DaytonaApiClient::SessionExecuteResponse doesn't have additional_properties attribute
         additional_properties: {}
       )
     end
@@ -542,40 +554,6 @@ module Daytona
     # @return [Daytona::OtelState, nil]
     attr_reader :otel_state
 
-    # Parse the output of a command to extract ExecutionArtifacts
-    #
-    # @param lines [Array<String>] A list of lines of output from a command
-    # @return [Daytona::ExecutionArtifacts] The artifacts from the command execution
-    def parse_output(lines)
-      artifacts = ExecutionArtifacts.new('', [])
-      stdout_lines = []
-
-      lines.each do |line|
-        if line.start_with?(ARTIFACT_PREFIX)
-          parse_json_line(line:, artifacts:)
-        else
-          stdout_lines << line
-        end
-      end
-
-      artifacts.stdout = stdout_lines.join("\n")
-      artifacts
-    end
-
-    # Parse a JSON line to extract artifacts
-    #
-    # @param line [String] The line to parse
-    # @param artifacts [Daytona::ExecutionArtifacts] The artifacts to add to
-    # @return [void]
-    def parse_json_line(line:, artifacts:)
-      data = JSON.parse(line.sub(ARTIFACT_PREFIX, '').strip, symbolize_names: true)
-
-      case data.fetch(:type, nil)
-      when ArtifactType::CHART
-        artifacts.charts.append(Charts.parse(data.fetch(:value, {})))
-      end
-    end
-
     # Parse combined stdout/stderr output into separate streams
     #
     # @param data [String] Combined log string with STDOUT_PREFIX and STDERR_PREFIX markers
@@ -590,16 +568,7 @@ module Daytona
       )
     end
 
-    ARTIFACT_PREFIX = 'dtn_artifact_k39fd2:'
-    private_constant :ARTIFACT_PREFIX
-
     WS_PORT = 2280
     private_constant :WS_PORT
-
-    module ArtifactType
-      ALL = [
-        CHART = 'chart'
-      ].freeze
-    end
   end
 end

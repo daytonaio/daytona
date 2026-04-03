@@ -90,9 +90,6 @@ module Daytona
     # @return [String] The version of the daemon running in the sandbox
     attr_reader :daemon_version
 
-    # @return [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
-    attr_reader :code_toolbox
-
     # @return [Daytona::Config]
     attr_reader :config
 
@@ -114,14 +111,12 @@ module Daytona
     # @return [Daytona::CodeInterpreter]
     attr_reader :code_interpreter
 
-    # @params code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @params config [Daytona::Config]
     # @params sandbox_api [DaytonaApiClient::SandboxApi]
     # @params sandbox_dto [DaytonaApiClient::Sandbox]
     # @params otel_state [Daytona::OtelState, nil]
-    def initialize(code_toolbox:, sandbox_dto:, config:, sandbox_api:, otel_state: nil) # rubocop:disable Metrics/MethodLength
+    def initialize(sandbox_dto:, config:, sandbox_api:, otel_state: nil) # rubocop:disable Metrics/MethodLength
       process_response(sandbox_dto)
-      @code_toolbox = code_toolbox
       @config = config
       @sandbox_api = sandbox_api
       @otel_state = otel_state
@@ -150,9 +145,9 @@ module Daytona
 
       @process = Process.new(
         sandbox_id: id,
-        code_toolbox:,
         toolbox_api: process_api,
         get_preview_link: proc { |port| preview_url(port) },
+        language: (labels || {}).fetch('code-toolbox-language', 'python'),
         otel_state:
       )
       @fs = FileSystem.new(sandbox_id: id, toolbox_api: fs_api, otel_state:)

@@ -16,7 +16,7 @@ from __future__ import annotations
 """  # noqa: E501
 
 
-__version__ = "0.0.0-dev"
+__version__ = "1.0.0"
 
 import importlib
 from typing import TYPE_CHECKING
@@ -44,6 +44,9 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client_async.exceptions import ApiException
 
     # import models into sdk package
+    from daytona_toolbox_api_client_async.models.code_run_artifacts import CodeRunArtifacts
+    from daytona_toolbox_api_client_async.models.code_run_request import CodeRunRequest
+    from daytona_toolbox_api_client_async.models.code_run_response import CodeRunResponse
     from daytona_toolbox_api_client_async.models.command import Command
     from daytona_toolbox_api_client_async.models.completion_context import CompletionContext
     from daytona_toolbox_api_client_async.models.completion_item import CompletionItem
@@ -146,6 +149,9 @@ _DYNAMIC_IMPORTS: dict[str, str] = {
     "ApiAttributeError": "daytona_toolbox_api_client_async.exceptions",
     "ApiException": "daytona_toolbox_api_client_async.exceptions",
     # models
+    "CodeRunArtifacts": "daytona_toolbox_api_client_async.models.code_run_artifacts",
+    "CodeRunRequest": "daytona_toolbox_api_client_async.models.code_run_request",
+    "CodeRunResponse": "daytona_toolbox_api_client_async.models.code_run_response",
     "Command": "daytona_toolbox_api_client_async.models.command",
     "CompletionContext": "daytona_toolbox_api_client_async.models.completion_context",
     "CompletionItem": "daytona_toolbox_api_client_async.models.completion_item",
@@ -262,6 +268,9 @@ __all__ = [
     "PortApi",
     "ProcessApi",
     "ServerApi",
+    "CodeRunArtifacts",
+    "CodeRunRequest",
+    "CodeRunResponse",
     "Command",
     "CompletionContext",
     "CompletionItem",

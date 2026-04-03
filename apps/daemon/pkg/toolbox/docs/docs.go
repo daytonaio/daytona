@@ -805,6 +805,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -937,6 +938,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "number",
+                        "format": "float64",
                         "description": "Scale factor (0.1-1.0)",
                         "name": "scale",
                         "in": "query"
@@ -1558,7 +1560,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/git.GitDeleteBranchRequest"
+                            "$ref": "#/definitions/GitGitDeleteBranchRequest"
                         }
                     }
                 ],
@@ -2133,6 +2135,41 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/IsPortInUseResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/process/code-run": {
+            "post": {
+                "description": "Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "process"
+                ],
+                "summary": "Execute code",
+                "operationId": "CodeRun",
+                "parameters": [
+                    {
+                        "description": "Code execution request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CodeRunRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CodeRunResponse"
                         }
                     }
                 }
@@ -2903,6 +2940,63 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "CodeRunArtifacts": {
+            "type": "object",
+            "properties": {
+                "charts": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                }
+            }
+        },
+        "CodeRunRequest": {
+            "type": "object",
+            "required": [
+                "code",
+                "language"
+            ],
+            "properties": {
+                "argv": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "code": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "language": {
+                    "description": "python, javascript, typescript",
+                    "type": "string"
+                },
+                "timeout": {
+                    "type": "integer"
+                }
+            }
+        },
+        "CodeRunResponse": {
+            "type": "object",
+            "properties": {
+                "artifacts": {
+                    "$ref": "#/definitions/CodeRunArtifacts"
+                },
+                "exitCode": {
+                    "type": "integer"
+                },
+                "result": {
+                    "type": "string"
+                }
+            }
+        },
         "Command": {
             "type": "object",
             "required": [
@@ -3087,6 +3181,13 @@ const docTemplate = `{
                 "cwd": {
                     "description": "Current working directory",
                     "type": "string"
+                },
+                "envs": {
+                    "description": "Environment variables to set for the command",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "timeout": {
                     "description": "Timeout in seconds, defaults to 10 seconds",
@@ -3320,6 +3421,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitGitDeleteBranchRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "path"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
                     "type": "string"
                 }
             }
@@ -4216,21 +4332,6 @@ const docTemplate = `{
         "gin.H": {
             "type": "object",
             "additionalProperties": {}
-        },
-        "git.GitDeleteBranchRequest": {
-            "type": "object",
-            "required": [
-                "name",
-                "path"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                }
-            }
         }
     }
 }`

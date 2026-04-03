@@ -81,7 +81,7 @@ module Daytona
     # @return [Daytona::Sandbox]
     def get(id)
       sandbox_dto = sandbox_api.get_sandbox(id)
-      to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+      to_sandbox(sandbox_dto:)
     end
 
     # Lists Sandboxes filtered by labels.
@@ -102,10 +102,8 @@ module Daytona
         total: response.total,
         page: response.page,
         total_pages: response.total_pages,
-        items: response
-               .items
-               .map do |sandbox_dto|
-                 to_sandbox(sandbox_dto:, code_toolbox: code_toolbox_from_labels(sandbox_dto.labels))
+        items: response.items.map do |sandbox_dto|
+          to_sandbox(sandbox_dto:)
         end
       )
     end
@@ -204,7 +202,7 @@ module Daytona
         Util.stream_async(uri:, headers:, on_chunk: on_snapshot_create_logs)
       end
 
-      sandbox = to_sandbox(sandbox_dto: response, code_toolbox: code_toolbox_from_labels(response.labels))
+      sandbox = to_sandbox(sandbox_dto: response)
 
       if sandbox.state != DaytonaApiClient::SandboxState::STARTED
         sandbox.wait_for_sandbox_start([0.001, timeout - (Time.now - start_time)].max)
@@ -246,41 +244,15 @@ module Daytona
     end
 
     # @param sandbox_dto [DaytonaApiClient::Sandbox]
-    # @param code_toolbox [Daytona::SandboxPythonCodeToolbox, Daytona::SandboxTsCodeToolbox]
     # @return [Daytona::Sandbox]
-    def to_sandbox(sandbox_dto:, code_toolbox:)
+    def to_sandbox(sandbox_dto:)
       Sandbox.new(
         sandbox_dto:,
         config:,
         sandbox_api:,
-        code_toolbox:,
         otel_state: @otel_state
       )
     end
-
-    # Converts a language to a code toolbox
-    #
-    # @param language [Symbol]
-    # @return [Daytona::CodeToolbox]
-    # @raise [Daytona::Sdk::Error] If the language is not supported
-    def code_toolbox_from_language(language)
-      case language
-      when CodeLanguage::PYTHON, nil
-        SandboxPythonCodeToolbox.new
-      when SandboxTsCodeToolbox, CodeLanguage::TYPESCRIPT
-        SandboxTsCodeToolbox.new
-      when CodeLanguage::JAVASCRIPT
-        SandboxJsCodeToolbox.new
-      else
-        raise Sdk::Error, "Unsupported language: #{language}"
-      end
-    end
-
-    # Get code toolbox from Sandbox labels
-    #
-    # @param labels [Hash<String, String>]
-    # @return [Daytona::CodeToolbox]
-    def code_toolbox_from_labels(labels) = code_toolbox_from_language(labels[LABEL_CODE_TOOLBOX_LANGUAGE]&.to_sym)
 
     SOURCE_RUBY = 'sdk-ruby'
     private_constant :SOURCE_RUBY

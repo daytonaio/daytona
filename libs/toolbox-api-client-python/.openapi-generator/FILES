@@ -15,6 +15,9 @@ daytona_toolbox_api_client/api_response.py
 daytona_toolbox_api_client/configuration.py
 daytona_toolbox_api_client/exceptions.py
 daytona_toolbox_api_client/models/__init__.py
+daytona_toolbox_api_client/models/code_run_artifacts.py
+daytona_toolbox_api_client/models/code_run_request.py
+daytona_toolbox_api_client/models/code_run_response.py
 daytona_toolbox_api_client/models/command.py
 daytona_toolbox_api_client/models/completion_context.py
 daytona_toolbox_api_client/models/completion_item.py

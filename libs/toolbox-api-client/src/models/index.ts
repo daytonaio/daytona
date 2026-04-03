@@ -1,3 +1,6 @@
+export * from './code-run-artifacts';
+export * from './code-run-request';
+export * from './code-run-response';
 export * from './command';
 export * from './completion-context';
 export * from './completion-item';

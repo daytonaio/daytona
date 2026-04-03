@@ -30,22 +30,13 @@ import {
 } from '@daytonaio/toolbox-api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
-import { CodeRunParams, Process } from './Process'
+import { Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { ComputerUse } from './ComputerUse'
 import { AxiosInstance } from 'axios'
 import { CodeInterpreter } from './CodeInterpreter'
 import { WithInstrumentation } from './utils/otel.decorator'
-
-/**
- * Interface defining methods that a code toolbox must implement
- * @interface
- */
-export interface SandboxCodeToolbox {
-  /** Generates a command to run the provided code */
-  getRunCommand(code: string, params?: CodeRunParams): string
-}
 
 /**
  * Represents a Daytona Sandbox.
@@ -127,16 +118,12 @@ export class Sandbox implements SandboxDto {
    * Creates a new Sandbox instance
    *
    * @param {SandboxDto} sandboxDto - The API Sandbox instance
-   * @param {SandboxApi} sandboxApi - API client for Sandbox operations
-   * @param {InfoApi} infoApi - API client for info operations
-   * @param {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
    */
   constructor(
     sandboxDto: SandboxDto,
     private readonly clientConfig: Configuration,
     private readonly axiosInstance: AxiosInstance,
     private readonly sandboxApi: SandboxApi,
-    private readonly codeToolbox: SandboxCodeToolbox,
   ) {
     this.processSandboxDto(sandboxDto)
 
@@ -153,11 +140,12 @@ export class Sandbox implements SandboxDto {
 
     this.fs = new FileSystem(this.clientConfig, new FileSystemApi(this.clientConfig, '', this.axiosInstance))
     this.git = new Git(new GitApi(this.clientConfig, '', this.axiosInstance))
+    const language = sandboxDto.labels?.['code-toolbox-language']
     this.process = new Process(
       this.clientConfig,
-      this.codeToolbox,
       new ProcessApi(this.clientConfig, '', this.axiosInstance),
       getPreviewToken,
+      language,
     )
     this.codeInterpreter = new CodeInterpreter(
       this.clientConfig,

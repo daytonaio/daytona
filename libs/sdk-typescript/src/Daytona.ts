@@ -14,9 +14,6 @@ import {
   ConfigApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios'
-import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
-import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
-import { SandboxJsCodeToolbox } from './code-toolbox/SandboxJsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError, DaytonaRateLimitError } from './errors/DaytonaError'
 import { Image } from './Image'
 import { Sandbox, PaginatedSandboxes } from './Sandbox'
@@ -467,8 +464,6 @@ export class Daytona implements AsyncDisposable {
       throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
     }
 
-    const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
-
     try {
       let buildInfo: any | undefined
       let snapshot: string | undefined
@@ -567,7 +562,6 @@ export class Daytona implements AsyncDisposable {
         new Configuration(structuredClone(this.clientConfig)),
         this.createAxiosInstance(),
         this.sandboxApi,
-        codeToolbox,
       )
 
       if (sandbox.state !== 'started') {
@@ -601,15 +595,12 @@ export class Daytona implements AsyncDisposable {
   public async get(sandboxIdOrName: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxIdOrName)
     const sandboxInstance = response.data
-    const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
-    const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
 
     return new Sandbox(
       sandboxInstance,
       structuredClone(this.clientConfig),
       this.createAxiosInstance(),
       this.sandboxApi,
-      codeToolbox,
     )
   }
 
@@ -640,13 +631,11 @@ export class Daytona implements AsyncDisposable {
 
     return {
       items: response.data.items.map((sandbox) => {
-        const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
         return new Sandbox(
           sandbox,
           structuredClone(this.clientConfig),
           this.createAxiosInstance(),
           this.sandboxApi,
-          this.getCodeToolbox(language),
         )
       }),
       total: response.data.total,
@@ -701,30 +690,6 @@ export class Daytona implements AsyncDisposable {
   @WithInstrumentation()
   public async delete(sandbox: Sandbox, timeout = 60) {
     await sandbox.delete(timeout)
-  }
-
-  /**
-   * Gets the appropriate code toolbox based on language.
-   *
-   * @private
-   * @param {CodeLanguage} [language] - Programming language for the toolbox
-   * @returns {SandboxCodeToolbox} The appropriate code toolbox instance
-   * @throws {DaytonaError} - `DaytonaError` - When an unsupported language is specified
-   */
-  private getCodeToolbox(language?: CodeLanguage) {
-    switch (language) {
-      case CodeLanguage.JAVASCRIPT:
-        return new SandboxJsCodeToolbox()
-      case CodeLanguage.TYPESCRIPT:
-        return new SandboxTsCodeToolbox()
-      case CodeLanguage.PYTHON:
-      case undefined:
-        return new SandboxPythonCodeToolbox()
-      default: {
-        const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
-        throw new DaytonaError(errMsg)
-      }
-    }
   }
 
   private createAxiosInstance(): AxiosInstance {

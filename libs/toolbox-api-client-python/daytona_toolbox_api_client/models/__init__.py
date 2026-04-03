@@ -20,6 +20,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     # import models into model package
+    from daytona_toolbox_api_client.models.code_run_artifacts import CodeRunArtifacts
+    from daytona_toolbox_api_client.models.code_run_request import CodeRunRequest
+    from daytona_toolbox_api_client.models.code_run_response import CodeRunResponse
     from daytona_toolbox_api_client.models.command import Command
     from daytona_toolbox_api_client.models.completion_context import CompletionContext
     from daytona_toolbox_api_client.models.completion_item import CompletionItem
@@ -101,6 +104,9 @@ if TYPE_CHECKING:
     from daytona_toolbox_api_client.models.work_dir_response import WorkDirResponse
 
 _DYNAMIC_IMPORTS: dict[str, str] = {
+    "CodeRunArtifacts": "daytona_toolbox_api_client.models.code_run_artifacts",
+    "CodeRunRequest": "daytona_toolbox_api_client.models.code_run_request",
+    "CodeRunResponse": "daytona_toolbox_api_client.models.code_run_response",
     "Command": "daytona_toolbox_api_client.models.command",
     "CompletionContext": "daytona_toolbox_api_client.models.completion_context",
     "CompletionItem": "daytona_toolbox_api_client.models.completion_item",

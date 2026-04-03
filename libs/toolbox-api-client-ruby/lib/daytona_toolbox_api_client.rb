@@ -17,6 +17,9 @@ require 'daytona_toolbox_api_client/version'
 require 'daytona_toolbox_api_client/configuration'
 
 # Models
+require 'daytona_toolbox_api_client/models/code_run_artifacts'
+require 'daytona_toolbox_api_client/models/code_run_request'
+require 'daytona_toolbox_api_client/models/code_run_response'
 require 'daytona_toolbox_api_client/models/command'
 require 'daytona_toolbox_api_client/models/completion_context'
 require 'daytona_toolbox_api_client/models/completion_item'

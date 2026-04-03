@@ -38,7 +38,7 @@ type GitBranchRequest struct {
 type GitDeleteBranchRequest struct {
 	Path string `json:"path" validate:"required"`
 	Name string `json:"name" validate:"required"`
-}
+} // @name GitGitDeleteBranchRequest
 
 type ListBranchResponse struct {
 	Branches []string `json:"branches" validate:"required"`

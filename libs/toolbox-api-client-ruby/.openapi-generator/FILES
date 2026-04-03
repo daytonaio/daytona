@@ -16,6 +16,9 @@ lib/daytona_toolbox_api_client/api/server_api.rb
 lib/daytona_toolbox_api_client/api_client.rb
 lib/daytona_toolbox_api_client/api_error.rb
 lib/daytona_toolbox_api_client/configuration.rb
+lib/daytona_toolbox_api_client/models/code_run_artifacts.rb
+lib/daytona_toolbox_api_client/models/code_run_request.rb
+lib/daytona_toolbox_api_client/models/code_run_response.rb
 lib/daytona_toolbox_api_client/models/command.rb
 lib/daytona_toolbox_api_client/models/completion_context.rb
 lib/daytona_toolbox_api_client/models/completion_item.rb

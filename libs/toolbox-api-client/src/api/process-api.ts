@@ -22,6 +22,10 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
+import type { CodeRunRequest } from '../models';
+// @ts-ignore
+import type { CodeRunResponse } from '../models';
+// @ts-ignore
 import type { Command } from '../models';
 // @ts-ignore
 import type { CreateSessionRequest } from '../models';
@@ -53,6 +57,42 @@ import type { SessionSendInputRequest } from '../models';
  */
 export const ProcessApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
+        /**
+         * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+         * @summary Execute code
+         * @param {CodeRunRequest} request Code execution request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        codeRun: async (request: CodeRunRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'request' is not null or undefined
+            assertParamExists('codeRun', 'request', request)
+            const localVarPath = `/process/code-run`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(request, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
         /**
          * Establish a WebSocket connection to interact with a pseudo-terminal session
          * @summary Connect to PTY session via WebSocket
@@ -672,6 +712,19 @@ export const ProcessApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ProcessApiAxiosParamCreator(configuration)
     return {
         /**
+         * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+         * @summary Execute code
+         * @param {CodeRunRequest} request Code execution request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async codeRun(request: CodeRunRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CodeRunResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.codeRun(request, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProcessApi.codeRun']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Establish a WebSocket connection to interact with a pseudo-terminal session
          * @summary Connect to PTY session via WebSocket
          * @param {string} sessionId PTY session ID
@@ -907,6 +960,16 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
     const localVarFp = ProcessApiFp(configuration)
     return {
         /**
+         * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+         * @summary Execute code
+         * @param {CodeRunRequest} request Code execution request
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        codeRun(request: CodeRunRequest, options?: RawAxiosRequestConfig): AxiosPromise<CodeRunResponse> {
+            return localVarFp.codeRun(request, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Establish a WebSocket connection to interact with a pseudo-terminal session
          * @summary Connect to PTY session via WebSocket
          * @param {string} sessionId PTY session ID
@@ -1090,6 +1153,18 @@ export const ProcessApiFactory = function (configuration?: Configuration, basePa
  * @extends {BaseAPI}
  */
 export class ProcessApi extends BaseAPI {
+    /**
+     * Execute Python, JavaScript, or TypeScript code and return output, exit code, and artifacts
+     * @summary Execute code
+     * @param {CodeRunRequest} request Code execution request
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProcessApi
+     */
+    public codeRun(request: CodeRunRequest, options?: RawAxiosRequestConfig) {
+        return ProcessApiFp(this.configuration).codeRun(request, options).then((request) => request(this.axios, this.basePath));
+    }
+
     /**
      * Establish a WebSocket connection to interact with a pseudo-terminal session
      * @summary Connect to PTY session via WebSocket

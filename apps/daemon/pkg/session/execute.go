@@ -119,21 +119,98 @@ func (s *SessionService) Execute(sessionId, cmdId, cmd string, async, isCombined
 				return nil, common_errors.NewBadRequestError(fmt.Errorf("failed to read log file: %w", err))
 			}
 
-			logContent := string(logBytes)
-
 			if isCombinedOutput {
-				// remove prefixes from log bytes
-				logBytes = bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
-				logContent = string(logBytes)
+				stripped := bytes.ReplaceAll(bytes.ReplaceAll(logBytes, log.STDOUT_PREFIX, []byte{}), log.STDERR_PREFIX, []byte{})
+				output := string(stripped)
+				return &SessionExecute{
+					CommandId: cmdId,
+					Output:    &output,
+					ExitCode:  &exitCodeInt,
+				}, nil
 			}
 
+			stdoutBytes, stderrBytes := demuxLogBytes(logBytes)
+			output := string(logBytes)
+			stdoutStr := string(stdoutBytes)
+			stderrStr := string(stderrBytes)
 			return &SessionExecute{
 				CommandId: cmdId,
-				Output:    &logContent,
+				Output:    &output,
+				Stdout:    &stdoutStr,
+				Stderr:    &stderrStr,
 				ExitCode:  &exitCodeInt,
 			}, nil
 		}
 	}
+}
+
+func demuxLogBytes(data []byte) (stdout, stderr []byte) {
+	var outBuf, errBuf []byte
+	pos := 0
+
+	for pos < len(data) {
+		outIdx := bytes.Index(data[pos:], log.STDOUT_PREFIX)
+		errIdx := bytes.Index(data[pos:], log.STDERR_PREFIX)
+
+		if outIdx >= 0 {
+			outIdx += pos
+		}
+		if errIdx >= 0 {
+			errIdx += pos
+		}
+
+		nextIdx := -1
+		var nextIsStdout bool
+		if outIdx >= 0 && (errIdx < 0 || outIdx <= errIdx) {
+			nextIdx = outIdx
+			nextIsStdout = true
+		} else if errIdx >= 0 {
+			nextIdx = errIdx
+			nextIsStdout = false
+		}
+
+		if nextIdx < 0 {
+			break
+		}
+
+		endOfPrefix := nextIdx + len(log.STDOUT_PREFIX)
+
+		nextMarker := len(data)
+		for search := endOfPrefix; search < len(data); {
+			oi := bytes.Index(data[search:], log.STDOUT_PREFIX)
+			ei := bytes.Index(data[search:], log.STDERR_PREFIX)
+			if oi >= 0 {
+				oi += search
+			}
+			if ei >= 0 {
+				ei += search
+			}
+
+			candidate := -1
+			if oi >= 0 && (ei < 0 || oi <= ei) {
+				candidate = oi
+			} else if ei >= 0 {
+				candidate = ei
+			}
+
+			if candidate < 0 {
+				break
+			}
+			nextMarker = candidate
+			break
+		}
+
+		chunk := data[endOfPrefix:nextMarker]
+		if nextIsStdout {
+			outBuf = append(outBuf, chunk...)
+		} else {
+			errBuf = append(errBuf, chunk...)
+		}
+
+		pos = nextMarker
+	}
+
+	return outBuf, errBuf
 }
 
 func toOctalEscapes(b []byte) string {

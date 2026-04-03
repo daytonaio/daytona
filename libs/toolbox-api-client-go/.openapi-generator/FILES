@@ -13,6 +13,9 @@ client.go
 configuration.go
 go.mod
 go.sum
+model_code_run_artifacts.go
+model_code_run_request.go
+model_code_run_response.go
 model_command.go
 model_completion_context.go
 model_completion_item.go

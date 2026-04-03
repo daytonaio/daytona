@@ -40,9 +40,6 @@ from .._utils.errors import intercept_errors
 from .._utils.otel_decorator import with_instrumentation
 from .._utils.stream import process_streaming_response
 from .._utils.timeout import http_timeout, with_timeout
-from ..code_toolbox.sandbox_js_code_toolbox import SandboxJsCodeToolbox
-from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
-from ..code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
 from ..common.daytona import (
     CodeLanguage,
     CodeLanguageLiteral,
@@ -52,7 +49,6 @@ from ..common.daytona import (
 )
 from ..common.errors import DaytonaError
 from ..common.image import Image
-from ..common.protocols import SandboxCodeToolbox
 from ..internal.urllib3_retry import RemoteDisconnectedRetry
 from .sandbox import PaginatedSandboxes, Sandbox
 from .snapshot import SnapshotService
@@ -380,7 +376,9 @@ class Daytona:
         timeout: float = 60,
         on_snapshot_create_logs: Callable[[str], None] | None = None,
     ) -> Sandbox:
-        code_toolbox = self._get_code_toolbox(params.language)
+        validated_language = self._validate_language_label(str(params.language) if params.language else None)
+        params.labels = params.labels or {}
+        params.labels["code-toolbox-language"] = validated_language.value
 
         if timeout and timeout < 0:
             raise DaytonaError("Timeout must be a non-negative number")
@@ -471,7 +469,7 @@ class Daytona:
             response,
             self._toolbox_api_client,
             self._sandbox_api,
-            code_toolbox,
+            validated_language.value,
         )
 
         if sandbox.state != SandboxState.STARTED:
@@ -480,37 +478,6 @@ class Daytona:
             sandbox.wait_for_sandbox_start(timeout=0)
 
         return sandbox
-
-    def _get_code_toolbox(self, language: CodeLanguage | CodeLanguageLiteral | None = None) -> SandboxCodeToolbox:
-        """Helper method to get the appropriate code toolbox based on language.
-
-        Args:
-            language (CodeLanguage | None): Language of the code toolbox. If not provided, defaults to Python.
-
-        Returns:
-            SandboxCodeToolbox: The appropriate code toolbox instance for the specified language.
-
-        Raises:
-            DaytonaError: If an unsupported language is specified.
-        """
-        if not language:
-            return SandboxPythonCodeToolbox()
-
-        enum_language = to_enum(CodeLanguage, language)
-        if enum_language is None:
-            raise DaytonaError(f"Unsupported language: {language}")
-        language = enum_language
-
-        toolboxes = {
-            CodeLanguage.JAVASCRIPT.value: SandboxJsCodeToolbox,
-            CodeLanguage.TYPESCRIPT.value: SandboxTsCodeToolbox,
-            CodeLanguage.PYTHON.value: SandboxPythonCodeToolbox,
-        }
-
-        try:
-            return toolboxes[language.value]()
-        except KeyError as e:
-            raise DaytonaError(f"Unsupported language: {language}") from e
 
     @with_instrumentation()
     def delete(self, sandbox: Sandbox, timeout: float = 60) -> None:
@@ -558,14 +525,12 @@ class Daytona:
 
         # Get the sandbox instance
         sandbox_instance = self._sandbox_api.get_sandbox(sandbox_id_or_name)
-
-        # Create and return sandbox with Python code toolbox as default
-        code_toolbox = SandboxPythonCodeToolbox()
+        language = self._validate_language_label(sandbox_instance.labels.get("code-toolbox-language")).value
         return Sandbox(
             sandbox_instance,
             self._toolbox_api_client,
             self._sandbox_api,
-            code_toolbox,
+            language,
         )
 
     @intercept_errors(message_prefix="Failed to list sandboxes: ")
@@ -598,16 +563,20 @@ class Daytona:
 
         response = self._sandbox_api.list_sandboxes_paginated(labels=json.dumps(labels), page=page, limit=limit)
 
-        return PaginatedSandboxes(
-            items=[
+        items: list[Sandbox] = []
+        for sandbox in response.items:
+            language = self._validate_language_label(sandbox.labels.get("code-toolbox-language")).value
+            items.append(
                 Sandbox(
                     sandbox,
                     self._toolbox_api_client,
                     self._sandbox_api,
-                    self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
+                    language,
                 )
-                for sandbox in response.items
-            ],
+            )
+
+        return PaginatedSandboxes(
+            items=items,
             total=response.total,
             page=response.page,
             total_pages=response.total_pages,
