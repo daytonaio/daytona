@@ -1,3 +1,6 @@
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 """Benchmark veRL ReTool tool backends: Daytona, Docker, and SandboxFusion."""
 
 from __future__ import annotations
@@ -221,11 +224,13 @@ class DockerContainerTool:
 def make_tool(args: argparse.Namespace):
     """Instantiate the requested backend from the local veRL checkout."""
     if args.backend == "docker":
-        return DockerContainerTool({
-            "image": args.docker_image,
-            "memory": args.docker_memory,
-            "default_timeout": args.default_timeout,
-        })
+        return DockerContainerTool(
+            {
+                "image": args.docker_image,
+                "memory": args.docker_memory,
+                "default_timeout": args.default_timeout,
+            }
+        )
 
     resolve_verl_root(args.verl_root)
     schema = build_code_interpreter_schema()
@@ -267,7 +272,9 @@ async def measure_setup(tool, count: int) -> dict[str, Any]:
     results = await asyncio.gather(*[_create_one(tool) for _ in range(count)], return_exceptions=True)
     total_wall = perf_counter() - total_started_at
 
-    succeeded = [(iid, elapsed) for result in results if not isinstance(result, BaseException) for iid, elapsed in [result]]
+    succeeded = [
+        (iid, elapsed) for result in results if not isinstance(result, BaseException) for iid, elapsed in [result]
+    ]
     failures = [result for result in results if isinstance(result, BaseException)]
 
     if failures:
