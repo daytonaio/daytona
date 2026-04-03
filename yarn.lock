@@ -19954,7 +19954,6 @@ __metadata:
     sqlite3: "npm:^5.1.7"
     starlight-openapi: "npm:^0.19.1"
     storybook: "npm:8"
-    suspend-react: "npm:^0.1.3"
     svix: "npm:^1.84.1"
     svix-react: "npm:^1.13.7"
     tailwind-merge: "npm:^3.4.0"
@@ -36741,15 +36740,6 @@ __metadata:
   version: 1.0.0
   resolution: "supports-preserve-symlinks-flag@npm:1.0.0"
   checksum: 10c0/6c4032340701a9950865f7ae8ef38578d8d7053f5e10518076e6554a9381fa91bd9c6850193695c141f32b21f979c985db07265a758867bac95de05f7d8aeb39
-  languageName: node
-  linkType: hard
-
-"suspend-react@npm:^0.1.3":
-  version: 0.1.3
-  resolution: "suspend-react@npm:0.1.3"
-  peerDependencies:
-    react: ">=17.0"
-  checksum: 10c0/c35436f492a5cab85a2aac8f5ee5af8f67edbab3a49e12d15c7f770aae4cf09fe2925b3b8c122929210c1f28aa0958f91684a687d6608f116f7da8406d8a2f1c
   languageName: node
   linkType: hard
 
