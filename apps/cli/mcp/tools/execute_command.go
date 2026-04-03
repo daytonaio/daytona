@@ -50,12 +50,8 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest, args Execu
 		return returnCommandError("Command must be a non-empty string", "ValueError")
 	}
 
-	// Process the command
+	// Keep the command raw and let toolbox enforce server-side command policy.
 	command := strings.TrimSpace(*args.Command)
-	if strings.Contains(command, "&&") || strings.HasPrefix(command, "cd ") {
-		// Wrap complex commands in /bin/sh -c
-		command = fmt.Sprintf("/bin/sh -c %s", shellQuote(command))
-	}
 
 	log.Infof("Executing command: %s", command)
 
@@ -121,10 +117,4 @@ func returnCommandError(message, errorType string) (*mcp.CallToolResult, error) 
 			},
 		},
 	}, nil
-}
-
-// Helper function to quote shell commands
-func shellQuote(s string) string {
-	// Simple shell quoting - wrap in single quotes and escape existing single quotes
-	return "'" + strings.ReplaceAll(s, "'", "'\"'\"'") + "'"
 }

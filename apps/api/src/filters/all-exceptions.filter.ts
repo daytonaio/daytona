@@ -19,6 +19,14 @@ import {
 import { ThrottlerException } from '@nestjs/throttler'
 import { FailedAuthTrackerService } from '../auth/failed-auth-tracker.service'
 
+const secretPatterns = [
+  /(api[_-]?key|access[_-]?key|secret[_-]?key|secret|token|password|passwd|authorization)[:=]\s*([^\s,;]+)/gi,
+  /(bearer\s+)[A-Za-z0-9._\-~+/=]+/gi,
+  /(AKIA[0-9A-Z]{16})/g,
+  /(gh[pousr]_[A-Za-z0-9]{20,})/g,
+  /(sk_live_[A-Za-z0-9]{16,})/g,
+]
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name)
@@ -78,7 +86,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       statusCode,
       error,
-      message,
+      message: redactString(message),
     })
   }
+}
+
+function redactString(input: string): string {
+  let redacted = input
+  for (const pattern of secretPatterns) {
+    redacted = redacted.replace(pattern, '$1[REDACTED]')
+  }
+  return redacted
 }
