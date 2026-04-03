@@ -28,13 +28,6 @@ export class Announcement {
 @ApiSchema({ name: 'PosthogConfig' })
 export class PosthogConfig {
   @ApiProperty({
-    description: 'PostHog API key',
-    example: 'phc_abc123',
-  })
-  @IsString()
-  apiKey: string
-
-  @ApiProperty({
     description: 'PostHog host URL',
     example: 'https://app.posthog.com',
   })
@@ -269,6 +262,10 @@ export class ConfigurationDto {
     this.sshGatewayCommand = configService.get('sshGateway.command')
     this.sshGatewayPublicKey = configService.get('sshGateway.publicKey')
 
+    if (this.sshGatewayCommand) {
+      this.sshGatewayCommand = redactSecretLikeValue(this.sshGatewayCommand)
+    }
+
     if (configService.get('billingApiUrl')) {
       this.billingApiUrl = configService.get('billingApiUrl')
     }
@@ -279,7 +276,6 @@ export class ConfigurationDto {
 
     if (configService.get('posthog.apiKey')) {
       this.posthog = {
-        apiKey: configService.get('posthog.apiKey'),
         host: configService.get('posthog.host'),
       }
     }
@@ -304,4 +300,10 @@ export class ConfigurationDto {
       },
     }
   }
+}
+
+function redactSecretLikeValue(value: string): string {
+  return value
+    .replace(/(api[_-]?key|access[_-]?key|secret[_-]?key|secret|token|password|passwd|authorization)[:=]\s*([^\s,;]+)/gi, '$1=[REDACTED]')
+    .replace(/(bearer\s+)[A-Za-z0-9._\-~+/=]+/gi, '$1[REDACTED]')
 }
