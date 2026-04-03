@@ -1,4 +1,4 @@
-"""Benchmark veRL ReTool tool backends against Daytona or SandboxFusion."""
+"""Benchmark veRL ReTool tool backends: Daytona, Docker, and SandboxFusion."""
 
 from __future__ import annotations
 
@@ -195,7 +195,18 @@ class DockerContainerTool:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
-        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+
+        try:
+            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+        except asyncio.TimeoutError:
+            proc.kill()
+            await proc.wait()
+
+            class _Response:
+                def __init__(self, text):
+                    self.text = text
+
+            return _Response("TimeoutError: execution exceeded timeout"), 0.0, {"had_error": True}
 
         output = stdout.decode() + stderr.decode()
         had_error = proc.returncode != 0
@@ -597,9 +608,23 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def validate_args(args: argparse.Namespace) -> None:
+    """Validate numeric arguments are positive."""
+    for c in args.concurrency:
+        if c < 1:
+            raise SystemExit(f"--concurrency values must be >= 1, got {c}")
+    if args.warmups < 0:
+        raise SystemExit(f"--warmups must be >= 0, got {args.warmups}")
+    if args.iterations < 1:
+        raise SystemExit(f"--iterations must be >= 1, got {args.iterations}")
+    if args.default_timeout < 1:
+        raise SystemExit(f"--default-timeout must be >= 1, got {args.default_timeout}")
+
+
 def main() -> int:
     """Run the benchmark and save the JSON plus CSV artifacts."""
     args = parse_args()
+    validate_args(args)
     check_backend_prereqs(args)
 
     output_dir = ensure_output_dir(Path(args.output_root), args.backend)
