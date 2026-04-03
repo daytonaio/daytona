@@ -367,6 +367,7 @@ export interface HeaderActiveState {
   isPythonSdkActive: boolean
   isRubySdkActive: boolean
   isGoSdkActive: boolean
+  isJavaSdkActive: boolean
   isApiActive: boolean
   isCliActive: boolean
   isReferencesActive: boolean
@@ -382,6 +383,7 @@ export function getHeaderActiveState(
     pythonSdk: `${baseUrl}/en/python-sdk`,
     rubySdk: `${baseUrl}/en/ruby-sdk`,
     goSdk: `${baseUrl}/en/go-sdk`,
+    javaSdk: `${baseUrl}/en/java-sdk`,
     api: `${baseUrl}/en/tools/api`,
     cli: `${baseUrl}/en/tools/cli`,
   }
@@ -399,6 +401,10 @@ export function getHeaderActiveState(
     currentPath
   )
   const isGoSdkActive = isActiveOrParentPath(referencePaths.goSdk, currentPath)
+  const isJavaSdkActive = isActiveOrParentPath(
+    referencePaths.javaSdk,
+    currentPath
+  )
   const isApiActive = isActiveOrParentPath(referencePaths.api, currentPath)
   const isCliActive = isActiveOrParentPath(referencePaths.cli, currentPath)
 
@@ -407,6 +413,7 @@ export function getHeaderActiveState(
     isPythonSdkActive,
     isRubySdkActive,
     isGoSdkActive,
+    isJavaSdkActive,
     isApiActive,
     isCliActive,
     isReferencesActive:
@@ -414,6 +421,7 @@ export function getHeaderActiveState(
       isPythonSdkActive ||
       isRubySdkActive ||
       isGoSdkActive ||
+      isJavaSdkActive ||
       isApiActive ||
       isCliActive,
     isGuidesActive: isActiveOrParentPath(`${baseUrl}/en/guides`, currentPath),

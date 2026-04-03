@@ -1,0 +1,135 @@
+---
+title: "LspServer"
+hideTitleOnPage: true
+---
+
+## LspServer
+
+Language Server Protocol (LSP) interface for Sandbox code intelligence operations.
+
+This class wraps Toolbox `LspApi` operations and maps Toolbox API errors to Daytona SDK
+exceptions via `ExceptionMapper`. It supports starting/stopping language servers,
+notifying document open/close events, and retrieving completions and symbols.
+
+### Constructors
+
+#### new LspServer()
+```java
+public LspServer(LspApi lspApi)
+```
+
+Creates an LSP server wrapper using the Toolbox LSP API client.
+
+**Parameters**:
+
+- `lspApi` _LspApi_ - Toolbox LSP API client
+
+### Methods
+
+#### start()
+```java
+public void start(String languageId, String pathToProject)
+```
+
+Starts a language server for the specified language and project root.
+
+This must be called before document notifications or code intelligence requests.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier (for example `"python"`, `"typescript"`)
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+
+#### stop()
+```java
+public void stop(String languageId, String pathToProject)
+```
+
+Stops a language server for the specified language and project root.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+
+#### didOpen()
+```java
+public void didOpen(String languageId, String pathToProject, String uri)
+```
+
+Notifies the language server that a document has been opened.
+
+Use this before requesting completions or symbols for a document to ensure the language
+server tracks it.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+- `uri` _String_ - document URI (typically `file://...`)
+
+#### didClose()
+```java
+public void didClose(String languageId, String pathToProject, String uri)
+```
+
+Notifies the language server that a document has been closed.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+- `uri` _String_ - document URI (typically `file://...`)
+
+#### completions()
+```java
+public CompletionList completions(String languageId, String pathToProject, String uri, int line, int character)
+```
+
+Retrieves completion candidates at a zero-based position in a document.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+- `uri` _String_ - document URI (typically `file://...`)
+- `line` _int_ - zero-based line number
+- `character` _int_ - zero-based character offset on the line
+
+**Returns**:
+
+- `CompletionList` - completion list returned by the language server
+
+#### documentSymbols()
+```java
+public List<LspSymbol> documentSymbols(String languageId, String pathToProject, String uri)
+```
+
+Returns all symbols defined in the specified document.
+
+**Parameters**:
+
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+- `uri` _String_ - document URI (typically `file://...`)
+
+**Returns**:
+
+- `List\<LspSymbol\>` - list of document symbols
+
+#### workspaceSymbols()
+```java
+public List<LspSymbol> workspaceSymbols(String query, String languageId, String pathToProject)
+```
+
+Searches workspace-wide symbols matching the provided query.
+
+**Parameters**:
+
+- `query` _String_ - symbol query text
+- `languageId` _String_ - language identifier
+- `pathToProject` _String_ - absolute or relative project root path inside the sandbox
+
+**Returns**:
+
+- `List\<LspSymbol\>` - list of matching workspace symbols

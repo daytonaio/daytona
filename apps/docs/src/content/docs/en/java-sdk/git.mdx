@@ -1,0 +1,155 @@
+---
+title: "Git"
+hideTitleOnPage: true
+---
+
+## Git
+
+Git operations facade for a specific Sandbox.
+
+Provides repository clone, branch, commit, status, and sync operations mapped to Daytona
+toolbox Git endpoints.
+
+### Methods
+
+#### clone()
+```java
+public void clone(String url, String path)
+```
+
+Clones a Git repository into the specified path.
+
+**Parameters**:
+
+- `url` _String_ - repository URL
+- `path` _String_ - destination path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if cloning fails
+
+#### clone()
+```java
+public void clone(String url, String path, String branch, String commitId, String username, String password)
+```
+
+Clones a repository with optional branch, commit, and credentials.
+
+**Parameters**:
+
+- `url` _String_ - repository URL
+- `path` _String_ - destination path in the Sandbox
+- `branch` _String_ - branch to clone; `null` uses default branch
+- `commitId` _String_ - commit SHA to checkout after clone; `null` skips detached checkout
+- `username` _String_ - username for authenticated remotes
+- `password` _String_ - password or token for authenticated remotes
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if cloning fails
+
+#### branches()
+```java
+public Map<String, Object> branches(String path)
+```
+
+Lists branches in a repository.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Returns**:
+
+- `Map\<String, Object\>` - map containing `branches` list
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the operation fails
+
+#### add()
+```java
+public void add(String path, List<String> files)
+```
+
+Stages files for commit.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `files` _List\<String\>_ - file paths to stage relative to repository root
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if staging fails
+
+#### commit()
+```java
+public GitCommitResponse commit(String path, String message, String author, String email)
+```
+
+Creates a commit from staged changes.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+- `message` _String_ - commit message
+- `author` _String_ - author display name
+- `email` _String_ - author email address
+
+**Returns**:
+
+- `GitCommitResponse` - commit metadata containing resulting hash
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if commit fails
+
+#### status()
+```java
+public GitStatus status(String path)
+```
+
+Retrieves Git status for a repository.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Returns**:
+
+- `GitStatus` - repository status including branch divergence and file status entries
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the operation fails
+
+#### push()
+```java
+public void push(String path)
+```
+
+Pushes local commits to remote.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if push fails
+
+#### pull()
+```java
+public void pull(String path)
+```
+
+Pulls updates from remote.
+
+**Parameters**:
+
+- `path` _String_ - repository path in the Sandbox
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if pull fails

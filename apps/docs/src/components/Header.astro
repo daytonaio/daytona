@@ -29,6 +29,7 @@ const {
   isPythonSdkActive,
   isRubySdkActive,
   isGoSdkActive,
+  isJavaSdkActive,
   isApiActive,
   isCliActive,
   isReferencesActive,
@@ -95,6 +96,13 @@ const {
           >
             <Fragment set:html={packageIcon} />
             {Astro.locals.t('sidebarconfig.goSdkReference' as any)}
+          </a>
+          <a
+            href={`${import.meta.env.BASE_URL}/en/java-sdk`}
+            class:list={[{ active: isJavaSdkActive }]}
+          >
+            <Fragment set:html={packageIcon} />
+            {Astro.locals.t('sidebarconfig.javaSdkReference' as any)}
           </a>
           <a
             href={`${import.meta.env.BASE_URL}/en/tools/api/#daytona/`}

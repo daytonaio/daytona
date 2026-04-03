@@ -11,3 +11,5 @@ libs/toolbox-api-client-go/** linguist-generated=true
 libs/toolbox-api-client-python/** linguist-generated=true
 libs/toolbox-api-client-python-async/** linguist-generated=true
 libs/toolbox-api-client-ruby/** linguist-generated=true
+libs/api-client-java/** linguist-generated=true
+libs/toolbox-api-client-java/** linguist-generated=true

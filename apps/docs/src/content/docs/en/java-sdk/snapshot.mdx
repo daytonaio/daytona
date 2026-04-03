@@ -1,0 +1,129 @@
+---
+title: "SnapshotService"
+hideTitleOnPage: true
+---
+
+## SnapshotService
+
+Service for managing Daytona Snapshots.
+
+Provides operations to create, list, retrieve, and delete snapshots.
+
+### Methods
+
+#### create()
+```java
+public Snapshot create(String name, String imageName)
+```
+
+Creates a snapshot from an existing image reference.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `imageName` _String_ - source image name or tag
+
+**Returns**:
+
+- `Snapshot` - created `Snapshot`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the API request fails
+
+#### create()
+```java
+public Snapshot create(String name, Image image, Consumer<String> onLogs)
+```
+
+Creates a snapshot from a declarative `Image` with optional build log streaming.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `image` _Image_ - declarative image definition
+- `onLogs` _Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Snapshot` - created `Snapshot` in active or error state
+
+**Throws**:
+
+- `DaytonaException` - if the API request fails or the build fails
+
+#### create()
+```java
+public Snapshot create(String name, Image image, io.daytona.sdk.model.Resources resources, Consumer<String> onLogs)
+```
+
+Creates a snapshot from a declarative `Image` with resources and optional build log streaming.
+
+**Parameters**:
+
+- `name` _String_ - snapshot name
+- `image` _Image_ - declarative image definition
+- `resources` _io.daytona.sdk.model.Resources_ - CPU/GPU/memory/disk resources; `null` for defaults
+- `onLogs` _Consumer\<String\>_ - callback for build log lines; `null` to skip streaming
+
+**Returns**:
+
+- `Snapshot` - created `Snapshot` in active or error state
+
+**Throws**:
+
+- `DaytonaException` - if the API request fails or the build fails
+
+#### list()
+```java
+public PaginatedSnapshots list(Integer page, Integer limit)
+```
+
+Lists snapshots with pagination.
+
+**Parameters**:
+
+- `page` _Integer_ - page number starting from 1; defaults to 1 when `null`
+- `limit` _Integer_ - maximum number of items per page; defaults to 10 when `null`
+
+**Returns**:
+
+- `PaginatedSnapshots` - paginated snapshot result
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the API request fails
+
+#### get()
+```java
+public Snapshot get(String nameOrId)
+```
+
+Retrieves a snapshot by name or ID.
+
+**Parameters**:
+
+- `nameOrId` _String_ - snapshot name or identifier
+
+**Returns**:
+
+- `Snapshot` - matching `Snapshot`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if no snapshot is found or request fails
+
+#### delete()
+```java
+public void delete(String id)
+```
+
+Deletes a snapshot by ID.
+
+**Parameters**:
+
+- `id` _String_ - snapshot identifier
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if deletion fails

@@ -1,0 +1,181 @@
+---
+title: "Pty"
+hideTitleOnPage: true
+---
+
+## PtyCreateOptions
+
+Options used when creating a PTY session in a Sandbox.
+
+### Constructors
+
+#### new PtyCreateOptions()
+```java
+public PtyCreateOptions()
+```
+
+Creates PTY options with default dimensions (`120x30`).
+
+#### new PtyCreateOptions()
+```java
+public PtyCreateOptions(String id, int cols, int rows, Consumer<byte[]> onData)
+```
+
+Creates PTY options with explicit values.
+
+**Parameters**:
+
+- `id` _String_ - custom PTY session identifier; if `null`, the server generates one
+- `cols` _int_ - terminal width in columns
+- `rows` _int_ - terminal height in rows
+- `onData` _Consumer\<byte[]\>_ - callback invoked for each PTY output chunk
+
+### Methods
+
+#### getId()
+```java
+public String getId()
+```
+
+Returns the PTY session identifier to request.
+
+**Returns**:
+
+- `String` - requested PTY session identifier, or `null` to auto-generate
+
+#### setId()
+```java
+public PtyCreateOptions setId(String id)
+```
+
+Sets the PTY session identifier.
+
+**Parameters**:
+
+- `id` _String_ - PTY session identifier
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
+#### getCols()
+```java
+public int getCols()
+```
+
+Returns terminal width in columns.
+
+**Returns**:
+
+- `int` - terminal width
+
+#### setCols()
+```java
+public PtyCreateOptions setCols(int cols)
+```
+
+Sets terminal width in columns.
+
+**Parameters**:
+
+- `cols` _int_ - terminal width
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
+#### getRows()
+```java
+public int getRows()
+```
+
+Returns terminal height in rows.
+
+**Returns**:
+
+- `int` - terminal height
+
+#### setRows()
+```java
+public PtyCreateOptions setRows(int rows)
+```
+
+Sets terminal height in rows.
+
+**Parameters**:
+
+- `rows` _int_ - terminal height
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
+#### getOnData()
+```java
+public Consumer<byte[]> getOnData()
+```
+
+Returns callback used for streaming PTY output.
+
+**Returns**:
+
+- `Consumer\<byte[]\>` - PTY output callback, or `null` when not configured
+
+#### setOnData()
+```java
+public PtyCreateOptions setOnData(Consumer<byte[]> onData)
+```
+
+Sets callback invoked for each PTY output chunk.
+
+**Parameters**:
+
+- `onData` _Consumer\<byte[]\>_ - callback receiving raw PTY bytes
+
+**Returns**:
+
+- `PtyCreateOptions` - this options instance
+
+## PtyResult
+
+Final outcome of a PTY session.
+
+Contains exit status and an optional error/exit reason reported by the PTY backend.
+
+### Constructors
+
+#### new PtyResult()
+```java
+public PtyResult(int exitCode, String error)
+```
+
+Creates a PTY result object.
+
+**Parameters**:
+
+- `exitCode` _int_ - exit code returned by the PTY process; negative values indicate no exit code
+- `error` _String_ - optional error or exit reason
+
+### Methods
+
+#### getExitCode()
+```java
+public int getExitCode()
+```
+
+Returns the process exit code.
+
+**Returns**:
+
+- `int` - PTY process exit code
+
+#### getError()
+```java
+public String getError()
+```
+
+Returns the PTY error or exit reason when available.
+
+**Returns**:
+
+- `String` - error message, or `null` when the session ended successfully

@@ -31,13 +31,20 @@
         "ms-toolsai.jupyter",
         "bradlc.vscode-tailwindcss",
         "shopify.ruby-lsp",
-        "castwide.solargraph"
+        "castwide.solargraph",
+        "redhat.java",
+        "vscjava.vscode-gradle"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
         "python.terminal.activateEnvironment": true,
-        "python.terminal.activateEnvInCurrentTerminal": true
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "java.import.projectSelection": "gradle",
+        "java.import.gradle.enabled": true,
+        "java.import.maven.enabled": false,
+        "java.autobuild.enabled": false,
+        "java.project.importHint": false
       }
     }
   },
@@ -65,10 +72,15 @@
     "ghcr.io/devcontainers/features/ruby:1": {
       "version": "3.4.5"
     },
+    "ghcr.io/devcontainers/features/java:1.8.0": {
+      "jdkDistro": "tem",
+      "version": "21.0.10",
+      "installMaven": true,
+      "installGradle": true,
+      "installAnt": true
+    },
     "./tools-feature": {
-      "pipPackages": [
-        "poetry==2.1.3"
-      ],
+      "pipPackages": ["poetry==2.1.3"],
       "goTools": [
         "github.com/swaggo/swag/cmd/swag@v1.16.4",
         "github.com/mitranim/gow@latest",
@@ -78,19 +90,12 @@
   },
   "onCreateCommand": {
     // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
-    "env": "test -f .env.local || touch .env.local"
+    "env": "test -f .env.local || touch .env.local",
+    "sysctl": "sudo sysctl -w fs.inotify.max_user_watches=524288 && sudo sysctl -w fs.inotify.max_user_instances=1024"
   },
-  "postStartCommand": "yarn && poetry lock && poetry install && bundle install && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use",
+  "postStartCommand": "yarn && poetry lock && poetry install && bundle install && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use && (chmod +x libs/api-client-java/gradlew libs/toolbox-api-client-java/gradlew libs/sdk-java/gradlew && libs/api-client-java/gradlew -p libs/api-client-java publishToMavenLocal -q && libs/toolbox-api-client-java/gradlew -p libs/toolbox-api-client-java publishToMavenLocal -q && libs/sdk-java/gradlew -p libs/sdk-java publishToMavenLocal -q || true)",
   "postAttachCommand": "",
-  "forwardPorts": [
-    5556,
-    "pgadmin:80",
-    "registry-ui:5100",
-    "maildev:1080",
-    "minio:9000",
-    "minio:9001",
-    "jaeger:16686"
-  ],
+  "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001", "jaeger:16686"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "daytona"
 }

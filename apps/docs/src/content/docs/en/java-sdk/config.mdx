@@ -1,0 +1,108 @@
+---
+title: "DaytonaConfig"
+hideTitleOnPage: true
+---
+
+## DaytonaConfig
+
+Configuration used to initialize a `Daytona` client.
+
+Contains API authentication settings, API endpoint URL, and the default target region used
+when creating new Sandboxes.
+
+### Methods
+
+#### getApiKey()
+```java
+public String getApiKey()
+```
+
+Returns the API key used to authenticate SDK requests.
+
+**Returns**:
+
+- `String` - API key configured for the client
+
+#### getApiUrl()
+```java
+public String getApiUrl()
+```
+
+Returns the Daytona API base URL.
+
+**Returns**:
+
+- `String` - API URL used for main API requests
+
+#### getTarget()
+```java
+public String getTarget()
+```
+
+Returns the default target location for newly created Sandboxes.
+
+**Returns**:
+
+- `String` - target region identifier, or `null` if not configured
+
+## DaytonaConfig.Builder
+
+Builder for creating immutable `DaytonaConfig` instances.
+
+### Methods
+
+#### apiKey()
+```java
+public Builder apiKey(String apiKey)
+```
+
+Sets the API key used for authenticating SDK requests.
+
+**Parameters**:
+
+- `apiKey` _String_ - Daytona API key
+
+**Returns**:
+
+- `Builder` - this builder instance
+
+#### apiUrl()
+```java
+public Builder apiUrl(String apiUrl)
+```
+
+Sets the Daytona API base URL.
+
+**Parameters**:
+
+- `apiUrl` _String_ - API URL to use; defaults to `https://app.daytona.io/api` when omitted
+
+**Returns**:
+
+- `Builder` - this builder instance
+
+#### target()
+```java
+public Builder target(String target)
+```
+
+Sets the default target region for new Sandboxes.
+
+**Parameters**:
+
+- `target` _String_ - target location identifier
+
+**Returns**:
+
+- `Builder` - this builder instance
+
+#### build()
+```java
+public DaytonaConfig build()
+```
+
+Builds a new immutable `DaytonaConfig`.
+
+**Returns**:
+
+- `DaytonaConfig` - configured `DaytonaConfig` instance

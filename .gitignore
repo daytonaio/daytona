@@ -84,3 +84,16 @@ examples/**/*.png
 go.work.sum
 
 .claude/worktrees
+
+# Java build outputs
+**/.gradle/
+**/build/
+*.class
+*.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+**/target/
+
+# .NET build outputs
+**/bin/Debug/
+**/bin/Release/
+**/obj/

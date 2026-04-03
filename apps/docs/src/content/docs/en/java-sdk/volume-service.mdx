@@ -1,0 +1,80 @@
+---
+title: "VolumeService"
+hideTitleOnPage: true
+---
+
+## VolumeService
+
+Service for managing Daytona Volumes.
+
+Volumes provide persistent shared storage that can be mounted into Sandboxes.
+
+### Methods
+
+#### create()
+```java
+public Volume create(String name)
+```
+
+Creates a new volume.
+
+**Parameters**:
+
+- `name` _String_ - volume name
+
+**Returns**:
+
+- `Volume` - created `Volume`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if creation fails
+
+#### list()
+```java
+public List<Volume> list()
+```
+
+Lists all accessible volumes.
+
+**Returns**:
+
+- `List\<Volume\>` - list of available volumes
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if the API request fails
+
+#### getByName()
+```java
+public Volume getByName(String name)
+```
+
+Retrieves a volume by name.
+
+**Parameters**:
+
+- `name` _String_ - volume name
+
+**Returns**:
+
+- `Volume` - matching `Volume`
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if no volume is found or request fails
+
+#### delete()
+```java
+public void delete(String id)
+```
+
+Deletes a volume by ID.
+
+**Parameters**:
+
+- `id` _String_ - volume identifier
+
+**Throws**:
+
+- `io.daytona.sdk.exception.DaytonaException` - if deletion fails

@@ -1,0 +1,224 @@
+apply plugin: 'idea'
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: 'com.diffplug.spotless'
+
+group = 'io.daytona'
+version = '0.0.0-dev'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.+'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.11.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+sourceSets {
+    main.java.srcDirs = ['src/main/java']
+}
+
+if(hasProperty('target') && target == 'android') {
+
+    apply plugin: 'com.android.library'
+    apply plugin: 'com.github.dcendents.android-maven'
+
+    android {
+        compileSdkVersion 25
+        buildToolsVersion '25.0.2'
+        defaultConfig {
+            minSdkVersion 14
+            targetSdkVersion 25
+        }
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_8
+            targetCompatibility JavaVersion.VERSION_1_8
+        }
+
+        // Rename the aar correctly
+        libraryVariants.all { variant ->
+            variant.outputs.each { output ->
+                def outputFile = output.outputFile
+                if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                    def fileName = "${project.name}-${variant.baseName}-${version}.aar"
+                    output.outputFile = new File(outputFile.parent, fileName)
+                }
+            }
+        }
+
+        dependencies {
+            provided "jakarta.annotation:jakarta.annotation-api:$jakarta_annotation_version"
+        }
+    }
+
+    afterEvaluate {
+        android.libraryVariants.all { variant ->
+            def task = project.tasks.create "jar${variant.name.capitalize()}", Jar
+            task.description = "Create jar artifact for ${variant.name}"
+            task.dependsOn variant.javaCompile
+            task.from variant.javaCompile.destinationDirectory
+            task.destinationDirectory = project.file("${project.buildDir}/outputs/jar")
+            task.archiveFileName = "${project.name}-${variant.baseName}-${version}.jar"
+            artifacts.add('archives', task)
+        }
+    }
+
+    task sourcesJar(type: Jar) {
+        from android.sourceSets.main.java.srcDirs
+        classifier = 'sources'
+    }
+
+    artifacts {
+        archives sourcesJar
+    }
+
+} else {
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    java {
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifactId = 'api-client'
+                from components.java
+                pom {
+                    name = 'Daytona API Client'
+                    description = 'Auto-generated Java client for the Daytona REST API'
+                    url = 'https://github.com/daytonaio/daytona'
+                    licenses {
+                        license {
+                            name = 'Apache License, Version 2.0'
+                            url = 'https://www.apache.org/licenses/LICENSE-2.0'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'daytonaio'
+                            name = 'Daytona Platforms Inc.'
+                            email = 'support@daytona.io'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:git://github.com/daytonaio/daytona.git'
+                        developerConnection = 'scm:git:ssh://github.com:daytonaio/daytona.git'
+                        url = 'https://github.com/daytonaio/daytona'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = 'release'
+                if (version.toString().endsWith('-SNAPSHOT')) {
+                    url = uri('https://central.sonatype.com/repository/maven-snapshots/')
+                    credentials {
+                        username = System.getenv('MAVEN_USERNAME') ?: ''
+                        password = System.getenv('MAVEN_PASSWORD') ?: ''
+                    }
+                } else {
+                    url = layout.buildDirectory.dir('staging-deploy')
+                }
+            }
+        }
+    }
+
+    signing {
+        def rawKey = System.getenv('MAVEN_GPG_SIGNING_KEY')
+        def signingKey = rawKey != null ? rawKey.replace('\\n', '\n') : null
+        def signingPassword = System.getenv('MAVEN_GPG_SIGNING_PASSWORD')
+        if (signingKey != null && !signingKey.isBlank()) {
+            useInMemoryPgpKeys(signingKey, signingPassword ?: '')
+            sign publishing.publications.maven
+        }
+    }
+
+    tasks.withType(Javadoc) {
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
+    task execute(type:JavaExec) {
+       main = System.getProperty('mainClass')
+       classpath = sourceSets.main.runtimeClasspath
+    }
+}
+
+ext {
+    jakarta_annotation_version = "1.3.5"
+}
+
+dependencies {
+    implementation 'io.swagger:swagger-annotations:1.6.8'
+    implementation "com.google.code.findbugs:jsr305:3.0.2"
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'io.gsonfire:gson-fire:1.9.0'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.17.0'
+    implementation "jakarta.annotation:jakarta.annotation-api:$jakarta_annotation_version"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.3'
+    testImplementation 'org.mockito:mockito-core:3.12.4'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.3'
+}
+
+javadoc {
+    options.tags = [ "http.response.details:a:Http Response Details" ]
+}
+
+// Use spotless plugin to automatically format code, remove unused import, etc
+// To apply changes directly to the file, run `gradlew spotlessApply`
+// Ref: https://github.com/diffplug/spotless/tree/main/plugin-gradle
+spotless {
+    // comment out below to run spotless as part of the `check` task
+    enforceCheck false
+
+    format 'misc', {
+        // define the files (e.g. '*.gradle', '*.md') to apply `misc` to
+        target '.gitignore'
+
+        // define the steps to apply to those files
+        trimTrailingWhitespace()
+        indentWithSpaces() // Takes an integer argument if you don't like 4
+        endWithNewline()
+    }
+    java {
+        // don't need to set target, it is inferred from java
+
+        // apply a specific flavor of google-java-format
+        googleJavaFormat('1.8').aosp().reflowLongStrings()
+
+        removeUnusedImports()
+        importOrder()
+    }
+}
+
+test {
+    // Enable JUnit 5 (Gradle 4.6+).
+    useJUnitPlatform()
+
+    // Always run tests, even when nothing changed.
+    dependsOn 'cleanTest'
+
+    // Show test results.
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+}

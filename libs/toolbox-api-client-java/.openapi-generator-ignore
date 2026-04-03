@@ -1,0 +1,12 @@
+# Prevent the generator from overwriting files we maintain.
+build.gradle
+settings.gradle
+README.md
+build.sbt
+pom.xml
+git_push.sh
+docs/*
+.gitignore
+.travis.yml
+api/*
+.github/**

@@ -20,16 +20,24 @@ on:
       rubygems_pkg_version:
         description: 'RubyGems package version (default: version)'
         required: false
+      maven_pkg_version:
+        description: 'Maven package version (default: version)'
+        required: false
 
 env:
   VERSION: ${{ inputs.version }}
   PYPI_PKG_VERSION: ${{ inputs.pypi_pkg_version || inputs.version}}
   NPM_PKG_VERSION: ${{ inputs.npm_pkg_version || inputs.version}}
   RUBYGEMS_PKG_VERSION: ${{ inputs.rubygems_pkg_version || inputs.version}}
+  MAVEN_PKG_VERSION: ${{ inputs.maven_pkg_version || inputs.version}}
   NPM_TAG: ${{ inputs.npm_tag }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
   RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+  MAVEN_GPG_SIGNING_KEY: ${{ secrets.MAVEN_GPG_SIGNING_KEY }}
+  MAVEN_GPG_SIGNING_PASSWORD: ${{ secrets.MAVEN_GPG_SIGNING_PASSWORD }}
   POETRY_VIRTUALENVS_IN_PROJECT: true
 
 jobs:

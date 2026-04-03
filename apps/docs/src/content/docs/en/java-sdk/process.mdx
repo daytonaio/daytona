@@ -1,0 +1,409 @@
+---
+title: "Process"
+hideTitleOnPage: true
+---
+
+## Process
+
+Process and session execution interface for a Sandbox.
+
+Supports single-command execution, code execution, long-running sessions, and PTY terminal
+sessions.
+
+### Methods
+
+#### executeCommand()
+```java
+public ExecuteResponse executeCommand(String command)
+```
+
+Executes a shell command with default options.
+
+**Parameters**:
+
+- `command` _String_ - command to execute
+
+**Returns**:
+
+- `ExecuteResponse` - execution result
+
+**Throws**:
+
+- `DaytonaException` - if execution fails
+
+#### executeCommand()
+```java
+public ExecuteResponse executeCommand(String command, String cwd, Map<String, String> env, Integer timeout)
+```
+
+Executes a shell command.
+
+**Parameters**:
+
+- `command` _String_ - command to execute
+- `cwd` _String_ - working directory, or `null` to use sandbox default
+- `env` _Map\<String, String\>_ - environment variables to set for the command
+- `timeout` _Integer_ - timeout in seconds
+
+**Returns**:
+
+- `ExecuteResponse` - execution result
+
+**Throws**:
+
+- `DaytonaException` - if execution fails
+
+#### codeRun()
+```java
+public ExecuteResponse codeRun(String code)
+```
+
+Executes source code using Sandbox language tooling.
+
+**Parameters**:
+
+- `code` _String_ - source code to execute
+
+**Returns**:
+
+- `ExecuteResponse` - execution result
+
+**Throws**:
+
+- `DaytonaException` - if execution fails
+
+#### codeRun()
+```java
+public ExecuteResponse codeRun(String code, Map<String, String> env, Integer timeout)
+```
+
+Executes source code using Sandbox language tooling.
+
+Base64-encodes the code and pipes it to the language runtime selected by
+the `code-toolbox-language` label. Uses `io.daytona.sdk.codetoolbox.CodeToolbox`
+implementations for language-specific command generation.
+
+**Parameters**:
+
+- `code` _String_ - source code to execute
+- `env` _Map\<String, String\>_ - environment variables to set during execution
+- `timeout` _Integer_ - timeout in seconds
+
+**Returns**:
+
+- `ExecuteResponse` - execution result
+
+**Throws**:
+
+- `DaytonaException` - if execution fails
+
+#### createSession()
+```java
+public void createSession(String sessionId)
+```
+
+Creates a persistent background session.
+
+**Parameters**:
+
+- `sessionId` _String_ - unique session identifier
+
+**Throws**:
+
+- `DaytonaException` - if session creation fails
+
+#### getSession()
+```java
+public Session getSession(String sessionId)
+```
+
+Returns session metadata.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+
+**Returns**:
+
+- `Session` - session metadata
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### getEntrypointSession()
+```java
+public Session getEntrypointSession()
+```
+
+Returns entrypoint session metadata.
+
+**Returns**:
+
+- `Session` - entrypoint session metadata
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### executeSessionCommand()
+```java
+public SessionExecuteResponse executeSessionCommand(String sessionId, SessionExecuteRequest req)
+```
+
+Executes a command in an existing session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+- `req` _SessionExecuteRequest_ - execution request
+
+**Returns**:
+
+- `SessionExecuteResponse` - command execution response
+
+**Throws**:
+
+- `DaytonaException` - if execution fails
+
+#### getSessionCommand()
+```java
+public Command getSessionCommand(String sessionId, String commandId)
+```
+
+Returns metadata for a command executed in a session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+- `commandId` _String_ - command identifier
+
+**Returns**:
+
+- `Command` - command metadata
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### getSessionCommandLogs()
+```java
+public String getSessionCommandLogs(String sessionId, String commandId)
+```
+
+Returns logs for a command executed in a session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+- `commandId` _String_ - command identifier
+
+**Returns**:
+
+- `String` - command logs
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### getEntrypointLogs()
+```java
+public String getEntrypointLogs()
+```
+
+Returns one-shot logs for the sandbox entrypoint session.
+
+**Returns**:
+
+- `String` - entrypoint logs
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### getEntrypointLogs()
+```java
+public void getEntrypointLogs(Consumer<String> onStdout, Consumer<String> onStderr)
+```
+
+Streams logs for the sandbox entrypoint session via WebSocket.
+
+**Parameters**:
+
+- `onStdout` _Consumer\<String\>_ - callback for stdout chunks
+- `onStderr` _Consumer\<String\>_ - callback for stderr chunks
+
+**Throws**:
+
+- `DaytonaException` - if streaming fails
+
+#### sendSessionCommandInput()
+```java
+public void sendSessionCommandInput(String sessionId, String commandId, String data)
+```
+
+Sends input data to a command executed in a session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+- `commandId` _String_ - command identifier
+- `data` _String_ - input text to send
+
+**Throws**:
+
+- `DaytonaException` - if sending input fails
+
+#### deleteSession()
+```java
+public void deleteSession(String sessionId)
+```
+
+Deletes a session.
+
+**Parameters**:
+
+- `sessionId` _String_ - session identifier
+
+**Throws**:
+
+- `DaytonaException` - if deletion fails
+
+#### listSessions()
+```java
+public List<Session> listSessions()
+```
+
+Lists all sessions in the Sandbox.
+
+**Returns**:
+
+- `List\<Session\>` - session list
+
+**Throws**:
+
+- `DaytonaException` - if listing fails
+
+#### createPty()
+```java
+public PtyHandle createPty(PtyCreateOptions options)
+```
+
+Creates a PTY terminal session.
+
+**Parameters**:
+
+- `options` _PtyCreateOptions_ - PTY options, or `null` to use defaults
+
+**Returns**:
+
+- `PtyHandle` - PTY handle for streaming I/O and lifecycle operations
+
+**Throws**:
+
+- `DaytonaException` - if PTY session creation fails
+
+#### connectPty()
+```java
+public PtyHandle connectPty(String sessionId)
+```
+
+Connects to an existing PTY terminal session.
+
+**Parameters**:
+
+- `sessionId` _String_ - PTY session identifier
+
+**Returns**:
+
+- `PtyHandle` - PTY handle for streaming I/O and lifecycle operations
+
+**Throws**:
+
+- `DaytonaException` - if websocket connection setup fails
+
+#### connectPty()
+```java
+public PtyHandle connectPty(String sessionId, PtyCreateOptions options)
+```
+
+Connects to an existing PTY terminal session.
+
+**Parameters**:
+
+- `sessionId` _String_ - PTY session identifier
+- `options` _PtyCreateOptions_ - PTY options, used for data callback configuration
+
+**Returns**:
+
+- `PtyHandle` - PTY handle for streaming I/O and lifecycle operations
+
+**Throws**:
+
+- `DaytonaException` - if websocket connection setup fails
+
+#### listPtySessions()
+```java
+public List<PtySessionInfo> listPtySessions()
+```
+
+Lists PTY sessions in the Sandbox.
+
+**Returns**:
+
+- `List\<PtySessionInfo\>` - PTY session information list
+
+**Throws**:
+
+- `DaytonaException` - if listing fails
+
+#### getPtySessionInfo()
+```java
+public PtySessionInfo getPtySessionInfo(String sessionId)
+```
+
+Returns PTY session information.
+
+**Parameters**:
+
+- `sessionId` _String_ - PTY session identifier
+
+**Returns**:
+
+- `PtySessionInfo` - PTY session information
+
+**Throws**:
+
+- `DaytonaException` - if retrieval fails
+
+#### resizePtySession()
+```java
+public void resizePtySession(String sessionId, int cols, int rows)
+```
+
+Resizes an active PTY session.
+
+**Parameters**:
+
+- `sessionId` _String_ - PTY session identifier
+- `cols` _int_ - terminal width in columns
+- `rows` _int_ - terminal height in rows
+
+**Throws**:
+
+- `DaytonaException` - if resize fails
+
+#### killPtySession()
+```java
+public void killPtySession(String sessionId)
+```
+
+Terminates a PTY session.
+
+**Parameters**:
+
+- `sessionId` _String_ - PTY session identifier
+
+**Throws**:
+
+- `DaytonaException` - if termination fails
