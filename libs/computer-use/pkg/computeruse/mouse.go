@@ -136,7 +136,7 @@ func (u *ComputerUse) Drag(req *computeruse.MouseDragRequest) (*computeruse.Mous
 
 func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.ScrollResponse, error) {
 	// Default amount if not specified
-	if req.Amount == 0 {
+	if req.Amount <= 0 {
 		req.Amount = 3
 	}
 
@@ -144,11 +144,10 @@ func (u *ComputerUse) Scroll(req *computeruse.MouseScrollRequest) (*computeruse.
 	robotgo.Move(req.X, req.Y)
 	time.Sleep(50 * time.Millisecond)
 
-	// Perform scroll
 	if req.Direction == "up" {
-		robotgo.ScrollSmooth(req.Amount, 0)
+		robotgo.ScrollSmooth(1, req.Amount, 10)
 	} else {
-		robotgo.ScrollSmooth(-req.Amount, 0)
+		robotgo.ScrollSmooth(-1, req.Amount, 10)
 	}
 
 	return &computeruse.ScrollResponse{
