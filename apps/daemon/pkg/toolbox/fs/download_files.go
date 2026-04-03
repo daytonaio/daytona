@@ -95,9 +95,8 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.
 
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", ctype)
-	hdr.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "file", path),
-	)
+	hdr.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"; filename*=utf-8''%s`,
+		toLatin1(path), encodeRFC5987(path)))
 
 	part, err := mw.CreatePart(hdr)
 	if err != nil {
@@ -114,9 +113,8 @@ func writeFilePart(ctx context.Context, mw *multipart.Writer, path string, r io.
 func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path, text string) {
 	hdr := textproto.MIMEHeader{}
 	hdr.Set("Content-Type", "text/plain; charset=utf-8")
-	hdr.Set("Content-Disposition",
-		fmt.Sprintf(`form-data; name="%s"; filename="%s"`, "error", path),
-	)
+	hdr.Set("Content-Disposition", fmt.Sprintf(`form-data; name="error"; filename="%s"; filename*=utf-8''%s`,
+		toLatin1(path), encodeRFC5987(path)))
 	if part, err := mw.CreatePart(hdr); err == nil {
 		_, err := io.WriteString(part, text)
 		if err != nil {
@@ -128,4 +126,48 @@ func writeErrorPart(ctx *gin.Context, mw *multipart.Writer, path, text string) {
 func fileExists(path string) bool {
 	info, err := os.Stat(path)
 	return err == nil && !info.IsDir()
+}
+
+// toLatin1 replaces characters outside ISO-8859-1 with '_'.
+func toLatin1(s string) string {
+	var buf []byte
+	for _, r := range s {
+		if r <= 0xFF {
+			buf = append(buf, byte(r))
+		} else {
+			buf = append(buf, '_')
+		}
+	}
+	return string(buf)
+}
+
+// encodeRFC5987 percent-encodes per RFC 5987 attr-char rules.
+// Safe: alphanumerics and !#$&+-.^_`|~ — everything else is encoded.
+func encodeRFC5987(s string) string {
+	var buf []byte
+	for _, b := range []byte(s) {
+		if isAttrChar(b) {
+			buf = append(buf, b)
+		} else {
+			buf = append(buf, fmt.Sprintf("%%%02X", b)...)
+		}
+	}
+	return string(buf)
+}
+
+// isAttrChar reports whether b is in the RFC 5987 attr-char safe set.
+func isAttrChar(b byte) bool {
+	switch {
+	case b >= 'a' && b <= 'z':
+		return true
+	case b >= 'A' && b <= 'Z':
+		return true
+	case b >= '0' && b <= '9':
+		return true
+	}
+	switch b {
+	case '!', '#', '$', '&', '+', '-', '.', '^', '_', '`', '|', '~':
+		return true
+	}
+	return false
 }
