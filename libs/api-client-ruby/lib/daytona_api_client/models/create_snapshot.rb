@@ -21,7 +21,7 @@ module DaytonaApiClient
     # The image name of the snapshot
     attr_accessor :image_name
 
-    # The entrypoint command for the snapshot
+    # Override the container entrypoint for this snapshot. If omitted, the image default is used.
     attr_accessor :entrypoint
 
     # Whether the snapshot is general

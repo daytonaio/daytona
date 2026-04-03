@@ -25,8 +25,8 @@ export class CreateSnapshotDto {
   imageName?: string
 
   @ApiPropertyOptional({
-    description: 'The entrypoint command for the snapshot',
-    example: 'sleep infinity',
+    description: 'Override the container entrypoint for this snapshot. If omitted, the image default is used.',
+    example: ['nginx', '-g', 'daemon off;'],
   })
   @IsString({
     each: true,

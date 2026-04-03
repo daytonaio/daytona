@@ -303,11 +303,9 @@ export const CreateSnapshotSheet = ({ className, ref }: { className?: string; re
                     value={field.state.value ?? ''}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    placeholder="sleep infinity"
                   />
                   <FieldDescription>
-                    Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
-                    have an entrypoint, 'sleep infinity' will be used as the default.
+                    Optional. Overrides the image entrypoint. Leave empty to use the image default.
                   </FieldDescription>
                 </Field>
               )}

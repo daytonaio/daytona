@@ -15,7 +15,7 @@ import Label from '@components/Label.astro'
 
 スナップショットのイメージには、Docker Hub の `alpine:3.21.3` や `debian:12.10` のような公開イメージの名前とタグ、または別の公開コンテナレジストリ（例: `my-public-registry.com/custom-alpine:3.21`）のイメージを指定できます。
 
-entrypoint フィールドは任意です。イメージに長時間稼働する entrypoint がない場合、Daytona は自動的に `sleep infinity` を実行して、作成直後にコンテナが即時終了しないようにします。
+entrypoint フィールドは任意です。省略した場合はイメージの既定のエントリポイントが使われます。
 
 :::note
 `latest` タグのイメージは頻繁に更新されるため、特定のタグ（例: `0.1.0`）のみがサポートされます。同様に、`lts` や `stable` といったタグも避けることを推奨します。

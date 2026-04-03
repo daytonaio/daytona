@@ -139,7 +139,7 @@ var (
 )
 
 func init() {
-	CreateCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the snapshot")
+	CreateCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "Override the container entrypoint; omit to use the image default")
 	CreateCmd.Flags().StringVarP(&imageNameFlag, "image", "i", "", "The image name for the snapshot")
 	CreateCmd.Flags().StringVarP(&dockerfilePathFlag, "dockerfile", "f", "", "Path to Dockerfile to build")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times). If not provided, context will be automatically determined from COPY/ADD commands in the Dockerfile")

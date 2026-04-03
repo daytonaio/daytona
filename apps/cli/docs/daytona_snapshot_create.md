@@ -13,7 +13,7 @@ daytona snapshot create [SNAPSHOT] [flags]
       --cpu int32             CPU cores that will be allocated to the underlying sandboxes (default: 1)
       --disk int32            Disk space that will be allocated to the underlying sandboxes in GB (default: 3)
   -f, --dockerfile string     Path to Dockerfile to build
-  -e, --entrypoint string     The entrypoint command for the snapshot
+  -e, --entrypoint string     Override the container entrypoint; omit to use the image default
   -i, --image string          The image name for the snapshot
       --memory int32          Memory that will be allocated to the underlying sandboxes in GB (default: 1)
       --region string         ID of the region where the snapshot will be available (defaults to organization default region)

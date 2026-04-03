@@ -26,7 +26,7 @@ class Snapshot(SyncSnapshotDto):
         image_name (str): Name of the Image of the Snapshot.
         state (str): State of the Snapshot.
         size (float | int | None): Size of the Snapshot.
-        entrypoint (list[str] | None): Entrypoint of the Snapshot.
+        entrypoint (list[str] | None): Container entrypoint override; if None, the image default is used.
         cpu (float | int): CPU of the Snapshot.
         gpu (float | int): GPU of the Snapshot.
         mem (float | int): Memory of the Snapshot in GiB.
@@ -68,7 +68,7 @@ class CreateSnapshotParams(BaseModel):
             it should be available on some registry. If an Image instance is provided,
             it will be used to create a new image in Daytona.
         resources (Resources | None): Resources of the snapshot.
-        entrypoint (list[str] | None): Entrypoint of the snapshot.
+        entrypoint (list[str] | None): Optional. Overrides the container entrypoint; if omitted, the image default is used.
         region_id (str | None): ID of the region where the snapshot will be available.
             Defaults to organization default region if not specified.
     """

@@ -13090,7 +13090,10 @@ components:
         memory: 1
         buildInfo: ""
         regionId: regionId
-        entrypoint: sleep infinity
+        entrypoint:
+          - nginx
+          - -g
+          - daemon off;
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
         gpu: 0
@@ -13104,8 +13107,11 @@ components:
           example: ubuntu:22.04
           type: string
         entrypoint:
-          description: The entrypoint command for the snapshot
-          example: sleep infinity
+          description: Override the container entrypoint for this snapshot. If omitted, the image default is used.
+          example:
+            - nginx
+            - -g
+            - daemon off;
           items:
             type: string
           type: array

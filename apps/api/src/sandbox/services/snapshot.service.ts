@@ -704,7 +704,6 @@ export class SnapshotService {
     }
   }
 
-  // TODO: revise/cleanup
   getEntrypointFromDockerfile(dockerfileContent: string): string[] {
     // Match ENTRYPOINT with either a string or JSON array
     const matches = [...dockerfileContent.matchAll(/ENTRYPOINT\s+(.*)/g)]
@@ -723,7 +722,7 @@ export class SnapshotService {
       }
     }
 
-    return ['sleep', 'infinity']
+    return []
   }
 
   /**

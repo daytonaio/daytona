@@ -13,7 +13,7 @@ module Daytona
     # @return [Daytona::Resources, nil] Resources of the snapshot
     attr_reader :resources
 
-    # @return [Array<String>, nil] Entrypoint of the snapshot
+    # @return [Array<String>, nil] Optional. Overrides the container entrypoint; if nil, the image default is used
     attr_reader :entrypoint
 
     # @return [String, nil] ID of the region where the snapshot will be available.
@@ -23,7 +23,7 @@ module Daytona
     # @param name [String] Name of the snapshot
     # @param image [String, Daytona::Image] Image of the snapshot
     # @param resources [Daytona::Resources, nil] Resources of the snapshot
-    # @param entrypoint [Array<String>, nil] Entrypoint of the snapshot
+    # @param entrypoint [Array<String>, nil] Optional. Overrides the container entrypoint; if omitted, the image default is used
     # @param region_id [String, nil] ID of the region where the snapshot will be available
     def initialize(name:, image:, resources: nil, entrypoint: nil, region_id: nil)
       @name = name
@@ -56,7 +56,7 @@ module Daytona
     # @return [Float, nil] Size of the Snapshot
     attr_reader :size
 
-    # @return [Array<String>, nil] Entrypoint of the Snapshot
+    # @return [Array<String>, nil] Container entrypoint override; nil means the image default
     attr_reader :entrypoint
 
     # @return [Float] CPU of the Snapshot
