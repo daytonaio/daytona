@@ -112,9 +112,19 @@ func run() int {
 		return 2
 	}
 
+	// Parse allowed CIDRs for network rules
+	allowedCIDRs, err := netrules.ParseCIDRList(cfg.NetworkAllowedCIDRs)
+	if err != nil {
+		logger.Error("Failed to parse NETWORK_ALLOWED_CIDRS", "error", err)
+		return 2
+	}
+	if len(allowedCIDRs) > 0 {
+		logger.Info("Loaded allowed CIDRs for network rules", "cidrs", allowedCIDRs)
+	}
+
 	// Initialize net rules manager
 	persistent := cfg.Environment != "development"
-	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent)
+	netRulesManager, err := netrules.NewNetRulesManager(logger, persistent, allowedCIDRs)
 	if err != nil {
 		logger.Error("Failed to initialize net rules manager", "error", err)
 		return 2

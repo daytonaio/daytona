@@ -30,9 +30,23 @@ func (manager *NetRulesManager) SetNetworkRules(name string, sourceIp string, ne
 		return err
 	}
 
+	// Allow DNS (UDP port 53) so containers can resolve domain names
+	if err := manager.ipt.AppendUnique("filter", chainName, "-j", "RETURN", "-p", "udp", "--dport", "53"); err != nil {
+		return err
+	}
+
 	// Add rules to allow traffic from the specified networks
 	for _, network := range allowedNetworks {
 		if err := manager.ipt.AppendUnique("filter", chainName, "-j", "RETURN", "-d", network.String(), "-p", "all"); err != nil {
+			return err
+		}
+	}
+
+	// Jump to the shared always-allowed chain. The shared chain uses ACCEPT
+	// for matching CIDRs (immediately allowing the packet), while unmatched
+	// packets return here and fall through to the DROP rule below.
+	if len(manager.allowedCIDRs) > 0 {
+		if err := manager.ipt.AppendUnique("filter", chainName, "-j", AllowedChainName, "-p", "all"); err != nil {
 			return err
 		}
 	}

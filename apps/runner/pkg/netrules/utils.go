@@ -12,6 +12,8 @@ import (
 const (
 	// ChainPrefix is the prefix used for all Daytona sandbox chains
 	ChainPrefix = "DAYTONA-SB-"
+	// AllowedChainName is the shared chain for always-allowed domain CIDRs
+	AllowedChainName = "DAYTONA-ALLOWED"
 )
 
 // ParseCidrNetworks parses a comma-separated list of CIDR networks and returns them as an array
@@ -47,6 +49,12 @@ func ParseRuleArguments(rule string) ([]string, error) {
 		}
 	}
 	return nil, fmt.Errorf("invalid rule format: %s", rule)
+}
+
+// ParseCIDRList parses a comma-separated list of CIDR networks.
+// Returns nil with no error when the input is empty.
+func ParseCIDRList(networks string) ([]*net.IPNet, error) {
+	return parseCidrNetworks(networks)
 }
 
 // formatChainName adds the DAYTONA-SB- prefix to a chain name if it doesn't already have it
