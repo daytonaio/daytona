@@ -410,7 +410,7 @@ import (
 
 func main() {
   config := &types.DaytonaConfig{
-    ApiKey: "your-api-key",
+    APIKey: "your-api-key",
   }
 
   client, err := daytona.NewClientWithConfig(config)
