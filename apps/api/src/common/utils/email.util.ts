@@ -11,4 +11,9 @@ export class EmailUtils {
   static areEqual(email1: string, email2: string): boolean {
     return this.normalize(email1) === this.normalize(email2)
   }
+
+  // Inserts zero-width spaces (U+200B) to break URL patterns and prevent email client auto-linking.
+  static sanitizeForDisplay(text: string): string {
+    return text.replace(/:\/\//g, ':\u200B/\u200B/').replace(/(?<=\w)\.(?=\w)/g, '\u200B.\u200B')
+  }
 }
