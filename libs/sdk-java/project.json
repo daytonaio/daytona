@@ -27,13 +27,19 @@
         "cwd": "{projectRoot}",
         "command": "./gradlew build -x test"
       },
-      "dependsOn": ["set-version"]
+      "dependsOn": [
+        "set-version",
+        {
+          "target": "build",
+          "projects": ["api-client-java", "toolbox-api-client-java"]
+        }
+      ]
     },
     "publish": {
       "executor": "nx:run-commands",
       "options": {
         "cwd": "{projectRoot}",
-        "command": "test -n \"$MAVEN_PKG_VERSION\" || { echo 'ERROR: MAVEN_PKG_VERSION is required for publish'; exit 1; } && rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew publish && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
+        "command": "test -n \"$MAVEN_PKG_VERSION\" || { echo 'ERROR: MAVEN_PKG_VERSION is required for publish'; exit 1; } && rm -rf build/staging-deploy build/central-bundle.zip && ./gradlew clean publishMavenJavaPublicationToReleaseRepository && if ! echo \"$MAVEN_PKG_VERSION\" | grep -q SNAPSHOT; then find build/staging-deploy -name 'maven-metadata.xml*' -delete && cd build/staging-deploy && zip -r ../central-bundle.zip . && cd .. && curl -s -w '\\nHTTP %{http_code}\\n' --fail-with-body -X POST 'https://central.sonatype.com/api/v1/publisher/upload?publishingType=AUTOMATIC' -H \"Authorization: Bearer $(echo -n $MAVEN_USERNAME:$MAVEN_PASSWORD | base64 -w0)\" -F 'bundle=@central-bundle.zip'; fi"
       },
       "dependsOn": [
         "build",
