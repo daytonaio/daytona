@@ -38,7 +38,7 @@ export type {
   ScatterChart,
 } from './types/Charts'
 
-export { SandboxState } from '@daytonaio/api-client'
+export { SandboxState } from '@daytona/api-client'
 export type {
   FileInfo,
   GitStatus,
@@ -46,7 +46,7 @@ export type {
   Match,
   ReplaceResult,
   SearchFilesResponse,
-} from '@daytonaio/toolbox-api-client'
+} from '@daytona/toolbox-api-client'
 
 export type { ScreenshotRegion, ScreenshotOptions } from './ComputerUse'
 

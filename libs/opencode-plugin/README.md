@@ -18,7 +18,7 @@ To add the plugin to a project, edit `opencode.json` in the project directory:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@daytonaio/opencode"]
+  "plugin": ["@daytona/opencode"]
 }
 ```
 

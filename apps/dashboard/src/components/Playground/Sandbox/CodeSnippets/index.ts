@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { CodeLanguage } from '@daytonaio/sdk'
+import { CodeLanguage } from '@daytona/sdk'
 import { PythonSnippetGenerator } from './python'
 import { CodeSnippetGenerator } from './types'
 import { TypeScriptSnippetGenerator } from './typescript'

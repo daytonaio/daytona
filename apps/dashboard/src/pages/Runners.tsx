@@ -28,7 +28,7 @@ import {
   OrganizationRolePermissionsEnum,
   Runner,
   RunnerState,
-} from '@daytonaio/api-client'
+} from '@daytona/api-client'
 import { PlusIcon } from 'lucide-react'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'

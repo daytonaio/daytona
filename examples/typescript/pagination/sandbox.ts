@@ -1,4 +1,4 @@
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona } from '@daytona/sdk'
 
 async function main() {
   const daytona = new Daytona()

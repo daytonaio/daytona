@@ -4,7 +4,7 @@
  */
 
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { Region, RegionType } from '@daytonaio/api-client'
+import { Region, RegionType } from '@daytona/api-client'
 import { IRegionsContext, RegionsContext } from '@/contexts/RegionsContext'
 import { useApi } from '@/hooks/useApi'
 import { handleApiError } from '@/lib/error-handling'

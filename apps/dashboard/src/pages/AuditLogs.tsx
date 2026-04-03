@@ -10,7 +10,7 @@ import { DateRangePicker, QuickRangesConfig } from '@/components/ui/date-range-p
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useAuditLogsQuery, type AuditLogsQueryParams } from '@/hooks/queries/useAuditLogsQuery'
 import { handleApiError } from '@/lib/error-handling'
-import { PaginatedAuditLogs } from '@daytonaio/api-client'
+import { PaginatedAuditLogs } from '@daytona/api-client'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { DateRange } from 'react-day-picker'
 

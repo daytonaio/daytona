@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { PaginatedAuditLogs } from '@daytonaio/api-client'
+import { PaginatedAuditLogs } from '@daytona/api-client'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useApi } from '../useApi'
 import { useSelectedOrganization } from '../useSelectedOrganization'

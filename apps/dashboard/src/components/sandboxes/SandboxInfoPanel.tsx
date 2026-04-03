@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from '@/components/ui/empty'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn, formatDuration, getRelativeTimeString } from '@/lib/utils'
-import { Sandbox } from '@daytonaio/api-client'
+import { Sandbox } from '@daytona/api-client'
 import { AlertCircle, Tag } from 'lucide-react'
 import React, { useMemo } from 'react'
 

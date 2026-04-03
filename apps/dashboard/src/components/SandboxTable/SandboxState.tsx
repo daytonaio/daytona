@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxState as SandboxStateType } from '@daytonaio/api-client'
+import { SandboxState as SandboxStateType } from '@daytona/api-client'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { getStateLabel } from './constants'
 import { STATE_ICONS } from './state-icons'

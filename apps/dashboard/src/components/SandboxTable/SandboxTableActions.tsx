@@ -4,7 +4,7 @@
  */
 
 import { RoutePath } from '@/enums/RoutePath'
-import { SandboxState } from '@daytonaio/api-client'
+import { SandboxState } from '@daytona/api-client'
 import { Terminal, MoreVertical, Play, Square, Loader2, Wrench } from 'lucide-react'
 import { generatePath, useNavigate } from 'react-router-dom'
 import { Button } from '../ui/button'

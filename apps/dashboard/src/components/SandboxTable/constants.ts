@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxState } from '@daytonaio/api-client'
+import { SandboxState } from '@daytona/api-client'
 import { CheckCircle, Circle, AlertTriangle, Timer, Archive } from 'lucide-react'
 import { FacetedFilterOption } from './types'
 

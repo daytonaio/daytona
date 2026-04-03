@@ -4,7 +4,7 @@
  */
 
 import { cn } from '@/lib/utils'
-import { RegionUsageOverview } from '@daytonaio/api-client/src'
+import { RegionUsageOverview } from '@daytona/api-client/src'
 
 export function UsageOverviewIndicator({
   usage,
