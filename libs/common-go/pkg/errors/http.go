@@ -31,7 +31,7 @@ type CustomError struct {
 
 func (e *CustomError) IsRetryable() bool {
 	switch e.StatusCode {
-	case http.StatusBadGateway, http.StatusGatewayTimeout:
+	case http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
 		return true
 	}
 
