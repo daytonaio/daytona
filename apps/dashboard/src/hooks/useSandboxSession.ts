@@ -27,6 +27,7 @@ const DEFAULT_URL_EXPIRY_SECONDS = 600
 export type UseSandboxSessionOptions = {
   scope?: string
   createParams?: CreateSandboxParams
+  target?: string
   terminal?: boolean
   vnc?: boolean
   notify?: { sandbox?: boolean; terminal?: boolean; vnc?: boolean }
@@ -79,6 +80,7 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
   const {
     scope,
     createParams,
+    target,
     terminal = false,
     vnc = false,
     notify,
@@ -97,8 +99,9 @@ export function useSandboxSession(options?: UseSandboxSessionOptions): UseSandbo
       jwtToken: user.access_token,
       apiUrl: import.meta.env.VITE_API_URL,
       organizationId: selectedOrganization.id,
+      ...(target ? { target } : {}),
     })
-  }, [user?.access_token, selectedOrganization?.id])
+  }, [user?.access_token, selectedOrganization?.id, target])
 
   const createMutation = useMutation<Sandbox, Error, CreateSandboxParams | undefined>({
     mutationKey: ['create-sandbox', scope ?? 'default'],

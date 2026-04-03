@@ -6,6 +6,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Switch } from '@/components/ui/switch'
 import { SandboxParametersSections } from '@/enums/Playground'
+import { useSnapshotsQuery } from '@/hooks/queries/useSnapshotsQuery'
 import { usePlayground } from '@/hooks/usePlayground'
 import { cn } from '@/lib/utils'
 import { BoltIcon, FolderIcon, GitBranchIcon, SquareTerminalIcon } from 'lucide-react'
@@ -32,19 +33,11 @@ const SandboxParameters = ({ className }: { className?: string }) => {
   const { openedParametersSections, setOpenedParametersSections, enabledSections, enableSection, disableSection } =
     usePlayground()
 
-  // TODO - Currently, snapshot selection is not supported in the Playground, so we are using empty array and false for loading. We keep to code commented to enable it in future if requested by users.
-  // const { snapshotApi } = useApi()
-  // const { selectedOrganization } = useSelectedOrganization()
-
-  // const { data: snapshotsData = [], isLoading: snapshotsLoading } = useQuery({
-  //   queryKey: ['snapshots', selectedOrganization?.id, 'all'],
-  //   queryFn: async () => {
-  //     if (!selectedOrganization) return []
-  //     const response = await snapshotApi.getAllSnapshots(selectedOrganization.id)
-  //     return response.data.items
-  //   },
-  //   enabled: !!selectedOrganization,
-  // })
+  const { data: snapshotsResponse, isLoading: snapshotsLoading } = useSnapshotsQuery({
+    page: 1,
+    pageSize: 100,
+  })
+  const snapshotsData = snapshotsResponse?.items ?? []
 
   return (
     <div className={cn('flex flex-col gap-6', className)}>
@@ -102,7 +95,7 @@ const SandboxParameters = ({ className }: { className?: string }) => {
                     {section.value === SandboxParametersSections.FILE_SYSTEM && <SandboxFileSystem />}
                     {section.value === SandboxParametersSections.GIT_OPERATIONS && <SandboxGitOperations />}
                     {section.value === SandboxParametersSections.SANDBOX_MANAGEMENT && (
-                      <SandboxManagementParameters snapshotsData={[]} snapshotsLoading={false} />
+                      <SandboxManagementParameters snapshotsData={snapshotsData} snapshotsLoading={snapshotsLoading} />
                     )}
                     {section.value === SandboxParametersSections.PROCESS_CODE_EXECUTION && (
                       <SandboxProcessCodeExecution />

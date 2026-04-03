@@ -4,21 +4,23 @@
  */
 
 import { Tooltip } from '@/components/Tooltip'
+import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { SANDBOX_SNAPSHOT_DEFAULT_VALUE } from '@/constants/Playground'
+import { SANDBOX_SNAPSHOT_DEFAULT_VALUE, SANDBOX_TARGET_DEFAULT_VALUE } from '@/constants/Playground'
 import { NumberParameterFormItem, ParameterFormItem } from '@/contexts/PlaygroundContext'
 import { usePlayground } from '@/hooks/usePlayground'
+import { useRegions } from '@/hooks/useRegions'
 import { getLanguageCodeToRun } from '@/lib/playground'
+import { cn, getRegionFullDisplayName } from '@/lib/utils'
 import { SnapshotDto } from '@daytonaio/api-client'
 import { CodeLanguage, Resources } from '@daytonaio/sdk'
-import { HelpCircleIcon } from 'lucide-react'
+import { ChevronDownIcon, HelpCircleIcon } from 'lucide-react'
 import InlineInputFormControl from '../../Inputs/InlineInputFormControl'
 import FormNumberInput from '../../Inputs/NumberInput'
 import FormSelectInput from '../../Inputs/SelectInput'
 import StackedInputFormControl from '../../Inputs/StackedInputFormControl'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
-// TODO - Currently, snapshot selection is not supported in the Playground, so props are hardcoded to an empty array and false for loading. We keep snapshot parts commented to enable it in future if requested by users. Also, sandbox creation and code snippet generation suppoort snapshot selection, so they will work when snapshot selection is enabled in the UI without requiring any additional changes. Currently, the snapshot value is fixed to 'Default'
 type SandboxManagementParametersProps = {
   snapshotsData: Array<SnapshotDto>
   snapshotsLoading: boolean
@@ -29,8 +31,12 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
   snapshotsLoading,
 }) => {
   const { sandboxParametersState, setSandboxParameterValue } = usePlayground()
+  const { availableRegions: regions, loadingAvailableRegions: regionsLoading } = useRegions()
+  const [advancedOpen, setAdvancedOpen] = useState(false)
+
   const sandboxLanguage = sandboxParametersState['language']
   const sandboxSnapshotName = sandboxParametersState['snapshotName']
+  const sandboxTarget = sandboxParametersState['sandboxTarget']
   const resources = sandboxParametersState['resources']
   const sandboxFromImageParams = sandboxParametersState['createSandboxBaseParams']
 
@@ -40,13 +46,18 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
     placeholder: 'Select sandbox language',
   }
 
-  // const sandboxSnapshotFormData: ParameterFormItem = {
-  //   label: 'Snapshot',
-  //   key: 'snapshotName',
-  //   placeholder: 'Select sandbox snapshot',
-  // }
+  const targetFormData: ParameterFormItem = {
+    label: 'Target',
+    key: 'sandboxTarget',
+    placeholder: 'Select sandbox target',
+  }
 
-  // Available languages
+  const sandboxSnapshotFormData: ParameterFormItem = {
+    label: 'Snapshot',
+    key: 'snapshotName',
+    placeholder: 'Select sandbox snapshot',
+  }
+
   const languageOptions = [
     {
       value: CodeLanguage.PYTHON,
@@ -75,14 +86,47 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
     { label: 'Delete (min)', key: 'autoDeleteInterval', min: -1, max: Infinity, placeholder: '' },
   ]
 
-  // Change code to run based on selected sandbox language
   useEffect(() => {
     setSandboxParameterValue('codeRunParams', {
       languageCode: getLanguageCodeToRun(sandboxParametersState.language),
     })
   }, [sandboxParametersState.language, setSandboxParameterValue])
 
+  useEffect(() => {
+    if (regionsLoading) return
+    if (!sandboxTarget || sandboxTarget === SANDBOX_TARGET_DEFAULT_VALUE) return
+    const exists = regions.some((r) => r.id === sandboxTarget)
+    if (!exists) {
+      setSandboxParameterValue('sandboxTarget', SANDBOX_TARGET_DEFAULT_VALUE)
+    }
+  }, [regions, regionsLoading, sandboxTarget, setSandboxParameterValue])
+
+  useEffect(() => {
+    if (snapshotsLoading) return
+    if (!sandboxSnapshotName || sandboxSnapshotName === SANDBOX_SNAPSHOT_DEFAULT_VALUE) return
+    const exists = snapshotsData.some((s) => s.name === sandboxSnapshotName)
+    if (!exists) {
+      setSandboxParameterValue('snapshotName', SANDBOX_SNAPSHOT_DEFAULT_VALUE)
+    }
+  }, [snapshotsData, snapshotsLoading, sandboxSnapshotName, setSandboxParameterValue])
+
   const nonDefaultSnapshotSelected = sandboxSnapshotName && sandboxSnapshotName !== SANDBOX_SNAPSHOT_DEFAULT_VALUE
+
+  const targetSelectOptions = [
+    { value: SANDBOX_TARGET_DEFAULT_VALUE, label: 'Default (organization)' },
+    ...regions.map((region) => ({
+      value: region.id,
+      label: getRegionFullDisplayName(region),
+    })),
+  ]
+
+  const snapshotSelectOptions = [
+    { value: SANDBOX_SNAPSHOT_DEFAULT_VALUE, label: 'Default' },
+    ...snapshotsData.map((snapshot) => ({
+      value: snapshot.name,
+      label: snapshot.name,
+    })),
+  ]
 
   return (
     <>
@@ -96,23 +140,54 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
           }}
         />
       </StackedInputFormControl>
-      {/* <StackedInputFormControl formItem={sandboxSnapshotFormData}>
-        <FormSelectInput
-          selectOptions={[
-            { value: SANDBOX_SNAPSHOT_DEFAULT_VALUE, label: 'Default' },
-            ...snapshotsData.map((snapshot) => ({
-              value: snapshot.name,
-              label: snapshot.name,
-            })),
-          ]}
-          loading={snapshotsLoading}
-          selectValue={sandboxSnapshotName}
-          formItem={sandboxSnapshotFormData}
-          onChangeHandler={(snapshotName) => {
-            setSandboxParameterValue(sandboxSnapshotFormData.key as 'snapshotName', snapshotName)
-          }}
-        />
-      </StackedInputFormControl> */}
+
+      <div className="space-y-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-auto px-0 py-1 text-muted-foreground hover:text-foreground"
+          aria-expanded={advancedOpen}
+          aria-controls="playground-advanced-options"
+          onClick={() => setAdvancedOpen((o) => !o)}
+        >
+          <ChevronDownIcon
+            className={cn('mr-1 size-4 shrink-0 transition-transform', advancedOpen && 'rotate-180')}
+            aria-hidden
+          />
+          Advanced options
+        </Button>
+        {advancedOpen && (
+          <div id="playground-advanced-options" className="space-y-4 border-l-2 border-muted pl-3">
+            <StackedInputFormControl formItem={targetFormData}>
+              <FormSelectInput
+                selectOptions={targetSelectOptions}
+                loading={regionsLoading}
+                selectValue={sandboxTarget ?? SANDBOX_TARGET_DEFAULT_VALUE}
+                formItem={targetFormData}
+                onChangeHandler={(value) => {
+                  setSandboxParameterValue('sandboxTarget', value)
+                }}
+              />
+            </StackedInputFormControl>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Region for sandbox creation. If not set, your organization default is used.
+            </p>
+            <StackedInputFormControl formItem={sandboxSnapshotFormData}>
+              <FormSelectInput
+                selectOptions={snapshotSelectOptions}
+                loading={snapshotsLoading}
+                selectValue={sandboxSnapshotName ?? SANDBOX_SNAPSHOT_DEFAULT_VALUE}
+                formItem={sandboxSnapshotFormData}
+                onChangeHandler={(snapshotName) => {
+                  setSandboxParameterValue('snapshotName', snapshotName)
+                }}
+              />
+            </StackedInputFormControl>
+          </div>
+        )}
+      </div>
+
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Label htmlFor="resources" className="text-sm text-muted-foreground">
@@ -126,7 +201,7 @@ const SandboxManagementParameters: React.FC<SandboxManagementParametersProps> = 
                 </div>
               }
               label={
-                <button className="rounded-full">
+                <button type="button" className="rounded-full">
                   <HelpCircleIcon className="h-4 w-4 text-muted-foreground" />
                 </button>
               }
