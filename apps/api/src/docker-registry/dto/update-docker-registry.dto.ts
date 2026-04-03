@@ -5,11 +5,13 @@
 
 import { IsString, IsOptional, IsUrl } from 'class-validator'
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'UpdateDockerRegistry' })
 export class UpdateDockerRegistryDto {
   @ApiProperty({ description: 'Registry name' })
   @IsString()
+  @IsSafeDisplayString()
   name: string
 
   @ApiProperty({ description: 'Registry URL' })

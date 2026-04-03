@@ -7,6 +7,7 @@ import { IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { Type } from 'class-transformer'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateApiKey' })
 export class CreateApiKeyDto {
@@ -17,6 +18,7 @@ export class CreateApiKeyDto {
   })
   @IsNotEmpty()
   @IsString()
+  @IsSafeDisplayString()
   name: string
 
   @ApiProperty({

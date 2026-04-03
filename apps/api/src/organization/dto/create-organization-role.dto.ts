@@ -6,6 +6,7 @@
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { ArrayNotEmpty, IsArray, IsEnum, IsString } from 'class-validator'
 import { OrganizationResourcePermission } from '../enums/organization-resource-permission.enum'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateOrganizationRole' })
 export class CreateOrganizationRoleDto {
@@ -15,6 +16,7 @@ export class CreateOrganizationRoleDto {
     required: true,
   })
   @IsString()
+  @IsSafeDisplayString()
   name: string
 
   @ApiProperty({
@@ -22,6 +24,7 @@ export class CreateOrganizationRoleDto {
     example: 'Can manage all resources',
   })
   @IsString()
+  @IsSafeDisplayString()
   description: string
 
   @ApiProperty({
