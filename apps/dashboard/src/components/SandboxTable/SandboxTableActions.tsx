@@ -37,7 +37,11 @@ export function SandboxTableActions({
 }: SandboxTableActionsProps) {
   const navigate = useNavigate()
   const primaryActionTooltip =
-    sandbox.state === SandboxState.STARTED
+    sandbox.state === SandboxState.STARTING
+      ? 'Starting sandbox'
+      : sandbox.state === SandboxState.STOPPING
+        ? 'Stopping sandbox'
+        : sandbox.state === SandboxState.STARTED
       ? 'Stop sandbox'
       : sandbox.state === SandboxState.ERROR && sandbox.recoverable
         ? 'Recover sandbox'
