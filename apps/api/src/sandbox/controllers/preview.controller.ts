@@ -4,15 +4,21 @@
  */
 
 import Redis from 'ioredis'
-import { Controller, Get, Param, Logger, NotFoundException, UseGuards, Req } from '@nestjs/common'
+import { Controller, Get, Param, Logger, NotFoundException, Req, UseGuards } from '@nestjs/common'
 import { SandboxService } from '../services/sandbox.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationUserService } from '../../organization/services/organization-user.service'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { ProxyAuthContextGuard } from '../guards/proxy-auth-context.guard'
 
-@ApiTags('preview')
 @Controller('preview')
+@ApiTags('preview')
+@ApiOAuth2(['openid', 'profile', 'email'])
+@ApiBearerAuth()
+@UseGuards(AuthenticatedRateLimitGuard)
 export class PreviewController {
   private readonly logger = new Logger(PreviewController.name)
 
@@ -37,6 +43,8 @@ export class PreviewController {
     description: 'Public status of the sandbox',
     type: Boolean,
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
   async isSandboxPublic(@Param('sandboxId') sandboxId: string): Promise<boolean> {
     const cached = await this.redis.get(`preview:public:${sandboxId}`)
     if (cached) {
@@ -90,6 +98,8 @@ export class PreviewController {
     description: 'Sandbox auth token validation status',
     type: Boolean,
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
   async isValidAuthToken(
     @Param('sandboxId') sandboxId: string,
     @Param('authToken') authToken: string,
@@ -124,9 +134,7 @@ export class PreviewController {
     description: 'User access status to the sandbox',
     type: Boolean,
   })
-  @UseGuards(CombinedAuthGuard)
-  @ApiOAuth2(['openid', 'profile', 'email'])
-  @ApiBearerAuth()
+  @AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
   async hasSandboxAccess(@Req() req: Request, @Param('sandboxId') sandboxId: string): Promise<boolean> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -171,6 +179,8 @@ export class PreviewController {
     description: 'Sandbox ID from signed preview URL token',
     type: String,
   })
+  @AuthStrategy(AuthStrategyType.API_KEY)
+  @UseGuards(ProxyAuthContextGuard)
   async getSandboxIdFromSignedPreviewUrlToken(
     @Param('signedPreviewToken') signedPreviewToken: string,
     @Param('port') port: number,

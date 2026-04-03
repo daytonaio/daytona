@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsObject, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsObject, IsNumber, IsOptional, IsString } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 
 @ApiSchema({ name: 'CreateSnapshot' })
@@ -34,13 +34,6 @@ export class CreateSnapshotDto {
   @IsArray()
   @IsOptional()
   entrypoint?: string[]
-
-  @ApiPropertyOptional({
-    description: 'Whether the snapshot is general',
-  })
-  @IsBoolean()
-  @IsOptional()
-  general?: boolean
 
   @ApiPropertyOptional({
     description: 'CPU cores allocated to the resulting sandbox',

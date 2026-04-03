@@ -25,6 +25,7 @@ go.mod
 go.sum
 model_account_provider.go
 model_admin_create_runner.go
+model_admin_get_webhook_status_200_response.go
 model_announcement.go
 model_api_key_list.go
 model_api_key_response.go
@@ -193,7 +194,6 @@ model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go
 model_webhook_app_portal_access.go
-model_webhook_controller_get_status_200_response.go
 model_webhook_event.go
 model_webhook_initialization_status.go
 model_windows_response.go

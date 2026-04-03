@@ -17,7 +17,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { JwtStrategy } from '../../auth/jwt.strategy'
 import { ApiKeyStrategy } from '../../auth/api-key.strategy'
-import { isAuthContext } from '../../common/interfaces/auth-context.interface'
+import { isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
 import { VolumeEvents } from '../../sandbox/constants/volume-events'
 import { VolumeDto } from '../../sandbox/dto/volume.dto'
 import { VolumeState } from '../../sandbox/enums/volume-state.enum'
@@ -81,9 +81,9 @@ export class NotificationGateway extends NotificationEmitter implements OnGatewa
 
       // Try API key authentication
       try {
-        const authContext = await this.apiKeyStrategy.validate(token)
+        const authContext = await this.apiKeyStrategy.validateToken(token)
 
-        if (isAuthContext(authContext)) {
+        if (isUserAuthContext(authContext)) {
           // Join the user room for user scoped notifications
           await socket.join(authContext.userId)
 

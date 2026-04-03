@@ -14,13 +14,11 @@ import {
   Logger,
   UseGuards,
   HttpCode,
-  UseInterceptors,
   RawBodyRequest,
   BadRequestException,
   Res,
   Next,
 } from '@nestjs/common'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -91,7 +89,6 @@ import {
   PtyResizeRequestDto,
 } from '../dto/toolbox.deprecated.dto'
 import { ToolboxService } from '../services/toolbox.deprecated.service'
-import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import {
   CompletionListDto,
   LspCompletionParamsDto,
@@ -105,7 +102,7 @@ import { NextFunction } from 'express'
 import { ServerResponse } from 'http'
 import { SandboxAccessGuard } from '../guards/sandbox-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
@@ -117,6 +114,8 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { DownloadFilesDto } from '../dto/download-files.dto'
 import { SkipThrottle } from '@nestjs/throttler'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -128,14 +127,15 @@ type RunnerInfo = {
 const RUNNER_INFO_CACHE_PREFIX = 'proxy:sandbox-runner-info:'
 const RUNNER_INFO_CACHE_TTL = 2 * 60 // 2 minutes
 
-@ApiTags('toolbox')
 @Controller('toolbox')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@SkipThrottle({ anonymous: true, authenticated: true })
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, SandboxAccessGuard)
-@RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+@ApiTags('toolbox')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@SkipThrottle({ anonymous: true, authenticated: true })
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(OrganizationAuthContextGuard, SandboxAccessGuard)
+@RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
 export class ToolboxController {
   private readonly logger = new Logger(ToolboxController.name)
   private readonly toolboxProxy: RequestHandler<
@@ -460,7 +460,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/files/folder')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Create folder',
     description: 'Create folder inside sandbox',
@@ -517,7 +516,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/files/move')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Move file',
     description: 'Move file inside sandbox',
@@ -552,7 +550,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/files/permissions')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Set file permissions',
     description: 'Set file owner/group/permissions inside sandbox',
@@ -591,7 +588,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/files/replace')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Replace in files',
     description: 'Replace text/pattern in multiple files inside sandbox',
@@ -725,7 +721,6 @@ export class ToolboxController {
   // Git operations
   @Post(':sandboxId/toolbox/git/add')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Add files',
     description: 'Add files to git commit',
@@ -783,7 +778,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/branches')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Create branch',
     description: 'Create branch on git repository',
@@ -819,7 +813,6 @@ export class ToolboxController {
 
   @Delete(':sandboxId/toolbox/git/branches')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Delete branch',
     description: 'Delete branch on git repository',
@@ -855,7 +848,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/clone')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Clone repository',
     description: 'Clone git repository',
@@ -895,7 +887,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/commit')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Commit changes',
     description: 'Commit changes to git repository',
@@ -957,7 +948,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/pull')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Pull changes',
     description: 'Pull changes from remote',
@@ -994,7 +984,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/push')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Push changes',
     description: 'Push changes to remote',
@@ -1031,7 +1020,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/git/checkout')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Checkout branch',
     description: 'Checkout branch or commit in git repository',
@@ -1089,7 +1077,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/process/execute')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Execute command',
     description: 'Execute command synchronously inside sandbox',
@@ -1177,7 +1164,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/process/session')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Create session',
     description: 'Create a new session in the sandbox',
@@ -1211,7 +1197,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/process/session/:sessionId/exec')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Execute command in session',
     description: 'Execute a command in a specific session',
@@ -1365,7 +1350,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/process/pty')
   @HttpCode(201)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Create PTY session',
     description: 'Create a new PTY session in the sandbox',
@@ -1459,7 +1443,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/lsp/completions')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Get Lsp Completions',
     description:
@@ -1486,7 +1469,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/lsp/did-close')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Call Lsp DidClose',
     description:
@@ -1512,7 +1494,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/lsp/did-open')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Call Lsp DidOpen',
     description:
@@ -1562,7 +1543,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/lsp/start')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Start Lsp server',
     description: 'Start Lsp server process inside sandbox project',
@@ -1587,7 +1567,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/lsp/stop')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Stop Lsp server',
     description: 'Stop Lsp server process inside sandbox project',
@@ -1640,7 +1619,6 @@ export class ToolboxController {
   // Computer use management endpoints
   @Post(':sandboxId/toolbox/computeruse/start')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Start computer use processes',
     description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
@@ -1668,7 +1646,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/stop')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Stop computer use processes',
     description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
@@ -1739,7 +1716,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/process/:processName/restart')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Restart process',
     description: 'Restart a specific VNC process',
@@ -1839,7 +1815,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/mouse/move')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Move mouse',
     description: 'Move mouse cursor to specified coordinates',
@@ -1865,7 +1840,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/mouse/click')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Click mouse',
     description: 'Click mouse at specified coordinates',
@@ -1891,7 +1865,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/mouse/drag')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Drag mouse',
     description: 'Drag mouse from start to end coordinates',
@@ -1917,7 +1890,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/mouse/scroll')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Scroll mouse',
     description: 'Scroll mouse at specified coordinates',
@@ -1944,7 +1916,6 @@ export class ToolboxController {
   // Keyboard endpoints
   @Post(':sandboxId/toolbox/computeruse/keyboard/type')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Type text',
     description: 'Type text using keyboard',
@@ -1969,7 +1940,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/keyboard/key')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Press key',
     description: 'Press a key with optional modifiers',
@@ -1994,7 +1964,6 @@ export class ToolboxController {
 
   @Post(':sandboxId/toolbox/computeruse/keyboard/hotkey')
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: '[DEPRECATED] Press hotkey',
     description: 'Press a hotkey combination',

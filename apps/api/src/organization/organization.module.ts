@@ -28,6 +28,7 @@ import { DataSource } from 'typeorm'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { SandboxRepository } from '../sandbox/repositories/sandbox.repository'
 import { SandboxLookupCacheInvalidationService } from '../sandbox/services/sandbox-lookup-cache-invalidation.service'
+import { OrganizationAuthContextGuard } from './guards/organization-auth-context.guard'
 import { RegionQuota } from './entities/region-quota.entity'
 import { RegionModule } from '../region/region.module'
 import { OrganizationRegionController } from './controllers/organization-region.controller'
@@ -76,6 +77,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
         sandboxLookupCacheInvalidationService: SandboxLookupCacheInvalidationService,
       ) => new SandboxRepository(dataSource, eventEmitter, sandboxLookupCacheInvalidationService),
     },
+    OrganizationAuthContextGuard,
   ],
   exports: [
     OrganizationService,
@@ -83,6 +85,7 @@ import { EncryptionModule } from '../encryption/encryption.module'
     OrganizationUserService,
     OrganizationInvitationService,
     OrganizationUsageService,
+    OrganizationAuthContextGuard,
   ],
 })
 export class OrganizationModule {}

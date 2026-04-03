@@ -55,7 +55,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'Array<Region>'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
+      auth_names = opts[:debug_auth_names] || []
 
       new_options = opts.merge(
         :operation => :"RegionsApi.list_shared_regions",

@@ -9,7 +9,6 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-  UnauthorizedException,
   InternalServerErrorException,
   HttpException,
   HttpStatus,
@@ -21,13 +20,12 @@ import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditService } from '../services/audit.service'
-import { AuthContext } from '../../common/interfaces/auth-context.interface'
+import { BaseAuthContext, isBaseAuthContext } from '../../common/interfaces/base-auth-context.interface'
+import { isUserAuthContext } from '../../common/interfaces/user-auth-context.interface'
+import { isOrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
+import { getAuthContext } from '../../common/utils/get-auth-context'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { TypedConfigService } from '../../config/typed-config.service'
-
-type RequestWithUser = Request & {
-  user?: AuthContext
-}
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -40,7 +38,7 @@ export class AuditInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest<RequestWithUser>()
+    const request = context.switchToHttp().getRequest<Request>()
     const response = context.switchToHttp().getResponse<Response>()
 
     const auditContext = this.reflector.get<AuditContext>(AUDIT_CONTEXT_KEY, context.getHandler())
@@ -55,13 +53,10 @@ export class AuditInterceptor implements NestInterceptor {
       return next.handle()
     }
 
-    if (!request.user) {
-      this.logger.error('No user context found for audited request:', request.url)
-      throw new UnauthorizedException()
-    }
+    const authContext = getAuthContext(context, isBaseAuthContext)
 
     return new Observable((observer) => {
-      this.handleAuditedRequest(auditContext, request, response, next, observer)
+      this.handleAuditedRequest(auditContext, authContext, request, response, next, observer)
     })
   }
 
@@ -69,16 +64,21 @@ export class AuditInterceptor implements NestInterceptor {
   // After the request handler returns, the audit log is optimistically updated with the outcome
   private async handleAuditedRequest(
     auditContext: AuditContext,
-    request: RequestWithUser,
+    authContext: BaseAuthContext,
+    request: Request,
     response: Response,
     next: CallHandler,
     observer: Subscriber<any>,
   ): Promise<void> {
     try {
+      const actorId = isUserAuthContext(authContext) ? authContext.userId : authContext.role
+      const actorEmail = isUserAuthContext(authContext) ? authContext.email : undefined
+      const organizationId = isOrganizationAuthContext(authContext) ? authContext.organizationId : undefined
+
       const auditLog = await this.auditService.createLog({
-        actorId: request.user.userId,
-        actorEmail: request.user.email,
-        organizationId: request.user.organizationId,
+        actorId,
+        actorEmail,
+        organizationId,
         action: auditContext.action,
         targetType: auditContext.targetType,
         targetId: this.resolveTargetId(auditContext, request),
@@ -91,10 +91,10 @@ export class AuditInterceptor implements NestInterceptor {
       try {
         const result = await firstValueFrom(next.handle())
 
-        const organizationId = this.resolveOrganizationId(request, result)
-        const targetId = this.resolveTargetId(auditContext, request, result)
+        const resolvedOrganizationId = this.resolveOrganizationId(organizationId, result)
+        const resolvedTargetId = this.resolveTargetId(auditContext, request, result)
         const statusCode = response.statusCode || HttpStatus.NO_CONTENT
-        await this.recordHandlerSuccess(auditLog, organizationId, targetId, statusCode)
+        await this.recordHandlerSuccess(auditLog, resolvedOrganizationId, resolvedTargetId, statusCode)
 
         observer.next(result)
         observer.complete()
@@ -112,8 +112,8 @@ export class AuditInterceptor implements NestInterceptor {
     }
   }
 
-  private resolveOrganizationId(request: RequestWithUser, result?: any): string | null {
-    return result?.organizationId || request.user.organizationId
+  private resolveOrganizationId(organizationId: string | undefined, result?: any): string | null {
+    return result?.organizationId || organizationId || null
   }
 
   /**
@@ -121,7 +121,7 @@ export class AuditInterceptor implements NestInterceptor {
    *
    * Prioritizes resolving the ID from the response object as the request may not include a unique resource identifier (e.g. delete sandbox by name).
    */
-  private resolveTargetId(auditContext: AuditContext, request: RequestWithUser, result?: any): string | null {
+  private resolveTargetId(auditContext: AuditContext, request: Request, result?: any): string | null {
     if (auditContext.targetIdFromResult && result) {
       const targetId = auditContext.targetIdFromResult(result)
       if (targetId) {
@@ -139,7 +139,7 @@ export class AuditInterceptor implements NestInterceptor {
     return null
   }
 
-  private resolveRequestMetadata(auditContext: AuditContext, request: RequestWithUser): AuditLogMetadata | null {
+  private resolveRequestMetadata(auditContext: AuditContext, request: Request): AuditLogMetadata | null {
     if (!auditContext.requestMetadata) {
       return null
     }

@@ -3,19 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  Logger,
-  UseGuards,
-  HttpCode,
-  UseInterceptors,
-  Query,
-} from '@nestjs/common'
+import { Controller, Get, Post, Delete, Body, Param, Logger, UseGuards, HttpCode, Query } from '@nestjs/common'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -26,29 +14,31 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { VolumeService } from '../services/volume.service'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
-import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuthContext } from '../../common/decorators/auth-context.decorator'
-import { OrganizationAuthContext } from '../../common/interfaces/auth-context.interface'
+import { IsOrganizationAuthContext } from '../../common/decorators/auth-context.decorator'
+import { OrganizationAuthContext } from '../../common/interfaces/organization-auth-context.interface'
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
-import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationAuthContextGuard } from '../../organization/guards/organization-auth-context.guard'
 import { VolumeDto } from '../dto/volume.dto'
 import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 import { VolumeAccessGuard } from '../guards/volume-access.guard'
 import { AuthenticatedRateLimitGuard } from '../../common/guards/authenticated-rate-limit.guard'
+import { AuthStrategy } from '../../auth/decorators/auth-strategy.decorator'
+import { AuthStrategyType } from '../../auth/enums/auth-strategy-type.enum'
 
-@ApiTags('volumes')
 @Controller('volumes')
-@ApiHeader(CustomHeaders.ORGANIZATION_ID)
-@UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard, AuthenticatedRateLimitGuard)
+@ApiTags('volumes')
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
+@ApiHeader(CustomHeaders.ORGANIZATION_ID)
+@AuthStrategy([AuthStrategyType.API_KEY, AuthStrategyType.JWT])
+@UseGuards(AuthenticatedRateLimitGuard)
+@UseGuards(OrganizationAuthContextGuard)
 export class VolumeController {
   private readonly logger = new Logger(VolumeController.name)
 
@@ -59,20 +49,20 @@ export class VolumeController {
     summary: 'List all volumes',
     operationId: 'listVolumes',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all volumes',
-    type: [VolumeDto],
-  })
   @ApiQuery({
     name: 'includeDeleted',
     required: false,
     type: Boolean,
     description: 'Include deleted volumes in the response',
   })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all volumes',
+    type: [VolumeDto],
+  })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   async listVolumes(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Query('includeDeleted') includeDeleted = false,
   ): Promise<VolumeDto[]> {
     const volumes = await this.volumeService.findAll(authContext.organizationId, includeDeleted)
@@ -81,7 +71,6 @@ export class VolumeController {
 
   @Post()
   @HttpCode(200)
-  @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
     summary: 'Create a new volume',
     operationId: 'createVolume',
@@ -103,7 +92,7 @@ export class VolumeController {
     },
   })
   async createVolume(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.create(authContext.organization, createVolumeDto)
@@ -125,8 +114,8 @@ export class VolumeController {
     description: 'Volume details',
     type: VolumeDto,
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   @UseGuards(VolumeAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   async getVolume(@Param('volumeId') volumeId: string): Promise<VolumeDto> {
     const volume = await this.volumeService.findOne(volumeId)
     return VolumeDto.fromVolume(volume)
@@ -150,13 +139,13 @@ export class VolumeController {
     status: 409,
     description: 'Volume is in use by one or more sandboxes',
   })
+  @UseGuards(VolumeAccessGuard)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_VOLUMES])
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.VOLUME,
     targetIdFromRequest: (req) => req.params.volumeId,
   })
-  @UseGuards(VolumeAccessGuard)
   async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
     return this.volumeService.delete(volumeId)
   }
@@ -176,10 +165,10 @@ export class VolumeController {
     description: 'Volume details',
     type: VolumeDto,
   })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   @UseGuards(VolumeAccessGuard)
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   async getVolumeByName(
-    @AuthContext() authContext: OrganizationAuthContext,
+    @IsOrganizationAuthContext() authContext: OrganizationAuthContext,
     @Param('name') name: string,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.findByName(authContext.organizationId, name)

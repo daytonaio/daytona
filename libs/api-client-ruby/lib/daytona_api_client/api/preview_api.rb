@@ -67,7 +67,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'String'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || []
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
         :operation => :"PreviewApi.get_sandbox_id_from_signed_preview_url_token",
@@ -189,7 +189,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'Boolean'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || []
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
         :operation => :"PreviewApi.is_sandbox_public",
@@ -256,7 +256,7 @@ module DaytonaApiClient
       return_type = opts[:debug_return_type] || 'Boolean'
 
       # auth_names
-      auth_names = opts[:debug_auth_names] || []
+      auth_names = opts[:debug_auth_names] || ['bearer', 'oauth2']
 
       new_options = opts.merge(
         :operation => :"PreviewApi.is_valid_auth_token",
