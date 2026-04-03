@@ -5,6 +5,7 @@
 
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 import { IsString, IsNotEmpty } from 'class-validator'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateRegion' })
 export class CreateRegionDto {
@@ -14,6 +15,7 @@ export class CreateRegionDto {
   })
   @IsString()
   @IsNotEmpty()
+  @IsSafeDisplayString()
   name: string
 
   @ApiProperty({

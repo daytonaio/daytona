@@ -6,6 +6,7 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { IsArray, IsObject, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
 import { CreateBuildInfoDto } from './create-build-info.dto'
+import { IsSafeDisplayString } from '../../common/validators'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
@@ -14,6 +15,7 @@ export class CreateSnapshotDto {
     example: 'ubuntu-4vcpu-8ram-100gb',
   })
   @IsString()
+  @IsSafeDisplayString()
   name: string
 
   @ApiPropertyOptional({
