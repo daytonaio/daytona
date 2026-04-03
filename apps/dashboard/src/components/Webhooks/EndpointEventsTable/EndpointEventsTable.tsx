@@ -6,9 +6,10 @@
 import { DebouncedInput } from '@/components/DebouncedInput'
 import { Pagination } from '@/components/Pagination'
 import { TableEmptyState } from '@/components/TableEmptyState'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { DataTableFacetedFilter } from '@/components/ui/data-table-faceted-filter'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import {
   ColumnFiltersState,
@@ -22,6 +23,7 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
+import { cn } from '@/lib/utils'
 import { Mail } from 'lucide-react'
 import { useCallback, useState } from 'react'
 import { EndpointMessageOut } from 'svix'
@@ -71,6 +73,9 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
     meta: {
       endpointEvents: {
@@ -78,6 +83,8 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
       },
     },
   })
+
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
 
   const handleRowClick = useCallback((index: number) => {
     setSelectedEventIndex(index)
@@ -99,8 +106,8 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
   )
 
   return (
-    <div>
-      <div className="flex items-center mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center">
         <DebouncedInput
           value={globalFilter ?? ''}
           onChange={(value) => setGlobalFilter(String(value))}
@@ -119,19 +126,36 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
           <DataTableFacetedFilter column={table.getColumn('status')} title="Status" options={statusOptions} />
         )}
       </div>
-      <div className="rounded-md">
-        <Table style={{ tableLayout: 'fixed', width: '100%' }}>
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message="No events found."
+              icon={<Mail className="size-8" />}
+              description={
+                <div className="space-y-2">
+                  <p>Events will appear here when webhooks are triggered.</p>
+                </div>
+              }
+            />
+          ) : undefined
+        }
+        style={isEmpty ? undefined : { tableLayout: 'fixed', width: '100%' }}
+      >
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
-                      className="px-2"
+                      className={cn('px-2', header.column.id === 'actions' && 'sticky right-0 z-[2]')}
                       key={header.id}
-                      style={{
-                        width: `${header.column.getSize()}px`,
-                      }}
+                      style={isEmpty ? undefined : { width: `${header.column.getSize()}px` }}
+                      sticky={header.column.id === 'actions' ? 'right' : undefined}
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -143,10 +167,14 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
           <TableBody>
             {loading ? (
               <>
-                {Array.from(new Array(5)).map((_, i) => (
+                {Array.from({ length: 25 }).map((_, i) => (
                   <TableRow key={i}>
                     {table.getVisibleLeafColumns().map((column) => (
-                      <TableCell key={column.id} className="px-2">
+                      <TableCell
+                        key={column.id}
+                        className={cn('px-2', column.id === 'actions' && 'sticky right-0 z-[1]')}
+                        sticky={column.id === 'actions' ? 'right' : undefined}
+                      >
                         <Skeleton className="h-4 w-10/12" />
                       </TableCell>
                     ))}
@@ -171,33 +199,25 @@ export function EndpointEventsTable({ data, loading, onReplay }: EndpointEventsT
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className="px-2"
+                      className={cn('px-2', cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
                       key={cell.id}
                       style={{
                         width: `${cell.column.getSize()}px`,
                       }}
+                      sticky={cell.column.id === 'actions' ? 'right' : undefined}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No events found."
-                icon={<Mail className="size-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Events will appear here when webhooks are triggered.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Events" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Events" />
+      </PageFooterPortal>
       <EventDetailsSheet
         event={selectedEventIndex !== null ? (table.getRowModel().rows[selectedEventIndex]?.original ?? null) : null}
         open={sheetOpen}

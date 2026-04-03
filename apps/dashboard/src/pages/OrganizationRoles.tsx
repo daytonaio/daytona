@@ -6,17 +6,18 @@
 import { CreateOrganizationRoleSheet } from '@/components/OrganizationRoles/CreateOrganizationRoleSheet'
 import { type CommandConfig, useRegisterCommands } from '@/components/CommandPalette'
 import { OrganizationRoleTable } from '@/components/OrganizationRoles/OrganizationRoleTable'
-import { PageContent, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizationRoles } from '@/hooks/useOrganizationRoles'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 import { OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { PlusIcon } from 'lucide-react'
-import React, { useMemo, useRef, useState } from 'react'
+import type { FC } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
-const OrganizationRoles: React.FC = () => {
+const OrganizationRoles: FC = () => {
   const { organizationsApi } = useApi()
 
   const { selectedOrganization } = useSelectedOrganization()
@@ -108,13 +109,13 @@ const OrganizationRoles: React.FC = () => {
   useRegisterCommands(rootCommands, { groupId: 'role-actions', groupLabel: 'Role actions', groupOrder: 0 })
 
   return (
-    <PageLayout>
+    <PageLayout contained>
       <PageHeader>
         <PageTitle>Roles</PageTitle>
         <CreateOrganizationRoleSheet className="ml-auto" onCreateRole={handleCreateRole} ref={createRoleSheetRef} />
       </PageHeader>
 
-      <PageContent>
+      <PageContent size="full" className="overflow-hidden">
         <OrganizationRoleTable
           data={roles}
           loadingData={loadingRoles}
@@ -123,6 +124,7 @@ const OrganizationRoles: React.FC = () => {
           loadingRoleAction={loadingRoleAction}
         />
       </PageContent>
+      <PageFooter />
     </PageLayout>
   )
 }

@@ -9,10 +9,9 @@ import { TimeRangeSelector } from '@/components/telemetry/TimeRangeSelector'
 import { Button } from '@/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 import { LogsQueryParams, useSandboxLogs } from '@/hooks/useSandboxLogs'
 import { cn } from '@/lib/utils'
@@ -202,11 +201,7 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
           <LogsEmptyState />
         </div>
       ) : (
-        <ScrollArea
-          fade="mask"
-          horizontal
-          className="flex-1 min-h-0 border rounded-md [&_[data-slot=scroll-area-viewport]>div]:!overflow-visible [&_[data-slot=scroll-area-viewport]>div>div]:!overflow-visible"
-        >
+        <TableContainer>
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-background after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-border">
               <TableRow>
@@ -283,7 +278,7 @@ export function SandboxLogsTab({ sandboxId }: { sandboxId: string }) {
               ))}
             </TableBody>
           </Table>
-        </ScrollArea>
+        </TableContainer>
       )}
 
       {data && data.totalPages > 1 && (

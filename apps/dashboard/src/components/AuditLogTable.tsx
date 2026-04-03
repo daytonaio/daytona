@@ -4,9 +4,11 @@
  */
 
 import { Pagination } from '@/components/Pagination'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { TableEmptyState } from '@/components/TableEmptyState'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRelativeTimeString } from '@/lib/utils'
 import { AuditLog } from '@daytonaio/api-client'
@@ -24,6 +26,8 @@ interface Props {
   pageCount: number
   totalItems: number
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
+  hasFilters?: boolean
+  onClearFilters?: () => void
 }
 
 export function AuditLogTable({
@@ -34,6 +38,8 @@ export function AuditLogTable({
   pageCount,
   onPaginationChange,
   totalItems,
+  hasFilters = false,
+  onClearFilters,
 }: Props) {
   const columns = getColumns()
 
@@ -58,9 +64,37 @@ export function AuditLogTable({
     getRowId: (row) => row.id,
   })
 
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+
   return (
-    <div>
-      <div className="rounded-md border">
+    <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching logs found.' : 'No logs yet.'}
+              icon={<TextSearch className="w-8 h-8" />}
+              description={
+                hasFilters ? undefined : (
+                  <div className="space-y-2">
+                    <p>Audit logs are detailed records of all actions taken by users in the organization.</p>
+                  </div>
+                )
+              }
+              action={
+                hasFilters && onClearFilters ? (
+                  <Button variant="outline" onClick={onClearFilters}>
+                    Clear filters
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : undefined
+        }
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -69,10 +103,14 @@ export function AuditLogTable({
                   return (
                     <TableHead
                       key={header.id}
-                      style={{
-                        minWidth: header.column.columnDef.size,
-                        maxWidth: header.column.columnDef.size,
-                      }}
+                      style={
+                        isEmpty
+                          ? undefined
+                          : {
+                              minWidth: header.column.columnDef.size,
+                              maxWidth: header.column.columnDef.size,
+                            }
+                      }
                     >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
@@ -100,22 +138,13 @@ export function AuditLogTable({
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No logs yet."
-                icon={<TextSearch className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>Audit logs are detailed records of all actions taken by users in the organization.</p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} className="mt-4" entityName="Logs" totalItems={totalItems} />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} entityName="Logs" totalItems={totalItems} />
+      </PageFooterPortal>
     </div>
   )
 }

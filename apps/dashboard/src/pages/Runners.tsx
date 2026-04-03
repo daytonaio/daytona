@@ -7,6 +7,7 @@ import { type CommandConfig, useRegisterCommands } from '@/components/CommandPal
 import { CreateRunnerSheet } from '@/components/CreateRunnerSheet'
 import RunnerDetailsSheet from '@/components/RunnerDetailsSheet'
 import { RunnerTable } from '@/components/RunnerTable'
+import { PageContent, PageFooter, PageHeader, PageLayout, PageTitle } from '@/components/PageLayout'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -84,7 +85,7 @@ const Runners: React.FC = () => {
   useEffect(() => {
     if (!autoRefresh) return
     const interval = setInterval(() => {
-      fetchRunners(false)
+      void fetchRunners(false)
     }, 5000)
     return () => clearInterval(interval)
   }, [autoRefresh, fetchRunners])
@@ -233,31 +234,36 @@ const Runners: React.FC = () => {
   useRegisterCommands(rootCommands, { groupId: 'runner-actions', groupLabel: 'Runner actions', groupOrder: 0 })
 
   return (
-    <div className="px-6 py-2">
-      <div className="mb-2 h-12 flex items-center justify-between">
-        <h1 className="text-2xl font-medium">Runners</h1>
+    <PageLayout contained>
+      <PageHeader>
+        <PageTitle>Runners</PageTitle>
         {writePermitted && regions.length > 0 && (
-          <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
+          <div className="ml-auto">
+            <CreateRunnerSheet regions={regions} onCreateRunner={handleCreateRunner} ref={createRunnerSheetRef} />
+          </div>
         )}
-      </div>
+      </PageHeader>
 
-      <RunnerTable
-        data={runners}
-        regions={regions}
-        loading={loadingRunnersData || loadingRegions}
-        isLoadingRunner={(runner) => runnerIsLoading[runner.id] || false}
-        writePermitted={writePermitted}
-        deletePermitted={deletePermitted}
-        onToggleEnabled={handleToggleEnabled}
-        onDelete={handleDelete}
-        getRegionName={getRegionName}
-        onRowClick={(runner: Runner) => {
-          setSelectedRunner(runner)
-          setShowRunnerDetails(true)
-        }}
-        autoRefresh={autoRefresh}
-        onAutoRefreshChange={setAutoRefresh}
-      />
+      <PageContent size="full" className="overflow-hidden">
+        <RunnerTable
+          data={runners}
+          regions={regions}
+          loading={loadingRunnersData || loadingRegions}
+          isLoadingRunner={(runner) => runnerIsLoading[runner.id] || false}
+          writePermitted={writePermitted}
+          deletePermitted={deletePermitted}
+          onToggleEnabled={handleToggleEnabled}
+          onDelete={handleDelete}
+          getRegionName={getRegionName}
+          onRowClick={(runner: Runner) => {
+            setSelectedRunner(runner)
+            setShowRunnerDetails(true)
+          }}
+          autoRefresh={autoRefresh}
+          onAutoRefreshChange={setAutoRefresh}
+        />
+      </PageContent>
+      <PageFooter />
 
       {runnerToToggleScheduling && (
         <Dialog open={toggleRunnerSchedulingDialogIsOpen} onOpenChange={setToggleRunnerSchedulingDialogIsOpen}>
@@ -328,7 +334,7 @@ const Runners: React.FC = () => {
         }}
         getRegionName={getRegionName}
       />
-    </div>
+    </PageLayout>
   )
 }
 

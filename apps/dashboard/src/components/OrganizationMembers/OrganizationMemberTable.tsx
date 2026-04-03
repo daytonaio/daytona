@@ -3,8 +3,17 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { useMemo, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
+import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
+import { PageFooterPortal } from '@/components/PageLayout'
+import { Pagination } from '@/components/Pagination'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { capitalize, cn } from '@/lib/utils'
+import { OrganizationUser, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -14,15 +23,8 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationUser, OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { Pagination } from '@/components/Pagination'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { UpsertOrganizationAccessSheet } from '@/components/OrganizationMembers/UpsertOrganizationAccessSheet'
-import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers/RemoveOrganizationMemberDialog'
-import { capitalize, cn } from '@/lib/utils'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { MoreHorizontal, Users } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
@@ -81,8 +83,13 @@ export function OrganizationMemberTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        right: ['actions'],
+      },
     },
   })
+
+  const isEmpty = !loadingData && table.getRowModel().rows.length === 0
 
   const handleUpdateMemberAccess = async (role: OrganizationUserRoleEnum, assignedRoleIds: string[]) => {
     if (memberToUpdate) {
@@ -122,15 +129,32 @@ export function OrganizationMemberTable({
 
   return (
     <>
-      <div>
-        <div className="rounded-md border">
+      <div className="flex min-h-0 flex-1 flex-col pt-2">
+        <TableContainer
+          className={isEmpty ? 'min-h-64' : undefined}
+          empty={
+            isEmpty ? (
+              <TableEmptyState
+                overlay
+                colSpan={columns.length}
+                message="No Members found."
+                icon={<Users className="h-5 w-5" />}
+                description="Invite people to collaborate in your organization."
+              />
+            ) : undefined
+          }
+        >
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead key={header.id}>
+                      <TableHead
+                        key={header.id}
+                        className={cn(header.column.id === 'actions' && 'sticky right-0 z-[2]')}
+                        sticky={header.column.id === 'actions' ? 'right' : undefined}
+                      >
                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     )
@@ -140,11 +164,21 @@ export function OrganizationMemberTable({
             </TableHeader>
             <TableBody>
               {loadingData ? (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    Loading...
-                  </TableCell>
-                </TableRow>
+                <>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i} className="h-14">
+                      {columns.map((column, colIndex) => (
+                        <TableCell
+                          key={colIndex}
+                          className={cn(column.id === 'actions' && 'sticky right-0 z-[1]')}
+                          sticky={column.id === 'actions' ? 'right' : undefined}
+                        >
+                          <Skeleton className="h-4 w-3/4" />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </>
               ) : table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
@@ -155,17 +189,23 @@ export function OrganizationMemberTable({
                     })}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      <TableCell
+                        key={cell.id}
+                        className={cn(cell.column.id === 'actions' && 'sticky right-0 z-[1]')}
+                        sticky={cell.column.id === 'actions' ? 'right' : undefined}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))
-              ) : (
-                <TableEmptyState colSpan={columns.length} message="No Members found." />
-              )}
+              ) : null}
             </TableBody>
           </Table>
-        </div>
-        <Pagination table={table} className="mt-4" entityName="Members" />
+        </TableContainer>
+        <PageFooterPortal>
+          <Pagination table={table} entityName="Members" />
+        </PageFooterPortal>
       </div>
 
       {memberToUpdate && (
@@ -274,6 +314,9 @@ const getColumns = ({
       },
       {
         id: 'actions',
+        size: 48,
+        minSize: 48,
+        maxSize: 48,
         cell: ({ row }) => {
           const canUpdateAccess = row.original.userId !== currentUserId
 

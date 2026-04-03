@@ -173,6 +173,10 @@ export function useSandboxTable({
       sorting: tableSorting,
       columnFilters: tableFilters,
       columnVisibility,
+      columnPinning: {
+        left: ['select', 'name'],
+        right: ['actions'],
+      },
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
@@ -180,7 +184,7 @@ export function useSandboxTable({
     },
     onColumnVisibilityChange: setColumnVisibility,
     defaultColumn: {
-      size: 100,
+      minSize: 0,
     },
     enableRowSelection: deletePermitted,
     getRowId: (row) => row.id,

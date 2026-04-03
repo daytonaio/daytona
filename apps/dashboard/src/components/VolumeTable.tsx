@@ -3,19 +3,29 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DebouncedInput } from '@/components/DebouncedInput'
+import { PageFooterPortal } from '@/components/PageLayout'
 import { Pagination } from '@/components/Pagination'
 import { SelectionToast } from '@/components/SelectionToast'
+import { TableEmptyState } from '@/components/TableEmptyState'
+import { Badge, BadgeProps } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableFacetedFilter, FacetedFilterOption } from '@/components/ui/data-table-faceted-filter'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCommandPaletteActions } from '@/components/CommandPalette'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { getRelativeTimeString } from '@/lib/utils'
+import { cn, getRelativeTimeString } from '@/lib/utils'
+import {
+  getColumnPinningBorderClasses,
+  getColumnPinningClasses,
+  getColumnPinningStyles,
+  getExplicitColumnSize,
+} from '@/lib/utils/table'
 import { OrganizationRolePermissionsEnum, VolumeDto, VolumeState } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -33,9 +43,10 @@ import {
 import { AlertTriangle, CheckCircle, HardDrive, Loader2, MoreHorizontal, Timer } from 'lucide-react'
 import { AnimatePresence } from 'motion/react'
 import { useCallback, useMemo, useState } from 'react'
-import { TableEmptyState } from './TableEmptyState'
 import { VolumeBulkAction, VolumeBulkActionAlertDialog } from './VolumeTable/BulkActionAlertDialog'
 import { getVolumeBulkActionCounts, isVolumeDeletable, useVolumeCommands } from './VolumeTable/useVolumeCommands'
+
+const FIXED_COLUMN_IDS = ['select', 'actions']
 
 interface VolumeTableProps {
   data: VolumeDto[]
@@ -77,6 +88,9 @@ export function VolumeTable({
   const table = useReactTable({
     data,
     columns,
+    defaultColumn: {
+      minSize: 0,
+    },
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -95,8 +109,15 @@ export function VolumeTable({
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
       },
+      columnPinning: {
+        left: ['select', 'name'],
+        right: ['actions'],
+      },
     },
   })
+  const leftPinnedCount = table.getLeftLeafColumns().length
+  const isEmpty = !loading && table.getRowModel().rows.length === 0
+  const hasFilters = table.getState().columnFilters.length > 0
   const selectedRows = table.getSelectedRowModel().rows
   const hasSelection = selectedRows.length > 0
   const selectedVolumes = selectedRows.map((row) => row.original)
@@ -152,26 +173,77 @@ export function VolumeTable({
   }
 
   return (
-    <div>
-      <div className="flex items-center mb-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      <div className="flex items-center gap-2">
         <DebouncedInput
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('name')?.setFilterValue(value)}
           placeholder="Search..."
-          className="max-w-sm mr-4"
+          className="max-w-sm"
         />
         {table.getColumn('state') && (
           <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
         )}
       </div>
-      <div className="rounded-md border">
+      <TableContainer
+        className={isEmpty ? 'min-h-[26rem]' : undefined}
+        empty={
+          isEmpty ? (
+            <TableEmptyState
+              overlay
+              colSpan={columns.length}
+              message={hasFilters ? 'No matching volumes found.' : 'No Volumes yet.'}
+              icon={<HardDrive className="h-4 w-4" />}
+              description={
+                hasFilters ? undefined : (
+                  <div className="space-y-2">
+                    <p>
+                      Volumes are shared, persistent directories backed by S3-compatible storage, perfect for reusing
+                      datasets, caching dependencies, or passing files across sandboxes.
+                    </p>
+                    <p>
+                      Create one via the SDK or CLI.{' '}
+                      <a href="https://www.daytona.io/docs/volumes" target="_blank" rel="noopener noreferrer">
+                        Read the Volumes guide
+                      </a>{' '}
+                      to learn more.
+                    </p>
+                  </div>
+                )
+              }
+              action={
+                hasFilters ? (
+                  <Button variant="outline" onClick={() => table.resetColumnFilters()}>
+                    Clear filters
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : undefined
+        }
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
+                {headerGroup.headers.map((header, headerIndex) => {
                   return (
-                    <TableHead className="px-2" key={header.id}>
+                    <TableHead
+                      className={cn(
+                        'px-2',
+                        !isEmpty && getColumnPinningBorderClasses(header.column, leftPinnedCount, headerIndex),
+                        !isEmpty && getColumnPinningClasses(header.column, true),
+                      )}
+                      key={header.id}
+                      style={
+                        isEmpty
+                          ? undefined
+                          : {
+                              ...getExplicitColumnSize(header),
+                              ...getColumnPinningStyles(header.column, FIXED_COLUMN_IDS),
+                            }
+                      }
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   )
@@ -181,11 +253,25 @@ export function VolumeTable({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  Loading...
-                </TableCell>
-              </TableRow>
+              <>
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {table.getVisibleLeafColumns().map((column, colIndex) => (
+                      <TableCell
+                        key={column.id}
+                        className={cn(
+                          'px-2',
+                          getColumnPinningBorderClasses(column, leftPinnedCount, colIndex),
+                          getColumnPinningClasses(column),
+                        )}
+                        style={getColumnPinningStyles(column, FIXED_COLUMN_IDS)}
+                      >
+                        <Skeleton className="h-4 w-10/12" />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
@@ -193,44 +279,28 @@ export function VolumeTable({
                   data-state={row.getIsSelected() && 'selected'}
                   className={`${processingVolumeAction[row.original.id] || row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING ? 'opacity-50 pointer-events-none' : ''}`}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell className="px-2" key={cell.id}>
+                  {row.getVisibleCells().map((cell, cellIndex) => (
+                    <TableCell
+                      className={cn(
+                        'px-2',
+                        getColumnPinningBorderClasses(cell.column, leftPinnedCount, cellIndex),
+                        getColumnPinningClasses(cell.column),
+                      )}
+                      key={cell.id}
+                      style={getColumnPinningStyles(cell.column, FIXED_COLUMN_IDS)}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
-            ) : (
-              <TableEmptyState
-                colSpan={columns.length}
-                message="No Volumes yet."
-                icon={<HardDrive className="w-8 h-8" />}
-                description={
-                  <div className="space-y-2">
-                    <p>
-                      Volumes are shared, persistent directories backed by S3-compatible storage, perfect for reusing
-                      datasets, caching dependencies, or passing files across sandboxes.
-                    </p>
-                    <p>
-                      Create one via the SDK or CLI. <br />
-                      <a
-                        href="https://www.daytona.io/docs/volumes"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline font-medium"
-                      >
-                        Read the Volumes guide
-                      </a>{' '}
-                      to learn more.
-                    </p>
-                  </div>
-                }
-              />
-            )}
+            ) : null}
           </TableBody>
         </Table>
-      </div>
-      <Pagination table={table} selectionEnabled={deletePermitted} entityName="Volumes" className="mt-4" />
+      </TableContainer>
+      <PageFooterPortal>
+        <Pagination table={table} selectionEnabled={deletePermitted} entityName="Volumes" />
+      </PageFooterPortal>
       <AnimatePresence>
         {hasSelection && (
           <SelectionToast
@@ -251,25 +321,20 @@ export function VolumeTable({
   )
 }
 
-const getStateIcon = (state: VolumeState) => {
+const getStateBadgeVariant = (state: VolumeState): BadgeProps['variant'] => {
   switch (state) {
     case VolumeState.READY:
-      return <CheckCircle className="w-4 h-4 flex-shrink-0" />
+      return 'success'
     case VolumeState.ERROR:
-      return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+      return 'destructive'
+    case VolumeState.CREATING:
+    case VolumeState.PENDING_CREATE:
+    case VolumeState.PENDING_DELETE:
+    case VolumeState.DELETING:
+      return 'warning'
+    case VolumeState.DELETED:
     default:
-      return <Timer className="w-4 h-4 flex-shrink-0" />
-  }
-}
-
-const getStateColor = (state: VolumeState) => {
-  switch (state) {
-    case VolumeState.READY:
-      return 'text-green-500'
-    case VolumeState.ERROR:
-      return 'text-red-500'
-    default:
-      return 'text-gray-600 dark:text-gray-400'
+      return 'secondary'
   }
 }
 
@@ -302,40 +367,49 @@ const getColumns = ({
   const columns: ColumnDef<VolumeDto>[] = [
     {
       id: 'select',
+      size: 44,
+      minSize: 44,
+      maxSize: 44,
       header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
-          }
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              const isProcessing = processingVolumeAction[row.original.id]
-              const isDeleting =
-                row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
-              const isDeletable = isVolumeDeletable(row.original)
-
-              if (isProcessing || isDeleting || !isDeletable) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
+        <div className="flex justify-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ? true : table.getIsSomePageRowsSelected() ? 'indeterminate' : false
             }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
+            onCheckedChange={(value) => {
+              for (const row of table.getRowModel().rows) {
+                const isProcessing = processingVolumeAction[row.original.id]
+                const isDeleting =
+                  row.original.state === VolumeState.PENDING_DELETE || row.original.state === VolumeState.DELETING
+                const isDeletable = isVolumeDeletable(row.original)
+
+                if (isProcessing || isDeleting || !isDeletable) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(!!value)
+                }
+              }
+            }}
+            aria-label="Select all"
+          />
+        </div>
       ),
       cell: ({ row }) => {
         if (processingVolumeAction[row.original.id]) {
-          return <Loader2 className="w-4 h-4 animate-spin" />
+          return (
+            <div className="flex justify-center">
+              <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+          )
         }
         return (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-            className="translate-y-[2px]"
-          />
+          <div className="flex justify-center">
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value) => row.toggleSelected(!!value)}
+              aria-label="Select row"
+            />
+          </div>
         )
       },
       enableSorting: false,
@@ -354,17 +428,13 @@ const getColumns = ({
       cell: ({ row }) => {
         const volume = row.original
         const state = row.original.state
-        const color = getStateColor(state)
+        const variant = getStateBadgeVariant(state)
+        const badge = <Badge variant={variant}>{getStateLabel(state)}</Badge>
 
         if (state === VolumeState.ERROR && !!volume.errorReason) {
           return (
             <Tooltip>
-              <TooltipTrigger>
-                <div className={`flex items-center gap-2 ${color}`}>
-                  {getStateIcon(state)}
-                  {getStateLabel(state)}
-                </div>
-              </TooltipTrigger>
+              <TooltipTrigger asChild>{badge}</TooltipTrigger>
               <TooltipContent>
                 <p className="max-w-[300px]">{volume.errorReason}</p>
               </TooltipContent>
@@ -372,12 +442,7 @@ const getColumns = ({
           )
         }
 
-        return (
-          <div className={`flex items-center gap-2 w-40 ${color}`}>
-            {getStateIcon(state)}
-            <span>{getStateLabel(state)}</span>
-          </div>
-        )
+        return badge
       },
       accessorKey: 'state',
       filterFn: (row, id, value) => {
@@ -400,7 +465,11 @@ const getColumns = ({
     },
     {
       id: 'actions',
+      header: () => null,
       enableHiding: false,
+      size: 48,
+      minSize: 48,
+      maxSize: 48,
       cell: ({ row }) => {
         if (!deletePermitted) {
           return null
@@ -416,9 +485,10 @@ const getColumns = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem
-                className={`cursor-pointer text-red-600 dark:text-red-400 ${
-                  processingVolumeAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''
-                }`}
+                variant="destructive"
+                className={cn('cursor-pointer', {
+                  'opacity-50 pointer-events-none': processingVolumeAction[row.original.id],
+                })}
                 disabled={processingVolumeAction[row.original.id]}
                 onClick={() => onDelete(row.original)}
               >

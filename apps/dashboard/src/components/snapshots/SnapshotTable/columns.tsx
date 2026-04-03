@@ -67,6 +67,9 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
 const columns: ColumnDef<SnapshotDto>[] = [
   {
     id: 'select',
+    size: 44,
+    minSize: 44,
+    maxSize: 44,
     header: ({ table }) => {
       const { deletePermitted, loading, selectableCount } = getMeta(table)
 
@@ -80,25 +83,26 @@ const columns: ColumnDef<SnapshotDto>[] = [
       }
 
       return (
-        <Checkbox
-          checked={allSelected || (partiallySelected && 'indeterminate')}
-          onCheckedChange={() => {
-            if (table)
-              table.getRowModel().rows.forEach((row) => {
-                if (row.original.general) {
-                  return
-                }
-                if (allSelected) {
-                  row.toggleSelected(false)
-                } else {
-                  row.toggleSelected(true)
-                }
-              })
-          }}
-          aria-label="Select all"
-          disabled={!deletePermitted || loading}
-          className="translate-y-[2px]"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={allSelected || (partiallySelected && 'indeterminate')}
+            onCheckedChange={() => {
+              if (table)
+                table.getRowModel().rows.forEach((row) => {
+                  if (row.original.general) {
+                    return
+                  }
+                  if (allSelected) {
+                    row.toggleSelected(false)
+                  } else {
+                    row.toggleSelected(true)
+                  }
+                })
+            }}
+            aria-label="Select all"
+            disabled={!deletePermitted || loading}
+          />
+        </div>
       )
     },
     cell: ({ row, table }) => {
@@ -109,17 +113,22 @@ const columns: ColumnDef<SnapshotDto>[] = [
       }
 
       if (loadingSnapshots[row.original.id]) {
-        return <Loader2 className="w-4 h-4 animate-spin" />
+        return (
+          <div className="flex justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+          </div>
+        )
       }
 
       return (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          disabled={!deletePermitted || loadingSnapshots[row.original.id] || loading}
-          className="translate-y-[2px]"
-        />
+        <div className="flex justify-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            disabled={!deletePermitted || loadingSnapshots[row.original.id] || loading}
+          />
+        </div>
       )
     },
     enableSorting: false,
@@ -286,6 +295,10 @@ const columns: ColumnDef<SnapshotDto>[] = [
   },
   {
     id: 'actions',
+    header: () => null,
+    size: 48,
+    minSize: 48,
+    maxSize: 48,
     cell: ({ row, table }) => {
       const { writePermitted, deletePermitted, loadingSnapshots, onActivate, onDeactivate, onDelete } = getMeta(table)
 
