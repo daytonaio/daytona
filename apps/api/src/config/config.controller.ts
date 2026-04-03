@@ -3,17 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Controller, Get, UseGuards } from '@nestjs/common'
+import { Controller, Get } from '@nestjs/common'
 import { TypedConfigService } from './typed-config.service'
 import { ApiOperation, ApiTags, ApiResponse } from '@nestjs/swagger'
 import { ConfigurationDto } from './dto/configuration.dto'
 import { Public } from '../auth/decorators/public.decorator'
-import { AnonymousRateLimitGuard } from '../common/guards/anonymous-rate-limit.guard'
 
 @ApiTags('config')
 @Controller('config')
 @Public()
-@UseGuards(AnonymousRateLimitGuard)
 export class ConfigController {
   constructor(private readonly configService: TypedConfigService) {}
 
