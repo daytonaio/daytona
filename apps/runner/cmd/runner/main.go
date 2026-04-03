@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -234,6 +235,8 @@ func run() int {
 		return 2
 	}
 
+	var executorService *executor.Executor
+
 	if cfg.ApiVersion == 2 {
 		healthcheckService, err := healthcheck.NewService(&healthcheck.HealthcheckServiceConfig{
 			Interval:   cfg.HealthcheckInterval,
@@ -256,7 +259,7 @@ func run() int {
 			healthcheckService.Start(ctx)
 		}()
 
-		executorService, err := executor.NewExecutor(&executor.ExecutorConfig{
+		executorService, err = executor.NewExecutor(&executor.ExecutorConfig{
 			Logger:    logger,
 			Docker:    dockerClient,
 			Collector: metricsCollector,
@@ -309,8 +312,53 @@ func run() int {
 		return 1
 	case <-interruptChannel:
 		logger.Info("Signal received, shutting down")
+		// Release the ports immediately so a new runner instance can
+		// bind during zero-downtime deploy.
 		apiServer.Stop()
-		logger.Info("Shutdown complete")
+		if sshGatewayService != nil {
+			sshGatewayService.Stop()
+		}
+		// Cancel context to stop the poller and other background services
+		cancel()
+
+		shutdownTimeout := 5 * time.Minute
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		defer shutdownCancel()
+
+		// Drain in-flight HTTP requests and jobs in parallel.
+		done := make(chan struct{})
+		go func() {
+			var wg sync.WaitGroup
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				logger.Info("Waiting for in-flight HTTP requests to complete")
+				apiServer.Shutdown(shutdownCtx)
+				logger.Info("All HTTP requests completed")
+			}()
+
+			if executorService != nil {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					logger.Info("Waiting for in-flight jobs to complete")
+					executorService.Wait()
+					logger.Info("All jobs completed")
+				}()
+			}
+
+			wg.Wait()
+			close(done)
+		}()
+
+		// A second signal during drain forces immediate exit.
+		select {
+		case <-done:
+			logger.Info("Shutdown complete")
+		case <-interruptChannel:
+			logger.Info("Second signal received, forcing shutdown")
+		}
 		return 143 // SIGTERM
 	case err := <-monitorErrChan:
 		logger.Error("Docker monitor error", "error", err)

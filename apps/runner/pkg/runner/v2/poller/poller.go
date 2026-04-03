@@ -58,7 +58,7 @@ func (s *Service) Start(ctx context.Context) {
 		if inProgressJobs != nil && len(inProgressJobs.Items) > 0 {
 			s.log.InfoContext(ctx, "Found IN_PROGRESS jobs", "count", len(inProgressJobs.Items))
 			for _, job := range inProgressJobs.Items {
-				go s.executor.Execute(ctx, &job)
+				s.executor.Execute(ctx, &job)
 			}
 		} else {
 			s.log.InfoContext(ctx, "No IN_PROGRESS jobs found")
@@ -87,7 +87,7 @@ func (s *Service) Start(ctx context.Context) {
 				s.log.DebugContext(ctx, "Received jobs", "count", len(jobs))
 				for _, job := range jobs {
 					// Execute job in goroutine for parallel processing
-					go s.executor.Execute(ctx, &job)
+					s.executor.Execute(ctx, &job)
 				}
 			}
 		}
