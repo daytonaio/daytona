@@ -18,11 +18,6 @@ type SnapshotDigestResponse struct {
 	SizeGB float64 `json:"sizeGB" example:"0.13"`
 } //	@name	SnapshotDigestResponse
 
-type InspectSnapshotInRegistryRequestDTO struct {
-	Snapshot string       `json:"snapshot" validate:"required" example:"nginx:latest"`
-	Registry *RegistryDTO `json:"registry,omitempty"`
-} //	@name	InspectSnapshotInRegistryRequest
-
 func HashWithoutPrefix(hash string) string {
 	return strings.TrimPrefix(hash, "sha256:")
 }

@@ -8,6 +8,7 @@ import { Runner } from '../entities/runner.entity'
 import { ModuleRef } from '@nestjs/core'
 import { RunnerAdapterV0 } from './runnerAdapter.v0'
 import { RunnerAdapterV2 } from './runnerAdapter.v2'
+import { RunnerAdapterV3 } from './runnerAdapter.v3'
 import { BuildInfo } from '../entities/build-info.entity'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { Sandbox } from '../entities/sandbox.entity'
@@ -130,6 +131,11 @@ export class RunnerAdapterFactory {
       }
       case '2': {
         const adapter = await this.moduleRef.create(RunnerAdapterV2)
+        await adapter.init(runner)
+        return adapter
+      }
+      case '3': {
+        const adapter = await this.moduleRef.create(RunnerAdapterV3)
         await adapter.init(runner)
         return adapter
       }

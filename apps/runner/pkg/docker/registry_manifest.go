@@ -29,7 +29,7 @@ func getImageSizeFromRegistry(ctx context.Context, imageName string, registry *d
 		remote.WithPlatform(v1.Platform{OS: "linux", Architecture: "amd64"}),
 	}
 
-	if registry != nil && registry.HasAuth() {
+	if registry != nil && dto.RegistryHasAuth(registry) {
 		opts = append(opts, remote.WithAuth(&authn.Basic{
 			Username: *registry.Username,
 			Password: *registry.Password,

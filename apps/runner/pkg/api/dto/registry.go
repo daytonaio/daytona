@@ -3,13 +3,10 @@
 
 package dto
 
-type RegistryDTO struct {
-	Url      string  `json:"url" validate:"required"`
-	Project  *string `json:"project" validate:"optional,omitempty"`
-	Username *string `json:"username" validate:"omitempty"`
-	Password *string `json:"password" validate:"omitempty"`
-} //	@name	RegistryDTO
+import specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 
-func (r *RegistryDTO) HasAuth() bool {
+type RegistryDTO = specsgen.RegistryInfo
+
+func RegistryHasAuth(r *RegistryDTO) bool {
 	return r.Username != nil && r.Password != nil && *r.Username != "" && *r.Password != ""
 }

@@ -3,8 +3,6 @@
 
 package dto
 
-type VolumeDTO struct {
-	VolumeId  string  `json:"volumeId"`
-	MountPath string  `json:"mountPath"`
-	Subpath   *string `json:"subpath,omitempty"`
-}
+import specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
+
+type VolumeDTO = specsgen.VolumeMount

@@ -259,10 +259,7 @@ func GetNetworkSettings(ctx *gin.Context) {
 	// }
 
 	// For now, return empty settings
-	networkSettings := dto.UpdateNetworkSettingsDTO{
-		NetworkBlockAll:  nil,
-		NetworkAllowList: nil,
-	}
+	networkSettings := dto.UpdateNetworkSettingsDTO{}
 
 	ctx.JSON(http.StatusOK, networkSettings)
 }
@@ -348,7 +345,7 @@ func Stop(ctx *gin.Context) {
 		return
 	}
 
-	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId, stopDto.Force)
+	err = runner.Docker.Stop(ctx.Request.Context(), sandboxId, stopDto.GetForce())
 	if err != nil {
 		ctx.Error(err)
 		return

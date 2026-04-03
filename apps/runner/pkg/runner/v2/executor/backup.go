@@ -9,17 +9,16 @@ import (
 	"context"
 	"fmt"
 
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/runner/v2/specs"
+	specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 )
 
-func (e *Executor) createBackup(ctx context.Context, job *apiclient.Job) (any, error) {
-	var createBackupDto dto.CreateBackupDTO
-	err := e.parsePayload(job.Payload, &createBackupDto)
-	if err != nil {
+func (e *Executor) createBackup(ctx context.Context, job *specsgen.Job) (any, error) {
+	var payload specsgen.CreateBackupPayload
+	if err := specs.ParsePayload(job.Payload, &payload); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal payload: %w", err)
 	}
 
-	// TODO: is state cache needed?
-	return nil, e.docker.CreateBackup(ctx, job.ResourceId, createBackupDto)
+	return nil, e.docker.CreateBackup(ctx, job.ResourceId, dto.CreateBackupDTO{CreateBackupPayload: &payload})
 }

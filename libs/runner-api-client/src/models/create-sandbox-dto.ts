@@ -15,10 +15,10 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { DtoVolumeDTO } from './dto-volume-dto';
+import type { SpecsgenRegistryInfo } from './specsgen-registry-info';
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegistryDTO } from './registry-dto';
+import type { SpecsgenVolumeMount } from './specsgen-volume-mount';
 
 /**
  * 
@@ -27,13 +27,13 @@ import type { RegistryDTO } from './registry-dto';
  */
 export interface CreateSandboxDTO {
     /**
-     * 
+     * json: authToken
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'authToken'?: string;
     /**
-     * 
+     * json: cpuQuota
      * @type {number}
      * @memberof CreateSandboxDTO
      */
@@ -51,13 +51,13 @@ export interface CreateSandboxDTO {
      */
     'env'?: { [key: string]: string; };
     /**
-     * 
+     * json: fromVolumeId
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'fromVolumeId'?: string;
     /**
-     * 
+     * json: gpuQuota
      * @type {number}
      * @memberof CreateSandboxDTO
      */
@@ -67,9 +67,9 @@ export interface CreateSandboxDTO {
      * @type {string}
      * @memberof CreateSandboxDTO
      */
-    'id': string;
+    'id'?: string;
     /**
-     * 
+     * json: memoryQuota
      * @type {number}
      * @memberof CreateSandboxDTO
      */
@@ -81,49 +81,49 @@ export interface CreateSandboxDTO {
      */
     'metadata'?: { [key: string]: string; };
     /**
-     * 
+     * json: networkAllowList
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'networkAllowList'?: string;
     /**
-     * 
+     * json: networkBlockAll
      * @type {boolean}
      * @memberof CreateSandboxDTO
      */
     'networkBlockAll'?: boolean;
     /**
-     * Nullable for backward compatibility
+     * json: organizationId
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'organizationId'?: string;
     /**
-     * 
+     * json: osUser
      * @type {string}
      * @memberof CreateSandboxDTO
      */
-    'osUser': string;
+    'osUser'?: string;
     /**
-     * 
+     * json: otelEndpoint
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'otelEndpoint'?: string;
     /**
-     * 
+     * json: regionId
      * @type {string}
      * @memberof CreateSandboxDTO
      */
     'regionId'?: string;
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof CreateSandboxDTO
      */
-    'registry'?: RegistryDTO;
+    'registry'?: SpecsgenRegistryInfo;
     /**
-     * 
+     * json: skipStart
      * @type {boolean}
      * @memberof CreateSandboxDTO
      */
@@ -133,24 +133,24 @@ export interface CreateSandboxDTO {
      * @type {string}
      * @memberof CreateSandboxDTO
      */
-    'snapshot': string;
+    'snapshot'?: string;
     /**
-     * 
+     * json: storageQuota
      * @type {number}
      * @memberof CreateSandboxDTO
      */
     'storageQuota'?: number;
     /**
-     * 
+     * json: userId
      * @type {string}
      * @memberof CreateSandboxDTO
      */
-    'userId': string;
+    'userId'?: string;
     /**
      * 
-     * @type {Array<DtoVolumeDTO>}
+     * @type {Array<SpecsgenVolumeMount>}
      * @memberof CreateSandboxDTO
      */
-    'volumes'?: Array<DtoVolumeDTO>;
+    'volumes'?: Array<SpecsgenVolumeMount>;
 }
 

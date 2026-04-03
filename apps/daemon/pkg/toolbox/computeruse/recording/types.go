@@ -19,22 +19,22 @@ type RecordingDTO struct {
 	Status          string     `json:"status" validate:"required"`
 	DurationSeconds *float64   `json:"durationSeconds,omitempty"`
 	SizeBytes       *int64     `json:"sizeBytes,omitempty"`
-} // @name Recording
+} //	@name	Recording
 
 // StartRecordingRequest represents the request to start a new recording
 type StartRecordingRequest struct {
 	Label *string `json:"label,omitempty"`
-} // @name StartRecordingRequest
+} //	@name	StartRecordingRequest
 
 // StopRecordingRequest represents the request to stop an active recording
 type StopRecordingRequest struct {
 	ID string `json:"id" validate:"required"`
-} // @name StopRecordingRequest
+} //	@name	StopRecordingRequest
 
 // ListRecordingsResponse represents the response containing all recordings
 type ListRecordingsResponse struct {
 	Recordings []RecordingDTO `json:"recordings" validate:"required"`
-} // @name ListRecordingsResponse
+} //	@name	ListRecordingsResponse
 
 func RecordingToDTO(r *recording.Recording) *RecordingDTO {
 	return &RecordingDTO{

@@ -3,25 +3,21 @@
 
 package dto
 
+import specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
+
 type PullSnapshotRequestDTO struct {
-	Snapshot            string       `json:"snapshot" validate:"required"`
-	Registry            *RegistryDTO `json:"registry,omitempty"`
-	DestinationRegistry *RegistryDTO `json:"destinationRegistry,omitempty"`
-	DestinationRef      *string      `json:"destinationRef,omitempty"`
-	NewTag              *string      `json:"newTag,omitempty"`
+	*specsgen.PullSnapshotPayload
 } //	@name	PullSnapshotRequestDTO
 
 type BuildSnapshotRequestDTO struct {
-	Snapshot               string        `json:"snapshot,omitempty"` // Snapshot ID and tag or the build's hash
-	SourceRegistries       []RegistryDTO `json:"sourceRegistries,omitempty"`
-	Registry               *RegistryDTO  `json:"registry,omitempty"`
-	Dockerfile             string        `json:"dockerfile" validate:"required"`
-	OrganizationId         string        `json:"organizationId" validate:"required"`
-	Context                []string      `json:"context"`
-	PushToInternalRegistry bool          `json:"pushToInternalRegistry"`
+	*specsgen.BuildSnapshotPayload
 } //	@name	BuildSnapshotRequestDTO
 
 type TagImageRequestDTO struct {
 	SourceImage string `json:"sourceImage" validate:"required"`
 	TargetImage string `json:"targetImage" validate:"required"`
 } //	@name	TagImageRequestDTO
+
+type InspectSnapshotInRegistryRequestDTO struct {
+	*specsgen.InspectSnapshotInRegistryPayload
+} //	@name	InspectSnapshotInRegistryRequest

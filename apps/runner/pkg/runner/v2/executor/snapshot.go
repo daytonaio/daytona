@@ -8,78 +8,76 @@ package executor
 import (
 	"context"
 
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/pkg/api/dto"
+	"github.com/daytonaio/runner/pkg/runner/v2/specs"
+	specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 )
 
-func (e *Executor) buildSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
-	var request dto.BuildSnapshotRequestDTO
-	err := e.parsePayload(job.Payload, &request)
+func (e *Executor) buildSnapshot(ctx context.Context, job *specsgen.Job) (any, error) {
+	var payload specsgen.BuildSnapshotPayload
+	if err := specs.ParsePayload(job.Payload, &payload); err != nil {
+		return nil, err
+	}
+
+	request := dto.BuildSnapshotRequestDTO{BuildSnapshotPayload: &payload}
+
+	if err := e.docker.BuildSnapshot(ctx, request); err != nil {
+		return nil, err
+	}
+
+	info, err := e.docker.GetImageInfo(ctx, request.GetSnapshot())
 	if err != nil {
 		return nil, err
 	}
 
-	err = e.docker.BuildSnapshot(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	info, err := e.docker.GetImageInfo(ctx, request.Snapshot)
-	if err != nil {
-		return nil, err
-	}
-
-	infoResponse := dto.SnapshotInfoResponse{
-		Name:       request.Snapshot,
-		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
+	return dto.SnapshotInfoResponse{
+		Name:       request.GetSnapshot(),
+		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024),
 		Entrypoint: info.Entrypoint,
 		Cmd:        info.Cmd,
 		Hash:       dto.HashWithoutPrefix(info.Hash),
-	}
-
-	return infoResponse, nil
+	}, nil
 }
 
-func (e *Executor) pullSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
-	var request dto.PullSnapshotRequestDTO
-	err := e.parsePayload(job.Payload, &request)
+func (e *Executor) pullSnapshot(ctx context.Context, job *specsgen.Job) (any, error) {
+	var payload specsgen.PullSnapshotPayload
+	if err := specs.ParsePayload(job.Payload, &payload); err != nil {
+		return nil, err
+	}
+
+	request := dto.PullSnapshotRequestDTO{PullSnapshotPayload: &payload}
+
+	if err := e.docker.PullSnapshot(ctx, request); err != nil {
+		return nil, err
+	}
+
+	info, err := e.docker.GetImageInfo(ctx, request.GetSnapshot())
 	if err != nil {
 		return nil, err
 	}
 
-	err = e.docker.PullSnapshot(ctx, request)
-	if err != nil {
-		return nil, err
-	}
-
-	info, err := e.docker.GetImageInfo(ctx, request.Snapshot)
-	if err != nil {
-		return nil, err
-	}
-
-	infoResponse := dto.SnapshotInfoResponse{
-		Name:       request.Snapshot,
-		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024), // Convert bytes to GB
+	return dto.SnapshotInfoResponse{
+		Name:       request.GetSnapshot(),
+		SizeGB:     float64(info.Size) / (1024 * 1024 * 1024),
 		Entrypoint: info.Entrypoint,
 		Cmd:        info.Cmd,
 		Hash:       dto.HashWithoutPrefix(info.Hash),
-	}
-
-	return infoResponse, nil
+	}, nil
 }
 
-func (e *Executor) removeSnapshot(ctx context.Context, job *apiclient.Job) (any, error) {
+func (e *Executor) removeSnapshot(ctx context.Context, job *specsgen.Job) (any, error) {
 	return nil, e.docker.RemoveImage(ctx, job.ResourceId, true)
 }
 
-func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *apiclient.Job) (any, error) {
-	var request dto.InspectSnapshotInRegistryRequestDTO
-	err := e.parsePayload(job.Payload, &request)
-	if err != nil {
+func (e *Executor) inspectSnapshotInRegistry(ctx context.Context, job *specsgen.Job) (any, error) {
+	var payload specsgen.InspectSnapshotInRegistryPayload
+	if err := specs.ParsePayload(job.Payload, &payload); err != nil {
 		return nil, err
 	}
 
-	digest, err := e.docker.InspectImageInRegistry(ctx, request.Snapshot, request.Registry)
+	request := dto.InspectSnapshotInRegistryRequestDTO{InspectSnapshotInRegistryPayload: &payload}
+
+	digest, err := e.docker.InspectImageInRegistry(ctx, request.GetSnapshot(), request.GetRegistry())
 	if err != nil {
 		return nil, err
 	}

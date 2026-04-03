@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { DtoVolumeDTO } from './dto-volume-dto';
+import type { SpecsgenVolumeMount } from './specsgen-volume-mount';
 
 /**
  * 
@@ -24,13 +24,13 @@ import type { DtoVolumeDTO } from './dto-volume-dto';
  */
 export interface RecoverSandboxDTO {
     /**
-     * 
+     * json: backupErrorReason
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
     'backupErrorReason'?: string;
     /**
-     * 
+     * json: cpuQuota
      * @type {number}
      * @memberof RecoverSandboxDTO
      */
@@ -42,47 +42,47 @@ export interface RecoverSandboxDTO {
      */
     'env'?: { [key: string]: string; };
     /**
-     * 
+     * json: errorReason
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
-    'errorReason': string;
+    'errorReason'?: string;
     /**
-     * 
+     * json: fromVolumeId
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
     'fromVolumeId'?: string;
     /**
-     * 
+     * json: gpuQuota
      * @type {number}
      * @memberof RecoverSandboxDTO
      */
     'gpuQuota'?: number;
     /**
-     * 
+     * json: memoryQuota
      * @type {number}
      * @memberof RecoverSandboxDTO
      */
     'memoryQuota'?: number;
     /**
-     * 
+     * json: networkAllowList
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
     'networkAllowList'?: string;
     /**
-     * 
+     * json: networkBlockAll
      * @type {boolean}
      * @memberof RecoverSandboxDTO
      */
     'networkBlockAll'?: boolean;
     /**
-     * 
+     * json: osUser
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
-    'osUser': string;
+    'osUser'?: string;
     /**
      * 
      * @type {string}
@@ -90,22 +90,22 @@ export interface RecoverSandboxDTO {
      */
     'snapshot'?: string;
     /**
-     * 
+     * json: storageQuota
      * @type {number}
      * @memberof RecoverSandboxDTO
      */
     'storageQuota'?: number;
     /**
-     * 
+     * json: userId
      * @type {string}
      * @memberof RecoverSandboxDTO
      */
-    'userId': string;
+    'userId'?: string;
     /**
      * 
-     * @type {Array<DtoVolumeDTO>}
+     * @type {Array<SpecsgenVolumeMount>}
      * @memberof RecoverSandboxDTO
      */
-    'volumes'?: Array<DtoVolumeDTO>;
+    'volumes'?: Array<SpecsgenVolumeMount>;
 }
 

@@ -17,31 +17,31 @@
 /**
  * 
  * @export
- * @interface RegistryDTO
+ * @interface SpecsgenRegistryInfo
  */
-export interface RegistryDTO {
+export interface SpecsgenRegistryInfo {
     /**
      * 
      * @type {string}
-     * @memberof RegistryDTO
+     * @memberof SpecsgenRegistryInfo
      */
     'password'?: string;
     /**
-     * 
+     * Optional registry project / namespace.
      * @type {string}
-     * @memberof RegistryDTO
+     * @memberof SpecsgenRegistryInfo
      */
     'project'?: string;
     /**
-     * 
+     * Registry URL (without scheme).
      * @type {string}
-     * @memberof RegistryDTO
+     * @memberof SpecsgenRegistryInfo
      */
-    'url': string;
+    'url'?: string;
     /**
      * 
      * @type {string}
-     * @memberof RegistryDTO
+     * @memberof SpecsgenRegistryInfo
      */
     'username'?: string;
 }

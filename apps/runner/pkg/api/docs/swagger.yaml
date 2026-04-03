@@ -8,38 +8,35 @@ definitions:
       dockerfile:
         type: string
       organizationId:
+        description: 'json: organizationId'
         type: string
       pushToInternalRegistry:
+        description: 'json: pushToInternalRegistry'
         type: boolean
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
-        description: Snapshot ID and tag or the build's hash
         type: string
       sourceRegistries:
+        description: 'json: sourceRegistries'
         items:
-          $ref: '#/definitions/RegistryDTO'
+          $ref: '#/definitions/specsgen.RegistryInfo'
         type: array
-    required:
-      - dockerfile
-      - organizationId
     type: object
   CreateBackupDTO:
     properties:
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
         type: string
-    required:
-      - registry
-      - snapshot
     type: object
   CreateSandboxDTO:
     properties:
       authToken:
+        description: 'json: authToken'
         type: string
       cpuQuota:
-        minimum: 1
+        description: 'json: cpuQuota'
         type: integer
       entrypoint:
         items:
@@ -50,52 +47,55 @@ definitions:
           type: string
         type: object
       fromVolumeId:
+        description: 'json: fromVolumeId'
         type: string
       gpuQuota:
-        minimum: 0
+        description: 'json: gpuQuota'
         type: integer
       id:
         type: string
       memoryQuota:
-        minimum: 1
+        description: 'json: memoryQuota'
         type: integer
       metadata:
         additionalProperties:
           type: string
         type: object
       networkAllowList:
+        description: 'json: networkAllowList'
         type: string
       networkBlockAll:
+        description: 'json: networkBlockAll'
         type: boolean
       organizationId:
-        description: Nullable for backward compatibility
+        description: 'json: organizationId'
         type: string
       osUser:
+        description: 'json: osUser'
         type: string
       otelEndpoint:
+        description: 'json: otelEndpoint'
         type: string
       regionId:
+        description: 'json: regionId'
         type: string
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       skipStart:
+        description: 'json: skipStart'
         type: boolean
       snapshot:
         type: string
       storageQuota:
-        minimum: 1
+        description: 'json: storageQuota'
         type: integer
       userId:
+        description: 'json: userId'
         type: string
       volumes:
         items:
-          $ref: '#/definitions/dto.VolumeDTO'
+          $ref: '#/definitions/specsgen.VolumeMount'
         type: array
-    required:
-      - id
-      - osUser
-      - snapshot
-      - userId
     type: object
   ErrorResponse:
     description: Error response
@@ -127,12 +127,9 @@ definitions:
   InspectSnapshotInRegistryRequest:
     properties:
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
-        example: nginx:latest
         type: string
-    required:
-      - snapshot
     type: object
   IsRecoverableDTO:
     properties:
@@ -149,87 +146,75 @@ definitions:
   PullSnapshotRequestDTO:
     properties:
       destinationRef:
+        description: 'json: destinationRef'
         type: string
       destinationRegistry:
-        $ref: '#/definitions/RegistryDTO'
+        allOf:
+          - $ref: '#/definitions/specsgen.RegistryInfo'
+        description: 'json: destinationRegistry'
       newTag:
+        description: 'json: newTag'
         type: string
       registry:
-        $ref: '#/definitions/RegistryDTO'
+        $ref: '#/definitions/specsgen.RegistryInfo'
       snapshot:
         type: string
-    required:
-      - snapshot
     type: object
   RecoverSandboxDTO:
     properties:
       backupErrorReason:
+        description: 'json: backupErrorReason'
         type: string
       cpuQuota:
-        minimum: 1
+        description: 'json: cpuQuota'
         type: integer
       env:
         additionalProperties:
           type: string
         type: object
       errorReason:
+        description: 'json: errorReason'
         type: string
       fromVolumeId:
+        description: 'json: fromVolumeId'
         type: string
       gpuQuota:
-        minimum: 0
+        description: 'json: gpuQuota'
         type: integer
       memoryQuota:
-        minimum: 1
+        description: 'json: memoryQuota'
         type: integer
       networkAllowList:
+        description: 'json: networkAllowList'
         type: string
       networkBlockAll:
+        description: 'json: networkBlockAll'
         type: boolean
       osUser:
+        description: 'json: osUser'
         type: string
       snapshot:
         type: string
       storageQuota:
-        minimum: 1
+        description: 'json: storageQuota'
         type: integer
       userId:
+        description: 'json: userId'
         type: string
       volumes:
         items:
-          $ref: '#/definitions/dto.VolumeDTO'
+          $ref: '#/definitions/specsgen.VolumeMount'
         type: array
-    required:
-      - errorReason
-      - osUser
-      - userId
-    type: object
-  RegistryDTO:
-    properties:
-      password:
-        type: string
-      project:
-        type: string
-      url:
-        type: string
-      username:
-        type: string
-    required:
-      - url
     type: object
   ResizeSandboxDTO:
     properties:
       cpu:
-        minimum: 1
         type: integer
       disk:
-        minimum: 1
         type: integer
       gpu:
-        minimum: 0
         type: integer
       memory:
-        minimum: 1
         type: integer
     type: object
   RunnerInfoResponseDTO:
@@ -355,20 +340,14 @@ definitions:
   UpdateNetworkSettingsDTO:
     properties:
       networkAllowList:
+        description: 'json: networkAllowList'
         type: string
       networkBlockAll:
+        description: 'json: networkBlockAll'
         type: boolean
       networkLimitEgress:
+        description: 'json: networkLimitEgress'
         type: boolean
-    type: object
-  dto.VolumeDTO:
-    properties:
-      mountPath:
-        type: string
-      subpath:
-        type: string
-      volumeId:
-        type: string
     type: object
   enums.BackupState:
     enum:
@@ -412,6 +391,30 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingSnapshot
+  specsgen.RegistryInfo:
+    properties:
+      password:
+        type: string
+      project:
+        description: Optional registry project / namespace.
+        type: string
+      url:
+        description: Registry URL (without scheme).
+        type: string
+      username:
+        type: string
+    type: object
+  specsgen.VolumeMount:
+    properties:
+      mountPath:
+        description: 'json: mountPath'
+        type: string
+      subpath:
+        type: string
+      volumeId:
+        description: 'json: volumeId'
+        type: string
+    type: object
 info:
   contact: {}
   description: Daytona Runner API

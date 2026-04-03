@@ -47,7 +47,7 @@ func (d *DockerClient) Start(ctx context.Context, containerId string, authToken 
 
 	// Re-establish FUSE mounts that may have died since the container was last running.
 	if volumesJSON, ok := metadata["volumes"]; ok {
-		var volumes []dto.VolumeDTO
+		var volumes []*dto.VolumeDTO
 		if err := json.Unmarshal([]byte(volumesJSON), &volumes); err == nil && len(volumes) > 0 {
 			_, err = d.getVolumesMountPathBinds(ctx, volumes)
 			if err != nil {

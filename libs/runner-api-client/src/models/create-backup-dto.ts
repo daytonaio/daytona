@@ -15,7 +15,7 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { RegistryDTO } from './registry-dto';
+import type { SpecsgenRegistryInfo } from './specsgen-registry-info';
 
 /**
  * 
@@ -25,15 +25,15 @@ import type { RegistryDTO } from './registry-dto';
 export interface CreateBackupDTO {
     /**
      * 
-     * @type {RegistryDTO}
+     * @type {SpecsgenRegistryInfo}
      * @memberof CreateBackupDTO
      */
-    'registry': RegistryDTO;
+    'registry'?: SpecsgenRegistryInfo;
     /**
      * 
      * @type {string}
      * @memberof CreateBackupDTO
      */
-    'snapshot': string;
+    'snapshot'?: string;
 }
 
