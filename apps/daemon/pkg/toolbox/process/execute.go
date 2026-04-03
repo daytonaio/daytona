@@ -16,6 +16,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 
 	"github.com/daytonaio/daemon/pkg/common"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,6 +44,26 @@ func ExecuteCommand(logger *slog.Logger) gin.HandlerFunc {
 			c.AbortWithError(http.StatusBadRequest, errors.New("empty command"))
 			return
 		}
+
+		if request.Cwd != nil {
+			if err := security.ValidateCwd(*request.Cwd); err != nil {
+				security.AuditCommandDecision(logger, "process.execute", request.Command, false, err.Error())
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		if security.UnsafeCommandChecksDisabled() {
+			logger.Warn("unsafe command policy is disabled via DAYTONA_ALLOW_UNSAFE_COMMANDS")
+		} else {
+			if err := security.ValidateCommand(request.Command); err != nil {
+				security.AuditCommandDecision(logger, "process.execute", request.Command, false, err.Error())
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		security.AuditCommandDecision(logger, "process.execute", request.Command, true, "")
 
 		// Pipe command via stdin to avoid OS ARG_MAX limits on large commands
 		cmd := exec.Command(common.GetShell())

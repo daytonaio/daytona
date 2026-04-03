@@ -12,6 +12,7 @@ import (
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
 	"github.com/daytonaio/daemon/internal/util"
 	"github.com/daytonaio/daemon/pkg/session"
+	"github.com/daytonaio/daemon/pkg/toolbox/process/security"
 	"github.com/gin-gonic/gin"
 )
 
@@ -48,6 +49,18 @@ func (s *SessionController) SessionExecuteCommand(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, errors.New("command cannot be empty"))
 		return
 	}
+
+	if security.UnsafeCommandChecksDisabled() {
+		s.logger.Warn("unsafe command policy is disabled via DAYTONA_ALLOW_UNSAFE_COMMANDS")
+	} else {
+		if err := security.ValidateCommand(request.Command); err != nil {
+			security.AuditCommandDecision(s.logger, "process.session.execute", request.Command, false, err.Error())
+			c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+	}
+
+	security.AuditCommandDecision(s.logger, "process.session.execute", request.Command, true, "")
 
 	// Handle backward compatibility for "async" field
 	if request.Async {
