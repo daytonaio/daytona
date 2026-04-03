@@ -8,6 +8,7 @@ import { useRegions } from '@/hooks/useRegions'
 import { SandboxState } from '@daytona/api-client'
 import { useFeatureFlagEnabled } from 'posthog-js/react'
 import { MoreHorizontal, Play, Square, Loader2, Wrench } from 'lucide-react'
+import TooltipButton from '../TooltipButton'
 import { Button } from '../ui/button'
 import {
   DropdownMenu,
@@ -41,6 +42,16 @@ export function SandboxTableActions({
   const linuxVmEnabled = useFeatureFlagEnabled(FeatureFlags.SANDBOX_LINUX_VM)
   const { getRegionName } = useRegions()
   const isExperimentalRegion = (getRegionName(sandbox.target) ?? '').toLowerCase() === 'experimental'
+  const primaryActionTooltip =
+    sandbox.state === SandboxState.STARTING
+      ? 'Starting sandbox'
+      : sandbox.state === SandboxState.STOPPING
+        ? 'Stopping sandbox'
+        : sandbox.state === SandboxState.STARTED
+          ? 'Stop sandbox'
+          : sandbox.state === SandboxState.ERROR && sandbox.recoverable
+            ? 'Recover sandbox'
+            : 'Start sandbox'
 
   const menuItems = useMemo(() => {
     const items = []
@@ -187,17 +198,12 @@ export function SandboxTableActions({
 
   return (
     <div className="flex items-center justify-end gap-2">
-      <Button
+      <TooltipButton
         variant="ghost"
         size="icon-sm"
         className="text-muted-foreground"
-        aria-label={
-          sandbox.state === SandboxState.STARTED
-            ? 'Stop sandbox'
-            : sandbox.state === SandboxState.ERROR && sandbox.recoverable
-              ? 'Recover sandbox'
-              : 'Start sandbox'
-        }
+        tooltipText={primaryActionTooltip}
+        aria-label={primaryActionTooltip}
         onClick={(e) => {
           e.stopPropagation()
           if (sandbox.state === SandboxState.STARTED) {
@@ -218,7 +224,7 @@ export function SandboxTableActions({
         ) : (
           <Play className="w-4 h-4" />
         )}
-      </Button>
+      </TooltipButton>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
