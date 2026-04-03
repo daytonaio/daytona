@@ -11,9 +11,9 @@ import (
 	"log/slog"
 	"time"
 
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
-	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
+	"github.com/daytonaio/runner/pkg/runner/v2/client"
 	"github.com/daytonaio/runner/pkg/runner/v2/executor"
+	specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 )
 
 type PollerServiceConfig struct {
@@ -29,12 +29,12 @@ type Service struct {
 	pollTimeout time.Duration
 	pollLimit   int
 	executor    *executor.Executor
-	client      *apiclient.APIClient
+	client      *client.APIClient
 }
 
 // NewService creates a new poller service
 func NewService(cfg *PollerServiceConfig) (*Service, error) {
-	apiClient, err := runnerapiclient.GetApiClient()
+	apiClient, err := client.NewAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create API client: %w", err)
 	}
@@ -50,15 +50,15 @@ func NewService(cfg *PollerServiceConfig) (*Service, error) {
 
 // Start begins the job polling loop
 func (s *Service) Start(ctx context.Context) {
-	inProgressJobs, _, err := s.client.JobsAPI.ListJobs(ctx).Status(apiclient.JOBSTATUS_IN_PROGRESS).Execute()
+	var listResp specsgen.ListJobsResponse
+	_, err := s.client.Do(ctx, "GET", "/jobs?status=IN_PROGRESS&limit=100", nil, &listResp)
 	if err != nil {
-		// Only log error
 		s.log.WarnContext(ctx, "Failed to fetch IN_PROGRESS jobs", "error", err)
 	} else {
-		if inProgressJobs != nil && len(inProgressJobs.Items) > 0 {
-			s.log.InfoContext(ctx, "Found IN_PROGRESS jobs", "count", len(inProgressJobs.Items))
-			for _, job := range inProgressJobs.Items {
-				go s.executor.Execute(ctx, &job)
+		if len(listResp.GetItems()) > 0 {
+			s.log.InfoContext(ctx, "Found IN_PROGRESS jobs", "count", len(listResp.GetItems()))
+			for _, job := range listResp.GetItems() {
+				go s.executor.Execute(ctx, job)
 			}
 		} else {
 			s.log.InfoContext(ctx, "No IN_PROGRESS jobs found")
@@ -73,21 +73,17 @@ func (s *Service) Start(ctx context.Context) {
 			s.log.InfoContext(ctx, "Job poller stopped")
 			return
 		default:
-			// Poll for jobs
 			jobs, err := s.pollJobs(ctx)
 			if err != nil {
 				s.log.ErrorContext(ctx, "Failed to poll jobs", "error", err)
-				// Wait a bit before retrying on error
 				time.Sleep(5 * time.Second)
 				continue
 			}
 
-			// Process jobs
 			if len(jobs) > 0 {
 				s.log.DebugContext(ctx, "Received jobs", "count", len(jobs))
 				for _, job := range jobs {
-					// Execute job in goroutine for parallel processing
-					go s.executor.Execute(ctx, &job)
+					go s.executor.Execute(ctx, job)
 				}
 			}
 		}
@@ -95,28 +91,16 @@ func (s *Service) Start(ctx context.Context) {
 }
 
 // pollJobs polls the API for pending jobs
-func (s *Service) pollJobs(ctx context.Context) ([]apiclient.Job, error) {
-	// Build poll request
-	timeout := float32(s.pollTimeout.Seconds())
-	limit := float32(s.pollLimit)
+func (s *Service) pollJobs(ctx context.Context) ([]*specsgen.Job, error) {
+	var resp specsgen.PollJobsResponse
+	path := fmt.Sprintf("/jobs/poll?timeout=%d&limit=%d", int(s.pollTimeout.Seconds()), s.pollLimit)
 
-	req := s.client.JobsAPI.PollJobs(ctx).
-		Timeout(timeout).
-		Limit(limit)
-
-	// Execute poll request
-	resp, httpResp, err := req.Execute()
+	httpResp, err := s.client.Do(ctx, "GET", path, nil, &resp)
 	if err != nil {
-		// Check if it's a timeout (expected for long polling)
 		if httpResp != nil && httpResp.StatusCode == 408 {
-			// Timeout is normal for long polling, just return empty
-			return []apiclient.Job{}, nil
+			return nil, nil
 		}
 		return nil, err
-	}
-
-	if resp == nil {
-		return []apiclient.Job{}, nil
 	}
 
 	return resp.GetJobs(), nil

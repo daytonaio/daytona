@@ -21,19 +21,19 @@
  */
 export interface UpdateNetworkSettingsDTO {
     /**
-     * 
+     * json: networkAllowList
      * @type {string}
      * @memberof UpdateNetworkSettingsDTO
      */
     'networkAllowList'?: string;
     /**
-     * 
+     * json: networkBlockAll
      * @type {boolean}
      * @memberof UpdateNetworkSettingsDTO
      */
     'networkBlockAll'?: boolean;
     /**
-     * 
+     * json: networkLimitEgress
      * @type {boolean}
      * @memberof UpdateNetworkSettingsDTO
      */

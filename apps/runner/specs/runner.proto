@@ -1,0 +1,249 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ *
+ * Proto specification for Daytona v2 runner job payloads.
+ *
+ * This file is the canonical schema source for all job payload types exchanged
+ * between the Daytona API and v2 runners via the job queue.  Types generated
+ * from this file replace the OpenAPI/Swagger-derived runner-api-client DTOs.
+ *
+ * JSON field naming: protobuf snake_case fields are automatically mapped to
+ * camelCase JSON keys by protojson (e.g. cpu_quota → cpuQuota), which matches
+ * the conventions already used by both sides of the job queue.
+ *
+ * Code generation (requires buf CLI ≥ v1):
+ *   buf generate apps/runner/specs
+ * See buf.gen.yaml for output targets.
+ */
+
+syntax = "proto3";
+
+package runner.v2.jobs;
+
+option go_package = "github.com/daytonaio/runner/pkg/runner/v2/specs/gen;specsgen";
+
+// ─── Job protocol types ───────────────────────────────────────────────────────
+
+enum JobType {
+  JOB_TYPE_UNSPECIFIED = 0;
+  CREATE_SANDBOX = 1;
+  START_SANDBOX = 2;
+  STOP_SANDBOX = 3;
+  DESTROY_SANDBOX = 4;
+  RESIZE_SANDBOX = 5;
+  CREATE_BACKUP = 6;
+  BUILD_SNAPSHOT = 7;
+  PULL_SNAPSHOT = 8;
+  RECOVER_SANDBOX = 9;
+  INSPECT_SNAPSHOT_IN_REGISTRY = 10;
+  REMOVE_SNAPSHOT = 11;
+  UPDATE_SANDBOX_NETWORK_SETTINGS = 12;
+}
+
+enum JobStatus {
+  JOB_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  IN_PROGRESS = 2;
+  COMPLETED = 3;
+  FAILED = 4;
+}
+
+enum ResourceType {
+  RESOURCE_TYPE_UNSPECIFIED = 0;
+  SANDBOX = 1;
+  SNAPSHOT = 2;
+  BACKUP = 3;
+}
+
+// Job is the v2 runner job record delivered by the job queue.
+message Job {
+  string id = 1;
+  JobType type = 2;
+  JobStatus status = 3;
+  ResourceType resource_type = 4;  // json: resourceType
+  string resource_id = 5;          // json: resourceId
+  optional string payload = 6;
+  map<string, string> trace_context = 7;  // json: traceContext
+  optional string error_message = 8;      // json: errorMessage
+  string created_at = 9;                  // json: createdAt
+  optional string updated_at = 10;        // json: updatedAt
+}
+
+// UpdateJobStatus is sent by the runner to report job completion.
+message UpdateJobStatus {
+  JobStatus status = 1;
+  optional string error_message = 2;    // json: errorMessage
+  optional string result_metadata = 3;  // json: resultMetadata
+}
+
+// PollJobsResponse wraps the array returned by GET /jobs/poll.
+message PollJobsResponse {
+  repeated Job jobs = 1;
+}
+
+// ListJobsResponse wraps the paginated list returned by GET /jobs.
+message ListJobsResponse {
+  repeated Job items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 total_pages = 4;  // json: totalPages
+}
+
+// ─── Runner healthcheck types ────────────────────────────────────────────────
+
+message RunnerHealthMetrics {
+  double current_cpu_load_average         = 1;   // json: currentCpuLoadAverage
+  double current_cpu_usage_percentage     = 2;   // json: currentCpuUsagePercentage
+  double current_memory_usage_percentage  = 3;   // json: currentMemoryUsagePercentage
+  double current_disk_usage_percentage    = 4;   // json: currentDiskUsagePercentage
+  double current_allocated_cpu            = 5;   // json: currentAllocatedCpu
+  double current_allocated_memory_gi_b    = 6;   // json: currentAllocatedMemoryGiB
+  double current_allocated_disk_gi_b      = 7;   // json: currentAllocatedDiskGiB
+  int32  current_snapshot_count           = 8;   // json: currentSnapshotCount
+  int64  current_started_sandboxes        = 9;   // json: currentStartedSandboxes
+  double cpu                              = 10;
+  double memory_gi_b                      = 11;  // json: memoryGiB
+  double disk_gi_b                        = 12;  // json: diskGiB
+}
+
+message RunnerServiceHealth {
+  string service_name            = 1;  // json: serviceName
+  bool healthy                   = 2;
+  optional string error_reason   = 3;  // json: errorReason
+}
+
+message RunnerHealthcheck {
+  optional RunnerHealthMetrics metrics              = 1;
+  repeated RunnerServiceHealth service_health        = 2;  // json: serviceHealth
+  optional string domain                             = 3;
+  optional string proxy_url                          = 4;  // json: proxyUrl
+  optional string api_url                            = 5;  // json: apiUrl
+  string app_version                                 = 6;  // json: appVersion
+}
+
+// ─── Shared types ────────────────────────────────────────────────────────────
+
+// RegistryInfo carries OCI registry credentials.
+message RegistryInfo {
+  // Registry URL (without scheme).
+  string url = 1;
+  // Optional registry project / namespace.
+  optional string project = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+// VolumeMount describes a volume attached to a sandbox.
+message VolumeMount {
+  string volume_id  = 1;  // json: volumeId
+  string mount_path = 2;  // json: mountPath
+  optional string subpath = 3;
+}
+
+// ─── Sandbox job payloads ────────────────────────────────────────────────────
+
+// CreateSandboxPayload is the job payload for CREATE_SANDBOX jobs.
+message CreateSandboxPayload {
+  string id             = 1;
+  optional string from_volume_id = 2;  // json: fromVolumeId
+  string user_id        = 3;           // json: userId
+  string snapshot       = 4;
+  string os_user        = 5;           // json: osUser
+  int64  cpu_quota      = 6;           // json: cpuQuota
+  int64  gpu_quota      = 7;           // json: gpuQuota
+  int64  memory_quota   = 8;           // json: memoryQuota
+  int64  storage_quota  = 9;           // json: storageQuota
+  map<string, string> env      = 10;
+  optional RegistryInfo registry       = 11;
+  repeated string entrypoint           = 12;
+  repeated VolumeMount volumes         = 13;
+  optional bool   network_block_all    = 14;  // json: networkBlockAll
+  optional string network_allow_list   = 15;  // json: networkAllowList
+  map<string, string> metadata         = 16;
+  optional string auth_token           = 17;  // json: authToken
+  optional string otel_endpoint        = 18;  // json: otelEndpoint
+  optional bool   skip_start           = 19;  // json: skipStart
+  optional string organization_id      = 20;  // json: organizationId
+  optional string region_id            = 21;  // json: regionId
+}
+
+// StartSandboxPayload is the job payload for START_SANDBOX jobs.
+message StartSandboxPayload {
+  optional string auth_token = 1;          // json: authToken
+  map<string, string> metadata = 2;
+}
+
+// StopSandboxPayload is the job payload for STOP_SANDBOX jobs.
+message StopSandboxPayload {
+  optional bool force = 1;
+}
+
+// ResizeSandboxPayload is the job payload for RESIZE_SANDBOX jobs.
+message ResizeSandboxPayload {
+  int64 cpu    = 1;
+  int64 gpu    = 2;
+  int64 memory = 3;
+  int64 disk   = 4;
+}
+
+// RecoverSandboxPayload is the job payload for RECOVER_SANDBOX jobs.
+message RecoverSandboxPayload {
+  optional string from_volume_id     = 1;  // json: fromVolumeId
+  string user_id                     = 2;  // json: userId
+  optional string snapshot           = 3;
+  string os_user                     = 4;  // json: osUser
+  int64  cpu_quota                   = 5;  // json: cpuQuota
+  int64  gpu_quota                   = 6;  // json: gpuQuota
+  int64  memory_quota                = 7;  // json: memoryQuota
+  int64  storage_quota               = 8;  // json: storageQuota
+  map<string, string> env            = 9;
+  repeated VolumeMount volumes       = 10;
+  optional bool   network_block_all  = 11; // json: networkBlockAll
+  optional string network_allow_list = 12; // json: networkAllowList
+  string error_reason                = 13; // json: errorReason
+  optional string backup_error_reason = 14; // json: backupErrorReason
+}
+
+// UpdateNetworkSettingsPayload is the job payload for
+// UPDATE_SANDBOX_NETWORK_SETTINGS jobs.
+message UpdateNetworkSettingsPayload {
+  optional bool   network_block_all    = 1;  // json: networkBlockAll
+  optional string network_allow_list   = 2;  // json: networkAllowList
+  optional bool   network_limit_egress = 3;  // json: networkLimitEgress
+}
+
+// ─── Snapshot job payloads ───────────────────────────────────────────────────
+
+// CreateBackupPayload is the job payload for CREATE_BACKUP jobs.
+message CreateBackupPayload {
+  string snapshot                  = 1;
+  optional RegistryInfo registry   = 2;
+}
+
+// BuildSnapshotPayload is the job payload for BUILD_SNAPSHOT jobs.
+message BuildSnapshotPayload {
+  optional string snapshot                    = 1;
+  repeated RegistryInfo source_registries     = 2;  // json: sourceRegistries
+  optional RegistryInfo registry              = 3;
+  string dockerfile                           = 4;
+  string organization_id                      = 5;  // json: organizationId
+  repeated string context                     = 6;
+  bool push_to_internal_registry              = 7;  // json: pushToInternalRegistry
+}
+
+// PullSnapshotPayload is the job payload for PULL_SNAPSHOT jobs.
+message PullSnapshotPayload {
+  string snapshot                              = 1;
+  optional RegistryInfo registry               = 2;
+  optional RegistryInfo destination_registry   = 3;  // json: destinationRegistry
+  optional string destination_ref              = 4;  // json: destinationRef
+  optional string new_tag                      = 5;  // json: newTag
+}
+
+// InspectSnapshotInRegistryPayload is the job payload for
+// INSPECT_SNAPSHOT_IN_REGISTRY jobs.
+message InspectSnapshotInRegistryPayload {
+  string snapshot                  = 1;
+  optional RegistryInfo registry   = 2;
+}

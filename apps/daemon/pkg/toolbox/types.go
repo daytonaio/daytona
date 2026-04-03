@@ -5,12 +5,12 @@ package toolbox
 
 type InitializeRequest struct {
 	Token string `json:"token" binding:"required"`
-} // @name InitializeRequest
+} //	@name	InitializeRequest
 
 type WorkDirResponse struct {
 	Dir string `json:"dir" binding:"required"`
-} // @name WorkDirResponse
+} //	@name	WorkDirResponse
 
 type UserHomeDirResponse struct {
 	Dir string `json:"dir" binding:"required"`
-} // @name UserHomeDirResponse
+} //	@name	UserHomeDirResponse

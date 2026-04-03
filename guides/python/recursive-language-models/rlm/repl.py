@@ -62,8 +62,7 @@ CODE_BLOCK_PATTERN = re.compile(
 # Broker Server Script (runs inside sandbox, handles rlm_query request queue)
 # =============================================================================
 
-_BROKER_SCRIPT = textwrap.dedent(
-    '''
+_BROKER_SCRIPT = textwrap.dedent('''
 import json
 import threading
 import time
@@ -145,8 +144,7 @@ def respond():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, threaded=True)
-'''
-)
+''')
 
 
 @dataclass
@@ -390,8 +388,7 @@ class DaytonaREPL:
         # Encode initial variables as base64 to avoid escaping issues
         initial_vars_b64 = base64.b64encode(json.dumps(self.initial_variables).encode()).decode()
 
-        return textwrap.dedent(
-            f'''
+        return textwrap.dedent(f'''
 import sys
 import io
 import json
@@ -632,8 +629,7 @@ print(json.dumps({{
     "final_var_name": _final_var_name,
     "locals": serialize_locals(_locals),
 }}))
-'''
-        )
+''')
 
     def execute_code(self, code: str) -> CodeBlockResult:
         """Execute a Python code block in the sandbox."""

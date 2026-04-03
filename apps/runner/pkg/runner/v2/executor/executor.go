@@ -19,10 +19,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/daytonaio/common-go/pkg/utils"
-	apiclient "github.com/daytonaio/daytona/libs/api-client-go"
 	"github.com/daytonaio/runner/internal/metrics"
-	runnerapiclient "github.com/daytonaio/runner/pkg/apiclient"
 	"github.com/daytonaio/runner/pkg/docker"
+	"github.com/daytonaio/runner/pkg/runner/v2/client"
+	specsgen "github.com/daytonaio/runner/pkg/runner/v2/specs/gen"
 )
 
 type ExecutorConfig struct {
@@ -34,14 +34,14 @@ type ExecutorConfig struct {
 // Executor handles job execution
 type Executor struct {
 	log       *slog.Logger
-	client    *apiclient.APIClient
+	client    *client.APIClient
 	docker    *docker.DockerClient
 	collector *metrics.Collector
 }
 
 // NewExecutor creates a new job executor
 func NewExecutor(cfg *ExecutorConfig) (*Executor, error) {
-	apiClient, err := runnerapiclient.GetApiClient()
+	apiClient, err := client.NewAPIClient()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create API client: %w", err)
 	}
@@ -55,25 +55,21 @@ func NewExecutor(cfg *ExecutorConfig) (*Executor, error) {
 }
 
 // Execute processes a job and updates its status
-func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
-	// Extract trace context from job to continue distributed trace
+func (e *Executor) Execute(ctx context.Context, job *specsgen.Job) {
 	ctx = e.extractTraceContext(ctx, job)
 
-	// Build log fields
 	jobLog := e.log.With(
 		slog.String("job_id", job.GetId()),
-		slog.String("job_type", string(job.GetType())),
+		slog.String("job_type", job.GetType().String()),
 	)
 
-	// Add resource info if present
-	if resourceType := job.GetResourceType(); resourceType != "" {
-		jobLog = jobLog.With(slog.String("resource_type", resourceType))
+	if resourceType := job.GetResourceType(); resourceType != specsgen.ResourceType_RESOURCE_TYPE_UNSPECIFIED {
+		jobLog = jobLog.With(slog.String("resource_type", resourceType.String()))
 	}
 	if resourceId := job.GetResourceId(); resourceId != "" {
 		jobLog = jobLog.With(slog.String("resource_id", resourceId))
 	}
 
-	// Add trace info to logs if available
 	if spanCtx := trace.SpanContextFromContext(ctx); spanCtx.IsValid() {
 		jobLog = jobLog.With(
 			slog.String("trace_id", spanCtx.TraceID().String()),
@@ -83,14 +79,12 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 
 	jobLog.InfoContext(ctx, "Executing job")
 
-	// Execute the job based on type
 	resultMetadata, err := e.executeJob(ctx, job)
 
-	// Update job status
-	status := apiclient.JOBSTATUS_COMPLETED
+	status := specsgen.JobStatus_COMPLETED
 	var errorMessage *string
 	if err != nil {
-		status = apiclient.JOBSTATUS_FAILED
+		status = specsgen.JobStatus_FAILED
 		errMsg := err.Error()
 		errorMessage = &errMsg
 		jobLog.ErrorContext(ctx, "Job failed", "error", err)
@@ -98,66 +92,61 @@ func (e *Executor) Execute(ctx context.Context, job *apiclient.Job) {
 		jobLog.InfoContext(ctx, "Job completed successfully")
 	}
 
-	// Report status to API
 	if err := e.updateJobStatus(ctx, job.GetId(), status, resultMetadata, errorMessage); err != nil {
 		jobLog.ErrorContext(ctx, "Failed to update job status", "error", err)
 	}
 }
 
 // executeJob dispatches to the appropriate handler based on job type
-func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, error) {
-	// Create a span for the job execution
+func (e *Executor) executeJob(ctx context.Context, job *specsgen.Job) (any, error) {
 	tracer := otel.Tracer("runner")
-	ctx, span := tracer.Start(ctx, fmt.Sprintf("execute_%s", job.GetType()),
+	ctx, span := tracer.Start(ctx, fmt.Sprintf("execute_%s", job.GetType().String()),
 		trace.WithAttributes(
 			attribute.String("job.id", job.GetId()),
-			attribute.String("job.type", string(job.GetType())),
-			attribute.String("job.status", string(job.GetStatus())),
+			attribute.String("job.type", job.GetType().String()),
+			attribute.String("job.status", job.GetStatus().String()),
 		),
 	)
 	defer span.End()
 
-	// Add resource attributes if present
-	if resourceType := job.GetResourceType(); resourceType != "" {
-		span.SetAttributes(attribute.String("resource.type", resourceType))
+	if resourceType := job.GetResourceType(); resourceType != specsgen.ResourceType_RESOURCE_TYPE_UNSPECIFIED {
+		span.SetAttributes(attribute.String("resource.type", resourceType.String()))
 	}
 	if resourceId := job.GetResourceId(); resourceId != "" {
 		span.SetAttributes(attribute.String("resource.id", resourceId))
 	}
 
-	// Dispatch to handler
 	var resultMetadata any
 	var err error
 	switch job.GetType() {
-	case apiclient.JOBTYPE_CREATE_SANDBOX:
+	case specsgen.JobType_CREATE_SANDBOX:
 		resultMetadata, err = e.createSandbox(ctx, job)
-	case apiclient.JOBTYPE_START_SANDBOX:
+	case specsgen.JobType_START_SANDBOX:
 		resultMetadata, err = e.startSandbox(ctx, job)
-	case apiclient.JOBTYPE_STOP_SANDBOX:
+	case specsgen.JobType_STOP_SANDBOX:
 		resultMetadata, err = e.stopSandbox(ctx, job)
-	case apiclient.JOBTYPE_DESTROY_SANDBOX:
+	case specsgen.JobType_DESTROY_SANDBOX:
 		resultMetadata, err = e.destroySandbox(ctx, job)
-	case apiclient.JOBTYPE_RESIZE_SANDBOX:
+	case specsgen.JobType_RESIZE_SANDBOX:
 		resultMetadata, err = e.resizeSandbox(ctx, job)
-	case apiclient.JOBTYPE_CREATE_BACKUP:
+	case specsgen.JobType_CREATE_BACKUP:
 		resultMetadata, err = e.createBackup(ctx, job)
-	case apiclient.JOBTYPE_BUILD_SNAPSHOT:
+	case specsgen.JobType_BUILD_SNAPSHOT:
 		resultMetadata, err = e.buildSnapshot(ctx, job)
-	case apiclient.JOBTYPE_PULL_SNAPSHOT:
+	case specsgen.JobType_PULL_SNAPSHOT:
 		resultMetadata, err = e.pullSnapshot(ctx, job)
-	case apiclient.JOBTYPE_REMOVE_SNAPSHOT:
+	case specsgen.JobType_REMOVE_SNAPSHOT:
 		resultMetadata, err = e.removeSnapshot(ctx, job)
-	case apiclient.JOBTYPE_UPDATE_SANDBOX_NETWORK_SETTINGS:
+	case specsgen.JobType_UPDATE_SANDBOX_NETWORK_SETTINGS:
 		resultMetadata, err = e.updateNetworkSettings(ctx, job)
-	case apiclient.JOBTYPE_INSPECT_SNAPSHOT_IN_REGISTRY:
+	case specsgen.JobType_INSPECT_SNAPSHOT_IN_REGISTRY:
 		resultMetadata, err = e.inspectSnapshotInRegistry(ctx, job)
-	case apiclient.JOBTYPE_RECOVER_SANDBOX:
+	case specsgen.JobType_RECOVER_SANDBOX:
 		resultMetadata, err = e.recoverSandbox(ctx, job)
 	default:
-		err = fmt.Errorf("unknown job type: %s", job.GetType())
+		err = fmt.Errorf("unknown job type: %s", job.GetType().String())
 	}
 
-	// Record error in span if present
 	if err != nil {
 		span.RecordError(err)
 		span.SetAttributes(attribute.Bool("error", true))
@@ -168,14 +157,13 @@ func (e *Executor) executeJob(ctx context.Context, job *apiclient.Job) (any, err
 }
 
 // updateJobStatus reports job completion status to the API
-func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status apiclient.JobStatus, resultMetadata any, errorMessage *string) error {
-	// Create a span for the API call - otelhttp will create a child span for the HTTP request
+func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status specsgen.JobStatus, resultMetadata any, errorMessage *string) error {
 	tracer := otel.Tracer("runner")
 	ctx, span := tracer.Start(ctx, "update_job_status",
 		trace.WithSpanKind(trace.SpanKindClient),
 		trace.WithAttributes(
 			attribute.String("job.id", jobID),
-			attribute.String("job.status", string(status)),
+			attribute.String("job.status", status.String()),
 		),
 	)
 	defer span.End()
@@ -184,28 +172,30 @@ func (e *Executor) updateJobStatus(ctx context.Context, jobID string, status api
 		span.SetAttributes(attribute.String("job.error", *errorMessage))
 	}
 
-	updateStatus := apiclient.NewUpdateJobStatus(status)
+	update := &specsgen.UpdateJobStatus{Status: status}
 	if errorMessage != nil {
-		updateStatus.SetErrorMessage(*errorMessage)
+		update.ErrorMessage = errorMessage
 	}
 
 	if resultMetadata != nil {
-		resultMetadataJSON, err := json.Marshal(resultMetadata)
+		metaJSON, err := json.Marshal(resultMetadata)
 		if err != nil {
 			return fmt.Errorf("failed to marshal result metadata: %w", err)
 		}
-		updateStatus.SetResultMetadata(string(resultMetadataJSON))
+		metaStr := string(metaJSON)
+		update.ResultMetadata = &metaStr
 	}
+
+	path := fmt.Sprintf("/jobs/%s/status", jobID)
 
 	err := utils.RetryWithExponentialBackoff(
 		ctx,
-		fmt.Sprintf("update job %s status to %s", jobID, status),
+		fmt.Sprintf("update job %s status to %s", jobID, status.String()),
 		utils.DEFAULT_MAX_RETRIES,
 		utils.DEFAULT_BASE_DELAY,
 		utils.DEFAULT_MAX_DELAY,
 		func() error {
-			req := e.client.JobsAPI.UpdateJobStatus(ctx, jobID).UpdateJobStatus(*updateStatus)
-			_, httpResp, err := req.Execute()
+			httpResp, err := e.client.Do(ctx, "POST", path, update, nil)
 			if err != nil && httpResp != nil && httpResp.StatusCode >= http.StatusBadRequest && httpResp.StatusCode < http.StatusInternalServerError {
 				return &utils.NonRetryableError{Err: fmt.Errorf("HTTP %d: %w", httpResp.StatusCode, err)}
 			}
@@ -237,26 +227,21 @@ func (e *Executor) parsePayload(payload *string, target interface{}) error {
 
 // extractTraceContext extracts OpenTelemetry trace context from the job
 // and returns a new context with the trace information to continue distributed tracing
-func (e *Executor) extractTraceContext(ctx context.Context, job *apiclient.Job) context.Context {
+func (e *Executor) extractTraceContext(ctx context.Context, job *specsgen.Job) context.Context {
 	traceContext := job.GetTraceContext()
 	if len(traceContext) == 0 {
 		e.log.DebugContext(ctx, "no trace context in job", "job_id", job.GetId())
 		return ctx
 	}
 
-	// Convert map[string]interface{} to map[string]string for propagation
 	carrier := make(propagation.MapCarrier)
 	for k, v := range traceContext {
-		if strVal, ok := v.(string); ok {
-			carrier[k] = strVal
-		}
+		carrier[k] = v
 	}
 
-	// Use W3C Trace Context propagator to extract trace info
 	propagator := propagation.TraceContext{}
 	ctx = propagator.Extract(ctx, carrier)
 
-	// Log trace information if extracted successfully
 	if spanCtx := trace.SpanContextFromContext(ctx); spanCtx.IsValid() {
 		e.log.DebugContext(ctx, "extracted trace context from job",
 			slog.String("job_id", job.GetId()),

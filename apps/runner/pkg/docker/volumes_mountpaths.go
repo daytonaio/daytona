@@ -28,7 +28,7 @@ func getVolumeMountBasePath() string {
 	return "/mnt"
 }
 
-func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
+func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []*dto.VolumeDTO) ([]string, error) {
 	volumeMountPathBinds := make([]string, 0)
 
 	// Tracks volumes with FUSE mounts already ensured in this call,

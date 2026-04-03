@@ -1417,10 +1417,6 @@ const docTemplate = `{
     "definitions": {
         "BuildSnapshotRequestDTO": {
             "type": "object",
-            "required": [
-                "dockerfile",
-                "organizationId"
-            ],
             "properties": {
                 "context": {
                     "type": "array",
@@ -1432,35 +1428,33 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "organizationId": {
+                    "description": "json: organizationId",
                     "type": "string"
                 },
                 "pushToInternalRegistry": {
+                    "description": "json: pushToInternalRegistry",
                     "type": "boolean"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
-                    "description": "Snapshot ID and tag or the build's hash",
                     "type": "string"
                 },
                 "sourceRegistries": {
+                    "description": "json: sourceRegistries",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/RegistryDTO"
+                        "$ref": "#/definitions/specsgen.RegistryInfo"
                     }
                 }
             }
         },
         "CreateBackupDTO": {
             "type": "object",
-            "required": [
-                "registry",
-                "snapshot"
-            ],
             "properties": {
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
                     "type": "string"
@@ -1469,19 +1463,14 @@ const docTemplate = `{
         },
         "CreateSandboxDTO": {
             "type": "object",
-            "required": [
-                "id",
-                "osUser",
-                "snapshot",
-                "userId"
-            ],
             "properties": {
                 "authToken": {
+                    "description": "json: authToken",
                     "type": "string"
                 },
                 "cpuQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: cpuQuota",
+                    "type": "integer"
                 },
                 "entrypoint": {
                     "type": "array",
@@ -1496,18 +1485,19 @@ const docTemplate = `{
                     }
                 },
                 "fromVolumeId": {
+                    "description": "json: fromVolumeId",
                     "type": "string"
                 },
                 "gpuQuota": {
-                    "type": "integer",
-                    "minimum": 0
+                    "description": "json: gpuQuota",
+                    "type": "integer"
                 },
                 "id": {
                     "type": "string"
                 },
                 "memoryQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: memoryQuota",
+                    "type": "integer"
                 },
                 "metadata": {
                     "type": "object",
@@ -1516,44 +1506,51 @@ const docTemplate = `{
                     }
                 },
                 "networkAllowList": {
+                    "description": "json: networkAllowList",
                     "type": "string"
                 },
                 "networkBlockAll": {
+                    "description": "json: networkBlockAll",
                     "type": "boolean"
                 },
                 "organizationId": {
-                    "description": "Nullable for backward compatibility",
+                    "description": "json: organizationId",
                     "type": "string"
                 },
                 "osUser": {
+                    "description": "json: osUser",
                     "type": "string"
                 },
                 "otelEndpoint": {
+                    "description": "json: otelEndpoint",
                     "type": "string"
                 },
                 "regionId": {
+                    "description": "json: regionId",
                     "type": "string"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "skipStart": {
+                    "description": "json: skipStart",
                     "type": "boolean"
                 },
                 "snapshot": {
                     "type": "string"
                 },
                 "storageQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: storageQuota",
+                    "type": "integer"
                 },
                 "userId": {
+                    "description": "json: userId",
                     "type": "string"
                 },
                 "volumes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VolumeDTO"
+                        "$ref": "#/definitions/specsgen.VolumeMount"
                     }
                 }
             }
@@ -1596,16 +1593,12 @@ const docTemplate = `{
         },
         "InspectSnapshotInRegistryRequest": {
             "type": "object",
-            "required": [
-                "snapshot"
-            ],
             "properties": {
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
-                    "type": "string",
-                    "example": "nginx:latest"
+                    "type": "string"
                 }
             }
         },
@@ -1630,21 +1623,25 @@ const docTemplate = `{
         },
         "PullSnapshotRequestDTO": {
             "type": "object",
-            "required": [
-                "snapshot"
-            ],
             "properties": {
                 "destinationRef": {
+                    "description": "json: destinationRef",
                     "type": "string"
                 },
                 "destinationRegistry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "description": "json: destinationRegistry",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/specsgen.RegistryInfo"
+                        }
+                    ]
                 },
                 "newTag": {
+                    "description": "json: newTag",
                     "type": "string"
                 },
                 "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
+                    "$ref": "#/definitions/specsgen.RegistryInfo"
                 },
                 "snapshot": {
                     "type": "string"
@@ -1653,18 +1650,14 @@ const docTemplate = `{
         },
         "RecoverSandboxDTO": {
             "type": "object",
-            "required": [
-                "errorReason",
-                "osUser",
-                "userId"
-            ],
             "properties": {
                 "backupErrorReason": {
+                    "description": "json: backupErrorReason",
                     "type": "string"
                 },
                 "cpuQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: cpuQuota",
+                    "type": "integer"
                 },
                 "env": {
                     "type": "object",
@@ -1673,63 +1666,49 @@ const docTemplate = `{
                     }
                 },
                 "errorReason": {
+                    "description": "json: errorReason",
                     "type": "string"
                 },
                 "fromVolumeId": {
+                    "description": "json: fromVolumeId",
                     "type": "string"
                 },
                 "gpuQuota": {
-                    "type": "integer",
-                    "minimum": 0
+                    "description": "json: gpuQuota",
+                    "type": "integer"
                 },
                 "memoryQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: memoryQuota",
+                    "type": "integer"
                 },
                 "networkAllowList": {
+                    "description": "json: networkAllowList",
                     "type": "string"
                 },
                 "networkBlockAll": {
+                    "description": "json: networkBlockAll",
                     "type": "boolean"
                 },
                 "osUser": {
+                    "description": "json: osUser",
                     "type": "string"
                 },
                 "snapshot": {
                     "type": "string"
                 },
                 "storageQuota": {
-                    "type": "integer",
-                    "minimum": 1
+                    "description": "json: storageQuota",
+                    "type": "integer"
                 },
                 "userId": {
+                    "description": "json: userId",
                     "type": "string"
                 },
                 "volumes": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.VolumeDTO"
+                        "$ref": "#/definitions/specsgen.VolumeMount"
                     }
-                }
-            }
-        },
-        "RegistryDTO": {
-            "type": "object",
-            "required": [
-                "url"
-            ],
-            "properties": {
-                "password": {
-                    "type": "string"
-                },
-                "project": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
                 }
             }
         },
@@ -1737,20 +1716,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "cpu": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 },
                 "disk": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 },
                 "gpu": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "memory": {
-                    "type": "integer",
-                    "minimum": 1
+                    "type": "integer"
                 }
             }
         },
@@ -1937,27 +1912,16 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "networkAllowList": {
+                    "description": "json: networkAllowList",
                     "type": "string"
                 },
                 "networkBlockAll": {
+                    "description": "json: networkBlockAll",
                     "type": "boolean"
                 },
                 "networkLimitEgress": {
+                    "description": "json: networkLimitEgress",
                     "type": "boolean"
-                }
-            }
-        },
-        "dto.VolumeDTO": {
-            "type": "object",
-            "properties": {
-                "mountPath": {
-                    "type": "string"
-                },
-                "subpath": {
-                    "type": "string"
-                },
-                "volumeId": {
-                    "type": "string"
                 }
             }
         },
@@ -2008,6 +1972,41 @@ const docTemplate = `{
                 "SandboxStateUnknown",
                 "SandboxStatePullingSnapshot"
             ]
+        },
+        "specsgen.RegistryInfo": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "project": {
+                    "description": "Optional registry project / namespace.",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Registry URL (without scheme).",
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "specsgen.VolumeMount": {
+            "type": "object",
+            "properties": {
+                "mountPath": {
+                    "description": "json: mountPath",
+                    "type": "string"
+                },
+                "subpath": {
+                    "type": "string"
+                },
+                "volumeId": {
+                    "description": "json: volumeId",
+                    "type": "string"
+                }
+            }
         }
     },
     "securityDefinitions": {

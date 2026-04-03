@@ -164,7 +164,7 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 			return
 		}
 
-		if !strings.Contains(request.Snapshot, ":") || strings.HasSuffix(request.Snapshot, ":") {
+		if !strings.Contains(request.GetSnapshot(), ":") || strings.HasSuffix(request.GetSnapshot(), ":") {
 			ctx.Error(common_errors.NewBadRequestError(errors.New("snapshot name must include a valid tag")))
 			return
 		}
@@ -175,23 +175,25 @@ func BuildSnapshot(generalCtx context.Context, logger *slog.Logger) func(ctx *gi
 			return
 		}
 
-		err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+		snapshotName := request.GetSnapshot()
+
+		err = runner.SnapshotErrorCache.RemoveError(generalCtx, snapshotName)
 		if err != nil {
-			logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
+			logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", snapshotName, "error", err)
 		}
 
 		go func() {
 			err := runner.Docker.BuildSnapshot(generalCtx, request)
 			if err != nil {
-				logger.DebugContext(generalCtx, "Build snapshot failed", "cacheKey", request.Snapshot, "error", err)
-				err = runner.SnapshotErrorCache.SetError(generalCtx, request.Snapshot, err.Error())
+				logger.DebugContext(generalCtx, "Build snapshot failed", "cacheKey", snapshotName, "error", err)
+				err = runner.SnapshotErrorCache.SetError(generalCtx, snapshotName, err.Error())
 				if err != nil {
-					logger.ErrorContext(generalCtx, "Failed to set snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
+					logger.ErrorContext(generalCtx, "Failed to set snapshot error cache entry", "cacheKey", snapshotName, "error", err)
 				}
 			} else {
-				err = runner.SnapshotErrorCache.RemoveError(generalCtx, request.Snapshot)
+				err = runner.SnapshotErrorCache.RemoveError(generalCtx, snapshotName)
 				if err != nil {
-					logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", request.Snapshot, "error", err)
+					logger.ErrorContext(generalCtx, "Failed to remove snapshot error cache entry", "cacheKey", snapshotName, "error", err)
 				}
 			}
 		}()

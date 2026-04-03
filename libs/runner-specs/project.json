@@ -1,0 +1,29 @@
+{
+  "name": "runner-specs",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/runner-specs",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "outputPath": "dist/libs/runner-specs",
+        "tsConfig": "libs/runner-specs/tsconfig.lib.json",
+        "packageJson": "libs/runner-specs/package.json",
+        "main": "libs/runner-specs/src/index.ts",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "generate:specs": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/libs/runner-specs/src/generated"],
+      "options": {
+        "commands": [
+          "buf generate apps/runner/specs"
+        ],
+        "parallel": false
+      }
+    }
+  },
+  "tags": []
+}

@@ -9,8 +9,7 @@ from ..common.process import CodeRunParams
 
 
 class SandboxCodeToolbox(Protocol):
-    def get_run_command(self, code: str, params: CodeRunParams | None = None) -> str:
-        ...
+    def get_run_command(self, code: str, params: CodeRunParams | None = None) -> str: ...
 
 
 class HasBody(Protocol):
