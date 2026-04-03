@@ -196,9 +196,16 @@ class DockerContainerTool:
         timeout = parameters.get("timeout", self._timeout)
 
         proc = await asyncio.create_subprocess_exec(
-            "docker", "run", "--rm", "--network=none",
-            f"--memory={self._memory}", "--cpus=1",
-            self._image, "python3", "-c", code,
+            "docker",
+            "run",
+            "--rm",
+            "--network=none",
+            f"--memory={self._memory}",
+            "--cpus=1",
+            self._image,
+            "python3",
+            "-c",
+            code,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
