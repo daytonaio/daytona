@@ -184,6 +184,8 @@ class Daytona:
 
         # Create API configuration without api_key
         configuration = Configuration(host=self._api_url)
+        # When None, keep urllib3 default (cpu_count * 5) — unlike aiohttp,
+        # urllib3 treats None as maxsize=1 which would hurt performance.
         pool_size = config.connection_pool_maxsize if config else 100
         if pool_size is not None:
             configuration.connection_pool_maxsize = pool_size
