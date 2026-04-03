@@ -60,7 +60,7 @@ export interface PaginatedSnapshots extends Omit<PaginatedSnapshotsDto, 'items'>
  * @property {string | Image} image - Image of the snapshot. If a string is provided, it should be available on some registry.
  * If an Image instance is provided, it will be used to create a new image in Daytona.
  * @property {Resources} resources - Resources of the snapshot.
- * @property {string[]} entrypoint - Entrypoint of the snapshot.
+ * @property {string[]} [entrypoint] - Optional. Overrides the container entrypoint; if omitted, the image default is used.
  * @property {string} regionId - ID of the region where the snapshot will be available. Defaults to organization default region if not specified.
  */
 export type CreateSnapshotParams = {

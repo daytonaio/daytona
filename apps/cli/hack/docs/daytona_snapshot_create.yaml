@@ -20,7 +20,7 @@ options:
     usage: Path to Dockerfile to build
   - name: entrypoint
     shorthand: e
-    usage: The entrypoint command for the snapshot
+    usage: Override the container entrypoint; omit to use the image default
   - name: image
     shorthand: i
     usage: The image name for the snapshot

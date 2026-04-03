@@ -115,7 +115,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return nil, errors.New("timeout waiting for the sandbox to start - please ensure that your entrypoint is long-running")
+			return nil, errors.New("timeout waiting for the sandbox container to start")
 		case <-ticker.C:
 			c, err := d.ContainerInspect(timeoutCtx, containerId)
 			if err != nil {
